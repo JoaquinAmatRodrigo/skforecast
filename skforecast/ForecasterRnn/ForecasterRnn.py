@@ -11,7 +11,6 @@ import warnings
 from copy import deepcopy
 from math import e
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
@@ -21,19 +20,26 @@ from sklearn.base import clone
 from sklearn.preprocessing import MinMaxScaler
 
 import skforecast
-
 from ..exceptions import IgnoredArgumentWarning, warn_skforecast_categories
 from ..ForecasterBase import ForecasterBase
-from ..utils import (check_interval, check_predict_input,
-                     check_select_fit_kwargs, check_y, expand_index,
-                     initialize_weights, preprocess_last_window, preprocess_y,
-                     transform_dataframe, transform_series)
+from ..utils import (
+    check_interval,
+    check_predict_input,
+    check_select_fit_kwargs,
+    check_y,
+    expand_index,
+    initialize_weights,
+    preprocess_last_window,
+    preprocess_y,
+    transform_dataframe,
+    transform_series,
+    set_skforecast_warnings,
+)
 
 logging.basicConfig(
     format="%(name)-10s %(levelname)-5s %(message)s",
     level=logging.INFO,
 )
-
 
 # TODO. Test Interval
 # TODO. Test Grid search
@@ -117,6 +123,9 @@ class ForecasterRnn(ForecasterBase):
         Maximum value of lag included in `lags`.
     window_size : int
         Size of the window needed to create the predictors.
+    window_size_diff : int
+        This attribute has the same value as window_size as this Forecaster 
+        doesn't support differentiation. Present here for API consistency.
     last_window : pandas Series
         Last window seen by the forecaster during training. It stores the values
         needed to predict the next `step` immediately after the training data.
@@ -183,7 +192,6 @@ class ForecasterRnn(ForecasterBase):
         weight_func: Optional[Callable] = None,
         fit_kwargs: Optional[dict] = {},
         forecaster_id: Optional[Union[str, int]] = None,
-        dropna_from_series: str = "Ignored",
         n_jobs: Any = None,
         transformer_exog: Any = None,
     ) -> None:
@@ -213,7 +221,7 @@ class ForecasterRnn(ForecasterBase):
         self.python_version = sys.version.split(" ")[0]
         self.forecaster_id = forecaster_id
         self.history = None
-        self.dropna_from_series = dropna_from_series
+        self.dropna_from_series = False # Ignored in this forecaster
 
         # Infer parameters from the model
         self.regressor = regressor
@@ -222,7 +230,8 @@ class ForecasterRnn(ForecasterBase):
         if lags == "auto":
             self.lags = np.arange(layer_init.input_shape[0][1]) + 1
             warnings.warn(
-                f"Setting `lags` = 'auto'. `lags` are inferred from the regressor architecture. Avoid the warning with lags=lags."
+                "Setting `lags` = 'auto'. `lags` are inferred from the regressor " 
+                "architecture. Avoid the warning with lags=lags."
             )
         elif isinstance(lags, int):
             self.lags = np.arange(lags) + 1
@@ -235,21 +244,24 @@ class ForecasterRnn(ForecasterBase):
 
         self.max_lag = np.max(self.lags)
         self.window_size = self.max_lag
+        self.window_size_diff = self.max_lag
 
         layer_end = self.regressor.layers[-1]
 
         try:
             self.series = layer_end.output_shape[-1]
-        # if does not work, break the and raise an error the input shape should be shape=(lags, n_series))
+        # if does not work, break the and raise an error the input shape should
+        # be shape=(lags, n_series))
         except:
             raise TypeError(
-                f"Input shape of the regressor should be Input(shape=(lags, n_series))."
+                "Input shape of the regressor should be Input(shape=(lags, n_series))."
             )
 
         if steps == "auto":
             self.steps = np.arange(layer_end.output_shape[1]) + 1
             warnings.warn(
-                f"`steps` default value = 'auto'. `steps` inferred from regressor architecture. Avoid the warning with steps=steps."
+                "`steps` default value = 'auto'. `steps` inferred from regressor "
+                "architecture. Avoid the warning with steps=steps."
             )
         elif isinstance(steps, int):
             self.steps = np.arange(steps) + 1
@@ -462,8 +474,9 @@ class ForecasterRnn(ForecasterBase):
             if series_not_in_transformer_series:
                 warnings.warn(
                     (
-                        f"{series_not_in_transformer_series} not present in `transformer_series`."
-                        f" No transformation is applied to these series."
+                        f"{series_not_in_transformer_series} not present in "
+                        f"`transformer_series`. No transformation is applied to "
+                        f"these series."
                     ),
                     IgnoredArgumentWarning,
                 )
@@ -554,9 +567,7 @@ class ForecasterRnn(ForecasterBase):
 
         """
         
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
                 
         # Reset values in case the forecaster has already been fitted.
         self.index_type = None
@@ -600,9 +611,7 @@ class ForecasterRnn(ForecasterBase):
 
         self.last_window = series.iloc[-self.max_lag :].copy()
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(suppress_warnings, action='default')
 
     def predict(
         self,
@@ -650,9 +659,7 @@ class ForecasterRnn(ForecasterBase):
 
         """
 
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('ignore', category=warn_category)
+        set_skforecast_warnings(suppress_warnings, action='ignore')
                 
         if levels is None:
             levels = self.levels
@@ -747,9 +754,7 @@ class ForecasterRnn(ForecasterBase):
             )
             predictions.loc[:, serie] = x
             
-        if suppress_warnings:
-            for warn_category in warn_skforecast_categories:
-                warnings.filterwarnings('default', category=warn_category)
+        set_skforecast_warnings(suppress_warnings, action='default')
                 
         return predictions
 
