@@ -10,7 +10,6 @@ import inspect
 import warnings
 from copy import deepcopy
 from typing import Any, Callable, Optional, Tuple, Union
-
 import joblib
 import numpy as np
 import pandas as pd
@@ -20,12 +19,14 @@ import sklearn.pipeline
 from sklearn.base import clone
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
-
 import skforecast
-
-from ..exceptions import (DataTypeWarning, IgnoredArgumentWarning,
-                          MissingExogWarning, MissingValuesWarning,
-                          SkforecastVersionWarning)
+from ..exceptions import (
+    DataTypeWarning,
+    IgnoredArgumentWarning,
+    MissingExogWarning,
+    MissingValuesWarning,
+    SkforecastVersionWarning,
+)
 
 optional_dependencies = {
     'sarimax': [
