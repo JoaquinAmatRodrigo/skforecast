@@ -100,7 +100,7 @@ pip install skforecast[deeplearning]
 + seaborn>=0.11, <0.14
 + statsmodels>=0.12, <0.15
 + pmdarima>=2.0, <2.1
-+ tensorflow>=2.15, <2.17
++ tensorflow>=2.15, <2.16
 
 
 ## Forecasters

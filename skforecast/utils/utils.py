@@ -5,27 +5,27 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Any, Optional, Tuple, Callable
-import warnings
 import importlib
+import inspect
+import warnings
+from copy import deepcopy
+from typing import Any, Callable, Optional, Tuple, Union
+
 import joblib
 import numpy as np
 import pandas as pd
 import sklearn
-from sklearn.base import clone
-import sklearn.pipeline
 import sklearn.linear_model
+import sklearn.pipeline
+from sklearn.base import clone
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
-import inspect
-from copy import deepcopy
 
 import skforecast
-from ..exceptions import MissingValuesWarning
-from ..exceptions import MissingExogWarning
-from ..exceptions import DataTypeWarning
-from ..exceptions import IgnoredArgumentWarning
-from ..exceptions import SkforecastVersionWarning
+
+from ..exceptions import (DataTypeWarning, IgnoredArgumentWarning,
+                          MissingExogWarning, MissingValuesWarning,
+                          SkforecastVersionWarning)
 
 optional_dependencies = {
     'sarimax': [
@@ -34,7 +34,7 @@ optional_dependencies = {
     ],
     'deeplearning': [
         'matplotlib>=3.3, <3.9',
-        'tensorflow>=2.15, <2.17',
+        'tensorflow>=2.15, <2.16',
     ],
     'plotting': [
         'matplotlib>=3.3, <3.9', 
