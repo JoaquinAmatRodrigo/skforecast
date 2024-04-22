@@ -34,7 +34,6 @@ def create_and_compile_model(
     optimizer: object=Adam(learning_rate=0.01),
     loss: object=MeanSquaredError(),
     compile_kwars: dict={},
-    backend: str="tensorflow",
 ) -> tf.keras.models.Model:
     """
     Creates a neural network model for time series prediction with flexible recurrent layers.
@@ -65,8 +64,6 @@ def create_and_compile_model(
         Optimization algorithm and learning rate.
     loss : object, default `MeanSquaredError()`
         Loss function for model training.
-    backend : str, default `'tensorflow'`
-        Deep learning backend to use: tensorflow, pytorch, or jax are supported.
 
     Returns
     -------
