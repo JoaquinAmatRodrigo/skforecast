@@ -148,7 +148,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         `max_lag`.
     window_size_diff : int
         This attribute has the same value as window_size as this Forecaster 
-        doesn't support differentiation.
+        doesn't support differentiation. Present here for API consistency.
     last_window : pandas Series
         Last window seen by the forecaster during training. It stores the values 
         needed to predict the next `step` immediately after the training data.   
