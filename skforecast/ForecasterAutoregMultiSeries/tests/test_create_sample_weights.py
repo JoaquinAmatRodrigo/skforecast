@@ -458,6 +458,7 @@ def test_create_sample_weights_output_using_series_weights_and_weight_func_diffe
     results = forecaster.create_sample_weights(
         series_col_names=["series_1", "series_2"], X_train=X_train
     )
+    
     expected = np.array([1, 0, 0, 0, 1, 1, 1, 0, 2, 2, 2], dtype=float)
 
     assert np.array_equal(results, expected)
@@ -483,6 +484,7 @@ def test_create_sample_weights_ValueError_when_weights_has_nan(encoding, X_train
         weight_func=custom_weights_nan,
     )
     forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
+
     err_msg = re.escape("The resulting `weights` cannot have NaN values.")
     with pytest.raises(ValueError, match=err_msg):
         forecaster.create_sample_weights(
@@ -512,6 +514,7 @@ def test_create_sample_weights_ValueError_when_weights_has_negative_values(
         weight_func=custom_weights_negative,
     )
     forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
+
     err_msg = re.escape("The resulting `weights` cannot have negative values.")
     with pytest.raises(ValueError, match=err_msg):
         forecaster.create_sample_weights(
@@ -539,11 +542,10 @@ def test_create_sample_weights_ValueError_when_weights_all_zeros(encoding, X_tra
         series_weights={"series_1": 0, "series_2": 0},
     )
     forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
+
     err_msg = re.escape(
-        (
-            "The resulting `weights` cannot be normalized because "
-            "the sum of the weights is zero."
-        )
+        ("The resulting `weights` cannot be normalized because "
+         "the sum of the weights is zero.")
     )
     with pytest.raises(ValueError, match=err_msg):
         forecaster.create_sample_weights(

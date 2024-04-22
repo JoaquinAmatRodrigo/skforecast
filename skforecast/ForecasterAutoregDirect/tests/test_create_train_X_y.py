@@ -94,10 +94,14 @@ def test_create_train_X_y_ValueError_when_y_and_exog_have_different_index():
                 ("Different index for `y` and `exog`. They must be equal "
                  "to ensure the correct alignment of values.") 
               )
-    with pytest.raises(ValueError, match = err_msg):
+    with pytest.raises(ValueError, match=err_msg):
         forecaster.fit(
-            y    = y,
-            exog = pd.Series(np.arange(10), index=pd.RangeIndex(start=0, stop=10, step=1))
+            y=y,
+            exog=pd.Series(
+                np.arange(10),
+                index=pd.RangeIndex(start=0, stop=10, step=1),
+                name="exog",
+            ),
         )
 
 
@@ -597,7 +601,7 @@ def test_create_train_X_y_output_when_y_is_series_10_steps_3_and_exog_is_datafra
     assert results[1].keys() == expected[1].keys()
     for key in expected[1]: 
         pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
-    
+
 
 def test_create_train_X_y_output_when_y_is_series_10_steps_1_and_exog_is_series_of_category():
     """

@@ -146,7 +146,10 @@ def test_fit_in_sample_residuals_not_stored(n_jobs):
     assert np.all(results[k] == expected[k] for k in expected.keys())
 
 
-def test_fit_last_window_stored():
+@pytest.mark.parametrize("store_last_window", 
+                         [True, ['l1', 'l2'], False], 
+                         ids=lambda lw: f'store_last_window: {lw}')
+def test_fit_last_window_stored(store_last_window):
     """
     Test that values of last window are stored after fitting.
     """
@@ -155,7 +158,7 @@ def test_fit_last_window_stored():
 
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), 
                                                level='l1', lags=3, steps=2)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series, store_last_window=store_last_window)
 
     expected = pd.DataFrame({
         'l1': pd.Series(np.array([7, 8, 9])), 
@@ -163,9 +166,12 @@ def test_fit_last_window_stored():
     })
     expected.index = pd.RangeIndex(start=7, stop=10, step=1)
 
-    pd.testing.assert_frame_equal(forecaster.last_window, expected)
-    assert forecaster.series_col_names == ['l1', 'l2']
-    assert forecaster.series_X_train == ['l1', 'l2']
+    if store_last_window:
+        pd.testing.assert_frame_equal(forecaster.last_window, expected)
+        assert forecaster.series_col_names == ['l1', 'l2']
+        assert forecaster.series_X_train == ['l1', 'l2']
+    else:
+        assert forecaster.last_window == None
 
 
 def test_fit_last_window_stored_when_different_lags():

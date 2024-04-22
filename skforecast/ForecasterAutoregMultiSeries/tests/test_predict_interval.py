@@ -1,5 +1,6 @@
 # Unit test predict_interval ForecasterAutoregMultiSeries
 # ==============================================================================
+from pathlib import Path
 import pytest
 import joblib
 import numpy as np
@@ -16,15 +17,14 @@ from lightgbm import LGBMRegressor
 from .fixtures_ForecasterAutoregMultiSeries import series
 from .fixtures_ForecasterAutoregMultiSeries import exog
 from .fixtures_ForecasterAutoregMultiSeries import exog_predict
-
-series_dict = joblib.load('./fixture_sample_multi_series.joblib')
-exog_dict = joblib.load('./fixture_sample_multi_series_exog.joblib')
+THIS_DIR = Path(__file__).parent
+series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
+exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
 end_train = "2016-07-31 23:59:00"
 series_dict_train = {k: v.loc[:end_train,] for k, v in series_dict.items()}
 exog_dict_train = {k: v.loc[:end_train,] for k, v in exog_dict.items()}
 series_dict_test = {k: v.loc[end_train:,] for k, v in series_dict.items()}
 exog_dict_test = {k: v.loc[end_train:,] for k, v in exog_dict.items()}
-
 series_2 = pd.DataFrame({'1': pd.Series(np.arange(10)), 
                          '2': pd.Series(np.arange(10))})
 

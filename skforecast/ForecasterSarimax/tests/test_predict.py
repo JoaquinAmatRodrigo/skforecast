@@ -273,12 +273,12 @@ def test_predict_ValueError_when_last_window_exog_index_does_not_follow_training
     lw_test = pd.Series(data=y_lw_datetime.to_numpy())
     lw_test.index = pd.date_range(start='2022-02-20', periods=50, freq='D')
     
-    exog_test = pd.Series(data=exog_datetime.to_numpy())
-    exog_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
-    exog_pred_test = pd.Series(data=exog_predict_datetime.to_numpy())
-    exog_pred_test.index = pd.date_range(start='2022-04-11', periods=10, freq='D')
-    lw_exog_test = pd.Series(data=exog_lw_datetime.to_numpy())
-    lw_exog_test.index = pd.date_range(start='2022-03-01', periods=50, freq='D')
+    exog_test = pd.Series(data=exog_datetime.to_numpy(), name='exog')
+    exog_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D', name='exog')
+    exog_pred_test = pd.Series(data=exog_predict_datetime.to_numpy(), name='exog')
+    exog_pred_test.index = pd.date_range(start='2022-04-11', periods=10, freq='D', name='exog')
+    lw_exog_test = pd.Series(data=exog_lw_datetime.to_numpy(), name='exog')
+    lw_exog_test.index = pd.date_range(start='2022-03-01', periods=50, freq='D', name='exog')
 
     forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 0, 1)))
     forecaster.fit(y=y_test, exog=exog_test)

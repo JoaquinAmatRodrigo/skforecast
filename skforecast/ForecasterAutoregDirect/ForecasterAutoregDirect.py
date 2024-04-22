@@ -11,8 +11,10 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
-import sklearn
-import sklearn.pipeline
+# TODO: Review
+# import sklearn
+from sklearn.exceptions import NotFittedError
+from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 import inspect
 from copy import copy
@@ -124,6 +126,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         Maximum value of lag included in `lags`.
     window_size : int
         Size of the window needed to create the predictors. It is equal to `max_lag`.
+    window_size_diff : int
+        This attribute has the same value as window_size as this Forecaster 
+        doesn't support differentiation.
     last_window : pandas Series
         Last window the forecaster has seen during training. It stores the
         values needed to predict the next `step` immediately after the training data.
@@ -235,6 +240,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
+        self.window_size_diff = self.max_lag
 
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name = type(self).__name__, 
@@ -267,7 +273,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         Information displayed when a ForecasterAutoregDirect object is printed.
         """
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
             params = {key : value for key, value in self.regressor.get_params().items() \
                       if key.startswith(name_pipe_steps)}
@@ -578,6 +584,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         self,
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        store_last_window: bool=True,
         store_in_sample_residuals: bool=True
     ) -> None:
         """
@@ -594,6 +601,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
+        store_last_window : bool, default `True`
+            Whether or not to store the last window of training data.
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
@@ -718,7 +727,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         else: 
             self.index_freq = X_train.index.step
 
-        self.last_window = y.iloc[-self.max_lag:].copy()
+        if store_last_window:
+            self.last_window = y.iloc[-self.max_lag:].copy()
 
 
     def predict(
@@ -1334,9 +1344,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         self, 
         lags: Union[int, list, np.ndarray, range]
     ) -> None:
-        """      
-        Set new value to the attribute `lags`.
-        Attributes `max_lag` and `window_size` are also updated.
+        """
+        Set new value to the attribute `lags`. Attributes `max_lag`, 
+        `window_size` and  `window_size_diff` are also updated.
         
         Parameters
         ----------
@@ -1355,7 +1365,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
-        self.window_size = max(self.lags)
+        self.window_size = self.max_lag
+        self.window_size_diff = self.max_lag
 
 
     def set_out_sample_residuals(
@@ -1400,7 +1411,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
 
         if not self.fitted:
-            raise sklearn.exceptions.NotFittedError(
+            raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `set_out_sample_residuals()`.")
             )
@@ -1498,7 +1509,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
         
         if not self.fitted:
-            raise sklearn.exceptions.NotFittedError(
+            raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `get_feature_importances()`.")
             )
@@ -1509,7 +1520,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                  f"({self.steps}). Got {step}.")
             )
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             estimator = self.regressors_[step][-1]
         else:
             estimator = self.regressors_[step]

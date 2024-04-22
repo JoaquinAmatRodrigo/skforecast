@@ -29,6 +29,7 @@ from ..utils import check_backtesting_input
 from ..utils import select_n_jobs_backtesting
 from ..utils import initialize_lags
 from ..utils import initialize_lags_grid
+from ..utils import set_skforecast_warnings
 
 # import logging
 # logger = logging.getLogger(__name__)
@@ -377,9 +378,7 @@ def _backtesting_forecaster_multiseries(
     
     """
 
-    if suppress_warnings:
-        for warn_category in warn_skforecast_categories:
-            warnings.filterwarnings('ignore', category=warn_category)
+    set_skforecast_warnings(suppress_warnings, action='ignore')
 
     forecaster = deepcopy(forecaster)
 
@@ -388,7 +387,7 @@ def _backtesting_forecaster_multiseries(
                      forecaster = forecaster,
                      refit      = refit
                  )
-    elif not isinstance(refit, bool) and refit != 1:
+    elif not isinstance(refit, bool) and refit != 1 and n_jobs != 1:
         warnings.warn(
             ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
              "is set to 1 to avoid unexpected results during parallelization."),
@@ -626,9 +625,7 @@ def _backtesting_forecaster_multiseries(
         axis=1
     )
 
-    if suppress_warnings:
-        for warn_category in warn_skforecast_categories:
-            warnings.filterwarnings('default', category=warn_category)
+    set_skforecast_warnings(suppress_warnings, action='default')
 
     return metrics_levels, backtest_predictions
 
@@ -1195,9 +1192,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     
     """
 
-    if suppress_warnings:
-        for warn_category in warn_skforecast_categories:
-            warnings.filterwarnings('ignore', category=warn_category)
+    set_skforecast_warnings(suppress_warnings, action='ignore')
 
     if return_best and exog is not None and (len(exog) != len(series)):
         raise ValueError(
@@ -1345,8 +1340,7 @@ def _evaluate_grid_hyperparameters_multiseries(
             f"  Levels: {results['levels'].iloc[0]}\n"
         )
 
-    for warn_category in warn_skforecast_categories:
-        warnings.filterwarnings('default', category=warn_category)
+    set_skforecast_warnings(suppress_warnings, action='default')
     
     return results
 
@@ -1637,10 +1631,8 @@ def _bayesian_search_optuna_multiseries(
         The best optimization result returned as an optuna FrozenTrial object.
 
     """
-
-    if suppress_warnings:
-        for warn_category in warn_skforecast_categories:
-            warnings.filterwarnings('ignore', category=warn_category)
+    
+    set_skforecast_warnings(suppress_warnings, action='ignore')
     
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
@@ -1856,9 +1848,7 @@ def _bayesian_search_optuna_multiseries(
             f"  Levels: {results['levels'].iloc[0]}\n"
         )
 
-    if suppress_warnings:
-        for warn_category in warn_skforecast_categories:
-            warnings.filterwarnings('default', category=warn_category)
+    set_skforecast_warnings(suppress_warnings, action='default')
             
     return results, best_trial
 
@@ -2083,8 +2073,7 @@ def backtesting_forecaster_multivariate(
     n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True,
-    suppress_warnings: bool=False,
-    output_file: Optional[str]=None
+    suppress_warnings: bool=False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     This function is an alias of backtesting_forecaster_multiseries.
@@ -2165,11 +2154,6 @@ def backtesting_forecaster_multivariate(
         If `True`, skforecast warnings will be suppressed during the backtesting 
         process. See skforecast.exceptions.warn_skforecast_categories for more
         information.
-    output_file : str, default `None`
-        Specifies the filename or full path where the results should be saved. 
-        The results will be saved in a tab-separated values (TSV) format. If 
-        `None`, the results will not be saved to a file.
-        **New in version 0.12.0**
 
     Returns
     -------
@@ -2204,9 +2188,7 @@ def backtesting_forecaster_multivariate(
         n_jobs                = n_jobs,
         verbose               = verbose,
         show_progress         = show_progress,
-        suppress_warnings     = suppress_warnings,
-        output_file           = output_file
-        
+        suppress_warnings     = suppress_warnings
     )
 
     return metrics_levels, backtest_predictions

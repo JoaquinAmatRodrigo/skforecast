@@ -13,20 +13,19 @@ from typing import Any, Callable, Optional, Tuple, Union
 import joblib
 import numpy as np
 import pandas as pd
-import sklearn
+from sklearn.base import clone
+from sklearn.pipeline import Pipeline
 import sklearn.linear_model
 import sklearn.pipeline
-from sklearn.base import clone
 from sklearn.compose import ColumnTransformer
 from sklearn.exceptions import NotFittedError
 import skforecast
-from ..exceptions import (
-    DataTypeWarning,
-    IgnoredArgumentWarning,
-    MissingExogWarning,
-    MissingValuesWarning,
-    SkforecastVersionWarning,
-)
+from ..exceptions import warn_skforecast_categories
+from ..exceptions import MissingValuesWarning
+from ..exceptions import MissingExogWarning
+from ..exceptions import DataTypeWarning
+from ..exceptions import IgnoredArgumentWarning
+from ..exceptions import SkforecastVersionWarning
 
 optional_dependencies = {
     'sarimax': [
@@ -687,11 +686,11 @@ def check_predict_input(
     """
 
     if not fitted:
-        raise sklearn.exceptions.NotFittedError(
+        raise NotFittedError(
             ("This Forecaster instance is not fitted yet. Call `fit` with "
              "appropriate arguments before using predict.")
         )
-    
+
     if isinstance(steps, (int, np.integer)) and steps < 1:
         raise ValueError(
             f"`steps` must be an integer greater than or equal to 1. Got {steps}."
@@ -713,7 +712,7 @@ def check_predict_input(
 
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)
-    
+
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
                            'ForecasterAutoregMultiSeriesCustom',
                            'ForecasterRnn']:
@@ -722,26 +721,26 @@ def check_predict_input(
                 ("`levels` must be a `list` of column names, a `str` of a "
                  "column name or `None`.")
             )
-        
+
         levels_to_check = levels_forecaster if forecaster_name == 'ForecasterRnn' else series_col_names
         if len(set(levels) - set(levels_to_check)) != 0:
             raise ValueError(
                 (f"`levels` names must be included in the series used during fit "
                  f"({levels_to_check}). Got {levels}.")
             )
-    
+
     if exog is None and included_exog:
         raise ValueError(
             ("Forecaster trained with exogenous variable/s. "
              "Same variable/s must be provided when predicting.")
         )
-        
+
     if exog is not None and not included_exog:
         raise ValueError(
             ("Forecaster trained without exogenous variable/s. "
              "`exog` must be `None` when predicting.")
         )
-        
+
     # Checks last_window
     # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
@@ -752,9 +751,9 @@ def check_predict_input(
             raise TypeError(
                 f"`last_window` must be a pandas DataFrame. Got {type(last_window)}."
             )
-        
+
         last_window_cols = last_window.columns.to_list()
-        
+
         if forecaster_name in ['ForecasterAutoregMultiSeries', 
                                'ForecasterAutoregMultiSeriesCustom',
                                'ForecasterRnn'] and \
@@ -765,7 +764,7 @@ def check_predict_input(
                  f"    `levels` : {levels}\n"
                  f"    `last_window` columns : {last_window_cols}")
             )
-        
+
         if forecaster_name == 'ForecasterAutoregMultiVariate':
             if len(set(series_col_names) - set(last_window_cols)) > 0:
                 raise ValueError(
@@ -774,13 +773,13 @@ def check_predict_input(
                      f"    `last_window` columns    : {last_window_cols}\n"
                      f"    `series` columns X train : {series_col_names}")
                 )
-    
+
     else:    
         if not isinstance(last_window, pd.Series):
             raise TypeError(
                 f"`last_window` must be a pandas Series. Got {type(last_window)}."
             )
-    
+
     # Check last_window len, nulls and index (type and freq)
     if len(last_window) < window_size:
         raise ValueError(
@@ -819,7 +818,7 @@ def check_predict_input(
                 raise TypeError(
                     f"`exog` must be a pandas Series, DataFrame or dict. Got {type(exog)}."
                 )
-        
+
         if not isinstance(exog, exog_type):
             raise TypeError(
                 f"Expected type for `exog`: {exog_type}. Got {type(exog)}."
@@ -837,14 +836,14 @@ def check_predict_input(
                 raise TypeError(
                     f"{exog_name} must be a pandas Series or DataFrame. Got {type(exog_to_check)}"
                 )
-            
+
             if exog_to_check.isnull().any().any():
                 warnings.warn(
                     (f"{exog_name} has missing values. Most of machine learning models "
                      f"do not allow missing values. `predict` method may fail."), 
                      MissingValuesWarning
                 )
-        
+
             # Check exog has many values as distance to max step predicted
             last_step = max(steps) if isinstance(steps, list) else steps
             if len(exog_to_check) < last_step:
@@ -884,7 +883,7 @@ def check_predict_input(
                     raise ValueError(
                         (f"When {exog_name} is a pandas Series, it must have a name. Got None.")
                     )
-                
+
                 if exog_to_check.name not in exog_col_names:
                     if forecaster_name in ['ForecasterAutoregMultiSeries', 
                                            'ForecasterAutoregMultiSeriesCustom']:
@@ -995,9 +994,12 @@ def check_predict_input(
             else:
                 if last_window_exog.name is None:
                     raise ValueError(
-                        (f"When `last_window_exog` is a pandas Series, it must have a name. Got None.")
+                        (
+                            "When `last_window_exog` is a pandas Series, it must have a "
+                            "name. Got None."
+                        )
                     )
-                
+
                 if last_window_exog.name not in exog_col_names:
                     raise ValueError(
                         (f"'{last_window_exog.name}' was not observed during training. "
@@ -2084,7 +2086,7 @@ def select_n_jobs_backtesting(
 
     forecaster_name = type(forecaster).__name__
 
-    if isinstance(forecaster.regressor, sklearn.pipeline.Pipeline):
+    if isinstance(forecaster.regressor, Pipeline):
         regressor_name = type(forecaster.regressor[-1]).__name__
     else:
         regressor_name = type(forecaster.regressor).__name__
@@ -2511,3 +2513,31 @@ def align_series_and_exog_multiseries(
                 exog_dict[k] = exog_dict[k].loc[first_valid_index : last_valid_index]
 
     return series_dict, exog_dict
+
+
+def set_skforecast_warnings(
+    suppress_warnings: bool,
+    action: str='default'
+) -> None:
+    """
+    Set skforecast warnings action.
+
+    Parameters
+    ----------
+    suppress_warnings : bool
+        If `True`, skforecast warnings will be suppressed. If `False`, skforecast
+        warnings will be shown as default. See 
+        skforecast.exceptions.warn_skforecast_categories for more information.
+    action : str, default 'default'
+        Action to be taken when a warning is raised. See the warnings module
+        for more information.
+
+    Returns
+    -------
+    None
+    
+    """
+
+    if suppress_warnings:
+        for category in warn_skforecast_categories:
+            warnings.filterwarnings(action, category=category)

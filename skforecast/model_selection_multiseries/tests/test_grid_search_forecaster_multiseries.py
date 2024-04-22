@@ -83,6 +83,7 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeriesC
                      regressor          = Ridge(random_state=123),
                      fun_predictors     = create_predictors,
                      window_size        = 2, 
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 

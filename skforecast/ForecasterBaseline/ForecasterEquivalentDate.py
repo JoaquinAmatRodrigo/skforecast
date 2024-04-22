@@ -96,6 +96,9 @@ class ForecasterEquivalentDate():
     window_size : int
         Number of past values needed to include the last equivalent dates according
         to the `offset` and `n_offsets`.
+    window_size_diff : int
+        This attribute has the same value as window_size as this Forecaster 
+        doesn't support differentiation.
     last_window : pandas Series
         This window represents the most recent data observed by the predictor
         during its training phase. It contains the past values needed to include
@@ -157,6 +160,7 @@ class ForecasterEquivalentDate():
             )
         
         self.window_size = self.offset * self.n_offsets
+        self.window_size_diff = self.offset * self.n_offsets
 
 
     def __repr__(
@@ -243,6 +247,7 @@ class ForecasterEquivalentDate():
                 window_size_idx_start = y_index.get_loc(first_valid_index)
                 window_size_idx_end = y_index.get_loc(y_index[-1])
                 self.window_size = window_size_idx_end - window_size_idx_start
+                self.window_size_diff = window_size_idx_end - window_size_idx_start
             except KeyError:
                 raise ValueError(
                     (f"The length of `y` ({len(y)}), must be greater than or equal "

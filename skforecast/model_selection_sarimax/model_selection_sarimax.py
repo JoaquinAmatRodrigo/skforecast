@@ -145,7 +145,7 @@ def _backtesting_sarimax(
                          forecaster = forecaster,
                          refit      = refit
                      )
-        elif not isinstance(refit, bool) and refit != 1:
+        elif not isinstance(refit, bool) and refit != 1 and n_jobs != 1:
             warnings.warn(
                 ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
                  "is set to 1 to avoid unexpected results during parallelization."),

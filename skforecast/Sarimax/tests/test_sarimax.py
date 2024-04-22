@@ -362,10 +362,10 @@ def test_Sarimax_predict_UserWarning_exog_length_greater_that_steps(y, exog, exo
     steps = 5
 
     warn_msg = re.escape(
-                 (f"when predicting using exogenous variables, the `exog` parameter "
-                  f"must have the same length as the number of predicted steps. Since "
-                  f"len(exog) > steps, only the first {steps} observations are used.")
-             )
+        ("When predicting using exogenous variables, the `exog` parameter "
+         "must have the same length as the number of predicted steps. Since "
+         "len(exog) > steps, only the first 5 observations are used.")
+    )
     with pytest.warns(UserWarning, match = warn_msg):
         sarimax.predict(steps=steps, exog=exog_predict)
 
@@ -840,9 +840,9 @@ def test_Sarimax_get_info_criteria_ValueError_criteria_invalid_value():
     criteria = 'not_valid'
 
     err_msg = re.escape(
-                (f"Invalid value for `criteria`. Valid options are 'aic', 'bic', "
-                 f"and 'hqic'.")
-              )
+        ("Invalid value for `criteria`. Valid options are 'aic', 'bic', "
+         "and 'hqic'.")
+    )
     with pytest.raises(ValueError, match = err_msg): 
         sarimax.get_info_criteria(criteria=criteria)
 
@@ -858,9 +858,9 @@ def test_Sarimax_get_info_criteria_ValueError_method_invalid_value():
     method = 'not_valid'
 
     err_msg = re.escape(
-                (f"Invalid value for `method`. Valid options are 'standard' and "
-                 f"'lutkepohl'.")
-              )
+        ("Invalid value for `method`. Valid options are 'standard' and "
+         "'lutkepohl'.")
+    )
     with pytest.raises(ValueError, match = err_msg): 
         sarimax.get_info_criteria(method=method)
 

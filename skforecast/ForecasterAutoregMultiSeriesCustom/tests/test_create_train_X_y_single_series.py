@@ -1,5 +1,6 @@
-# Unit test _create_train_X_y_single_series ForecasterAutoregMultiSeries
+# Unit test _create_train_X_y_single_series ForecasterAutoregMultiSeriesCustom
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
@@ -7,7 +8,77 @@ from sklearn.base import clone
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
+from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
+
+def create_predictors_3(y): # pragma: no cover
+    """
+    Create first 3 lags of a time series.
+    """
+    lags = y[-1:-4:-1]
+
+    return lags
+
+def create_predictors_5(y): # pragma: no cover
+    """
+    Create first 5 lags of a time series.
+    """
+    lags = y[-1:-6:-1]
+
+    return lags
+
+
+@pytest.mark.parametrize("differentiation", 
+                         [None, 1, 2], 
+                         ids = lambda dt : f'differentiation: {dt}')
+def test_create_train_X_y_single_series_ValueError_when_forecaster_window_size_does_not_match_with_fun_predictors(
+    differentiation,
+):
+    """
+    Test ValueError is raised when the window needed by `fun_predictors()` does
+    not correspond with the forecaster.window_size.
+    """
+    y = pd.Series(np.array([2, 56, 4.3, 23, 1, 8, 4.3, 104.1]), dtype=float, name="l1")
+
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+        regressor=LinearRegression(),
+        fun_predictors=create_predictors_3,
+        window_size=2,
+        differentiation=differentiation,
+    )
+    forecaster.transformer_series_ = {"l1": None}
+    if differentiation is not None:
+        forecaster.differentiator_ = {"l1": clone(forecaster.differentiator)}
+
+    err_msg = re.escape(
+        ("The `window_size` argument (2), declared when "
+         "initializing the forecaster, does not correspond to the window "
+         "used by `create_predictors_3`.")
+    )
+    with pytest.raises(ValueError, match=err_msg):
+        forecaster._create_train_X_y_single_series(y=y, ignore_exog=True)
+
+
+def test_create_train_X_y_single_series_ValueError_when_len_name_predictors_not_match_X_train_columns():
+    """
+    Test ValueError is raised when argument `name_predictors` has less values 
+    than the number of columns of X_train.
+    """
+    y = pd.Series(np.arange(7, dtype=float), name='l1')
+
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor       = LinearRegression(),
+                     fun_predictors  = create_predictors_3,
+                     name_predictors = ['lag_1', 'lag_2'],
+                     window_size     = 3
+                 )
+    forecaster.transformer_series_ = {'l1': None}
+
+    err_msg = re.escape(
+        ("The length of provided predictors names (`name_predictors`) do not "
+         "match the number of columns created by `create_predictors_3`.")  
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster._create_train_X_y_single_series(y=y, ignore_exog=True)
 
 
 @pytest.mark.parametrize("ignore_exog", 
@@ -20,7 +91,11 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_None(igno
     """
     y = pd.Series(np.arange(7, dtype=float), name='l1')
     
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors_3,
+                     window_size    = 3
+                 )
     forecaster.transformer_series_ = {'l1': StandardScaler()}
     results = forecaster._create_train_X_y_single_series(
                   y           = y,
@@ -35,8 +110,9 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_None(igno
                              [ 0.5,  0. , -0.5, 'l1'],
                              [ 1. ,  0.5,  0. , 'l1']]),
             index   = pd.RangeIndex(start=3, stop=7, step=1),
-            columns = ['lag_1', 'lag_2', 'lag_3', '_level_skforecast']
-        ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float}),
+            columns = ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2',
+                       '_level_skforecast']
+        ).astype({'custom_predictor_0': float, 'custom_predictor_1': float, 'custom_predictor_2': float}),
         pd.DataFrame(
             data    = np.nan,
             columns = ['_dummy_exog_col_to_keep_shape'],
@@ -66,8 +142,13 @@ def test_create_train_X_y_single_series_output_when_series_and_exog():
     y = pd.Series(np.arange(10, dtype=float), name='l1')
     exog = pd.DataFrame(np.arange(100, 110, dtype=float), columns=['exog'])
     
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
-                                              transformer_series=None)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors_5,
+                     window_size        = 5,
+                     name_predictors    = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
+                     transformer_series = None
+                 )
     forecaster.transformer_series_ = {'l1': None}
     results = forecaster._create_train_X_y_single_series(
                   y           = y,
@@ -112,9 +193,14 @@ def test_create_train_X_y_single_series_output_when_series_10_and_exog_is_datafr
     y = pd.Series(np.arange(10, dtype=float), name='l1')
     exog = pd.DataFrame({'exog_1': np.arange(10, 20, dtype=float),
                          'exog_2': pd.Categorical(range(100, 110))})
-
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
-                                              transformer_series=None)
+    
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors_5,
+                     window_size        = 5,
+                     name_predictors    = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
+                     transformer_series = None
+                 )
     forecaster.transformer_series_ = {'l1': None}
     results = forecaster._create_train_X_y_single_series(
                   y           = y,
@@ -163,9 +249,13 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_DataFrame
                'exog_2' : np.arange(1000, 1007, dtype=float)},
                index = pd.date_range("1990-01-01", periods=7, freq='D')
            )
-
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
-                                              transformer_series=None)
+    
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors_3,
+                     window_size        = 3,
+                     transformer_series = None
+                 )
     forecaster.transformer_series_ = {'l1': None}
     results = forecaster._create_train_X_y_single_series(
                   y           = y,
@@ -180,8 +270,8 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_DataFrame
                              [4.0, 3.0, 2.0, 'l1'],
                              [5.0, 4.0, 3.0, 'l1']]),
             index   = pd.date_range("1990-01-04", periods=4, freq='D'),
-            columns = ['lag_1', 'lag_2', 'lag_3', '_level_skforecast']
-        ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float}),
+            columns = ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', '_level_skforecast']
+        ).astype({'custom_predictor_0': float, 'custom_predictor_1': float, 'custom_predictor_2': float}),
         pd.DataFrame(
             data = np.array([[103., 1003.],
                              [104., 1004.],
@@ -214,9 +304,14 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_DataFrame
                'exog_2' : np.arange(1000, 1010, dtype=float)}
            )
     exog.iloc[2:7, 0] = np.nan
-
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
-                                              transformer_series=None)
+    
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors_5,
+                     window_size        = 5,
+                     name_predictors    = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
+                     transformer_series = None
+                 )
     forecaster.transformer_series_ = {'l1': None}
     results = forecaster._create_train_X_y_single_series(
                   y           = y,
@@ -266,9 +361,13 @@ def test_create_train_X_y_single_series_output_when_transformer_and_fitted():
     y = pd.Series(np.arange(9, dtype=float), name='l1')
     transformer = MinMaxScaler()
     transformer.fit(y.values.reshape(-1, 1))
-
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
-                                              transformer_series=None)
+    
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors_3,
+                     window_size        = 3,
+                     transformer_series = None
+                 )
     forecaster.transformer_series_ = {'l1': transformer}
     forecaster.fitted = True
 
@@ -284,8 +383,8 @@ def test_create_train_X_y_single_series_output_when_transformer_and_fitted():
                              [2.   , 1.875, 1.75 , 'l1'],
                              [2.125, 2.   , 1.875, 'l1']]),
             index   = pd.RangeIndex(start=3, stop=9, step=1),
-            columns = ['lag_1', 'lag_2', 'lag_3', '_level_skforecast']
-        ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float}),
+            columns = ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', '_level_skforecast']
+        ).astype({'custom_predictor_0': float, 'custom_predictor_1': float, 'custom_predictor_2': float}),
         None,
         pd.Series(
             data  = np.array([1.625, 1.75, 1.875, 2., 2.125, 2.25]),
@@ -311,9 +410,14 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_and_differen
     y = pd.Series(np.arange(10, dtype=float), name='l1')
     exog = pd.DataFrame(np.arange(100, 110, dtype=float), columns=['exog'])
     
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
-                                              transformer_series = None,
-                                              differentiation    = 1)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors_5,
+                     window_size        = 5,
+                     name_predictors    = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
+                     transformer_series = None,
+                     differentiation    = 1
+                 )
     forecaster.transformer_series_ = {'l1': None}
     forecaster.differentiator_ = {'l1': clone(forecaster.differentiator)}
     forecaster.fitted = fitted
@@ -363,9 +467,14 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_and_differen
     y = pd.Series(np.arange(10, dtype=float), name='l1')
     exog = pd.DataFrame(np.arange(100, 110, dtype=float), columns=['exog'])
     
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
-                                              transformer_series = None,
-                                              differentiation    = 2)
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors_5,
+                     window_size        = 5,
+                     name_predictors    = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
+                     transformer_series = None,
+                     differentiation    = 2
+                 )
     forecaster.transformer_series_ = {'l1': None}
     forecaster.differentiator_ = {'l1': clone(forecaster.differentiator)}
     forecaster.fitted = fitted

@@ -41,10 +41,10 @@ def test_output_get_feature_importances_when_regressor_is_RandomForest():
     and it is trained with series pandas DataFrame.
     """
     forecaster = ForecasterAutoregMultiSeries(
-        RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123),
-        lags     = 3,
-        encoding = 'onehot'
-    )
+                     regressor = RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123),
+                     lags     = 3,
+                     encoding = 'onehot'
+                 )
     forecaster.fit(series=series)
 
     results = forecaster.get_feature_importances(sort_importance=False)
@@ -63,10 +63,10 @@ def test_output_get_feature_importances_when_regressor_is_RandomForest_with_exog
     exog=pd.Series(np.arange(10, 20), name='exog').
     """
     forecaster = ForecasterAutoregMultiSeries(
-        RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123),
-        lags     = 3,
-        encoding = 'onehot'
-    )
+                     regressor = RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123),
+                     lags     = 3,
+                     encoding = 'onehot'
+                 )
     forecaster.fit(series=series, exog=pd.Series(np.arange(10, 20), name='exog'))
     
     results = forecaster.get_feature_importances()
@@ -84,10 +84,10 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression():
     and it is trained with series pandas DataFrame.
     """
     forecaster = ForecasterAutoregMultiSeries(
-        LinearRegression(),
-        lags     = 3,
-        encoding = 'onehot'
-    )
+                     regressor = LinearRegression(),
+                     lags      = 3,
+                     encoding  = 'onehot'
+                 )
     forecaster.fit(series=series)
 
     results = forecaster.get_feature_importances(sort_importance=False)
@@ -110,11 +110,11 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_with_
                              '2': pd.Series(np.arange(10))})
 
     forecaster = ForecasterAutoregMultiSeries(
-        LinearRegression(),
-        lags               = 3,
-        transformer_series = None,
-        encoding           = 'onehot'
-    )
+                     regressor          = LinearRegression(),
+                     lags               = 3,
+                     encoding           = 'onehot',
+                     transformer_series = None
+                 )
     forecaster.fit(series=series_2, exog=pd.Series(np.arange(10, 20), name='exog'))
 
     results = forecaster.get_feature_importances(sort_importance=False)
@@ -161,8 +161,8 @@ def test_output_get_feature_importances_when_pipeline_LinearRegression():
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = make_pipeline(StandardScaler(), LinearRegression()),
                      lags               = 3,
-                     transformer_series = None,
-                     encoding='onehot'
+                     encoding           = 'onehot',
+                     transformer_series = None
                  )
     forecaster.fit(series=series)
 
@@ -183,14 +183,14 @@ def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
     it is trained with series pandas DataFrame.
     """
     forecaster = ForecasterAutoregMultiSeries(
-        regressor=make_pipeline(
-            StandardScaler(),
-            RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123),
-        ),
-        lags=3,
-        encoding="onehot",
-        transformer_series=None,
-    )
+                     regressor = make_pipeline(
+                                     StandardScaler(), 
+                                     RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123)
+                                 ),
+                     lags               = 3,
+                     encoding           = "onehot",
+                     transformer_series = None,
+                 )
     forecaster.fit(series=series)
 
     results = forecaster.get_feature_importances(sort_importance=False)

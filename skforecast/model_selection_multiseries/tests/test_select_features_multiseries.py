@@ -379,7 +379,7 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force
         exog            = exog,
         select_only     = 'autoreg',
         force_inclusion = ['custom_predictor_4', 'exog_4'],
-        verbose         = False,
+        verbose         = True
     )
 
     assert selected_autoreg == ['custom_predictor_0', 'custom_predictor_2', 

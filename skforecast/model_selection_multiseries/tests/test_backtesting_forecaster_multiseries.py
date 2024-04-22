@@ -5,10 +5,13 @@ import pytest
 import joblib
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from lightgbm import LGBMRegressor
 from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_error
+
+from skforecast.exceptions import IgnoredArgumentWarning
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
@@ -18,15 +21,14 @@ from skforecast.model_selection_multiseries import backtesting_forecaster_multiv
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
-
-series_dict = joblib.load('./fixture_sample_multi_series.joblib')
-exog_dict = joblib.load('./fixture_sample_multi_series_exog.joblib')
+THIS_DIR = Path(__file__).parent
+series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
+exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
 end_train = "2016-07-31 23:59:00"
 series_dict_train = {k: v.loc[:end_train,] for k, v in series_dict.items()}
 exog_dict_train = {k: v.loc[:end_train,] for k, v in exog_dict.items()}
 series_dict_test = {k: v.loc[end_train:,] for k, v in series_dict.items()}
 exog_dict_test = {k: v.loc[end_train:,] for k, v in exog_dict.items()}
-
 series_with_nans = series.copy()
 series_with_nans['l2'].iloc[:10] = np.nan
 
@@ -98,13 +100,16 @@ def test_backtesting_forecaster_multiseries_TypeError_when_forecaster_not_a_fore
                                                         encoding='onehot'), 'auto'),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), -1),
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), -1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), 1),
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), 1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), 'auto')], 
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), 'auto')], 
                          ids=lambda fc: f'forecaster, n_jobs: {fc}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_with_mocked(forecaster, n_jobs):
     """
@@ -153,7 +158,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_not_initial_train_size_with_mocked(forecaster):
     """
@@ -216,13 +222,16 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                         encoding='onehot'), 'auto'),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), -1),
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), -1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), 1),
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), 1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), 'auto')], 
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), 'auto')], 
                          ids=lambda fc: f'forecaster, n_jobs: {fc}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_with_mocked(forecaster, n_jobs):
     """
@@ -285,13 +294,16 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                         encoding='onehot'), 'auto'),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), -1),
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), -1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), 1),
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), 1),
                           (ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                               fun_predictors=create_predictors, 
-                                                              window_size=2, transformer_series=None), 'auto')], 
+                                                              window_size=2, transformer_series=None,
+                                                              encoding='onehot'), 'auto')], 
                          ids=lambda fc: f'forecaster, n_jobs: {fc}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_with_mocked(forecaster, n_jobs):
     """
@@ -341,7 +353,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_list_metrics_with_mocked_metrics(forecaster):
     """
@@ -392,7 +405,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_no_refit_levels_metrics_remainder_with_mocked(forecaster):
     """
@@ -446,7 +460,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_levels_metrics_remainder_with_mocked(forecaster):
     """
@@ -500,7 +515,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_not_refit_exog_interval_with_mocked(forecaster):
     """
@@ -558,7 +574,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_exog_interval_with_mocked(forecaster):
     """
@@ -616,7 +633,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_no_refit_exog_interval_gap_with_mocked(forecaster):
     """
@@ -681,7 +699,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_exog_interval_gap_with_mocked(forecaster):
     """
@@ -744,7 +763,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_exog_fixed_train_size_interval_gap_with_mocked(forecaster):
     """
@@ -810,7 +830,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_no_refit_different_lengths_with_mocked(forecaster):
     """
@@ -876,7 +897,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_different_lengths_with_mocked(forecaster):
     """
@@ -939,7 +961,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_fixed_train_size_different_lengths_with_mocked(forecaster):
     """
@@ -1005,7 +1028,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_int_interval_yes_exog_yes_remainder_with_mocked(forecaster):
     """
@@ -1095,7 +1119,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                        encoding='onehot'), 
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
                                                              fun_predictors=create_predictors, 
-                                                             window_size=2, transformer_series=None)], 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
                          ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
 def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_refit_int_interval_yes_exog_not_allow_remainder_gap_with_mocked(forecaster):
     """
@@ -1555,7 +1580,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                          [0.80370716, 0.68682964, 0.9087857 ],
                          [0.49265658, 0.34504526, 0.63842054],
                          [0.5482819 , 0.39901207, 0.67372527]]),
-        columns = ['l1', 'lower_bound', 'upper_bound'],
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
         index = pd.RangeIndex(start=38, stop=50, step=1)
     )
                                    
@@ -1613,7 +1638,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                          [0.81570257, 0.68317749, 0.95105791],
                          [0.5040059 , 0.36942232, 0.65356959],
                          [0.54173456, 0.41187539, 0.69844758]]),
-        columns = ['l1', 'lower_bound', 'upper_bound'],
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
         index = pd.RangeIndex(start=38, stop=50, step=1)
     )
                                    
@@ -1678,7 +1703,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                          [0.63726975, 0.45737877, 0.81036088],
                          [0.54013414, 0.36261322, 0.71490412],
                          [0.52550978, 0.35956884, 0.6786523 ]]),
-        columns = ['l1', 'lower_bound', 'upper_bound'],
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
         index = pd.RangeIndex(start=33, stop=50, step=1)
     )
                                    
@@ -1741,7 +1766,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                 [0.3198172 , 0.18545173, 0.44111693],
                                                 [0.45269985, 0.29948117, 0.57043644],
                                                 [0.76214215, 0.63320969, 0.90810797]]),
-                               columns = ['l1', 'lower_bound', 'upper_bound'],
+                               columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
                                index = pd.RangeIndex(start=33, stop=48, step=1)
                            )
                                    
@@ -1807,7 +1832,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                          [0.6605119 , 0.44992937, 0.79751069],
                          [0.49225437, 0.31367508, 0.67624609],
                          [0.52528842, 0.33700505, 0.74482225]]),
-        columns = ['l1', 'lower_bound', 'upper_bound'],
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
         index = pd.date_range(start='2022-02-05', periods=15, freq='D')
     )
     backtest_predictions = backtest_predictions.asfreq('D')
@@ -1831,27 +1856,34 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                  )
     
     refit = 2
+    n_jobs = 2
     n_validation = 20
     steps = 2
 
-    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series,
-                                               steps                 = steps,
-                                               levels                = 'l1',
-                                               metric                = 'mean_absolute_error',
-                                               initial_train_size    = len(series) - n_validation,
-                                               gap                   = 0,
-                                               allow_incomplete_fold = False,
-                                               refit                 = refit,
-                                               fixed_train_size      = True,
-                                               exog                  = series['l1'].rename('exog_1'),
-                                               interval              = [5, 95],
-                                               n_boot                = 100,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
-                                           )
+    warn_msg = re.escape(
+        ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
+         "is set to 1 to avoid unexpected results during parallelization.")
+    )
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
+        metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                                   forecaster            = forecaster,
+                                                   series                = series,
+                                                   steps                 = steps,
+                                                   levels                = 'l1',
+                                                   metric                = 'mean_absolute_error',
+                                                   initial_train_size    = len(series) - n_validation,
+                                                   gap                   = 0,
+                                                   allow_incomplete_fold = False,
+                                                   refit                 = refit,
+                                                   fixed_train_size      = True,
+                                                   exog                  = series['l1'].rename('exog_1'),
+                                                   interval              = [5, 95],
+                                                   n_boot                = 100,
+                                                   random_state          = 123,
+                                                   in_sample_residuals   = True,
+                                                   verbose               = False,
+                                                   n_jobs                = n_jobs
+                                               )
     
     expected_metric = pd.DataFrame(
         {'levels': ['l1'], 
@@ -1878,7 +1910,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                          [0.74059646, 0.6075235 , 0.88275308],
                          [0.55112717, 0.37251772, 0.69426237],
                          [0.55778417, 0.4247112 , 0.69994079]]),
-        columns = ['l1', 'lower_bound', 'upper_bound'],
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
         index = pd.RangeIndex(start=30, stop=50, step=1)
     )
                                    
@@ -1958,7 +1990,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                          [0.68566159, 0.54133048, 0.8819007 ],
                          [0.34632377, 0.19069195, 0.4712714 ],
                          [0.44695116, 0.26594138, 0.60046927]]),
-        columns = ['l1', 'lower_bound', 'upper_bound'],
+        columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
         index = pd.date_range(start='2022-01-24', periods=24, freq='D')
     )
     backtest_predictions = backtest_predictions.asfreq('D')

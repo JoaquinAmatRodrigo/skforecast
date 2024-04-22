@@ -507,7 +507,7 @@ class Sarimax(BaseEstimator, RegressorMixin):
         # the number of steps
         if exog is not None and len(exog) > steps:
             warnings.warn(
-                (f"when predicting using exogenous variables, the `exog` parameter "
+                (f"When predicting using exogenous variables, the `exog` parameter "
                  f"must have the same length as the number of predicted steps. Since "
                  f"len(exog) > steps, only the first {steps} observations are used.")
             )
