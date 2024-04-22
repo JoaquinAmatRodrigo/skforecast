@@ -6,13 +6,15 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
-+ Added `bayesian_search_forecaster_multiseries` function to `model_selection_multiseries` module. This function performs a Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
++ Multiseries forecaster (global models) can be trained using series of different lengths and with different exogenous variables per series.
 
-+ Added `select_features` and `select_features_multiseries` functions to the `model_selection` and `model_selection_multiseries` modules to perform feature selection using scikit-learn selectors.
++ Bayesian hyperparameter search is now available for all multiseries forecasters using `optuna` as the search engine.
 
-+ Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
++ New functionality to select features using scikit-learn selectors (`select_features` and `select_features_multiseries`).
 
-+ 
++ Added new forecaster `ForecasterRnn` to create forecasting models based on deep learning (RNN and LSTM).
+
++ New method to predict intervals conditioned on the range of the predicted values. This is can help to improve the interval coverage when the residuals are not homoscedastic.
 
 **Added**
 
@@ -36,13 +38,18 @@ The main changes in this release are:
 
 + Added `set_dark_theme` function to the `plot` module to set a dark theme for matplotlib plots.
 
-+ Allow tuple type for `lags` argument in Forecasters.
++ Allow tuple type for `lags` argument in all Forecasters.
 
-+ Added `window_size_diff` attribute to the Forecasters with differentiation. It stores the size of the window (`window_size`) extended by the order of differentiation. Added  to all Forecasters for API consistency.
++ Added `window_size_diff` attribute to all Forecasters. It stores the size of the window (`window_size`) extended by the order of differentiation. Added  to all Forecasters for API consistency.
 
 + Added `store_last_window` parameter to `fit` method in Forecasters. If `True`, store the last window of the training data.
 
 + Added `utils.set_skforecast_warnings` function to set the warnings of the skforecast package.
+
++ Added new forecaster `ForecasterRnn` to create forecasting models based on deep learning (RNN and LSTM).
+
++ Added new function `create_and_compile_model` to module `skforecast.ForecasterRnn.utils` to help to create and compile a RNN or LSTM models to be used in `ForecasterRnn`.
+
 
 **Changed**
 
