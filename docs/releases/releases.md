@@ -6,7 +6,7 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
-+ Multiseries forecaster (global models) can be trained using series of different lengths and with different exogenous variables per series.
++ Multiseries forecaster (Global Models) can be trained using series of different lengths and with different exogenous variables per series.
 
 + Bayesian hyperparameter search is now available for all multiseries forecasters using `optuna` as the search engine.
 
@@ -15,6 +15,8 @@ The main changes in this release are:
 + Added new forecaster `ForecasterRnn` to create forecasting models based on deep learning (RNN and LSTM).
 
 + New method to predict intervals conditioned on the range of the predicted values. This is can help to improve the interval coverage when the residuals are not homoscedastic.
+
++ All forecasters are now able to differentiate the time series before modeling it.
 
 **Added**
 
@@ -39,6 +41,8 @@ The main changes in this release are:
 + Added `set_dark_theme` function to the `plot` module to set a dark theme for matplotlib plots.
 
 + Allow tuple type for `lags` argument in all Forecasters.
+
++ Argument `differentiation` in all Forecasters to model the n-order differentiated time series.
 
 + Added `window_size_diff` attribute to all Forecasters. It stores the size of the window (`window_size`) extended by the order of differentiation. Added  to all Forecasters for API consistency.
 
