@@ -118,7 +118,7 @@ class ForecasterAutoreg(ForecasterBase):
         Differentiation is reversed in the output of `predict()` and `predict_interval()`.
         **WARNING: This argument is newly introduced and requires special attention. It
         is still experimental and may undergo changes.**
-        **New in version 0.12.0**
+        **New in version 0.10.0**
     binner : sklearn.preprocessing.KBinsDiscretizer
         KBinsDiscretizer used to discretize residuals into k bins according to the
         predicted values each residual is associated with.
@@ -253,11 +253,13 @@ class ForecasterAutoreg(ForecasterBase):
         self.binner_kwargs = binner_kwargs
         if binner_kwargs is None:
             self.binner_kwargs = {
-                'n_bins': 15, 'encode': 'ordinal', 'strategy': 'quantile', 'subsample': 10000
+                'n_bins': 15, 'encode': 'ordinal', 'strategy': 'quantile',
+                'subsample': 10000, 'random_state': 789654, 'dtype': np.float32
             }
         else:
             self.binner_kwargs = binner_kwargs
             self.binner_kwargs['encode'] = 'ordinal'
+            self.binner_kwargs['dtype'] = np.float32
         self.binner = KBinsDiscretizer(**self.binner_kwargs)
         self.binner_intervals = None
 
