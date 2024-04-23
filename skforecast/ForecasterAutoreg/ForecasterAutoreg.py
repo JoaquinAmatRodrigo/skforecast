@@ -86,7 +86,7 @@ class ForecasterAutoreg(ForecasterBase):
         Additional arguments to be passed to the `KBinsDiscretizer` used to 
         discretize residuals into k bins according to the predicted values each
         residual is associated with. Argument `encode` is always set to `ordinal`
-        and `dtype` to np.float32.
+        and `dtype` to np.float64.
         **New in version 0.12.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
@@ -128,7 +128,7 @@ class ForecasterAutoreg(ForecasterBase):
         Additional arguments to be passed to the `KBinsDiscretizer` used to 
         discretize residuals into k bins according to the predicted values each
         residual is associated with. Argument `encode` is always set to `ordinal`
-        and `dtype` to np.float32.
+        and `dtype` to np.float64.
     source_code_weight_func : str
         Source code of the custom function used to create weights.
     differentiation : int
@@ -255,12 +255,12 @@ class ForecasterAutoreg(ForecasterBase):
         if binner_kwargs is None:
             self.binner_kwargs = {
                 'n_bins': 15, 'encode': 'ordinal', 'strategy': 'quantile',
-                'subsample': 10000, 'random_state': 789654, 'dtype': np.float32
+                'subsample': 10000, 'random_state': 789654, 'dtype': np.float64
             }
         else:
             self.binner_kwargs = binner_kwargs
             self.binner_kwargs['encode'] = 'ordinal'
-            self.binner_kwargs['dtype'] = np.float32
+            self.binner_kwargs['dtype'] = np.float64
         self.binner = KBinsDiscretizer(**self.binner_kwargs)
         self.binner_intervals = None
 
