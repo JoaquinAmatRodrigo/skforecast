@@ -85,7 +85,8 @@ class ForecasterAutoreg(ForecasterBase):
     binner_kwargs : dict, default `None`
         Additional arguments to be passed to the `KBinsDiscretizer` used to 
         discretize residuals into k bins according to the predicted values each
-        residual is associated with. Argument `encode` is always set to `ordinal`.
+        residual is associated with. Argument `encode` is always set to `ordinal`
+        and `dtype` to np.float64.
         **New in version 0.12.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
@@ -126,8 +127,8 @@ class ForecasterAutoreg(ForecasterBase):
     binner_kwargs : dict, default `None`
         Additional arguments to be passed to the `KBinsDiscretizer` used to 
         discretize residuals into k bins according to the predicted values each
-        residual is associated with. Argument `encode` is always set to `ordinal`.
-        **New in version 0.12.0**
+        residual is associated with. Argument `encode` is always set to `ordinal`
+        and `dtype` to np.float64.
     source_code_weight_func : str
         Source code of the custom function used to create weights.
     differentiation : int
@@ -254,12 +255,12 @@ class ForecasterAutoreg(ForecasterBase):
         if binner_kwargs is None:
             self.binner_kwargs = {
                 'n_bins': 15, 'encode': 'ordinal', 'strategy': 'quantile',
-                'subsample': 10000, 'random_state': 789654, 'dtype': np.float32
+                'subsample': 10000, 'random_state': 789654, 'dtype': np.float64
             }
         else:
             self.binner_kwargs = binner_kwargs
             self.binner_kwargs['encode'] = 'ordinal'
-            self.binner_kwargs['dtype'] = np.float32
+            self.binner_kwargs['dtype'] = np.float64
         self.binner = KBinsDiscretizer(**self.binner_kwargs)
         self.binner_intervals = None
 
@@ -600,12 +601,10 @@ class ForecasterAutoreg(ForecasterBase):
         
         # This is done to save time during fit in functions such as backtesting()
         if store_in_sample_residuals:
-
             in_sample_predictions = pd.Series(
                                         data  = self.regressor.predict(X_train),
                                         index = X_train.index
                                     )
-            
             self._binning_in_sample_residuals(
                 y_true = y_train,
                 y_pred = in_sample_predictions
@@ -1403,7 +1402,17 @@ class ForecasterAutoreg(ForecasterBase):
         y_pred : pandas Series, numpy ndarray, default `None`
             Predicted values of the time series from which the residuals have been
             calculated. This argument is used to bin residuals according to the
-            predicted values. If `y_pred` is `None`, residuals are not binned.
+            predicted values. `y_pred` and `residuals` must be of the same class
+            (both pandas Series or both numpy ndarray) must have the same length
+            and, if they are pandas Series, the same index. 
+            
+            - If `y_pred` is `None`, residuals are not binned.
+            - If affter binning, a bin has more than 200 residuals, only a random
+                sample of 200 residuals is stored.
+            - If affter binning, a bin binning is empty, it is filled with a
+            random sample of residuals from other bins. This is done to ensure
+            that all bins have at least one residual and can be used in the
+            prediction process.
             **New in version 0.12.0**
         append : bool, default `True`
             If `True`, new residuals are added to the once already stored in the
@@ -1553,7 +1562,7 @@ class ForecasterAutoreg(ForecasterBase):
                     rng = np.random.default_rng(seed=123)
                     self.out_sample_residuals_by_bin[k] = rng.choice(
                                                               a=self.out_sample_residuals,
-                                                              size=100,
+                                                              size=200,
                                                               replace=True
                                                           )
 

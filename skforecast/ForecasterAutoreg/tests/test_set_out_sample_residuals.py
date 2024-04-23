@@ -8,6 +8,9 @@ from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
+# Fixtures
+from .fixtures_ForecasterAutoreg import y
+
 
 def test_set_out_sample_residuals_TypeError_when_residuals_is_not_numpy_array_or_pandas_series():
     """
@@ -126,7 +129,7 @@ def test_same_out_sample_residuals_stored_when_residuals_length_is_greater_than_
     forecaster.set_out_sample_residuals(residuals=np.arange(2000))
     out_sample_residuals_2 = forecaster.out_sample_residuals
 
-    assert (out_sample_residuals_1 == out_sample_residuals_2).all()
+    np.testing.assert_almost_equal(out_sample_residuals_1, out_sample_residuals_2)
 
 
 def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no_append():
@@ -139,7 +142,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no
     expected = np.arange(10)
     results = forecaster.out_sample_residuals
 
-    assert (results == expected).all()
+    np.testing.assert_almost_equal(results, expected)
 
 
 def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_append():
@@ -152,7 +155,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_ap
     expected = np.hstack([np.arange(10), np.arange(10)])
     results = forecaster.out_sample_residuals
 
-    assert (results == expected).all()
+    np.testing.assert_almost_equal(results, expected)
 
 
 def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_append():
@@ -165,7 +168,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_ap
     expected = np.hstack([np.arange(10), np.arange(1200)])[:1000]
     results = forecaster.out_sample_residuals
 
-    assert (results == expected).all()
+    np.testing.assert_almost_equal(results, expected)
 
 
 def test_set_out_sample_residuals_when_transform_is_True():
@@ -186,3 +189,33 @@ def test_set_out_sample_residuals_when_transform_is_True():
     forecaster.set_out_sample_residuals(residuals=new_residuals, transform=True)
 
     np.testing.assert_array_equal(new_residuals_transformed, forecaster.out_sample_residuals)
+
+
+def test_same_out_sample_residuals_by_bin_stored_when_y_pred_is_provided():
+    """
+    Test out sample residuals by bin are stored when y_pred is provided.
+    """
+    # The in sample residuals and predictions are passed to the method
+    # set_out_sample_residuals so out_sample_residuals_by_bin and
+    # out_sample_residuals_by_bin must be equal
+    forecaster = ForecasterAutoreg(
+                regressor=LinearRegression(),
+                lags = 5,
+                binner_kwargs={'n_bins':3}
+            )
+    forecaster.fit(y)
+    X_train, y_train = forecaster.create_train_X_y(y)
+    forecaster.regressor.fit(X_train, y_train)
+    predictions = forecaster.regressor.predict(X_train)
+    residuals = y_train - predictions
+
+    forecaster.set_out_sample_residuals(
+        residuals=residuals,
+        y_pred=predictions
+    )
+
+    for k in forecaster.out_sample_residuals_by_bin.keys():
+        np.testing.assert_almost_equal(
+            forecaster.in_sample_residuals_by_bin[k],
+            forecaster.out_sample_residuals_by_bin[k]
+        )
