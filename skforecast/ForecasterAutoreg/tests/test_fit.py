@@ -64,6 +64,57 @@ def test_fit_in_sample_residuals_stored():
     np.testing.assert_array_equal(results, expected)
 
 
+def test_fit_in_sample_residuals_by_bin_stored():
+    """
+    Test that values of in_sample_residuals_by_bin are stored after fitting.
+    """
+    forecaster = ForecasterAutoreg(
+                regressor=LinearRegression(),
+                lags = 5,
+                binner_kwargs={'n_bins':3}
+            )
+    forecaster.fit(y)
+
+    X_train, y_train = forecaster.create_train_X_y(y)
+    forecaster.regressor.fit(X_train, y_train)
+    predictions_regressor = forecaster.regressor.predict(X_train)
+    expected_1 = y_train - predictions_regressor
+
+    expected_2 = {
+        0: np.array([
+                0.0334789 , -0.12428472,  0.34053202, -0.40668544, -0.29246428,
+                0.16990408, -0.02118736, -0.24234062, -0.11745596,  0.1697826 ,
+                -0.01432662, -0.00063421, -0.03462192,  0.41322689,  0.19077889
+            ]),
+        1: np.array([
+                -0.07235524, -0.10880301, -0.07773704, -0.09070227,  0.21559424,
+                -0.29380582,  0.03359274,  0.10109702,  0.2080735 , -0.17086244,
+                0.01929597, -0.09396861, -0.0670198 ,  0.38248168, -0.01100463
+            ]),
+        2: np.array([
+                0.44780048,  0.03560524, -0.04960603,  0.24323339,  0.12651656,
+                -0.46533293, -0.17532266, -0.24111645,  0.3805961 , -0.05842153,
+                0.08927473, -0.42295249, -0.32047616,  0.38902396, -0.01640072
+            ])
+    }
+
+    expected_3 = {
+        0: (0.31791969404305154, 0.47312737276420375),
+        1: (0.47312737276420375, 0.5259220171775293),
+        2: (0.5259220171775293, 0.6492244994657664)
+    }
+
+    np.testing.assert_almost_equal(
+        np.sort(forecaster.in_sample_residuals),
+        np.sort(expected_1)
+    )
+
+    for k in expected_2.keys():
+        np.testing.assert_almost_equal(forecaster.in_sample_residuals_by_bin[k], expected_2[k])
+
+    assert forecaster.binner_intervals == expected_3
+
+
 def test_fit_same_residuals_when_residuals_greater_than_1000():
     """
     Test fit return same residuals when residuals len is greater than 1000.
