@@ -40,8 +40,8 @@ def create_and_compile_model(
 
     Parameters
     ----------
-    series : numpy ndarray
-        Input time series data represented as a NumPy array.
+    series : pandas DataFrame
+        Input time series.
     lags : int, list
         Number of lagged time steps to consider in the input, or a list of 
         specific lag indices.
