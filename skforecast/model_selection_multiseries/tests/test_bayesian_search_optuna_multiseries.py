@@ -4,6 +4,7 @@ import os
 import re
 import sys
 import pytest
+from pytest import approx
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
@@ -43,6 +44,7 @@ def test_ValueError_bayesian_search_optuna_multiseries_metric_list_duplicate_nam
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
                      lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -79,6 +81,7 @@ def test_ValueError_bayesian_search_optuna_multiseries_when_search_space_names_d
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
                      lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -117,14 +120,15 @@ def test_ValueError_bayesian_search_optuna_multiseries_when_search_space_names_d
 # pytest -m "not slow" --verbose
 @pytest.mark.slow
 @pytest.mark.skipif(sys.version_info < (3, 8), reason="requires python3.8 or higher")
-def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeries():
+def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags_grid_dict():
     """
-    Test output of _bayesian_search_optuna_multiseries in 
-    ForecasterAutoregMultiSeries with mocked (mocked done in skforecast v0.12.0).
+    Test output of _bayesian_search_optuna_multiseries in ForecasterAutoregMultiSeries 
+    when `lags_grid` is a dict with mocked (mocked done in skforecast v0.12.0).
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = RandomForestRegressor(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -207,7 +211,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -277,7 +282,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_create_st
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     steps = 3
@@ -350,7 +356,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_study_opt
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = RandomForestRegressor(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
     steps = 3
     n_validation = 12
@@ -422,7 +429,8 @@ def test_results_output_bayesian_search_optuna_multiseries_when_lags_is_not_prov
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 4
+                     lags      = 4,
+                     encoding  = 'onehot'
                  )
     steps = 3
     n_validation = 12
@@ -496,7 +504,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
-                     window_size    = 4
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
     steps = 3
     n_validation = 12
@@ -723,7 +732,8 @@ def test_evaluate_bayesian_search_optuna_multiseries_when_return_best_Forecaster
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
     steps = 3
     n_validation = 12
@@ -763,7 +773,8 @@ def test_evaluate_bayesian_search_optuna_multiseries_when_return_best_Forecaster
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
-                     window_size    = 4
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
     steps = 3
     n_validation = 12
@@ -800,7 +811,8 @@ def test_results_opt_best_output__bayesian_search_optuna_multiseries_with_output
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
     steps              = 3
     metric             = 'mean_absolute_error'
@@ -830,7 +842,8 @@ def test_results_opt_best_output__bayesian_search_optuna_multiseries_with_output
         forecaster = ForecasterAutoregMultiSeries(
                          regressor = Ridge(random_state=random_state, 
                                            alpha=alpha),
-                         lags      = 2
+                         lags      = 2,
+                         encoding  = 'onehot'
                      )
         metrics_levels, _ = backtesting_forecaster_multiseries(
                                 forecaster         = forecaster,
@@ -873,7 +886,7 @@ def test_results_opt_best_output__bayesian_search_optuna_multiseries_with_output
                        )[1]
 
     assert best_trial.number == results_opt_best.number
-    assert best_trial.values == results_opt_best.values
+    assert best_trial.values == approx(results_opt_best.values)
     assert best_trial.params == results_opt_best.params
 
 
@@ -928,7 +941,8 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeriesCustom_o
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = RandomForestRegressor(random_state=123),
                      fun_predictors = create_predictors,
-                     window_size    = 4
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
 
     steps = 3

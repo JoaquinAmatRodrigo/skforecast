@@ -5,13 +5,14 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Callable, Any
+from typing import Union, Tuple, Optional, Callable, Generator, Any
+import os
+import re
+from copy import deepcopy
+import logging
+import warnings
 import numpy as np
 import pandas as pd
-import warnings
-import logging
-import os
-from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
 from sklearn.model_selection import ParameterGrid
@@ -19,6 +20,7 @@ from sklearn.model_selection import ParameterSampler
 import optuna
 from optuna.samplers import TPESampler
 
+from ..exceptions import warn_skforecast_categories
 from ..exceptions import LongTrainingWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..model_selection.model_selection import _get_metric
@@ -27,11 +29,16 @@ from ..utils import check_backtesting_input
 from ..utils import select_n_jobs_backtesting
 from ..utils import initialize_lags
 from ..utils import initialize_lags_grid
+from ..utils import set_skforecast_warnings
 
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
-)
+# import logging
+# logger = logging.getLogger(__name__)
+# logger.setLevel(logging.INFO)
+# console_handler = logging.StreamHandler()
+# console_handler.setLevel(logging.INFO)
+# formatter = logging.Formatter('%(name)-10s %(levelname)-5s %(message)s')
+# console_handler.setFormatter(formatter)
+# logger.addHandler(console_handler)
 
 
 def _initialize_levels_model_selection_multiseries(
@@ -88,11 +95,166 @@ def _initialize_levels_model_selection_multiseries(
     else:
         if levels is None:
             # Forecaster could be untrained, so self.series_col_names cannot be used.
-            levels = list(series.columns) 
+            if isinstance(series, pd.DataFrame):
+                levels = list(series.columns)
+            else:
+                levels = list(series.keys())
         elif isinstance(levels, str):
             levels = [levels]
 
     return levels
+
+
+def _extract_data_folds_multiseries(
+    series: Union[pd.Series, pd.DataFrame, dict],
+    folds: list,
+    span_index: Union[pd.DatetimeIndex, pd.RangeIndex],
+    window_size: int,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
+    dropna_last_window: bool=False,
+    externally_fitted: bool=False
+) -> Generator[
+        Tuple[
+            Union[pd.Series, pd.DataFrame, dict],
+            pd.DataFrame,
+            list,
+            Optional[Union[pd.Series, pd.DataFrame, dict]],
+            Optional[Union[pd.Series, pd.DataFrame, dict]],
+            list
+        ],
+        None,
+        None
+    ]:
+    """
+    Select the data from series and exog that corresponds to each fold created using the
+    skforecast.model_selection._create_backtesting_folds function.
+
+    Parameters
+    ----------
+    series: pandas Series, pandas DataFrame, dict
+        Time series.
+    folds: list
+        Folds created using the skforecast.model_selection._create_backtesting_folds
+        function.
+    span_index: pandas DatetimeIndex, pandas RangeIndex
+        Full index from the minimum to the maximum index among all series.
+    window_size: int
+        Size of the window needed to create the predictors.
+    exog: pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variable.
+    dropna_last_window: bool, default `False`
+        If `True`, drop the columns of the last window that have NaN values.
+    externally_fitted : bool, default `False`
+        Flag indicating whether the forecaster is already trained. Only used when 
+        `initial_train_size` is None and `refit` is False.
+
+    Yield
+    -----
+    series_train: pandas Series, pandas DataFrame, dict
+        Time series corresponding to the training set of the fold.
+    series_last_window: pandas DataFrame
+        Time series corresponding to the last window of the fold.
+    levels_last_window: list
+        Levels of the time series present to the last window of the fold.
+    exog_train: pandas Series, pandas DataFrame, dict, None
+        Exogenous variable corresponding to the training set of the fold.
+    exog_test: pandas Series, pandas DataFrame, dict, None
+        Exogenous variable corresponding to the test set of the fold.
+    fold: list
+        Fold created using the skforecast.model_selection._create_backtesting_folds
+
+    """
+
+    for fold in folds:
+        train_iloc_start       = fold[0][0]
+        train_iloc_end         = fold[0][1]
+        last_window_iloc_start = fold[1][0]
+        last_window_iloc_end   = fold[1][1]
+        test_iloc_start        = fold[2][0]
+        test_iloc_end          = fold[2][1]
+
+        if isinstance(series, dict) or isinstance(exog, dict):
+            # Substract 1 to the iloc indexes to get the loc indexes
+            train_loc_start       = span_index[train_iloc_start]
+            train_loc_end         = span_index[train_iloc_end - 1]
+            last_window_loc_start = span_index[last_window_iloc_start]
+            last_window_loc_end   = span_index[last_window_iloc_end - 1]
+            test_loc_start        = span_index[test_iloc_start]
+            test_loc_end          = span_index[test_iloc_end - 1]
+
+        if isinstance(series, pd.DataFrame):
+            series_train = series.iloc[train_iloc_start:train_iloc_end, ]
+
+            series_to_drop = []
+            for col in series_train.columns:
+                if series_train[col].isna().all():
+                    series_to_drop.append(col)
+                else:
+                    first_valid_index = series_train[col].first_valid_index()
+                    last_valid_index = series_train[col].last_valid_index()
+                    if (
+                        len(series_train[col].loc[first_valid_index:last_valid_index])
+                        < window_size
+                    ):
+                        series_to_drop.append(col)
+
+            series_last_window = series.iloc[
+                last_window_iloc_start:last_window_iloc_end,
+            ]
+            
+            series_train = series_train.drop(columns=series_to_drop)
+            if not externally_fitted:
+                series_last_window = series_last_window.drop(columns=series_to_drop)
+        else:
+            series_train = {}
+            for k in series.keys():
+                v = series[k].loc[train_loc_start:train_loc_end]
+                if not v.isna().all():
+                    first_valid_index = v.first_valid_index()
+                    last_valid_index  = v.last_valid_index()
+                    if first_valid_index is not None and last_valid_index is not None:
+                        v = v.loc[first_valid_index : last_valid_index]
+                        if len(v) >= window_size:
+                            series_train[k] = v
+
+            series_last_window = {}
+            for k, v in series.items():
+                v = series[k].loc[last_window_loc_start:last_window_loc_end]
+                if ((externally_fitted or k in series_train) and len(v) >= window_size):
+                    series_last_window[k] = v
+
+            series_last_window = pd.DataFrame(series_last_window)
+
+        if dropna_last_window:
+            series_last_window = series_last_window.dropna(axis=1, how="any")
+            # TODO: add the option to drop the series without minimum non NaN values.
+            # Similar to how pandas does in the rolling window function.
+        
+        levels_last_window = list(series_last_window.columns)
+
+        if exog is not None:
+            if isinstance(exog, (pd.Series, pd.DataFrame)):
+                exog_train = exog.iloc[train_iloc_start:train_iloc_end, ]
+                exog_test = exog.iloc[test_iloc_start:test_iloc_end, ]
+            else:
+                exog_train = {
+                    k: v.loc[train_loc_start:train_loc_end] 
+                    for k, v in exog.items()
+                }
+                exog_train = {k: v for k, v in exog_train.items() if len(v) > 0}
+
+                exog_test = {
+                    k: v.loc[test_loc_start:test_loc_end]
+                    for k, v in exog.items()
+                    if externally_fitted or k in exog_train
+                }
+
+                exog_test = {k: v for k, v in exog_test.items() if len(v) > 0}
+        else:
+            exog_train = None
+            exog_test = None
+
+        yield series_train, series_last_window, levels_last_window, exog_train, exog_test, fold
 
 
 def _backtesting_forecaster_multiseries(
@@ -113,7 +275,8 @@ def _backtesting_forecaster_multiseries(
     in_sample_residuals: bool=True,
     n_jobs: Union[int, str]='auto',
     verbose: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    suppress_warnings: bool=False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting for multi-series and multivariate forecasters.
@@ -196,6 +359,10 @@ def _backtesting_forecaster_multiseries(
         for backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the backtesting 
+        process. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
 
     Returns
     -------
@@ -211,16 +378,25 @@ def _backtesting_forecaster_multiseries(
     
     """
 
+    set_skforecast_warnings(suppress_warnings, action='ignore')
+
     forecaster = deepcopy(forecaster)
-    
-    if n_jobs == 'auto':        
+
+    if n_jobs == 'auto':
         n_jobs = select_n_jobs_backtesting(
                      forecaster = forecaster,
                      refit      = refit
                  )
+    elif not isinstance(refit, bool) and refit != 1 and n_jobs != 1:
+        warnings.warn(
+            ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
+             "is set to 1 to avoid unexpected results during parallelization."),
+             IgnoredArgumentWarning
+        )
+        n_jobs = 1
     else:
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
-    
+
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
                  series     = series,
@@ -235,14 +411,42 @@ def _backtesting_forecaster_multiseries(
 
     store_in_sample_residuals = False if interval is None else True
 
+    if isinstance(series, dict):
+        min_index = min([v.index[0] for v in series.values()])
+        max_index = max([v.index[-1] for v in series.values()])
+        # All series must have the same frequency
+        frequency = series[list(series.keys())[0]].index.freqstr
+        span_index = pd.date_range(start=min_index, end=max_index, freq=frequency)
+    else:
+        span_index = series.index
+
     if initial_train_size is not None:
-        # First model training, this is done to allow parallelization when `refit` 
+        # First model training, this is done to allow parallelization when `refit`
         # is `False`. The initial Forecaster fit is outside the auxiliary function.
-        exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
+        fold_initial_train = [
+            [0, initial_train_size],
+            [initial_train_size - forecaster.window_size, initial_train_size],
+            [0, 0], # dummy values
+            [0, 0], # dummy values
+            True
+        ]
+        data_fold = _extract_data_folds_multiseries(
+                        series             = series,
+                        folds              = [fold_initial_train],
+                        span_index         = span_index,
+                        window_size        = forecaster.window_size,
+                        exog               = exog,
+                        dropna_last_window = forecaster.dropna_from_series,
+                        externally_fitted  = False
+                    )
+        series_train, _, last_window_levels, exog_train, _, _ = next(data_fold)
+
         forecaster.fit(
-            series                    = series.iloc[:initial_train_size, ],
+            series                    = series_train,
             exog                      = exog_train,
-            store_in_sample_residuals = store_in_sample_residuals
+            store_last_window         = last_window_levels,
+            store_in_sample_residuals = store_in_sample_residuals,
+            suppress_warnings         = suppress_warnings
         )
         window_size = forecaster.window_size
         externally_fitted = False
@@ -254,7 +458,7 @@ def _backtesting_forecaster_multiseries(
         externally_fitted = True
 
     folds = _create_backtesting_folds(
-                data                  = series,
+                data                  = span_index,
                 window_size           = window_size,
                 initial_train_size    = initial_train_size,
                 test_size             = steps,
@@ -264,7 +468,7 @@ def _backtesting_forecaster_multiseries(
                 gap                   = gap,
                 allow_incomplete_fold = allow_incomplete_fold,
                 return_all_indexes    = False,
-                verbose               = verbose  
+                verbose               = verbose
             )
 
     if refit:
@@ -286,94 +490,142 @@ def _backtesting_forecaster_multiseries(
     if show_progress:
         folds = tqdm(folds)
 
-    def _fit_predict_forecaster(series, exog, forecaster, interval, fold):
+    data_folds = _extract_data_folds_multiseries(
+                     series             = series,
+                     folds              = folds,
+                     span_index         = span_index,
+                     window_size        = forecaster.window_size,
+                     exog               = exog,
+                     dropna_last_window = forecaster.dropna_from_series,
+                     externally_fitted  = externally_fitted
+                 )
+
+    def _fit_predict_forecaster(data_fold, forecaster, interval, levels):
         """
         Fit the forecaster and predict `steps` ahead. This is an auxiliary 
         function used to parallelize the backtesting_forecaster_multiseries
         function.
         """
 
-        train_idx_start   = fold[0][0]
-        train_idx_end     = fold[0][1]
-        last_window_start = fold[1][0]
-        last_window_end   = fold[1][1]
-        test_idx_start    = fold[2][0]
-        test_idx_end      = fold[2][1]
+        (
+            series_train,
+            last_window_series,
+            last_window_levels,
+            exog_train,
+            next_window_exog,
+            fold
+        ) = data_fold
 
-        if fold[4] is False:
-            # When the model is not fitted, last_window must be updated to include 
-            # the data needed to make predictions.
-            last_window_series = series.iloc[last_window_start:last_window_end, ].copy()
-        else:
-            # The model is fitted before making predictions. If `fixed_train_size`  
-            # the train size doesn't increase but moves by `steps` in each iteration. 
-            # If `False` the train size increases by `steps` in each  iteration.
-            series_train = series.iloc[train_idx_start:train_idx_end, ]
-            exog_train = exog.iloc[train_idx_start:train_idx_end, ] if exog is not None else None
-            last_window_series = None
+        if fold[4] is True:
             forecaster.fit(
                 series                    = series_train, 
                 exog                      = exog_train,
-                store_in_sample_residuals = store_in_sample_residuals
+                store_last_window         = last_window_levels,
+                store_in_sample_residuals = store_in_sample_residuals,
+                suppress_warnings         = suppress_warnings
             )
-        
-        next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
 
-        steps = len(range(test_idx_start, test_idx_end))
+        test_iloc_start = fold[2][0]
+        test_iloc_end   = fold[2][1]
+        steps = len(range(test_iloc_start, test_iloc_end))
         if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' and gap > 0:
             # Select only the steps that need to be predicted if gap > 0
-            test_idx_start = fold[3][0]
-            test_idx_end   = fold[3][1]
-            steps = list(np.arange(len(range(test_idx_start, test_idx_end))) + gap + 1)
-        
+            test_iloc_start = fold[3][0]
+            test_iloc_end   = fold[3][1]
+            steps = list(np.arange(len(range(test_iloc_start, test_iloc_end))) + gap + 1)
+
+        levels_predict = [level for level in levels 
+                          if level in last_window_levels]
         if interval is None:
             pred = forecaster.predict(
-                       steps       = steps, 
-                       levels      = levels, 
-                       last_window = last_window_series,
-                       exog        = next_window_exog
+                       steps             = steps, 
+                       levels            = levels_predict, 
+                       last_window       = last_window_series,
+                       exog              = next_window_exog,
+                       suppress_warnings = suppress_warnings
                    )
         else:
             pred = forecaster.predict_interval(
                        steps               = steps,
-                       levels              = levels, 
+                       levels              = levels_predict, 
                        last_window         = last_window_series,
                        exog                = next_window_exog,
                        interval            = interval,
                        n_boot              = n_boot,
                        random_state        = random_state,
-                       in_sample_residuals = in_sample_residuals
+                       in_sample_residuals = in_sample_residuals,
+                       suppress_warnings   = suppress_warnings
                    )
 
         if type(forecaster).__name__ != 'ForecasterAutoregMultiVariate' and gap > 0:
             pred = pred.iloc[gap:, ]
-        
+
         return pred
-    
-    backtest_predictions = (
-        Parallel(n_jobs=n_jobs)
-        (delayed(_fit_predict_forecaster)
-        (series=series, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
-         for fold in folds)
+
+    backtest_predictions = Parallel(n_jobs=n_jobs)(
+        delayed(_fit_predict_forecaster)(
+            data_fold  = data_fold,
+            forecaster = forecaster,
+            interval   = interval,
+            levels     = levels,
+        )
+        for data_fold in data_folds
     )
 
-    backtest_predictions = pd.concat(backtest_predictions)
+    backtest_predictions = pd.concat(backtest_predictions, axis=0)
 
-    metrics_levels = [[m(
-                         y_true = series[level].loc[backtest_predictions.index],
-                         y_pred = backtest_predictions[level]
-                        ) for m in metrics
-                      ] for level in levels]
+    levels_in_backtest_predictions = backtest_predictions.columns
+    if interval is not None:
+        levels_in_backtest_predictions = [
+            level 
+            for level in levels_in_backtest_predictions
+            if not re.search(r'_lower_bound|_upper_bound', level)
+        ]
+    for level in levels_in_backtest_predictions:
+        valid_index = series[level][series[level].notna()].index
+        no_valid_index = backtest_predictions.index.difference(valid_index, sort=False)
+        cols = [level]
+        if interval:
+            cols = cols + [f'{level}_lower_bound', f'{level}_upper_bound']
+        backtest_predictions.loc[no_valid_index, cols] = np.nan
+
+    metrics_levels = []
+    for level in levels:
+        if level in levels_in_backtest_predictions:
+            predictions_level = pd.merge(
+                series[level],
+                backtest_predictions[level],
+                left_index  = True,
+                right_index = True,
+                how         = "outer",
+                suffixes    = ("_true", "_pred"),
+            ).dropna(axis=0, how="any")
+
+            if not predictions_level.empty:
+                metrics_level = [
+                    m(
+                        y_true = predictions_level.iloc[:, 0],
+                        y_pred = predictions_level.iloc[:, 1],
+                    )
+                    for m in metrics
+                ]
+                metrics_levels.append(metrics_level)
+            else:
+                metrics_levels.append([None for _ in metrics])
+        else:
+            metrics_levels.append([None for _ in metrics])
 
     metrics_levels = pd.concat(
-                         [pd.DataFrame({'levels': levels}), 
-                          pd.DataFrame(
-                              data    = metrics_levels,
-                              columns = [m if isinstance(m, str) else m.__name__ 
-                                         for m in metrics]
-                          )],
-                         axis=1
-                     )
+        [pd.DataFrame({'levels': levels}),
+         pd.DataFrame(
+             data    = metrics_levels,
+             columns = [m if isinstance(m, str) else m.__name__
+                        for m in metrics]
+         )],
+        axis=1
+    )
+
+    set_skforecast_warnings(suppress_warnings, action='default')
 
     return metrics_levels, backtest_predictions
 
@@ -396,7 +648,8 @@ def backtesting_forecaster_multiseries(
     in_sample_residuals: bool=True,
     n_jobs: Union[int, str]='auto',
     verbose: bool=False,
-    show_progress: bool=True
+    show_progress: bool=True,
+    suppress_warnings: bool=False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting for multi-series and multivariate forecasters.
@@ -468,7 +721,7 @@ def backtesting_forecaster_multiseries(
         deterministic.
     in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of prediction 
-        error to create prediction intervals.  If `False`, out_sample_residuals 
+        error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
@@ -480,6 +733,10 @@ def backtesting_forecaster_multiseries(
         for backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the backtesting 
+        process. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
 
     Returns
     -------
@@ -502,12 +759,6 @@ def backtesting_forecaster_multiseries(
         'ForecasterRnn'
     ]
 
-    multi_series_forecasters_with_levels = [
-        'ForecasterAutoregMultiSeries', 
-        'ForecasterAutoregMultiSeriesCustom', 
-        'ForecasterRnn'
-    ]
-
     forecaster_name = type(forecaster).__name__
 
     if forecaster_name not in multi_series_forecasters:
@@ -522,6 +773,7 @@ def backtesting_forecaster_multiseries(
         steps                 = steps,
         metric                = metric,
         series                = series,
+        exog                  = exog,
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
@@ -533,7 +785,8 @@ def backtesting_forecaster_multiseries(
         in_sample_residuals   = in_sample_residuals,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        suppress_warnings     = suppress_warnings
     )
 
     metrics_levels, backtest_predictions = _backtesting_forecaster_multiseries(
@@ -554,7 +807,8 @@ def backtesting_forecaster_multiseries(
         in_sample_residuals   = in_sample_residuals,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        suppress_warnings     = suppress_warnings
     )
 
     return metrics_levels, backtest_predictions
@@ -578,6 +832,7 @@ def grid_search_forecaster_multiseries(
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    suppress_warnings: bool=False,
     output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
@@ -641,6 +896,10 @@ def grid_search_forecaster_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter 
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
     output_file : str, default `None`
         Specifies the filename or full path where the results should be saved. 
         The results will be saved in a tab-separated values (TSV) format. If 
@@ -682,6 +941,7 @@ def grid_search_forecaster_multiseries(
                   return_best           = return_best,
                   verbose               = verbose,
                   show_progress         = show_progress,
+                  suppress_warnings     = suppress_warnings,
                   output_file           = output_file
               )
 
@@ -708,6 +968,7 @@ def random_search_forecaster_multiseries(
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    suppress_warnings: bool=False,
     output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
@@ -776,6 +1037,10 @@ def random_search_forecaster_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter 
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
     output_file : str, default `None`
         Specifies the filename or full path where the results should be saved. 
         The results will be saved in a tab-separated values (TSV) format. If 
@@ -818,6 +1083,7 @@ def random_search_forecaster_multiseries(
                   n_jobs                = n_jobs,
                   verbose               = verbose,
                   show_progress         = show_progress,
+                  suppress_warnings     = suppress_warnings,
                  output_file            = output_file
               )
 
@@ -842,6 +1108,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    suppress_warnings: bool=False,
     output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
@@ -899,6 +1166,10 @@ def _evaluate_grid_hyperparameters_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter 
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
     output_file : str, default `None`
         Specifies the filename or full path where the results should be saved. 
         The results will be saved in a tab-separated values (TSV) format. If 
@@ -915,10 +1186,13 @@ def _evaluate_grid_hyperparameters_multiseries(
         - column lags_label: descriptive label or alias for the lags.
         - column params: parameters configuration for each iteration.
         - column metric: metric value estimated for each iteration. The resulting 
-        metric will be the average of the optimization of all levels.
+        metric will be the weighted average of the optimization of all levels. The
+        number of available predictions for each level is used as weight.
         - additional n columns with param = value.
     
     """
+
+    set_skforecast_warnings(suppress_warnings, action='ignore')
 
     if return_best and exog is not None and (len(exog) != len(series)):
         raise ValueError(
@@ -972,32 +1246,51 @@ def _evaluate_grid_hyperparameters_multiseries(
         for params in param_grid:
 
             forecaster.set_params(params)
-            metrics_levels = backtesting_forecaster_multiseries(
-                                 forecaster            = forecaster,
-                                 series                = series,
-                                 exog                  = exog,
-                                 steps                 = steps,
-                                 levels                = levels,
-                                 metric                = metric,
-                                 initial_train_size    = initial_train_size,
-                                 fixed_train_size      = fixed_train_size,
-                                 gap                   = gap,
-                                 allow_incomplete_fold = allow_incomplete_fold,
-                                 refit                 = refit,
-                                 interval              = None,
-                                 verbose               = verbose,
-                                 n_jobs                = n_jobs,
-                                 show_progress         = False
-                             )[0]
-            warnings.filterwarnings('ignore', category=RuntimeWarning, 
-                                    message= "The forecaster will be fit.*")
+            metrics_levels, predictions = backtesting_forecaster_multiseries(
+                forecaster            = forecaster,
+                series                = series,
+                exog                  = exog,
+                steps                 = steps,
+                levels                = levels,
+                metric                = metric,
+                initial_train_size    = initial_train_size,
+                fixed_train_size      = fixed_train_size,
+                gap                   = gap,
+                allow_incomplete_fold = allow_incomplete_fold,
+                refit                 = refit,
+                interval              = None,
+                verbose               = verbose,
+                n_jobs                = n_jobs,
+                show_progress         = False,
+                suppress_warnings     = suppress_warnings
+            )
+
+            n_predictions = (
+                predictions
+                .notna()
+                .sum()
+                .to_frame(name='n_predictions')
+                .reset_index(names='levels')
+            )
+            metrics_levels = metrics_levels.merge(
+                right = n_predictions,
+                how   = 'left',
+                on    = 'levels'
+            ).dropna()
+            
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('ignore', category=warn_category)
 
             lags_list.append(lags_v)
             lags_label_list.append(lags_k)
             params_list.append(params)
             for m in metric:
                 m_name = m if isinstance(m, str) else m.__name__
-                metric_dict[m_name].append(metrics_levels[m_name].mean())
+                metric_weighted_average = np.average(
+                    a = metrics_levels[m_name],
+                    weights = metrics_levels['n_predictions']
+                )
+                metric_dict[m_name].append(metric_weighted_average)
 
             if output_file is not None:
                 header = ['levels', 'lags', 'lags_label', 'params', 
@@ -1046,7 +1339,9 @@ def _evaluate_grid_hyperparameters_multiseries(
             f"  Backtesting metric: {best_metric}\n"
             f"  Levels: {results['levels'].iloc[0]}\n"
         )
-            
+
+    set_skforecast_warnings(suppress_warnings, action='default')
+    
     return results
 
 
@@ -1063,13 +1358,14 @@ def bayesian_search_forecaster_multiseries(
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Any='deprecated',
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    suppress_warnings: bool=False,
     output_file: Optional[str]=None,
     engine: str='optuna',
     kwargs_create_study: dict={},
@@ -1140,6 +1436,10 @@ def bayesian_search_forecaster_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
     output_file : str, default `None`
         Specifies the filename or full path where the results should be saved. 
         The results will be saved in a tab-separated values (TSV) format. If 
@@ -1208,6 +1508,7 @@ def bayesian_search_forecaster_multiseries(
                               n_jobs                = n_jobs,
                               verbose               = verbose,
                               show_progress         = show_progress,
+                              suppress_warnings     = suppress_warnings,
                               output_file           = output_file,
                               kwargs_create_study   = kwargs_create_study,
                               kwargs_study_optimize = kwargs_study_optimize
@@ -1228,14 +1529,14 @@ def _bayesian_search_optuna_multiseries(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    lags_grid: Any='deprecated',
     refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    suppress_warnings: bool=False,
     output_file: Optional[str]=None,
     kwargs_create_study: dict={},
     kwargs_study_optimize: dict={}
@@ -1282,11 +1583,6 @@ def _bayesian_search_optuna_multiseries(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    lags_grid : deprecated
-        **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
-        `search_space` to define the candidate values for the lags. This allows 
-        the lags to be optimized along with the other hyperparameters of the 
-        regressor in the bayesian search.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
@@ -1304,10 +1600,10 @@ def _bayesian_search_optuna_multiseries(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
-    output_file : str, default `None`
-        File name or full path to save the results. Results are saved as a 
-        tab-separated file. If `None`, the results will not be saved.
-        **New in version 0.12.0**
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
     output_file : str, default `None`
         Specifies the filename or full path where the results should be saved. 
         The results will be saved in a tab-separated values (TSV) format. If 
@@ -1335,7 +1631,9 @@ def _bayesian_search_optuna_multiseries(
         The best optimization result returned as an optuna FrozenTrial object.
 
     """
-
+    
+    set_skforecast_warnings(suppress_warnings, action='ignore')
+    
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
                  series     = series,
@@ -1368,7 +1666,8 @@ def _bayesian_search_optuna_multiseries(
         allow_incomplete_fold = allow_incomplete_fold,
         refit                 = refit,
         n_jobs                = n_jobs,
-        verbose               = verbose
+        verbose               = verbose,
+        suppress_warnings     = suppress_warnings
     ) -> float:
         
         sample = search_space(trial)
@@ -1378,28 +1677,47 @@ def _bayesian_search_optuna_multiseries(
             if "lags" in sample:
                 forecaster.set_lags(sample['lags'])
         
-        metrics_levels = backtesting_forecaster_multiseries(
-                             forecaster            = forecaster,
-                             series                = series,
-                             exog                  = exog,
-                             steps                 = steps,
-                             levels                = levels,
-                             metric                = metric,
-                             initial_train_size    = initial_train_size,
-                             fixed_train_size      = fixed_train_size,
-                             gap                   = gap,
-                             allow_incomplete_fold = allow_incomplete_fold,
-                             refit                 = refit,
-                             n_jobs                = n_jobs,
-                             verbose               = verbose,
-                             show_progress         = False
-                         )[0]
+        metrics_levels, predictions = backtesting_forecaster_multiseries(
+            forecaster            = forecaster,
+            series                = series,
+            exog                  = exog,
+            steps                 = steps,
+            levels                = levels,
+            metric                = metric,
+            initial_train_size    = initial_train_size,
+            fixed_train_size      = fixed_train_size,
+            gap                   = gap,
+            allow_incomplete_fold = allow_incomplete_fold,
+            refit                 = refit,
+            n_jobs                = n_jobs,
+            verbose               = verbose,
+            show_progress         = False,
+            suppress_warnings     = suppress_warnings
+        )
+
+        n_predictions = (
+            predictions
+            .notna()
+            .sum()
+            .to_frame(name='n_predictions')
+            .reset_index(names='levels')
+        )
+        metrics_levels = metrics_levels.merge(
+            right = n_predictions,
+            how   = 'left',
+            on    = 'levels'
+        ).dropna()
         
         # Store metrics in the variable `metric_values` defined outside _objective.
         nonlocal metric_values
         metric_values.append(metrics_levels)
 
-        return metrics_levels.iloc[:, 1].mean()
+        metric_weighted_average = np.average(
+            a = metrics_levels.iloc[:, 1],
+            weights = metrics_levels['n_predictions']
+        )
+
+        return metric_weighted_average
 
     if show_progress:
         kwargs_study_optimize['show_progress_bar'] = True
@@ -1461,7 +1779,11 @@ def _bayesian_search_optuna_multiseries(
         m_values = metric_values[i]
         for m in metric:
             m_name = m if isinstance(m, str) else m.__name__
-            metric_dict[m_name].append(m_values[m_name].mean())
+            metric_weighted_average = np.average(
+                a = m_values[m_name],
+                weights = m_values['n_predictions']
+            )
+            metric_dict[m_name].append(metric_weighted_average)
     
     if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeriesCustom',
                                          'ForecasterAutoregMultiVariate']:
@@ -1525,8 +1847,209 @@ def _bayesian_search_optuna_multiseries(
             f"  Backtesting metric: {best_metric}\n"
             f"  Levels: {results['levels'].iloc[0]}\n"
         )
-    
+
+    set_skforecast_warnings(suppress_warnings, action='default')
+            
     return results, best_trial
+
+
+def select_features_multiseries(
+    forecaster: object,
+    selector: object,
+    series: pd.DataFrame,
+    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    select_only: Optional[str]=None,
+    force_inclusion: Optional[Union[list, str]]=None,
+    subsample: Union[int, float]=0.5,
+    random_state: int=123,
+    verbose: bool=True,
+) -> Union[list, list]:
+    """
+    Feature selection using any of the sklearn.feature_selection module selectors 
+    (such as `RFECV`, `SelectFromModel`, etc.). Two groups of features are
+    evaluated: autoregressive features and exogenous features. By default, the 
+    selection process is performed on both sets of features at the same time, 
+    so that the most relevant autoregressive and exogenous features are selected. 
+    However, using the `select_only` argument, the selection process can focus 
+    only on the autoregressive or exogenous features without taking into account 
+    the other features. Therefore, all other features will remain in the model. 
+    It is also possible to force the inclusion of certain features in the final 
+    list of selected features using the `force_inclusion` parameter.
+
+    Parameters
+    ----------
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiseriesCustom
+        Forecaster model.
+    selector : object
+        A feature selector from sklearn.feature_selection.
+    series : pandas DataFrame
+        Target time series to which the feature selection will be applied.
+    exog : pandas Series, pandas DataFrame, default `None`
+        Exogenous variable/s included as predictor/s. Must have the same
+        number of observations as `y` and should be aligned so that y[i] is
+        regressed on exog[i].
+    select_only : str, default `None`
+        Decide what type of features to include in the selection process. 
+        
+        - If `'autoreg'`, only autoregressive features (lags or custom 
+        predictors) are evaluated by the selector. All exogenous features are 
+        included in the output (`selected_exog`).
+        - If `'exog'`, only exogenous features are evaluated without the presence
+        of autoregressive features. All autoregressive features are included 
+        in the output (`selected_autoreg`).
+        - If `None`, all features are evaluated by the selector.
+    force_inclusion : list, str, default `None`
+        Features to force include in the final list of selected features.
+        
+        - If `list`, list of feature names to force include.
+        - If `str`, regular expression to identify features to force include. 
+        For example, if `force_inclusion="^sun_"`, all features that begin 
+        with "sun_" will be included in the final list of selected features.
+    subsample : int, float, default `0.5`
+        Proportion of records to use for feature selection.
+    random_state : int, default `123`
+        Sets a seed for the random subsample so that the subsampling process 
+        is always deterministic.
+    verbose : bool, default `True`
+        Print information about feature selection process.
+
+    Returns
+    -------
+    selected_autoreg : list
+        List of selected autoregressive features.
+    selected_exog : list
+        List of selected exogenous features.
+
+    """
+
+    valid_forecasters = [
+        'ForecasterAutoregMultiSeries',
+        'ForecasterAutoregMultiSeriesCustom',
+    ]
+
+    if type(forecaster).__name__ not in valid_forecasters:
+        raise TypeError(
+            f"`forecaster` must be one of the following classes: {valid_forecasters}."
+        )
+    
+    if select_only not in ['autoreg', 'exog', None]:
+        raise ValueError(
+            "`select_only` must be one of the following values: 'autoreg', 'exog', None."
+        )
+
+    if subsample <= 0 or subsample > 1:
+        raise ValueError(
+            "`subsample` must be a number greater than 0 and less than or equal to 1."
+        )
+    
+    forecaster = deepcopy(forecaster)
+    forecaster.fitted = False
+    output = forecaster._create_train_X_y(series=series, exog=exog)
+    X_train = output[0]
+    y_train = output[1]
+    series_col_names = output[3]
+
+    if forecaster.encoding == 'onehot':
+        encoding_cols = series_col_names
+    else:
+        encoding_cols = ['_level_skforecast']
+
+    if hasattr(forecaster, 'lags'):
+        autoreg_cols = [f"lag_{lag}" for lag in forecaster.lags]
+    else:
+        if forecaster.name_predictors is not None:
+            autoreg_cols = forecaster.name_predictors
+        else:
+            autoreg_cols = [
+                col
+                for col in X_train.columns
+                if re.match(r'^custom_predictor_\d+', col)
+            ]
+    exog_cols = [
+        col
+        for col in X_train.columns
+        if col not in autoreg_cols and col not in encoding_cols
+    ]
+
+    forced_autoreg = []
+    forced_exog = []
+    if force_inclusion is not None:
+        if isinstance(force_inclusion, list):
+            forced_autoreg = [col for col in force_inclusion if col in autoreg_cols]
+            forced_exog = [col for col in force_inclusion if col in exog_cols]
+        elif isinstance(force_inclusion, str):
+            forced_autoreg = [col for col in autoreg_cols if re.match(force_inclusion, col)]
+            forced_exog = [col for col in exog_cols if re.match(force_inclusion, col)]
+
+    if select_only == 'autoreg':
+        X_train = X_train.drop(columns=exog_cols + encoding_cols)
+    elif select_only == 'exog':
+        X_train = X_train.drop(columns=autoreg_cols + encoding_cols)
+    else:
+        X_train = X_train.drop(columns=encoding_cols)
+
+    if isinstance(subsample, float):
+        subsample = int(len(X_train)*subsample)
+
+    rng = np.random.default_rng(seed=random_state)
+    sample = rng.choice(X_train.index, size=subsample, replace=False)
+    X_train_sample = X_train.loc[sample, :]
+    y_train_sample = y_train.loc[sample]
+    selector.fit(X_train_sample, y_train_sample)
+    selected_features = selector.get_feature_names_out()
+
+    if select_only == 'exog':
+        selected_autoreg = autoreg_cols
+    else:
+        selected_autoreg = [
+            feature
+            for feature in selected_features
+            if feature in autoreg_cols
+        ]
+
+    if select_only == 'autoreg':
+        selected_exog = exog_cols
+    else:
+        selected_exog = [
+            feature
+            for feature in selected_features
+            if feature in exog_cols
+        ]
+
+    if force_inclusion is not None: 
+        if select_only != 'autoreg':
+            forced_exog_not_selected = set(forced_exog) - set(selected_features)
+            selected_exog.extend(forced_exog_not_selected)
+            selected_exog.sort(key=exog_cols.index)
+        if select_only != 'exog':
+            forced_autoreg_not_selected = set(forced_autoreg) - set(selected_features)
+            selected_autoreg.extend(forced_autoreg_not_selected)
+            selected_autoreg.sort(key=autoreg_cols.index)
+
+    if len(selected_autoreg) == 0:
+        warnings.warn(
+            ("No autoregressive features has been selected. Since a Forecaster "
+             "cannot be created without them, be sure to include at least one "
+             "using the `force_inclusion` parameter.")
+        )
+    else:
+        if hasattr(forecaster, 'lags'):
+            selected_autoreg = [int(feature.replace('lag_', '')) 
+                                for feature in selected_autoreg] 
+
+    if verbose:
+        print(f"Recursive feature elimination ({selector.__class__.__name__})")
+        print("--------------------------------" + "-"*len(selector.__class__.__name__))
+        print(f"Total number of records available: {X_train.shape[0]}")
+        print(f"Total number of records used for feature selection: {X_train_sample.shape[0]}")
+        print(f"Number of features available: {len(autoreg_cols) + len(exog_cols)}") 
+        print(f"    Autoreg (n={len(autoreg_cols)})")
+        print(f"    Exog    (n={len(exog_cols)})")
+        print(f"Number of features selected: {len(selected_features)}")
+        print(f"    Autoreg (n={len(selected_autoreg)}) : {selected_autoreg}")
+        print(f"    Exog    (n={len(selected_exog)}) : {selected_exog}")
+
+    return selected_autoreg, selected_exog
 
 
 # Alias MultiVariate
@@ -1550,7 +2073,7 @@ def backtesting_forecaster_multivariate(
     n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True,
-    output_file: Optional[str]=None
+    suppress_warnings: bool=False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     This function is an alias of backtesting_forecaster_multiseries.
@@ -1627,11 +2150,10 @@ def backtesting_forecaster_multivariate(
         for backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
-    output_file : str, default `None`
-        Specifies the filename or full path where the results should be saved. 
-        The results will be saved in a tab-separated values (TSV) format. If 
-        `None`, the results will not be saved to a file.
-        **New in version 0.12.0**
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the backtesting 
+        process. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
 
     Returns
     -------
@@ -1665,8 +2187,8 @@ def backtesting_forecaster_multivariate(
         in_sample_residuals   = in_sample_residuals,
         n_jobs                = n_jobs,
         verbose               = verbose,
-        show_progress         = show_progress
-        
+        show_progress         = show_progress,
+        suppress_warnings     = suppress_warnings
     )
 
     return metrics_levels, backtest_predictions
@@ -1690,6 +2212,7 @@ def grid_search_forecaster_multivariate(
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    suppress_warnings: bool=False,
     output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
@@ -1755,6 +2278,10 @@ def grid_search_forecaster_multivariate(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter 
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
     output_file : str, default `None`
         Specifies the filename or full path where the results should be saved. 
         The results will be saved in a tab-separated values (TSV) format. If 
@@ -1794,6 +2321,7 @@ def grid_search_forecaster_multivariate(
         n_jobs                = n_jobs,
         verbose               = verbose,
         show_progress         = show_progress,
+        suppress_warnings     = suppress_warnings,
         output_file           = output_file
     )
 
@@ -1820,6 +2348,7 @@ def random_search_forecaster_multivariate(
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    suppress_warnings: bool=False,
     output_file: Optional[str]=None
 ) -> pd.DataFrame:
     """
@@ -1890,6 +2419,10 @@ def random_search_forecaster_multivariate(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter 
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
     output_file : str, default `None`
         Specifies the filename or full path where the results should be saved. 
         The results will be saved in a tab-separated values (TSV) format. If 
@@ -1931,6 +2464,7 @@ def random_search_forecaster_multivariate(
         n_jobs                = n_jobs,
         verbose               = verbose,
         show_progress         = show_progress,
+        suppress_warnings     = suppress_warnings,
         output_file           = output_file
     ) 
 
@@ -1957,6 +2491,7 @@ def bayesian_search_forecaster_multivariate(
     n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     show_progress: bool=True,
+    suppress_warnings: bool=False,
     output_file: Optional[str]=None,
     engine: str='optuna',
     kwargs_create_study: dict={},
@@ -2030,6 +2565,10 @@ def bayesian_search_forecaster_multivariate(
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
     output_file : str, default `None`
         Specifies the filename or full path where the results should be saved. 
         The results will be saved in a tab-separated values (TSV) format. If 
@@ -2055,35 +2594,36 @@ def bayesian_search_forecaster_multivariate(
         - column metric: metric value estimated for each iteration. The resulting 
         metric will be the average of the optimization of all levels.
         - additional n columns with param = value.
-    results_opt_best : optuna object
+    best_trial : optuna object
         The best optimization result returned as a FrozenTrial optuna object.
     
     """
 
-    results, results_opt_best = bayesian_search_forecaster_multiseries(
-                                    forecaster            = forecaster,
-                                    series                = series,
-                                    exog                  = exog,
-                                    levels                = levels, 
-                                    lags_grid             = lags_grid,
-                                    search_space          = search_space,
-                                    steps                 = steps,
-                                    metric                = metric,
-                                    refit                 = refit,
-                                    initial_train_size    = initial_train_size,
-                                    fixed_train_size      = fixed_train_size,
-                                    gap                   = gap,
-                                    allow_incomplete_fold = allow_incomplete_fold,
-                                    n_trials              = n_trials,
-                                    random_state          = random_state,
-                                    return_best           = return_best,
-                                    n_jobs                = n_jobs,
-                                    verbose               = verbose,
-                                    show_progress         = show_progress,
-                                    output_file           = output_file,
-                                    engine                = engine,
-                                    kwargs_create_study   = kwargs_create_study,
-                                    kwargs_study_optimize = kwargs_study_optimize
-                                )
+    results, best_trial = bayesian_search_forecaster_multiseries(
+                              forecaster            = forecaster,
+                              series                = series,
+                              exog                  = exog,
+                              levels                = levels, 
+                              lags_grid             = lags_grid,
+                              search_space          = search_space,
+                              steps                 = steps,
+                              metric                = metric,
+                              refit                 = refit,
+                              initial_train_size    = initial_train_size,
+                              fixed_train_size      = fixed_train_size,
+                              gap                   = gap,
+                              allow_incomplete_fold = allow_incomplete_fold,
+                              n_trials              = n_trials,
+                              random_state          = random_state,
+                              return_best           = return_best,
+                              n_jobs                = n_jobs,
+                              verbose               = verbose,
+                              show_progress         = show_progress,
+                              suppress_warnings     = suppress_warnings,
+                              output_file           = output_file,
+                              engine                = engine,
+                              kwargs_create_study   = kwargs_create_study,
+                              kwargs_study_optimize = kwargs_study_optimize
+                          )
 
-    return results, results_opt_best
+    return results, best_trial

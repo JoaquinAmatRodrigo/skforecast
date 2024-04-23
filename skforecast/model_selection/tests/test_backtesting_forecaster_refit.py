@@ -1,5 +1,6 @@
 # Unit test _backtesting_forecaster Refit
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
@@ -13,6 +14,7 @@ from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.model_selection.model_selection import _backtesting_forecaster
 
 # Fixtures
+from skforecast.exceptions import IgnoredArgumentWarning
 from .fixtures_model_selection import y
 from .fixtures_model_selection import exog
 from .fixtures_model_selection import out_sample_residuals
@@ -984,24 +986,29 @@ def test_output_backtesting_forecaster_refit_int_interval_yes_exog_not_allow_rem
 
     forecaster = ForecasterAutoreg(regressor=Ridge(random_state=123), lags=3)
 
-    metric, backtest_predictions = _backtesting_forecaster(
-                                       forecaster            = forecaster,
-                                       y                     = y_with_index,
-                                       exog                  = exog_with_index,
-                                       refit                 = 3,
-                                       initial_train_size    = len(y_with_index) - 20,
-                                       fixed_train_size      = True,
-                                       gap                   = 3,
-                                       allow_incomplete_fold = False,
-                                       steps                 = 4,
-                                       metric                = 'mean_squared_error',
-                                       interval              = [5, 95],
-                                       n_boot                = 500,
-                                       random_state          = 123,
-                                       in_sample_residuals   = True,
-                                       verbose               = False,
-                                       n_jobs                = 1
-                                   )
+    warn_msg = re.escape(
+        ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
+         "is set to 1 to avoid unexpected results during parallelization.")
+    )
+    with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
+        metric, backtest_predictions = _backtesting_forecaster(
+                                           forecaster            = forecaster,
+                                           y                     = y_with_index,
+                                           exog                  = exog_with_index,
+                                           refit                 = 3,
+                                           initial_train_size    = len(y_with_index) - 20,
+                                           fixed_train_size      = True,
+                                           gap                   = 3,
+                                           allow_incomplete_fold = False,
+                                           steps                 = 4,
+                                           metric                = 'mean_squared_error',
+                                           interval              = [5, 95],
+                                           n_boot                = 500,
+                                           random_state          = 123,
+                                           in_sample_residuals   = True,
+                                           verbose               = False,
+                                           n_jobs                = 2
+                                       )
     backtest_predictions = backtest_predictions.asfreq('D')
 
     assert expected_metric == approx(metric)

@@ -97,13 +97,18 @@ def test_fit_in_sample_residuals_not_stored(n_jobs):
     assert all(results[k] == expected[k] for k in expected.keys())
 
 
-def test_fit_last_window_stored():
+@pytest.mark.parametrize("store_last_window", 
+                         [True, False], 
+                         ids=lambda lw: f'store_last_window: {lw}')
+def test_fit_last_window_stored(store_last_window):
     """
     Test that values of last window are stored after fitting.
     """    
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
-    forecaster.fit(y=pd.Series(np.arange(50)))
+    forecaster.fit(y=pd.Series(np.arange(50)), store_last_window=store_last_window)
     expected = pd.Series(np.array([47, 48, 49]), index=[47, 48, 49])
-    results = forecaster.last_window
 
-    pd.testing.assert_series_equal(expected, results)
+    if store_last_window:
+        pd.testing.assert_series_equal(forecaster.last_window, expected)
+    else:
+        assert forecaster.last_window == None

@@ -2,8 +2,13 @@
 # ==============================================================================
 import re
 import pytest
+import joblib
+import warnings
 import numpy as np
 import pandas as pd
+from pathlib import Path
+from sklearn.preprocessing import StandardScaler
+from lightgbm import LGBMRegressor
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
@@ -13,6 +18,14 @@ from skforecast.model_selection_multiseries import bayesian_search_forecaster_mu
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
+THIS_DIR = Path(__file__).parent
+series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
+exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
+end_train = "2016-07-31 23:59:00"
+series_dict_train = {k: v.loc[:end_train,] for k, v in series_dict.items()}
+exog_dict_train = {k: v.loc[:end_train,] for k, v in exog_dict.items()}
+series_dict_test = {k: v.loc[end_train:,] for k, v in series_dict.items()}
+exog_dict_test = {k: v.loc[end_train:,] for k, v in exog_dict.items()}
 
 def create_predictors(y): # pragma: no cover
     """
@@ -20,6 +33,14 @@ def create_predictors(y): # pragma: no cover
     """
 
     lags = y[-1:-5:-1]
+
+    return lags
+
+def create_predictors_14(y): # pragma: no cover
+    """
+    Create first 14 lags of a time series.
+    """
+    lags = y[-1:-15:-1]
 
     return lags
 
@@ -31,7 +52,8 @@ def test_ValueError_bayesian_search_forecaster_multiseries_when_return_best_and_
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
     exog = series[:30].copy()
 
@@ -70,7 +92,8 @@ def test_bayesian_search_forecaster_multiseries_ValueError_when_engine_not_optun
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
 
     def search_space(trial): # pragma: no cover
@@ -107,7 +130,8 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 
+                     lags      = 2,
+                     encoding  = 'onehot'
                  )
     steps = 3
     n_validation = 12
@@ -180,7 +204,8 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
-                     window_size    = 4
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
     steps = 3
     n_validation = 12
@@ -245,6 +270,155 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
     })
 
     pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with_mocked():
+    """
+    Test output of bayesian_search_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom when series and exog are
+    dictionaries (mocked done in Skforecast v0.12.0).
+    """
+
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags=14,
+        encoding='ordinal',
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    )
+
+    lags_grid = [[5], [1, 7, 14]]
+
+    def search_space(trial):
+        search_space = {
+            "n_estimators": trial.suggest_int("n_estimators", 2, 5),
+            "max_depth": trial.suggest_int("max_depth", 2, 5),
+            "lags": trial.suggest_categorical("lags", lags_grid),
+        }
+
+        return search_space
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning, module="optuna")
+        
+        results_search, best_trial = bayesian_search_forecaster_multiseries(
+            forecaster         = forecaster,
+            series             = series_dict,
+            exog               = exog_dict,
+            search_space       = search_space,
+            metric             = 'mean_absolute_error',
+            initial_train_size = len(series_dict_train['id_1000']),
+            steps              = 24,
+            refit              = False,
+            n_trials           = 3,
+            return_best        = False,
+            show_progress      = False,
+            verbose            = False,
+            suppress_warnings  = True
+        )
+    
+    expected = pd.DataFrame(
+        np.array([[list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+            np.array([ 1,  7, 14]), {'n_estimators': 4, 'max_depth': 3},
+            709.8836514262415, 4, 3],
+            [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+            np.array([ 1,  7, 14]), {'n_estimators': 3, 'max_depth': 3},
+            721.1848222120482, 3, 3],
+            [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+            np.array([5]), {'n_estimators': 4, 'max_depth': 3},
+            754.3537196425694, 4, 3]], dtype=object),
+        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth'],
+        index=pd.Index([0, 2, 1], dtype='int64')
+    ).astype({
+        'mean_absolute_error': float,
+        'n_estimators': int,
+        'max_depth': int
+    })
+    
+    results_search = results_search.astype({
+        'mean_absolute_error': float,
+        'n_estimators': int,
+        'max_depth': int
+    })
+
+    pd.testing.assert_frame_equal(expected, results_search)
+
+
+def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with_mocked_ForecasterAutoregMultiSeriesCustom():
+    """
+    Test output of bayesian_search_forecaster_multiseries in ForecasterAutoregMultiSeriesCustom 
+    and ForecasterAutoregMultiSeriesCustom when series and exog are
+    dictionaries (mocked done in Skforecast v0.12.0).
+    """
+
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        fun_predictors=create_predictors_14, 
+        window_size=14,
+        encoding='ordinal',
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    )
+
+    def search_space(trial):
+        search_space = {
+            "n_estimators": trial.suggest_int("n_estimators", 2, 5),
+            "max_depth": trial.suggest_int("max_depth", 2, 5)
+        }
+
+        return search_space
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning, module="optuna")
+        
+        results_search, best_trial = bayesian_search_forecaster_multiseries(
+            forecaster         = forecaster,
+            series             = series_dict,
+            exog               = exog_dict,
+            search_space       = search_space,
+            metric             = 'mean_absolute_error',
+            initial_train_size = len(series_dict_train['id_1000']),
+            steps              = 24,
+            refit              = False,
+            n_trials           = 3,
+            return_best        = False,
+            show_progress      = False,
+            verbose            = False,
+            suppress_warnings  = True
+        )
+    
+    expected = pd.DataFrame(
+        np.array([[list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+            'custom function: create_predictors_14',
+            {'n_estimators': 4, 'max_depth': 3}, 709.5984345666709, 4, 3],
+            [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+            'custom function: create_predictors_14',
+            {'n_estimators': 4, 'max_depth': 3}, 709.5984345666709, 4, 3],
+            [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+            'custom function: create_predictors_14',
+            {'n_estimators': 2, 'max_depth': 4}, 746.7287691073261, 2, 4]],
+            dtype=object),
+        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth'],
+        index=pd.Index([0, 2, 1], dtype='int64')
+    ).astype({
+        'mean_absolute_error': float,
+        'n_estimators': int,
+        'max_depth': int
+    })
+    
+    results_search = results_search.astype({
+        'mean_absolute_error': float,
+        'n_estimators': int,
+        'max_depth': int
+    })
+
+    pd.testing.assert_frame_equal(expected, results_search)
 
 
 def test_results_output_bayesian_search_forecaster_multivariate_optuna_engine_ForecasterAutoregMultiVariate():

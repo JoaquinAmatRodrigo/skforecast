@@ -36,7 +36,8 @@ def test_ValueError_evaluate_grid_hyperparameters_multiseries_when_return_best_a
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 3
+                     lags      = 3,
+                     encoding  = 'onehot'
                  )
     exog = series.iloc[:30, 0]
 
@@ -69,7 +70,8 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_metric_list_du
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
-                     lags      = 3
+                     lags      = 3,
+                     encoding  = 'onehot'
                  )
     
     err_msg = re.escape("When `metric` is a `list`, each metric name must be unique.")
@@ -100,6 +102,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = Ridge(random_state=123),
                      lags               = 2, 
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 
@@ -149,7 +152,8 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = Ridge(random_state=123),
-                     lags               = 2, 
+                     lags               = 2,
+                     encoding           = 'onehot', 
                      transformer_series = None
                  )
 
@@ -201,6 +205,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = Ridge(random_state=123),
                      lags               = 2, 
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 
@@ -250,6 +255,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = Ridge(random_state=123),
                      lags               = 2, 
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 
@@ -300,6 +306,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = Ridge(random_state=123),
                      lags               = 2, 
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 
@@ -355,6 +362,7 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = Ridge(random_state=123),
                      lags               = 2, 
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 
@@ -484,6 +492,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                      regressor          = Ridge(random_state=123),
                      fun_predictors     = create_predictors,
                      window_size        = 4,
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 
@@ -533,6 +542,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                      regressor          = Ridge(random_state=123),
                      fun_predictors     = create_predictors,
                      window_size        = 4,
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 
@@ -579,6 +589,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                      regressor          = Ridge(random_state=123),
                      fun_predictors     = create_predictors,
                      window_size        = 4,
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
 
@@ -623,9 +634,10 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     _evaluate_grid_hyperparameters_multiseries.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor          = Ridge(random_state=123),
-                     fun_predictors     = create_predictors,
-                     window_size        = 4
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
 
     steps = 3
@@ -663,7 +675,8 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesC
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
-                     window_size    = 4
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
 
     steps = 3
@@ -706,7 +719,8 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesC
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
-                     window_size    = 4
+                     window_size    = 4,
+                     encoding       = 'onehot'
                  )
 
     steps = 3

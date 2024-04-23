@@ -29,10 +29,10 @@ def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
                  )
 
     err_msg = re.escape(
-            ("`forecaster` must be of type `ForecasterSarimax`, for all other "
-             "types of forecasters use the functions available in the other "
-             "`model_selection` modules.")
-        )
+        ("`forecaster` must be of type `ForecasterSarimax`, for all other "
+         "types of forecasters use the functions available in the other "
+         "`model_selection` modules.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         backtesting_sarimax(
             forecaster            = forecaster,
@@ -102,16 +102,16 @@ def test_output_backtesting_sarimax_no_refit_no_exog_remainder_with_mocked():
                  )
     
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        steps              = 5,
-                                        metric             = 'mean_squared_error',
-                                        initial_train_size = len(y_datetime)-12,
-                                        fixed_train_size   = False,
-                                        refit              = False,
-                                        alpha              = None,
-                                        interval           = None,
-                                        verbose            = False
+                                       forecaster         = forecaster,
+                                       y                  = y_datetime,
+                                       steps              = 5,
+                                       metric             = 'mean_squared_error',
+                                       initial_train_size = len(y_datetime)-12,
+                                       fixed_train_size   = False,
+                                       refit              = False,
+                                       alpha              = None,
+                                       interval           = None,
+                                       verbose            = False
                                    )
     
     expected_metric = 0.07396344749165738
@@ -140,17 +140,17 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked(n
                  )
     
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        steps              = 3,
-                                        metric             = 'mean_squared_error',
-                                        initial_train_size = len(y_datetime)-12,
-                                        fixed_train_size   = False,
-                                        refit              = True,
-                                        alpha              = None,
-                                        interval           = None,
-                                        n_jobs             = n_jobs,
-                                        verbose            = False
+                                       forecaster         = forecaster,
+                                       y                  = y_datetime,
+                                       steps              = 3,
+                                       metric             = 'mean_squared_error',
+                                       initial_train_size = len(y_datetime)-12,
+                                       fixed_train_size   = False,
+                                       refit              = True,
+                                       alpha              = None,
+                                       interval           = None,
+                                       n_jobs             = n_jobs,
+                                       verbose            = False
                                    )
     
     expected_metric = 0.038704200731126036

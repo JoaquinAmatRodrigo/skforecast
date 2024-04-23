@@ -16,9 +16,9 @@ def test_init_ValueError_when_differentiation_argument_is_not_int_or_greater_tha
     Test ValueError is raised when differentiation is not an int or greater than 0.
     """
     err_msg = re.escape(
-                  (f"Argument `differentiation` must be an integer equal to or "
-                   f"greater than 1. Got {dif}.")
-              )
+        (f"Argument `differentiation` must be an integer equal to or "
+         f"greater than 1. Got {dif}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
          ForecasterAutoreg(
              regressor       = LinearRegression(),
@@ -40,7 +40,8 @@ def test_init_window_size_is_increased_when_differentiation(dif):
                      differentiation = dif
                  )
     
-    assert forecaster.window_size == len(forecaster.lags) + dif
+    assert forecaster.window_size == len(forecaster.lags)
+    assert forecaster.window_size_diff == len(forecaster.lags) + dif
 
 
 def test_init_binner_is_created_when_binner_kwargs_is_None():

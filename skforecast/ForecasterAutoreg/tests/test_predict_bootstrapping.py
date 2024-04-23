@@ -5,10 +5,11 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.preprocessing import TimeSeriesDifferentiator
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
+
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.preprocessing import TimeSeriesDifferentiator
 
 # Fixtures
 from .fixtures_ForecasterAutoreg import y
@@ -182,8 +183,9 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_and_di
     """
     # Data differentiated
     diferenciator = TimeSeriesDifferentiator(order=1)
-    data_diff = diferenciator.fit_transform(data)
+    data_diff = diferenciator.fit_transform(data.to_numpy())
     data_diff = pd.Series(data_diff, index=data.index).dropna()
+
     # Simulated exogenous variable
     rng = np.random.default_rng(9876)
     exog = pd.Series(
@@ -206,6 +208,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_and_di
     boot_predictions_1 = boot_predictions_1.sort_index()
     boot_predictions_1 = boot_predictions_1.cumsum(axis=0).iloc[1:,]
     boot_predictions_1 = boot_predictions_1.asfreq('MS')
+    
     forecaster_2 = ForecasterAutoreg(regressor=LinearRegression(), lags=15, differentiation=1)
     forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
     boot_predictions_2 = forecaster_2.predict_bootstrapping(

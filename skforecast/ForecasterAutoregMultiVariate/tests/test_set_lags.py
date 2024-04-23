@@ -18,6 +18,7 @@ def test_set_lags_when_lags_argument_is_int():
     assert (forecaster.lags == np.array([1, 2, 3, 4, 5])).all()
     assert forecaster.max_lag == 5
     assert forecaster.window_size == 5
+    assert forecaster.window_size_diff == 5
 
 
 def test_set_lags_when_lags_argument_is_list():
@@ -32,6 +33,7 @@ def test_set_lags_when_lags_argument_is_list():
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     assert forecaster.max_lag == 3
     assert forecaster.window_size == 3
+    assert forecaster.window_size_diff == 3
 
 
 def test_set_lags_when_lags_argument_is_1d_numpy_array():
@@ -46,6 +48,7 @@ def test_set_lags_when_lags_argument_is_1d_numpy_array():
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     assert forecaster.max_lag == 3
     assert forecaster.window_size == 3
+    assert forecaster.window_size_diff == 3
 
 
 def test_set_lags_when_lags_argument_is_a_dict():
@@ -60,6 +63,7 @@ def test_set_lags_when_lags_argument_is_a_dict():
     assert (forecaster.lags['l2'] == np.array([1, 5])).all()
     assert forecaster.max_lag == 5
     assert forecaster.window_size == 5
+    assert forecaster.window_size_diff == 5
 
 
 def test_set_lags_when_lags_argument_is_a_dict_with_None():
@@ -75,6 +79,7 @@ def test_set_lags_when_lags_argument_is_a_dict_with_None():
     assert isinstance(forecaster.lags['l2'], type(None))
     assert forecaster.max_lag == 3
     assert forecaster.window_size == 3
+    assert forecaster.window_size_diff == 3
 
 
 @pytest.mark.parametrize("lags, max_lag",
@@ -92,3 +97,4 @@ def test_set_lags_max_lag_stored(lags, max_lag):
     
     assert forecaster.max_lag == max_lag
     assert forecaster.window_size == max_lag
+    assert forecaster.window_size_diff == max_lag

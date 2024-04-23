@@ -53,9 +53,10 @@ def test_output_get_feature_importances_when_regressor_is_RandomForest():
     """
 
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor       = RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123),
-                     fun_predictors  = create_predictors,
-                     window_size     = 3
+                     regressor      = RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 3,
+                     encoding       = 'onehot'
                  )
     forecaster.fit(series=series)
 
@@ -75,16 +76,19 @@ def test_output_get_feature_importances_when_regressor_is_RandomForest_with_exog
     exog=pd.Series(np.arange(10, 20), name='exog').
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor       = RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123),
-                     fun_predictors  = create_predictors,
-                     window_size     = 3
+                     regressor      = RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 3,
+                     encoding       = 'onehot'
                  )
     forecaster.fit(series=series, exog=pd.Series(np.arange(10, 20), name='exog'))
 
     results = forecaster.get_feature_importances()
     expected = pd.DataFrame({
-                   'feature': ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', 'exog', '1', '2'],
-                   'importance': np.array([0.73269896, 0., 0.21193772, 0.05536332, 0., 0.])
+                   'feature': ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', 
+                               '1', '2', 'exog'],
+                   'importance': np.array([0.73269896, 0., 0.21193772, 
+                                           0., 0., 0.05536332])
                }).sort_values(by='importance', ascending=False)
 
     pd.testing.assert_frame_equal(results, expected)
@@ -96,15 +100,17 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression():
     and it is trained with series pandas DataFrame.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor       = LinearRegression(),
-                     fun_predictors  = create_predictors,
-                     window_size     = 3
+                     regressor      = LinearRegression(),
+                     fun_predictors = create_predictors,
+                     window_size    = 3,
+                     encoding       = 'onehot'
                  )
     forecaster.fit(series=series)
 
     results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
-                   'feature': ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', '1', '2'],
+                   'feature': ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', 
+                               '1', '2'],
                    'importance': np.array([3.33333333e-01, 3.33333333e-01, 3.33333333e-01, 
                                            -1.48164367e-16, 1.48164367e-16])
                })
@@ -124,15 +130,17 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_with_
                      regressor          = LinearRegression(),
                      fun_predictors     = create_predictors,
                      window_size        = 3,
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
     forecaster.fit(series=series_2, exog=pd.Series(np.arange(10, 20), name='exog'))
 
     results = forecaster.get_feature_importances(sort_importance=False)
     expected = pd.DataFrame({
-                   'feature': ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', 'exog', '1', '2'],
+                   'feature': ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2', 
+                               '1', '2', 'exog'],
                    'importance': np.array([2.50000000e-01,  2.50000000e-01,  2.50000000e-01,  
-                                           2.50000000e-01, -2.97120907e-17,  2.97120907e-17])
+                                           -2.97120907e-17,  2.97120907e-17, 2.50000000e-01])
                })
 
     pd.testing.assert_frame_equal(results, expected)
@@ -157,11 +165,11 @@ def test_output_and_UserWarning_get_feature_importances_when_regressor_no_attrib
     expected = None
 
     warn_msg = re.escape(
-                (f"Impossible to access feature importances for regressor of type "
-                 f"{type(estimator)}. This method is only valid when the "
-                 f"regressor stores internally the feature importances in the "
-                 f"attribute `feature_importances_` or `coef_`.")
-            )
+        (f"Impossible to access feature importances for regressor of type "
+         f"{type(estimator)}. This method is only valid when the "
+         f"regressor stores internally the feature importances in the "
+         f"attribute `feature_importances_` or `coef_`.")
+    )
     with pytest.warns(UserWarning, match = warn_msg):
         results = forecaster.get_feature_importances()
         assert results is expected
@@ -177,6 +185,7 @@ def test_output_get_feature_importances_when_pipeline_LinearRegression():
                      regressor          = make_pipeline(StandardScaler(), LinearRegression()),
                      fun_predictors     = create_predictors,
                      window_size        = 3,
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
     forecaster.fit(series=series)
@@ -198,10 +207,13 @@ def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
     it is trained with series pandas DataFrame.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor = make_pipeline(StandardScaler(), 
-                                               RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123)),
+                     regressor = make_pipeline(
+                                     StandardScaler(), 
+                                     RandomForestRegressor(n_estimators=1, max_depth=2, random_state=123)
+                                 ),
                      fun_predictors     = create_predictors,
                      window_size        = 3,
+                     encoding           = 'onehot',
                      transformer_series = None
                  )
     forecaster.fit(series=series)

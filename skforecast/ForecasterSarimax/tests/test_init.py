@@ -20,9 +20,9 @@ def test_TypeError_when_regressor_is_not_pmdarima_ARIMA_when_initialization():
     regressor = LinearRegression()
 
     err_msg = re.escape(
-            (f"`regressor` must be an instance of type pmdarima.arima.ARIMA "
-             f"or skforecast.Sarimax.Sarimax. Got {type(regressor)}.")
-        ) 
+        (f"`regressor` must be an instance of type pmdarima.arima.ARIMA "
+         f"or skforecast.Sarimax.Sarimax. Got {type(regressor)}.")
+    ) 
     with pytest.raises(TypeError, match = err_msg):
         ForecasterSarimax(regressor = regressor)
 
@@ -53,9 +53,9 @@ def test_IgnoredArgumentWarning_when_skforecast_Sarimax_and_fit_kwargs():
     using the skforecast Sarimax model.
     """ 
     warn_msg = re.escape(
-                 ("When using the skforecast Sarimax model, the fit kwargs should "
-                  "be passed using the model parameter `sm_fit_kwargs`.")
-             )
+        ("When using the skforecast Sarimax model, the fit kwargs should "
+         "be passed using the model parameter `sm_fit_kwargs`.")
+    )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         forecaster = ForecasterSarimax(
                          regressor  = Sarimax(order=(1, 0, 1)),

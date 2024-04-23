@@ -17,6 +17,7 @@ from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
 from ..exceptions import LongTrainingWarning
+from ..exceptions import IgnoredArgumentWarning
 from ..model_selection.model_selection import _get_metric
 from ..model_selection.model_selection import _create_backtesting_folds
 from ..utils import check_backtesting_input
@@ -38,10 +39,10 @@ def _backtesting_sarimax(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     suppress_warnings_fit: bool=False,
     verbose: bool=False,
     show_progress: bool=True,
@@ -132,6 +133,11 @@ def _backtesting_sarimax(
     forecaster = deepcopy(forecaster)
     
     if refit == False:
+        warnings.warn(
+            ("If `refit = False`, `n_jobs` is set to 1 to avoid unexpected "
+             "results during parallelization."),
+             IgnoredArgumentWarning
+        )
         n_jobs = 1
     else:
         if n_jobs == 'auto':        
@@ -139,6 +145,13 @@ def _backtesting_sarimax(
                          forecaster = forecaster,
                          refit      = refit
                      )
+        elif not isinstance(refit, bool) and refit != 1 and n_jobs != 1:
+            warnings.warn(
+                ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
+                 "is set to 1 to avoid unexpected results during parallelization."),
+                 IgnoredArgumentWarning
+            )
+            n_jobs = 1
         else:
             n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
@@ -294,10 +307,10 @@ def backtesting_sarimax(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     alpha: Optional[float]=None,
     interval: Optional[list]=None,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     suppress_warnings_fit: bool=False,
     show_progress: bool=True
@@ -442,9 +455,9 @@ def grid_search_sarimax(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     suppress_warnings_fit: bool=False,
     show_progress: bool=True,
@@ -558,11 +571,11 @@ def random_search_sarimax(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     n_iter: int=10,
     random_state: int=123,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     suppress_warnings_fit: bool=False,
     show_progress: bool=True,
@@ -681,9 +694,9 @@ def _evaluate_grid_hyperparameters_sarimax(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Optional[Union[bool, int]]=False,
+    refit: Union[bool, int]=False,
     return_best: bool=True,
-    n_jobs: Optional[Union[int, str]]='auto',
+    n_jobs: Union[int, str]='auto',
     verbose: bool=True,
     suppress_warnings_fit: bool=False,
     show_progress: bool=True,
