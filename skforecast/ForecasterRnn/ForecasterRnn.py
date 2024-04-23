@@ -20,18 +20,15 @@ from sklearn.base import clone
 from sklearn.preprocessing import MinMaxScaler
 
 import skforecast
-from ..exceptions import IgnoredArgumentWarning, warn_skforecast_categories
+from ..exceptions import IgnoredArgumentWarning
 from ..ForecasterBase import ForecasterBase
 from ..utils import (
-    check_interval,
     check_predict_input,
     check_select_fit_kwargs,
     check_y,
     expand_index,
-    initialize_weights,
     preprocess_last_window,
     preprocess_y,
-    transform_dataframe,
     transform_series,
     set_skforecast_warnings,
 )
@@ -612,6 +609,7 @@ class ForecasterRnn(ForecasterBase):
         self.last_window = series.iloc[-self.max_lag :].copy()
 
         set_skforecast_warnings(suppress_warnings, action='default')
+
 
     def predict(
         self,

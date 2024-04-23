@@ -23,6 +23,7 @@
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/joaquinamatrodrigo?logo=github&label=Github%20sponsors&link=https%3A%2F%2Fgithub.com%2Fsponsors%2FJoaquinAmatRodrigo)
 [![NumFOCUS Affiliated](https://img.shields.io/badge/NumFOCUS-Affiliated%20Project-orange.svg?style=flat&colorA=E1523D&colorB=007D8A)](https://numfocus.org/sponsored-projects/affiliated-projects)
 
+
 ## About The Project
 
 **Skforecast** is a Python library that eases using scikit-learn regressors as single and multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (LightGBM, XGBoost, CatBoost, ...).
@@ -52,7 +53,7 @@ pip install skforecast
 Specific version:
 
 ```bash
-pip install skforecast==0.11.0
+pip install skforecast==0.12.0
 ```
 
 Latest (unstable):
@@ -90,10 +91,10 @@ pip install skforecast[deeplearning]
 
 + numpy>=1.20, <1.27
 + pandas>=1.2, <2.3
-+ tqdm>=4.57.0, <4.67
++ tqdm>=4.57, <4.67
 + scikit-learn>=1.2, <1.5
-+ optuna>=2.10.0, <3.7
-+ joblib>=1.1.0, <1.5
++ optuna>=2.10, <3.7
++ joblib>=1.1, <1.5
 
 ### Optional dependencies
 
@@ -115,9 +116,10 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 |[ForecasterAutoreg](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)|✔️||✔️||✔️|✔️|✔️||
 |[ForecasterAutoregCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)|✔️||✔️||✔️|✔️|✔️|✔️|✔️|
 |[ForecasterAutoregDirect](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)|✔️|||✔️|✔️||✔️||
-|[ForecasterMultiSeries](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)||✔️|✔️||✔️||✔️||
-|[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||✔️|✔️||✔️||✔️|✔️|
+|[ForecasterMultiSeries](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)||✔️|✔️||✔️|✔️|✔️||
+|[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||✔️|✔️||✔️|✔️|✔️|✔️|
 |[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||✔️||✔️|✔️||✔️||
+|[ForecasterRNN](https://skforecast.org/latest/user_guides/deep-learning-rnn-forecaster.html)||✔️||✔️|||||
 |[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|✔️||✔️||✔️|✔️|✔️||
 
 
@@ -216,12 +218,12 @@ If you use skforecast for a scientific publication, we would appreciate citation
 **Zenodo**
 
 ```
-Amat Rodrigo, Joaquin, & Escobar Ortiz, Javier. (2023). skforecast (v0.11.0). Zenodo. https://doi.org/10.5281/zenodo.8382788
+Amat Rodrigo, Joaquin, & Escobar Ortiz, Javier. (2024). skforecast (v0.12.0). Zenodo. https://doi.org/10.5281/zenodo.8382788
 ```
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. (2023). skforecast (Version 0.11.0) [Computer software]. https://doi.org/10.5281/zenodo.8382788
+Amat Rodrigo, J., & Escobar Ortiz, J. (2024). skforecast (Version 0.12.0) [Computer software]. https://doi.org/10.5281/zenodo.8382788
 ```
 
 **BibTeX**:
@@ -229,9 +231,9 @@ Amat Rodrigo, J., & Escobar Ortiz, J. (2023). skforecast (Version 0.11.0) [Compu
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 title = {skforecast},
-version = {0.11.0},
-month = {11},
-year = {2023},
+version = {0.12.0},
+month = {4},
+year = {2024},
 license = {BSD-3-Clause},
 url = {https://skforecast.org/},
 doi = {10.5281/zenodo.8382788}

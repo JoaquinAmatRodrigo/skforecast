@@ -406,6 +406,36 @@ def test_check_predict_input_ValueError_when_series_col_names_not_last_window_Fo
         )
 
 
+def test_check_predict_input_ValueError_when_last_window_not_stored_during_training_single_series():
+    """
+    """
+    last_window = None
+    err_msg = re.escape(
+        ("`last_window` was not stored during training. If you don't want "
+         "to retrain the Forecaster, provide `last_window` as argument.")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_predict_input(
+            forecaster_name  = 'ForecasterAutoreg',
+            steps            = 10,
+            fitted           = True,
+            included_exog    = True,
+            index_type       = pd.RangeIndex,
+            index_freq       = None,
+            window_size      = 5,
+            last_window      = last_window,
+            last_window_exog = None,
+            exog             = pd.Series(np.arange(10)),
+            exog_type        = pd.Series,
+            exog_col_names   = None,
+            interval         = None,
+            alpha            = None,
+            max_steps        = None,
+            levels           = None,
+            series_col_names = None
+        )
+
+
 def test_check_predict_input_TypeError_when_last_window_is_not_pandas_series():
     """
     """

@@ -363,9 +363,10 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force
     ForecasterAutoregCustom.
     """
     forecaster = ForecasterAutoregCustom(
-                     regressor      = LinearRegression(),
-                     fun_predictors = lambda y: y[-1:-6:-1],
-                     window_size    = 5,
+                     regressor       = LinearRegression(),
+                     fun_predictors  = lambda y: y[-1:-6:-1],
+                     name_predictors = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
+                     window_size     = 5,
                  )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
@@ -375,10 +376,9 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force
         y               = y,
         exog            = exog,
         select_only     = 'autoreg',
-        force_inclusion = ['custom_predictor_4', 'exog_4'],
+        force_inclusion = ['lag_5', 'exog_4'],
         verbose         = True,
     )
 
-    assert selected_autoreg == ['custom_predictor_0', 'custom_predictor_2', 
-                                'custom_predictor_3', 'custom_predictor_4']
+    assert selected_autoreg == ['lag_1', 'lag_3', 'lag_4', 'lag_5']
     assert selected_exog == ['exog_0', 'exog_1', 'exog_2', 'exog_3', 'exog_4']

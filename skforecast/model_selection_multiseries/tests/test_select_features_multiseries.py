@@ -135,7 +135,6 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_exog_regressor(
     assert selected_exog == ['exog1', 'exog4']
 
 
-@pytest.mark.skip
 def test_select_features_when_selector_is_RFE_and_select_only_is_exog_ForecasterAutoregMultiseriesCustom():
     """
     Test that select_features returns the expected values when selector is RFE
@@ -187,7 +186,6 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg():
     assert selected_exog == ['exog1', 'exog2', 'exog3', 'exog4']
 
 
-@pytest.mark.skip
 def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg_ForecasterAutoregMultiseriesCustom():
     """
     Test that select_features returns the expected values when selector is RFE
@@ -245,16 +243,16 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_None():
     assert selected_exog == ['exog1', 'exog3', 'exog4']
 
 
-@pytest.mark.skip
 def test_select_features_when_selector_is_RFE_and_select_only_is_None_ForecasterAutoregMultiseriesCustom():
     """
     Test that select_features returns the expected values when selector is RFE
     select_only is None and forecaster is ForecasterAutoregCustom.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = LinearRegression(),
-                     fun_predictors = lambda y: y[-1:-6:-1],
-                     window_size    = 5,
+                     regressor       = LinearRegression(),
+                     fun_predictors  = lambda y: y[-1:-6:-1],
+                     name_predictors = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
+                     window_size     = 5
                  )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
@@ -303,7 +301,7 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force
     assert selected_autoreg == [1, 2, 3, 4, 5]
     assert selected_exog == ['exog1', 'exog3', 'exog4']
 
-@pytest.mark.skip
+
 def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_force_inclusion_is_regex_ForecasterAutoregMultiseriesCustom():
     """
     Test that select_features returns the expected values when selector is RFE
@@ -352,13 +350,13 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_forc
         exog            = exog,
         select_only     = None,
         force_inclusion = ['lag_1'],
-        verbose         = False,
+        verbose         = True,
     )
 
     assert selected_autoreg == [1]
     assert selected_exog == ['exog1', 'exog3', 'exog4']
 
-@pytest.mark.skip
+
 def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force_inclusion_is_list_ForecasterAutoregCustom():
     """
     Test that select_features returns the expected values when selector is RFE

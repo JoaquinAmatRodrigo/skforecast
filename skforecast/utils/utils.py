@@ -743,6 +743,16 @@ def check_predict_input(
 
     # Checks last_window
     # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
+    if isinstance(last_window, type(None)) and forecaster_name not in [
+        'ForecasterAutoregMultiSeries', 
+        'ForecasterAutoregMultiSeriesCustom',
+        'ForecasterRnn'
+    ]:
+        raise ValueError(
+            ("`last_window` was not stored during training. If you don't want "
+             "to retrain the Forecaster, provide `last_window` as argument.")
+        )
+
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
                            'ForecasterAutoregMultiSeriesCustom',
                            'ForecasterAutoregMultiVariate',
@@ -773,8 +783,7 @@ def check_predict_input(
                      f"    `last_window` columns    : {last_window_cols}\n"
                      f"    `series` columns X train : {series_col_names}")
                 )
-
-    else:    
+    else:
         if not isinstance(last_window, pd.Series):
             raise TypeError(
                 f"`last_window` must be a pandas Series. Got {type(last_window)}."

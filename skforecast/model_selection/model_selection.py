@@ -213,6 +213,7 @@ def _create_backtesting_folds(
 
         if differentiation is None:
             differentiation = 0
+        
         for i, fold in enumerate(folds):
             training_start    = data.index[fold[0][0] + differentiation] if fold[0] is not None else None
             training_end      = data.index[fold[0][-1]] if fold[0] is not None else None
@@ -1348,14 +1349,6 @@ def bayesian_search_forecaster(
              "Example: {'lags' : trial.suggest_categorical('lags', [3, 5])}")
         )
         lags_grid = 'deprecated'
-    
-    if engine == 'skopt':
-        warnings.warn(
-            ("The engine 'skopt' for `bayesian_search_forecaster` is deprecated "
-             "in favor of 'optuna' engine. To continue using it, use skforecast "
-             "0.6.0. The optimization will be performed using the 'optuna' engine.")
-        )
-        engine = 'optuna'
 
     if engine not in ['optuna']:
         raise ValueError(

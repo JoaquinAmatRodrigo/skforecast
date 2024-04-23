@@ -20,9 +20,9 @@ def test_set_out_sample_residuals_TypeError_when_residuals_is_not_numpy_array_or
     residuals = [1, 2, 3]
 
     err_msg = re.escape(
-                f"`residuals` argument must be `numpy ndarray` or `pandas Series`, "
-                f"but found {type(residuals)}."
-            )
+        f"`residuals` argument must be `numpy ndarray` or `pandas Series`, "
+        f"but found {type(residuals)}."
+    )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
 
@@ -36,9 +36,9 @@ def test_set_out_sample_residuals_TypeError_when_y_pred_is_not_numpy_array_or_pa
     y_pred = [1, 2, 3]
 
     err_msg = re.escape(
-                f"`y_pred` argument must be `numpy ndarray`, `pandas Series` or `None`, "
-                f"but found {type(y_pred)}."
-            )
+        f"`y_pred` argument must be `numpy ndarray`, `pandas Series` or `None`, "
+        f"but found {type(y_pred)}."
+    )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
 
@@ -51,9 +51,9 @@ def test_set_out_sample_residuals_ValueError_when_residuals_and_y_pred_have_diff
     y_pred = pd.Series([1, 2, 3, 4])
 
     err_msg = re.escape(
-                f"`residuals` and `y_pred` must have the same length, but found "
-                f"{len(residuals)} and {len(y_pred)}."
-            )
+        f"`residuals` and `y_pred` must have the same length, but found "
+        f"{len(residuals)} and {len(y_pred)}."
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
 
@@ -67,9 +67,9 @@ def test_set_out_sample_residuals_ValueError_when_residuals_and_y_pred_have_diff
     y_pred = pd.Series([1, 2, 3], index=[1, 2, 4])
 
     err_msg = re.escape(
-                f"`residuals` and `y_pred` must have the same index, but found "
-                    f"{residuals.index} and {y_pred.index}."
-            )
+        f"`residuals` and `y_pred` must have the same index, but found "
+        f"{residuals.index} and {y_pred.index}."
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
 
@@ -82,10 +82,10 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     residuals = np.arange(10)
 
     warn_msg = re.escape(
-                (f"Argument `transform` is set to `False` but forecaster was trained "
-                 f"using a transformer {forecaster.transformer_y}. Ensure that the new residuals "
-                 f"are already transformed or set `transform=True`.")
-            )
+        (f"Argument `transform` is set to `False` but forecaster was trained "
+         f"using a transformer {forecaster.transformer_y}. Ensure that the new residuals "
+         f"are already transformed or set `transform=True`.")
+    )
     with pytest.warns(UserWarning, match = warn_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=False)
 
@@ -99,10 +99,10 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     residuals = np.arange(10)
 
     warn_msg = re.escape(
-                (f"Residuals will be transformed using the same transformer used "
-                 f"when training the forecaster ({forecaster.transformer_y}). Ensure that the "
-                 f"new residuals are on the same scale as the original time series.")
-            )
+        (f"Residuals will be transformed using the same transformer used "
+         f"when training the forecaster ({forecaster.transformer_y}). Ensure that the "
+         f"new residuals are on the same scale as the original time series.")
+    )
     with pytest.warns(UserWarning, match = warn_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=True)
 
