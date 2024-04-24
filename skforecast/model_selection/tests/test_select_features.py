@@ -229,7 +229,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_None():
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=5)
 
     warn_msg = re.escape(
-        ("No autoregressive features has been selected. Since a Forecaster "
+        ("No autoregressive features have been selected. Since a Forecaster "
          "cannot be created without them, be sure to include at least one "
          "using the `force_inclusion` parameter.")
     )
@@ -260,7 +260,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_None_Forecaster
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=5)
 
     warn_msg = re.escape(
-        ("No autoregressive features has been selected. Since a Forecaster "
+        ("No autoregressive features have been selected. Since a Forecaster "
          "cannot be created without them, be sure to include at least one "
          "using the `force_inclusion` parameter.")
     )
