@@ -1,9 +1,9 @@
 # Unit test select_features_multiseries
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
-import re
 from sklearn.linear_model import LinearRegression
 from sklearn.feature_selection import RFE
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
