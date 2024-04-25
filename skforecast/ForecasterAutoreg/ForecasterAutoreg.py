@@ -1458,6 +1458,12 @@ class ForecasterAutoreg(ForecasterBase):
                      f"{residuals.index} and {y_pred.index}.")
                 )
 
+        if y_pred is not None and not self.fitted:
+            raise NotFittedError(
+                ("This forecaster is not fitted yet. Call `fit` with appropriate "
+                 "arguments before using `set_out_sample_residuals()`.")
+            )
+
         if isinstance(residuals, np.ndarray):
             residuals = pd.Series(residuals, name='residuals')
         else:
