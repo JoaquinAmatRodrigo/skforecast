@@ -83,10 +83,10 @@ class ForecasterAutoreg(ForecasterBase):
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
     binner_kwargs : dict, default `None`
-        Additional arguments to be passed to the `KBinsDiscretizer` used to 
-        discretize residuals into k bins according to the predicted values each
-        residual is associated with. Argument `encode` is always set to `ordinal`
-        and `dtype` to np.float64.
+        Additional arguments to pass to the `KBinsDiscretizer` used to discretize 
+        the residuals into k bins according to the predicted values associated 
+        with each residual. The `encode' argument is always set to 'ordinal' 
+        and `dtype' to np.float64.
         **New in version 0.12.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
@@ -121,14 +121,15 @@ class ForecasterAutoreg(ForecasterBase):
         is still experimental and may undergo changes.**
         **New in version 0.10.0**
     binner : sklearn.preprocessing.KBinsDiscretizer
-        KBinsDiscretizer used to discretize residuals into k bins according to the
-        predicted values each residual is associated with.
+        `KBinsDiscretizer` used to discretize residuals into k bins according 
+        to the predicted values associated with each residual.
         **New in version 0.12.0**
-    binner_kwargs : dict, default `None`
-        Additional arguments to be passed to the `KBinsDiscretizer` used to 
-        discretize residuals into k bins according to the predicted values each
-        residual is associated with. Argument `encode` is always set to `ordinal`
-        and `dtype` to np.float64.
+    binner_kwargs : dict
+        Additional arguments to pass to the `KBinsDiscretizer` used to discretize 
+        the residuals into k bins according to the predicted values associated 
+        with each residual. The `encode' argument is always set to 'ordinal' 
+        and `dtype' to np.float64.
+        **New in version 0.12.0**
     source_code_weight_func : str
         Source code of the custom function used to create weights.
     differentiation : int
@@ -657,13 +658,15 @@ class ForecasterAutoreg(ForecasterBase):
             data.groupby('bin')['residual'].apply(np.array).to_dict()
         )
 
+        # Only up to 200 residuals are stored per bin
         for k, v in self.in_sample_residuals_by_bin.items():
-            # Only up to 200 residuals are stored per bin
+            # TODO: Include `random_state` in fit method to allow the user 
+            # change the residual sample stored.
             rng = np.random.default_rng(seed=95123)
             if len(v) > 200:
                 sample = rng.choice(a=v, size=200, replace=False)
                 self.in_sample_residuals_by_bin[k] = sample
-        
+
         self.in_sample_residuals = np.concatenate(list(
             self.in_sample_residuals_by_bin.values()
         ))
@@ -1432,28 +1435,34 @@ class ForecasterAutoreg(ForecasterBase):
 
         if not isinstance(residuals, (np.ndarray, pd.Series)):
             raise TypeError(
-                f"`residuals` argument must be `numpy ndarray` or `pandas Series`, "
-                f"but found {type(residuals)}."
+                (f"`residuals` argument must be `numpy ndarray` or `pandas Series`, "
+                 f"but found {type(residuals)}.")
             )
 
         if not isinstance(y_pred, (np.ndarray, pd.Series, type(None))):
             raise TypeError(
-                f"`y_pred` argument must be `numpy ndarray`, `pandas Series` or `None`, "
-                f"but found {type(y_pred)}."
+                (f"`y_pred` argument must be `numpy ndarray`, `pandas Series` or `None`, "
+                 f"but found {type(y_pred)}.")
             )
 
         if y_pred is not None and len(residuals) != len(y_pred):
             raise ValueError(
-                f"`residuals` and `y_pred` must have the same length, but found "
-                f"{len(residuals)} and {len(y_pred)}."
+                (f"`residuals` and `y_pred` must have the same length, but found "
+                 f"{len(residuals)} and {len(y_pred)}.")
             )
 
         if isinstance(residuals, pd.Series) and isinstance(y_pred, pd.Series):
             if not residuals.index.equals(y_pred.index):
                 raise ValueError(
-                    f"`residuals` and `y_pred` must have the same index, but found "
-                    f"{residuals.index} and {y_pred.index}."
+                    (f"`residuals` and `y_pred` must have the same index, but found "
+                     f"{residuals.index} and {y_pred.index}.")
                 )
+
+        if y_pred is not None and not self.fitted:
+            raise NotFittedError(
+                ("This forecaster is not fitted yet. Call `fit` with appropriate "
+                 "arguments before using `set_out_sample_residuals()`.")
+            )
 
         if isinstance(residuals, np.ndarray):
             residuals = pd.Series(residuals, name='residuals')
@@ -1561,9 +1570,9 @@ class ForecasterAutoreg(ForecasterBase):
                 for k in empty_bins:
                     rng = np.random.default_rng(seed=123)
                     self.out_sample_residuals_by_bin[k] = rng.choice(
-                                                              a=self.out_sample_residuals,
-                                                              size=200,
-                                                              replace=True
+                                                              a       = self.out_sample_residuals,
+                                                              size    = 200,
+                                                              replace = True
                                                           )
 
 

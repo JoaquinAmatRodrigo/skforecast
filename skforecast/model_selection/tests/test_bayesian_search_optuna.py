@@ -289,46 +289,57 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_kwargs_stu
 
     def search_space(trial):
         search_space  = {
-            'n_estimators': trial.suggest_int('n_estimators', 100, 200),
-            'max_depth'   : trial.suggest_int('max_depth', 20, 35, log=True),
+            'n_estimators': trial.suggest_int('n_estimators', 2, 10),
+            'max_depth'   : trial.suggest_int('max_depth', 2, 10, log=True),
             'max_features': trial.suggest_categorical('max_features', ['log2', 'sqrt']),
             'lags'        : trial.suggest_categorical('lags', [2, 4])
         } 
         
         return search_space
 
-    kwargs_study_optimize = {'timeout': 5}
+    kwargs_study_optimize = {'timeout': 10}
     results = _bayesian_search_optuna(
-                  forecaster            = forecaster,
-                  y                     = y,
-                  search_space          = search_space,
-                  steps                 = steps,
-                  metric                = 'mean_absolute_error',
-                  refit                 = True,
-                  initial_train_size    = len(y_train),
-                  fixed_train_size      = True,
-                  n_trials              = 10,
-                  random_state          = 123,
-                  n_jobs                = 1,
-                  return_best           = False,
-                  verbose               = False,
-                  kwargs_study_optimize = kwargs_study_optimize
-              )[0].reset_index(drop=True)
-    
-    expected_results = pd.DataFrame(
-        np.array([
-            [np.array([1, 2]),
-                {'n_estimators': 109, 'max_depth': 25, 'max_features': 'sqrt'},
-                 0.21489690173547402, 109, 25, 'sqrt'],
-            [np.array([1, 2]),
-                {'n_estimators': 170, 'max_depth': 23, 'max_features': 'sqrt'},
-                  0.21698591071568632, 170, 23, 'sqrt']
-        ], dtype=object),
-        columns=['lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth', 'max_features'],
-        index=pd.RangeIndex(start=0, stop=2, step=1)
-    )
+                    forecaster            = forecaster,
+                    y                     = y,
+                    search_space          = search_space,
+                    steps                 = steps,
+                    metric                = 'mean_absolute_error',
+                    refit                 = True,
+                    initial_train_size    = len(y_train),
+                    fixed_train_size      = True,
+                    n_trials              = 5,
+                    random_state          = 123,
+                    n_jobs                = 1,
+                    return_best           = False,
+                    verbose               = False,
+                    kwargs_study_optimize = kwargs_study_optimize
+                )[0].reset_index(drop=True)
 
-    pd.testing.assert_frame_equal(results.head(2), expected_results, check_dtype=False)
+    expected_results = pd.DataFrame(
+        np.array([[np.array([1, 2, 3, 4]),
+            {'n_estimators': 8, 'max_depth': 3, 'max_features': 'log2'},
+            0.2176619102322017, 8, 3, 'log2'],
+        [np.array([1, 2]),
+            {'n_estimators': 8, 'max_depth': 3, 'max_features': 'sqrt'},
+            0.21923614756760298, 8, 3, 'sqrt'],
+        [np.array([1, 2]),
+            {'n_estimators': 5, 'max_depth': 2, 'max_features': 'sqrt'},
+            0.22116013675443522, 5, 2, 'sqrt'],
+        [np.array([1, 2, 3, 4]),
+            {'n_estimators': 10, 'max_depth': 6, 'max_features': 'log2'},
+            0.22221487679563792, 10, 6, 'log2'],
+        [np.array([1, 2]),
+            {'n_estimators': 6, 'max_depth': 4, 'max_features': 'sqrt'},
+            0.22883925084220677, 6, 4, 'sqrt']], dtype=object),
+        columns=['lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth', 'max_features'],
+        index=pd.RangeIndex(start=0, stop=5, step=1)
+    ).astype({
+        'mean_absolute_error': float,
+        'n_estimators': int,
+        'max_depth': int
+    })
+
+    pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
 
 
 def test_results_output_bayesian_search_optuna_ForecasterAutoreg_when_lags_not_in_search_space():

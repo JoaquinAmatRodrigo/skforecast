@@ -2028,7 +2028,7 @@ def select_features_multiseries(
 
     if len(selected_autoreg) == 0:
         warnings.warn(
-            ("No autoregressive features has been selected. Since a Forecaster "
+            ("No autoregressive features have been selected. Since a Forecaster "
              "cannot be created without them, be sure to include at least one "
              "using the `force_inclusion` parameter.")
         )

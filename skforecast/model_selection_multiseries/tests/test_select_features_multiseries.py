@@ -1,9 +1,9 @@
 # Unit test select_features_multiseries
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
-import re
 from sklearn.linear_model import LinearRegression
 from sklearn.feature_selection import RFE
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
@@ -135,7 +135,6 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_exog_regressor(
     assert selected_exog == ['exog1', 'exog4']
 
 
-@pytest.mark.skip
 def test_select_features_when_selector_is_RFE_and_select_only_is_exog_ForecasterAutoregMultiseriesCustom():
     """
     Test that select_features returns the expected values when selector is RFE
@@ -159,7 +158,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_exog_Forecaster
 
     assert selected_autoreg == ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2',
                                 'custom_predictor_3', 'custom_predictor_4']
-    assert selected_exog == ['exog_1', 'exog_4']
+    assert selected_exog == ['exog1', 'exog3', 'exog4']
 
 
 def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg():
@@ -187,7 +186,6 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg():
     assert selected_exog == ['exog1', 'exog2', 'exog3', 'exog4']
 
 
-@pytest.mark.skip
 def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg_ForecasterAutoregMultiseriesCustom():
     """
     Test that select_features returns the expected values when selector is RFE
@@ -197,7 +195,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg_Forecas
                      regressor      = LinearRegression(),
                      fun_predictors = lambda y: y[-1:-6:-1],
                      window_size    = 5,
-                     ecoding        = 'ordinal'
+                     encoding       = 'ordinal'
                  )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
@@ -210,7 +208,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg_Forecas
         verbose     = False,
     )
 
-    assert selected_autoreg == ['custom_predictor_0', 'custom_predictor_2', 'custom_predictor_3']
+    assert selected_autoreg == ['custom_predictor_0', 'custom_predictor_3', 'custom_predictor_4']
     assert selected_exog == ['exog1', 'exog2', 'exog3', 'exog4']
 
 
@@ -227,7 +225,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_None():
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
     warn_msg = re.escape(
-        ("No autoregressive features has been selected. Since a Forecaster "
+        ("No autoregressive features have been selected. Since a Forecaster "
          "cannot be created without them, be sure to include at least one "
          "using the `force_inclusion` parameter.")
     )
@@ -245,24 +243,25 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_None():
     assert selected_exog == ['exog1', 'exog3', 'exog4']
 
 
-@pytest.mark.skip
 def test_select_features_when_selector_is_RFE_and_select_only_is_None_ForecasterAutoregMultiseriesCustom():
     """
     Test that select_features returns the expected values when selector is RFE
     select_only is None and forecaster is ForecasterAutoregCustom.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = LinearRegression(),
-                     fun_predictors = lambda y: y[-1:-6:-1],
-                     window_size    = 5,
+                     regressor       = LinearRegression(),
+                     fun_predictors  = lambda y: y[-1:-6:-1],
+                     name_predictors = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
+                     window_size     = 5
                  )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
     warn_msg = re.escape(
-        ("No autoregressive features has been selected. Since a Forecaster "
-         "cannot be created without them, be sure to include at least one "
-         "to ensure the autoregressive component of the forecast model "
-         "using the `force_inclusion` parameter.")
+        (
+            "No autoregressive features have been selected. Since a Forecaster cannot "
+            "be created without them, be sure to include at least one using the "
+            "`force_inclusion` parameter."
+        )
     )
     with pytest.warns(UserWarning, match = warn_msg):
         selected_autoreg, selected_exog = select_features_multiseries(
@@ -303,7 +302,7 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force
     assert selected_autoreg == [1, 2, 3, 4, 5]
     assert selected_exog == ['exog1', 'exog3', 'exog4']
 
-@pytest.mark.skip
+
 def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_force_inclusion_is_regex_ForecasterAutoregMultiseriesCustom():
     """
     Test that select_features returns the expected values when selector is RFE
@@ -352,13 +351,13 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_forc
         exog            = exog,
         select_only     = None,
         force_inclusion = ['lag_1'],
-        verbose         = False,
+        verbose         = True,
     )
 
     assert selected_autoreg == [1]
     assert selected_exog == ['exog1', 'exog3', 'exog4']
 
-@pytest.mark.skip
+
 def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force_inclusion_is_list_ForecasterAutoregCustom():
     """
     Test that select_features returns the expected values when selector is RFE
@@ -366,22 +365,26 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force
     ForecasterAutoregCustom.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = LinearRegression(),
-                     fun_predictors = lambda y: y[-1:-6:-1],
-                     window_size    = 5,
-                 )
+        regressor=LinearRegression(),
+        fun_predictors=lambda y: y[-1:-6:-1],
+        window_size=5,
+    )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
     selected_autoreg, selected_exog = select_features_multiseries(
-        selector        = selector,
-        forecaster      = forecaster,
-        series          = series,
-        exog            = exog,
-        select_only     = 'autoreg',
-        force_inclusion = ['custom_predictor_4', 'exog_4'],
-        verbose         = True
+        selector=selector,
+        forecaster=forecaster,
+        series=series,
+        exog=exog,
+        select_only="autoreg",
+        force_inclusion=["custom_predictor_1", "exog_4"],
+        verbose=True,
     )
 
-    assert selected_autoreg == ['custom_predictor_0', 'custom_predictor_2', 
-                                'custom_predictor_3', 'custom_predictor_4']
-    assert selected_exog == ['exog1', 'exog3', 'exog4']
+    assert selected_autoreg == [
+        "custom_predictor_0",
+        "custom_predictor_1",
+        "custom_predictor_3",
+        "custom_predictor_4",
+    ]
+    assert selected_exog == ["exog1", "exog2", "exog3", "exog4"]

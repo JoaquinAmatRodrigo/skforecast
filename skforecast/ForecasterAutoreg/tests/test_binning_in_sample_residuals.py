@@ -1,9 +1,8 @@
 # Unit test _binning_in_sample_residuals ForecasterAutoreg
 # ==============================================================================
-import re
-import pytest
 import numpy as np
 import pandas as pd
+from sklearn.linear_model import LinearRegression
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 
 
@@ -62,3 +61,30 @@ def test_binning_in_sample_residuals_output():
         np.testing.assert_almost_equal(forecaster.in_sample_residuals_by_bin[k], expected_2[k])
 
     assert forecaster.binner_intervals == expected_3
+
+
+def test_binning_in_sample_residuals_stores_maximum_200_residuals_per_bin():
+    """
+    Test that _binning_in_sample_residuals stores a maximum of 200 residuals per bin.
+    """
+
+    y = pd.Series(
+            data = np.random.normal(loc=10, scale=1, size=1000),
+            index = pd.date_range(start='01-01-2000', periods=1000, freq='H')
+
+        )
+    forecaster = ForecasterAutoreg(
+                    regressor=LinearRegression(),
+                    lags = 5,
+                    binner_kwargs={'n_bins':2}
+                )
+    forecaster.fit(y)
+
+    for v in forecaster.in_sample_residuals_by_bin.values():
+        assert len(v) == 200
+        assert len(v) > 0
+
+    np.testing.assert_array_almost_equal(
+        forecaster.in_sample_residuals,
+        np.concatenate(list(forecaster.in_sample_residuals_by_bin.values()))
+    )

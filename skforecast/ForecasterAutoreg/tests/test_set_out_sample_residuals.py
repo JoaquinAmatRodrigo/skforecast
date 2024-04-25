@@ -20,9 +20,9 @@ def test_set_out_sample_residuals_TypeError_when_residuals_is_not_numpy_array_or
     residuals = [1, 2, 3]
 
     err_msg = re.escape(
-                f"`residuals` argument must be `numpy ndarray` or `pandas Series`, "
-                f"but found {type(residuals)}."
-            )
+        f"`residuals` argument must be `numpy ndarray` or `pandas Series`, "
+        f"but found {type(residuals)}."
+    )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
 
@@ -36,9 +36,9 @@ def test_set_out_sample_residuals_TypeError_when_y_pred_is_not_numpy_array_or_pa
     y_pred = [1, 2, 3]
 
     err_msg = re.escape(
-                f"`y_pred` argument must be `numpy ndarray`, `pandas Series` or `None`, "
-                f"but found {type(y_pred)}."
-            )
+        f"`y_pred` argument must be `numpy ndarray`, `pandas Series` or `None`, "
+        f"but found {type(y_pred)}."
+    )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
 
@@ -51,9 +51,9 @@ def test_set_out_sample_residuals_ValueError_when_residuals_and_y_pred_have_diff
     y_pred = pd.Series([1, 2, 3, 4])
 
     err_msg = re.escape(
-                f"`residuals` and `y_pred` must have the same length, but found "
-                f"{len(residuals)} and {len(y_pred)}."
-            )
+        f"`residuals` and `y_pred` must have the same length, but found "
+        f"{len(residuals)} and {len(y_pred)}."
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
 
@@ -67,9 +67,9 @@ def test_set_out_sample_residuals_ValueError_when_residuals_and_y_pred_have_diff
     y_pred = pd.Series([1, 2, 3], index=[1, 2, 4])
 
     err_msg = re.escape(
-                f"`residuals` and `y_pred` must have the same index, but found "
-                    f"{residuals.index} and {y_pred.index}."
-            )
+        f"`residuals` and `y_pred` must have the same index, but found "
+        f"{residuals.index} and {y_pred.index}."
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
 
@@ -82,10 +82,10 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     residuals = np.arange(10)
 
     warn_msg = re.escape(
-                (f"Argument `transform` is set to `False` but forecaster was trained "
-                 f"using a transformer {forecaster.transformer_y}. Ensure that the new residuals "
-                 f"are already transformed or set `transform=True`.")
-            )
+        (f"Argument `transform` is set to `False` but forecaster was trained "
+         f"using a transformer {forecaster.transformer_y}. Ensure that the new residuals "
+         f"are already transformed or set `transform=True`.")
+    )
     with pytest.warns(UserWarning, match = warn_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=False)
 
@@ -99,10 +99,10 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     residuals = np.arange(10)
 
     warn_msg = re.escape(
-                (f"Residuals will be transformed using the same transformer used "
-                 f"when training the forecaster ({forecaster.transformer_y}). Ensure that the "
-                 f"new residuals are on the same scale as the original time series.")
-            )
+        (f"Residuals will be transformed using the same transformer used "
+         f"when training the forecaster ({forecaster.transformer_y}). Ensure that the "
+         f"new residuals are on the same scale as the original time series.")
+    )
     with pytest.warns(UserWarning, match = warn_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=True)
 
@@ -219,3 +219,94 @@ def test_same_out_sample_residuals_by_bin_stored_when_y_pred_is_provided():
             forecaster.in_sample_residuals_by_bin[k],
             forecaster.out_sample_residuals_by_bin[k]
         )
+
+def test_set_out_sample_residuals_stores_maximum_200_residuals_per_bin():
+    """
+    Test that set_out_sample_residuals stores a maximum of 200 residuals per bin.
+    """
+    y = pd.Series(
+        data=np.random.normal(loc=10, scale=1, size=1000),
+        index=pd.date_range(start="01-01-2000", periods=1000, freq="H"),
+    )
+    residuals = np.random.normal(loc=0, scale=1, size=1000)
+    y_pred = y
+    forecaster = ForecasterAutoreg(
+        regressor=LinearRegression(), lags=5, binner_kwargs={"n_bins": 2}
+    )
+    forecaster.fit(y)
+    forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
+
+    for v in forecaster.out_sample_residuals_by_bin.values():
+        assert len(v) == 200
+
+    np.testing.assert_array_almost_equal(
+        forecaster.out_sample_residuals,
+        np.concatenate(list(forecaster.out_sample_residuals_by_bin.values())),
+    )
+
+
+def test_set_out_sample_residuals_append_new_residuals_per_bin():
+    """
+    Test that set_out_sample_residuals append residuals per bin and stores
+    maximum 200 residuals per bin.
+    """
+    rng = np.random.default_rng(12345)
+    y = pd.Series(
+        data=rng.normal(loc=10, scale=1, size=100),
+        index=pd.date_range(start="01-01-2000", periods=100, freq="H"),
+    )
+    residuals = rng.normal(loc=0, scale=1, size=100)
+    y_pred = y
+
+    forecaster = ForecasterAutoreg(
+        regressor=LinearRegression(), lags=5, binner_kwargs={"n_bins": 2}
+    )
+    forecaster.fit(y)   
+    forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred, append=True)
+    for v in forecaster.out_sample_residuals_by_bin.values():
+        assert len(v) == 50
+
+    forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred, append=True)
+    for v in forecaster.out_sample_residuals_by_bin.values():
+        assert len(v) == 100
+
+    forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred, append=True)
+    forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred, append=True)
+    forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred, append=True)
+    forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred, append=True)
+    for v in forecaster.out_sample_residuals_by_bin.values():
+        assert len(v) == 200
+
+
+def test_set_out_sample_residuals_when_there_are_no_residuals_for_some_bins():
+    """
+    Test that set_out_sample_residuals works when there are no residuals for some bins.
+    """
+    rng = np.random.default_rng(12345)
+    y = pd.Series(
+        data=rng.normal(loc=10, scale=1, size=100),
+        index=pd.date_range(start="01-01-2000", periods=100, freq="H"),
+    )
+    y_pred = y.loc[y > 10]
+    residuals = rng.normal(loc=0, scale=1, size=len(y_pred))
+
+    forecaster = ForecasterAutoreg(
+        regressor=LinearRegression(), lags=5, binner_kwargs={"n_bins": 3}
+    )
+    forecaster.fit(y)
+
+    warn_msg = re.escape(
+        (
+            "The following bins have no out of sample residuals: [0]. "
+            "No predicted values fall in the interval "
+            "[(9.587346214675517, 9.938296088788048)]. "
+            "Empty bins will be filled with a random sample of residuals from "
+            "the other bins."
+        )
+    )
+    with pytest.warns(UserWarning, match=warn_msg):
+        forecaster.set_out_sample_residuals(
+            residuals=residuals, y_pred=y_pred, append=True
+        )
+
+    assert len(forecaster.out_sample_residuals_by_bin[0]) == 200

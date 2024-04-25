@@ -14,9 +14,9 @@ The main changes in this release are:
 
 + Added new forecaster `ForecasterRnn` to create forecasting models based on deep learning (RNN and LSTM).
 
-+ New method to predict intervals conditioned on the range of the predicted values. This is can help to improve the interval coverage when the residuals are not homoscedastic.
++ New method to predict intervals conditioned on the range of the predicted values. This is can help to improve the interval coverage when the residuals are not homoscedastic (`ForecasterAutoreg`).
 
-+ All forecasters are now able to differentiate the time series before modeling it.
++ All Recursive Forecasters are now able to differentiate the time series before modeling it.
 
 **Added**
 

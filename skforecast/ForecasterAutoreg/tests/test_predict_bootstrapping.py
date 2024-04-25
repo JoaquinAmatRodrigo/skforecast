@@ -25,9 +25,9 @@ def test_predict_bootstrapping_NotFittedError_when_fitted_is_False():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
 
     err_msg = re.escape(
-                ("This Forecaster instance is not fitted yet. Call `fit` with "
-                 "appropriate arguments before using predict.")
-              )
+        ("This Forecaster instance is not fitted yet. Call `fit` with "
+         "appropriate arguments before using predict.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1)
 
@@ -41,13 +41,32 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     forecaster.fit(y=pd.Series(np.arange(10)))
 
     err_msg = re.escape(
-                ("`forecaster.out_sample_residuals` is `None`. Use "
-                 "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                 "before `predict_interval()`, `predict_bootstrapping()`, "
-                 "`predict_quantiles()` or `predict_dist()`.")
-              )
+        ("`forecaster.out_sample_residuals` is `None`. Use "
+         "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+         "before `predict_interval()`, `predict_bootstrapping()`, "
+         "`predict_quantiles()` or `predict_dist()`.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False)
+
+
+def test_predict_bootstrapping_ValueError_when_out_sample_residuals_by_bin_is_None():
+    """
+    Test ValueError is raised when in_sample_residuals=False and
+    forecaster.out_sample_residuals is None.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster.fit(y=pd.Series(np.arange(10)))
+
+    err_msg = re.escape(
+        ("`forecaster.out_sample_residuals_by_bin` is `None`. Use "
+         "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
+         "before `predict_interval()`, `predict_bootstrapping()`, "
+         "`predict_quantiles()` or `predict_dist()`.")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False,
+                                         binned_residuals=True)
 
 
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_steps_is_1_in_sample_residuals_is_True():
@@ -212,10 +231,9 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_and_di
     forecaster_2 = ForecasterAutoreg(regressor=LinearRegression(), lags=15, differentiation=1)
     forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
     boot_predictions_2 = forecaster_2.predict_bootstrapping(
-                            steps=steps,
-                            exog=exog_diff.loc[end_train:],
-                            n_boot=10
+                            steps  = steps,
+                            exog   = exog_diff.loc[end_train:],
+                            n_boot = 10
                         )
     
     pd.testing.assert_frame_equal(boot_predictions_1, boot_predictions_2)
-

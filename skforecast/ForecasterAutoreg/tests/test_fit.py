@@ -1,6 +1,7 @@
 # Unit test fit ForecasterAutoreg
 # ==============================================================================
 import pytest
+from pytest import approx
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
@@ -69,10 +70,10 @@ def test_fit_in_sample_residuals_by_bin_stored():
     Test that values of in_sample_residuals_by_bin are stored after fitting.
     """
     forecaster = ForecasterAutoreg(
-                regressor=LinearRegression(),
-                lags = 5,
-                binner_kwargs={'n_bins':3}
-            )
+                     regressor     = LinearRegression(),
+                     lags          = 5,
+                     binner_kwargs = {'n_bins': 3}
+                 )
     forecaster.fit(y)
 
     X_train, y_train = forecaster.create_train_X_y(y)
@@ -108,11 +109,11 @@ def test_fit_in_sample_residuals_by_bin_stored():
         np.sort(forecaster.in_sample_residuals),
         np.sort(expected_1)
     )
-
     for k in expected_2.keys():
         np.testing.assert_almost_equal(forecaster.in_sample_residuals_by_bin[k], expected_2[k])
-
-    assert forecaster.binner_intervals == expected_3
+    for k in expected_3.keys():
+        assert forecaster.binner_intervals[k][0] == approx(expected_3[k][0])
+        assert forecaster.binner_intervals[k][1] == approx(expected_3[k][1])
 
 
 def test_fit_same_residuals_when_residuals_greater_than_1000():

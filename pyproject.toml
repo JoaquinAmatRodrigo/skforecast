@@ -35,10 +35,10 @@ keywords = [
 dependencies = [
     "numpy>=1.20, <1.27",
     "pandas>=1.2, <2.3",
-    "tqdm>=4.57.0, <4.67",
+    "tqdm>=4.57, <4.67",
     "scikit-learn>=1.2, <1.5",
-    "optuna>=2.10.0, <3.7",
-    "joblib>=1.1.0, <1.5",
+    "optuna>=2.10, <3.7",
+    "joblib>=1.1, <1.5",
 ]
 requires-python = ">=3.8"
 
@@ -86,10 +86,10 @@ docs = [
 ]
 
 test = [
-    "pytest>=7.1, <7.5",
-    "pytest-cov>=3.0.0, <4.2",
-    "lightgbm>=4.0.0, <4.4",
+    "pytest>=7.1, <8.2",
+    "pytest-cov>=4.0, <5.1",
     "pytest-xdist>=3.3, <3.6",
+    "lightgbm>=4.0, <4.4",
     "tomli>=2.0, <2.1"
 ]
 
