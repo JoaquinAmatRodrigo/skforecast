@@ -195,7 +195,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg_Forecas
                      regressor      = LinearRegression(),
                      fun_predictors = lambda y: y[-1:-6:-1],
                      window_size    = 5,
-                     encoding        = 'ordinal'
+                     encoding       = 'ordinal'
                  )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 

@@ -337,7 +337,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_kwargs_stu
         'mean_absolute_error': float,
         'n_estimators': int,
         'max_depth': int
-        })
+    })
 
     pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
 
