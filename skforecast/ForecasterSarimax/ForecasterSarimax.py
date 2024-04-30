@@ -5,7 +5,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional
+from typing import Union, Optional
 import warnings
 import logging
 import sys
@@ -98,8 +98,7 @@ class ForecasterSarimax():
     exog_type : type
         Type of exogenous variable/s used in training.
     exog_col_names : list
-        Names of columns of `exog` if `exog` used in training was a pandas
-        DataFrame.
+        Names of the exogenous variables used during training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
     creation_date : str
@@ -208,6 +207,7 @@ class ForecasterSarimax():
         self,
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        store_last_window: bool=True,
         suppress_warnings: bool=False
     ) -> None:
         """
@@ -224,6 +224,8 @@ class ForecasterSarimax():
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
+        store_last_window : bool, default `True`
+            Whether or not to store the last window of training data.
         suppress_warnings : bool, default `False`
             If `True`, warnings generated during fitting will be ignored.
 
@@ -300,7 +302,8 @@ class ForecasterSarimax():
         else: 
             self.index_freq = y.index.step
 
-        self.last_window = y.copy()
+        if store_last_window:
+            self.last_window = y.copy()
         
         if self.engine == 'pmdarima':
             self.extended_index = self.regressor.arima_res_.fittedvalues.index.copy()
@@ -871,3 +874,20 @@ class ForecasterSarimax():
             metric = self.regressor.get_info_criteria(criteria=criteria, method=method)
         
         return metric
+
+
+    def summary(self) -> None:
+        """
+        Show forecaster information.
+        
+        Parameters
+        ----------
+        self
+
+        Returns
+        -------
+        None
+        
+        """
+        
+        print(self)

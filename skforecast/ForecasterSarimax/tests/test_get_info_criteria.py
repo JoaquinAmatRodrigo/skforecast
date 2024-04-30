@@ -26,9 +26,9 @@ def test_ForecasterSarimax_get_info_criteria_ValueError_criteria_invalid_value()
     criteria = 'not_valid'
 
     err_msg = re.escape(
-                (f"Invalid value for `criteria`. Valid options are 'aic', 'bic', "
-                 f"and 'hqic'.")
-              )
+        ("Invalid value for `criteria`. Valid options are 'aic', 'bic', "
+         "and 'hqic'.")
+    )
     with pytest.raises(ValueError, match = err_msg): 
         forecaster.get_info_criteria(criteria=criteria)
 
@@ -43,9 +43,9 @@ def test_ForecasterSarimax_get_info_criteria_ValueError_method_invalid_value():
     method = 'not_valid'
 
     err_msg = re.escape(
-                (f"Invalid value for `method`. Valid options are 'standard' and "
-                 f"'lutkepohl'.")
-              )
+        ("Invalid value for `method`. Valid options are 'standard' and "
+         "'lutkepohl'.")
+    )
     with pytest.raises(ValueError, match = err_msg): 
         forecaster.get_info_criteria(method=method)
 

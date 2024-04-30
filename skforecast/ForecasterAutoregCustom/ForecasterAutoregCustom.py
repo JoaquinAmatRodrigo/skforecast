@@ -11,8 +11,8 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
-import sklearn
-import sklearn.pipeline
+from sklearn.exceptions import NotFittedError
+from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 import inspect
 
@@ -77,7 +77,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         If `None`, no differencing is applied. The order of differentiation is the number
         of times the differencing operation is applied to a time series. Differencing
         involves computing the differences between consecutive data points in the series.
-        Diferentiarion is reversed in the output of `predict()` and `predict_interval()`.
+        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
         **WARNING: This argument is newly introduced and requires special attention. It
         is still experimental and may undergo changes.**
         **New in version 0.10.0**
@@ -97,8 +97,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         Source code of the custom function used to create the predictors.
     window_size : int
         Size of the window needed by `fun_predictors` to create the predictors.
-        If `differentiation` is not `None`, `window_size` is increased by the
-        order of differentiation.
+    window_size_diff : int
+        Size of the window extended by the order of differentiation. When using
+        differentiation, the `window_size` is increased by the order of differentiation
+        so that the predictors can be created correctly.
     name_predictors : list
         Name of the predictors returned by `fun_predictors`. If `None`, predictors are
         named using the prefix 'custom_predictor_<i>' where `i` is the index of the position
@@ -117,17 +119,13 @@ class ForecasterAutoregCustom(ForecasterBase):
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
-    differentiation : int, default `None`
-        Order of differencing applied to the time series before training the forecaster.
-        If `None`, no differencing is applied. The order of differentiation is the number
-        of times the differencing operation is applied to a time series. Differencing
-        involves computing the differences between consecutive data points in the series.
-        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
-        **WARNING: This argument is newly introduced and requires special attention. It
-        is still experimental and may undergo changes.**
-        **New in version 0.10.0**
     source_code_weight_func : str
         Source code of the custom function used to create weights.
+    differentiation : int
+        Order of differencing applied to the time series before training the 
+        forecaster.
+    differentiator : TimeSeriesDifferentiator
+        Skforecast object used to differentiate the time series.
     last_window : pandas Series
         This window represents the most recent data observed by the predictor
         during its training phase. It contains the values needed to predict the
@@ -151,8 +149,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         Type of each exogenous variable/s used in training. If `transformer_exog` 
         is used, the dtypes are calculated after the transformation.
     exog_col_names : list
-        Names of columns of `exog` if `exog` used in training was a pandas
-        DataFrame.
+        Names of the exogenous variables used during training.
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
@@ -199,13 +196,14 @@ class ForecasterAutoregCustom(ForecasterBase):
         self.fun_predictors             = fun_predictors
         self.source_code_fun_predictors = None
         self.window_size                = window_size
+        self.window_size_diff           = window_size
         self.name_predictors            = name_predictors
         self.transformer_y              = transformer_y
         self.transformer_exog           = transformer_exog
         self.weight_func                = weight_func
+        self.source_code_weight_func    = None
         self.differentiation            = differentiation
         self.differentiator             = None
-        self.source_code_weight_func    = None
         self.last_window                = None
         self.index_type                 = None
         self.index_freq                 = None
@@ -236,7 +234,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                     (f"Argument `differentiation` must be an integer equal to or "
                      f"greater than 1. Got {differentiation}.")
                 )
-            self.window_size += self.differentiation
+            self.window_size_diff += self.differentiation
             self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
 
         if not isinstance(fun_predictors, Callable):
@@ -266,7 +264,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         Information displayed when a ForecasterAutoregCustom object is printed.
         """
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
             params = {key : value for key, value in self.regressor.get_params().items() \
                       if key.startswith(name_pipe_steps)}
@@ -329,11 +327,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         """
         
-        if len(y) < self.window_size + 1:
+        if len(y) < self.window_size_diff + 1:
             raise ValueError(
-                (f"`y` must have as many values as the windows_size needed by "
-                 f"{self.fun_predictors.__name__}. For this Forecaster the "
-                 f"minimum length is {self.window_size + 1}")
+                (f"`y` does not have enough values to calculate "
+                 f"predictors. It must be at least {self.window_size_diff + 1}.")
             )
 
         check_y(y=y)
@@ -346,13 +343,17 @@ class ForecasterAutoregCustom(ForecasterBase):
         y_values, y_index = preprocess_y(y=y)
 
         if self.differentiation is not None:
-            y_values = self.differentiator.fit_transform(y_values)
+            if not self.fitted:
+                y_values = self.differentiator.fit_transform(y_values)
+            else:
+                differentiator = clone(self.differentiator)
+                y_values = differentiator.fit_transform(y_values)
         
         if exog is not None:
             if len(exog) != len(y):
                 raise ValueError(
-                    f'`exog` must have same number of samples as `y`. '
-                    f'length `exog`: ({len(exog)}), length `y`: ({len(y)})'
+                    (f"`exog` must have same number of samples as `y`. "
+                     f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
                 )
             check_exog(exog=exog, allow_nan=True)
             if isinstance(exog, pd.Series):
@@ -383,7 +384,6 @@ class ForecasterAutoregCustom(ForecasterBase):
        
         X_train  = []
         y_train  = []
-
         for i in range(len(y) - self.window_size):
 
             train_index = np.arange(i, self.window_size + i)
@@ -396,33 +396,30 @@ class ForecasterAutoregCustom(ForecasterBase):
         y_train = np.array(y_train)
 
         if self.name_predictors is None:
-            X_train_col_names = [f"custom_predictor_{i}" for i in range(X_train.shape[1])]
+            X_train_predictors_names = [
+                f"custom_predictor_{i}" for i in range(X_train.shape[1])
+            ]
         else:
             if len(self.name_predictors) != X_train.shape[1]:
                 raise ValueError(
-                    ("The length of provided predictors names (`name_predictors`) do not "
-                     "match the number of columns created by `fun_predictors()`.")
+                    (f"The length of provided predictors names "
+                     f"(`name_predictors`) do not match the number of columns "
+                     f"created by `{self.fun_predictors.__name__}`.")
                 )
-            X_train_col_names = self.name_predictors.copy()
-
-        if np.isnan(X_train).any():
-            raise ValueError(
-                "`fun_predictors()` is returning `NaN` values."
-            )
+            X_train_predictors_names = self.name_predictors.copy()
 
         expected = self.fun_predictors(y_values[:-1])
         observed = X_train[-1, :]
-
-        if expected.shape != observed.shape or not (expected == observed).all():
+        if expected.shape != observed.shape or not np.allclose(expected, observed, equal_nan=True):
             raise ValueError(
                 (f"The `window_size` argument ({self.window_size}), declared when "
                  f"initializing the forecaster, does not correspond to the window "
-                 f"used by `fun_predictors()`.")
+                 f"used by `{self.fun_predictors.__name__}`.")
             )
         
         X_train = pd.DataFrame(
                       data    = X_train,
-                      columns = X_train_col_names,
+                      columns = X_train_predictors_names,
                       index   = y_index[self.window_size: ]
                   )
         
@@ -433,13 +430,24 @@ class ForecasterAutoregCustom(ForecasterBase):
             exog_to_train.index = exog_index[self.window_size:]
             check_exog_dtypes(exog_to_train)
             X_train = pd.concat((X_train, exog_to_train), axis=1)
+
+        if not self.fitted:
+            self.X_train_col_names = X_train.columns.to_list()
         
-        self.X_train_col_names = X_train.columns.to_list()
         y_train = pd.Series(
                       data  = y_train,
                       index = y_index[self.window_size: ],
                       name  = 'y'
                   )
+
+        if self.differentiation is not None:
+            X_train = X_train.iloc[self.differentiation: ]
+            y_train = y_train.iloc[self.differentiation: ]
+        
+        if X_train[X_train_predictors_names].isna().any().any():
+            raise ValueError(
+                f"`{self.fun_predictors.__name__}` is returning `NaN` values."
+            )
 
         return X_train, y_train
 
@@ -491,6 +499,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         self,
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        store_last_window: bool=True,
         store_in_sample_residuals: bool=True
     ) -> None:
         """
@@ -507,6 +516,8 @@ class ForecasterAutoregCustom(ForecasterBase):
             Exogenous variable/s included as predictor/s. Must have the same
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
+        store_last_window : bool, default `True`
+            Whether or not to store the last window of training data.
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting.
@@ -573,7 +584,8 @@ class ForecasterAutoregCustom(ForecasterBase):
         # The last time window of training data is stored so that predictors in
         # the first iteration of `predict()` can be calculated. It also includes
         # the values need to calculate the diferenctiation.
-        self.last_window = y.iloc[-self.window_size:].copy()
+        if store_last_window:
+            self.last_window = y.iloc[-self.window_size_diff:].copy()
 
 
     def _recursive_predict(
@@ -609,7 +621,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             X = self.fun_predictors(y=last_window).reshape(1, -1)
             if np.isnan(X).any():
                 raise ValueError(
-                    "`fun_predictors()` is returning `NaN` values."
+                    f"`{self.fun_predictors.__name__}` is returning `NaN` values."
                 )
             if exog is not None:
                 X = np.column_stack((X, exog[i, ].reshape(1, -1)))
@@ -668,7 +680,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             included_exog    = self.included_exog,
             index_type       = self.index_type,
             index_freq       = self.index_freq,
-            window_size      = self.window_size,
+            window_size      = self.window_size_diff,
             last_window      = last_window,
             last_window_exog = None,
             exog             = exog,
@@ -681,7 +693,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             series_col_names = None
         )
 
-        last_window = last_window.iloc[-self.window_size:].copy()
+        last_window = last_window.iloc[-self.window_size_diff:].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -814,7 +826,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             included_exog    = self.included_exog,
             index_type       = self.index_type,
             index_freq       = self.index_freq,
-            window_size      = self.window_size,
+            window_size      = self.window_size_diff,
             last_window      = last_window,
             last_window_exog = None,
             exog             = exog,
@@ -827,7 +839,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             series_col_names = None
         )
 
-        last_window = last_window.iloc[-self.window_size:].copy()
+        last_window = last_window.iloc[-self.window_size_diff:].copy()
 
         if exog is not None:
             if isinstance(exog, pd.DataFrame):
@@ -1307,12 +1319,12 @@ class ForecasterAutoregCustom(ForecasterBase):
         """
 
         if not self.fitted:
-            raise sklearn.exceptions.NotFittedError(
+            raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `get_feature_importances()`.")
             )
 
-        if isinstance(self.regressor, sklearn.pipeline.Pipeline):
+        if isinstance(self.regressor, Pipeline):
             estimator = self.regressor[-1]
         else:
             estimator = self.regressor

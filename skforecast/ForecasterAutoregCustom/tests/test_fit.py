@@ -1,5 +1,6 @@
 # Unit test fit ForecasterAutoregCustom
 # ==============================================================================
+import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
@@ -125,7 +126,10 @@ def test_fit_in_sample_residuals_not_stored():
     assert results is None
 
 
-def test_fit_last_window_stored():
+@pytest.mark.parametrize("store_last_window", 
+                         [True, False], 
+                         ids=lambda lw: f'store_last_window: {lw}')
+def test_fit_last_window_stored(store_last_window):
     """
     Test that values of last window are stored after fitting.
     """   
@@ -134,10 +138,13 @@ def test_fit_last_window_stored():
                      fun_predictors = create_predictors,
                      window_size    = 5
                  )
-    forecaster.fit(y=pd.Series(np.arange(50)))
+    forecaster.fit(y=pd.Series(np.arange(50)), store_last_window=store_last_window)
     expected = pd.Series(np.array([45, 46, 47, 48, 49]), index=[45, 46, 47, 48, 49])
- 
-    pd.testing.assert_series_equal(forecaster.last_window, expected)
+
+    if store_last_window:
+        pd.testing.assert_series_equal(forecaster.last_window, expected)
+    else:
+        assert forecaster.last_window == None
 
 
 def test_fit_model_coef_when_using_weight_func():

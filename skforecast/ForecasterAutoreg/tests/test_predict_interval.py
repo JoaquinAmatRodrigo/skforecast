@@ -1,7 +1,5 @@
 # Unit test predict_interval ForecasterAutoreg
 # ==============================================================================
-import re
-import pytest
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
@@ -9,6 +7,10 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.linear_model import LinearRegression
+
+# Fixtures
+from .fixtures_ForecasterAutoreg import y
+
 
 
 def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_in_sample_residuals_is_True():
@@ -64,6 +66,29 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     results = forecaster.predict_interval(steps=1, in_sample_residuals=False)
 
     pd.testing.assert_frame_equal(results, expected)
+
+
+def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_5_in_sample_residuals_is_True_binned_residuals_is_True():
+    """
+    Test output when regressor is LinearRegression 5 step ahead is predicted
+    using in sample residuals.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster.fit(y=y)
+    expected = pd.DataFrame(
+                   data    = np.array(
+                                [[0.56842545, 0.25304752, 0.98664822],
+                                [0.50873285, 0.05687183, 0.95641577],
+                                [0.51189344, 0.25202529, 0.9780938 ],
+                                [0.51559104, 0.16866501, 0.97785889],
+                                [0.51060927, 0.05872579, 0.89504973]]
+                            ),
+                   columns = ['pred', 'lower_bound', 'upper_bound'],
+                   index   = pd.RangeIndex(start=50, stop=55, step=1)
+               )
+    results = forecaster.predict_interval(steps=5, in_sample_residuals=True, binned_residuals=True)
+
+    pd.testing.assert_frame_equal(results, expected)
     
     
 def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_is_False():
@@ -103,11 +128,11 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
     forecaster.fit(y=y)
     predictions = forecaster.predict_interval(steps=5)
     expected = pd.DataFrame(
-                   data = np.array([[-0.1578203 , -2.02104471,  1.55076389],
-                                    [-0.18459942, -1.85211385,  1.49693466],
-                                    [-0.13711051, -1.82918043,  1.37837389],
-                                    [-0.01966358, -1.7522189 ,  1.31940346],
-                                    [-0.03228613, -1.77074022,  1.56056698]]),
+                   data = np.array([[-0.1578203 , -1.13499023,  1.55076389],
+                                    [-0.18459942, -1.94268356,  1.13498352],
+                                    [-0.13711051, -1.66269707,  1.50135233],
+                                    [-0.01966358, -1.45879457,  1.4130552 ],
+                                    [-0.03228613, -1.67774065,  0.98407656]]),
                    index = pd.RangeIndex(start=20, stop=25, step=1),
                    columns = ['pred', 'lower_bound', 'upper_bound']
                )
@@ -157,3 +182,28 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
                )
     
     pd.testing.assert_frame_equal(predictions, expected)
+
+
+def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_5_in_sample_residuals_is_False_binned_residuals_is_True():
+    """
+    Test output when regressor is LinearRegression, steps=5, in_sample_residuals=False,
+    binned_residuals=True.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster.fit(y=y)
+    forecaster.out_sample_residuals_by_bin = forecaster.in_sample_residuals_by_bin
+    expected = pd.DataFrame(
+                   data    = np.array(
+                                [[0.56842545, 0.25304752, 0.98664822],
+                                [0.50873285, 0.05687183, 0.95641577],
+                                [0.51189344, 0.25202529, 0.9780938 ],
+                                [0.51559104, 0.16866501, 0.97785889],
+                                [0.51060927, 0.05872579, 0.89504973]]
+                            ),
+                   columns = ['pred', 'lower_bound', 'upper_bound'],
+                   index   = pd.RangeIndex(start=50, stop=55, step=1)
+               )
+    results = forecaster.predict_interval(
+        steps=5, in_sample_residuals=False, binned_residuals=True
+    )
+    pd.testing.assert_frame_equal(results, expected)

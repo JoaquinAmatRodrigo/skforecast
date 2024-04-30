@@ -6,7 +6,7 @@ site_url: https://joaquinamatrodrigo.github.io/skforecast/
 site_description: Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).
 site_author: Joaquin Amat Rodrigo and Javier Escobar Ortiz
 use_directory_urls: false
-copyright: Copyright &copy; 2021 - 2023 Joaquín Amat Rodrigo, Javier Escobar Ortiz
+copyright: Copyright &copy; 2021 - 2024 Joaquín Amat Rodrigo, Javier Escobar Ortiz
 
 nav:
   - Home:
@@ -32,7 +32,9 @@ nav:
       - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
       - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb
       - Independent multi-time series forecasting: user_guides/independent-multi-time-series-forecasting.ipynb
+      - Series with different lengths and different exogenous variables: user_guides/multi-series-with-different-length-and-different_exog.ipynb
       - Dependent multivariate series forecasting: user_guides/dependent-multi-series-multivariate-forecasting.ipynb
+      - Deep learning Recurrent Neural Networks: user_guides/deep-learning-rnn-forecaster.ipynb
       - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
       - Foreasting baseline: user_guides/forecasting-baseline.ipynb
       - Exogenous variables: user_guides/exogenous-variables.ipynb
@@ -44,6 +46,7 @@ nav:
       - Probabilistic forecasting: user_guides/probabilistic-forecasting.ipynb
       - Categorical features: user_guides/categorical-features.ipynb
       - Calendars features: user_guides/calendar-features.ipynb
+      - Feature selection: user_guides/feature-selection.ipynb
       - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
       - Forecaster in production: user_guides/forecaster-in-production.ipynb
       - Save and load forecaster: user_guides/save-load-forecaster.ipynb
@@ -62,6 +65,7 @@ nav:
       - ForecasterMultiSeries: api/ForecasterMultiSeries.md
       - ForecasterMultiSeriesCustom: api/ForecasterMultiSeriesCustom.md
       - ForecasterMultiVariate: api/ForecasterMultiVariate.md
+      - ForecasterRnn: api/ForecasterRnn.md
       - ForecasterSarimax: api/ForecasterSarimax.md
       - Sarimax: api/Sarimax.md
       - ForecasterBaseline: api/ForecasterBaseline.md

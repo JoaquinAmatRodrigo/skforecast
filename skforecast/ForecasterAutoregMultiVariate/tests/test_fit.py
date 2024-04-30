@@ -9,29 +9,6 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 
-@pytest.mark.parametrize('exog', ['l1', ['l1'], ['l1', 'l2']])
-def test_fit_ValueError_when_exog_columns_same_as_series_col_names(exog):
-    """
-    Test ValueError is raised when an exog column is named the same as
-    the series columns.
-    """
-    series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
-                           'l2': pd.Series(np.arange(10))})
-
-    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', lags=3, steps=2)
-    series_col_names = list(series.columns)
-    exog_col_names = exog if isinstance(exog, list) else [exog]
-
-    err_msg = re.escape(
-                    (f'`exog` cannot contain a column named the same as one of the series'
-                     f' (column names of series).\n'
-                     f'    `series` columns : {series_col_names}.\n'
-                     f'    `exog`   columns : {exog_col_names}.')
-                )
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster.fit(series=series, exog=series[exog])
-
-
 def test_fit_correct_dict_create_transformer_series():
     """
     Test fit method creates correctly all the auxiliary dicts transformer_series_.
@@ -169,23 +146,32 @@ def test_fit_in_sample_residuals_not_stored(n_jobs):
     assert np.all(results[k] == expected[k] for k in expected.keys())
 
 
-def test_fit_last_window_stored():
+@pytest.mark.parametrize("store_last_window", 
+                         [True, ['l1', 'l2'], False], 
+                         ids=lambda lw: f'store_last_window: {lw}')
+def test_fit_last_window_stored(store_last_window):
     """
     Test that values of last window are stored after fitting.
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
-                           'l2': pd.Series(np.arange(50, 60))
-                          })
+                           'l2': pd.Series(np.arange(50, 60))})
 
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), 
                                                level='l1', lags=3, steps=2)
-    forecaster.fit(series=series)
-    expected = pd.DataFrame({'l1': pd.Series(np.array([7, 8, 9])), 
-                             'l2': pd.Series(np.array([57, 58, 59]))
-                            })
+    forecaster.fit(series=series, store_last_window=store_last_window)
+
+    expected = pd.DataFrame({
+        'l1': pd.Series(np.array([7, 8, 9])), 
+        'l2': pd.Series(np.array([57, 58, 59]))
+    })
     expected.index = pd.RangeIndex(start=7, stop=10, step=1)
 
-    pd.testing.assert_frame_equal(forecaster.last_window, expected)
+    if store_last_window:
+        pd.testing.assert_frame_equal(forecaster.last_window, expected)
+        assert forecaster.series_col_names == ['l1', 'l2']
+        assert forecaster.series_X_train == ['l1', 'l2']
+    else:
+        assert forecaster.last_window == None
 
 
 def test_fit_last_window_stored_when_different_lags():
@@ -194,16 +180,43 @@ def test_fit_last_window_stored_when_different_lags():
     configurations.
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
-                           'l2': pd.Series(np.arange(100, 110))
-                          })
+                           'l2': pd.Series(np.arange(100, 110))})
 
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
                                                lags = {'l1': 3, 'l2': [1, 5]}, 
                                                steps = 2)
     forecaster.fit(series=series)
-    expected = pd.DataFrame({'l1': pd.Series(np.array([5, 6, 7, 8, 9])), 
-                             'l2': pd.Series(np.array([105, 106, 107, 108, 109]))
-                            })
+
+    expected = pd.DataFrame({
+        'l1': pd.Series(np.array([5, 6, 7, 8, 9])), 
+        'l2': pd.Series(np.array([105, 106, 107, 108, 109]))
+    })
     expected.index = pd.RangeIndex(start=5, stop=10, step=1)
 
     pd.testing.assert_frame_equal(forecaster.last_window, expected)
+    assert forecaster.series_col_names == ['l1', 'l2']
+    assert forecaster.series_X_train == ['l1', 'l2']
+
+
+@pytest.mark.parametrize("level",
+                         ['l1', 'l2'],
+                         ids=lambda level: f'level: {level}')
+def test_fit_last_window_stored_when_lags_dict_with_None(level):
+    """
+    Test that values of last window are stored after fitting when lags is a dict
+    with None values.    
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
+                           'l2': pd.Series(np.arange(100, 110))})
+
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level=level,
+                                               lags = {'l1': 3, 'l2': None}, 
+                                               steps = 2)
+    forecaster.fit(series=series)
+
+    expected = pd.DataFrame({'l1': pd.Series(np.array([7, 8, 9]))})
+    expected.index = pd.RangeIndex(start=7, stop=10, step=1)
+
+    pd.testing.assert_frame_equal(forecaster.last_window, expected)
+    assert forecaster.series_col_names == ['l1'] if level == 'l1' else ['l1', 'l2']
+    assert forecaster.series_X_train == ['l1']

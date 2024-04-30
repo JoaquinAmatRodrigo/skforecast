@@ -43,9 +43,9 @@ def test_predict_TypeError_when_steps_list_contain_floats(steps):
     forecaster.fit(series=series)
 
     err_msg = re.escape(
-                    f"`steps` argument must be an int, a list of ints or `None`. "
-                    f"Got {type(steps)}."
-                )
+        (f"`steps` argument must be an int, a list of ints or `None`. "
+         f"Got {type(steps)}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.predict(steps=steps)
 
@@ -58,9 +58,9 @@ def test_predict_NotFittedError_when_fitted_is_False():
                                                lags=3, steps=3)
 
     err_msg = re.escape(
-                ("This Forecaster instance is not fitted yet. Call `fit` with "
-                 "appropriate arguments before using predict.")
-              )
+        ("This Forecaster instance is not fitted yet. Call `fit` with "
+         "appropriate arguments before using predict.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict(steps=5)
 
@@ -115,6 +115,42 @@ def test_predict_output_when_regressor_is_LinearRegression_with_different_lags()
                    data    = np.array([0.58053278, 0.43052971, 0.60582844]),
                    index   = pd.RangeIndex(start=50, stop=53, step=1),
                    columns = ['l2']
+               )
+    
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_lags_dict_with_None_in_level_lags():
+    """
+    Test predict output when using LinearRegression as regressor when lags is a 
+    dict and level has None lags configuration.
+    """
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
+                                               lags={'l1': 5, 'l2': None}, steps=3)
+    forecaster.fit(series=series)
+    results = forecaster.predict(steps=3)
+    expected = pd.DataFrame(
+                   data    = np.array([0.59695170, 0.49497765, 0.51970720]),
+                   index   = pd.RangeIndex(start=50, stop=53, step=1),
+                   columns = ['l2']
+               )
+    
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_lags_dict_with_None_but_no_in_level():
+    """
+    Test predict output when using LinearRegression as regressor when lags is a 
+    dict with None values.
+    """
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
+                                               lags={'l1': 5, 'l2': None}, steps=3)
+    forecaster.fit(series=series)
+    results = forecaster.predict(steps=3)
+    expected = pd.DataFrame(
+                   data    = np.array([0.61119488, 0.48858659, 0.46753222]),
+                   index   = pd.RangeIndex(start=50, stop=53, step=1),
+                   columns = ['l1']
                )
     
     pd.testing.assert_frame_equal(results, expected)

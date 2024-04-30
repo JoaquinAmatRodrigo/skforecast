@@ -45,7 +45,8 @@ def test_predict_quantiles_output_when_forecaster_is_LinearRegression_steps_is_2
                   levels              = level,
                   exog                = exog_predict,
                   n_boot              = 4,
-                  in_sample_residuals = True
+                  in_sample_residuals = True,
+                  suppress_warnings   = True
               )
     
     expected = pd.DataFrame(

@@ -961,7 +961,7 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_F
 
     assert out == expected_out
     assert folds == expected
-    
+
 
 @pytest.mark.parametrize("return_all_indexes, expected",
                          [(True, [[range(0, 70), range(60, 70), range(70, 82), range(75, 82), False],
@@ -1018,6 +1018,68 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
         "Fold: 2\n"
         "    Training:   14 -- 83  (n=70)\n"
         "    Validation: 89 -- 95  (n=7)\n\n"
+    )
+
+    assert out == expected_out
+    assert folds == expected
+
+
+@pytest.mark.parametrize("return_all_indexes, expected",
+                         [(True, [[range(0, 70), range(67, 70), range(70, 80), range(70, 80), False],
+                                  [range(0, 80), range(77, 80), range(80, 90), range(80, 90), True],
+                                  [range(0, 90), range(87, 90), range(90, 100), range(90, 100), True]]),
+                          (False, [[[0, 70], [67, 70], [70, 80], [70, 80], False],
+                                   [[0, 80], [77, 80], [80, 90], [80, 90], True],
+                                   [[0, 90], [87, 90], [90, 100], [90, 100], True]])], 
+                         ids = lambda argument : f'{argument}' )
+def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder_differentiation(capfd, return_all_indexes, expected):
+    """
+    Test _create_backtesting_folds output when refit is True, fixed_train_size is 
+    False, gap=0, not remainder and differentiation=1.
+    """
+    y = pd.Series(np.arange(100))
+    y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
+    differentiation = 1
+    window_size = 2 + differentiation
+    initial_train_size = 70
+    test_size = 10
+    refit = True
+    fixed_train_size = False
+
+    folds = _create_backtesting_folds(
+                data                  = y,
+                window_size           = window_size,
+                initial_train_size    = initial_train_size,
+                test_size             = test_size,
+                externally_fitted     = False,
+                refit                 = refit,
+                fixed_train_size      = fixed_train_size,
+                gap                   = 0,
+                allow_incomplete_fold = True,
+                return_all_indexes    = return_all_indexes,
+                differentiation       = differentiation,
+                verbose               = True
+            )
+    
+    out, _ = capfd.readouterr()
+    expected_out = (
+        "Information of backtesting process\n"
+        "----------------------------------\n"
+        "Number of observations used for initial training: 69\n"
+        "    First 1 observation/s in training sets are used for differentiation\n"
+        "Number of observations used for backtesting: 30\n"
+        "    Number of folds: 3\n"
+        "    Number of steps per fold: 10\n"
+        "    Number of steps to exclude from the end of each train set before test (gap): 0\n\n"
+        "Fold: 0\n"
+        "    Training:   2022-01-02 00:00:00 -- 2022-03-11 00:00:00  (n=69)\n"
+        "    Validation: 2022-03-12 00:00:00 -- 2022-03-21 00:00:00  (n=10)\n"
+        "Fold: 1\n"
+        "    Training:   2022-01-02 00:00:00 -- 2022-03-21 00:00:00  (n=79)\n"
+        "    Validation: 2022-03-22 00:00:00 -- 2022-03-31 00:00:00  (n=10)\n"
+        "Fold: 2\n"
+        "    Training:   2022-01-02 00:00:00 -- 2022-03-31 00:00:00  (n=89)\n"
+        "    Validation: 2022-04-01 00:00:00 -- 2022-04-10 00:00:00  (n=10)\n\n"
     )
 
     assert out == expected_out

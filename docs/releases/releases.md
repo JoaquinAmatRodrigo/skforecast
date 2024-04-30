@@ -6,17 +6,31 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
-+ Added `bayesian_search_forecaster_multiseries` function to `model_selection_multiseries` module. This function performs a Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
++ Multiseries forecaster (Global Models) can be trained using series of different lengths and with different exogenous variables per series.
 
-+ Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
++ Bayesian hyperparameter search is now available for all multiseries forecasters using `optuna` as the search engine.
 
-+ 
++ New functionality to select features using scikit-learn selectors (`select_features` and `select_features_multiseries`).
+
++ Added new forecaster `ForecasterRnn` to create forecasting models based on deep learning (RNN and LSTM).
+
++ New method to predict intervals conditioned on the range of the predicted values. This is can help to improve the interval coverage when the residuals are not homoscedastic (`ForecasterAutoreg`).
+
++ All Recursive Forecasters are now able to differentiate the time series before modeling it.
 
 **Added**
 
 + Added `bayesian_search_forecaster_multiseries` function to `model_selection_multiseries` module. This function performs a Bayesian hyperparameter search for the `ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom`, and `ForecasterAutoregMultiVariate` using `optuna` as the search engine.
 
++ `ForecasterAutoregMultiVariate` allows to include None when lags is a dict so that a series does not participate in the construction of X_train.
+
++ The `output_file` argument has been added to the hyperparameter search functions in the `model_selection`, `model_selection_multiseries` and `model_selection_sarimax` modules to save the results of the hyperparameter search in a tab-separated values (TSV) file.
+
++ New argument `binned_residuals` in method `predict_interval` allows to condition the bootstraped residuals on range of the predicted values. 
+
 + Added `save_custom_functions` argument to the `save_forecaster` function in the `utils` module. If `True`, save custom functions used in the forecaster (`fun_predictors` and `weight_func`) as .py files. Custom functions must be available in the environment where the forecaster is loaded.
+
++ Added `select_features` and `select_features_multiseries` functions to the `model_selection` and `model_selection_multiseries` modules to perform feature selection using scikit-learn selectors.
 
 + Added `sort_importance` argument to `get_feature_importances` method in all Forecasters. If `True`, sort the feature importances in descending order.
 
@@ -26,9 +40,26 @@ The main changes in this release are:
 
 + Added `set_dark_theme` function to the `plot` module to set a dark theme for matplotlib plots.
 
++ Allow tuple type for `lags` argument in all Forecasters.
+
++ Argument `differentiation` in all Forecasters to model the n-order differentiated time series.
+
++ Added `window_size_diff` attribute to all Forecasters. It stores the size of the window (`window_size`) extended by the order of differentiation. Added  to all Forecasters for API consistency.
+
++ Added `store_last_window` parameter to `fit` method in Forecasters. If `True`, store the last window of the training data.
+
++ Added `utils.set_skforecast_warnings` function to set the warnings of the skforecast package.
+
++ Added new forecaster `ForecasterRnn` to create forecasting models based on deep learning (RNN and LSTM).
+
++ Added new function `create_and_compile_model` to module `skforecast.ForecasterRnn.utils` to help to create and compile a RNN or LSTM models to be used in `ForecasterRnn`.
+
+
 **Changed**
 
-+ 
++ Deprecated argument `lags_grid` in `bayesian_search_forecaster`. Use `search_space` to define the candidate values for the lags. This allows the lags to be optimized along with the other hyperparameters of the regressor in the bayesian search.
+
++ `n_boot` argument in `predict_interval`changed from 500 to 250.
 
 + Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
 

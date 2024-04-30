@@ -41,6 +41,22 @@ def test_init_ValueError_when_steps_is_less_than_1():
         ForecasterAutoregMultiVariate(LinearRegression(), level='l1', lags=2, steps=steps)
 
 
+@pytest.mark.parametrize("lags, max_lag",
+                         [(3, 3), 
+                          ({'l1': 3, 'l2': 4}, 4), 
+                          ({'l1': None, 'l2': 5}, 5)],
+                         ids = lambda value : f'lags: {value}')
+def test_init_max_lag_stored(lags, max_lag):
+    """
+    Test max_lag is equal to the maximum lag.
+    """
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', 
+                                               lags=lags, steps=2)
+    
+    assert forecaster.max_lag == max_lag
+    assert forecaster.window_size == max_lag
+
+
 @pytest.mark.parametrize("n_jobs", 
                          [1.0, 'not_int_auto'], 
                          ids = lambda value : f'n_jobs: {value}')

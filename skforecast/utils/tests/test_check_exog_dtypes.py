@@ -23,12 +23,12 @@ def test_check_exog_dtypes_DataTypeWarning_when_exog_has_str_values(exog):
          "Fitting the forecaster may fail.")
     )
     with pytest.warns(DataTypeWarning, match = warn_msg):
-        check_exog_dtypes(exog)
+        check_exog_dtypes(exog, call_check_exog=False)
 
 
 @pytest.mark.parametrize("exog", 
-                         [pd.Series([True, True, True]),
-                          pd.Series([True, True, True]).to_frame()], 
+                         [pd.Series([True, True, True], name='exog'),
+                          pd.Series([True, True, True], name='exog').to_frame()], 
                          ids = lambda exog : f'exog type: {type(exog)}')
 def test_check_exog_dtypes_DataTypeWarning_when_exog_has_bool_values(exog):
     """
@@ -56,7 +56,7 @@ def test_check_exog_dtypes_TypeError_when_exog_is_Series_with_no_int_categories(
         "latest/user_guides/categorical-features.html")
     )
     with pytest.raises(TypeError, match = err_msg):
-        check_exog_dtypes(pd.Series(['A', 'B', 'C'], dtype='category'))
+        check_exog_dtypes(pd.Series(['A', 'B', 'C'], dtype='category', name='exog'))
 
 
 def test_check_exog_dtypes_TypeError_when_exog_is_DataFrame_with_no_int_categories():
@@ -71,7 +71,7 @@ def test_check_exog_dtypes_TypeError_when_exog_is_DataFrame_with_no_int_categori
         "latest/user_guides/categorical-features.html")
     )
     with pytest.raises(TypeError, match = err_msg):
-        check_exog_dtypes(pd.Series(['A', 'B', 'C'], dtype='category').to_frame())
+        check_exog_dtypes(pd.Series(['A', 'B', 'C'], dtype='category', name='exog').to_frame())
 
 
 @pytest.mark.parametrize("dtype", 

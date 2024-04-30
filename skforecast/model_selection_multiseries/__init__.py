@@ -6,5 +6,6 @@ from .model_selection_multiseries import (
     backtesting_forecaster_multivariate,
     grid_search_forecaster_multivariate,
     random_search_forecaster_multivariate,
-    bayesian_search_forecaster_multivariate
+    bayesian_search_forecaster_multivariate,
+    select_features_multiseries
 )

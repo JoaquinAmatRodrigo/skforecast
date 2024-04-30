@@ -5,7 +5,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional
+from typing import Union, Optional
 import warnings
 import logging
 import inspect
@@ -392,7 +392,7 @@ class Sarimax(BaseEstimator, RegressorMixin):
     def _create_sarimax(
         self,
         endog: Union[np.ndarray, pd.Series, pd.DataFrame],
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None
     ) -> None:
         """
         A helper method to create a new statsmodel SARIMAX model.
@@ -420,7 +420,7 @@ class Sarimax(BaseEstimator, RegressorMixin):
     def fit(
         self,
         y: Union[np.ndarray, pd.Series, pd.DataFrame],
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None
     ) -> None:
         """
         Fit the model to the data.
@@ -464,9 +464,9 @@ class Sarimax(BaseEstimator, RegressorMixin):
     def predict(
         self,
         steps: int,
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None, 
-        return_conf_int: bool = False,
-        alpha: float = 0.05
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None, 
+        return_conf_int: bool=False,
+        alpha: float=0.05
     ) -> Union[np.ndarray, pd.DataFrame]:
         """
         Forecast future values and, if desired, their confidence intervals.
@@ -507,7 +507,7 @@ class Sarimax(BaseEstimator, RegressorMixin):
         # the number of steps
         if exog is not None and len(exog) > steps:
             warnings.warn(
-                (f"when predicting using exogenous variables, the `exog` parameter "
+                (f"When predicting using exogenous variables, the `exog` parameter "
                  f"must have the same length as the number of predicted steps. Since "
                  f"len(exog) > steps, only the first {steps} observations are used.")
             )
@@ -544,9 +544,9 @@ class Sarimax(BaseEstimator, RegressorMixin):
     def append(
         self,
         y: Union[np.ndarray, pd.Series, pd.DataFrame],
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None,
-        refit: bool = False,
-        copy_initialization: bool = False,
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None,
+        refit: bool=False,
+        copy_initialization: bool=False,
         **kwargs
     ) -> None:
         """
@@ -611,9 +611,9 @@ class Sarimax(BaseEstimator, RegressorMixin):
     def apply(
         self,
         y: Union[np.ndarray, pd.Series, pd.DataFrame],
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None,
-        refit: bool = False,
-        copy_initialization: bool = False,
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None,
+        refit: bool=False,
+        copy_initialization: bool=False,
         **kwargs
     ) -> None:
         """
@@ -671,7 +671,7 @@ class Sarimax(BaseEstimator, RegressorMixin):
     def extend(
         self,
         y: Union[np.ndarray, pd.Series, pd.DataFrame],
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None,
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None,
         **kwargs
     ) -> None:
         """

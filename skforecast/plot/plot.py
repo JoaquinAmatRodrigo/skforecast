@@ -183,7 +183,7 @@ def plot_prediction_distribution(
 
 
 def set_dark_theme(
-    custom_style: dict = None
+    custom_style: Optional[dict]=None
 ) -> None:
     """
     Set aspects of the visual theme for all matplotlib plots.

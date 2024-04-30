@@ -43,9 +43,9 @@ def test_predict_NotFittedError_when_fitted_is_False():
     forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 1, 1)))
 
     err_msg = re.escape(
-                ("This Forecaster instance is not fitted yet. Call `fit` with "
-                 "appropriate arguments before using predict.")
-              )
+        ("This Forecaster instance is not fitted yet. Call `fit` with "
+         "appropriate arguments before using predict.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict_interval(
             steps = 5, 
@@ -305,11 +305,11 @@ def test_predict_interval_ValueError_when_last_window_exog_index_does_not_follow
     lw_test = pd.Series(data=y_lw_datetime.to_numpy())
     lw_test.index = pd.date_range(start='2022-02-20', periods=50, freq='D')
 
-    exog_test = pd.Series(data=exog_datetime.to_numpy())
+    exog_test = pd.Series(data=exog_datetime.to_numpy(), name='exog')
     exog_test.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
-    exog_pred_test = pd.Series(data=exog_predict_datetime.to_numpy())
+    exog_pred_test = pd.Series(data=exog_predict_datetime.to_numpy(), name='exog')
     exog_pred_test.index = pd.date_range(start='2022-04-11', periods=10, freq='D')
-    lw_exog_test = pd.Series(data=exog_lw_datetime.to_numpy())
+    lw_exog_test = pd.Series(data=exog_lw_datetime.to_numpy(), name='exog')
     lw_exog_test.index = pd.date_range(start='2022-03-01', periods=50, freq='D')
 
     forecaster = ForecasterSarimax(regressor = Sarimax(order=(1, 0, 0)))

@@ -1,5 +1,6 @@
 # Unit test _recursive_predict ForecasterAutoregMultiSeriesCustom
 # ==============================================================================
+import pytest
 from pytest import approx
 import numpy as np
 import pandas as pd
@@ -16,18 +17,21 @@ def create_predictors(y): # pragma: no cover
     return lags
 
 
-def test_recursive_predict_output_when_regressor_is_LinearRegression():
+@pytest.mark.parametrize("encoding",
+                         ["ordinal", "ordinal_category", "onehot"],
+                         ids=lambda dt: f"encoding: {dt}")
+def test_recursive_predict_output_when_regressor_is_LinearRegression(encoding):
     """
     Test _recursive_predict output when using LinearRegression as regressor.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(start=0, stop=50)), 
-                           '2': pd.Series(np.arange(start=50, stop=100))
-                          })
+                           '2': pd.Series(np.arange(start=50, stop=100))})
 
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor          = LinearRegression(),
                      fun_predictors     = create_predictors,
                      window_size        = 5,
+                     encoding           = encoding,
                      transformer_series = None
                  )
     forecaster.fit(series=series)
@@ -53,19 +57,22 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression():
     assert predictions_2 == approx(expected_2)
 
 
-def test_recursive_predict_output_when_regressor_is_LinearRegression_StandardScaler():
+@pytest.mark.parametrize("encoding",
+                         ["ordinal", "ordinal_category", "onehot"],
+                         ids=lambda dt: f"encoding: {dt}")
+def test_recursive_predict_output_when_regressor_is_LinearRegression_StandardScaler(encoding):
     """
     Test _recursive_predict output when using LinearRegression as regressor and
     StandardScaler.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(start=0, stop=50)), 
-                           '2': pd.Series(np.arange(start=50, stop=100))
-                          })
+                           '2': pd.Series(np.arange(start=50, stop=100))})
 
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor          = Ridge(random_state=123),
-                     fun_predictors     = create_predictors,
-                     window_size        = 5
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors,
+                     window_size    = 5,
+                     encoding       = encoding 
                  )
     forecaster.fit(series=series)
     level = '1'

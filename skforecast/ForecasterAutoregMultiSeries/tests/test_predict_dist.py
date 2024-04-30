@@ -46,7 +46,8 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                   levels              = level,
                   exog                = exog_predict,
                   n_boot              = 4,
-                  in_sample_residuals = True
+                  in_sample_residuals = True,
+                  suppress_warnings   = True
               )
     
     expected = pd.DataFrame(
