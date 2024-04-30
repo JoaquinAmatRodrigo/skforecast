@@ -302,11 +302,11 @@ def test_set_out_sample_residuals_when_there_are_no_residuals_for_some_bins():
 
     warn_msg = re.escape(
         (
-            "The following bins have no out of sample residuals: [0]. "
-            "No predicted values fall in the interval "
-            "[(9.587346214675517, 9.938296088788048)]. "
-            "Empty bins will be filled with a random sample of residuals from "
-            "the other bins."
+            f"The following bins have no out of sample residuals: [0]. "
+            f"No predicted values fall in the interval "
+            f"[{forecaster.binner_intervals[0]}]. "
+            f"Empty bins will be filled with a random sample of residuals from "
+            f"the other bins."
         )
     )
     with pytest.warns(UserWarning, match=warn_msg):
