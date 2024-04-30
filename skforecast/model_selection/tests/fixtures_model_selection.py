@@ -47,6 +47,11 @@ out_sample_residuals = np.array([
                         0.75352599, 0.74186215, 0.04857903, 0.7086974 , 0.83924335
                       ])
 
+if pd.__version__ < '2.2.0':
+    freq = "H"
+else:
+    freq = "h"
+
 y_feature_selection = pd.Series(
     np.array([
         -1.58530369e-01,  3.63524919e+01,  8.86770772e+01, -2.08096884e+01,
@@ -175,7 +180,7 @@ y_feature_selection = pd.Series(
         3.84932111e+01,  6.24541727e+01,  1.11414165e+01, -7.28150550e+01,
        -7.81017553e+01, -1.29776897e+02, -1.31206072e+00, -5.03490895e+01
     ]),
-    index=pd.date_range(start='2020-01-01', periods=500, freq='H')
+    index=pd.date_range(start='2020-01-01', periods=500, freq=freq)
 )
 
 exog_feature_selection = pd.DataFrame(
@@ -681,6 +686,6 @@ exog_feature_selection = pd.DataFrame(
        [-4.09241617e-01, -1.09635351e+00,  4.61605393e-01, -8.77618277e-01, -2.04813502e-01],
        [ 1.25870044e+00, -9.87571530e-01, -3.94754919e-01,  6.82132899e-02,  3.51798274e-02]
     ]),
-    index = pd.date_range(start='2020-01-01', periods=500, freq='H'),
+    index = pd.date_range(start='2020-01-01', periods=500, freq=freq),
     columns=[f"exog_{i}" for i in range(5)]
 )

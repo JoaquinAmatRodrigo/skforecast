@@ -13,6 +13,10 @@ from skforecast.exceptions import MissingValuesWarning
 from skforecast.exceptions import MissingExogWarning
 from skforecast.exceptions import IgnoredArgumentWarning
 
+if pd.__version__ < '2.2.0':
+    freq = "M"
+else:
+    freq = "ME"
 
 def test_check_predict_input_NotFittedError_when_fitted_is_False():
     """
@@ -606,9 +610,9 @@ def test_check_predict_input_TypeError_when_exog_is_not_pandas_series_or_datafra
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.DataFrame(np.arange(10), columns=['l1'], index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.DataFrame(np.arange(10), columns=['l1'], index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = None,
             exog             = np.arange(10),
             exog_type        = None,
@@ -635,9 +639,9 @@ def test_check_predict_input_TypeError_when_exog_is_not_of_exog_type():
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = None,
             exog             = exog,
             exog_type        = exog_type,
@@ -663,9 +667,9 @@ def test_check_predict_input_TypeError_when_exog_dict_and_not_pandas_series_or_D
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.DataFrame(np.arange(10), columns=['l1'], index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.DataFrame(np.arange(10), columns=['l1'], index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = None,
             exog             = {'l1': np.arange(10)},
             exog_type        = dict,
@@ -692,11 +696,11 @@ def test_check_predict_input_MissingValuesWarning_when_exog_has_missing_values()
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 2,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = None,
-            exog             = pd.Series([1, 2, 3, np.nan], index=pd.date_range(start='11/1/2018', periods=4, freq='M'), name='exog1'),
+            exog             = pd.Series([1, 2, 3, np.nan], index=pd.date_range(start='11/1/2018', periods=4, freq=freq), name='exog1'),
             exog_type        = pd.Series,
             exog_col_names   = ['exog1'],
             interval         = None,
@@ -726,11 +730,11 @@ def test_check_predict_input_MissingValuesWarning_when_len_exog_is_less_than_ste
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(10), name='l1', index=pd.date_range(start='1/1/2018', periods=10, freq='M')).to_frame(),
+            last_window      = pd.Series(np.arange(10), name='l1', index=pd.date_range(start='1/1/2018', periods=10, freq=freq)).to_frame(),
             last_window_exog = None,
-            exog             = pd.Series(np.arange(5), name='exog1', index=pd.date_range(start='11/1/2018', periods=5, freq='M')),
+            exog             = pd.Series(np.arange(5), name='exog1', index=pd.date_range(start='11/1/2018', periods=5, freq=freq)),
             exog_type        = pd.Series,
             exog_col_names   = ['exog1'],
             interval         = None,
@@ -759,9 +763,9 @@ def test_check_predict_input_ValueError_when_len_exog_is_less_than_steps(steps):
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = None,
             exog             = pd.Series(np.arange(5)),
             exog_type        = pd.Series,
@@ -780,7 +784,7 @@ def test_check_predict_input_MissingExogWarning_when_exog_is_DataFrame_without_c
     Forecaster multi series.
     """
     exog = pd.DataFrame(np.arange(10).reshape(5, 2), columns=['col1', 'col2'])
-    exog.index = pd.date_range(start='1/1/2018', periods=5, freq='M')
+    exog.index = pd.date_range(start='1/1/2018', periods=5, freq=freq)
     exog_col_names = ['col1', 'col3']
 
     warn_msg = re.escape(
@@ -794,9 +798,9 @@ def test_check_predict_input_MissingExogWarning_when_exog_is_DataFrame_without_c
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.DataFrame(np.arange(10), columns=['l1'], index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.DataFrame(np.arange(10), columns=['l1'], index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = None,
             exog             = exog,
             exog_type        = pd.DataFrame,
@@ -827,9 +831,9 @@ def test_check_predict_input_ValueError_when_exog_is_DataFrame_without_columns_i
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = None,
             exog             = exog,
             exog_type        = pd.DataFrame,
@@ -859,9 +863,9 @@ def test_check_predict_input_ValueError_when_exog_is_Series_with_no_name():
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = None,
             exog             = exog,
             exog_type        = pd.Series,
@@ -880,12 +884,12 @@ def test_check_predict_input_IgnoredArgumentWarning_when_exog_is_Series_with_nam
     `exog_col_names` when Forecaster multi series.
     """
     exog = pd.Series(np.arange(10), name='exog2')
-    exog.index = pd.date_range(start='11/01/2018', periods=10, freq='M')
+    exog.index = pd.date_range(start='11/01/2018', periods=10, freq=freq)
     exog_col_names = ['exog1']
 
     last_window = pd.Series(
         np.arange(10), 
-        index = pd.date_range(start='01/01/2018', periods=10, freq='M'), 
+        index = pd.date_range(start='01/01/2018', periods=10, freq=freq), 
         name  = 'l1'
     ).to_frame()
 
@@ -900,7 +904,7 @@ def test_check_predict_input_IgnoredArgumentWarning_when_exog_is_Series_with_nam
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
             last_window      = last_window,
             last_window_exog = None,
@@ -934,9 +938,9 @@ def test_check_predict_input_ValueError_when_exog_is_Series_with_name_not_in_exo
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = None,
             exog             = exog,
             exog_type        = pd.Series,
@@ -968,9 +972,9 @@ def test_check_predict_input_TypeError_when_exog_index_is_not_of_index_type():
             fitted           = True,
             included_exog    = True,
             index_type       = index_type,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = None,
             exog             = exog,
             exog_type        = pd.Series,
@@ -987,7 +991,7 @@ def test_check_predict_input_TypeError_when_exog_index_frequency_is_not_index_fr
     """
     """
     exog = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10), name='exog1')
-    index_freq = 'M'
+    index_freq = freq
     check_exog(exog = exog)
     _, exog_index = preprocess_exog(exog=exog.iloc[:0, ])
 
@@ -1002,9 +1006,9 @@ def test_check_predict_input_TypeError_when_exog_index_frequency_is_not_index_fr
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = None,
             exog             = exog,
             exog_type        = pd.Series,
@@ -1022,9 +1026,9 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
     Raise exception if `exog` index does not start at the end of `last_window` index when DatetimeIndex.
     """
     exog_datetime = pd.Series(data=np.random.rand(10), name='exog1')
-    exog_datetime.index = pd.date_range(start='2022-03-01', periods=10, freq='M')
+    exog_datetime.index = pd.date_range(start='2022-03-01', periods=10, freq=freq)
     lw_datetime = pd.Series(data=np.random.rand(10))
-    lw_datetime.index = pd.date_range(start='2022-01-01', periods=10, freq='M')
+    lw_datetime.index = pd.date_range(start='2022-01-01', periods=10, freq=freq)
 
     expected_index = '2022-11-30 00:00:00'
 
@@ -1042,7 +1046,7 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
             last_window      = lw_datetime,
             last_window_exog = None,
@@ -1082,7 +1086,7 @@ def test_check_predict_input_ValueError_when_exog_index_does_not_follow_last_win
             fitted           = True,
             included_exog    = True,
             index_type       = pd.RangeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
             last_window      = lw_datetime,
             last_window_exog = None,
@@ -1217,10 +1221,10 @@ def test_check_predict_input_MissingValuesWarning_when_ForecasterSarimax_last_wi
             series_col_names = None
         )
 
-
 def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_index_is_not_of_index_type():
     """
     """
+    
     last_window_exog = pd.Series(np.arange(10), name='exog1')
     index_type = pd.DatetimeIndex
     _, last_window_exog_index = preprocess_last_window(
@@ -1238,11 +1242,11 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
             fitted           = True,
             included_exog    = True,
             index_type       = index_type,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = last_window_exog,
-            exog             = pd.Series(np.arange(10), index=pd.date_range(start='30/11/2018', periods=10, freq='M'), name='exog1'),
+            exog             = pd.Series(np.arange(10), index=pd.date_range(start='30/11/2018', periods=10, freq=freq), name='exog1'),
             exog_type        = pd.Series,
             exog_col_names   = ['exog1'],
             interval         = None,
@@ -1256,8 +1260,9 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
 def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_index_frequency_is_not_index_freq():
     """
     """
+    
     last_window_exog = pd.Series(np.arange(10), index=pd.date_range(start='2018', periods=10, freq='Y'))
-    index_freq = 'M'
+    index_freq = freq
     _, last_window_exog_index = preprocess_last_window(
                                 last_window = last_window_exog.iloc[:0]
                            )
@@ -1275,9 +1280,9 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
             index_type       = pd.DatetimeIndex,
             index_freq       = index_freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq='M')),
+            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
             last_window_exog = last_window_exog,
-            exog             = pd.Series(np.arange(10), index=pd.date_range(start='30/11/2018', periods=10, freq='M'), name='exog1'),
+            exog             = pd.Series(np.arange(10), index=pd.date_range(start='30/11/2018', periods=10, freq=freq), name='exog1'),
             exog_type        = pd.Series,
             exog_col_names   = ['exog1'],
             interval         = None,
@@ -1292,12 +1297,13 @@ def test_check_predict_input_ValueError_when_last_window_exog_is_DataFrame_witho
     """
     Raise ValueError when there are missing columns in `last_window_exog`, ForecasterSarimax.
     """
+    
     exog = pd.DataFrame(np.arange(10).reshape(5, 2), columns=['col1', 'col3'])
-    exog.index = pd.date_range(start='6/1/2018', periods=5, freq='M')
+    exog.index = pd.date_range(start='6/1/2018', periods=5, freq=freq)
     exog_col_names = ['col1', 'col3']
 
     last_window_exog = pd.DataFrame(np.arange(10).reshape(5, 2), columns=['col1', 'col2'])
-    last_window_exog.index = pd.date_range(start='1/1/2018', periods=5, freq='M')
+    last_window_exog.index = pd.date_range(start='1/1/2018', periods=5, freq=freq)
 
     err_msg = re.escape(
         (f"Missing columns in `last_window_exog`. Expected {exog_col_names}. "
@@ -1310,9 +1316,9 @@ def test_check_predict_input_ValueError_when_last_window_exog_is_DataFrame_witho
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(5), index=pd.date_range(start='1/1/2018', periods=5, freq='M')),
+            last_window      = pd.Series(np.arange(5), index=pd.date_range(start='1/1/2018', periods=5, freq=freq)),
             last_window_exog = last_window_exog,
             exog             = exog,
             exog_type        = pd.DataFrame,
@@ -1325,16 +1331,18 @@ def test_check_predict_input_ValueError_when_last_window_exog_is_DataFrame_witho
         )
 
 
+@pytest.mark.skipif(pd.__version__ > '2.2.0', reason="requires pandas < 2.2.0")
 def test_check_predict_input_ValueError_when_last_window_exog_is_Series_with_no_name():
     """
     Raise ValueError when `last_window_exog` has no name, ForecasterSarimax.
     """
+    
     exog = pd.Series(np.arange(5), name='exog1')
-    exog.index = pd.date_range(start='6/1/2018', periods=5, freq='M')
+    exog.index = pd.date_range(start='6/1/2018', periods=5, freq=freq)
     exog_col_names = ['exog1']
 
     last_window_exog = pd.Series(np.arange(5))
-    last_window_exog.index = pd.date_range(start='1/1/2018', periods=5, freq='M')
+    last_window_exog.index = pd.date_range(start='1/1/2018', periods=5, freq=freq)
     
     err_msg = re.escape(
         (f"When `last_window_exog` is a pandas Series, it must have a name. Got None.")
@@ -1346,9 +1354,9 @@ def test_check_predict_input_ValueError_when_last_window_exog_is_Series_with_no_
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(5), index=pd.date_range(start='1/1/2018', periods=5, freq='M')),
+            last_window      = pd.Series(np.arange(5), index=pd.date_range(start='1/1/2018', periods=5, freq=freq)),
             last_window_exog = last_window_exog,
             exog             = exog,
             exog_type        = pd.Series,
@@ -1366,11 +1374,11 @@ def test_check_predict_input_ValueError_when_last_window_exog_is_Series_without_
     Raise ValueError when `last_window_exog` name is not in `exog_col_names`, ForecasterSarimax.
     """
     exog = pd.Series(np.arange(5), name='exog1')
-    exog.index = pd.date_range(start='6/1/2018', periods=5, freq='M')
+    exog.index = pd.date_range(start='6/1/2018', periods=5, freq=freq)
     exog_col_names = ['exog1']
 
     last_window_exog = pd.Series(np.arange(5), name='exog2')
-    last_window_exog.index = pd.date_range(start='1/1/2018', periods=5, freq='M')
+    last_window_exog.index = pd.date_range(start='1/1/2018', periods=5, freq=freq)
     
     err_msg = re.escape(
         ("'exog2' was not observed during training. "
@@ -1383,9 +1391,9 @@ def test_check_predict_input_ValueError_when_last_window_exog_is_Series_without_
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
-            index_freq       = 'M',
+            index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(5), index=pd.date_range(start='1/1/2018', periods=5, freq='M')),
+            last_window      = pd.Series(np.arange(5), index=pd.date_range(start='1/1/2018', periods=5, freq=freq)),
             last_window_exog = last_window_exog,
             exog             = exog,
             exog_type        = pd.Series,
