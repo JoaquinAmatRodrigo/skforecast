@@ -11,6 +11,11 @@ from sklearn.preprocessing import StandardScaler
 # Fixtures
 from .fixtures_ForecasterAutoreg import y
 
+if pd.__version__ < '2.2.0':
+    freq = "H"
+else:
+    freq = "h"
+
 
 def test_set_out_sample_residuals_TypeError_when_residuals_is_not_numpy_array_or_pandas_series():
     """
@@ -226,7 +231,7 @@ def test_set_out_sample_residuals_stores_maximum_200_residuals_per_bin():
     """
     y = pd.Series(
         data=np.random.normal(loc=10, scale=1, size=1000),
-        index=pd.date_range(start="01-01-2000", periods=1000, freq="H"),
+        index=pd.date_range(start="01-01-2000", periods=1000, freq="h"),
     )
     residuals = np.random.normal(loc=0, scale=1, size=1000)
     y_pred = y
@@ -253,7 +258,7 @@ def test_set_out_sample_residuals_append_new_residuals_per_bin():
     rng = np.random.default_rng(12345)
     y = pd.Series(
         data=rng.normal(loc=10, scale=1, size=100),
-        index=pd.date_range(start="01-01-2000", periods=100, freq="H"),
+        index=pd.date_range(start="01-01-2000", periods=100, freq="h"),
     )
     residuals = rng.normal(loc=0, scale=1, size=100)
     y_pred = y
@@ -285,7 +290,7 @@ def test_set_out_sample_residuals_when_there_are_no_residuals_for_some_bins():
     rng = np.random.default_rng(12345)
     y = pd.Series(
         data=rng.normal(loc=10, scale=1, size=100),
-        index=pd.date_range(start="01-01-2000", periods=100, freq="H"),
+        index=pd.date_range(start="01-01-2000", periods=100, freq="h"),
     )
     y_pred = y.loc[y > 10]
     residuals = rng.normal(loc=0, scale=1, size=len(y_pred))
