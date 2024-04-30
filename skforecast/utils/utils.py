@@ -34,7 +34,7 @@ optional_dependencies = {
     ],
     'deeplearning': [
         'matplotlib>=3.3, <3.9',
-        'tensorflow>=2.15, <2.16',
+        'tensorflow>=2.13, <2.16',
     ],
     'plotting': [
         'matplotlib>=3.3, <3.9', 
