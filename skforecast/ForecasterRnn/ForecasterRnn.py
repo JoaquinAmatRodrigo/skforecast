@@ -82,8 +82,6 @@ class ForecasterRnn(ForecasterBase):
         Not used, present here for API consistency by convention.
     n_jobs : Ignored
         Not used, present here for API consistency by convention.
-    dropna_from_series : Ignored
-        Not used, present here for API consistency by convention.
         
     Attributes
     ----------
