@@ -43,7 +43,7 @@ from ..utils import set_skforecast_warnings
 
 def _initialize_levels_model_selection_multiseries(
     forecaster: object, 
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     levels: Optional[Union[str, list]]=None
 ) -> list:
     """
@@ -51,9 +51,9 @@ def _initialize_levels_model_selection_multiseries(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate, ForecasterRnn
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
@@ -131,18 +131,18 @@ def _extract_data_folds_multiseries(
 
     Parameters
     ----------
-    series: pandas Series, pandas DataFrame, dict
+    series : pandas Series, pandas DataFrame, dict
         Time series.
-    folds: list
+    folds : list
         Folds created using the skforecast.model_selection._create_backtesting_folds
         function.
-    span_index: pandas DatetimeIndex, pandas RangeIndex
+    span_index : pandas DatetimeIndex, pandas RangeIndex
         Full index from the minimum to the maximum index among all series.
-    window_size: int
+    window_size : int
         Size of the window needed to create the predictors.
-    exog: pandas Series, pandas DataFrame, dict, default `None`
-        Exogenous variable.
-    dropna_last_window: bool, default `False`
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
+    dropna_last_window : bool, default `False`
         If `True`, drop the columns of the last window that have NaN values.
     externally_fitted : bool, default `False`
         Flag indicating whether the forecaster is already trained. Only used when 
@@ -150,7 +150,7 @@ def _extract_data_folds_multiseries(
 
     Yield
     -----
-    series_train: pandas Series, pandas DataFrame, dict
+    series_train : pandas Series, pandas DataFrame, dict
         Time series corresponding to the training set of the fold.
     series_last_window: pandas DataFrame
         Time series corresponding to the last window of the fold.
@@ -259,7 +259,7 @@ def _extract_data_folds_multiseries(
 
 def _backtesting_forecaster_multiseries(
     forecaster: object,
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: Optional[int]=None,
@@ -267,7 +267,7 @@ def _backtesting_forecaster_multiseries(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
@@ -299,7 +299,7 @@ def _backtesting_forecaster_multiseries(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     steps : int
         Number of steps to predict.
@@ -328,10 +328,8 @@ def _backtesting_forecaster_multiseries(
         `test_size`. If `False`, the last fold is excluded.
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variable/s included as predictor/s.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
