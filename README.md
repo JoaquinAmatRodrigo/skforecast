@@ -81,7 +81,7 @@ pip install skforecast[deeplearning]
 
 # Dependencies
 
-+ Python >= 3.8
++ Python >= 3.8, <3.12
 
 ## Hard dependencies
 
@@ -248,7 +248,7 @@ Amat Rodrigo, J., & Escobar Ortiz, J. (2024). skforecast (Version 0.12.0) [Compu
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 title = {skforecast},
 version = {0.12.0},
-month = {4},
+month = {5},
 year = {2024},
 license = {BSD-3-Clause},
 url = {https://skforecast.org/},
