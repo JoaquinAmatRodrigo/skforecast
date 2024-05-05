@@ -148,7 +148,7 @@ def test_predict_bootstrapping_IgnoredArgumentWarning_when_levels_is_list_and_di
 
     warn_msg = re.escape(
         ("Only series whose last window ends at the same index "
-         "can be predicted together. Series that not reach the "
+         "can be predicted together. Series that do not reach the "
          "maximum index, '2020-02-19 00:00:00', are excluded "
          "from prediction: {'2'}.")
     )

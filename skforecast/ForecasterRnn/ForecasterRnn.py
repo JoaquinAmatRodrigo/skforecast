@@ -82,8 +82,6 @@ class ForecasterRnn(ForecasterBase):
         Not used, present here for API consistency by convention.
     n_jobs : Ignored
         Not used, present here for API consistency by convention.
-    dropna_from_series : Ignored
-        Not used, present here for API consistency by convention.
         
     Attributes
     ----------
@@ -190,7 +188,7 @@ class ForecasterRnn(ForecasterBase):
         fit_kwargs: Optional[dict] = {},
         forecaster_id: Optional[Union[str, int]] = None,
         n_jobs: Any = None,
-        transformer_exog: Any = None,
+        transformer_exog: Any = None
     ) -> None:
         self.levels = None
         self.transformer_series = transformer_series

@@ -43,7 +43,7 @@ from ..utils import set_skforecast_warnings
 
 def _initialize_levels_model_selection_multiseries(
     forecaster: object, 
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     levels: Optional[Union[str, list]]=None
 ) -> list:
     """
@@ -51,9 +51,9 @@ def _initialize_levels_model_selection_multiseries(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate, ForecasterRnn
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
@@ -131,18 +131,18 @@ def _extract_data_folds_multiseries(
 
     Parameters
     ----------
-    series: pandas Series, pandas DataFrame, dict
+    series : pandas Series, pandas DataFrame, dict
         Time series.
-    folds: list
+    folds : list
         Folds created using the skforecast.model_selection._create_backtesting_folds
         function.
-    span_index: pandas DatetimeIndex, pandas RangeIndex
+    span_index : pandas DatetimeIndex, pandas RangeIndex
         Full index from the minimum to the maximum index among all series.
-    window_size: int
+    window_size : int
         Size of the window needed to create the predictors.
-    exog: pandas Series, pandas DataFrame, dict, default `None`
-        Exogenous variable.
-    dropna_last_window: bool, default `False`
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
+    dropna_last_window : bool, default `False`
         If `True`, drop the columns of the last window that have NaN values.
     externally_fitted : bool, default `False`
         Flag indicating whether the forecaster is already trained. Only used when 
@@ -150,7 +150,7 @@ def _extract_data_folds_multiseries(
 
     Yield
     -----
-    series_train: pandas Series, pandas DataFrame, dict
+    series_train : pandas Series, pandas DataFrame, dict
         Time series corresponding to the training set of the fold.
     series_last_window: pandas DataFrame
         Time series corresponding to the last window of the fold.
@@ -259,7 +259,7 @@ def _extract_data_folds_multiseries(
 
 def _backtesting_forecaster_multiseries(
     forecaster: object,
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: Optional[int]=None,
@@ -267,7 +267,7 @@ def _backtesting_forecaster_multiseries(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
@@ -299,7 +299,7 @@ def _backtesting_forecaster_multiseries(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     steps : int
         Number of steps to predict.
@@ -328,10 +328,8 @@ def _backtesting_forecaster_multiseries(
         `test_size`. If `False`, the last fold is excluded.
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
@@ -632,7 +630,7 @@ def _backtesting_forecaster_multiseries(
 
 def backtesting_forecaster_multiseries(
     forecaster: object,
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: Optional[int],
@@ -640,7 +638,7 @@ def backtesting_forecaster_multiseries(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
@@ -672,7 +670,7 @@ def backtesting_forecaster_multiseries(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate, ForecasterRnn
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     steps : int
         Number of steps to predict.
@@ -702,10 +700,8 @@ def backtesting_forecaster_multiseries(
         `test_size`. If `False`, the last fold is excluded.
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
@@ -816,7 +812,7 @@ def backtesting_forecaster_multiseries(
 
 def grid_search_forecaster_multiseries(
     forecaster: object,
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     param_grid: dict,
     steps: int,
     metric: Union[str, Callable, list],
@@ -825,7 +821,7 @@ def grid_search_forecaster_multiseries(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
     refit: Union[bool, int]=False,
     return_best: bool=True,
@@ -843,7 +839,7 @@ def grid_search_forecaster_multiseries(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
@@ -872,10 +868,8 @@ def grid_search_forecaster_multiseries(
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
@@ -950,7 +944,7 @@ def grid_search_forecaster_multiseries(
 
 def random_search_forecaster_multiseries(
     forecaster: object,
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     param_distributions: dict,
     steps: int,
     metric: Union[str, Callable, list],
@@ -959,7 +953,7 @@ def random_search_forecaster_multiseries(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
     refit: Union[bool, int]=False,
     n_iter: int=10,
@@ -979,7 +973,7 @@ def random_search_forecaster_multiseries(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     param_distributions : dict
         Dictionary with parameters names (`str`) as keys and distributions or 
@@ -1008,10 +1002,8 @@ def random_search_forecaster_multiseries(
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
@@ -1092,7 +1084,7 @@ def random_search_forecaster_multiseries(
 
 def _evaluate_grid_hyperparameters_multiseries(
     forecaster: object,
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     param_grid: dict,
     steps: int,
     metric: Union[str, Callable, list],
@@ -1101,7 +1093,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
     refit: Union[bool, int]=False,
     return_best: bool=True,
@@ -1118,7 +1110,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
@@ -1147,10 +1139,8 @@ def _evaluate_grid_hyperparameters_multiseries(
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
@@ -1347,7 +1337,7 @@ def _evaluate_grid_hyperparameters_multiseries(
 
 def bayesian_search_forecaster_multiseries(
     forecaster: object,
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     search_space: Callable,
     steps: int,
     metric: Union[str, Callable, list],
@@ -1356,7 +1346,7 @@ def bayesian_search_forecaster_multiseries(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     lags_grid: Any='deprecated',
     refit: Union[bool, int]=False,
     n_trials: int=10,
@@ -1380,7 +1370,7 @@ def bayesian_search_forecaster_multiseries(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     search_space : Callable
         Function with argument `trial` which returns a dictionary with parameters names 
@@ -1410,10 +1400,8 @@ def bayesian_search_forecaster_multiseries(
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     lags_grid : deprecated
         **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
         `search_space` to define the candidate values for the lags. This allows 
@@ -1519,7 +1507,7 @@ def bayesian_search_forecaster_multiseries(
 
 def _bayesian_search_optuna_multiseries(
     forecaster: object,
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     search_space: Callable,
     steps: int,
     metric: Union[str, Callable, list],
@@ -1528,7 +1516,7 @@ def _bayesian_search_optuna_multiseries(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
@@ -1549,7 +1537,7 @@ def _bayesian_search_optuna_multiseries(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     search_space : Callable
         Function with argument `trial` which returns a dictionary with parameters names 
@@ -1579,10 +1567,8 @@ def _bayesian_search_optuna_multiseries(
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
@@ -1856,8 +1842,8 @@ def _bayesian_search_optuna_multiseries(
 def select_features_multiseries(
     forecaster: object,
     selector: object,
-    series: pd.DataFrame,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    series: Union[pd.DataFrame, dict],
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     select_only: Optional[str]=None,
     force_inclusion: Optional[Union[list, str]]=None,
     subsample: Union[int, float]=0.5,
@@ -1884,10 +1870,8 @@ def select_features_multiseries(
         A feature selector from sklearn.feature_selection.
     series : pandas DataFrame
         Target time series to which the feature selection will be applied.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     select_only : str, default `None`
         Decide what type of features to include in the selection process. 
         
@@ -2056,7 +2040,7 @@ def select_features_multiseries(
 # ==============================================================================
 def backtesting_forecaster_multivariate(
     forecaster: object,
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: Optional[int],
@@ -2064,7 +2048,7 @@ def backtesting_forecaster_multivariate(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     refit: Union[bool, int]=False,
     interval: Optional[list]=None,
     n_boot: int=500,
@@ -2089,7 +2073,7 @@ def backtesting_forecaster_multivariate(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     steps : int
         Number of steps to predict.
@@ -2119,10 +2103,8 @@ def backtesting_forecaster_multivariate(
         `test_size`. If `False`, the last fold is excluded.
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
@@ -2196,7 +2178,7 @@ def backtesting_forecaster_multivariate(
 
 def grid_search_forecaster_multivariate(
     forecaster: object,
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     param_grid: dict,
     steps: int,
     metric: Union[str, Callable, list],
@@ -2205,7 +2187,7 @@ def grid_search_forecaster_multivariate(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
     refit: Union[bool, int]=False,
     return_best: bool=True,
@@ -2225,7 +2207,7 @@ def grid_search_forecaster_multivariate(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
@@ -2254,10 +2236,8 @@ def grid_search_forecaster_multivariate(
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
@@ -2330,7 +2310,7 @@ def grid_search_forecaster_multivariate(
 
 def random_search_forecaster_multivariate(
     forecaster: object,
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     param_distributions: dict,
     steps: int,
     metric: Union[str, Callable, list],
@@ -2339,7 +2319,7 @@ def random_search_forecaster_multivariate(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
     refit: Union[bool, int]=False,
     n_iter: int=10,
@@ -2361,7 +2341,7 @@ def random_search_forecaster_multivariate(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     param_distributions : dict
         Dictionary with parameters names (`str`) as keys and distributions or 
@@ -2390,10 +2370,8 @@ def random_search_forecaster_multivariate(
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
@@ -2473,7 +2451,7 @@ def random_search_forecaster_multivariate(
 
 def bayesian_search_forecaster_multivariate(
     forecaster: object,
-    series: pd.DataFrame,
+    series: Union[pd.DataFrame, dict],
     search_space: Callable,
     steps: int,
     metric: Union[str, Callable, list],
@@ -2482,7 +2460,7 @@ def bayesian_search_forecaster_multivariate(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     lags_grid: Any='deprecated',
     refit: Union[bool, int]=False,
     n_trials: int=10,
@@ -2508,7 +2486,7 @@ def bayesian_search_forecaster_multivariate(
     ----------
     forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
         Forecaster model.
-    series : pandas DataFrame
+    series : pandas DataFrame, dict
         Training time series.
     search_space : Callable
         Function with argument `trial` which returns a dictionary with parameters names 
@@ -2538,10 +2516,8 @@ def bayesian_search_forecaster_multivariate(
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
         If `None`, all levels are taken into account. The resulting metric will be
         the average of the optimization of all levels.
-    exog : pandas Series, pandas DataFrame, default `None`
-        Exogenous variable/s included as predictor/s. Must have the same
-        number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i].
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
     lags_grid : deprecated
         **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
         `search_space` to define the candidate values for the lags. This allows 

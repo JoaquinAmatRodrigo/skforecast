@@ -133,11 +133,12 @@ def _backtesting_sarimax(
     forecaster = deepcopy(forecaster)
     
     if refit == False:
-        warnings.warn(
-            ("If `refit = False`, `n_jobs` is set to 1 to avoid unexpected "
-             "results during parallelization."),
-             IgnoredArgumentWarning
-        )
+        if n_jobs != 'auto' and n_jobs != 1:
+            warnings.warn(
+                ("If `refit = False`, `n_jobs` is set to 1 to avoid unexpected "
+                "results during parallelization."),
+                IgnoredArgumentWarning
+            )
         n_jobs = 1
     else:
         if n_jobs == 'auto':        
