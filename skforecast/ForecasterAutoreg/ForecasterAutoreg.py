@@ -889,6 +889,9 @@ class ForecasterAutoreg(ForecasterBase):
             If `True`, residuals used in each bootstrapping iteration are selected
             conditioning on the predicted values. If `False`, residuals are selected
             randomly without conditioning on the predicted values.
+            **WARNING: This argument is newly introduced and requires special attention.
+            It is still experimental and may undergo changes.**
+            **New in version 0.12.0**
 
         Returns
         -------
@@ -1100,6 +1103,9 @@ class ForecasterAutoreg(ForecasterBase):
             If `True`, residuals used in each bootstrapping iteration are selected
             conditioning on the predicted values. If `False`, residuals are selected
             randomly without conditioning on the predicted values.
+            **WARNING: This argument is newly introduced and requires special attention.
+            It is still experimental and may undergo changes.**
+            **New in version 0.12.0**
 
         Returns
         -------
@@ -1192,6 +1198,9 @@ class ForecasterAutoreg(ForecasterBase):
             If `True`, residuals used in each bootstrapping iteration are selected
             conditioning on the predicted values. If `False`, residuals are selected
             randomly without conditioning on the predicted values.
+            **WARNING: This argument is newly introduced and requires special attention.
+            It is still experimental and may undergo changes.**
+            **New in version 0.12.0**
 
         Returns
         -------
@@ -1270,6 +1279,9 @@ class ForecasterAutoreg(ForecasterBase):
             If `True`, residuals used in each bootstrapping iteration are selected
             conditioning on the predicted values. If `False`, residuals are selected
             randomly without conditioning on the predicted values.
+            **WARNING: This argument is newly introduced and requires special attention.
+            It is still experimental and may undergo changes.**
+            **New in version 0.12.0**
 
         Returns
         -------
