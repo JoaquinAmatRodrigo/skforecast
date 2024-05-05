@@ -188,7 +188,7 @@ class ForecasterRnn(ForecasterBase):
         fit_kwargs: Optional[dict] = {},
         forecaster_id: Optional[Union[str, int]] = None,
         n_jobs: Any = None,
-        transformer_exog: Any = None,
+        transformer_exog: Any = None
     ) -> None:
         self.levels = None
         self.transformer_series = transformer_series
