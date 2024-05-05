@@ -1,4 +1,4 @@
-# Unit test create_train_X_y ForecasterAutoregMultiVariate
+# Unit test _create_train_X_y ForecasterAutoregMultiVariate
 # ==============================================================================
 import re
 import pytest
@@ -18,12 +18,12 @@ def test_filter_train_X_y_for_step_exception_when_step_not_in_steps(step):
     
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
                                                lags=3, steps=3)
-    X_train, y_train, _, _, _ = forecaster.create_train_X_y(series=series)
+    X_train, y_train, _, _, _ = forecaster._create_train_X_y(series=series)
 
     err_msg = re.escape(
-                (f"Invalid value `step`. For this forecaster, minimum value is 1 "
-                 f"and the maximum step is {forecaster.steps}.")
-            )
+        (f"Invalid value `step`. For this forecaster, minimum value is 1 "
+         f"and the maximum step is {forecaster.steps}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.filter_train_X_y_for_step(step=step, X_train=X_train, y_train=y_train)
 
@@ -38,7 +38,7 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_exog_is_None_for_s
     
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
                                                lags=3, steps=2, transformer_series=None)
-    X_train, y_train, _, _, _ = forecaster.create_train_X_y(series=series)
+    X_train, y_train, _, _, _ = forecaster._create_train_X_y(series=series)
     results = forecaster.filter_train_X_y_for_step(step=1, X_train=X_train, y_train=y_train)
 
     expected = (
@@ -75,7 +75,7 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_and_exog_for_step_
 
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
                                                lags=[1, 2, 3], steps=2, transformer_series=None)
-    X_train, y_train, _, _, _ = forecaster.create_train_X_y(series=series, exog=exog)
+    X_train, y_train, _, _, _ = forecaster._create_train_X_y(series=series, exog=exog)
     results = forecaster.filter_train_X_y_for_step(step=2, X_train=X_train, y_train=y_train)
 
     expected = (
@@ -114,7 +114,7 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_and_exog_for_step_
 
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
                                                lags=[1, 2, 3], steps=2, transformer_series=None)
-    X_train, y_train, _, _, _ = forecaster.create_train_X_y(series=series, exog=exog)
+    X_train, y_train, _, _, _ = forecaster._create_train_X_y(series=series, exog=exog)
     results = forecaster.filter_train_X_y_for_step(
                   step          = 2, 
                   X_train       = X_train, 
@@ -159,7 +159,7 @@ def test_filter_train_X_y_for_step_output_when_lags_dict_with_None_steps_2_and_e
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
                                                lags={'l1': None, 'l2': 3}, 
                                                steps=2, transformer_series=None)
-    X_train, y_train, _, _, _ = forecaster.create_train_X_y(series=series, exog=exog)
+    X_train, y_train, _, _, _ = forecaster._create_train_X_y(series=series, exog=exog)
     results = forecaster.filter_train_X_y_for_step(step=2, X_train=X_train, y_train=y_train)
 
     expected = (
@@ -198,7 +198,7 @@ def test_filter_train_X_y_for_step_output_when_lags_dict_with_None_steps_2_and_e
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
                                                lags={'l1': 3, 'l2': None}, 
                                                steps=2, transformer_series=None)
-    X_train, y_train, _, _, _ = forecaster.create_train_X_y(series=series, exog=exog)
+    X_train, y_train, _, _, _ = forecaster._create_train_X_y(series=series, exog=exog)
     results = forecaster.filter_train_X_y_for_step(
                   step          = 2, 
                   X_train       = X_train, 
