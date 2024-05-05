@@ -171,7 +171,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Names of the series used during training.
     series_X_train : list
         Names of the series added to `X_train` when creating the training
-        matrices with `create_train_X_y` method. It is a subset of 
+        matrices with `_create_train_X_y` method. It is a subset of 
         `series_col_names`.
     X_train_col_names : list
         Names of columns of the matrix created internally for training.
@@ -433,7 +433,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         return X_data, y_data
 
 
-    def create_train_X_y(
+    def _create_train_X_y(
         self,
         series: pd.DataFrame,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
@@ -466,7 +466,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Names of the series (levels) provided by the user during training.
         series_X_train : list
             Names of the series added to `X_train` when creating the training
-            matrices with `create_train_X_y` method. It is a subset of 
+            matrices with `_create_train_X_y` method. It is a subset of 
             `series_col_names`.
         exog_col_names : list
             Names of the exogenous variables included in the training matrices.
@@ -643,7 +643,50 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                         
         return X_train, y_train, series_col_names, series_X_train, exog_col_names
 
-    
+
+    def create_train_X_y(
+        self,
+        series: pd.DataFrame,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+    ) -> Tuple[pd.DataFrame, dict, list, list, list]:
+        """
+        Create training matrices from multiple time series and exogenous
+        variables. The resulting matrices contain the target variable and predictors
+        needed to train all the regressors (one per step).
+        
+        Parameters
+        ----------
+        series : pandas DataFrame
+            Training time series.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
+            number of observations as `series` and their indexes must be aligned.
+
+        Returns
+        -------
+        X_train : pandas DataFrame
+            Training values (predictors) for each step. Note that the index 
+            corresponds to that of the last step. It is updated for the corresponding 
+            step in the filter_train_X_y_for_step method.
+            Shape: (len(series) - self.max_lag, len(self.lags)*len(series.columns) + exog.shape[1]*steps)
+        y_train : dict
+            Values (target) of the time series related to each row of `X_train` 
+            for each step of the form {step: y_step_[i]}.
+            Shape of each series: (len(y) - self.max_lag, )
+        
+        """
+
+        output = self._create_train_X_y(
+                     series = series, 
+                     exog   = exog
+                 )
+
+        X_train = output[0]
+        y_train = output[1]
+
+        return X_train, y_train
+
+
     def filter_train_X_y_for_step(
         self,
         step: int,
@@ -653,7 +696,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Select the columns needed to train a forecaster for a specific step.  
-        The input matrices should be created using `create_train_X_y` method. 
+        The input matrices should be created using `_create_train_X_y` method. 
         This method updates the index of `X_train` to the corresponding one 
         according to `y_train`. If `remove_suffix=True` the suffix "_step_i" 
         will be removed from the column names. 
@@ -663,9 +706,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         step : int
             step for which columns must be selected selected. Starts at 1.
         X_train : pandas DataFrame
-            Dataframe created with the `create_train_X_y` method, first return.
+            Dataframe created with the `_create_train_X_y` method, first return.
         y_train : dict
-            Dict created with the `create_train_X_y` method, second return.
+            Dict created with the `_create_train_X_y` method, second return.
         remove_suffix : bool, default `False`
             If True, suffix "_step_i" is removed from the column names.
 
@@ -723,7 +766,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Parameters
         ----------
         X_train : pandas DataFrame
-            Dataframe created with `create_train_X_y` and filter_train_X_y_for_step`
+            Dataframe created with `_create_train_X_y` and filter_train_X_y_for_step`
             methods, first return.
 
         Returns
@@ -812,7 +855,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.training_range      = None
 
         X_train, y_train, series_col_names, series_X_train, exog_col_names = (
-            self.create_train_X_y(series=series, exog=exog)
+            self._create_train_X_y(series=series, exog=exog)
         )
 
         def fit_forecaster(regressor, X_train, y_train, step, store_in_sample_residuals):
@@ -824,9 +867,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             regressor : object
                 Regressor to be fitted.
             X_train : pandas DataFrame
-                Dataframe created with the `create_train_X_y` method, first return.
+                Dataframe created with the `_create_train_X_y` method, first return.
             y_train : dict
-                Dict created with the `create_train_X_y` method, second return.
+                Dict created with the `_create_train_X_y` method, second return.
             step : int
                 Step of the forecaster to be fitted.
             store_in_sample_residuals : bool

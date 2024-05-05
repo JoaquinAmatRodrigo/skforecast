@@ -1351,8 +1351,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                 if input_levels_is_list and series_excluded_from_last_window:
                     warnings.warn(
                         (f"Only series whose last window ends at the same index "
-                         f"can be predicted together. Series that not reach the "
-                         f"maximum index, '{max_index_levels}', are excluded "
+                         f"can be predicted together. Series that do not reach "
+                         f"the maximum index, '{max_index_levels}', are excluded "
                          f"from prediction: {series_excluded_from_last_window}."),
                         IgnoredArgumentWarning
                     )
@@ -1602,8 +1602,8 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                     if input_levels_is_list and series_excluded_from_last_window:
                         warnings.warn(
                             (f"Only series whose last window ends at the same index "
-                             f"can be predicted together. Series that not reach the "
-                             f"maximum index, '{max_index_levels}', are excluded "
+                             f"can be predicted together. Series that do not reach "
+                             f"the maximum index, '{max_index_levels}', are excluded "
                              f"from prediction: {series_excluded_from_last_window}."),
                              IgnoredArgumentWarning
                         )

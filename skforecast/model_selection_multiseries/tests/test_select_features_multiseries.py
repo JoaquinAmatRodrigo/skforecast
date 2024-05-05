@@ -84,6 +84,7 @@ def test_ValueError_select_features_raise_when_subsample_is_not_greater_0_less_e
             subsample  = subsample,
         )
 
+
 def test_select_features_when_selector_is_RFE_and_select_only_is_exog():
     """
     Test that select_features returns the expected values when selector is RFE
