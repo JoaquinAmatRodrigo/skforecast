@@ -1900,6 +1900,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#skforecast.utils.utils.initialize_transformer_series" class="md-nav__link">
+    <span class="md-ellipsis">
+      initialize_transformer_series()
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.utils.utils.initialize_lags_grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      initialize_lags_grid()
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#skforecast.utils.utils.check_select_fit_kwargs" class="md-nav__link">
     <span class="md-ellipsis">
       check_select_fit_kwargs()
@@ -2083,6 +2101,42 @@
   <a href="#skforecast.utils.utils.select_n_jobs_fit_forecaster" class="md-nav__link">
     <span class="md-ellipsis">
       select_n_jobs_fit_forecaster()
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.utils.utils.check_preprocess_series" class="md-nav__link">
+    <span class="md-ellipsis">
+      check_preprocess_series()
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.utils.utils.check_preprocess_exog_multiseries" class="md-nav__link">
+    <span class="md-ellipsis">
+      check_preprocess_exog_multiseries()
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.utils.utils.align_series_and_exog_multiseries" class="md-nav__link">
+    <span class="md-ellipsis">
+      align_series_and_exog_multiseries()
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.utils.utils.set_skforecast_warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_skforecast_warnings()
     </span>
   </a>
   
@@ -2493,6 +2547,24 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#skforecast.utils.utils.initialize_transformer_series" class="md-nav__link">
+    <span class="md-ellipsis">
+      initialize_transformer_series()
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.utils.utils.initialize_lags_grid" class="md-nav__link">
+    <span class="md-ellipsis">
+      initialize_lags_grid()
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#skforecast.utils.utils.check_select_fit_kwargs" class="md-nav__link">
     <span class="md-ellipsis">
       check_select_fit_kwargs()
@@ -2676,6 +2748,42 @@
   <a href="#skforecast.utils.utils.select_n_jobs_fit_forecaster" class="md-nav__link">
     <span class="md-ellipsis">
       select_n_jobs_fit_forecaster()
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.utils.utils.check_preprocess_series" class="md-nav__link">
+    <span class="md-ellipsis">
+      check_preprocess_series()
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.utils.utils.check_preprocess_exog_multiseries" class="md-nav__link">
+    <span class="md-ellipsis">
+      check_preprocess_exog_multiseries()
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.utils.utils.align_series_and_exog_multiseries" class="md-nav__link">
+    <span class="md-ellipsis">
+      align_series_and_exog_multiseries()
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#skforecast.utils.utils.set_skforecast_warnings" class="md-nav__link">
+    <span class="md-ellipsis">
+      set_skforecast_warnings()
     </span>
   </a>
   
@@ -3621,6 +3729,431 @@ ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.</p>
             <span class="n">series_weights</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="n">weight_func</span><span class="p">,</span> <span class="n">source_code_weight_func</span><span class="p">,</span> <span class="n">series_weights</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="skforecast.utils.utils.initialize_transformer_series" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">initialize_transformer_series</span><span class="p">(</span><span class="n">series_col_names</span><span class="p">,</span> <span class="n">transformer_series</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skforecast.utils.utils.initialize_transformer_series" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Initialize <code>transformer_series_</code> attribute for the Forecasters Multiseries.</p>
+<ul>
+<li>If <code>transformer_series</code> is <code>None</code>, no transformation is applied.</li>
+<li>If <code>transformer_series</code> is a scikit-learn transformer (object), the same 
+transformer is applied to all series (<code>series_col_names</code>).</li>
+<li>If <code>transformer_series</code> is a <code>dict</code>, a different transformer can be
+applied to each series. The keys of the dictionary must be the same as the
+names of the series in <code>series_col_names</code>.</li>
+</ul>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>series_col_names</code></td>
+          <td>
+                <code>list</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Names of the series (levels) used during training.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>transformer_series</code></td>
+          <td>
+                <code>(object, dict)</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>An instance of a transformer (preprocessor) compatible with the scikit-learn
+preprocessing API with methods: fit, transform, fit_transform and 
+inverse_transform.</p>
+            </div>
+          </td>
+          <td>
+                <code>`None`</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>transformer_series_</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary with the transformer for each series. It is created cloning the 
+objects in <code>transformer_series</code> and is used internally to avoid overwriting.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">186</span>
+<span class="normal">187</span>
+<span class="normal">188</span>
+<span class="normal">189</span>
+<span class="normal">190</span>
+<span class="normal">191</span>
+<span class="normal">192</span>
+<span class="normal">193</span>
+<span class="normal">194</span>
+<span class="normal">195</span>
+<span class="normal">196</span>
+<span class="normal">197</span>
+<span class="normal">198</span>
+<span class="normal">199</span>
+<span class="normal">200</span>
+<span class="normal">201</span>
+<span class="normal">202</span>
+<span class="normal">203</span>
+<span class="normal">204</span>
+<span class="normal">205</span>
+<span class="normal">206</span>
+<span class="normal">207</span>
+<span class="normal">208</span>
+<span class="normal">209</span>
+<span class="normal">210</span>
+<span class="normal">211</span>
+<span class="normal">212</span>
+<span class="normal">213</span>
+<span class="normal">214</span>
+<span class="normal">215</span>
+<span class="normal">216</span>
+<span class="normal">217</span>
+<span class="normal">218</span>
+<span class="normal">219</span>
+<span class="normal">220</span>
+<span class="normal">221</span>
+<span class="normal">222</span>
+<span class="normal">223</span>
+<span class="normal">224</span>
+<span class="normal">225</span>
+<span class="normal">226</span>
+<span class="normal">227</span>
+<span class="normal">228</span>
+<span class="normal">229</span>
+<span class="normal">230</span>
+<span class="normal">231</span>
+<span class="normal">232</span>
+<span class="normal">233</span>
+<span class="normal">234</span>
+<span class="normal">235</span>
+<span class="normal">236</span>
+<span class="normal">237</span>
+<span class="normal">238</span>
+<span class="normal">239</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">initialize_transformer_series</span><span class="p">(</span>
+    <span class="n">series_col_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">transformer_series</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">object</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize `transformer_series_` attribute for the Forecasters Multiseries.</span>
+
+<span class="sd">    - If `transformer_series` is `None`, no transformation is applied.</span>
+<span class="sd">    - If `transformer_series` is a scikit-learn transformer (object), the same </span>
+<span class="sd">    transformer is applied to all series (`series_col_names`).</span>
+<span class="sd">    - If `transformer_series` is a `dict`, a different transformer can be</span>
+<span class="sd">    applied to each series. The keys of the dictionary must be the same as the</span>
+<span class="sd">    names of the series in `series_col_names`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    series_col_names : list</span>
+<span class="sd">        Names of the series (levels) used during training.</span>
+<span class="sd">    transformer_series : object, dict, default `None`</span>
+<span class="sd">        An instance of a transformer (preprocessor) compatible with the scikit-learn</span>
+<span class="sd">        preprocessing API with methods: fit, transform, fit_transform and </span>
+<span class="sd">        inverse_transform. </span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    transformer_series_ : dict</span>
+<span class="sd">        Dictionary with the transformer for each series. It is created cloning the </span>
+<span class="sd">        objects in `transformer_series` and is used internally to avoid overwriting.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">transformer_series</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">transformer_series_</span> <span class="o">=</span> <span class="p">{</span><span class="n">serie</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">serie</span> <span class="ow">in</span> <span class="n">series_col_names</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">transformer_series</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">transformer_series_</span> <span class="o">=</span> <span class="p">{</span><span class="n">serie</span><span class="p">:</span> <span class="n">clone</span><span class="p">(</span><span class="n">transformer_series</span><span class="p">)</span> 
+                               <span class="k">for</span> <span class="n">serie</span> <span class="ow">in</span> <span class="n">series_col_names</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">transformer_series_</span> <span class="o">=</span> <span class="p">{</span><span class="n">serie</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">serie</span> <span class="ow">in</span> <span class="n">series_col_names</span><span class="p">}</span>
+        <span class="c1"># Only elements already present in transformer_series_ are updated</span>
+        <span class="n">transformer_series_</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">transformer_series</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> 
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">transformer_series_</span>
+        <span class="p">)</span>
+        <span class="n">series_not_in_transformer_series</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="nb">set</span><span class="p">(</span><span class="n">series_col_names</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">transformer_series</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">series_not_in_transformer_series</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">series_not_in_transformer_series</span><span class="si">}</span><span class="s2"> not present in `transformer_series`.&quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot; No transformation is applied to these series.&quot;</span><span class="p">),</span>
+                 <span class="n">IgnoredArgumentWarning</span>
+            <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">transformer_series_</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="skforecast.utils.utils.initialize_lags_grid" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">initialize_lags_grid</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skforecast.utils.utils.initialize_lags_grid" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Initialize lags grid and lags label for model selection. </p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>forecaster</code></td>
+          <td>
+                <code>Forecaster</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
+ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
+ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>lags_grid</code></td>
+          <td>
+                <code>(list, dict)</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Lists of lags to try, containing int, lists, numpy ndarray, or range 
+objects. If <code>dict</code>, the keys are used as labels in the <code>results</code> 
+DataFrame, and the values are used as the lists of lags to try. Ignored 
+if the forecaster is an instance of <code>ForecasterAutoregCustom</code> or 
+<code>ForecasterAutoregMultiSeriesCustom</code>.</p>
+            </div>
+          </td>
+          <td>
+                <code>`None`</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>lags_grid</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary with lags configuration for each iteration.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+<td><code>lags_label</code></td>          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Label for lags representation in the results object.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">242</span>
+<span class="normal">243</span>
+<span class="normal">244</span>
+<span class="normal">245</span>
+<span class="normal">246</span>
+<span class="normal">247</span>
+<span class="normal">248</span>
+<span class="normal">249</span>
+<span class="normal">250</span>
+<span class="normal">251</span>
+<span class="normal">252</span>
+<span class="normal">253</span>
+<span class="normal">254</span>
+<span class="normal">255</span>
+<span class="normal">256</span>
+<span class="normal">257</span>
+<span class="normal">258</span>
+<span class="normal">259</span>
+<span class="normal">260</span>
+<span class="normal">261</span>
+<span class="normal">262</span>
+<span class="normal">263</span>
+<span class="normal">264</span>
+<span class="normal">265</span>
+<span class="normal">266</span>
+<span class="normal">267</span>
+<span class="normal">268</span>
+<span class="normal">269</span>
+<span class="normal">270</span>
+<span class="normal">271</span>
+<span class="normal">272</span>
+<span class="normal">273</span>
+<span class="normal">274</span>
+<span class="normal">275</span>
+<span class="normal">276</span>
+<span class="normal">277</span>
+<span class="normal">278</span>
+<span class="normal">279</span>
+<span class="normal">280</span>
+<span class="normal">281</span>
+<span class="normal">282</span>
+<span class="normal">283</span>
+<span class="normal">284</span>
+<span class="normal">285</span>
+<span class="normal">286</span>
+<span class="normal">287</span>
+<span class="normal">288</span>
+<span class="normal">289</span>
+<span class="normal">290</span>
+<span class="normal">291</span>
+<span class="normal">292</span>
+<span class="normal">293</span>
+<span class="normal">294</span>
+<span class="normal">295</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">initialize_lags_grid</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span> 
+    <span class="n">lags_grid</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]]</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initialize lags grid and lags label for model selection. </span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    forecaster : Forecaster</span>
+<span class="sd">        Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, </span>
+<span class="sd">        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, </span>
+<span class="sd">        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.</span>
+<span class="sd">    lags_grid : list, dict, default `None`</span>
+<span class="sd">        Lists of lags to try, containing int, lists, numpy ndarray, or range </span>
+<span class="sd">        objects. If `dict`, the keys are used as labels in the `results` </span>
+<span class="sd">        DataFrame, and the values are used as the lists of lags to try. Ignored </span>
+<span class="sd">        if the forecaster is an instance of `ForecasterAutoregCustom` or </span>
+<span class="sd">        `ForecasterAutoregMultiSeriesCustom`.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    lags_grid : dict</span>
+<span class="sd">        Dictionary with lags configuration for each iteration.</span>
+<span class="sd">    lags_label : str</span>
+<span class="sd">        Label for lags representation in the results object.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lags_grid</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">dict</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`lags_grid` argument must be a list, dict or None. &quot;</span>
+             <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">lags_grid</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">forecaster</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;ForecasterAutoregCustom&#39;</span><span class="p">,</span> 
+                                     <span class="s1">&#39;ForecasterAutoregMultiSeriesCustom&#39;</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="n">lags_grid</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`lags_grid` ignored if forecaster is an instance of &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">forecaster</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">`.&quot;</span><span class="p">),</span>
+                <span class="n">IgnoredArgumentWarning</span>
+            <span class="p">)</span>
+        <span class="n">lags_grid</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;custom predictors&#39;</span><span class="p">]</span>
+
+    <span class="n">lags_label</span> <span class="o">=</span> <span class="s1">&#39;values&#39;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lags_grid</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">lags_grid</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lags</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="n">lags</span> <span class="k">for</span> <span class="n">lags</span> <span class="ow">in</span> <span class="n">lags_grid</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="n">lags_grid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lags_grid</span> <span class="o">=</span> <span class="p">{</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">forecaster</span><span class="o">.</span><span class="n">lags</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">forecaster</span><span class="o">.</span><span class="n">lags</span><span class="p">)}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lags_label</span> <span class="o">=</span> <span class="s1">&#39;keys&#39;</span>
+
+    <span class="k">return</span> <span class="n">lags_grid</span><span class="p">,</span> <span class="n">lags_label</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
@@ -9666,6 +10199,1217 @@ and regressor_name is a linear regressor, then n_jobs=1, otherwise n_jobs=cpu_co
         <span class="n">n_jobs</span> <span class="o">=</span> <span class="mi">1</span>
 
     <span class="k">return</span> <span class="n">n_jobs</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="skforecast.utils.utils.check_preprocess_series" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">check_preprocess_series</span><span class="p">(</span><span class="n">series</span><span class="p">)</span></code>
+
+<a href="#skforecast.utils.utils.check_preprocess_series" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Check and preprocess <code>series</code> argument in <code>ForecasterAutoregMultiSeries</code> and
+<code>ForecasterAutoregMultiSeriesCustom</code> classes.</p>
+<ul>
+<li>If <code>series</code> is a pandas DataFrame, it is converted to a dict of pandas 
+Series and index is overwritten according to the rules of preprocess_y.</li>
+<li>If <code>series</code> is a dict, all values are converted to pandas Series. Checks
+if all index are pandas DatetimeIndex and, at least, one Series has a non-null
+frequency. No multiple frequency is allowed.</li>
+</ul>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>series</code></td>
+          <td>
+                <code>pandas DataFrame, dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Training time series.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>series_dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary with the series used during training.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+<td><code>series_indexes</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary with the index of each series.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2175</span>
+<span class="normal">2176</span>
+<span class="normal">2177</span>
+<span class="normal">2178</span>
+<span class="normal">2179</span>
+<span class="normal">2180</span>
+<span class="normal">2181</span>
+<span class="normal">2182</span>
+<span class="normal">2183</span>
+<span class="normal">2184</span>
+<span class="normal">2185</span>
+<span class="normal">2186</span>
+<span class="normal">2187</span>
+<span class="normal">2188</span>
+<span class="normal">2189</span>
+<span class="normal">2190</span>
+<span class="normal">2191</span>
+<span class="normal">2192</span>
+<span class="normal">2193</span>
+<span class="normal">2194</span>
+<span class="normal">2195</span>
+<span class="normal">2196</span>
+<span class="normal">2197</span>
+<span class="normal">2198</span>
+<span class="normal">2199</span>
+<span class="normal">2200</span>
+<span class="normal">2201</span>
+<span class="normal">2202</span>
+<span class="normal">2203</span>
+<span class="normal">2204</span>
+<span class="normal">2205</span>
+<span class="normal">2206</span>
+<span class="normal">2207</span>
+<span class="normal">2208</span>
+<span class="normal">2209</span>
+<span class="normal">2210</span>
+<span class="normal">2211</span>
+<span class="normal">2212</span>
+<span class="normal">2213</span>
+<span class="normal">2214</span>
+<span class="normal">2215</span>
+<span class="normal">2216</span>
+<span class="normal">2217</span>
+<span class="normal">2218</span>
+<span class="normal">2219</span>
+<span class="normal">2220</span>
+<span class="normal">2221</span>
+<span class="normal">2222</span>
+<span class="normal">2223</span>
+<span class="normal">2224</span>
+<span class="normal">2225</span>
+<span class="normal">2226</span>
+<span class="normal">2227</span>
+<span class="normal">2228</span>
+<span class="normal">2229</span>
+<span class="normal">2230</span>
+<span class="normal">2231</span>
+<span class="normal">2232</span>
+<span class="normal">2233</span>
+<span class="normal">2234</span>
+<span class="normal">2235</span>
+<span class="normal">2236</span>
+<span class="normal">2237</span>
+<span class="normal">2238</span>
+<span class="normal">2239</span>
+<span class="normal">2240</span>
+<span class="normal">2241</span>
+<span class="normal">2242</span>
+<span class="normal">2243</span>
+<span class="normal">2244</span>
+<span class="normal">2245</span>
+<span class="normal">2246</span>
+<span class="normal">2247</span>
+<span class="normal">2248</span>
+<span class="normal">2249</span>
+<span class="normal">2250</span>
+<span class="normal">2251</span>
+<span class="normal">2252</span>
+<span class="normal">2253</span>
+<span class="normal">2254</span>
+<span class="normal">2255</span>
+<span class="normal">2256</span>
+<span class="normal">2257</span>
+<span class="normal">2258</span>
+<span class="normal">2259</span>
+<span class="normal">2260</span>
+<span class="normal">2261</span>
+<span class="normal">2262</span>
+<span class="normal">2263</span>
+<span class="normal">2264</span>
+<span class="normal">2265</span>
+<span class="normal">2266</span>
+<span class="normal">2267</span>
+<span class="normal">2268</span>
+<span class="normal">2269</span>
+<span class="normal">2270</span>
+<span class="normal">2271</span>
+<span class="normal">2272</span>
+<span class="normal">2273</span>
+<span class="normal">2274</span>
+<span class="normal">2275</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">check_preprocess_series</span><span class="p">(</span>
+    <span class="n">series</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check and preprocess `series` argument in `ForecasterAutoregMultiSeries` and</span>
+<span class="sd">    `ForecasterAutoregMultiSeriesCustom` classes.</span>
+
+<span class="sd">    - If `series` is a pandas DataFrame, it is converted to a dict of pandas </span>
+<span class="sd">    Series and index is overwritten according to the rules of preprocess_y.</span>
+<span class="sd">    - If `series` is a dict, all values are converted to pandas Series. Checks</span>
+<span class="sd">    if all index are pandas DatetimeIndex and, at least, one Series has a non-null</span>
+<span class="sd">    frequency. No multiple frequency is allowed.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    series : pandas DataFrame, dict</span>
+<span class="sd">        Training time series.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    series_dict : dict</span>
+<span class="sd">        Dictionary with the series used during training.</span>
+<span class="sd">    series_indexes : dict</span>
+<span class="sd">        Dictionary with the index of each series.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">series_index</span> <span class="o">=</span> <span class="n">preprocess_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">series</span><span class="p">,</span> <span class="n">return_values</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">series</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">series_index</span>
+        <span class="n">series_dict</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="s2">&quot;series&quot;</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+
+        <span class="n">not_valid_series</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">k</span> 
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">series</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">not_valid_series</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;If `series` is a dictionary, all series must be a named &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;pandas Series or a pandas DataFrame with a single column. &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;Review series: </span><span class="si">{</span><span class="n">not_valid_series</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">series_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">series</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">}</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">series_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">v</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;If `series` is a dictionary, all series must be a named &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;pandas Series or a pandas DataFrame with a single column. &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;Review series: &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+                    <span class="p">)</span>
+                <span class="n">series_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">series_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">k</span>
+
+        <span class="n">not_valid_index</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">k</span> 
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">series_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">)</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">not_valid_index</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;If `series` is a dictionary, all series must have a Pandas &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;DatetimeIndex as index with the same frequency. &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;Review series: </span><span class="si">{</span><span class="n">not_valid_index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">indexes_freq</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">v</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">freq</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">series_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+        <span class="n">indexes_freq</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">indexes_freq</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="n">indexes_freq</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;If `series` is a dictionary, all series must have a Pandas &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;DatetimeIndex as index with the same frequency. &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;Found frequencies: </span><span class="si">{</span><span class="n">indexes_freq</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`series` must be a pandas DataFrame or a dict of DataFrames or Series. &quot;</span>
+             <span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">series</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">series_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All values of series &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; are NaN.&quot;</span><span class="p">)</span>
+
+    <span class="n">series_indexes</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">k</span><span class="p">:</span> <span class="n">v</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">series_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">}</span>
+
+    <span class="k">return</span> <span class="n">series_dict</span><span class="p">,</span> <span class="n">series_indexes</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="skforecast.utils.utils.check_preprocess_exog_multiseries" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">check_preprocess_exog_multiseries</span><span class="p">(</span><span class="n">input_series_is_dict</span><span class="p">,</span> <span class="n">series_indexes</span><span class="p">,</span> <span class="n">series_col_names</span><span class="p">,</span> <span class="n">exog</span><span class="p">,</span> <span class="n">exog_dict</span><span class="p">)</span></code>
+
+<a href="#skforecast.utils.utils.check_preprocess_exog_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Check and preprocess <code>exog</code> argument in <code>ForecasterAutoregMultiSeries</code> and
+<code>ForecasterAutoregMultiSeriesCustom</code> classes.</p>
+<ul>
+<li>If input series is a pandas DataFrame (input_series_is_dict = False),<br />
+checks that input exog (pandas Series, DataFrame or dict) has the same index 
+(type, length and frequency). Index is overwritten according to the rules 
+of preprocess_exog. Create a dict of exog with the same keys as series.</li>
+<li>If input series is a dict (input_series_is_dict = True), then input 
+exog must be a dict. Check exog has a pandas DatetimeIndex and convert all
+values to pandas DataFrames.</li>
+</ul>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>input_series_is_dict</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Indicates if input series argument is a dict.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>series_indexes</code></td>
+          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary with the index of each series.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>series_col_names</code></td>
+          <td>
+                <code>list</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Names of the series (levels) used during training.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>exog</code></td>
+          <td>
+                <code>pandas Series, pandas DataFrame, dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Exogenous variable/s used during training.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>exog_dict</code></td>
+          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary with the exogenous variable/s used during training.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>exog_dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary with the exogenous variable/s used during training.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+<td><code>exog_col_names</code></td>          <td>
+                <code>list</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Names of the exogenous variables used during training.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2278</span>
+<span class="normal">2279</span>
+<span class="normal">2280</span>
+<span class="normal">2281</span>
+<span class="normal">2282</span>
+<span class="normal">2283</span>
+<span class="normal">2284</span>
+<span class="normal">2285</span>
+<span class="normal">2286</span>
+<span class="normal">2287</span>
+<span class="normal">2288</span>
+<span class="normal">2289</span>
+<span class="normal">2290</span>
+<span class="normal">2291</span>
+<span class="normal">2292</span>
+<span class="normal">2293</span>
+<span class="normal">2294</span>
+<span class="normal">2295</span>
+<span class="normal">2296</span>
+<span class="normal">2297</span>
+<span class="normal">2298</span>
+<span class="normal">2299</span>
+<span class="normal">2300</span>
+<span class="normal">2301</span>
+<span class="normal">2302</span>
+<span class="normal">2303</span>
+<span class="normal">2304</span>
+<span class="normal">2305</span>
+<span class="normal">2306</span>
+<span class="normal">2307</span>
+<span class="normal">2308</span>
+<span class="normal">2309</span>
+<span class="normal">2310</span>
+<span class="normal">2311</span>
+<span class="normal">2312</span>
+<span class="normal">2313</span>
+<span class="normal">2314</span>
+<span class="normal">2315</span>
+<span class="normal">2316</span>
+<span class="normal">2317</span>
+<span class="normal">2318</span>
+<span class="normal">2319</span>
+<span class="normal">2320</span>
+<span class="normal">2321</span>
+<span class="normal">2322</span>
+<span class="normal">2323</span>
+<span class="normal">2324</span>
+<span class="normal">2325</span>
+<span class="normal">2326</span>
+<span class="normal">2327</span>
+<span class="normal">2328</span>
+<span class="normal">2329</span>
+<span class="normal">2330</span>
+<span class="normal">2331</span>
+<span class="normal">2332</span>
+<span class="normal">2333</span>
+<span class="normal">2334</span>
+<span class="normal">2335</span>
+<span class="normal">2336</span>
+<span class="normal">2337</span>
+<span class="normal">2338</span>
+<span class="normal">2339</span>
+<span class="normal">2340</span>
+<span class="normal">2341</span>
+<span class="normal">2342</span>
+<span class="normal">2343</span>
+<span class="normal">2344</span>
+<span class="normal">2345</span>
+<span class="normal">2346</span>
+<span class="normal">2347</span>
+<span class="normal">2348</span>
+<span class="normal">2349</span>
+<span class="normal">2350</span>
+<span class="normal">2351</span>
+<span class="normal">2352</span>
+<span class="normal">2353</span>
+<span class="normal">2354</span>
+<span class="normal">2355</span>
+<span class="normal">2356</span>
+<span class="normal">2357</span>
+<span class="normal">2358</span>
+<span class="normal">2359</span>
+<span class="normal">2360</span>
+<span class="normal">2361</span>
+<span class="normal">2362</span>
+<span class="normal">2363</span>
+<span class="normal">2364</span>
+<span class="normal">2365</span>
+<span class="normal">2366</span>
+<span class="normal">2367</span>
+<span class="normal">2368</span>
+<span class="normal">2369</span>
+<span class="normal">2370</span>
+<span class="normal">2371</span>
+<span class="normal">2372</span>
+<span class="normal">2373</span>
+<span class="normal">2374</span>
+<span class="normal">2375</span>
+<span class="normal">2376</span>
+<span class="normal">2377</span>
+<span class="normal">2378</span>
+<span class="normal">2379</span>
+<span class="normal">2380</span>
+<span class="normal">2381</span>
+<span class="normal">2382</span>
+<span class="normal">2383</span>
+<span class="normal">2384</span>
+<span class="normal">2385</span>
+<span class="normal">2386</span>
+<span class="normal">2387</span>
+<span class="normal">2388</span>
+<span class="normal">2389</span>
+<span class="normal">2390</span>
+<span class="normal">2391</span>
+<span class="normal">2392</span>
+<span class="normal">2393</span>
+<span class="normal">2394</span>
+<span class="normal">2395</span>
+<span class="normal">2396</span>
+<span class="normal">2397</span>
+<span class="normal">2398</span>
+<span class="normal">2399</span>
+<span class="normal">2400</span>
+<span class="normal">2401</span>
+<span class="normal">2402</span>
+<span class="normal">2403</span>
+<span class="normal">2404</span>
+<span class="normal">2405</span>
+<span class="normal">2406</span>
+<span class="normal">2407</span>
+<span class="normal">2408</span>
+<span class="normal">2409</span>
+<span class="normal">2410</span>
+<span class="normal">2411</span>
+<span class="normal">2412</span>
+<span class="normal">2413</span>
+<span class="normal">2414</span>
+<span class="normal">2415</span>
+<span class="normal">2416</span>
+<span class="normal">2417</span>
+<span class="normal">2418</span>
+<span class="normal">2419</span>
+<span class="normal">2420</span>
+<span class="normal">2421</span>
+<span class="normal">2422</span>
+<span class="normal">2423</span>
+<span class="normal">2424</span>
+<span class="normal">2425</span>
+<span class="normal">2426</span>
+<span class="normal">2427</span>
+<span class="normal">2428</span>
+<span class="normal">2429</span>
+<span class="normal">2430</span>
+<span class="normal">2431</span>
+<span class="normal">2432</span>
+<span class="normal">2433</span>
+<span class="normal">2434</span>
+<span class="normal">2435</span>
+<span class="normal">2436</span>
+<span class="normal">2437</span>
+<span class="normal">2438</span>
+<span class="normal">2439</span>
+<span class="normal">2440</span>
+<span class="normal">2441</span>
+<span class="normal">2442</span>
+<span class="normal">2443</span>
+<span class="normal">2444</span>
+<span class="normal">2445</span>
+<span class="normal">2446</span>
+<span class="normal">2447</span>
+<span class="normal">2448</span>
+<span class="normal">2449</span>
+<span class="normal">2450</span>
+<span class="normal">2451</span>
+<span class="normal">2452</span>
+<span class="normal">2453</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">check_preprocess_exog_multiseries</span><span class="p">(</span>
+    <span class="n">input_series_is_dict</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">series_indexes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">series_col_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">exog</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
+    <span class="n">exog_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">list</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check and preprocess `exog` argument in `ForecasterAutoregMultiSeries` and</span>
+<span class="sd">    `ForecasterAutoregMultiSeriesCustom` classes.</span>
+
+<span class="sd">    - If input series is a pandas DataFrame (input_series_is_dict = False),  </span>
+<span class="sd">    checks that input exog (pandas Series, DataFrame or dict) has the same index </span>
+<span class="sd">    (type, length and frequency). Index is overwritten according to the rules </span>
+<span class="sd">    of preprocess_exog. Create a dict of exog with the same keys as series.</span>
+<span class="sd">    - If input series is a dict (input_series_is_dict = True), then input </span>
+<span class="sd">    exog must be a dict. Check exog has a pandas DatetimeIndex and convert all</span>
+<span class="sd">    values to pandas DataFrames.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    input_series_is_dict : bool</span>
+<span class="sd">        Indicates if input series argument is a dict.</span>
+<span class="sd">    series_indexes : dict</span>
+<span class="sd">        Dictionary with the index of each series.</span>
+<span class="sd">    series_col_names : list</span>
+<span class="sd">        Names of the series (levels) used during training.</span>
+<span class="sd">    exog : pandas Series, pandas DataFrame, dict</span>
+<span class="sd">        Exogenous variable/s used during training.</span>
+<span class="sd">    exog_dict : dict</span>
+<span class="sd">        Dictionary with the exogenous variable/s used during training.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    exog_dict : dict</span>
+<span class="sd">        Dictionary with the exogenous variable/s used during training.</span>
+<span class="sd">    exog_col_names : list</span>
+<span class="sd">        Names of the exogenous variables used during training.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exog</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`exog` must be a pandas Series, DataFrame, dictionary of pandas &quot;</span>
+             <span class="sa">f</span><span class="s2">&quot;Series/DataFrames or None. Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exog</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">input_series_is_dict</span><span class="p">:</span>
+        <span class="c1"># If input series is a pandas DataFrame, all index are the same.</span>
+        <span class="c1"># Select the first index to check exog</span>
+        <span class="n">series_index</span> <span class="o">=</span> <span class="n">series_indexes</span><span class="p">[</span><span class="n">series_col_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exog</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)):</span> 
+
+        <span class="k">if</span> <span class="n">input_series_is_dict</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`exog` must be a dict of DataFrames or Series if &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;`series` is a dict. Got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">exog</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">_</span><span class="p">,</span> <span class="n">exog_index</span> <span class="o">=</span> <span class="n">preprocess_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">exog</span><span class="p">,</span> <span class="n">return_values</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">exog</span> <span class="o">=</span> <span class="n">exog</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exog</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">)</span> <span class="k">else</span> <span class="n">exog</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">exog</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">exog_index</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">exog</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series_index</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`exog` must have same number of samples as `series`. &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;length `exog`: (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">exog</span><span class="p">)</span><span class="si">}</span><span class="s2">), length `series`: (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">series_index</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">exog_index</span> <span class="o">==</span> <span class="n">series_index</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="p">(</span><span class="s2">&quot;Different index for `series` and `exog`. They must be equal &quot;</span>
+                 <span class="s2">&quot;to ensure the correct alignment of values.&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="n">exog_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">serie</span><span class="p">:</span> <span class="n">exog</span> <span class="k">for</span> <span class="n">serie</span> <span class="ow">in</span> <span class="n">series_col_names</span><span class="p">}</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">not_valid_exog</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">k</span> 
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">exog</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">)))</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">not_valid_exog</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;If `exog` is a dictionary, all exog must be a named pandas &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;Series, a pandas DataFrame or None. Review exog: </span><span class="si">{</span><span class="n">not_valid_exog</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Only elements already present in exog_dict are updated</span>
+        <span class="n">exog_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+            <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">exog</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> 
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">exog_dict</span> <span class="ow">and</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="p">)</span>
+
+        <span class="n">series_not_in_exog</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">series_col_names</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">exog</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">series_not_in_exog</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">series_not_in_exog</span><span class="si">}</span><span class="s2"> not present in `exog`. All values &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;of the exogenous variables for these series will be NaN.&quot;</span><span class="p">),</span>
+                 <span class="n">MissingExogWarning</span>
+            <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">exog_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">check_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">allow_nan</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+                    <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
+                <span class="n">exog_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">input_series_is_dict</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">exog_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series_index</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`exog` for series &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; must have same number of &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;samples as `series`. length `exog`: (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="si">}</span><span class="s2">), &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;length `series`: (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">series_index</span><span class="p">)</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+                        <span class="p">)</span>
+
+                    <span class="n">_</span><span class="p">,</span> <span class="n">v_index</span> <span class="o">=</span> <span class="n">preprocess_exog</span><span class="p">(</span><span class="n">exog</span><span class="o">=</span><span class="n">v</span><span class="p">,</span> <span class="n">return_values</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">exog_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">v_index</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">exog_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">index</span> <span class="o">==</span> <span class="n">series_index</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Different index for series &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; and its exog. &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;When `series` is a pandas DataFrame, they must be &quot;</span>
+                             <span class="sa">f</span><span class="s2">&quot;equal to ensure the correct alignment of values.&quot;</span><span class="p">)</span>
+                        <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">not_valid_index</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">k</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">exog_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DatetimeIndex</span><span class="p">)</span>
+            <span class="p">]</span>
+            <span class="k">if</span> <span class="n">not_valid_index</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;All exog must have a Pandas DatetimeIndex as index with the &quot;</span>
+                     <span class="sa">f</span><span class="s2">&quot;same frequency. Check exog for series: </span><span class="si">{</span><span class="n">not_valid_index</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="p">)</span>
+
+    <span class="n">exog_col_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+        <span class="nb">set</span><span class="p">(</span>
+            <span class="n">column</span>
+            <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="n">exog_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">to_list</span><span class="p">()</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Check that all exog have the same dtypes for common columns</span>
+    <span class="n">exog_dtype_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">col_name</span><span class="p">:</span> <span class="nb">set</span><span class="p">()</span> 
+                       <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">exog_col_names</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">exog_dict</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">v</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">exog_dtype_dict</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">col_name</span><span class="p">,</span> <span class="n">dtypes</span> <span class="ow">in</span> <span class="n">exog_dtype_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dtypes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Column &#39;</span><span class="si">{</span><span class="n">col_name</span><span class="si">}</span><span class="s2">&#39; has different dtypes in different exog &quot;</span>
+                 <span class="sa">f</span><span class="s2">&quot;DataFrames or Series.&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">exog_col_names</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">series_col_names</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">exog_col_names</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`exog` cannot contain a column named the same as one of the &quot;</span>
+             <span class="sa">f</span><span class="s2">&quot;series (column names of series).</span><span class="se">\n</span><span class="s2">&quot;</span>
+             <span class="sa">f</span><span class="s2">&quot;    `series` columns : </span><span class="si">{</span><span class="n">series_col_names</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
+             <span class="sa">f</span><span class="s2">&quot;    `exog`   columns : </span><span class="si">{</span><span class="n">exog_col_names</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">exog_dict</span><span class="p">,</span> <span class="n">exog_col_names</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="skforecast.utils.utils.align_series_and_exog_multiseries" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">align_series_and_exog_multiseries</span><span class="p">(</span><span class="n">series_dict</span><span class="p">,</span> <span class="n">input_series_is_dict</span><span class="p">,</span> <span class="n">exog_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+<a href="#skforecast.utils.utils.align_series_and_exog_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Align series and exog according to their index. If needed, reindexing is
+applied. Heading and trailing NaNs are removed from all series in 
+<code>series_dict</code>.</p>
+<ul>
+<li>If input series is a pandas DataFrame (input_series_is_dict = False),<br />
+input exog (pandas Series, DataFrame or dict) must have the same index 
+(type, length and frequency). Reindexing is not applied.</li>
+<li>If input series is a dict (input_series_is_dict = True), then input 
+exog must be a dict. Both must have a pandas DatetimeIndex, but can have 
+different lengths. Reindexing is applied.</li>
+</ul>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>series_dict</code></td>
+          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary with the series used during training.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>input_series_is_dict</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Indicates if input series argument is a dict.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>exog_dict</code></td>
+          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary with the exogenous variable/s used during training.</p>
+            </div>
+          </td>
+          <td>
+                <code>`None`</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+<th>Name</th>        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+<td><code>series_dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary with the series used during training.</p>
+            </div>
+          </td>
+        </tr>
+        <tr>
+<td><code>exog_dict</code></td>          <td>
+                <code>dict</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Dictionary with the exogenous variable/s used during training.</p>
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2456</span>
+<span class="normal">2457</span>
+<span class="normal">2458</span>
+<span class="normal">2459</span>
+<span class="normal">2460</span>
+<span class="normal">2461</span>
+<span class="normal">2462</span>
+<span class="normal">2463</span>
+<span class="normal">2464</span>
+<span class="normal">2465</span>
+<span class="normal">2466</span>
+<span class="normal">2467</span>
+<span class="normal">2468</span>
+<span class="normal">2469</span>
+<span class="normal">2470</span>
+<span class="normal">2471</span>
+<span class="normal">2472</span>
+<span class="normal">2473</span>
+<span class="normal">2474</span>
+<span class="normal">2475</span>
+<span class="normal">2476</span>
+<span class="normal">2477</span>
+<span class="normal">2478</span>
+<span class="normal">2479</span>
+<span class="normal">2480</span>
+<span class="normal">2481</span>
+<span class="normal">2482</span>
+<span class="normal">2483</span>
+<span class="normal">2484</span>
+<span class="normal">2485</span>
+<span class="normal">2486</span>
+<span class="normal">2487</span>
+<span class="normal">2488</span>
+<span class="normal">2489</span>
+<span class="normal">2490</span>
+<span class="normal">2491</span>
+<span class="normal">2492</span>
+<span class="normal">2493</span>
+<span class="normal">2494</span>
+<span class="normal">2495</span>
+<span class="normal">2496</span>
+<span class="normal">2497</span>
+<span class="normal">2498</span>
+<span class="normal">2499</span>
+<span class="normal">2500</span>
+<span class="normal">2501</span>
+<span class="normal">2502</span>
+<span class="normal">2503</span>
+<span class="normal">2504</span>
+<span class="normal">2505</span>
+<span class="normal">2506</span>
+<span class="normal">2507</span>
+<span class="normal">2508</span>
+<span class="normal">2509</span>
+<span class="normal">2510</span>
+<span class="normal">2511</span>
+<span class="normal">2512</span>
+<span class="normal">2513</span>
+<span class="normal">2514</span>
+<span class="normal">2515</span>
+<span class="normal">2516</span>
+<span class="normal">2517</span>
+<span class="normal">2518</span>
+<span class="normal">2519</span>
+<span class="normal">2520</span>
+<span class="normal">2521</span>
+<span class="normal">2522</span>
+<span class="normal">2523</span>
+<span class="normal">2524</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">align_series_and_exog_multiseries</span><span class="p">(</span>
+    <span class="n">series_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">input_series_is_dict</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">exog_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Align series and exog according to their index. If needed, reindexing is</span>
+<span class="sd">    applied. Heading and trailing NaNs are removed from all series in </span>
+<span class="sd">    `series_dict`.</span>
+
+<span class="sd">    - If input series is a pandas DataFrame (input_series_is_dict = False),  </span>
+<span class="sd">    input exog (pandas Series, DataFrame or dict) must have the same index </span>
+<span class="sd">    (type, length and frequency). Reindexing is not applied.</span>
+<span class="sd">    - If input series is a dict (input_series_is_dict = True), then input </span>
+<span class="sd">    exog must be a dict. Both must have a pandas DatetimeIndex, but can have </span>
+<span class="sd">    different lengths. Reindexing is applied.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    series_dict : dict</span>
+<span class="sd">        Dictionary with the series used during training.</span>
+<span class="sd">    input_series_is_dict : bool</span>
+<span class="sd">        Indicates if input series argument is a dict.</span>
+<span class="sd">    exog_dict : dict, default `None`</span>
+<span class="sd">        Dictionary with the exogenous variable/s used during training.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    series_dict : dict</span>
+<span class="sd">        Dictionary with the series used during training.</span>
+<span class="sd">    exog_dict : dict</span>
+<span class="sd">        Dictionary with the exogenous variable/s used during training.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">series_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+
+        <span class="n">first_valid_index</span> <span class="o">=</span> <span class="n">series_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">first_valid_index</span><span class="p">()</span>
+        <span class="n">last_valid_index</span> <span class="o">=</span> <span class="n">series_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">last_valid_index</span><span class="p">()</span>
+
+        <span class="n">series_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">series_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">first_valid_index</span> <span class="p">:</span> <span class="n">last_valid_index</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">exog_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">input_series_is_dict</span><span class="p">:</span>
+                <span class="n">index_intersection</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">series_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">exog_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">index_intersection</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Series &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; and its `exog` do not have the same index. &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;All exog values will be NaN for the period of the series.&quot;</span><span class="p">),</span>
+                         <span class="n">MissingValuesWarning</span>
+                    <span class="p">)</span>
+                <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">index_intersection</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]):</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                        <span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Series &#39;</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&#39; and its `exog` do not have the same length. &quot;</span>
+                         <span class="sa">f</span><span class="s2">&quot;Exog values will be NaN for the not matched period of the series.&quot;</span><span class="p">),</span>
+                         <span class="n">MissingValuesWarning</span>
+                    <span class="p">)</span>  
+                <span class="n">exog_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">exog_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">index_intersection</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">index_intersection</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]):</span>
+                    <span class="n">exog_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">exog_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">reindex</span><span class="p">(</span>
+                                       <span class="n">series_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> 
+                                       <span class="n">fill_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+                                   <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">exog_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">exog_dict</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">first_valid_index</span> <span class="p">:</span> <span class="n">last_valid_index</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">series_dict</span><span class="p">,</span> <span class="n">exog_dict</span>
+</code></pre></div></td></tr></table></div>
+          </details>
+  </div>
+
+</div>
+
+
+<div class="doc doc-object doc-function">
+
+
+
+
+<h2 id="skforecast.utils.utils.set_skforecast_warnings" class="doc doc-heading">
+          <code class="highlight language-python"><span class="n">set_skforecast_warnings</span><span class="p">(</span><span class="n">suppress_warnings</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">)</span></code>
+
+<a href="#skforecast.utils.utils.set_skforecast_warnings" class="headerlink" title="Permanent link">&para;</a></h2>
+
+
+  <div class="doc doc-contents first">
+  
+      <p>Set skforecast warnings action.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>suppress_warnings</code></td>
+          <td>
+                <code>bool</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>If <code>True</code>, skforecast warnings will be suppressed. If <code>False</code>, skforecast
+warnings will be shown as default. See 
+skforecast.exceptions.warn_skforecast_categories for more information.</p>
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+        <tr>
+          <td><code>action</code></td>
+          <td>
+                <code>str</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              <p>Action to be taken when a warning is raised. See the warnings module
+for more information.</p>
+            </div>
+          </td>
+          <td>
+                <code>`&#39;default&#39;`</code>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+
+
+  <p><strong>Returns:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Type</th>
+        <th>Description</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td>
+                <code>None</code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+        </tr>
+    </tbody>
+  </table>
+
+          <details class="quote">
+            <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
+            <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2527</span>
+<span class="normal">2528</span>
+<span class="normal">2529</span>
+<span class="normal">2530</span>
+<span class="normal">2531</span>
+<span class="normal">2532</span>
+<span class="normal">2533</span>
+<span class="normal">2534</span>
+<span class="normal">2535</span>
+<span class="normal">2536</span>
+<span class="normal">2537</span>
+<span class="normal">2538</span>
+<span class="normal">2539</span>
+<span class="normal">2540</span>
+<span class="normal">2541</span>
+<span class="normal">2542</span>
+<span class="normal">2543</span>
+<span class="normal">2544</span>
+<span class="normal">2545</span>
+<span class="normal">2546</span>
+<span class="normal">2547</span>
+<span class="normal">2548</span>
+<span class="normal">2549</span>
+<span class="normal">2550</span>
+<span class="normal">2551</span>
+<span class="normal">2552</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">set_skforecast_warnings</span><span class="p">(</span>
+    <span class="n">suppress_warnings</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+    <span class="n">action</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s1">&#39;default&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Set skforecast warnings action.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    suppress_warnings : bool</span>
+<span class="sd">        If `True`, skforecast warnings will be suppressed. If `False`, skforecast</span>
+<span class="sd">        warnings will be shown as default. See </span>
+<span class="sd">        skforecast.exceptions.warn_skforecast_categories for more information.</span>
+<span class="sd">    action : str, default `&#39;default&#39;`</span>
+<span class="sd">        Action to be taken when a warning is raised. See the warnings module</span>
+<span class="sd">        for more information.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    None</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">suppress_warnings</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">warn_skforecast_categories</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="n">action</span><span class="p">,</span> <span class="n">category</span><span class="o">=</span><span class="n">category</span><span class="p">)</span>
 </code></pre></div></td></tr></table></div>
           </details>
   </div>
