@@ -2537,7 +2537,7 @@ def set_skforecast_warnings(
         If `True`, skforecast warnings will be suppressed. If `False`, skforecast
         warnings will be shown as default. See 
         skforecast.exceptions.warn_skforecast_categories for more information.
-    action : str, default 'default'
+    action : str, default `'default'`
         Action to be taken when a warning is raised. See the warnings module
         for more information.
 

@@ -4,6 +4,8 @@
 ::: skforecast.utils.utils.load_forecaster
 ::: skforecast.utils.utils.initialize_lags
 ::: skforecast.utils.utils.initialize_weights
+::: skforecast.utils.utils.initialize_transformer_series
+::: skforecast.utils.utils.initialize_lags_grid
 ::: skforecast.utils.utils.check_select_fit_kwargs
 ::: skforecast.utils.utils.check_y
 ::: skforecast.utils.utils.check_exog
@@ -25,3 +27,7 @@
 ::: skforecast.utils.utils.check_backtesting_input
 ::: skforecast.utils.utils.select_n_jobs_backtesting
 ::: skforecast.utils.utils.select_n_jobs_fit_forecaster
+::: skforecast.utils.utils.check_preprocess_series
+::: skforecast.utils.utils.check_preprocess_exog_multiseries
+::: skforecast.utils.utils.align_series_and_exog_multiseries
+::: skforecast.utils.utils.set_skforecast_warnings

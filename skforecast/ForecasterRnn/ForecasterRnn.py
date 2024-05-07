@@ -9,7 +9,6 @@ import logging
 import sys
 import warnings
 from copy import deepcopy
-from math import e
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 import matplotlib
 import matplotlib.pyplot as plt
@@ -54,7 +53,7 @@ class ForecasterRnn(ForecasterBase):
         Name of one or more time series to be predicted. This determine the series
         the forecaster will be handling. If `None`, all series used during training
         will be available for prediction.
-    lags : int, list, str, default 'auto'
+    lags : int, list, str, default `'auto'`
         Lags used as predictors. If 'auto', lags used are from 1 to N, where N is
         extracted from the input layer `self.regressor.layers[0].input_shape[0][1]`.
     transformer_series : object, dict, default `sklearn.preprocessing.MinMaxScaler(feature_range=(0, 1))`
@@ -64,14 +63,13 @@ class ForecasterRnn(ForecasterBase):
         the forecaster. ColumnTransformers are not allowed since they do not have
         inverse_transform method.
 
-            - If single transformer: it is cloned and applied to all series.
-            - If `dict` of transformers: a different transformer can be used for each
-            series.
+        - If single transformer: it is cloned and applied to all series.
+        - If `dict` of transformers: a different transformer can be used for each series.
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
-    steps : int, list, str, default 'auto'
+    steps : int, list, str, default `'auto'`
         Steps to be predicted. If 'auto', steps used are from 1 to N, where N is
         extracted from the output layer `self.regressor.layers[-1].output_shape[1]`.
     lags  : Ignored
@@ -105,10 +103,6 @@ class ForecasterRnn(ForecasterBase):
         inverse_transform. Transformation is applied to each `series` before training
         the forecaster. ColumnTransformers are not allowed since they do not have
         inverse_transform method.
-
-            - If single transformer: it is cloned and applied to all series.
-            - If `dict` of transformers: a different transformer can be used for each
-            series.
     transformer_series_ : dict
         Dictionary with the transformer for each series. It is created cloning the
         objects in `transformer_series` and is used internally to avoid overwriting.
@@ -173,6 +167,7 @@ class ForecasterRnn(ForecasterBase):
         internally to avoid overwriting.
     dropna_from_series : Ignored
         Not used, present here for API consistency by convention.
+    
     """
 
     def __init__(
@@ -764,16 +759,11 @@ class ForecasterRnn(ForecasterBase):
 
         Parameters
         ----------
-        ax : matplotlib.axes.Axes, default `None`.
+        ax : matplotlib.axes.Axes, default `None`
             Pre-existing ax for the plot. Otherwise, call matplotlib.pyplot.subplots()
             internally.
         fig_kw : dict
-            Other keyword arguments are passed to matplotlib.pyplot.subplots()
-
-        Raises
-        ------
-        ValueError
-            If 'val_loss' key is not present in the history dictionary.
+            Other keyword arguments are passed to matplotlib.pyplot.subplots().
 
         Returns
         -------
