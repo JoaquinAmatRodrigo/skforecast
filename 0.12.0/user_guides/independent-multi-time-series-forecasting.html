@@ -5439,9 +5439,30 @@ Forecaster id: None </pre>
 </li>
 <li><p>If <code>series</code> is a <code>pandas DataFrame</code> and <code>exog</code> is a dict of <code>pandas Series</code> or <code>DataFrames</code>. Each key in <code>exog</code> must be a column in <code>series</code> and the values are the exog for each series. <code>exog</code> must have the same index as <code>series</code> (type, length and frequency).</p>
 </li>
-<li><p>If <code>series</code> is a dict of <code>pandas Series</code>, <code>exog</code> must be a dict of <code>pandas Series</code> or <code>DataFrames</code>. The keys in <code>series</code> and <code>exog</code> must be the same. All series and exog must have a <code>pandas DatetimeIndex</code> with the same frequency.</p>
+<li><p>If <code>series</code> is a <code>dict</code> of <code>pandas Series</code>, <code>exog</code> must be a dict of <code>pandas Series</code> or <code>DataFrames</code>. The keys in <code>series</code> and <code>exog</code> must be the same. All series and exog must have a <code>pandas DatetimeIndex</code> with the same frequency.</p>
 </li>
 </ul>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">Series type</th>
+<th style="text-align:center">Exog type</th>
+<th style="text-align:center">Requirements</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><code>DataFrame</code></td>
+<td style="text-align:center"><code>Series</code>, <code>DataFrame</code> or <code>dict</code></td>
+<td style="text-align:center">Same index (type, length and frequency)</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>dict</code></td>
+<td style="text-align:center"><code>dict</code></td>
+<td style="text-align:center">Both <code>pandas DatetimeIndex</code> (same frequency)</td>
+</tr>
+</tbody>
+</table>
 </div>
 </div>
 </div>
