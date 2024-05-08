@@ -3400,8 +3400,8 @@ Training index type: DatetimeIndex
 Training index frequency: D 
 Regressor parameters: alpha: 1.0, copy_X: True, fit_intercept: True, max_iter: None, positive: False, ... 
 fit_kwargs: {} 
-Creation date: 2024-05-07 12:38:35 
-Last fit date: 2024-05-07 12:38:35 
+Creation date: 2024-05-08 11:48:27 
+Last fit date: 2024-05-08 11:48:27 
 Skforecast version: 0.12.0 
 Python version: 3.11.5 
 Forecaster id: None </pre>
@@ -3611,22 +3611,22 @@ display(predictions_intervals.head(3))</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Backtesting Multi-Series</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">metrics_levels</span><span class="p">,</span> <span class="n">backtest_predictions</span> <span class="o">=</span> <span class="n">backtesting_forecaster_multiseries</span><span class="p">(</span>
-                                           <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
-                                           <span class="n">series</span>                <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
-                                           <span class="n">exog</span>                  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                                           <span class="n">levels</span>                <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                                           <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
-                                           <span class="n">metric</span>                <span class="o">=</span> <span class="s1">'mean_absolute_error'</span><span class="p">,</span>
-                                           <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_train</span><span class="p">),</span>
-                                           <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                           <span class="n">gap</span>                   <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                                           <span class="n">allow_incomplete_fold</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                           <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                           <span class="n">n_jobs</span>                <span class="o">=</span> <span class="s1">'auto'</span><span class="p">,</span>
-                                           <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                                           <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                           <span class="n">suppress_warnings</span>     <span class="o">=</span> <span class="kc">False</span>
-                                       <span class="p">)</span>
+    <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">series</span>                <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
+    <span class="n">exog</span>                  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">levels</span>                <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
+    <span class="n">metric</span>                <span class="o">=</span> <span class="s1">'mean_absolute_error'</span><span class="p">,</span>
+    <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_train</span><span class="p">),</span>
+    <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">gap</span>                   <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">allow_incomplete_fold</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_jobs</span>                <span class="o">=</span> <span class="s1">'auto'</span><span class="p">,</span>
+    <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">suppress_warnings</span>     <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Backtest metrics"</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">metrics_levels</span><span class="p">)</span>
@@ -3637,22 +3637,22 @@ display(predictions_intervals.head(3))</div>
 <div class="clipboard-copy-txt" id="cell-7"># Backtesting Multi-Series
 # ==============================================================================
 metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                           forecaster            = forecaster,
-                                           series                = data,
-                                           exog                  = None,
-                                           levels                = None,
-                                           steps                 = 24,
-                                           metric                = 'mean_absolute_error',
-                                           initial_train_size    = len(data_train),
-                                           fixed_train_size      = True,
-                                           gap                   = 0,
-                                           allow_incomplete_fold = True,
-                                           refit                 = True,
-                                           n_jobs                = 'auto',
-                                           verbose               = False,
-                                           show_progress         = True,
-                                           suppress_warnings     = False
-                                       )
+    forecaster            = forecaster,
+    series                = data,
+    exog                  = None,
+    levels                = None,
+    steps                 = 24,
+    metric                = 'mean_absolute_error',
+    initial_train_size    = len(data_train),
+    fixed_train_size      = True,
+    gap                   = 0,
+    allow_incomplete_fold = True,
+    refit                 = True,
+    n_jobs                = 'auto',
+    verbose               = False,
+    show_progress         = True,
+    suppress_warnings     = False
+)
 
 print("Backtest metrics")
 display(metrics_levels)
@@ -4100,27 +4100,27 @@ results</div>
     <span class="k">return</span> <span class="n">search_space</span>
 
 <span class="n">results</span><span class="p">,</span> <span class="n">best_trial</span> <span class="o">=</span> <span class="n">bayesian_search_forecaster_multiseries</span><span class="p">(</span>
-                          <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
-                          <span class="n">series</span>                <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
-                          <span class="n">exog</span>                  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">levels</span>                <span class="o">=</span> <span class="n">levels</span><span class="p">,</span> <span class="c1"># Same as levels=None</span>
-                          <span class="n">search_space</span>          <span class="o">=</span> <span class="n">search_space</span><span class="p">,</span>
-                          <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
-                          <span class="n">metric</span>                <span class="o">=</span> <span class="s1">'mean_absolute_error'</span><span class="p">,</span>
-                          <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_train</span><span class="p">),</span>
-                          <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">n_trials</span>              <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
-                          <span class="n">random_state</span>          <span class="o">=</span> <span class="mi">123</span><span class="p">,</span>
-                          <span class="n">return_best</span>           <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">n_jobs</span>                <span class="o">=</span> <span class="s1">'auto'</span><span class="p">,</span>
-                          <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                          <span class="n">suppress_warnings</span>     <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">engine</span>                <span class="o">=</span> <span class="s1">'optuna'</span><span class="p">,</span>
-                          <span class="n">kwargs_create_study</span>   <span class="o">=</span> <span class="p">{},</span>
-                          <span class="n">kwargs_study_optimize</span> <span class="o">=</span> <span class="p">{}</span>
-                      <span class="p">)</span>
+    <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">series</span>                <span class="o">=</span> <span class="n">data</span><span class="p">,</span>
+    <span class="n">exog</span>                  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">levels</span>                <span class="o">=</span> <span class="n">levels</span><span class="p">,</span> <span class="c1"># Same as levels=None</span>
+    <span class="n">search_space</span>          <span class="o">=</span> <span class="n">search_space</span><span class="p">,</span>
+    <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
+    <span class="n">metric</span>                <span class="o">=</span> <span class="s1">'mean_absolute_error'</span><span class="p">,</span>
+    <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_train</span><span class="p">),</span>
+    <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_trials</span>              <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+    <span class="n">random_state</span>          <span class="o">=</span> <span class="mi">123</span><span class="p">,</span>
+    <span class="n">return_best</span>           <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_jobs</span>                <span class="o">=</span> <span class="s1">'auto'</span><span class="p">,</span>
+    <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">suppress_warnings</span>     <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">engine</span>                <span class="o">=</span> <span class="s1">'optuna'</span><span class="p">,</span>
+    <span class="n">kwargs_create_study</span>   <span class="o">=</span> <span class="p">{},</span>
+    <span class="n">kwargs_study_optimize</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="p">)</span>
 
 <span class="n">results</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
@@ -4147,27 +4147,27 @@ def search_space(trial):
     return search_space
 
 results, best_trial = bayesian_search_forecaster_multiseries(
-                          forecaster            = forecaster,
-                          series                = data,
-                          exog                  = None,
-                          levels                = levels, # Same as levels=None
-                          search_space          = search_space,
-                          steps                 = 24,
-                          metric                = 'mean_absolute_error',
-                          refit                 = False,
-                          initial_train_size    = len(data_train),
-                          fixed_train_size      = False,
-                          n_trials              = 5,
-                          random_state          = 123,
-                          return_best           = False,
-                          n_jobs                = 'auto',
-                          verbose               = False,
-                          show_progress         = True,
-                          suppress_warnings     = False,
-                          engine                = 'optuna',
-                          kwargs_create_study   = {},
-                          kwargs_study_optimize = {}
-                      )
+    forecaster            = forecaster,
+    series                = data,
+    exog                  = None,
+    levels                = levels, # Same as levels=None
+    search_space          = search_space,
+    steps                 = 24,
+    metric                = 'mean_absolute_error',
+    refit                 = False,
+    initial_train_size    = len(data_train),
+    fixed_train_size      = False,
+    n_trials              = 5,
+    random_state          = 123,
+    return_best           = False,
+    n_jobs                = 'auto',
+    verbose               = False,
+    show_progress         = True,
+    suppress_warnings     = False,
+    engine                = 'optuna',
+    kwargs_create_study   = {},
+    kwargs_study_optimize = {}
+)
 
 results.head(4)</div>
 </div>
@@ -4316,7 +4316,7 @@ best_trial</div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
 <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
 <div class="jp-RenderedText jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/plain" tabindex="0">
-<pre>FrozenTrial(number=3, state=1, values=[3.007253701973608], datetime_start=datetime.datetime(2024, 5, 7, 12, 38, 41, 296852), datetime_complete=datetime.datetime(2024, 5, 7, 12, 38, 41, 501258), params={'lags': 24, 'n_estimators': 16, 'min_samples_leaf': 8, 'ccp_alpha': 0.3229589138531782, 'max_features': 'log2'}, user_attrs={}, system_attrs={}, intermediate_values={}, distributions={'lags': CategoricalDistribution(choices=(24, 48)), 'n_estimators': IntDistribution(high=20, log=False, low=10, step=1), 'min_samples_leaf': IntDistribution(high=10, log=False, low=1, step=1), 'ccp_alpha': FloatDistribution(high=1.0, log=False, low=0.0, step=None), 'max_features': CategoricalDistribution(choices=('log2', 'sqrt'))}, trial_id=3, value=None)</pre>
+<pre>FrozenTrial(number=3, state=1, values=[3.007253701973608], datetime_start=datetime.datetime(2024, 5, 8, 11, 48, 34, 139032), datetime_complete=datetime.datetime(2024, 5, 8, 11, 48, 34, 373658), params={'lags': 24, 'n_estimators': 16, 'min_samples_leaf': 8, 'ccp_alpha': 0.3229589138531782, 'max_features': 'log2'}, user_attrs={}, system_attrs={}, intermediate_values={}, distributions={'lags': CategoricalDistribution(choices=(24, 48)), 'n_estimators': IntDistribution(high=20, log=False, low=10, step=1), 'min_samples_leaf': IntDistribution(high=10, log=False, low=1, step=1), 'ccp_alpha': FloatDistribution(high=1.0, log=False, low=0.0, step=None), 'max_features': CategoricalDistribution(choices=('log2', 'sqrt'))}, trial_id=3, value=None)</pre>
 </div>
 </div>
 </div>
@@ -4561,8 +4561,8 @@ Training index type: DatetimeIndex
 Training index frequency: D 
 Regressor parameters: alpha: 1.0, copy_X: True, fit_intercept: True, max_iter: None, positive: False, ... 
 fit_kwargs: {} 
-Creation date: 2024-05-07 12:38:41 
-Last fit date: 2024-05-07 12:38:41 
+Creation date: 2024-05-08 11:48:34 
+Last fit date: 2024-05-08 11:48:34 
 Skforecast version: 0.12.0 
 Python version: 3.11.5 
 Forecaster id: None </pre>
@@ -5120,22 +5120,22 @@ X_train.loc[X_train['_level_skforecast'] == 1].head(3)</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Backtesting Multi-Series with exog</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">metrics_levels</span><span class="p">,</span> <span class="n">backtest_predictions</span> <span class="o">=</span> <span class="n">backtesting_forecaster_multiseries</span><span class="p">(</span>
-                                           <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
-                                           <span class="n">series</span>                <span class="o">=</span> <span class="n">data_exog</span><span class="p">[[</span><span class="s1">'item_1'</span><span class="p">,</span> <span class="s1">'item_2'</span><span class="p">,</span> <span class="s1">'item_3'</span><span class="p">]],</span>
-                                           <span class="n">exog</span>                  <span class="o">=</span> <span class="n">data_exog</span><span class="p">[[</span><span class="s1">'month'</span><span class="p">]],</span>
-                                           <span class="n">levels</span>                <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                                           <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
-                                           <span class="n">metric</span>                <span class="o">=</span> <span class="s1">'mean_absolute_error'</span><span class="p">,</span>
-                                           <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_exog_train</span><span class="p">),</span>
-                                           <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                           <span class="n">gap</span>                   <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                                           <span class="n">allow_incomplete_fold</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                           <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                           <span class="n">n_jobs</span>                <span class="o">=</span> <span class="s1">'auto'</span><span class="p">,</span>
-                                           <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                                           <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                           <span class="n">suppress_warnings</span>     <span class="o">=</span> <span class="kc">False</span>
-                                       <span class="p">)</span>
+    <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">series</span>                <span class="o">=</span> <span class="n">data_exog</span><span class="p">[[</span><span class="s1">'item_1'</span><span class="p">,</span> <span class="s1">'item_2'</span><span class="p">,</span> <span class="s1">'item_3'</span><span class="p">]],</span>
+    <span class="n">exog</span>                  <span class="o">=</span> <span class="n">data_exog</span><span class="p">[[</span><span class="s1">'month'</span><span class="p">]],</span>
+    <span class="n">levels</span>                <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
+    <span class="n">metric</span>                <span class="o">=</span> <span class="s1">'mean_absolute_error'</span><span class="p">,</span>
+    <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data_exog_train</span><span class="p">),</span>
+    <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">gap</span>                   <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">allow_incomplete_fold</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_jobs</span>                <span class="o">=</span> <span class="s1">'auto'</span><span class="p">,</span>
+    <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">suppress_warnings</span>     <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">"Backtest metrics"</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">metrics_levels</span><span class="p">)</span>
@@ -5146,22 +5146,22 @@ X_train.loc[X_train['_level_skforecast'] == 1].head(3)</div>
 <div class="clipboard-copy-txt" id="cell-18"># Backtesting Multi-Series with exog
 # ==============================================================================
 metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                           forecaster            = forecaster,
-                                           series                = data_exog[['item_1', 'item_2', 'item_3']],
-                                           exog                  = data_exog[['month']],
-                                           levels                = None,
-                                           steps                 = 24,
-                                           metric                = 'mean_absolute_error',
-                                           initial_train_size    = len(data_exog_train),
-                                           fixed_train_size      = True,
-                                           gap                   = 0,
-                                           allow_incomplete_fold = True,
-                                           refit                 = True,
-                                           n_jobs                = 'auto',
-                                           verbose               = False,
-                                           show_progress         = True,
-                                           suppress_warnings     = False
-                                       )
+    forecaster            = forecaster,
+    series                = data_exog[['item_1', 'item_2', 'item_3']],
+    exog                  = data_exog[['month']],
+    levels                = None,
+    steps                 = 24,
+    metric                = 'mean_absolute_error',
+    initial_train_size    = len(data_exog_train),
+    fixed_train_size      = True,
+    gap                   = 0,
+    allow_incomplete_fold = True,
+    refit                 = True,
+    n_jobs                = 'auto',
+    verbose               = False,
+    show_progress         = True,
+    suppress_warnings     = False
+)
 
 print("Backtest metrics")
 display(metrics_levels)
@@ -5405,8 +5405,8 @@ Training index type: DatetimeIndex
 Training index frequency: D 
 Regressor parameters: alpha: 1.0, copy_X: True, fit_intercept: True, max_iter: None, positive: False, ... 
 fit_kwargs: {} 
-Creation date: 2024-05-07 12:38:41 
-Last fit date: 2024-05-07 12:38:42 
+Creation date: 2024-05-08 11:48:35 
+Last fit date: 2024-05-08 11:48:35 
 Skforecast version: 0.12.0 
 Python version: 3.11.5 
 Forecaster id: None </pre>
@@ -5453,7 +5453,12 @@ Forecaster id: None </pre>
 <tbody>
 <tr>
 <td style="text-align:center"><code>DataFrame</code></td>
-<td style="text-align:center"><code>Series</code>, <code>DataFrame</code> or <code>dict</code></td>
+<td style="text-align:center"><code>Series</code> or <code>DataFrame</code></td>
+<td style="text-align:center">Same index (type, length and frequency)</td>
+</tr>
+<tr>
+<td style="text-align:center"><code>DataFrame</code></td>
+<td style="text-align:center"><code>dict</code></td>
 <td style="text-align:center">Same index (type, length and frequency)</td>
 </tr>
 <tr>

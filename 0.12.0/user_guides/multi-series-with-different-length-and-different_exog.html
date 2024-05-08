@@ -4266,22 +4266,22 @@ Forecaster id: None </pre>
              <span class="p">)</span>
 
 <span class="n">metrics_levels</span><span class="p">,</span> <span class="n">backtest_predictions</span> <span class="o">=</span> <span class="n">backtesting_forecaster_multiseries</span><span class="p">(</span>
-                                           <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
-                                           <span class="n">series</span>                <span class="o">=</span> <span class="n">series_dict</span><span class="p">,</span>
-                                           <span class="n">exog</span>                  <span class="o">=</span> <span class="n">exog_dict</span><span class="p">,</span>
-                                           <span class="n">levels</span>                <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                                           <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
-                                           <span class="n">metric</span>                <span class="o">=</span> <span class="s2">"mean_absolute_error"</span><span class="p">,</span>
-                                           <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series_dict_train</span><span class="p">[</span><span class="s2">"id_1000"</span><span class="p">]),</span>
-                                           <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                           <span class="n">gap</span>                   <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                                           <span class="n">allow_incomplete_fold</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                           <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                                           <span class="n">n_jobs</span>                <span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
-                                           <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                           <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                                           <span class="n">suppress_warnings</span>     <span class="o">=</span> <span class="kc">True</span>
-                                       <span class="p">)</span>
+    <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">series</span>                <span class="o">=</span> <span class="n">series_dict</span><span class="p">,</span>
+    <span class="n">exog</span>                  <span class="o">=</span> <span class="n">exog_dict</span><span class="p">,</span>
+    <span class="n">levels</span>                <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
+    <span class="n">metric</span>                <span class="o">=</span> <span class="s2">"mean_absolute_error"</span><span class="p">,</span>
+    <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series_dict_train</span><span class="p">[</span><span class="s2">"id_1000"</span><span class="p">]),</span>
+    <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">gap</span>                   <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">allow_incomplete_fold</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_jobs</span>                <span class="o">=</span><span class="s2">"auto"</span><span class="p">,</span>
+    <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">suppress_warnings</span>     <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span>
 
 <span class="n">display</span><span class="p">(</span><span class="n">metrics_levels</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
@@ -4297,22 +4297,22 @@ forecaster = ForecasterAutoregMultiSeries(
              )
 
 metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                           forecaster            = forecaster,
-                                           series                = series_dict,
-                                           exog                  = exog_dict,
-                                           levels                = None,
-                                           steps                 = 24,
-                                           metric                = "mean_absolute_error",
-                                           initial_train_size    = len(series_dict_train["id_1000"]),
-                                           fixed_train_size      = True,
-                                           gap                   = 0,
-                                           allow_incomplete_fold = True,
-                                           refit                 = False,
-                                           n_jobs                ="auto",
-                                           verbose               = True,
-                                           show_progress         = True,
-                                           suppress_warnings     = True
-                                       )
+    forecaster            = forecaster,
+    series                = series_dict,
+    exog                  = exog_dict,
+    levels                = None,
+    steps                 = 24,
+    metric                = "mean_absolute_error",
+    initial_train_size    = len(series_dict_train["id_1000"]),
+    fixed_train_size      = True,
+    gap                   = 0,
+    allow_incomplete_fold = True,
+    refit                 = False,
+    n_jobs                ="auto",
+    verbose               = True,
+    show_progress         = True,
+    suppress_warnings     = True
+)
 
 display(metrics_levels)
 print("")
@@ -4676,24 +4676,24 @@ plt.tight_layout()</div>
     <span class="k">return</span> <span class="n">search_space</span>
 
 <span class="n">results</span><span class="p">,</span> <span class="n">best_trial</span> <span class="o">=</span> <span class="n">bayesian_search_forecaster_multiseries</span><span class="p">(</span>
-                          <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
-                          <span class="n">series</span>                <span class="o">=</span> <span class="n">series_dict</span><span class="p">,</span>
-                          <span class="n">exog</span>                  <span class="o">=</span> <span class="n">exog_dict</span><span class="p">,</span>
-                          <span class="n">levels</span>                <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-                          <span class="n">search_space</span>          <span class="o">=</span> <span class="n">search_space</span><span class="p">,</span>
-                          <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
-                          <span class="n">metric</span>                <span class="o">=</span> <span class="s1">'mean_absolute_error'</span><span class="p">,</span>
-                          <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series_dict_train</span><span class="p">[</span><span class="s2">"id_1000"</span><span class="p">]),</span>
-                          <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">n_trials</span>              <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-                          <span class="n">random_state</span>          <span class="o">=</span> <span class="mi">123</span><span class="p">,</span>
-                          <span class="n">return_best</span>           <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">n_jobs</span>                <span class="o">=</span> <span class="s1">'auto'</span><span class="p">,</span>
-                          <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-                          <span class="n">suppress_warnings</span>     <span class="o">=</span> <span class="kc">True</span>
-                      <span class="p">)</span>
+    <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">series</span>                <span class="o">=</span> <span class="n">series_dict</span><span class="p">,</span>
+    <span class="n">exog</span>                  <span class="o">=</span> <span class="n">exog_dict</span><span class="p">,</span>
+    <span class="n">levels</span>                <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">search_space</span>          <span class="o">=</span> <span class="n">search_space</span><span class="p">,</span>
+    <span class="n">steps</span>                 <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
+    <span class="n">metric</span>                <span class="o">=</span> <span class="s1">'mean_absolute_error'</span><span class="p">,</span>
+    <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">initial_train_size</span>    <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">series_dict_train</span><span class="p">[</span><span class="s2">"id_1000"</span><span class="p">]),</span>
+    <span class="n">fixed_train_size</span>      <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_trials</span>              <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="n">random_state</span>          <span class="o">=</span> <span class="mi">123</span><span class="p">,</span>
+    <span class="n">return_best</span>           <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_jobs</span>                <span class="o">=</span> <span class="s1">'auto'</span><span class="p">,</span>
+    <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">suppress_warnings</span>     <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span>
 
 <span class="n">results</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
 </pre></div>
@@ -4716,24 +4716,24 @@ def search_space(trial):
     return search_space
 
 results, best_trial = bayesian_search_forecaster_multiseries(
-                          forecaster            = forecaster,
-                          series                = series_dict,
-                          exog                  = exog_dict,
-                          levels                = None,
-                          search_space          = search_space,
-                          steps                 = 24,
-                          metric                = 'mean_absolute_error',
-                          refit                 = False,
-                          initial_train_size    = len(series_dict_train["id_1000"]),
-                          fixed_train_size      = False,
-                          n_trials              = 10,
-                          random_state          = 123,
-                          return_best           = False,
-                          n_jobs                = 'auto',
-                          verbose               = False,
-                          show_progress         = True,
-                          suppress_warnings     = True
-                      )
+    forecaster            = forecaster,
+    series                = series_dict,
+    exog                  = exog_dict,
+    levels                = None,
+    search_space          = search_space,
+    steps                 = 24,
+    metric                = 'mean_absolute_error',
+    refit                 = False,
+    initial_train_size    = len(series_dict_train["id_1000"]),
+    fixed_train_size      = False,
+    n_trials              = 10,
+    random_state          = 123,
+    return_best           = False,
+    n_jobs                = 'auto',
+    verbose               = False,
+    show_progress         = True,
+    suppress_warnings     = True
+)
 
 results.head(4)</div>
 </div>
