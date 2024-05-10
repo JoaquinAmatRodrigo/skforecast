@@ -165,7 +165,7 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 + [**Global Forecasting Models: Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
 
-+ [**Probabilistic forecasting**](https://www.cienciadedatos.net/documentos/py42-forecasting-prediction-intervals-machine-learning.html)
++ [**Probabilistic forecasting**](https://www.cienciadedatos.net/documentos/py42-probabilistic-forecasting.html)
 
 + [**Forecasting with Deep Learning**](https://cienciadedatos.net/documentos/py54-forecasting-with-deep-learning)
 
