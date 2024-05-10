@@ -119,7 +119,7 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 |[ForecasterMultiSeries](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)||✔️|✔️||✔️|✔️|✔️||
 |[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||✔️|✔️||✔️|✔️|✔️|✔️|
 |[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||✔️||✔️|✔️||✔️||
-|[ForecasterRNN](https://skforecast.org/latest/user_guides/deep-learning-rnn-forecaster.html)||✔️||✔️|||||
+|[ForecasterRNN](https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm)||✔️||✔️|||||
 |[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|✔️||✔️||✔️|✔️|✔️||
 
 
