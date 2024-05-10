@@ -10,7 +10,7 @@
 
 <i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Global Forecasting Models: Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
 
-<i class="fa-light fa-chart-line fa" style="font-size: 25px; color:#f26e1d;"></i>  [**Probabilistic forecasting**](https://www.cienciadedatos.net/documentos/py42-forecasting-prediction-intervals-machine-learning.html)
+<i class="fa-light fa-chart-line fa" style="font-size: 25px; color:#f26e1d;"></i>  [**Probabilistic forecasting**](https://www.cienciadedatos.net/documentos/py42-probabilistic-forecasting.html)
 
 <i class="fa-solid fa-layer-group" style="color: #001633;"></i> [**Forecasting with Deep Learning**](https://cienciadedatos.net/documentos/py54-forecasting-with-deep-learning)
 
