@@ -707,7 +707,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_differentia
     forecaster_2.fit(series=series_dict_datetime, exog=exog_dict_datetime)
     predictions_2 = forecaster_2.predict(steps=steps, exog=exog_pred)
 
-    pd.testing.assert_frame_equal(predictions_1, predictions_2)
+    pd.testing.assert_frame_equal(predictions_1.asfreq('D'), predictions_2)
 
 
 def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differentiation_is_2():
