@@ -2,6 +2,21 @@
 
 All significant changes to this project are documented in this release file.
 
+## [0.12.1] - [2024-05-20]
+
+This is a minor release to fix a bug.
+
+**Added**
+
+
+**Changed**
+
+
+**Fixed**
+
++ Bug fix when storing `last_window` using a `ForecasterAutoregMultiSeries` that includes differentiation.
+
+
 ## [0.12.0] - [2024-05-05]
 
 The main changes in this release are:
