@@ -2298,20 +2298,20 @@ def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and
         None,
         None,
         {'l1': pd.Series(
-                   data  = np.array([7., 8., 9.]),
-                   index = pd.date_range("1990-01-08", periods=3, freq='D'),
+                   data  = np.array([6., 7., 8., 9.]),
+                   index = pd.date_range("1990-01-07", periods=4, freq='D'),
                    name  = 'l1',
                    dtype = float
                ),
          'l2': pd.Series(
-                   data  = np.array([17., 18., 19.]),
-                   index = pd.date_range("1990-01-07", periods=3, freq='D'),
+                   data  = np.array([16., 17., 18., 19.]),
+                   index = pd.date_range("1990-01-06", periods=4, freq='D'),
                    name  = 'l2',
                    dtype = float
                ),
          'l3': pd.Series(
-                   data  = np.array([22., 23., 24.]),
-                   index = pd.date_range("1990-01-05", periods=3, freq='D'),
+                   data  = np.array([21., 22., 23., 24.]),
+                   index = pd.date_range("1990-01-04", periods=4, freq='D'),
                    name  = 'l3',
                    dtype = float
                )
