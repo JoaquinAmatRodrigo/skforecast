@@ -846,7 +846,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             if series_to_store:
                 last_window = {
-                    k: v.iloc[-self.max_lag:].copy()
+                    k: v.iloc[-self.window_size_diff:].copy()
                     for k, v in series_dict.items()
                     if k in series_to_store
                 }
