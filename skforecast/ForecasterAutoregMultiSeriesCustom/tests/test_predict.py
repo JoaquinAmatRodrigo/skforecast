@@ -21,6 +21,7 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 from lightgbm import LGBMRegressor
 
 from skforecast.exceptions import IgnoredArgumentWarning
+from skforecast.preprocessing import TimeSeriesDifferentiator
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 
 # Fixtures
@@ -647,3 +648,198 @@ def test_predict_output_when_series_and_exog_dict():
     )
 
     pd.testing.assert_frame_equal(predictions, expected)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differentiation_is_1():
+    """
+    Test predict output when using LinearRegression as regressor and differentiation=1.
+    """
+    end_train = 30
+    # Data differentiated
+    diferenciator = TimeSeriesDifferentiator(order=1)
+    series_1_diff = diferenciator.fit_transform(series['1'].to_numpy())
+    series_2_diff = diferenciator.fit_transform(series['2'].to_numpy())
+    data_diff = pd.DataFrame(
+        {'1': series_1_diff, '2': series_2_diff}
+    ).dropna()
+    data_diff.index = series.index[1:]
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(series)), index=series.index, name='exog'
+    )
+    exog_diff = exog.iloc[1:]
+
+    steps = len(data_diff.loc[end_train + 1:])
+
+    forecaster_1 = ForecasterAutoregMultiSeriesCustom(
+                       regressor          = LinearRegression(),
+                       fun_predictors     = create_predictors,
+                       window_size        = 5,
+                       transformer_series = None
+                   )
+    forecaster_1.fit(series=data_diff.loc[:end_train], exog=exog_diff.loc[:end_train])
+    predictions_diff = forecaster_1.predict(steps=steps, exog=exog_diff.loc[end_train + 1:])
+    # Revert the differentiation
+    last_value_train = series.loc[:end_train].iloc[[-1]]
+    predictions_1 = pd.concat([last_value_train, predictions_diff]).cumsum()[1:]
+
+    forecaster_2 = ForecasterAutoregMultiSeriesCustom(
+                       regressor          = LinearRegression(),
+                       fun_predictors     = create_predictors,
+                       window_size        = 5,
+                       differentiation    = 1,
+                       transformer_series = None
+                   )
+    forecaster_2.fit(series=series.loc[:end_train], exog=exog.loc[:end_train])
+    predictions_2 = forecaster_2.predict(steps=steps, exog=exog.loc[end_train + 1:])
+
+    pd.testing.assert_frame_equal(predictions_1, predictions_2)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_exog_differentiation_is_1_and_transformer_series():
+    """
+    Test predict output when using LinearRegression as regressor and differentiation=1,
+    and transformer_series is StandardScaler.
+    """
+    end_train = '2003-01-30 23:59:00'
+
+    # Data scaled and differentiated
+    series_datetime = series.copy()
+    series_datetime.index = pd.date_range(start='2003-01-01', periods=len(series), freq='D')
+    series_dict_datetime = {
+        "1": series_datetime['1'].loc[:end_train],
+        "2": series_datetime['2'].loc[:end_train]
+    }
+
+    scaler_dict = {
+        "1": StandardScaler(),
+        "2": StandardScaler()
+    }
+
+    series_dict_diff = {}
+    df_last_value_train = pd.DataFrame()
+    for k, v in series_dict_datetime.items():
+
+        scaler_dict[k].fit(v.to_numpy().reshape(-1, 1))
+        data_scaled = scaler_dict[k].transform(v.copy().to_numpy().reshape(-1, 1))
+        data_scaled = pd.Series(data_scaled.flatten(), index=v.index)
+        last_value_train = data_scaled.iloc[[-1]]
+        df_last_value_train[k] = last_value_train
+
+        data_scaled_diff = TimeSeriesDifferentiator(order=1).fit_transform(data_scaled.to_numpy())
+        data_scaled_diff = pd.Series(data_scaled_diff).dropna()
+        data_scaled_diff.index = v.index[1:]
+        series_dict_diff[k] = data_scaled_diff
+    
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(series)), name='exog'
+    )
+    exog.index = pd.date_range(start='2003-01-01', periods=len(series), freq='D')
+    exog_dict_datetime = {
+        "1": exog.loc[:end_train],
+        "2": exog.loc[:end_train]
+    }
+    exog_diff = {
+        '1': exog_dict_datetime['1'].iloc[1:],
+        '2': exog_dict_datetime['2'].iloc[1:]
+    }
+    exog_pred = {
+        '1': exog.loc[end_train:],
+        '2': exog.loc[end_train:]
+    }
+
+    steps = len(series_datetime.loc[end_train:])
+
+    forecaster_1 = ForecasterAutoregMultiSeriesCustom(
+                       regressor          = LinearRegression(),
+                       fun_predictors     = create_predictors,
+                       window_size        = 5,
+                       transformer_series = None
+                   )
+    forecaster_1.fit(series=series_dict_diff, exog=exog_diff)
+    predictions_diff = forecaster_1.predict(steps=steps, exog=exog_pred)
+    # Revert the differentiation
+    predictions_1 = pd.concat([df_last_value_train, predictions_diff]).cumsum()[1:]
+    # Revert the scaling
+    for k in scaler_dict.keys():
+        predictions_1[k] = scaler_dict[k].inverse_transform(predictions_1[k].to_numpy().reshape(-1, 1))
+
+    forecaster_2 = ForecasterAutoregMultiSeriesCustom(
+                       regressor          = LinearRegression(),
+                       fun_predictors     = create_predictors,
+                       window_size        = 5,
+                       differentiation    = 1,
+                       transformer_series = StandardScaler()
+                   )
+    forecaster_2.fit(series=series_dict_datetime, exog=exog_dict_datetime)
+    predictions_2 = forecaster_2.predict(steps=steps, exog=exog_pred)
+
+    pd.testing.assert_frame_equal(predictions_1.asfreq('D'), predictions_2)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differentiation_is_2():
+    """
+    Test predict output when using LinearRegression as regressor and differentiation=2.
+    """
+    series_dt = series.copy()
+    series_dt.index = pd.date_range(start='2003-01-01', periods=len(series), freq='D')
+
+    # Data differentiated
+    df_diff_1 = pd.DataFrame()
+    df_diff_2 = pd.DataFrame()
+    for col in series_dt.columns:
+
+        diferenciator_1 = TimeSeriesDifferentiator(order=1)
+        diferenciator_2 = TimeSeriesDifferentiator(order=2)
+
+        data_diff_1 = diferenciator_1.fit_transform(series_dt[col].to_numpy())
+        data_diff_1 = pd.Series(data_diff_1).dropna()
+        df_diff_1[col] = data_diff_1
+
+        data_diff_2 = diferenciator_2.fit_transform(series_dt[col].to_numpy())
+        data_diff_2 = pd.Series(data_diff_2).dropna()
+        df_diff_2[col] = data_diff_2
+
+    df_diff_1.index = series_dt.index[1:]
+    df_diff_2.index = series_dt.index[2:]
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(series_dt)), index=series_dt.index, name='exog'
+    )
+    exog_diff_2 = exog.iloc[2:]
+
+    end_train = '2003-01-30 23:59:00'
+    steps = len(series_dt.loc[end_train:])
+
+    forecaster_1 = ForecasterAutoregMultiSeriesCustom(
+                       regressor          = LinearRegression(),
+                       fun_predictors     = create_predictors,
+                       window_size        = 5,
+                       transformer_series = None
+                   )
+    forecaster_1.fit(series=df_diff_2.loc[:end_train], exog=exog_diff_2.loc[:end_train])
+    predictions_diff_2 = forecaster_1.predict(steps=steps, exog=exog_diff_2.loc[end_train:])
+    
+    # Revert the differentiation
+    last_value_train_diff = df_diff_1.loc[:end_train].iloc[[-1]]
+    predictions_diff_1 = pd.concat([last_value_train_diff, predictions_diff_2]).cumsum()[1:]
+    last_value_train = series_dt.loc[:end_train].iloc[[-1]]
+    predictions_1 = pd.concat([last_value_train, predictions_diff_1]).cumsum()[1:]
+
+    forecaster_2 = ForecasterAutoregMultiSeriesCustom(
+                       regressor          = LinearRegression(),
+                       fun_predictors     = create_predictors,
+                       window_size        = 5,
+                       differentiation    = 2,
+                       transformer_series = None
+                   )
+    forecaster_2.fit(series=series_dt.loc[:end_train], exog=exog.loc[:end_train])
+    predictions_2 = forecaster_2.predict(steps=steps, exog=exog.loc[end_train:])
+
+    pd.testing.assert_frame_equal(predictions_1, predictions_2)
