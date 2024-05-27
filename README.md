@@ -9,8 +9,8 @@
 | Meta | [![License](https://img.shields.io/github/license/JoaquinAmatRodrigo/skforecast)](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE) [![DOI](https://zenodo.org/badge/337705968.svg)](https://zenodo.org/doi/10.5281/zenodo.8382787) |
 | Testing | [![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg) [![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast) |
 |Donation | [![paypal](https://img.shields.io/static/v1?style=social&amp;label=Donate&amp;message=%E2%9D%A4&amp;logo=Paypal&amp;color&amp;link=%3curl%3e)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6) [![buymeacoffee](https://img.shields.io/badge/-Buy_me_a%C2%A0coffee-gray?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/skforecast) ![GitHub Sponsors](https://img.shields.io/github/sponsors/joaquinamatrodrigo?logo=github&label=Github%20sponsors&link=https%3A%2F%2Fgithub.com%2Fsponsors%2FJoaquinAmatRodrigo) |
+|Community | [![!slack](https://img.shields.io/static/v1?logo=linkedin&label=LinkedIn&message=news&color=lightblue)](https://www.linkedin.com/company/skforecast/)
 |Affiliation | [![NumFOCUS Affiliated](https://img.shields.io/badge/NumFOCUS-Affiliated%20Project-orange.svg?style=flat&colorA=E1523D&colorB=007D8A)](https://numfocus.org/sponsored-projects/affiliated-projects)
-
 
 
 # About The Project
@@ -33,17 +33,17 @@ Thank you for choosing skforecast! We value your suggestions, bug reports and re
 
 # Table of Contents
 
-- [Documentation](#documentation)
-- [Installation](#installation)
-- [Dependencies](#dependencies)
-- [What is new in skforecast 0.12?](#what-is-new-in-skforecast-012)
-- [Forecasters](#forecasters)
-- [Main User Guides](#main-user-guides)
-- [Examples and tutorials](#examples-and-tutorials)
-- [How to contribute](#how-to-contribute)
-- [Citation](#citation)
-- [Donating](#donating)
-- [License](#license)
+- :books: [Documentation](#documentation)
+- :computer: [Installation](#installation)
+- :link: [Dependencies](#dependencies)
+- :sparkles: [What is new in skforecast 0.12?](#what-is-new-in-skforecast-012)
+- :crystal_ball: [Forecasters](#forecasters)
+- :bulb: [Main User Guides](#main-user-guides)
+- :mortar_board: [Examples and tutorials](#examples-and-tutorials)
+- :handshake: [How to contribute](#how-to-contribute)
+- :memo: [Citation](#citation)
+- :money_with_wings: [Donating](#donating)
+- :scroll: [License](#license)
 
 
 # Documentation
