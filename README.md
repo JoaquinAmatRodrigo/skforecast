@@ -58,6 +58,7 @@ For detailed information on how to use and leverage the full potential of **skfo
 | :rocket: [Quick start]                  | Get started quickly with skforecast |
 | :hammer_and_wrench: [User guides]       | Detailed guides on skforecast features and functionalities |
 | :mortar_board: [Examples and tutorials] | Learn through practical examples and tutorials to master skforecast |
+| :question: [FAQ and tips]               | Find answers and tips about forecasting |
 | :books: [API Reference]                 | Comprehensive reference for skforecast functions and classes |
 | :black_nib: [Authors]                   | Meet the authors and contributors of skforecast |
 
@@ -65,6 +66,7 @@ For detailed information on how to use and leverage the full potential of **skfo
 [Quick start]: https://skforecast.org/latest/user_guides/quick-start-skforecast
 [User guides]: https://skforecast.org/latest/user_guides/user-guides
 [Examples and tutorials]: https://skforecast.org/latest/examples/examples
+[FAQ and tips]: https://skforecast.org/latest/faq/faq
 [API Reference]: https://skforecast.org/latest/api/forecasterautoreg
 [Authors]: https://skforecast.org/latest/authors/authors
 
