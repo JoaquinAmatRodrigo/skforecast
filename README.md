@@ -31,11 +31,30 @@ The fields of statistics and machine learning have developed many excellent regr
 Thank you for choosing skforecast! We value your suggestions, bug reports and recommendations as they help us identify areas for improvement and ensure that skforecast meets the needs of the community. Please consider sharing your experiences, reporting bugs, making suggestions or even contributing to the codebase on GitHub. Together, let's make time series forecasting more accessible and accurate for everyone.
 
 
+# Table of Contents
+
+- [Documentation](#documentation)
+- [Installation](#installation)
+- [Dependencies](#dependencies)
+- [What is new in skforecast 0.12?](#what-is-new-in-skforecast-012)
+- [Forecasters](#forecasters)
+- [Main User Guides](#main-user-guides)
+- [Examples and tutorials](#examples-and-tutorials)
+- [How to contribute](#how-to-contribute)
+- [Citation](#citation)
+- [Donating](#donating)
+- [License](#license)
+
+
 # Documentation
 
 For detailed information on how to use and leverage the full potential of **skforecast** please refer to the comprehensive documentation available at:
 
 **https://skforecast.org** :books:
+
+| Documentation |     |
+|:-------------:|:----|
+| Documentation |     |
 
 
 # Installation
