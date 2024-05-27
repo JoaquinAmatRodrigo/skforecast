@@ -18,6 +18,7 @@ forecaster = ForecasterAutoreg(
                  weight_func      = None,
                  differentiation  = None,
                  fit_kwargs       = None,
+                 binner_kwargs    = None,
                  forecaster_id    = None
              )
 ```
@@ -58,7 +59,7 @@ forecaster = ForecasterAutoreg(
 
 To apply machine learning models to forecasting problems, the time series needs to be transformed into a matrix where each value is associated with a specific time window (known as lags) that precedes it. In the context of time series, a lag with respect to a time step *t* is defined as the value of the series at previous time steps. For instance, lag 1 represents the value at time step *t-1*, while lag *m* represents the value at time step *t-m*.
 
-This transformation is essential for machine learning models to capture the dependencies and patterns that exist between past and future values in a time series. By using lags as input features, machine learning models can learn from the past and make predictions about future values. The number of lags used as input features in the matrix is an important hyperparameter that needs to be carefully tuned to obtain the best performance of the model.
+Learn more about [machine learning for forecasting](https://skforecast.org/latest/introduction-forecasting/introduction-forecasting#machine-learning-for-forecasting).
 <br><br>
 
 <p style="text-align: center">
@@ -84,7 +85,7 @@ forecaster = ForecasterAutoreg(
 
 Skforecast has two arguments in all the forecasters that allow more detailed control over input data transformations. This feature is particularly useful as many machine learning models require specific data pre-processing transformations. For example, linear models may benefit from features being scaled, or categorical features being transformed into numerical values.
 
-Both arguments expect an instance of a transformer (preprocessor) compatible with the scikit-learn preprocessing API with the methods: fit, transform, fit_transform and, inverse_transform.
+Both arguments expect an instance of a transformer (preprocessor) compatible with the `scikit-learn` preprocessing API with the methods: `fit`, `transform`, `fit_transform` and, `inverse_transform`.
 
 More information: [Scikit-learn transformers and pipelines](https://skforecast.org/latest/user_guides/sklearn-transformers-and-pipeline.html).
 
@@ -96,8 +97,8 @@ More information: [Scikit-learn transformers and pipelines](https://skforecast.o
 # Create a forecaster
 # ==============================================================================
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor
 
 forecaster = ForecasterAutoreg(
                  regressor        = RandomForestRegressor(),
@@ -118,8 +119,8 @@ More information: [Weighted time series forecasting](https://skforecast.org/late
 # Create a forecaster
 # ==============================================================================
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor
 
 # Custom function to create weights
 # ==============================================================================
@@ -140,7 +141,7 @@ forecaster = ForecasterAutoreg(
                  lags             = 5,
                  transformer_y    = None,
                  transformer_exog = None,
-                 weight_func      = custom_weights,
+                 weight_func      = custom_weights
              )
 ```
 
@@ -159,8 +160,8 @@ More information: [Time series differentiation](https://skforecast.org/latest/fa
 # Create a forecaster
 # ==============================================================================
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.preprocessing import StandardScaler
+from sklearn.ensemble import RandomForestRegressor
 
 forecaster = ForecasterAutoreg(
                  regressor        = RandomForestRegressor(),
@@ -168,7 +169,7 @@ forecaster = ForecasterAutoreg(
                  transformer_y    = None,
                  transformer_exog = None,
                  weight_func      = None,
-                 differentiation  = 1,
+                 differentiation  = 1
              )
 ```
 
@@ -201,6 +202,31 @@ forecaster = ForecasterAutoreg(
                  weight_func      = None,
                  differentiation  = None,
                  fit_kwargs       = {'categorical_feature': ['exog_1', 'exog_2']}
+             )
+```
+
+
+### Intervals conditioned on predicted values (binned residuals)
+
+When creating prediction intervals, skforecast uses a `sklearn.preprocessing.KBinsDiscretizer` to bin the residuals. The `binner_kwargs` parameter allows the user to pass additional arguments to the `KBinsDiscretizer` object. 
+
+More information: [Intervals conditioned on predicted values (binned residuals)](https://skforecast.org/latest/user_guides/probabilistic-forecasting#intervals-conditioned-on-predicted-values-binned-residuals).
+
+```python
+# Create a forecaster
+# ==============================================================================
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from lightgbm import LGBMRegressor
+
+forecaster = ForecasterAutoreg(
+                 regressor        = LGBMRegressor(),
+                 lags             = 5,
+                 transformer_y    = None,
+                 transformer_exog = None,
+                 weight_func      = None,
+                 differentiation  = None,
+                 fit_kwargs       = None,
+                 binner_kwargs    = {'n_bins': 10}
              )
 ```
 
@@ -252,7 +278,6 @@ forecaster = ForecasterAutoregDirect(
                  transformer_exog = None,
                  weight_func      = None,
                  fit_kwargs       = None,
-                 n_jobs           = 'auto',
                  forecaster_id    = 'my_forecaster'
              )
 ```
