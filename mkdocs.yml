@@ -28,6 +28,7 @@ nav:
     - Forecaster Attributes: introduction-forecasting/forecaster-attributes.ipynb
 
   - User Guides:
+      - Table of contents: user_guides/user-guides.md
       - Input data: user_guides/input-data.ipynb
       - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
       - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb

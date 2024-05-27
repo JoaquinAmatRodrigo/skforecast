@@ -13,6 +13,21 @@
 |Affiliation | [![NumFOCUS Affiliated](https://img.shields.io/badge/NumFOCUS-Affiliated%20Project-orange.svg?style=flat&colorA=E1523D&colorB=007D8A)](https://numfocus.org/sponsored-projects/affiliated-projects)
 
 
+# Table of Contents
+
+- :information_source: [About The Project](#about-the-project)
+- :books: [Documentation](#documentation)
+- :computer: [Installation](#installation)
+- :link: [Dependencies](#dependencies)
+- :sparkles: [What is new in skforecast 0.12?](#what-is-new-in-skforecast-012)
+- :crystal_ball: [Forecasters](#forecasters)
+- :mortar_board: [Examples and tutorials](#examples-and-tutorials)
+- :handshake: [How to contribute](#how-to-contribute)
+- :memo: [Citation](#citation)
+- :money_with_wings: [Donating](#donating)
+- :scroll: [License](#license)
+
+
 # About The Project
 
 **Skforecast** is a Python library that eases using scikit-learn regressors as single and multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (LightGBM, XGBoost, CatBoost, ...).
@@ -31,21 +46,6 @@ The fields of statistics and machine learning have developed many excellent regr
 Thank you for choosing skforecast! We value your suggestions, bug reports and recommendations as they help us identify areas for improvement and ensure that skforecast meets the needs of the community. Please consider sharing your experiences, reporting bugs, making suggestions or even contributing to the codebase on GitHub. Together, let's make time series forecasting more accessible and accurate for everyone.
 
 
-# Table of Contents
-
-- :books: [Documentation](#documentation)
-- :computer: [Installation](#installation)
-- :link: [Dependencies](#dependencies)
-- :sparkles: [What is new in skforecast 0.12?](#what-is-new-in-skforecast-012)
-- :crystal_ball: [Forecasters](#forecasters)
-- :bulb: [Main User Guides](#main-user-guides)
-- :mortar_board: [Examples and tutorials](#examples-and-tutorials)
-- :handshake: [How to contribute](#how-to-contribute)
-- :memo: [Citation](#citation)
-- :money_with_wings: [Donating](#donating)
-- :scroll: [License](#license)
-
-
 # Documentation
 
 For detailed information on how to use and leverage the full potential of **skforecast** please refer to the comprehensive documentation available at:
@@ -54,7 +54,12 @@ For detailed information on how to use and leverage the full potential of **skfo
 
 | Documentation |     |
 |:-------------:|:----|
-| Documentation |     |
+| :book: [Introduction to forecasting](https://skforecast.org/latest/introduction-forecasting/introduction-forecasting) | Dive into the basics of forecasting concepts and methodologies. |
+| :rocket: [Quick start](https://skforecast.org/latest/user_guides/quick-start-skforecast) | Get up and running with skforecast in no time with this step-by-step guide. |
+| :hammer_and_wrench: [User guides](https://skforecast.org/latest/user_guides/user-guides) | Explore detailed guides on using the various features and functionalities of skforecast. |
+| :mortar_board: [Examples and tutorials](https://skforecast.org/latest/examples/examples) | Learn through practical examples and tutorials to master skforecast. |
+| :books: [API Reference](https://skforecast.org/latest/api/forecasterautoreg) | Access the comprehensive reference for all skforecast functions and classes. |
+| :black_nib: [Authors](https://skforecast.org/latest/authors/authors) | Meet the brilliant minds behind skforecast and see who contributed to the project. |
 
 
 # Installation
@@ -149,27 +154,6 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 |[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||
 |[ForecasterRNN](https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm)||:heavy_check_mark:||:heavy_check_mark:|||||
 |[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
-
-
-# Main User Guides
-
-+ [Introduction to time series and forecasting](https://skforecast.org/latest/introduction-forecasting/introduction-forecasting.html)
-
-+ [Recursive multi-step forecasting](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)
-
-+ [Direct multi-step forecasting](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)
-
-+ [Independent multi-series forecasting](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)
-
-+ [Dependent multi-series forecasting (Multivariate forecasting)](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)
-
-+ [Backtesting (validation) of forecasting models](https://skforecast.org/latest/user_guides/backtesting.html)
-
-+ [Hyperparameter tuning and lags selection of forecasting models](https://skforecast.org/latest/user_guides/hyperparameter-tuning-and-lags-selection.html)
-
-+ [Probabilistic forecasting](https://skforecast.org/latest/user_guides/probabilistic-forecasting.html)
-
-+ [Using forecasters in production](https://skforecast.org/latest/user_guides/forecaster-in-production.html)
 
 
 # Examples and tutorials
