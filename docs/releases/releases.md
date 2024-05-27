@@ -2,9 +2,17 @@
 
 All significant changes to this project are documented in this release file.
 
+**Legend for changelogs**
+
++ <span class="badge text-bg-feature">Feature</span> New feature.
++ <span class="badge text-bg-enhancement">Enhancement</span> Improvement in existing functionality.
++ <span class="badge text-bg-api-change">API Change</span> Changes in the API.
++ <span class="badge text-bg-danger">Fix</span> Bug fix.
+
+
 ## [0.12.1] - [2024-05-20]
 
-This is a minor release to fix a bug.
+<span class="badge text-bg-danger">Fix</span> This is a minor release to fix a bug.
 
 **Added**
 
@@ -16,22 +24,23 @@ This is a minor release to fix a bug.
 
 + Bug fix when storing `last_window` using a `ForecasterAutoregMultiSeries` that includes differentiation.
 
-
 ## [0.12.0] - [2024-05-05]
 
 The main changes in this release are:
 
-+ Multiseries forecaster (Global Models) can be trained using series of different lengths and with different exogenous variables per series.
++ <span class="badge text-bg-feature">Feature</span> Multiseries forecaster (Global Models) can be trained using series of different lengths and with different exogenous variables per series.
 
-+ Bayesian hyperparameter search is now available for all multiseries forecasters using `optuna` as the search engine.
++ <span class="badge text-bg-feature">Feature</span> New functionality to select features using scikit-learn selectors (`select_features` and `select_features_multiseries`).
 
-+ New functionality to select features using scikit-learn selectors (`select_features` and `select_features_multiseries`).
++ <span class="badge text-bg-feature">Feature</span> Added new forecaster `ForecasterRnn` to create forecasting models based on deep learning (RNN and LSTM).
 
-+ Added new forecaster `ForecasterRnn` to create forecasting models based on deep learning (RNN and LSTM).
++ <span class="badge text-bg-feature">Feature</span> New method to predict intervals conditioned on the range of the predicted values. This is can help to improve the interval coverage when the residuals are not homoscedastic (`ForecasterAutoreg`).
 
-+ New method to predict intervals conditioned on the range of the predicted values. This is can help to improve the interval coverage when the residuals are not homoscedastic (`ForecasterAutoreg`).
++ <span class="badge text-bg-enhancement">Enhancement</span> Bayesian hyperparameter search is now available for all multiseries forecasters using `optuna` as the search engine.
 
-+ All Recursive Forecasters are now able to differentiate the time series before modeling it.
++ <span class="badge text-bg-enhancement">Enhancement</span> All Recursive Forecasters are now able to differentiate the time series before modeling it.
+
++ <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
 
 **Added**
 
