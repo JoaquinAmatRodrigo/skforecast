@@ -53,7 +53,7 @@ For detailed information on how to use and leverage the full potential of **skfo
 **https://skforecast.org** :books:
 
 | Documentation |     |
-|:-------------:|:----|
+|:--------------|:----|
 | :book: [Introduction to forecasting](https://skforecast.org/latest/introduction-forecasting/introduction-forecasting) | Dive into the basics of forecasting concepts and methodologies. |
 | :rocket: [Quick start](https://skforecast.org/latest/user_guides/quick-start-skforecast) | Get up and running with skforecast in no time with this step-by-step guide. |
 | :hammer_and_wrench: [User guides](https://skforecast.org/latest/user_guides/user-guides) | Explore detailed guides on using the various features and functionalities of skforecast. |
