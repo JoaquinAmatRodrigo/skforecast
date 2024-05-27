@@ -54,12 +54,12 @@ For detailed information on how to use and leverage the full potential of **skfo
 
 | Documentation                           |     |
 |:----------------------------------------|:----|
-| :book: [Introduction to forecasting]    | Dive into the basics of forecasting concepts and methodologies. |
-| :rocket: [Quick start]                  | Get up and running with skforecast in no time with this step-by-step guide. |
-| :hammer_and_wrench: [User guides]       | Explore detailed guides on using the various features and functionalities of skforecast. |
-| :mortar_board: [Examples and tutorials] | Learn through practical examples and tutorials to master skforecast. |
-| :books: [API Reference]                 | Access the comprehensive reference for all skforecast functions and classes. |
-| :black_nib: [Authors]                   | Meet the brilliant minds behind skforecast and see who contributed to the project. |
+| :book: [Introduction to forecasting]    | Basics of forecasting concepts and methodologies |
+| :rocket: [Quick start]                  | Get started quickly with skforecast |
+| :hammer_and_wrench: [User guides]       | Detailed guides on skforecast features and functionalities |
+| :mortar_board: [Examples and tutorials] | Learn through practical examples and tutorials to master skforecast |
+| :books: [API Reference]                 | Comprehensive reference for skforecast functions and classes |
+| :black_nib: [Authors]                   | Meet the authors and contributors of skforecast |
 
 [Introduction to forecasting]: https://skforecast.org/latest/introduction-forecasting/introduction-forecasting
 [Quick start]: https://skforecast.org/latest/user_guides/quick-start-skforecast
