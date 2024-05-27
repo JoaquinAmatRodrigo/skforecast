@@ -70,6 +70,7 @@ For detailed information on how to use and leverage the full potential of **skfo
 [API Reference]: https://skforecast.org/latest/api/forecasterautoreg
 [Authors]: https://skforecast.org/latest/authors/authors
 
+
 # Installation
 
 The default installation of skforecast only installs hard dependencies.
