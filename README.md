@@ -52,15 +52,21 @@ For detailed information on how to use and leverage the full potential of **skfo
 
 **https://skforecast.org** :books:
 
-| Documentation |     |
-|:--------------|:----|
-| :book: [Introduction to forecasting](https://skforecast.org/latest/introduction-forecasting/introduction-forecasting) | Dive into the basics of forecasting concepts and methodologies. |
-| :rocket: [Quick start](https://skforecast.org/latest/user_guides/quick-start-skforecast) | Get up and running with skforecast in no time with this step-by-step guide. |
-| :hammer_and_wrench: [User guides](https://skforecast.org/latest/user_guides/user-guides) | Explore detailed guides on using the various features and functionalities of skforecast. |
-| :mortar_board: [Examples and tutorials](https://skforecast.org/latest/examples/examples) | Learn through practical examples and tutorials to master skforecast. |
-| :books: [API Reference](https://skforecast.org/latest/api/forecasterautoreg) | Access the comprehensive reference for all skforecast functions and classes. |
-| :black_nib: [Authors](https://skforecast.org/latest/authors/authors) | Meet the brilliant minds behind skforecast and see who contributed to the project. |
+| Documentation                           |     |
+|:----------------------------------------|:----|
+| :book: [Introduction to forecasting]    | Dive into the basics of forecasting concepts and methodologies. |
+| :rocket: [Quick start]                  | Get up and running with skforecast in no time with this step-by-step guide. |
+| :hammer_and_wrench: [User guides]       | Explore detailed guides on using the various features and functionalities of skforecast. |
+| :mortar_board: [Examples and tutorials] | Learn through practical examples and tutorials to master skforecast. |
+| :books: [API Reference]                 | Access the comprehensive reference for all skforecast functions and classes. |
+| :black_nib: [Authors]                   | Meet the brilliant minds behind skforecast and see who contributed to the project. |
 
+[Introduction to forecasting]: (https://skforecast.org/latest/introduction-forecasting/introduction-forecasting)
+[Quick start]: (https://skforecast.org/latest/user_guides/quick-start-skforecast)
+[User guides]: (https://skforecast.org/latest/user_guides/user-guides)
+[Examples and tutorials]: (https://skforecast.org/latest/examples/examples)
+[API Reference]: (https://skforecast.org/latest/api/forecasterautoreg)
+[Authors]: (https://skforecast.org/latest/authors/authors)
 
 # Installation
 
@@ -146,14 +152,23 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 | Forecaster | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Time series differentiation | Exogenous features | Custom features |
 |:-----------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:---------------------------:|:------------------:|:---------------:|
-|[ForecasterAutoreg](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
-|[ForecasterAutoregCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
-|[ForecasterAutoregDirect](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)|:heavy_check_mark:|||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||
-|[ForecasterMultiSeries](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
-|[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
-|[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||
-|[ForecasterRNN](https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm)||:heavy_check_mark:||:heavy_check_mark:|||||
-|[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
+|[ForecasterAutoreg]|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
+|[ForecasterAutoregCustom]|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
+|[ForecasterAutoregDirect]|:heavy_check_mark:|||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||
+|[ForecasterMultiSeries]||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
+|[ForecasterMultiSeriesCustom]||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
+|[ForecasterMultiVariate]||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||
+|[ForecasterRNN]||:heavy_check_mark:||:heavy_check_mark:|||||
+|[ForecasterSarimax]|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
+
+[ForecasterAutoreg]: (https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)
+[ForecasterAutoregCustom]: (https://skforecast.org/latest/user_guides/custom-predictors.html)
+[ForecasterAutoregDirect]: (https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)
+[ForecasterMultiSeries]: (https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)
+[ForecasterMultiSeriesCustom]: (https://skforecast.org/latest/user_guides/custom-predictors.html)
+[ForecasterMultiVariate]: (https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)
+[ForecasterRNN]: (https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm)
+[ForecasterSarimax]: (https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)
 
 
 # Examples and tutorials
