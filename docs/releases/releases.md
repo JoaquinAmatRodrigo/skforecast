@@ -28,19 +28,19 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
-+ <span class="badge text-bg-feature">Feature</span> Multiseries forecaster (Global Models) can be trained using series of different lengths and with different exogenous variables per series.
++ <span class="badge text-bg-feature">Feature</span> Multiseries forecaster (Global Models) can be trained using [series of different lengths and with different exogenous variables](https://skforecast.org/latest/user_guides/multi-series-with-different-length-and-different_exog) per series.
 
-+ <span class="badge text-bg-feature">Feature</span> New functionality to select features using scikit-learn selectors (`select_features` and `select_features_multiseries`).
++ <span class="badge text-bg-feature">Feature</span> New functionality to [select features](https://skforecast.org/latest/user_guides/feature-selection) using scikit-learn selectors (`select_features` and `select_features_multiseries`).
 
-+ <span class="badge text-bg-feature">Feature</span> Added new forecaster `ForecasterRnn` to create forecasting models based on deep learning (RNN and LSTM).
++ <span class="badge text-bg-feature">Feature</span> Added new forecaster `ForecasterRnn` to create forecasting models based on [deep learning](https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm) (RNN and LSTM).
 
-+ <span class="badge text-bg-feature">Feature</span> New method to predict intervals conditioned on the range of the predicted values. This is can help to improve the interval coverage when the residuals are not homoscedastic (`ForecasterAutoreg`).
++ <span class="badge text-bg-feature">Feature</span> New method to [predict intervals conditioned on the range of the predicted values](https://skforecast.org/latest/user_guides/probabilistic-forecasting#intervals-conditioned-on-predicted-values-binned-residuals). This is can help to improve the interval coverage when the residuals are not homoscedastic (`ForecasterAutoreg`).
 
-+ <span class="badge text-bg-enhancement">Enhancement</span> Bayesian hyperparameter search is now available for all multiseries forecasters using `optuna` as the search engine.
++ <span class="badge text-bg-enhancement">Enhancement</span> [Bayesian hyperparameter search](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting#hyperparameter-tuning-and-lags-selection-multi-series) is now available for all multiseries forecasters using `optuna` as the search engine.
 
-+ <span class="badge text-bg-enhancement">Enhancement</span> All Recursive Forecasters are now able to differentiate the time series before modeling it.
++ <span class="badge text-bg-enhancement">Enhancement</span> All Recursive Forecasters are now able to [differentiate the time series](https://skforecast.org/latest/faq/time-series-differentiation) before modeling it.
 
-+ <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters (`ForecasterAutoregMultiSeries`, `ForecasterAutoregMultiSeriesCustom` and `ForecasterAutoregMultiVariate`).
++ <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to use a `StandardScaler()` in the Global Forecasters ([`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/api/forecastermultiseries), [`ForecasterAutoregMultiSeriesCustom`](https://skforecast.org/latest/api/forecastermultiseriescustom) and [`ForecasterAutoregMultiVariate`](https://skforecast.org/latest/api/forecastermultivariate)).
 
 **Added**
 

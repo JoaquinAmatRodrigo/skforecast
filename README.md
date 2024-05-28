@@ -138,12 +138,12 @@ pip install skforecast[deeplearning]
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [x] Multiseries forecaster (Global Models) can be trained using series of different lengths and with different exogenous variables per series.
-- [x] Bayesian hyperparameter search is now available for all multiseries forecasters using `optuna` as the search engine.
-- [x] New functionality to select features using scikit-learn selectors (`select_features` and `select_features_multiseries`).
-- [x] Added new forecaster `ForecasterRnn` to create forecasting models based on deep learning (RNN and LSTM).
-- [x] New method to predict intervals conditioned on the range of the predicted values. This is can help to improve the interval coverage when the residuals are not homoscedastic (`ForecasterAutoreg`).
-- [x] All Recursive Forecasters are now able to differentiate the time series before modeling it.
+- [x] Multiseries forecaster (Global Models) can be trained using [series of different lengths and with different exogenous variables](https://skforecast.org/latest/user_guides/multi-series-with-different-length-and-different_exog) per series.
+- [x] [Bayesian hyperparameter search](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting#hyperparameter-tuning-and-lags-selection-multi-series) is now available for all multiseries forecasters using `optuna` as the search engine.
+- [x] New functionality to [select features](https://skforecast.org/latest/user_guides/feature-selection) using scikit-learn selectors (`select_features` and `select_features_multiseries`).
+- [x] Added new forecaster `ForecasterRnn` to create forecasting models based on [deep learning](https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm) (RNN and LSTM).
+- [x] New method to [predict intervals conditioned on the range of the predicted values](https://skforecast.org/latest/user_guides/probabilistic-forecasting#intervals-conditioned-on-predicted-values-binned-residuals). This is can help to improve the interval coverage when the residuals are not homoscedastic (`ForecasterAutoreg`).
+- [x] All Recursive Forecasters are now able to [differentiate the time series](https://skforecast.org/latest/faq/time-series-differentiation) before modeling it.
 - [x] Bug fixes and performance improvements.
 
 
