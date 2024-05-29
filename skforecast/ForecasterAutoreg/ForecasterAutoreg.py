@@ -1390,7 +1390,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.window_size_diff = max(self.lags)
         if self.differentiation is not None:
             self.window_size_diff += self.differentiation        
-        
+
 
     def set_out_sample_residuals(
         self, 
