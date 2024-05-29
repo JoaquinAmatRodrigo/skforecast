@@ -17,8 +17,7 @@
 
 - :information_source: [About The Project](#about-the-project)
 - :books: [Documentation](#documentation)
-- :computer: [Installation](#installation)
-- :link: [Dependencies](#dependencies)
+- :computer: [Installation & Dependencies](#installation--dependencies)
 - :sparkles: [What is new in skforecast 0.12?](#what-is-new-in-skforecast-012)
 - :crystal_ball: [Forecasters](#forecasters)
 - :mortar_board: [Examples and tutorials](#examples-and-tutorials)
@@ -71,67 +70,15 @@ For detailed information on how to use and leverage the full potential of **skfo
 [Authors]: https://skforecast.org/latest/authors/authors
 
 
-# Installation
+# Installation & Dependencies
 
-The default installation of skforecast only installs hard dependencies.
+To install the basic version of `skforecast` with its core dependencies, run:
 
 ```bash
 pip install skforecast
 ```
 
-Specific version:
-
-```bash
-pip install skforecast==0.12.1
-```
-
-Latest (unstable):
-
-```bash
-pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
-```
-
-Install the full version (all dependencies):
-
-```bash
-pip install skforecast[full]
-```
-
-Install optional dependencies:
-
-```bash
-pip install skforecast[sarimax]
-```
-
-```bash
-pip install skforecast[plotting]
-```
-
-```bash
-pip install skforecast[deeplearning]
-```
-
-
-# Dependencies
-
-+ Python >= 3.8, <3.12
-
-## Hard dependencies
-
-+ numpy>=1.20, <1.27
-+ pandas>=1.2, <2.3
-+ tqdm>=4.57, <4.67
-+ scikit-learn>=1.2, <1.5
-+ optuna>=2.10, <3.7
-+ joblib>=1.1, <1.5
-
-## Optional dependencies
-
-+ matplotlib>=3.3, <3.9
-+ seaborn>=0.11, <0.14
-+ statsmodels>=0.12, <0.15
-+ pmdarima>=2.0, <2.1
-+ tensorflow>=2.13, <2.16
+If you want to learn more about the installation process, dependencies and optional features, please refer to the [Installation Guide](https://skforecast.org/latest/quick-start/how-to-install.html).
 
 
 # What is new in skforecast 0.12?
