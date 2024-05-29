@@ -1,4 +1,4 @@
-# Change Log
+# Changelog
 
 All significant changes to this project are documented in this release file.
 
@@ -10,7 +10,7 @@ All significant changes to this project are documented in this release file.
 | <span class="badge text-bg-danger">Fix</span>              | Bug fix                               |
 
 
-## [0.12.1] - [2024-05-20]
+## 0.12.1 <small>May 20, 2024</small> { id="0.12.1" }
 
 <span class="badge text-bg-danger">Fix</span> This is a minor release to fix a bug.
 
@@ -24,7 +24,8 @@ All significant changes to this project are documented in this release file.
 
 + Bug fix when storing `last_window` using a `ForecasterAutoregMultiSeries` that includes differentiation.
 
-## [0.12.0] - [2024-05-05]
+
+## 0.12.0 <small>May 05, 2024</small> { id="0.12.0" }
 
 The main changes in this release are:
 
@@ -96,7 +97,7 @@ The main changes in this release are:
 + Small bug in `utils.select_n_jobs_backtesting`, rename `ForecasterAutoregMultiseries` to `ForecasterAutoregMultiSeries`.
 
 
-## [0.11.0] - [2023-11-16]
+## 0.11.0 <small>Nov 16, 2023</small> { id="0.11.0" }
 
 The main changes in this release are:
 
@@ -125,7 +126,7 @@ The main changes in this release are:
 + Fixed a bug where the `create_train_X_y` method did not correctly align lags and exogenous variables when the index was not a Pandas index in all Forecasters.
 
 
-## [0.10.1] - [2023-09-26]
+## 0.10.1 <small>Sep 26, 2023</small> { id="0.10.1" }
 
 This is a minor release to fix a bug when using `grid_search_forecaster`, `random_search_forecaster` or `bayesian_search_forecaster` with a Forecaster that includes differentiation.
 
@@ -140,7 +141,7 @@ This is a minor release to fix a bug when using `grid_search_forecaster`, `rando
 + Bug fix `grid_search_forecaster`, `random_search_forecaster` or `bayesian_search_forecaster` with a Forecaster that includes differentiation.
 
 
-## [0.10.0] - [2023-09-07]
+## 0.10.0 <small>Sep 07, 2023</small> { id="0.10.0" }
 
 The main changes in this release are:
 
@@ -165,7 +166,7 @@ The main changes in this release are:
 **Fixed**
 
 
-## [0.9.1] - [2023-07-14]
+## 0.9.1 <small>Jul 14, 2023</small> { id="0.9.1" }
 
 The main changes in this release are:
 
@@ -180,7 +181,7 @@ The main changes in this release are:
 + Fix imports in `skforecast.utils` module to correctly import `sklearn.linear_model` into the `select_n_jobs_backtesting` and `select_n_jobs_fit_forecaster` functions.
 
 
-## [0.9.0] - [2023-07-09]
+## 0.9.0 <small>Jul 09, 2023</small> { id="0.9.0" }
 
 The main changes in this release are:
 
@@ -231,7 +232,7 @@ The main changes in this release are:
 + The `filter_train_X_y_for_step` method in `ForecasterAutoregDirect` and `ForecasterAutoregMultiVariate` now updates the index of `X_train_step` to ensure correct alignment with `y_train_step`.
 
 
-## [0.8.1] - [2023-05-27]
+## 0.8.1 <small>May 27, 2023</small> { id="0.8.1" }
 
 **Added**
 
@@ -246,7 +247,7 @@ The main changes in this release are:
 - `utils.check_exog_dtypes` now compares the `dtype.name` instead of the `dtype`. (suggested by Metaming https://github.com/Metaming)
 
 
-## [0.8.0] - [2023-05-16]
+## 0.8.0 <small>May 16, 2023</small> { id="0.8.0" }
 
 **Added**
 
@@ -303,7 +304,7 @@ The main changes in this release are:
 + The dtypes of exogenous variables are maintained when generating the training matrices with the `create_train_X_y` method in all the Forecasters.
 
 
-## [0.7.0] - [2023-03-21]
+## 0.7.0 <small>Mar 21, 2023</small> { id="0.7.0" }
 
 **Added**
 
@@ -354,7 +355,7 @@ The main changes in this release are:
 + Replace `getfullargspec` in favor of `inspect.signature` (contribution by @jordisilv).
 
 
-## [0.6.0] - [2022-11-30]
+## 0.6.0 <small>Nov 30, 2022</small> { id="0.6.0" }
 
 **Added**
 
@@ -421,7 +422,7 @@ The main changes in this release are:
 + In `ForecasterAutoregMultiSeries`, fix bug transformers initialization.
 
 
-## [0.5.1] - [2022-10-05]
+## 0.5.1 <small>Oct 05, 2022</small> { id="0.5.1" }
 
 **Added**
 
@@ -442,7 +443,7 @@ The main changes in this release are:
 + `Create_train_X_y` in `ForecasterAutoregMultiSeries` now works when the forecaster is not fitted.
 
 
-## [0.5.0] - [2022-09-23]
+## 0.5.0 <small>Sep 23, 2022</small> { id="0.5.0" }
 
 **Added**
 
@@ -493,7 +494,7 @@ The main changes in this release are:
 + `in_sample_residuals` stored as a `pd.Series` when `len(residuals) > 1000`.
 
 
-## [0.4.3] - [2022-03-18]
+## 0.4.3 <small>Mar 18, 2022</small> { id="0.4.3" }
 
 **Added**
 
@@ -524,7 +525,7 @@ The main changes in this release are:
 + Added random seed to residuals downsampling (ForecasterAutoreg and ForecasterAutoregCustom)
 
 
-## [0.4.2] - [2022-01-08]
+## 0.4.2 <small>Jan 08, 2022</small> { id="0.4.2" }
 
 **Added**
 
@@ -545,7 +546,7 @@ The main changes in this release are:
 + Methods `get_coef` and `get_feature_importance` of `ForecasterAutoregMultiOutput` class return proper feature names.
 
 
-## [0.4.1] - [2021-12-13]
+## 0.4.1 <small>Dec 13, 2021</small> { id="0.4.1" }
 
 **Added**
 
@@ -555,7 +556,8 @@ The main changes in this release are:
 
 + `fit` and `predict` transform pandas series and dataframes to numpy arrays if regressor is XGBoost.
 
-## [0.4.0] - [2021-12-10]
+
+## 0.4.0 <small>Dec 10, 2021</small> { id="0.4.0" }
 
 Version 0.4 has undergone a huge code refactoring. Main changes are related to input-output formats (only pandas series and dataframes are allowed although internally numpy arrays are used for performance) and model validation methods (unified into backtesting with and without refit).
 
@@ -593,7 +595,8 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 
 **Fixed**
 
-## [0.3.0] - [2021-09-01]
+
+## 0.3.0 <small>Sep 01, 2021</small> { id="0.3.0" }
 
 **Added**
 
@@ -615,7 +618,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 **Fixed**
 
 
-## [0.2.0] - [2021-08-26]
+## 0.2.0 <small>Aug 26, 2021</small> { id="0.2.0" }
 
 **Added**
 
@@ -635,8 +638,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 **Fixed**
 
 
-
-## [0.1.9] - [2021-07-27]
+## 0.1.9 <small>Jul 27, 2021</small> { id="0.1.9" }
 
 **Added**
 
@@ -664,7 +666,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 + Update lags of  `ForecasterAutoregMultiOutput` after `grid_search_forecaster`.
 
 
-## [0.1.8.1] - [2021-05-17]
+## 0.1.8.1 <small>May 17, 2021</small> { id="0.1.8.1" }
 
 **Added**
 
@@ -691,7 +693,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 + Values stored in `self.last_window` when training `ForecasterAutoregMultiOutput`. 
 
 
-## [0.1.8] - [2021-04-02]
+## 0.1.8 <small>Apr 02, 2021</small> { id="0.1.8" }
 
 **Added**
 
@@ -705,7 +707,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 **Fixed**
 
 
-## [0.1.7] - [2021-03-19]
+## 0.1.7 <small>Mar 19, 2021</small> { id="0.1.7" }
 
 **Added**
 
@@ -718,7 +720,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 **Fixed**
  
  
-## [0.1.6] - [2021-03-14]
+## 0.1.6 <small>Mar 14, 2021</small> { id="0.1.6" }
 
 **Added**
 
@@ -733,8 +735,9 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 - Renamed `ts_cv_forecaster` to `cv_forecaster`.
  
 **Fixed**
- 
-## [0.1.4] - [2021-02-15]
+
+
+## 0.1.4 <small>Feb 15, 2021</small> { id="0.1.4" }
   
 **Added**
 

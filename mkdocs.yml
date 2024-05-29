@@ -12,8 +12,8 @@ nav:
   - Home:
     - Welcome to skforecast: README.md
     - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
-    - Quick start: user_guides/quick-start-skforecast.ipynb
-    - User Guides: user_guides/input-data.ipynb
+    - Quick start: quick-start/quick-start-skforecast.ipynb
+    - User Guides: user_guides/user-guides.md
     - Examples and tutorials: examples/examples.md
     - API Reference: api/ForecasterAutoreg.md
     - FAQ and Tips: faq/faq.md
@@ -23,73 +23,74 @@ nav:
     - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
 
   - Quick start:
-    - Quick start: user_guides/quick-start-skforecast.ipynb
-    - Forecaster Parameters: introduction-forecasting/forecaster-parameters.md
-    - Forecaster Attributes: introduction-forecasting/forecaster-attributes.ipynb
+    - Quick start: quick-start/quick-start-skforecast.ipynb
+    - Forecaster Parameters: quick-start/forecaster-parameters.md
+    - Forecaster Attributes: quick-start/forecaster-attributes.ipynb
+    - How to install: quick-start/how-to-install.md
 
   - User Guides:
-      - Table of contents: user_guides/user-guides.md
-      - Input data: user_guides/input-data.ipynb
-      - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
-      - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb
-      - "Global Models : Independent multi-time series forecasting": user_guides/independent-multi-time-series-forecasting.ipynb
-      - "Global Models : Series with different lengths and different exogenous variables": user_guides/multi-series-with-different-length-and-different_exog.ipynb
-      - "Global Models : Dependent multivariate series forecasting": user_guides/dependent-multi-series-multivariate-forecasting.ipynb
-      - Deep learning Recurrent Neural Networks: user_guides/forecasting-with-deep-learning-rnn-lstm.ipynb
-      - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
-      - Foreasting baseline: user_guides/forecasting-baseline.ipynb
-      - Exogenous variables: user_guides/exogenous-variables.ipynb
-      - Custom predictors: user_guides/custom-predictors.ipynb
-      - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
-      - Backtesting forecaster: user_guides/backtesting.ipynb
-      - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
-      - Scikit-learn Transformers and Pipelines: user_guides/sklearn-transformers-and-pipeline.ipynb
-      - Probabilistic forecasting: user_guides/probabilistic-forecasting.ipynb
-      - Categorical features: user_guides/categorical-features.ipynb
-      - Calendars features: user_guides/calendar-features.ipynb
-      - Feature selection: user_guides/feature-selection.ipynb
-      - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
-      - Forecaster in production: user_guides/forecaster-in-production.ipynb
-      - Save and load forecaster: user_guides/save-load-forecaster.ipynb
-      - Explainability: user_guides/explainability.ipynb
-      - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
-      - Plot forecaster residuals: user_guides/plot-forecaster-residuals.ipynb
-      - Datasets: user_guides/datasets.ipynb
+    - Table of contents: user_guides/user-guides.md
+    - Input data: user_guides/input-data.ipynb
+    - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
+    - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb
+    - "Global Models : Independent multi-time series forecasting": user_guides/independent-multi-time-series-forecasting.ipynb
+    - "Global Models : Series with different lengths and different exogenous variables": user_guides/multi-series-with-different-length-and-different_exog.ipynb
+    - "Global Models : Dependent multivariate series forecasting": user_guides/dependent-multi-series-multivariate-forecasting.ipynb
+    - Deep learning Recurrent Neural Networks: user_guides/forecasting-with-deep-learning-rnn-lstm.ipynb
+    - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
+    - Foreasting baseline: user_guides/forecasting-baseline.ipynb
+    - Exogenous variables: user_guides/exogenous-variables.ipynb
+    - Custom predictors: user_guides/custom-predictors.ipynb
+    - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
+    - Backtesting forecaster: user_guides/backtesting.ipynb
+    - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
+    - Scikit-learn Transformers and Pipelines: user_guides/sklearn-transformers-and-pipeline.ipynb
+    - Probabilistic forecasting: user_guides/probabilistic-forecasting.ipynb
+    - Categorical features: user_guides/categorical-features.ipynb
+    - Calendars features: user_guides/calendar-features.ipynb
+    - Feature selection: user_guides/feature-selection.ipynb
+    - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
+    - Forecaster in production: user_guides/forecaster-in-production.ipynb
+    - Save and load forecaster: user_guides/save-load-forecaster.ipynb
+    - Explainability: user_guides/explainability.ipynb
+    - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
+    - Plot forecaster residuals: user_guides/plot-forecaster-residuals.ipynb
+    - Datasets: user_guides/datasets.ipynb
 
   - Examples and tutorials:
-      - Examples and tutorials: examples/examples.md
+    - Examples and tutorials: examples/examples.md
 
   - API Reference:
-      - ForecasterAutoreg: api/ForecasterAutoreg.md
-      - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
-      - ForecasterAutoregDirect: api/ForecasterAutoregDirect.md
-      - ForecasterMultiSeries: api/ForecasterMultiSeries.md
-      - ForecasterMultiSeriesCustom: api/ForecasterMultiSeriesCustom.md
-      - ForecasterMultiVariate: api/ForecasterMultiVariate.md
-      - ForecasterRnn: api/ForecasterRnn.md
-      - ForecasterSarimax: api/ForecasterSarimax.md
-      - Sarimax: api/Sarimax.md
-      - ForecasterBaseline: api/ForecasterBaseline.md
-      - model_selection: api/model_selection.md
-      - model_selection_multiseries: api/model_selection_multiseries.md
-      - model_selection_sarimax: api/model_selection_sarimax.md
-      - preprocessing: api/preprocessing.md
-      - plot: api/plot.md
-      - utils: api/utils.md
-      - datasets: api/datasets.md
-      - exceptions: api/exceptions.md
+    - ForecasterAutoreg: api/ForecasterAutoreg.md
+    - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
+    - ForecasterAutoregDirect: api/ForecasterAutoregDirect.md
+    - ForecasterMultiSeries: api/ForecasterMultiSeries.md
+    - ForecasterMultiSeriesCustom: api/ForecasterMultiSeriesCustom.md
+    - ForecasterMultiVariate: api/ForecasterMultiVariate.md
+    - ForecasterRnn: api/ForecasterRnn.md
+    - ForecasterSarimax: api/ForecasterSarimax.md
+    - Sarimax: api/Sarimax.md
+    - ForecasterBaseline: api/ForecasterBaseline.md
+    - model_selection: api/model_selection.md
+    - model_selection_multiseries: api/model_selection_multiseries.md
+    - model_selection_sarimax: api/model_selection_sarimax.md
+    - preprocessing: api/preprocessing.md
+    - plot: api/plot.md
+    - utils: api/utils.md
+    - datasets: api/datasets.md
+    - exceptions: api/exceptions.md
 
   - FAQ and Tips:
-      - Table of contents: faq/faq.md
-      - Time series differentiation: faq/time-series-differentiation.ipynb
-      - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
-      - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
-      - Cyclical features in time series: faq/cyclical-features-time-series.ipynb
-      - Stacking (ensemble) machine learning models: faq/stacking-ensemble-models-forecasting.ipynb
-      - Forecasting with delayed historical data: faq/forecasting-with-delayed-historical-data.ipynb
-      - Time series aggregation: faq/time-series-aggregation.ipynb
-      - Parallelization in skforecast: faq/parallelization-skforecast.ipynb
-      - Profiling skforecast: faq/profiling-skforecast.ipynb
+    - Table of contents: faq/faq.md
+    - Time series differentiation: faq/time-series-differentiation.ipynb
+    - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
+    - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
+    - Cyclical features in time series: faq/cyclical-features-time-series.ipynb
+    - Stacking (ensemble) machine learning models: faq/stacking-ensemble-models-forecasting.ipynb
+    - Forecasting with delayed historical data: faq/forecasting-with-delayed-historical-data.ipynb
+    - Time series aggregation: faq/time-series-aggregation.ipynb
+    - Parallelization in skforecast: faq/parallelization-skforecast.ipynb
+    - Profiling skforecast: faq/profiling-skforecast.ipynb
 
   - Releases: releases/releases.md
 
@@ -119,19 +120,22 @@ plugins:
 
 theme:
   name: material
+  codehilite:
+    linenums: true
+    pygments_style: vs
   custom_dir: docs/overrides
-  font:
-    text: Open Sans
-    code: Ubuntu Mono
-  logo: img/logo-skforecast-orange-no-backgound.png
   favicon: img/favicon.png
-  highlightjs: true
   features:
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
     - navigation.expand
     - navigation.top
+  font:
+    text: Open Sans
+    code: Ubuntu Mono
+  highlightjs: true
+  logo: img/logo-skforecast-orange-no-backgound.png
   palette:
     # # Palette toggle for automatic mode
     # - media: "(prefers-color-scheme)"
@@ -157,22 +161,23 @@ theme:
 
 markdown_extensions:
   - admonition
-  - pymdownx.details
-  - pymdownx.superfences
+  - attr_list
   - codehilite
-  - pymdownx.inlinehilite
+  - footnotes
   - pymdownx.details
-  - pymdownx.tabbed
-  - pymdownx.highlight:
-      use_pygments: true
-      linenums: true
-  - pymdownx.superfences
-  - pymdownx.magiclink
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      use_pygments: true
+      linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.magiclink
+  - pymdownx.superfences
+  - pymdownx.tabbed
   - toc:
       permalink: true
+
 extra:
   version:
     provider: mike
