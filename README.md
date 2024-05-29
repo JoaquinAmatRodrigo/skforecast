@@ -9,8 +9,22 @@
 | Meta | [![License](https://img.shields.io/github/license/JoaquinAmatRodrigo/skforecast)](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE) [![DOI](https://zenodo.org/badge/337705968.svg)](https://zenodo.org/doi/10.5281/zenodo.8382787) |
 | Testing | [![Build status](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/JoaquinAmatRodrigo/skforecast/actions/workflows/unit-tests.yml/badge.svg) [![codecov](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast/branch/master/graph/badge.svg)](https://codecov.io/gh/JoaquinAmatRodrigo/skforecast) |
 |Donation | [![paypal](https://img.shields.io/static/v1?style=social&amp;label=Donate&amp;message=%E2%9D%A4&amp;logo=Paypal&amp;color&amp;link=%3curl%3e)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6) [![buymeacoffee](https://img.shields.io/badge/-Buy_me_a%C2%A0coffee-gray?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/skforecast) ![GitHub Sponsors](https://img.shields.io/github/sponsors/joaquinamatrodrigo?logo=github&label=Github%20sponsors&link=https%3A%2F%2Fgithub.com%2Fsponsors%2FJoaquinAmatRodrigo) |
+|Community | [![!slack](https://img.shields.io/static/v1?logo=linkedin&label=LinkedIn&message=news&color=lightblue)](https://www.linkedin.com/company/skforecast/)
 |Affiliation | [![NumFOCUS Affiliated](https://img.shields.io/badge/NumFOCUS-Affiliated%20Project-orange.svg?style=flat&colorA=E1523D&colorB=007D8A)](https://numfocus.org/sponsored-projects/affiliated-projects)
 
+
+# Table of Contents
+
+- :information_source: [About The Project](#about-the-project)
+- :books: [Documentation](#documentation)
+- :computer: [Installation & Dependencies](#installation--dependencies)
+- :sparkles: [What is new in skforecast 0.12?](#what-is-new-in-skforecast-012)
+- :crystal_ball: [Forecasters](#forecasters)
+- :mortar_board: [Examples and tutorials](#examples-and-tutorials)
+- :handshake: [How to contribute](#how-to-contribute)
+- :memo: [Citation](#citation)
+- :money_with_wings: [Donating](#donating)
+- :scroll: [License](#license)
 
 
 # About The Project
@@ -37,80 +51,46 @@ For detailed information on how to use and leverage the full potential of **skfo
 
 **https://skforecast.org** :books:
 
+| Documentation                           |     |
+|:----------------------------------------|:----|
+| :book: [Introduction to forecasting]    | Basics of forecasting concepts and methodologies |
+| :rocket: [Quick start]                  | Get started quickly with skforecast |
+| :hammer_and_wrench: [User guides]       | Detailed guides on skforecast features and functionalities |
+| :mortar_board: [Examples and tutorials] | Learn through practical examples and tutorials to master skforecast |
+| :question: [FAQ and tips]               | Find answers and tips about forecasting |
+| :books: [API Reference]                 | Comprehensive reference for skforecast functions and classes |
+| :black_nib: [Authors]                   | Meet the authors and contributors of skforecast |
 
-# Installation
+[Introduction to forecasting]: https://skforecast.org/latest/introduction-forecasting/introduction-forecasting
+[Quick start]: https://skforecast.org/latest/user_guides/quick-start-skforecast
+[User guides]: https://skforecast.org/latest/user_guides/user-guides
+[Examples and tutorials]: https://skforecast.org/latest/examples/examples
+[FAQ and tips]: https://skforecast.org/latest/faq/faq
+[API Reference]: https://skforecast.org/latest/api/forecasterautoreg
+[Authors]: https://skforecast.org/latest/authors/authors
 
-The default installation of skforecast only installs hard dependencies.
+
+# Installation & Dependencies
+
+To install the basic version of `skforecast` with its core dependencies, run:
 
 ```bash
 pip install skforecast
 ```
 
-Specific version:
-
-```bash
-pip install skforecast==0.12.1
-```
-
-Latest (unstable):
-
-```bash
-pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
-```
-
-Install the full version (all dependencies):
-
-```bash
-pip install skforecast[full]
-```
-
-Install optional dependencies:
-
-```bash
-pip install skforecast[sarimax]
-```
-
-```bash
-pip install skforecast[plotting]
-```
-
-```bash
-pip install skforecast[deeplearning]
-```
-
-
-# Dependencies
-
-+ Python >= 3.8, <3.12
-
-## Hard dependencies
-
-+ numpy>=1.20, <1.27
-+ pandas>=1.2, <2.3
-+ tqdm>=4.57, <4.67
-+ scikit-learn>=1.2, <1.5
-+ optuna>=2.10, <3.7
-+ joblib>=1.1, <1.5
-
-## Optional dependencies
-
-+ matplotlib>=3.3, <3.9
-+ seaborn>=0.11, <0.14
-+ statsmodels>=0.12, <0.15
-+ pmdarima>=2.0, <2.1
-+ tensorflow>=2.13, <2.16
+If you want to learn more about the installation process, dependencies and optional features, please refer to the [Installation Guide](https://skforecast.org/latest/quick-start/how-to-install.html).
 
 
 # What is new in skforecast 0.12?
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [x] Multiseries forecaster (Global Models) can be trained using series of different lengths and with different exogenous variables per series.
-- [x] Bayesian hyperparameter search is now available for all multiseries forecasters using `optuna` as the search engine.
-- [x] New functionality to select features using scikit-learn selectors (`select_features` and `select_features_multiseries`).
-- [x] Added new forecaster `ForecasterRnn` to create forecasting models based on deep learning (RNN and LSTM).
-- [x] New method to predict intervals conditioned on the range of the predicted values. This is can help to improve the interval coverage when the residuals are not homoscedastic (`ForecasterAutoreg`).
-- [x] All Recursive Forecasters are now able to differentiate the time series before modeling it.
+- [x] Multiseries forecaster (Global Models) can be trained using [series of different lengths and with different exogenous variables](https://skforecast.org/latest/user_guides/multi-series-with-different-length-and-different_exog) per series.
+- [x] [Bayesian hyperparameter search](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting#hyperparameter-tuning-and-lags-selection-multi-series) is now available for all multiseries forecasters using `optuna` as the search engine.
+- [x] New functionality to [select features](https://skforecast.org/latest/user_guides/feature-selection) using scikit-learn selectors (`select_features` and `select_features_multiseries`).
+- [x] Added new forecaster `ForecasterRnn` to create forecasting models based on [deep learning](https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm) (RNN and LSTM).
+- [x] New method to [predict intervals conditioned on the range of the predicted values](https://skforecast.org/latest/user_guides/probabilistic-forecasting#intervals-conditioned-on-predicted-values-binned-residuals). This is can help to improve the interval coverage when the residuals are not homoscedastic (`ForecasterAutoreg`).
+- [x] All Recursive Forecasters are now able to [differentiate the time series](https://skforecast.org/latest/faq/time-series-differentiation) before modeling it.
 - [x] Bug fixes and performance improvements.
 
 
@@ -122,35 +102,23 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 | Forecaster | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Time series differentiation | Exogenous features | Custom features |
 |:-----------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:---------------------------:|:------------------:|:---------------:|
-|[ForecasterAutoreg](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
-|[ForecasterAutoregCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
-|[ForecasterAutoregDirect](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)|:heavy_check_mark:|||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||
-|[ForecasterMultiSeries](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
-|[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
-|[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||
-|[ForecasterRNN](https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm)||:heavy_check_mark:||:heavy_check_mark:|||||
-|[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
+|[ForecasterAutoreg]|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
+|[ForecasterAutoregCustom]|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
+|[ForecasterAutoregDirect]|:heavy_check_mark:|||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||
+|[ForecasterMultiSeries]||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
+|[ForecasterMultiSeriesCustom]||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
+|[ForecasterMultiVariate]||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||
+|[ForecasterRNN]||:heavy_check_mark:||:heavy_check_mark:|||||
+|[ForecasterSarimax]|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
 
-
-# Main User Guides
-
-+ [Introduction to time series and forecasting](https://skforecast.org/latest/introduction-forecasting/introduction-forecasting.html)
-
-+ [Recursive multi-step forecasting](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)
-
-+ [Direct multi-step forecasting](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)
-
-+ [Independent multi-series forecasting](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)
-
-+ [Dependent multi-series forecasting (Multivariate forecasting)](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)
-
-+ [Backtesting (validation) of forecasting models](https://skforecast.org/latest/user_guides/backtesting.html)
-
-+ [Hyperparameter tuning and lags selection of forecasting models](https://skforecast.org/latest/user_guides/hyperparameter-tuning-and-lags-selection.html)
-
-+ [Probabilistic forecasting](https://skforecast.org/latest/user_guides/probabilistic-forecasting.html)
-
-+ [Using forecasters in production](https://skforecast.org/latest/user_guides/forecaster-in-production.html)
+[ForecasterAutoreg]: https://skforecast.org/latest/user_guides/autoregresive-forecaster.html
+[ForecasterAutoregCustom]: https://skforecast.org/latest/user_guides/custom-predictors.html
+[ForecasterAutoregDirect]: https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html
+[ForecasterMultiSeries]: https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html
+[ForecasterMultiSeriesCustom]: https://skforecast.org/latest/user_guides/custom-predictors.html
+[ForecasterMultiVariate]: https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html
+[ForecasterRNN]: https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm
+[ForecasterSarimax]: https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html
 
 
 # Examples and tutorials
