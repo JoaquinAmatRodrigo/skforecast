@@ -3036,7 +3036,7 @@
 <p><strong>Changed</strong></p>
 <p><strong>Fixed</strong></p>
 <ul>
-<li>Bug fix when storing <code>last_window</code> using a <code>ForecasterAutoregMultiSeries</code> that includes differentiation.</li>
+<li>Bug fix when storing <code>last_window</code> using a <a href="https://skforecast.org/latest/api/forecastermultiseries"><code>ForecasterAutoregMultiSeries</code></a> that includes differentiation.</li>
 </ul>
 <h2 id="0.12.0">0.12.0 <small>May 05, 2024</small><a class="headerlink" href="#0.12.0" title="Permanent link">&para;</a></h2>
 <p>The main changes in this release are:</p>
@@ -3045,13 +3045,13 @@
 <p><span class="badge text-bg-feature">Feature</span> Multiseries forecaster (Global Models) can be trained using <a href="https://skforecast.org/latest/user_guides/multi-series-with-different-length-and-different_exog">series of different lengths and with different exogenous variables</a> per series.</p>
 </li>
 <li>
-<p><span class="badge text-bg-feature">Feature</span> New functionality to <a href="https://skforecast.org/latest/user_guides/feature-selection">select features</a> using scikit-learn selectors (<code>select_features</code> and <code>select_features_multiseries</code>).</p>
+<p><span class="badge text-bg-feature">Feature</span> New functionality to <a href="https://skforecast.org/latest/user_guides/feature-selection">select features</a> using scikit-learn selectors (<a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.select_features"><code>select_features</code></a> and <a href="https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.select_features_multiseries"><code>select_features_multiseries</code></a>).</p>
 </li>
 <li>
-<p><span class="badge text-bg-feature">Feature</span> Added new forecaster <code>ForecasterRnn</code> to create forecasting models based on <a href="https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm">deep learning</a> (RNN and LSTM).</p>
+<p><span class="badge text-bg-feature">Feature</span> Added new forecaster <a href="https://skforecast.org/latest/api/forecasterrnn"><code>ForecasterRnn</code></a> to create forecasting models based on <a href="https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm">deep learning</a> (RNN and LSTM).</p>
 </li>
 <li>
-<p><span class="badge text-bg-feature">Feature</span> New method to <a href="https://skforecast.org/latest/user_guides/probabilistic-forecasting#intervals-conditioned-on-predicted-values-binned-residuals">predict intervals conditioned on the range of the predicted values</a>. This is can help to improve the interval coverage when the residuals are not homoscedastic (<code>ForecasterAutoreg</code>).</p>
+<p><span class="badge text-bg-feature">Feature</span> New method to <a href="https://skforecast.org/latest/user_guides/probabilistic-forecasting#intervals-conditioned-on-predicted-values-binned-residuals">predict intervals conditioned on the range of the predicted values</a>. This is can help to improve the interval coverage when the residuals are not homoscedastic (<a href="https://skforecast.org/latest/api/forecasterautoreg"><code>ForecasterAutoreg</code></a>).</p>
 </li>
 <li>
 <p><span class="badge text-bg-enhancement">Enhancement</span> <a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting#hyperparameter-tuning-and-lags-selection-multi-series">Bayesian hyperparameter search</a> is now available for all multiseries forecasters using <code>optuna</code> as the search engine.</p>
