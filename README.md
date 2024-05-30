@@ -62,7 +62,7 @@ For detailed information on how to use and leverage the full potential of **skfo
 | :black_nib: [Authors]                   | Meet the authors and contributors of skforecast |
 
 [Introduction to forecasting]: https://skforecast.org/latest/introduction-forecasting/introduction-forecasting
-[Quick start]: https://skforecast.org/latest/user_guides/quick-start-skforecast
+[Quick start]: https://skforecast.org/latest/quick-start/quick-start-skforecast
 [User guides]: https://skforecast.org/latest/user_guides/user-guides
 [Examples and tutorials]: https://skforecast.org/latest/examples/examples
 [FAQ and tips]: https://skforecast.org/latest/faq/faq
