@@ -1,4 +1,4 @@
-# Change Log
+# Changelog
 
 All significant changes to this project are documented in the release file.
 
