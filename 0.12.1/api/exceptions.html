@@ -282,7 +282,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../user_guides/quick-start-skforecast.html" class="md-tabs__link">
+        <a href="../quick-start/quick-start-skforecast.html" class="md-tabs__link">
           
   
   Quick start
@@ -300,7 +300,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../user_guides/input-data.html" class="md-tabs__link">
+        <a href="../user_guides/user-guides.html" class="md-tabs__link">
           
   
   User Guides
@@ -538,7 +538,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/quick-start-skforecast.html" class="md-nav__link">
+      <a href="../quick-start/quick-start-skforecast.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -558,7 +558,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/input-data.html" class="md-nav__link">
+      <a href="../user_guides/user-guides.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -774,7 +774,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/quick-start-skforecast.html" class="md-nav__link">
+      <a href="../quick-start/quick-start-skforecast.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -794,7 +794,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../introduction-forecasting/forecaster-parameters.html" class="md-nav__link">
+      <a href="../quick-start/forecaster-parameters.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -814,11 +814,31 @@
   
   
     <li class="md-nav__item">
-      <a href="../introduction-forecasting/forecaster-attributes.html" class="md-nav__link">
+      <a href="../quick-start/forecaster-attributes.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     Forecaster Attributes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-start/how-to-install.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    How to install
   </span>
   
 
@@ -875,6 +895,26 @@
             User Guides
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/user-guides.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Table of contents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2382,7 +2422,7 @@ matrix generates missing values. Most machine learning models do not accept
 missing values, so the Forecaster's <code>fit' and</code>predict' methods may fail.</p>
 
                 <details class="quote">
-                  <summary>Source code in <code>skforecast/exceptions/exceptions.py</code></summary>
+                  <summary>Source code in <code>skforecast\exceptions\exceptions.py</code></summary>
                   <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">21</span>
 <span class="normal">22</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
@@ -2430,7 +2470,7 @@ data. Most machine learning models do not accept missing values, so the
 Forecaster's <code>fit' and</code>predict' methods may fail.</p>
 
                 <details class="quote">
-                  <summary>Source code in <code>skforecast/exceptions/exceptions.py</code></summary>
+                  <summary>Source code in <code>skforecast\exceptions\exceptions.py</code></summary>
                   <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">38</span>
 <span class="normal">39</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
@@ -2478,7 +2518,7 @@ Forecaster's <code>fit' and</code>predict' methods may fail.</p>
 accept other data types, therefore the forecaster <code>fit</code> and <code>predict</code> may fail.</p>
 
                 <details class="quote">
-                  <summary>Source code in <code>skforecast/exceptions/exceptions.py</code></summary>
+                  <summary>Source code in <code>skforecast\exceptions\exceptions.py</code></summary>
                   <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">55</span>
 <span class="normal">56</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
@@ -2525,7 +2565,7 @@ accept other data types, therefore the forecaster <code>fit</code> and <code>pre
 the process may take a while to run.</p>
 
                 <details class="quote">
-                  <summary>Source code in <code>skforecast/exceptions/exceptions.py</code></summary>
+                  <summary>Source code in <code>skforecast\exceptions\exceptions.py</code></summary>
                   <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">71</span>
 <span class="normal">72</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
@@ -2572,7 +2612,7 @@ the process may take a while to run.</p>
 or a function.</p>
 
                 <details class="quote">
-                  <summary>Source code in <code>skforecast/exceptions/exceptions.py</code></summary>
+                  <summary>Source code in <code>skforecast\exceptions\exceptions.py</code></summary>
                   <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">87</span>
 <span class="normal">88</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>
@@ -2619,7 +2659,7 @@ or a function.</p>
 environment differs from the version used to initialize the forecaster.</p>
 
                 <details class="quote">
-                  <summary>Source code in <code>skforecast/exceptions/exceptions.py</code></summary>
+                  <summary>Source code in <code>skforecast\exceptions\exceptions.py</code></summary>
                   <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">103</span>
 <span class="normal">104</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">message</span> <span class="o">=</span> <span class="n">message</span>

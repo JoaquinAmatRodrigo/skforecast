@@ -21,6 +21,7 @@
 [![paypal](https://img.shields.io/static/v1?style=social&amp;label=Donate&amp;message=%E2%9D%A4&amp;logo=Paypal&amp;color&amp;link=%3curl%3e)](https://www.paypal.com/donate/?hosted_button_id=D2JZSWRLTZDL6)
 [![buymeacoffee](https://img.shields.io/badge/-Buy_me_a%C2%A0coffee-gray?logo=buy-me-a-coffee)](https://www.buymeacoffee.com/skforecast)
 ![GitHub Sponsors](https://img.shields.io/github/sponsors/joaquinamatrodrigo?logo=github&label=Github%20sponsors&link=https%3A%2F%2Fgithub.com%2Fsponsors%2FJoaquinAmatRodrigo)
+[![!slack](https://img.shields.io/static/v1?logo=linkedin&label=LinkedIn&message=news&color=lightblue)](https://www.linkedin.com/company/skforecast/)
 [![NumFOCUS Affiliated](https://img.shields.io/badge/NumFOCUS-Affiliated%20Project-orange.svg?style=flat&colorA=E1523D&colorB=007D8A)](https://numfocus.org/sponsored-projects/affiliated-projects)
 
 
@@ -42,67 +43,15 @@ The fields of statistics and machine learning have developed many excellent regr
 Thank you for choosing skforecast! We value your suggestions, bug reports and recommendations as they help us identify areas for improvement and ensure that skforecast meets the needs of the community. Please consider sharing your experiences, reporting bugs, making suggestions or even contributing to the codebase on GitHub. Together, let's make time series forecasting more accessible and accurate for everyone.
 
 
-## Installation
+## Installation & Dependencies
 
-The default installation of skforecast only installs hard dependencies.
+To install the basic version of `skforecast` with its core dependencies, run:
 
 ```bash
 pip install skforecast
 ```
 
-Specific version:
-
-```bash
-pip install skforecast==0.12.1
-```
-
-Latest (unstable):
-
-```bash
-pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
-```
-
-Install the full version (all dependencies):
-
-```bash
-pip install skforecast[full]
-```
-
-Install optional dependencies:
-
-```bash
-pip install skforecast[sarimax]
-```
-
-```bash
-pip install skforecast[plotting]
-```
-
-```bash
-pip install skforecast[deeplearning]
-```
-
-
-## Dependencies
-
-+ Python >= 3.8, <3.12
-
-### Hard dependencies
-
-+ numpy>=1.20, <1.27
-+ pandas>=1.2, <2.3
-+ tqdm>=4.57, <4.67
-+ scikit-learn>=1.2, <1.5
-+ optuna>=2.10, <3.7
-+ joblib>=1.1, <1.5
-
-### Optional dependencies
-
-+ matplotlib>=3.3, <3.9
-+ seaborn>=0.11, <0.14
-+ statsmodels>=0.12, <0.15
-+ pmdarima>=2.0, <2.1
-+ tensorflow>=2.13, <2.16
+If you want to learn more about the installation process, dependencies and optional features, please refer to the [Installation Guide](https://skforecast.org/latest/quick-start/how-to-install.html).
 
 
 ## Forecasters
@@ -111,16 +60,25 @@ A **Forecaster** object in the skforecast library is a comprehensive container t
 
 The **skforecast** library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.
 
-| Forecaster | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Time series differentiation | Exogenous features | Custom features |
-|:-----------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:---------------------------:|:------------------:|:---------------:|
-|[ForecasterAutoreg](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)|✔️||✔️||✔️|✔️|✔️||
-|[ForecasterAutoregCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)|✔️||✔️||✔️|✔️|✔️|✔️|✔️|
-|[ForecasterAutoregDirect](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)|✔️|||✔️|✔️||✔️||
-|[ForecasterMultiSeries](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)||✔️|✔️||✔️|✔️|✔️||
-|[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||✔️|✔️||✔️|✔️|✔️|✔️|
-|[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||✔️||✔️|✔️||✔️||
-|[ForecasterRNN](https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm)||✔️||✔️|||||
-|[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|✔️||✔️||✔️|✔️|✔️||
+| Forecaster                   | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Time series differentiation | Exogenous features | Custom features |
+|:-----------------------------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:---------------------------:|:------------------:|:---------------:|
+|[ForecasterAutoreg]           |✔️||✔️||✔️|✔️|✔️||
+|[ForecasterAutoregCustom]     |✔️||✔️||✔️|✔️|✔️|✔️|✔️|
+|[ForecasterAutoregDirect]     |✔️|||✔️|✔️||✔️||
+|[ForecasterMultiSeries]       ||✔️|✔️||✔️|✔️|✔️||
+|[ForecasterMultiSeriesCustom] ||✔️|✔️||✔️|✔️|✔️|✔️|
+|[ForecasterMultiVariate]      ||✔️||✔️|✔️||✔️||
+|[ForecasterRNN]               ||✔️||✔️|||||
+|[ForecasterSarimax]           |✔️||✔️||✔️|✔️|✔️||
+
+[ForecasterAutoreg]: https://skforecast.org/latest/user_guides/autoregresive-forecaster.html
+[ForecasterAutoregCustom]: https://skforecast.org/latest/user_guides/custom-predictors.html
+[ForecasterAutoregDirect]: https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html
+[ForecasterMultiSeries]: https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html
+[ForecasterMultiSeriesCustom]: https://skforecast.org/latest/user_guides/custom-predictors.html
+[ForecasterMultiVariate]: https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html
+[ForecasterRNN]: https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm
+[ForecasterSarimax]: https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html
 
 
 ## Features

@@ -121,21 +121,31 @@ The [`ForecasterAutoregMultiVariate`](https://skforecast.org/latest/user_guides/
 
 ## Forecasters
 
-A Forecaster object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.
+A **Forecaster** object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.
 
-The skforecast library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.
+The **skforecast** library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.
 
-| Forecaster | Single series | Multiple series | Recursive prediction| Probabilistic prediction | Exogenous features | Custom features |
-|:-----------|:-------------:|:---------------:|:-------------------:|:------------------------:|:-------------------:|:-----------------:|
-|[ForecasterAutoreg](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html)|✔️||✔️||✔️|✔️||
-|[ForecasterAutoregCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)|✔️||✔️||✔️|✔️|✔️|✔️|
-|[ForecasterAutoregDirect](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html)|✔️|||✔️|✔️|✔️||
-|[ForecasterMultiSeries](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html)||✔️|✔️||✔️|✔️||
-|[ForecasterMultiSeriesCustom](https://skforecast.org/latest/user_guides/custom-predictors.html)||✔️|✔️||✔️|✔️|✔️|✔️|
-|[ForecasterMultiVariate](https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html)||✔️||✔️|✔️|✔️||
-|[ForecasterSarimax](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html)|✔️||✔️||✔️|✔️||
+| Forecaster                   | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Time series differentiation | Exogenous features | Custom features |
+|:-----------------------------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:---------------------------:|:------------------:|:---------------:|
+|[ForecasterAutoreg]           |✔️||✔️||✔️|✔️|✔️||
+|[ForecasterAutoregCustom]     |✔️||✔️||✔️|✔️|✔️|✔️|✔️|
+|[ForecasterAutoregDirect]     |✔️|||✔️|✔️||✔️||
+|[ForecasterMultiSeries]       ||✔️|✔️||✔️|✔️|✔️||
+|[ForecasterMultiSeriesCustom] ||✔️|✔️||✔️|✔️|✔️|✔️|
+|[ForecasterMultiVariate]      ||✔️||✔️|✔️||✔️||
+|[ForecasterRNN]               ||✔️||✔️|||||
+|[ForecasterSarimax]           |✔️||✔️||✔️|✔️|✔️||
 
-To understand what can be done when initializing a forecaster with **skforecast** visit [Forecaster parameters](https://skforecast.org/latest/introduction-forecasting/forecaster-parameters) and [Forecaster attributes](https://skforecast.org/latest/introduction-forecasting/forecaster-attributes).
+[ForecasterAutoreg]: https://skforecast.org/latest/user_guides/autoregresive-forecaster.html
+[ForecasterAutoregCustom]: https://skforecast.org/latest/user_guides/custom-predictors.html
+[ForecasterAutoregDirect]: https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html
+[ForecasterMultiSeries]: https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html
+[ForecasterMultiSeriesCustom]: https://skforecast.org/latest/user_guides/custom-predictors.html
+[ForecasterMultiVariate]: https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html
+[ForecasterRNN]: https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm
+[ForecasterSarimax]: https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html
+
+To understand what can be done when initializing a forecaster with **skforecast** visit [Forecaster parameters](https://skforecast.org/latest/quick-start/forecaster-parameters) and [Forecaster attributes](https://skforecast.org/latest/quick-start/forecaster-attributes).
 
 
 ## Backtesting forecasting models

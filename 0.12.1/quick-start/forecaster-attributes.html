@@ -12,13 +12,13 @@
         <meta name="author" content="Joaquin Amat Rodrigo and Javier Escobar Ortiz">
       
       
-        <link rel="canonical" href="https://joaquinamatrodrigo.github.io/skforecast/0.12.1/introduction-forecasting/forecaster-attributes.html">
+        <link rel="canonical" href="https://joaquinamatrodrigo.github.io/skforecast/0.12.1/quick-start/forecaster-attributes.html">
       
       
         <link rel="prev" href="forecaster-parameters.html">
       
       
-        <link rel="next" href="../user_guides/input-data.html">
+        <link rel="next" href="how-to-install.html">
       
       
       <link rel="icon" href="../img/favicon.png">
@@ -264,7 +264,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="introduction-forecasting.html" class="md-tabs__link">
+        <a href="../introduction-forecasting/introduction-forecasting.html" class="md-tabs__link">
           
   
   Introduction to forecasting
@@ -284,7 +284,7 @@
     
     
       <li class="md-tabs__item md-tabs__item--active">
-        <a href="../user_guides/quick-start-skforecast.html" class="md-tabs__link">
+        <a href="quick-start-skforecast.html" class="md-tabs__link">
           
   
   Quick start
@@ -302,7 +302,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../user_guides/input-data.html" class="md-tabs__link">
+        <a href="../user_guides/user-guides.html" class="md-tabs__link">
           
   
   User Guides
@@ -518,7 +518,7 @@
   
   
     <li class="md-nav__item">
-      <a href="introduction-forecasting.html" class="md-nav__link">
+      <a href="../introduction-forecasting/introduction-forecasting.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -538,7 +538,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/quick-start-skforecast.html" class="md-nav__link">
+      <a href="quick-start-skforecast.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -558,7 +558,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/input-data.html" class="md-nav__link">
+      <a href="../user_guides/user-guides.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -706,7 +706,7 @@
   
   
     <li class="md-nav__item">
-      <a href="introduction-forecasting.html" class="md-nav__link">
+      <a href="../introduction-forecasting/introduction-forecasting.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -774,7 +774,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/quick-start-skforecast.html" class="md-nav__link">
+      <a href="quick-start-skforecast.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -931,6 +931,26 @@
 
               
             
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="how-to-install.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    How to install
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
           </ul>
         </nav>
       
@@ -978,6 +998,26 @@
             User Guides
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/user-guides.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Table of contents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2633,12 +2673,11 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
     if (!diagrams.length) {
       return;
     }
-    const mermaid = (await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.7.0/mermaid.esm.min.mjs")).default;
+    const mermaid = (await import("https://cdnjs.cloudflare.com/ajax/libs/mermaid/10.6.0/mermaid.esm.min.mjs")).default;
     const parser = new DOMParser();
 
     mermaid.initialize({
       maxTextSize: 100000,
-      maxEdges: 100000,
       startOnLoad: false,
       fontFamily: window
         .getComputedStyle(document.body)
@@ -2709,8 +2748,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       let results = null;
       let output = null;
       try {
-        let { svg } = await mermaid.render(id, raw, el);
-        svg = cleanMermaidSvg(svg);
+        const { svg } = await mermaid.render(id, raw, el);
         results = makeMermaidImage(svg);
         output = document.createElement("figure");
         results.map(output.appendChild, output);
@@ -2723,38 +2761,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
       }
       parent.classList.add("jp-RenderedMermaid");
       parent.appendChild(output);
-    }
-
-
-    /**
-     * Post-process to ensure mermaid diagrams contain only valid SVG and XHTML.
-     */
-    function cleanMermaidSvg(svg) {
-      return svg.replace(RE_VOID_ELEMENT, replaceVoidElement);
-    }
-
-
-    /**
-     * A regular expression for all void elements, which may include attributes and
-     * a slash.
-     *
-     * @see https://developer.mozilla.org/en-US/docs/Glossary/Void_element
-     *
-     * Of these, only `<br>` is generated by Mermaid in place of `\n`,
-     * but _any_ "malformed" tag will break the SVG rendering entirely.
-     */
-    const RE_VOID_ELEMENT =
-      /<\s*(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)\s*([^>]*?)\s*>/gi;
-
-    /**
-     * Ensure a void element is closed with a slash, preserving any attributes.
-     */
-    function replaceVoidElement(match, tag, rest) {
-      rest = rest.trim();
-      if (!rest.endsWith('/')) {
-        rest = `${rest} /`;
-      }
-      return `<${tag} ${rest}>`;
     }
 
     void Promise.all([...diagrams].map(renderOneMarmaid));
@@ -2853,12 +2859,14 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Libraries</span>
 <span class="c1"># ==============================================================================</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-1"># Libraries
 # ==============================================================================
+import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.ensemble import RandomForestRegressor</div>
@@ -2958,9 +2966,9 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {'bootstrap': True, 'ccp_alpha': 0.0, 'criterion': 'squared_error', 'max_depth': None, 'max_features': 1.0, 'max_leaf_nodes': None, 'max_samples': None, 'min_impurity_decrease': 0.0, 'min_samples_leaf': 1, 'min_samples_split': 2, 'min_weight_fraction_leaf': 0.0, 'monotonic_cst': None, 'n_estimators': 100, 'n_jobs': None, 'oob_score': False, 'random_state': 123, 'verbose': 0, 'warm_start': False} 
 fit_kwargs: {} 
-Creation date: 2024-05-05 12:08:01 
-Last fit date: 2024-05-05 12:08:01 
-Skforecast version: 0.12.0 
+Creation date: 2024-05-27 12:14:21 
+Last fit date: 2024-05-27 12:14:21 
+Skforecast version: 0.12.1 
 Python version: 3.11.5 
 Forecaster id: None </pre>
 </div>
@@ -3054,7 +3062,7 @@ fit_kwargs
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="regressor">Regressor<a class="anchor-link" href="#regressor">¶</a></h2><p>Skforecast is a Python library that facilitates using scikit-learn regressors as multi-step forecasters and also works with any regressor compatible with the scikit-learn API.</p>
+<h2 id="regressor">Regressor<a class="anchor-link" href="#regressor">¶</a></h2><p>Skforecast is a Python library that facilitates using <code>scikit-learn</code> regressors as multi-step forecasters and also works with any regressor compatible with the scikit-learn API.</p>
 </div>
 </div>
 </div>
@@ -3791,7 +3799,7 @@ forecaster.window_size</div>
 <b style="color: #00b8d4;">✎ Note</b>
 </p>
 <p>In the forecasters that follows a <a href="https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html">Direct Strategy</a> and in the <a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html">
-Independent multi-series forecasting</a> this parameter is a <code>dict</code> containing the residuals for each regressor/serie.</p>
+Global Forecasting Models: Independent multi-series forecasting</a> this parameter is a <code>dict</code> containing the residuals for each regressor/serie.</p>
 </div>
 </div>
 </div>

@@ -18,7 +18,7 @@
         <link rel="prev" href="../releases/releases.html">
       
       
-        <link rel="next" href="../user_guides/quick-start-skforecast.html">
+        <link rel="next" href="../quick-start/quick-start-skforecast.html">
       
       
       <link rel="icon" href="../img/favicon.png">
@@ -284,7 +284,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../user_guides/quick-start-skforecast.html" class="md-tabs__link">
+        <a href="../quick-start/quick-start-skforecast.html" class="md-tabs__link">
           
   
   Quick start
@@ -302,7 +302,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../user_guides/input-data.html" class="md-tabs__link">
+        <a href="../user_guides/user-guides.html" class="md-tabs__link">
           
   
   User Guides
@@ -756,7 +756,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/quick-start-skforecast.html" class="md-nav__link">
+      <a href="../quick-start/quick-start-skforecast.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -776,7 +776,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/input-data.html" class="md-nav__link">
+      <a href="../user_guides/user-guides.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1212,7 +1212,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/quick-start-skforecast.html" class="md-nav__link">
+      <a href="../quick-start/quick-start-skforecast.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1232,7 +1232,7 @@
   
   
     <li class="md-nav__item">
-      <a href="forecaster-parameters.html" class="md-nav__link">
+      <a href="../quick-start/forecaster-parameters.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -1252,11 +1252,31 @@
   
   
     <li class="md-nav__item">
-      <a href="forecaster-attributes.html" class="md-nav__link">
+      <a href="../quick-start/forecaster-attributes.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     Forecaster Attributes
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../quick-start/how-to-install.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    How to install
   </span>
   
 
@@ -1313,6 +1333,26 @@
             User Guides
           </label>
           <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/user-guides.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Table of contents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
             
               
                 
@@ -2913,16 +2953,18 @@
 
 <p>The <a href="https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html"><code>ForecasterAutoregMultiVariate</code></a> class covers this process. </p>
 <h2 id="forecasters">Forecasters<a class="headerlink" href="#forecasters" title="Permanent link">&para;</a></h2>
-<p>A Forecaster object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.</p>
-<p>The skforecast library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.</p>
+<p>A <strong>Forecaster</strong> object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.</p>
+<p>The <strong>skforecast</strong> library offers a variety of forecaster types, each tailored to specific requirements such as single or multiple time series, direct or recursive strategies, or custom predictors. Regardless of the specific forecaster type, all instances share the same API.</p>
 <table>
 <thead>
 <tr>
 <th style="text-align: left;">Forecaster</th>
 <th style="text-align: center;">Single series</th>
 <th style="text-align: center;">Multiple series</th>
-<th style="text-align: center;">Recursive prediction</th>
+<th style="text-align: center;">Recursive strategy</th>
+<th style="text-align: center;">Direct strategy</th>
 <th style="text-align: center;">Probabilistic prediction</th>
+<th style="text-align: center;">Time series differentiation</th>
 <th style="text-align: center;">Exogenous features</th>
 <th style="text-align: center;">Custom features</th>
 </tr>
@@ -2936,6 +2978,8 @@
 <td style="text-align: center;"></td>
 <td style="text-align: center;">✔️</td>
 <td style="text-align: center;">✔️</td>
+<td style="text-align: center;">✔️</td>
+<td style="text-align: center;"></td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="https://skforecast.org/latest/user_guides/custom-predictors.html">ForecasterAutoregCustom</a></td>
@@ -2943,6 +2987,8 @@
 <td style="text-align: center;"></td>
 <td style="text-align: center;">✔️</td>
 <td style="text-align: center;"></td>
+<td style="text-align: center;">✔️</td>
+<td style="text-align: center;">✔️</td>
 <td style="text-align: center;">✔️</td>
 <td style="text-align: center;">✔️</td>
 </tr>
@@ -2953,7 +2999,9 @@
 <td style="text-align: center;"></td>
 <td style="text-align: center;">✔️</td>
 <td style="text-align: center;">✔️</td>
+<td style="text-align: center;"></td>
 <td style="text-align: center;">✔️</td>
+<td style="text-align: center;"></td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html">ForecasterMultiSeries</a></td>
@@ -2963,6 +3011,8 @@
 <td style="text-align: center;"></td>
 <td style="text-align: center;">✔️</td>
 <td style="text-align: center;">✔️</td>
+<td style="text-align: center;">✔️</td>
+<td style="text-align: center;"></td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="https://skforecast.org/latest/user_guides/custom-predictors.html">ForecasterMultiSeriesCustom</a></td>
@@ -2970,6 +3020,8 @@
 <td style="text-align: center;">✔️</td>
 <td style="text-align: center;">✔️</td>
 <td style="text-align: center;"></td>
+<td style="text-align: center;">✔️</td>
+<td style="text-align: center;">✔️</td>
 <td style="text-align: center;">✔️</td>
 <td style="text-align: center;">✔️</td>
 </tr>
@@ -2980,7 +3032,20 @@
 <td style="text-align: center;"></td>
 <td style="text-align: center;">✔️</td>
 <td style="text-align: center;">✔️</td>
+<td style="text-align: center;"></td>
 <td style="text-align: center;">✔️</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: left;"><a href="https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm">ForecasterRNN</a></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✔️</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✔️</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
 </tr>
 <tr>
 <td style="text-align: left;"><a href="https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html">ForecasterSarimax</a></td>
@@ -2990,10 +3055,12 @@
 <td style="text-align: center;"></td>
 <td style="text-align: center;">✔️</td>
 <td style="text-align: center;">✔️</td>
+<td style="text-align: center;">✔️</td>
+<td style="text-align: center;"></td>
 </tr>
 </tbody>
 </table>
-<p>To understand what can be done when initializing a forecaster with <strong>skforecast</strong> visit <a href="https://skforecast.org/latest/introduction-forecasting/forecaster-parameters">Forecaster parameters</a> and <a href="https://skforecast.org/latest/introduction-forecasting/forecaster-attributes">Forecaster attributes</a>.</p>
+<p>To understand what can be done when initializing a forecaster with <strong>skforecast</strong> visit <a href="https://skforecast.org/latest/quick-start/forecaster-parameters">Forecaster parameters</a> and <a href="https://skforecast.org/latest/quick-start/forecaster-attributes">Forecaster attributes</a>.</p>
 <h2 id="backtesting-forecasting-models">Backtesting forecasting models<a class="headerlink" href="#backtesting-forecasting-models" title="Permanent link">&para;</a></h2>
 <p>In time series forecasting, the process of <em>backtesting</em> consists of evaluating the performance of a predictive model by applying it retrospectively to historical data. Therefore, it is a special type of cross-validation applied to the previous period(s).</p>
 <p>The purpose of backtesting is to evaluate the accuracy and effectiveness of a model and identify any potential issues or areas of improvement. By testing the model on historical data, one can assess how well it performs on data that it has not seen before. This is an important step in the modeling process, as it helps to ensure that the model is robust and reliable.</p>
