@@ -1,6 +1,6 @@
 [project]
 name = "skforecast"
-version = "0.12.1"
+version = "0.13.0"
 description="Forecasting time series with scikit-learn regressors. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...)."
 readme = "README.md"
 authors = [
@@ -15,10 +15,10 @@ maintainers = [
 
 classifiers = [
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
     "License :: OSI Approved :: BSD License"
 ]
 keywords = [
@@ -39,7 +39,7 @@ dependencies = [
     "optuna>=2.10, <3.7",
     "joblib>=1.1, <1.5",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 
 [project.optional-dependencies]
 sarimax = [
