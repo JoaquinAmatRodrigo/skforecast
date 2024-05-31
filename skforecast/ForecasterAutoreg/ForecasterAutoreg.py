@@ -255,7 +255,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.binner_kwargs = binner_kwargs
         if binner_kwargs is None:
             self.binner_kwargs = {
-                'n_bins': 15, 'encode': 'ordinal', 'strategy': 'quantile',
+                'n_bins': 10, 'encode': 'ordinal', 'strategy': 'quantile',
                 'subsample': 10000, 'random_state': 789654, 'dtype': np.float64
             }
         else:
