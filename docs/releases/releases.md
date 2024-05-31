@@ -15,9 +15,13 @@ All significant changes to this project are documented in this release file.
 
 **Added**
 
++ Support for `python 3.12`.
 
 **Changed**
 
++ Deprecated `python 3.8` compatibility.
+
++ Change default value of `n_bins` when initializing `ForecasterAutoreg` from 15 to 10.
 
 **Fixed**
 
