@@ -10,6 +10,18 @@ All significant changes to this project are documented in this release file.
 | <span class="badge text-bg-danger">Fix</span>              | Bug fix                               |
 
 
+## 0.13.0 <small>In development</small> { id="0.13.0" }
+
+
+**Added**
+
+
+**Changed**
+
+
+**Fixed**
+
+
 ## 0.12.1 <small>May 20, 2024</small> { id="0.12.1" }
 
 <span class="badge text-bg-danger">Fix</span> This is a minor release to fix a bug.
