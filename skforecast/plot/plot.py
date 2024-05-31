@@ -232,7 +232,7 @@ def set_dark_theme(
     plt.rcParams.update(dark_style)
 
 
-def plot_predicted_intervals(
+def plot_prediction_intervals(
     predictions: pd.DataFrame,
     y_true: pd.DataFrame,
     target_variable: str,
