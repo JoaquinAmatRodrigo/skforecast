@@ -17,6 +17,8 @@ All significant changes to this project are documented in this release file.
 
 + Support for `python 3.12`.
 
++ New plot function `plot_predicted_intervals` in the `plot` module to plot predicted intervals.
+
 **Changed**
 
 + Deprecated `python 3.8` compatibility.
