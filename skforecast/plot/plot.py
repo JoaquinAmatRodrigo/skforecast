@@ -116,7 +116,7 @@ def plot_multivariate_time_series_corr(
     ax.set_xlabel('Time series')
     
     return fig
-    
+
 
 def plot_prediction_distribution(
     bootstrapping_predictions: pd.DataFrame,
@@ -264,6 +264,10 @@ def plot_prediction_intervals(
         Title of y-axis, by default None.
     ax : matplotlib axes, default `None`
         Axes where to plot, by default None.
+
+    Returns
+    -------
+    None
     
     """
     
