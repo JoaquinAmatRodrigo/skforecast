@@ -23,6 +23,8 @@ All significant changes to this project are documented in this release file.
 
 + Change default value of `n_bins` when initializing `ForecasterAutoreg` from 15 to 10.
 
++ Refactor `_recursive_predict` in all recursive forecasters.
+
 **Fixed**
 
 

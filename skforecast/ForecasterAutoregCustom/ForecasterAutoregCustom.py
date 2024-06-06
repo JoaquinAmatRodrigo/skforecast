@@ -588,59 +588,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             self.last_window = y.iloc[-self.window_size_diff:].copy()
 
 
-    def _recursive_predict(
-        self,
-        steps: int,
-        last_window: np.ndarray,
-        exog: Optional[np.ndarray]=None
-    ) -> np.ndarray:
-        """
-        Predict n steps ahead. It is an iterative process in which, each prediction,
-        is used as a predictor for the next step.
-        
-        Parameters
-        ----------
-        steps : int
-            Number of future steps predicted.
-        last_window : numpy ndarray
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
-        exog : numpy ndarray, default `None`
-            Exogenous variable/s included as predictor/s.
-
-        Returns
-        -------
-        predictions : numpy ndarray
-            Predicted values.
-        
-        """
-
-        predictions = np.full(shape=steps, fill_value=np.nan)
-
-        for i in range(steps):
-            X = self.fun_predictors(y=last_window).reshape(1, -1)
-            if np.isnan(X).any():
-                raise ValueError(
-                    f"`{self.fun_predictors.__name__}` is returning `NaN` values."
-                )
-            if exog is not None:
-                X = np.column_stack((X, exog[i, ].reshape(1, -1)))
-
-            with warnings.catch_warnings():
-                # Suppress scikit-learn warning: "X does not have valid feature names,
-                # but NoOpTransformer was fitted with feature names".
-                warnings.simplefilter("ignore")
-                prediction = self.regressor.predict(X)
-                predictions[i] = prediction.ravel()[0]
-
-            # Update `last_window` values. The first position is discarded and 
-            # the new prediction is added at the end.
-            last_window = np.append(last_window[1:], prediction)
-
-        return predictions
-
-
-    def create_predict_X(
+    def create_predict_inputs(
         self,
         steps: int,
         last_window: Optional[pd.Series]=None,
@@ -652,7 +600,9 @@ class ForecasterAutoregCustom(ForecasterBase):
             pd.Index
         ]:
         """
-        Create predictors for the first iteration of the prediction process.
+        Create inputs needed for the first iteration of the prediction process. 
+        Since it is a recursive process, last window is updated at each 
+        iteration of the prediction process.
         
         Parameters
         ----------
@@ -680,9 +630,6 @@ class ForecasterAutoregCustom(ForecasterBase):
             Index of `last_window_values`.
         
         """
-
-        # TODO: Do we want to include arguments `transform` and `diff` to let the user
-        # inspect the predictors without transformations or differentiation?
 
         if last_window is None:
             last_window = self.last_window
@@ -754,6 +701,61 @@ class ForecasterAutoregCustom(ForecasterBase):
         return last_window_values, exog_values, last_window_index
 
 
+    def _recursive_predict(
+        self,
+        steps: int,
+        last_window: np.ndarray,
+        exog: Optional[np.ndarray]=None
+    ) -> np.ndarray:
+        """
+        Predict n steps ahead. It is an iterative process in which, each prediction,
+        is used as a predictor for the next step.
+        
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        last_window : numpy ndarray
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
+        exog : numpy ndarray, default `None`
+            Exogenous variable/s included as predictor/s.
+
+        Returns
+        -------
+        predictions : numpy ndarray
+            Predicted values.
+        
+        """
+
+        predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
+        last_window = np.concatenate((last_window, predictions))
+
+        for i in range(steps):
+            X = self.fun_predictors(
+                y=last_window[i:self.window_size_diff + i]
+            ).reshape(1, -1)
+            if np.isnan(X).any():
+                raise ValueError(
+                    f"`{self.fun_predictors.__name__}` is returning `NaN` values."
+                )
+            if exog is not None:
+                X = np.column_stack((X, exog[i, ].reshape(1, -1)))
+
+            with warnings.catch_warnings():
+                # Suppress scikit-learn warning: "X does not have valid feature names,
+                # but NoOpTransformer was fitted with feature names".
+                warnings.simplefilter("ignore")
+                prediction = self.regressor.predict(X).ravel()[0]
+                predictions[i] = prediction
+
+            # Update `last_window` values. The first position is discarded and 
+            # the new prediction is added at the end.
+            last_window[self.window_size_diff + i] = prediction
+
+        return predictions
+
+
     def predict(
         self,
         steps: int,
@@ -784,7 +786,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         """
 
-        last_window_values, exog_values, last_window_index = self.create_predict_X(
+        last_window_values, exog_values, last_window_index = self.create_predict_inputs(
             steps=steps, last_window=last_window, exog=exog, output_type="numpy"
         )
             
@@ -877,7 +879,7 @@ class ForecasterAutoregCustom(ForecasterBase):
                  "`predict_quantiles()` or `predict_dist()`.")
             )
 
-        last_window_values, exog_values, last_window_index = self.create_predict_X(
+        last_window_values, exog_values, last_window_index = self.create_predict_inputs(
             steps=steps, last_window=last_window, exog=exog, output_type="numpy"
         )
 
