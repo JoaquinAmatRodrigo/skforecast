@@ -116,7 +116,7 @@ def plot_multivariate_time_series_corr(
     ax.set_xlabel('Time series')
     
     return fig
-    
+
 
 def plot_prediction_distribution(
     bootstrapping_predictions: pd.DataFrame,
@@ -230,3 +230,63 @@ def set_dark_theme(
         dark_style.update(custom_style)
         
     plt.rcParams.update(dark_style)
+
+
+def plot_prediction_intervals(
+    predictions: pd.DataFrame,
+    y_true: pd.DataFrame,
+    target_variable: str,
+    initial_x_zoom: list=None,
+    title: str=None,
+    xaxis_title: str=None,
+    yaxis_title: str=None,
+    ax: plt.Axes=None
+):
+    """
+    Plot predicted intervals vs real values using matplotlib.
+
+    Parameters
+    ----------
+    predictions : pandas DataFrame
+        Predicted values and intervals. Expected columns are 'pred', 'lower_bound'
+        and 'upper_bound'.
+    y_true : pandas DataFrame
+        Real values of target variable.
+    target_variable : str
+        Name of target variable.
+    initial_x_zoom : list, default `None`
+        Initial zoom of x-axis, by default None.
+    title : str, default `None`
+        Title of the plot, by default None.
+    xaxis_title : str, default `None`
+        Title of x-axis, by default None.
+    yaxis_title : str, default `None`
+        Title of y-axis, by default None.
+    ax : matplotlib axes, default `None`
+        Axes where to plot, by default None.
+
+    Returns
+    -------
+    None
+    
+    """
+    
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(7, 3))
+
+    y_true.loc[predictions.index, target_variable].plot(ax=ax, label='Real value')
+    predictions['pred'].plot(ax=ax, label='prediction')
+    ax.fill_between(
+        predictions.index,
+        predictions['lower_bound'],
+        predictions['upper_bound'],
+        color = '#444444',
+        alpha = 0.3,
+    )
+    ax.set_ylabel(yaxis_title)
+    ax.set_xlabel(xaxis_title)
+    ax.set_title(title)
+    ax.legend()
+
+    if initial_x_zoom is not None:
+        ax.set_xlim(initial_x_zoom)
