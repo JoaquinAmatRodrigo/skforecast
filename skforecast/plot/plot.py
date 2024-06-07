@@ -56,7 +56,7 @@ def plot_residuals(
         )
         
     if residuals is None:
-        residuals = y_pred - y_true
+        residuals = y_true - y_pred
             
     if fig is None:
         fig = plt.figure(constrained_layout=True, **fig_kw)
