@@ -314,7 +314,7 @@ def test_output_backtesting_forecaster_interval_no_exog_no_remainder_with_mocked
         columns=['pred', 'lower_bound', 'upper_bound'],
         index=pd.RangeIndex(start=38, stop=50, step=1)
     )
-    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
@@ -361,7 +361,7 @@ def test_output_backtesting_forecaster_interval_no_exog_yes_remainder_with_mocke
         columns=['pred', 'lower_bound', 'upper_bound'],
         index=pd.RangeIndex(start=38, stop=50, step=1)
     )
-    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
@@ -408,7 +408,7 @@ def test_output_backtesting_forecaster_interval_yes_exog_no_remainder_with_mocke
         columns=['pred', 'lower_bound', 'upper_bound'],
         index=pd.RangeIndex(start=38, stop=50, step=1)
     )
-    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
@@ -454,7 +454,7 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_with_mock
             [0.48227974, 0.12771743, 0.85841022]]),
         columns=['pred', 'lower_bound', 'upper_bound'],
         index=pd.RangeIndex(start=38, stop=50, step=1))
-    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(

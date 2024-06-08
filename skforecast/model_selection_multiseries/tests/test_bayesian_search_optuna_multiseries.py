@@ -10,6 +10,7 @@ import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
+from sklearn.preprocessing import StandardScaler
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
@@ -128,7 +129,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = RandomForestRegressor(random_state=123),
                      lags      = 2,
-                     encoding  = 'onehot'
+                     encoding  = 'onehot',
+                     transformer_series = StandardScaler()
                  )
 
     steps = 3
@@ -212,7 +214,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
                      lags      = 2,
-                     encoding  = 'onehot'
+                     encoding  = 'onehot',
+                     transformer_series = StandardScaler()
                  )
 
     steps = 3
@@ -283,7 +286,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_create_st
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
                      lags      = 2,
-                     encoding  = 'onehot'
+                     encoding  = 'onehot',
+                        transformer_series = StandardScaler()
                  )
 
     steps = 3
@@ -357,7 +361,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_study_opt
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = RandomForestRegressor(random_state=123),
                      lags      = 2,
-                     encoding  = 'onehot'
+                     encoding  = 'onehot',
+                     transformer_series = StandardScaler()
                  )
     steps = 3
     n_validation = 12
@@ -430,7 +435,8 @@ def test_results_output_bayesian_search_optuna_multiseries_when_lags_is_not_prov
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
                      lags      = 4,
-                     encoding  = 'onehot'
+                     encoding  = 'onehot',
+                     transformer_series = StandardScaler()
                  )
     steps = 3
     n_validation = 12
@@ -505,7 +511,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
                      window_size    = 4,
-                     encoding       = 'onehot'
+                     encoding       = 'onehot',
+                     transformer_series = StandardScaler()
                  )
     steps = 3
     n_validation = 12
@@ -733,7 +740,8 @@ def test_evaluate_bayesian_search_optuna_multiseries_when_return_best_Forecaster
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
                      lags      = 2,
-                     encoding  = 'onehot'
+                     encoding  = 'onehot',
+                     transformer_series = StandardScaler()
                  )
     steps = 3
     n_validation = 12
@@ -771,10 +779,11 @@ def test_evaluate_bayesian_search_optuna_multiseries_when_return_best_Forecaster
     (mocked done in skforecast v0.12.0).
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = Ridge(random_state=123),
-                     fun_predictors = create_predictors,
-                     window_size    = 4,
-                     encoding       = 'onehot'
+                     regressor          = Ridge(random_state=123),
+                     fun_predictors     = create_predictors,
+                     window_size        = 4,
+                     encoding           = 'onehot',
+                     transformer_series = StandardScaler()
                  )
     steps = 3
     n_validation = 12
