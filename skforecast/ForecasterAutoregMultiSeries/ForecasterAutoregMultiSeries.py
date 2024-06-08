@@ -378,9 +378,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if self.transformer_series is None and isinstance(regressor, scaling_regressors):
             warnings.warn(
-                "When using a linear model, it is recommended to use a transformer_y "
-                "to ensure all series are in the same scale.You can use, for example, a "
-                "StandardScaler from sklearn.preprocessing."
+                ("When using a linear model, it is recommended to use a transformer_series "
+                 "to ensure all series are in the same scale. You can use, for example, a "
+                 "`StandardScaler` from sklearn.preprocessing.")
             )
 
 
