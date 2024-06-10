@@ -2,23 +2,17 @@
 # ==============================================================================
 import re
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
-from skforecast.preprocessing import TimeSeriesDifferentiator
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import OrdinalEncoder
-from sklearn.preprocessing import FunctionTransformer
 from sklearn.compose import make_column_transformer
-from sklearn.compose import make_column_selector
-from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import HistGradientBoostingRegressor
-from lightgbm import LGBMRegressor
 
 # Fixtures
 from .fixtures_ForecasterAutoregCustom import y as y_categorical
