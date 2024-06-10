@@ -74,7 +74,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     Test output of predict_bootstrapping when regressor is LinearRegression and
     1 step ahead is predicted with exog using in-sample residuals.
     """
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
     expected = pd.DataFrame(
                    data    = np.array([[0.83836963, 0.54888446, 1.16537933, 0.69662898]]),
@@ -91,13 +91,13 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     Test output of predict_bootstrapping when regressor is LinearRegression and
     2 steps ahead are predicted with exog using in-sample residuals.
     """
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
     expected = pd.DataFrame(
                    data    = np.array(
-                                [[ 0.83836963,  0.54888446,  1.16537933,  0.69662898],
-                                [ 0.21874597, -0.0376708 ,  0.29184038,  0.5833093 ]]
-                            ),
+                                 [[ 0.83836963,  0.54888446,  1.16537933,  0.69662898],
+                                  [ 0.21874597, -0.0376708 ,  0.29184038,  0.5833093 ]]
+                             ),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -111,7 +111,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     Test output of predict_bootstrapping when regressor is LinearRegression and
     1 step ahead is predicted with exog using out-sample residuals.
     """
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
     expected = pd.DataFrame(
@@ -129,7 +129,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     Test output of predict_bootstrapping when regressor is LinearRegression and
     2 steps ahead are predicted with exog using out-sample residuals.
     """
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
     forecaster.out_sample_residuals = forecaster.in_sample_residuals
     expected = pd.DataFrame(
@@ -180,6 +180,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                      lags             = 3,
                      transformer_y    = StandardScaler(),
                      transformer_exog = StandardScaler(),
+                     binner_kwargs    = {'n_bins': 15}
                  )
     forecaster.fit(y=y, exog=exog)
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=True)

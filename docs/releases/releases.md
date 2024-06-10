@@ -25,6 +25,8 @@ All significant changes to this project are documented in this release file.
 
 + Change default value of `n_bins` when initializing `ForecasterAutoreg` from 15 to 10.
 
++ Change default value of `transformer_series` when initializing `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` from `StandardScaler()` to `None`.
+
 **Fixed**
 
 

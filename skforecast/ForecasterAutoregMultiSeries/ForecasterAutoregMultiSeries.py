@@ -11,10 +11,10 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
+import sklearn
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
-from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import OrdinalEncoder
 from copy import copy
@@ -72,7 +72,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         pandas.category dtype so that it can be used as a categorical variable. 
         - If `'onehot'`, a binary column is created for each series.
         **New in version 0.12.0**
-    transformer_series : transformer (preprocessor), dict, default `sklearn.preprocessing.StandardScaler`
+    transformer_series : transformer (preprocessor), dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
         inverse_transform. Transformation is applied to each `series` before training 
@@ -279,7 +279,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         regressor: object,
         lags: Union[int, np.ndarray, list],
         encoding: str='ordinal_category',
-        transformer_series: Optional[Union[object, dict]]=StandardScaler(),
+        transformer_series: Optional[Union[object, dict]]=None,
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
         series_weights: Optional[dict]=None,
@@ -369,6 +369,19 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                categories = 'auto',
                                dtype      = int
                            ).set_output(transform='pandas')
+
+        scaling_regressors = tuple(
+            member[1]
+            for member in inspect.getmembers(sklearn.linear_model, inspect.isclass)
+            + inspect.getmembers(sklearn.svm, inspect.isclass)
+        )
+
+        if self.transformer_series is None and isinstance(regressor, scaling_regressors):
+            warnings.warn(
+                ("When using a linear model, it is recommended to use a transformer_series "
+                 "to ensure all series are in the same scale. You can use, for example, a "
+                 "`StandardScaler` from sklearn.preprocessing.")
+            )
 
 
     def __repr__(

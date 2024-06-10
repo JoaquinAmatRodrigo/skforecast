@@ -59,3 +59,21 @@ def test_ForecasterAutoregMultiSeries_init_invalid_encoding():
             lags      = [1, 2, 3],
             encoding  = 'invalid_encoding',
         )
+
+
+def test_ForecasterAutoregMultiSeries_init_not_scaling_with_linear_model():
+    """
+    Test Warning is raised when Forecaster has no transformer_series and it
+    is using a linear model.
+    """
+
+    warn_msg = re.escape(
+        ("When using a linear model, it is recommended to use a transformer_series "
+         "to ensure all series are in the same scale. You can use, for example, a "
+         "`StandardScaler` from sklearn.preprocessing.") 
+    )
+    with pytest.warns(UserWarning, match = warn_msg):
+        ForecasterAutoregMultiSeries(
+            regressor = LinearRegression(),
+            lags      = [1, 2, 3]
+        )

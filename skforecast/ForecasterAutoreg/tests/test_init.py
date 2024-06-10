@@ -54,7 +54,7 @@ def test_init_binner_is_created_when_binner_kwargs_is_None():
                  )
     
     expected = {
-        'n_bins': 15, 'encode': 'ordinal', 'strategy': 'quantile',
+        'n_bins': 10, 'encode': 'ordinal', 'strategy': 'quantile',
         'subsample': 10000, 'random_state': 789654, 'dtype': np.float64
     }
 

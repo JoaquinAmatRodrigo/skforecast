@@ -131,7 +131,8 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
                      lags      = 2,
-                     encoding  = 'onehot'
+                     encoding  = 'onehot',
+                     transformer_series = StandardScaler()
                  )
     steps = 3
     n_validation = 12
@@ -205,7 +206,8 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
                      window_size    = 4,
-                     encoding       = 'onehot'
+                     encoding       = 'onehot',
+                     transformer_series = StandardScaler()
                  )
     steps = 3
     n_validation = 12

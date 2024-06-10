@@ -845,7 +845,7 @@ class ForecasterAutoreg(ForecasterBase):
         
         return predictions
 
-    
+
     def predict_bootstrapping(
         self,
         steps: int,

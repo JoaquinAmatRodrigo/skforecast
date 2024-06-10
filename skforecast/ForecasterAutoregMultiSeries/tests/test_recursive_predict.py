@@ -7,7 +7,7 @@ import pandas as pd
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import LinearRegression
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
-
+from sklearn.preprocessing import StandardScaler
 
 @pytest.mark.parametrize("encoding",
                          ["ordinal", "ordinal_category", "onehot"],
@@ -57,6 +57,7 @@ def test_recursive_predict_output_when_regressor_is_Ridge_StandardScaler(encodin
                            '2': pd.Series(np.arange(start=50, stop=100))})
 
     forecaster = ForecasterAutoregMultiSeries(Ridge(random_state=123), lags=5,
+                                              transformer_series=StandardScaler(),
                                               encoding=encoding)
     forecaster.fit(series=series)
     level = '1'
