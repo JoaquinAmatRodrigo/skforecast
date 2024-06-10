@@ -1213,12 +1213,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
 
-        predictions = np.full(shape=steps, fill_value=np.nan)
+        predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
+        last_window = np.concatenate((last_window, predictions))
         level_encoded = np.array([self.encoding_mapping[level]], dtype='float64')
 
         for i in range(steps):
 
-            X = last_window[-self.lags].reshape(1, -1)
+            X = last_window[-self.lags - (steps - i)].reshape(1, -1)
 
             if self.encoding == 'onehot':
                 levels_dummies = np.zeros(shape=(1, len(self.series_col_names)), dtype=float)
@@ -1234,12 +1235,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
-                prediction = self.regressor.predict(X)
-                predictions[i] = prediction.ravel()[0]
+                prediction = self.regressor.predict(X).ravel()[0]
+                predictions[i] = prediction
 
             # Update `last_window` values. The first position is discarded and
             # the new prediction is added at the end.
-            last_window = np.append(last_window[1:], prediction)
+            last_window[-(steps - i)] = prediction
 
         return predictions
 
