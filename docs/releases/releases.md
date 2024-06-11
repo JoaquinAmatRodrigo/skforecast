@@ -12,6 +12,9 @@ All significant changes to this project are documented in this release file.
 
 ## 0.13.0 <small>In development</small> { id="0.13.0" }
 
+The main changes in this release are:
+
++ <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/api/forecastermultiseries) and [`ForecasterAutoregMultiSeriesCustom`](https://skforecast.org/latest/api/forecastermultiseriescustom). In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
 
 **Added**
 
