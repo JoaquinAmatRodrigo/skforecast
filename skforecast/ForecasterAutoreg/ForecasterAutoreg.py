@@ -733,7 +733,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         return predictions
 
-            
+
     def predict(
         self,
         steps: int,
