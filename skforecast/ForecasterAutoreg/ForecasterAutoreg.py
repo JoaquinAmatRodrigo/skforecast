@@ -313,7 +313,6 @@ class ForecasterAutoreg(ForecasterBase):
             f"Weight function included: {True if self.weight_func is not None else False} \n"
             f"Differentiation order: {self.differentiation} \n"
             f"Exogenous included: {self.included_exog} \n"
-            f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
@@ -403,8 +402,18 @@ class ForecasterAutoreg(ForecasterBase):
             Shape: (len(y) - self.max_lag, )
         
         """
-        
+
         check_y(y=y)
+
+
+        # TODO: move to utils function
+        # ----------------------------------------------------------------------
+        if isinstance(y, pd.Series):
+            y = y.to_frame(name=y.name if y.name is not None else 'y')
+        if isinstance(exog, pd.Series):
+            exog = exog.to_frame(name=exog.name if exog.name is not None else 'exog')
+        # ----------------------------------------------------------------------
+        
         fit_transformer = False if self.fitted else True
         y = transform_series(
                 series            = y,
