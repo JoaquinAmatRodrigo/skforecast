@@ -382,7 +382,7 @@ def check_y(
 
 
 def check_exog(
-    exog: Any,
+    exog: Union[pd.Series, pd.DataFrame],
     allow_nan: bool=True,
     series_id: str="`exog`"
 ) -> None:
@@ -392,7 +392,7 @@ def check_exog(
     
     Parameters
     ----------
-    exog : Any
+    exog : pandas DataFrame, pandas Series
         Exogenous variable/s included as predictor/s.
     allow_nan : bool, default `True`
         If True, allows the presence of NaN values in `exog`. If False (default),
@@ -1075,7 +1075,7 @@ def preprocess_y(
                       step  = 1
                   )
 
-    y_values = y.to_numpy(copy=True) if return_values else None
+    y_values = y.to_numpy(copy=True).ravel() if return_values else None
 
     return y_values, y_index
 
