@@ -414,10 +414,10 @@ class ForecasterAutoreg(ForecasterBase):
 
         fit_transformer = False if self.fitted else True
         y = transform_dataframe(
-                series            = y,
+                df                = y, 
                 transformer       = self.transformer_y,
                 fit               = fit_transformer,
-                inverse_transform = False
+                inverse_transform = False,
             )
         y_values, y_index = preprocess_y(y=y)
 
@@ -610,7 +610,11 @@ class ForecasterAutoreg(ForecasterBase):
         # predictors in the first iteration of `predict()` can be calculated. It
         # also includes the values need to calculate the diferenctiation.
         if store_last_window:
-            self.last_window = y.iloc[-self.window_size_diff:].copy()
+            self.last_window = (
+                y.iloc[-self.window_size_diff:]
+                .copy()
+                .to_frame(name=y.name if y.name is not None else 'y')
+            )
 
     def _binning_in_sample_residuals(
         self,
@@ -755,6 +759,14 @@ class ForecasterAutoreg(ForecasterBase):
 
         if last_window is None:
             last_window = self.last_window
+        else:
+            # TODO: move to utils function
+            # ----------------------------------------------------------------------
+            if isinstance(last_window, pd.Series):
+                last_window = last_window.to_frame(
+                    name=last_window.name if last_window.name is not None else "y"
+                )
+            # ----------------------------------------------------------------------
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -783,6 +795,7 @@ class ForecasterAutoreg(ForecasterBase):
                 exog = exog.to_frame(
                     name=exog.name if exog.name is not None else "exog"
                 )
+            exog = exog.loc[:, self.exog_col_names]
             exog = transform_dataframe(
                         df                = exog,
                         transformer       = self.transformer_exog,
@@ -794,8 +807,8 @@ class ForecasterAutoreg(ForecasterBase):
         else:
             exog_values = None
 
-        last_window = transform_series(
-                          series            = last_window,
+        last_window = transform_dataframe(
+                          df                = last_window,
                           transformer       = self.transformer_y,
                           fit               = False,
                           inverse_transform = False
@@ -913,6 +926,14 @@ class ForecasterAutoreg(ForecasterBase):
 
         if last_window is None:
             last_window = self.last_window
+        else:
+            # TODO: move to utils function
+            # ----------------------------------------------------------------------
+            if isinstance(last_window, pd.Series):
+                last_window = last_window.to_frame(
+                    name=last_window.name if last_window.name is not None else "y"
+                )
+            # ----------------------------------------------------------------------
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -951,8 +972,8 @@ class ForecasterAutoreg(ForecasterBase):
         else:
             exog_values = None
 
-        last_window = transform_series(
-                          series            = last_window,
+        last_window = transform_dataframe(
+                          df                = last_window,
                           transformer       = self.transformer_y,
                           fit               = False,
                           inverse_transform = False

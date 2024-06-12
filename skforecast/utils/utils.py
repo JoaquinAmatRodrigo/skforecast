@@ -784,7 +784,7 @@ def check_predict_input(
                      f"    `series` columns X train : {series_col_names}")
                 )
     else:
-        if not isinstance(last_window, pd.Series):
+        if not isinstance(last_window, (pd.Series, pd.DataFrame)):
             raise TypeError(
                 f"`last_window` must be a pandas Series. Got {type(last_window)}."
             )
@@ -1137,7 +1137,7 @@ def preprocess_last_window(
                                 step  = 1
                             )
 
-    last_window_values = last_window.to_numpy(copy=True) if return_values else None
+    last_window_values = last_window.to_numpy(copy=True).ravel() if return_values else None
 
     return last_window_values, last_window_index
 
