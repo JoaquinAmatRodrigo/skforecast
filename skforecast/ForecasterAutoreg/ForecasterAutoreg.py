@@ -146,7 +146,7 @@ class ForecasterAutoreg(ForecasterBase):
         Size of the window extended by the order of differentiation. When using
         differentiation, the `window_size` is increased by the order of differentiation
         so that the predictors can be created correctly.
-    last_window : pandas Series
+    last_window : pandas DataFrame
         This window represents the most recent data observed by the predictor
         during its training phase. It contains the values needed to predict the
         next step immediately after the training data. These values are stored
@@ -587,8 +587,11 @@ class ForecasterAutoreg(ForecasterBase):
             self.included_exog = True
             self.exog_type = type(exog)
             self.exog_dtypes = get_exog_dtypes(exog=exog)
-            self.exog_col_names = \
-                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
+            self.exog_col_names = (
+                exog.columns.to_list()
+                if isinstance(exog, pd.DataFrame)
+                else [exog.name]
+            )
 
         # This is done to save time during fit in functions such as backtesting()
         if store_in_sample_residuals:
@@ -786,7 +789,7 @@ class ForecasterAutoreg(ForecasterBase):
                         transformer       = self.transformer_exog,
                         fit               = False,
                         inverse_transform = False
-                    )
+                   )
             check_exog_dtypes(exog=exog)
             exog_values = exog.to_numpy()[:steps]
         else:

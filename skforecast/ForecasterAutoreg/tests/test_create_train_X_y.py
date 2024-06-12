@@ -25,9 +25,9 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=2)
 
     err_msg = re.escape(
-        ("If exog is of type category, it must contain only integer values. "
-         "See skforecast docs for more info about how to include categorical "
-         "features https://skforecast.org/"
+        ("Categorical dtypes in exog must contain only integer values. "
+         "See skforecast docs for more info about how to include "
+         "categorical features https://skforecast.org/"
          "latest/user_guides/categorical-features.html")
     )
     with pytest.raises(TypeError, match = err_msg):

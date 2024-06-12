@@ -491,7 +491,7 @@ def check_exog_dtypes(
         for col in exog.select_dtypes(include='category'):
             if exog[col].cat.categories.dtype not in [int, np.int32, np.int64]:
                 raise TypeError(
-                    ("Categorical columns in exog must contain only integer values. "
+                    ("Categorical dtypes in exog must contain only integer values. "
                      "See skforecast docs for more info about how to include "
                      "categorical features https://skforecast.org/"
                      "latest/user_guides/categorical-features.html")
@@ -508,7 +508,7 @@ def check_exog_dtypes(
         if exog.dtype.name == 'category' and exog.cat.categories.dtype not in [int,
         np.int32, np.int64]:
             raise TypeError(
-                ("If exog is of type category, it must contain only integer values. "
+                ("Categorical dtypes in exog must contain only integer values. "
                  "See skforecast docs for more info about how to include "
                  "categorical features https://skforecast.org/"
                  "latest/user_guides/categorical-features.html")
