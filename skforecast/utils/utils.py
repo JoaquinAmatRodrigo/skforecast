@@ -1205,6 +1205,43 @@ def preprocess_exog(
     return exog_values, exog_index
 
 
+def input_to_frame(
+        data: Union[pd.Series, pd.DataFrame],
+        input_name: str
+) -> pd.DataFrame:
+    """
+    Convert data to a pandas DataFrame. If data is a pandas Series, it is 
+    converted to a DataFrame with a single column. If data is a DataFrame, 
+    it is returned as is.
+
+    Parameters
+    ----------
+    data : pandas Series, pandas DataFrame
+        Input data.
+    input_name : str
+        Name of the input data. Accepted values are 'y', 'last_window' and 'exog'.
+
+    Returns
+    -------
+    input : pandas DataFrame
+        Input data as a DataFrame.
+
+    """
+
+    output_col_name = {
+        'y': 'y',
+        'last_window': 'y',
+        'exog': 'exog'
+    }
+
+    if isinstance(data, pd.Series):
+        data = data.to_frame(
+                    name=data.name if data.name is not None else output_col_name[input_name]
+                )
+
+    return data
+
+
 def cast_exog_dtypes(
     exog: Union[pd.Series, pd.DataFrame],
     exog_dtypes: dict,

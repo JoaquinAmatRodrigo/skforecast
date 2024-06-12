@@ -31,6 +31,7 @@ from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
+from ..utils import input_to_frame
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
@@ -401,16 +402,10 @@ class ForecasterAutoreg(ForecasterBase):
         """
 
         check_y(y=y)
+        y = input_to_frame(data=y, input_name='y')
         if exog is not None:
             check_exog(exog=exog, allow_nan=True)
-
-        # TODO: move to utils function
-        # ----------------------------------------------------------------------
-        if isinstance(y, pd.Series):
-            y = y.to_frame(name=y.name if y.name is not None else 'y')
-        if isinstance(exog, pd.Series):
-            exog = exog.to_frame(name=exog.name if exog.name is not None else 'exog')
-        # ----------------------------------------------------------------------
+            exog = input_to_frame(data=exog, input_name='exog')
 
         fit_transformer = False if self.fitted else True
         y = transform_dataframe(
@@ -759,14 +754,6 @@ class ForecasterAutoreg(ForecasterBase):
 
         if last_window is None:
             last_window = self.last_window
-        else:
-            # TODO: move to utils function
-            # ----------------------------------------------------------------------
-            if isinstance(last_window, pd.Series):
-                last_window = last_window.to_frame(
-                    name=last_window.name if last_window.name is not None else "y"
-                )
-            # ----------------------------------------------------------------------
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -789,12 +776,10 @@ class ForecasterAutoreg(ForecasterBase):
         )
 
         last_window = last_window.iloc[-self.window_size_diff:].copy()
+        last_window = input_to_frame(data=last_window, input_name='last_window')
 
         if exog is not None:
-            if isinstance(exog, pd.Series):
-                exog = exog.to_frame(
-                    name=exog.name if exog.name is not None else "exog"
-                )
+            exog = input_to_frame(data=exog, input_name='exog')
             exog = exog.loc[:, self.exog_col_names]
             exog = transform_dataframe(
                         df                = exog,
@@ -926,14 +911,6 @@ class ForecasterAutoreg(ForecasterBase):
 
         if last_window is None:
             last_window = self.last_window
-        else:
-            # TODO: move to utils function
-            # ----------------------------------------------------------------------
-            if isinstance(last_window, pd.Series):
-                last_window = last_window.to_frame(
-                    name=last_window.name if last_window.name is not None else "y"
-                )
-            # ----------------------------------------------------------------------
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -956,12 +933,11 @@ class ForecasterAutoreg(ForecasterBase):
         )
 
         last_window = last_window.iloc[-self.window_size_diff:]
+        last_window = input_to_frame(data=last_window, input_name='last_window')
 
         if exog is not None:
-            if isinstance(exog, pd.Series):
-                exog = exog.to_frame(
-                    name=exog.name if exog.name is not None else "exog"
-                )
+            exog = input_to_frame(data=exog, input_name='exog')
+            exog = exog.loc[:, self.exog_col_names]
             exog = transform_dataframe(
                         df                = exog,
                         transformer       = self.transformer_exog,
