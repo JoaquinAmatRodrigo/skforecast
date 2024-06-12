@@ -20,7 +20,7 @@ def fetch_dataset(
     """
     Fetch a dataset from the skforecast-datasets repository. Available datasets
     are: 'h2o', 'items_sales', 'air_pollution', 'fuel_consumption', 'web_visits',
-    'bike_sharing', 'store_item_demand'.
+    'bike_sharing', 'store_item_demand', 'bicimad'.
 
     Parameters
     ----------
@@ -295,6 +295,25 @@ def fetch_dataset(
                 'The original data was obtained from: inversion. (2018). Store Item '
                 'Demand Forecasting Challenge. Kaggle. '
                 'https://kaggle.com/competitions/demand-forecasting-kernels-only'
+            )
+        },
+        'bicimad': {
+            'url': (
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/bicimad_users.csv'
+            ),
+            'sep': ',',
+            'index_col': 'date',
+            'date_format': '%Y-%m-%d',
+            'freq': '1D',
+            'description': (
+                'This dataset contains the daily users of the bicycle rental '
+                'service (BiciMad) in the city of Madrid (Spain) from 2014-06-23 '
+                'to 2022-09-30.'
+            ),
+            'source': (
+                'The original data was obtained from: Portal de datos abiertos '
+                'del Ayuntamiento de Madrid https://datos.madrid.es/portal/site/egob'
             )
         }
     }
