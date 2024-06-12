@@ -134,7 +134,7 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 + [**Modelling time series trend with tree based models**](https://www.cienciadedatos.net/documentos/py49-modelling-time-series-trend-with-tree-based-models.html)
 
-+ [**Reducing the influence of Covid-19 on time series forecasting models**](https://www.cienciadedatos.net/documentos/py45-weighted-time-series-forecasting.html)
++ [**Mitigating the impact of covid on forecasting models**](https://www.cienciadedatos.net/documentos/py45-weighted-time-series-forecasting.html)
 
 + [**Forecasting time series with missing values**](https://www.cienciadedatos.net/documentos/py46-forecasting-time-series-missing-values.html)
 
@@ -168,6 +168,8 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 + [**Modelar series temporales con tendencia utilizando modelos de árboles**](https://cienciadedatos.net/documentos/py49-modelar-tendencia-en-series-temporales-modelos-de-arboles.html)
 
 + [**Predicción de demanda intermitente**](https://www.cienciadedatos.net/documentos/py48-forecasting-demanda-intermitente.html)
+
++ [**Reducir el impacto del Covid en modelos de forecasting**](https://cienciadedatos.net/documentos/py45-weighted-time-series-forecasting-es.html)
 
 + [**Forecasting de la demanda eléctrica**](https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/15kQpANRBCLfNf77nmNcV6GjGPoYdOmmF)
 
