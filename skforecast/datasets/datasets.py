@@ -286,7 +286,7 @@ def fetch_dataset(
             'sep': ',',
             'index_col': 'date',
             'date_format': '%Y-%m-%d',
-            'freq': '1D',
+            'freq': 'D',
             'description': (
                 'This dataset contains 913,000 sales transactions from 2013-01-01 to '
                 '2017-12-31 for 50 products (SKU) in 10 stores.'
@@ -305,7 +305,7 @@ def fetch_dataset(
             'sep': ',',
             'index_col': 'date',
             'date_format': '%Y-%m-%d',
-            'freq': '1D',
+            'freq': 'D',
             'description': (
                 'This dataset contains the daily users of the bicycle rental '
                 'service (BiciMad) in the city of Madrid (Spain) from 2014-06-23 '
@@ -324,7 +324,7 @@ def fetch_dataset(
             'sep': None,
             'index_col': 'timestamp',
             'date_format': '%Y-%m-%d %H:%M:%S',
-            'freq': '1H',
+            'freq': 'H',
             'description': "Time series with hourly frequency from the M4 competition.",
             'source': (
                 "Monash Time Series Forecasting Repository  "
@@ -348,7 +348,7 @@ def fetch_dataset(
             'sep': None,
             'index_col': 'timestamp',
             'date_format': '%Y-%m-%d %H:%M:%S',
-            'freq': '1D',
+            'freq': 'D',
             'description': "Time series with daily frequency from the M4 competition.",
             'source': (
                 "Monash Time Series Forecasting Repository  "
@@ -382,20 +382,6 @@ def fetch_dataset(
                 f"Error reading dataset {name} from {url}. Try to version = 'latest'"
             )
 
-        if not raw:
-            try:
-                index_col = datasets[name]['index_col']
-                freq = datasets[name]['freq']
-                if freq == 'H' and pd.__version__ >= '2.2.0':
-                    freq = "h"
-                date_format = datasets[name]['date_format']
-                df = df.set_index(index_col)
-                df.index = pd.to_datetime(df.index, format=date_format)
-                df = df.asfreq(freq)
-                df = df.sort_index()
-            except:
-                pass
-
     if url.endswith('.parquet'):
         try:
             df = pd.read_parquet(url)
@@ -403,6 +389,20 @@ def fetch_dataset(
             raise ValueError(
                 f"Error reading dataset {name} from {url}. Try to version = 'latest'"
             )
+        
+    if not raw:
+        try:
+            index_col = datasets[name]['index_col']
+            freq = datasets[name]['freq']
+            if freq == 'H' and pd.__version__ >= '2.2.0':
+                freq = "h"
+            date_format = datasets[name]['date_format']
+            df = df.set_index(index_col)
+            df.index = pd.to_datetime(df.index, format=date_format)
+            df = df.asfreq(freq)
+            df = df.sort_index()
+        except:
+            pass
     
     if verbose:
         print(name)
