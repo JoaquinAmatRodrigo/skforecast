@@ -286,7 +286,7 @@ def fetch_dataset(
             'sep': ',',
             'index_col': 'date',
             'date_format': '%Y-%m-%d',
-            'freq': '1D',
+            'freq': 'D',
             'description': (
                 'This dataset contains 913,000 sales transactions from 2013-01-01 to '
                 '2017-12-31 for 50 products (SKU) in 10 stores.'
@@ -305,7 +305,7 @@ def fetch_dataset(
             'sep': ',',
             'index_col': 'date',
             'date_format': '%Y-%m-%d',
-            'freq': '1D',
+            'freq': 'D',
             'description': (
                 'This dataset contains the daily users of the bicycle rental '
                 'service (BiciMad) in the city of Madrid (Spain) from 2014-06-23 '
@@ -315,7 +315,55 @@ def fetch_dataset(
                 'The original data was obtained from: Portal de datos abiertos '
                 'del Ayuntamiento de Madrid https://datos.madrid.es/portal/site/egob'
             )
-        }
+        },
+        'm4_hourly': {
+            'url': (
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/m4_hourly.parquet'
+            ),
+            'sep': None,
+            'index_col': 'timestamp',
+            'date_format': '%Y-%m-%d %H:%M:%S',
+            'freq': 'H',
+            'description': "Time series with hourly frequency from the M4 competition.",
+            'source': (
+                "Monash Time Series Forecasting Repository  "
+                "(https://zenodo.org/communities/forecasting) Godahewa, R., Bergmeir, "
+                "C., Webb, G. I., Hyndman, R. J., & Montero-Manso, P. (2021). Monash "
+                "Time Series Forecasting Archive. In Neural Information Processing "
+                "Systems Track on Datasets and Benchmarks. \n"
+                "Raw data, available in .tsf format, has been converted to Pandas "
+                "format using the code provided by the authors in "
+                "https://github.com/rakshitha123/TSForecasting/blob/master/utils/data_loader.py \n"
+                "The category of each time series has been included in the dataset. This "
+                "information has been obtainded from the Kaggle competition page: "
+                "https://www.kaggle.com/datasets/yogesh94/m4-forecasting-competition-dataset"
+            )
+        },
+        'm4_daily': {
+            'url': (
+                f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
+                f'skforecast-datasets/{version}/data/m4_daily.parquet'
+            ),
+            'sep': None,
+            'index_col': 'timestamp',
+            'date_format': '%Y-%m-%d %H:%M:%S',
+            'freq': 'D',
+            'description': "Time series with daily frequency from the M4 competition.",
+            'source': (
+                "Monash Time Series Forecasting Repository  "
+                "(https://zenodo.org/communities/forecasting) Godahewa, R., Bergmeir, "
+                "C., Webb, G. I., Hyndman, R. J., & Montero-Manso, P. (2021). Monash "
+                "Time Series Forecasting Archive. In Neural Information Processing "
+                "Systems Track on Datasets and Benchmarks. \n"
+                "Raw data, available in .tsf format, has been converted to Pandas "
+                "format using the code provided by the authors in "
+                "https://github.com/rakshitha123/TSForecasting/blob/master/utils/data_loader.py \n"
+                "The category of each time series has been included in the dataset. This "
+                "information has been obtainded from the Kaggle competition page: "
+                "https://www.kaggle.com/datasets/yogesh94/m4-forecasting-competition-dataset"
+            )
+        },
     }
     
     if name not in datasets.keys():
@@ -325,14 +373,23 @@ def fetch_dataset(
     
     url = datasets[name]['url']
 
-    try:
-        sep = datasets[name]['sep']
-        df = pd.read_csv(url, sep=sep, **kwargs_read_csv)
-    except:
-        raise ValueError(
-            f"Error reading dataset {name} from {url}. Try to version = 'latest'"
-        )
+    if url.endswith('.csv'):
+        try:
+            sep = datasets[name]['sep']
+            df = pd.read_csv(url, sep=sep, **kwargs_read_csv)
+        except:
+            raise ValueError(
+                f"Error reading dataset {name} from {url}. Try to version = 'latest'"
+            )
 
+    if url.endswith('.parquet'):
+        try:
+            df = pd.read_parquet(url)
+        except:
+            raise ValueError(
+                f"Error reading dataset {name} from {url}. Try to version = 'latest'"
+            )
+        
     if not raw:
         try:
             index_col = datasets[name]['index_col']
