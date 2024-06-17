@@ -18,9 +18,7 @@ def fetch_dataset(
     verbose: bool = True
 ) -> pd.DataFrame:
     """
-    Fetch a dataset from the skforecast-datasets repository. Available datasets
-    are: 'h2o', 'items_sales', 'air_pollution', 'fuel_consumption', 'web_visits',
-    'bike_sharing', 'store_item_demand', 'bicimad'.
+    Fetch a dataset from the skforecast-datasets repository.
 
     Parameters
     ----------
@@ -364,6 +362,22 @@ def fetch_dataset(
                 "https://www.kaggle.com/datasets/yogesh94/m4-forecasting-competition-dataset"
             )
         },
+        'ashrae_daily': {
+            'url': 'https://drive.google.com/file/d/1fMsYjfhrFLmeFjKG3jenXjDa5s984ThC/view?usp=sharing',
+            'sep': None,
+            'index_col': 'timestamp',
+            'date_format': '%Y-%m-%d %H:%M:%S',
+            'freq': 'D',
+            'description': (
+                "Daily energy consumption data from the ASHRAE competition with "
+                "building metadata and weather data."
+            ),
+            'source': (
+                "Kaggle competition Addison Howard, Chris Balbach, Clayton Miller, "
+                "Jeff Haberl, Krishnan Gowri, Sohier Dane. (2019). ASHRAE - Great Energy "
+                "Predictor III. Kaggle. https://www.kaggle.com/c/ashrae-energy-prediction/overview"
+            )
+        },
     }
     
     if name not in datasets.keys():
@@ -389,6 +403,11 @@ def fetch_dataset(
             raise ValueError(
                 f"Error reading dataset {name} from {url}. Try to version = 'latest'"
             )
+        
+    if url.startswith('https://drive.google.com'):
+        file_id = url.split('/')[-2]
+        url = 'https://drive.google.com/uc?id=' + file_id
+        df = pd.read_parquet(url)
         
     if not raw:
         try:
