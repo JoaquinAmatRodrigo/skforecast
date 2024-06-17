@@ -403,9 +403,6 @@ class ForecasterAutoreg(ForecasterBase):
 
         check_y(y=y)
         y = input_to_frame(data=y, input_name='y')
-        if exog is not None:
-            check_exog(exog=exog, allow_nan=True)
-            exog = input_to_frame(data=exog, input_name='exog')
 
         fit_transformer = False if self.fitted else True
         y = transform_dataframe(
@@ -424,6 +421,8 @@ class ForecasterAutoreg(ForecasterBase):
                 y_values = differentiator.fit_transform(y_values)
 
         if exog is not None:
+            check_exog(exog=exog, allow_nan=True)
+            exog = input_to_frame(data=exog, input_name='exog')
             if len(exog) != len(y):
                 raise ValueError(
                     (f"`exog` must have same number of samples as `y`. "
