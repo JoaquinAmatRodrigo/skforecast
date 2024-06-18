@@ -786,7 +786,8 @@ def check_predict_input(
     else:
         if not isinstance(last_window, (pd.Series, pd.DataFrame)):
             raise TypeError(
-                f"`last_window` must be a pandas Series. Got {type(last_window)}."
+                f"`last_window` must be a pandas Series or DataFrame. "
+                f"Got {type(last_window)}."
             )
 
     # Check last_window len, nulls and index (type and freq)
@@ -827,11 +828,15 @@ def check_predict_input(
                 raise TypeError(
                     f"`exog` must be a pandas Series, DataFrame or dict. Got {type(exog)}."
                 )
-
-        if not isinstance(exog, exog_type):
-            raise TypeError(
-                f"Expected type for `exog`: {exog_type}. Got {type(exog)}."
-            )
+            if isinstance(exog_type, type(dict)):
+                raise TypeError(
+                    f"Expected type for `exog`: {exog_type}. Got {type(exog)}."
+                )
+        else:
+            if not isinstance(exog, (pd.Series, pd.DataFrame)):
+                raise TypeError(
+                    f"`exog` must be a pandas Series or DataFrame. Got {type(exog)}."
+                )
 
         if isinstance(exog, dict):
             exogs_to_check = [(f"`exog` for series '{k}'", v) 
