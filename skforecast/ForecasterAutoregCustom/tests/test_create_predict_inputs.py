@@ -93,15 +93,16 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
                       -0.61, -0.88]),
             name = 'y'
         )
-    transformer_y = StandardScaler()
+    
     forecaster = ForecasterAutoregCustom(
                      regressor = LinearRegression(),
                      fun_predictors = create_predictors,
                      window_size    = 5,
-                     transformer_y = transformer_y
+                     transformer_y = StandardScaler()
                  )
     forecaster.fit(y=y)
     results = forecaster.create_predict_inputs(steps=5, output_type='numpy')
+
     expected = (
         np.array([-0.1056608, -0.30987914, -0.45194408, -0.28324197, -0.52297655]),
         None,
@@ -166,12 +167,13 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
                             remainder = 'passthrough',
                             verbose_feature_names_out = False
                        )
+    
     forecaster = ForecasterAutoregCustom(
-                    regressor        = LinearRegression(),
-                    fun_predictors   = create_predictors,
-                    window_size      = 5,
-                    transformer_y    = transformer_y,
-                    transformer_exog = transformer_exog
+                     regressor        = LinearRegression(),
+                     fun_predictors   = create_predictors,
+                     window_size      = 5,
+                     transformer_y    = transformer_y,
+                     transformer_exog = transformer_exog
                  )
     forecaster.fit(y=y, exog=exog)
     results = forecaster.create_predict_inputs(steps=5, exog=exog_predict)
@@ -277,10 +279,10 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_exog_diff
     steps = len(data.loc[end_train:])
 
     forecaster = ForecasterAutoregCustom(
-                    regressor        = LinearRegression(),
-                    fun_predictors   = create_predictors,
-                    window_size      = 15,
-                    differentiation  = 1
+                     regressor        = LinearRegression(),
+                     fun_predictors   = create_predictors_15,
+                     window_size      = 15,
+                     differentiation  = 1
                 )
     forecaster.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
     results = forecaster.create_predict_inputs(steps=steps, exog=exog.loc[end_train:])

@@ -24,12 +24,12 @@ from ..utils import check_y
 from ..utils import check_exog
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
+from ..utils import check_predict_input
 from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import expand_index
-from ..utils import check_predict_input
 from ..utils import transform_series
 from ..utils import transform_dataframe
 from ..preprocessing import TimeSeriesDifferentiator
