@@ -2524,6 +2524,203 @@ def align_series_and_exog_multiseries(
     return series_dict, exog_dict
 
 
+def prepare_levels_multiseries(
+    series_X_train: list,
+    levels: Optional[Union[str, list]]=None
+) -> Tuple[list, bool]:
+    """
+    Prepare list of levels to be predicted in multiseries Forecasters.
+
+    Parameters
+    ----------
+    series_X_train : list
+        Names of the series (levels) included in the matrix `X_train`.
+    levels : str, list, default `None`
+        Names of the series (levels) to be predicted.
+
+    Returns
+    -------
+    levels : list
+        Names of the series (levels) to be predicted.
+
+    """
+
+    input_levels_is_list = False
+    if levels is None:
+        levels = series_X_train
+    elif isinstance(levels, str):
+        levels = [levels]
+    else:
+        input_levels_is_list = True
+
+    return levels, input_levels_is_list
+
+
+def preprocess_levels_self_last_window_multiseries(
+    levels: list,
+    input_levels_is_list: bool,
+    last_window: dict
+) -> Tuple[list, pd.DataFrame]:
+    """
+    Preprocess `levels` and `last_window` arguments in multiseries Forecasters. 
+    Only levels whose last window ends at the same datetime index will 
+    be predicted together.
+
+    Parameters
+    ----------
+    levels : list
+        Names of the series (levels) to be predicted.
+    input_levels_is_list : bool
+        Indicates if input levels argument is a list.
+    last_window : dict
+        Dictionary with the last window of each series (self.last_window).
+
+    Returns
+    -------
+    levels : list
+        Names of the series (levels) to be predicted.
+    last_window : pandas DataFrame
+        Series values used to create the predictors (lags) needed in the 
+        first iteration of the prediction (t + 1).
+
+    """
+
+    available_last_windows = set() if last_window is None else set(last_window.keys())
+    not_available_last_window = set(levels) - available_last_windows
+    if not_available_last_window:
+        warnings.warn(
+            (f"Levels {not_available_last_window} are excluded from "
+             f"prediction since they were not stored in `last_window` "
+             f"attribute during training. If you don't want to retrain "
+             f"the Forecaster, provide `last_window` as argument."),
+            IgnoredArgumentWarning
+        )
+        levels = [level for level in levels 
+                  if level not in not_available_last_window]
+
+        if not levels:
+            raise ValueError(
+                ("No series to predict. None of the series are present in "
+                 "`last_window` attribute. Provide `last_window` as argument "
+                 "in predict method.")
+            )
+
+    last_index_levels = [
+        v.index[-1] 
+        for k, v in last_window.items()
+        if k in levels
+    ]
+    if len(set(last_index_levels)) > 1:
+        max_index_levels = max(last_index_levels)
+        selected_levels = [
+            k
+            for k, v in last_window.items()
+            if k in levels and v.index[-1] == max_index_levels
+        ]
+
+        series_excluded_from_last_window = set(levels) - set(selected_levels)
+        levels = selected_levels
+
+        if input_levels_is_list and series_excluded_from_last_window:
+            warnings.warn(
+                (f"Only series whose last window ends at the same index "
+                 f"can be predicted together. Series that do not reach "
+                 f"the maximum index, '{max_index_levels}', are excluded "
+                 f"from prediction: {series_excluded_from_last_window}."),
+                IgnoredArgumentWarning
+            )
+
+    last_window = pd.DataFrame(
+        {k: v 
+         for k, v in last_window.items() 
+         if k in levels}
+    )
+
+    return levels, last_window
+
+
+def prepare_residuals_multiseries(
+    levels: list,
+    use_in_sample: bool,
+    in_sample_residuals: Optional[dict]=None,
+    out_sample_residuals: Optional[dict]=None
+) -> Tuple[list, bool]:
+    """
+    Prepare residuals for bootstrapping prediction in multiseries Forecasters.
+
+    Parameters
+    ----------
+    levels : list
+        Names of the series (levels) to be predicted.
+    use_in_sample : bool
+        Indicates if in_sample_residuals are used. Same as `in_sample_residuals`
+        argument in predict method.
+    in_sample_residuals : dict, default `None`
+        Residuals of the model when predicting training data. Only stored up to
+        1000 values in the form `{level: residuals}`. If `transformer_series` 
+        is not `None`, residuals are stored in the transformed scale.
+    out_sample_residuals : dict, default `None`
+        Residuals of the model when predicting non-training data. Only stored
+        up to 1000 values in the form `{level: residuals}`. If `transformer_series` 
+        is not `None`, residuals are assumed to be in the transformed scale. Use 
+        `set_out_sample_residuals()` method to set values.
+
+    Returns
+    -------
+    levels : list
+        Names of the series (levels) to be predicted.
+    residuals_levels : dict
+        Residuals of the model for each level to use in bootstrapping prediction.
+
+    """
+
+    if use_in_sample:
+        if not set(levels).issubset(set(in_sample_residuals.keys())):
+            raise ValueError(
+                (f"Not `forecaster.in_sample_residuals` for levels: "
+                 f"{set(levels) - set(in_sample_residuals.keys())}.")
+            )
+        residuals_levels = in_sample_residuals
+    else:
+        if out_sample_residuals is None:
+            raise ValueError(
+                ("`forecaster.out_sample_residuals` is `None`. Use "
+                 "`in_sample_residuals=True` or method "
+                 "`set_out_sample_residuals()` before `predict_interval()`, "
+                 "`predict_bootstrapping()`,`predict_quantiles()` or "
+                 "`predict_dist()`.")
+            )
+        else:
+            if not set(levels).issubset(set(out_sample_residuals.keys())):
+                raise ValueError(
+                    (f"Not `forecaster.out_sample_residuals` for levels: "
+                     f"{set(levels) - set(out_sample_residuals.keys())}. "
+                     f"Use method `set_out_sample_residuals()`.")
+                )
+        residuals_levels = out_sample_residuals
+
+    check_residuals = (
+        "forecaster.in_sample_residuals" if use_in_sample
+        else "forecaster.out_sample_residuals"
+    )
+    for level in levels:
+        if (level not in residuals_levels.keys() or 
+            residuals_levels[level] is None or 
+            len(residuals_levels[level]) == 0):
+            raise ValueError(
+                (f"Not available residuals for level '{level}'. "
+                 f"Check `{check_residuals}`.")
+            )
+        elif (any(element is None for element in residuals_levels[level]) or
+                np.any(np.isnan(residuals_levels[level]))):
+            raise ValueError(
+                (f"forecaster residuals for level '{level}' contains `None` "
+                 f"or `NaNs` values. Check `{check_residuals}`.")
+            )
+        
+    return residuals_levels
+
+
 def set_skforecast_warnings(
     suppress_warnings: bool,
     action: str='default'
