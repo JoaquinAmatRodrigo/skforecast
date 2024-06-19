@@ -30,4 +30,7 @@
 ::: skforecast.utils.utils.check_preprocess_series
 ::: skforecast.utils.utils.check_preprocess_exog_multiseries
 ::: skforecast.utils.utils.align_series_and_exog_multiseries
+::: skforecast.utils.utils.prepare_levels_multiseries
+::: skforecast.utils.utils.preprocess_levels_self_last_window_multiseries
+::: skforecast.utils.utils.prepare_residuals_multiseries
 ::: skforecast.utils.utils.set_skforecast_warnings

@@ -100,27 +100,27 @@ exog_lw_predict = pd.Series(
 
 # Datetime Series
 y_datetime = pd.Series(data=y.to_numpy())
-y_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
+y_datetime.index = pd.date_range(start='2000', periods=50, freq='YE')
 y_datetime.name = 'y'
 
 y_lw_datetime = pd.Series(data=y_lw.to_numpy())
-y_lw_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
+y_lw_datetime.index = pd.date_range(start='2050', periods=50, freq='YE')
 y_lw_datetime.name = 'y'
 
 exog_datetime = pd.Series(data=exog.to_numpy())
-exog_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
+exog_datetime.index = pd.date_range(start='2000', periods=50, freq='YE')
 exog_datetime.name = 'exog'
 
 exog_lw_datetime = pd.Series(data=exog_lw.to_numpy())
-exog_lw_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
+exog_lw_datetime.index = pd.date_range(start='2050', periods=50, freq='YE')
 exog_lw_datetime.name = 'exog'
 
 exog_predict_datetime = pd.Series(data=exog_predict.to_numpy())
-exog_predict_datetime.index = pd.date_range(start='2050', periods=10, freq='A')
+exog_predict_datetime.index = pd.date_range(start='2050', periods=10, freq='YE')
 exog_predict_datetime.name = 'exog'
 
 exog_lw_predict_datetime = pd.Series(data=exog_lw_predict.to_numpy())
-exog_lw_predict_datetime.index = pd.date_range(start='2100', periods=10, freq='A')
+exog_lw_predict_datetime.index = pd.date_range(start='2100', periods=10, freq='YE')
 exog_lw_predict_datetime.name = 'exog'
 
 
@@ -149,13 +149,13 @@ df_exog_lw_predict = pd.DataFrame({
 df_exog_lw_predict.index = pd.RangeIndex(start=100, stop=110)
 
 df_exog_datetime = df_exog.copy()
-df_exog_datetime.index = pd.date_range(start='2000', periods=50, freq='A')
+df_exog_datetime.index = pd.date_range(start='2000', periods=50, freq='YE')
 
 df_exog_lw_datetime = df_exog_lw.copy()
-df_exog_lw_datetime.index = pd.date_range(start='2050', periods=50, freq='A')
+df_exog_lw_datetime.index = pd.date_range(start='2050', periods=50, freq='YE')
 
 df_exog_predict_datetime = df_exog_predict.copy()
-df_exog_predict_datetime.index = pd.date_range(start='2050', periods=10, freq='A')
+df_exog_predict_datetime.index = pd.date_range(start='2050', periods=10, freq='YE')
 
 df_exog_lw_predict_datetime = df_exog_lw_predict.copy()
-df_exog_lw_predict_datetime.index = pd.date_range(start='2100', periods=10, freq='A')
+df_exog_lw_predict_datetime.index = pd.date_range(start='2100', periods=10, freq='YE')
