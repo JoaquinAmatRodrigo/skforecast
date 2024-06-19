@@ -761,7 +761,7 @@ class ForecasterAutoreg(ForecasterBase):
             if output_type == 'pandas':
                 exog_values = exog.iloc[:steps]
             else:
-                exog_values = exog.to_numpy().ravel()[:steps]
+                exog_values = exog.to_numpy()[:steps]
         else:
             exog_values = None
 

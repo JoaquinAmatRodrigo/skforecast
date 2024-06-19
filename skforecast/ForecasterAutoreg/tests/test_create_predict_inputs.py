@@ -114,7 +114,7 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
 
     expected = (
         np.array([1.16937289, -2.34810076, 0.89246539, 0.27129451, 0.0542589]),
-        np.array([-1.76425513, -1.00989936, 0.59254869, 0.45863938, 0.1640389]),
+        np.array([[-1.76425513], [-1.00989936], [ 0.59254869], [ 0.45863938], [ 0.1640389 ]]),
         pd.RangeIndex(start=3, stop=8, step=1)
     )
     
