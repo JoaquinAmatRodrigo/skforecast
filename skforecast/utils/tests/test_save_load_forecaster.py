@@ -50,18 +50,31 @@ def test_save_and_load_forecaster_persistence():
     os.remove('forecaster.joblib')
 
     for key in vars(forecaster).keys():
+    
         attribute_forecaster = forecaster.__getattribute__(key)
         attribute_forecaster_loaded = forecaster_loaded.__getattribute__(key)
 
         if key in ['regressor', 'binner', 'transformer_y', 'transformer_exog']:
             assert joblib.hash(attribute_forecaster) == joblib.hash(attribute_forecaster_loaded)
-        elif isinstance(attribute_forecaster, (np.ndarray, pd.Series, pd.DataFrame, pd.Index)):
-            assert (attribute_forecaster == attribute_forecaster_loaded).all()
+        elif isinstance(attribute_forecaster, np.ndarray):
+            np.testing.assert_array_equal(attribute_forecaster, attribute_forecaster_loaded)
+        elif isinstance(attribute_forecaster, pd.Series):
+            pd.testing.assert_series_equal(attribute_forecaster, attribute_forecaster_loaded)
+        elif isinstance(attribute_forecaster, pd.DataFrame):
+            pd.testing.assert_frame_equal(attribute_forecaster, attribute_forecaster_loaded)
+        elif isinstance(attribute_forecaster, pd.Index):
+            pd.testing.assert_index_equal(attribute_forecaster, attribute_forecaster_loaded)
         elif isinstance(attribute_forecaster, dict):
             assert attribute_forecaster.keys() == attribute_forecaster_loaded.keys()
             for k in attribute_forecaster.keys():
-                if isinstance(attribute_forecaster[k], (np.ndarray, pd.Series, pd.DataFrame, pd.Index)):
-                    assert (attribute_forecaster[k] == attribute_forecaster_loaded[k]).all()
+                if isinstance(attribute_forecaster[k], np.ndarray):
+                    np.testing.assert_array_equal(attribute_forecaster[k], attribute_forecaster_loaded[k])
+                elif isinstance(attribute_forecaster[k], pd.Series):
+                    pd.testing.assert_series_equal(attribute_forecaster[k], attribute_forecaster_loaded[k])
+                elif isinstance(attribute_forecaster[k], pd.DataFrame):
+                    pd.testing.assert_frame_equal(attribute_forecaster[k], attribute_forecaster_loaded[k])
+                elif isinstance(attribute_forecaster[k], pd.Index):
+                    pd.testing.assert_index_equal(attribute_forecaster[k], attribute_forecaster_loaded[k])
                 else:
                     assert attribute_forecaster[k] == attribute_forecaster_loaded[k]
         else:
