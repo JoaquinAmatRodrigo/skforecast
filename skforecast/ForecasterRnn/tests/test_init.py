@@ -2,8 +2,7 @@ from skforecast.ForecasterRnn.ForecasterRnn import ForecasterRnn
 from skforecast.ForecasterRnn.utils import create_and_compile_model
 import pandas as pd
 import numpy as np
-import tensorflow as tf
-from tensorflow import keras
+import keras
 from keras.losses import MeanSquaredError
 from keras.optimizers import Adam
 import pytest

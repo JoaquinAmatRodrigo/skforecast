@@ -6,15 +6,15 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterRnn import ForecasterRnn
 from skforecast.ForecasterRnn.utils import create_and_compile_model
-import tensorflow as tf
+import keras
 
 
 lags = 6
 steps = 3
 levels = "l1"
 activation = "relu"
-optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
-loss = tf.keras.losses.MeanSquaredError()
+optimizer = keras.optimizers.Adam(learning_rate=0.01)
+loss = keras.losses.MeanSquaredError()
 recurrent_units = 100
 dense_units = [128, 64]
 

@@ -12,7 +12,6 @@ import os
 from ..utils import check_optional_dependency
 
 try:
-    import tensorflow as tf
     import keras
     from keras.models import Model
     from keras.layers import Dense, Input, Reshape, LSTM, SimpleRNN
