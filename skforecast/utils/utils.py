@@ -2669,7 +2669,7 @@ def prepare_residuals_multiseries(
     -------
     levels : list
         Names of the series (levels) to be predicted.
-    residuals_levels : dict
+    residuals : dict
         Residuals of the model for each level to use in bootstrapping prediction.
 
     """
@@ -2680,7 +2680,7 @@ def prepare_residuals_multiseries(
                 (f"Not `forecaster.in_sample_residuals` for levels: "
                  f"{set(levels) - set(in_sample_residuals.keys())}.")
             )
-        residuals_levels = in_sample_residuals
+        residuals = in_sample_residuals
     else:
         if out_sample_residuals is None:
             raise ValueError(
@@ -2697,28 +2697,28 @@ def prepare_residuals_multiseries(
                      f"{set(levels) - set(out_sample_residuals.keys())}. "
                      f"Use method `set_out_sample_residuals()`.")
                 )
-        residuals_levels = out_sample_residuals
+        residuals = out_sample_residuals
 
     check_residuals = (
         "forecaster.in_sample_residuals" if use_in_sample
         else "forecaster.out_sample_residuals"
     )
     for level in levels:
-        if (level not in residuals_levels.keys() or 
-            residuals_levels[level] is None or 
-            len(residuals_levels[level]) == 0):
+        if (level not in residuals.keys() or 
+            residuals[level] is None or 
+            len(residuals[level]) == 0):
             raise ValueError(
                 (f"Not available residuals for level '{level}'. "
                  f"Check `{check_residuals}`.")
             )
-        elif (any(element is None for element in residuals_levels[level]) or
-                np.any(np.isnan(residuals_levels[level]))):
+        elif (any(element is None for element in residuals[level]) or
+              np.any(np.isnan(residuals[level]))):
             raise ValueError(
                 (f"forecaster residuals for level '{level}' contains `None` "
                  f"or `NaNs` values. Check `{check_residuals}`.")
             )
         
-    return residuals_levels
+    return residuals
 
 
 def set_skforecast_warnings(

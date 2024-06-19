@@ -1218,8 +1218,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
         predict_boot : bool, default `False`
-            If `True`, residuals from the training data are returned to 
-            generate bootstrapping predictions.
+            If `True`, residuals are returned to generate bootstrapping predictions.
         in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create predictions. If `False`, out of sample 
@@ -1246,10 +1245,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Names of the series (levels) to be predicted.
         prediction_index : pandas Index
             Index of the predictions.
-        residuals_levels : dict, None
+        residuals : dict, None
             Residuals used to generate bootstrapping predictions for each level 
             in the form `{level: residuals}`. If `predict_boot = False`, 
-            `residuals_levels` is `None`.
+            `residuals` is `None`.
         
         """
 
@@ -1268,14 +1267,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                   )
             
         if self.fitted and predict_boot:
-            residuals_levels = prepare_residuals_multiseries(
-                                   levels               = levels,
-                                   use_in_sample        = in_sample_residuals,
-                                   in_sample_residuals  = self.in_sample_residuals,
-                                   out_sample_residuals = self.out_sample_residuals
-                               )
+            residuals = prepare_residuals_multiseries(
+                            levels               = levels,
+                            use_in_sample        = in_sample_residuals,
+                            in_sample_residuals  = self.in_sample_residuals,
+                            out_sample_residuals = self.out_sample_residuals
+                        )
         else:
-            residuals_levels = None
+            residuals = None
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
@@ -1359,31 +1358,31 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if isinstance(exog, dict):
                 # Fill the empty dataframe with the exog values of each level
                 # and transform them if necessary
-                exog_level = exog[level]
-                if isinstance(exog_level, pd.Series):
-                    exog_level = exog_level.to_frame()
+                exog_values = exog[level]
+                if isinstance(exog_values, pd.Series):
+                    exog_values = exog_values.to_frame()
 
-                exog_level = empty_exog.fillna(exog_level)
-                exog_level = transform_dataframe(
-                                 df                = exog_level,
-                                 transformer       = self.transformer_exog,
-                                 fit               = False,
-                                 inverse_transform = False
-                             )
+                exog_values = empty_exog.fillna(exog_values)
+                exog_values = transform_dataframe(
+                                  df                = exog_values,
+                                  transformer       = self.transformer_exog,
+                                  fit               = False,
+                                  inverse_transform = False
+                              )
                 
                 check_exog_dtypes(
-                    exog      = exog_level,
+                    exog      = exog_values,
                     series_id = f"`exog` for series '{level}'"
                 )
 
                 if output_type == 'numpy':
-                    exog_values = exog_level.to_numpy()
+                    exog_values = exog_values.to_numpy()
             
             exog_values_dict[level] = exog_values
         
         set_skforecast_warnings(suppress_warnings, action='default')
 
-        return last_window_values_dict, exog_values_dict, levels, prediction_index, residuals_levels
+        return last_window_values_dict, exog_values_dict, levels, prediction_index, residuals
 
 
     def _recursive_predict(
@@ -1610,7 +1609,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_values_dict,
             levels,
             prediction_index,
-            residuals_levels
+            residuals
         ) = self.create_predict_inputs(
             steps               = steps,
             levels              = levels,
@@ -1633,7 +1632,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             rng = np.random.default_rng(seed=random_state)
             seeds = rng.integers(low=0, high=10000, size=n_boot)
 
-            residuals = residuals_levels[level]
+            residuals_level = residuals[level]
 
             for i in range(n_boot):
                 # In each bootstraping iteration the initial last_window and exog
@@ -1643,7 +1642,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
                 rng = np.random.default_rng(seed=seeds[i])
                 sample_residuals = rng.choice(
-                                       a       = residuals,
+                                       a       = residuals_level,
                                        size    = steps,
                                        replace = True
                                    )
