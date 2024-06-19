@@ -1211,8 +1211,8 @@ def preprocess_exog(
 
 
 def input_to_frame(
-        data: Union[pd.Series, pd.DataFrame],
-        input_name: str
+    data: Union[pd.Series, pd.DataFrame],
+    input_name: str
 ) -> pd.DataFrame:
     """
     Convert data to a pandas DataFrame. If data is a pandas Series, it is 
@@ -1228,7 +1228,7 @@ def input_to_frame(
 
     Returns
     -------
-    input : pandas DataFrame
+    data : pandas DataFrame
         Input data as a DataFrame.
 
     """
@@ -1241,8 +1241,8 @@ def input_to_frame(
 
     if isinstance(data, pd.Series):
         data = data.to_frame(
-                    name=data.name if data.name is not None else output_col_name[input_name]
-                )
+                   name=data.name if data.name is not None else output_col_name[input_name]
+               )
 
     return data
 

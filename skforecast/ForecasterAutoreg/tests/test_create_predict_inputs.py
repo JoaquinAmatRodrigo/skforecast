@@ -49,16 +49,16 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression():
     results = forecaster.create_predict_inputs(steps=5)
 
     expected = (
-        pd.Series(
-            data = np.array([45., 46., 47., 48., 49.]),
-            index = pd.RangeIndex(start=45, stop=50, step=1),
-            name = 'y'
+        pd.DataFrame(
+            data    = np.array([45., 46., 47., 48., 49.]),
+            index   = pd.RangeIndex(start=45, stop=50, step=1),
+            columns = ['y']
         ),
         None,
         pd.RangeIndex(start=45, stop=50, step=1)
     )
     
-    pd.testing.assert_series_equal(results[0], expected[0])
+    pd.testing.assert_frame_equal(results[0], expected[0])
     assert results[1] is None
     pd.testing.assert_index_equal(results[2], expected[2])
 
@@ -113,8 +113,8 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
     results = forecaster.create_predict_inputs(steps=5, exog=exog_predict, output_type='numpy')
 
     expected = (
-        np.array([1.16937289, -2.34810076, 0.89246539,  0.27129451,  0.0542589]),
-        np.array([-1.76425513, -1.00989936,  0.59254869,  0.45863938,  0.1640389]),
+        np.array([1.16937289, -2.34810076, 0.89246539, 0.27129451, 0.0542589]),
+        np.array([-1.76425513, -1.00989936, 0.59254869, 0.45863938, 0.1640389]),
         pd.RangeIndex(start=3, stop=8, step=1)
     )
     
@@ -156,10 +156,10 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
     results = forecaster.create_predict_inputs(steps=5, exog=exog_predict)
     
     expected = (
-        pd.Series(
-            data = np.array([1.16937289, -2.34810076, 0.89246539,  0.27129451,  0.0542589]),
-            index = pd.RangeIndex(start=3, stop=8, step=1),
-            name = 'no_name'
+        pd.DataFrame(
+            data    = np.array([1.16937289, -2.34810076, 0.89246539,  0.27129451,  0.0542589]),
+            index   = pd.RangeIndex(start=3, stop=8, step=1),
+            columns = ['y']
         ),
         pd.DataFrame({
             'col_1': [-1.76425513, -1.00989936,  0.59254869,  0.45863938,  0.1640389],
@@ -170,7 +170,7 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
         pd.RangeIndex(start=3, stop=8, step=1)
     )
     
-    pd.testing.assert_series_equal(results[0], expected[0])
+    pd.testing.assert_frame_equal(results[0], expected[0])
     pd.testing.assert_frame_equal(results[1], expected[1])
     pd.testing.assert_index_equal(results[2], expected[2])
 
@@ -216,10 +216,10 @@ def test_create_predict_inputs_when_categorical_features_native_implementation_H
     results = forecaster.create_predict_inputs(steps=10, exog=exog_predict)
     
     expected = (
-        pd.Series(
-            data = np.array([0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]),
-            index = pd.RangeIndex(start=45, stop=50, step=1),
-            name = 'y'
+        pd.DataFrame(
+            data    = np.array([0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]),
+            index   = pd.RangeIndex(start=45, stop=50, step=1),
+            columns = ['y']
         ),
         pd.DataFrame({
             'exog_2': [0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
@@ -234,7 +234,7 @@ def test_create_predict_inputs_when_categorical_features_native_implementation_H
         pd.RangeIndex(start=45, stop=50, step=1)
     )
     
-    pd.testing.assert_series_equal(results[0], expected[0])
+    pd.testing.assert_frame_equal(results[0], expected[0])
     pd.testing.assert_frame_equal(results[1], expected[1])
     pd.testing.assert_index_equal(results[2], expected[2])
 
@@ -263,15 +263,15 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_exog_diff
     results = forecaster.create_predict_inputs(steps=steps, exog=exog.loc[end_train:])
     
     expected = (
-        pd.Series(
-            data = np.array([np.nan, 0.14355438, -0.56028323,  0.07558021, 0.04869748,
-                             0.09807633, -0.00584249,  0.17596768,  0.01630394,  0.09883014,
-                             0.02377842, -0.01018012,  0.10597971, -0.01463081, -0.48984868,
-                             0.07503713]),
-            index = pd.date_range(start='2001-12-01', periods=16, freq='MS'),
-            name = 'y'
+        pd.DataFrame(
+            data    = np.array([np.nan, 0.14355438, -0.56028323,  0.07558021, 0.04869748,
+                                0.09807633, -0.00584249,  0.17596768,  0.01630394,  0.09883014,
+                                0.02377842, -0.01018012,  0.10597971, -0.01463081, -0.48984868,
+                                0.07503713]),
+            index   = pd.date_range(start='2001-12-01', periods=16, freq='MS'),
+            columns = ['y']
         ),
-        pd.Series(
+        pd.DataFrame(
             data = np.array([ 1.16172882,  0.29468848, -0.4399757 ,  1.25008389,  1.37496887,
                              -0.41673182,  0.32732157,  1.57848827,  0.40402941,  1.34466867,
                              -1.0724777 ,  0.14619469, -0.78475177, -2.97987806, -1.46735738,
@@ -285,12 +285,12 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_exog_diff
                              -0.27088044, -0.39179496, -1.34347494, -0.07230096, -1.51146602,
                              -0.66840335, -0.78148407, -0.27354003, -0.27128144, -0.6389055 ,
                               0.19573233, -0.67321672,  1.1559056 ]),
-            index = pd.date_range(start='2003-04-01', periods=63, freq='MS'),
-            name = 'exog'
+            index   = pd.date_range(start='2003-04-01', periods=63, freq='MS'),
+            columns = ['exog']
         ),
         pd.date_range(start='2001-12-01', periods=16, freq='MS')
     )
     
-    pd.testing.assert_series_equal(results[0], expected[0])
-    pd.testing.assert_series_equal(results[1], expected[1])
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_frame_equal(results[1], expected[1])
     pd.testing.assert_index_equal(results[2], expected[2])

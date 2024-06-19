@@ -682,12 +682,12 @@ class ForecasterAutoreg(ForecasterBase):
     def create_predict_inputs(
         self,
         steps: int,
-        last_window: Optional[pd.Series]=None,
+        last_window: Optional[Union[pd.Series, pd.DataFrame]]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
         output_type: str='pandas'
     ) -> Tuple[
-            Union[pd.Series, np.ndarray],
-            Optional[Union[pd.Series, pd.DataFrame, np.ndarray]],
+            Union[pd.DataFrame, np.ndarray],
+            Optional[Union[pd.DataFrame, np.ndarray]],
             pd.Index
         ]:
         """
@@ -699,7 +699,7 @@ class ForecasterAutoreg(ForecasterBase):
         ----------
         steps : int
             Number of future steps predicted.
-        last_window : pandas Series, default `None`
+        last_window : pandas Series, pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
             If `last_window = None`, the values stored in `self.last_window` are
@@ -713,9 +713,9 @@ class ForecasterAutoreg(ForecasterBase):
 
         Returns
         -------
-        last_window_values : pandas Series, numpy ndarray
+        last_window_values : pandas DataFrame, numpy ndarray
             Series predictors.
-        exog_values : pandas Series, pandas DataFrame, numpy ndarray, default `None`
+        exog_values : pandas DataFrame, numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
         last_window_index : pandas Index
             Index of `last_window_values`.
@@ -752,16 +752,16 @@ class ForecasterAutoreg(ForecasterBase):
             exog = input_to_frame(data=exog, input_name='exog')
             exog = exog.loc[:, self.exog_col_names]
             exog = transform_dataframe(
-                        df                = exog,
-                        transformer       = self.transformer_exog,
-                        fit               = False,
-                        inverse_transform = False
+                       df                = exog,
+                       transformer       = self.transformer_exog,
+                       fit               = False,
+                       inverse_transform = False
                    )
             check_exog_dtypes(exog=exog)
             if output_type == 'pandas':
                 exog_values = exog.iloc[:steps]
             else:
-                exog_values = exog.to_numpy()[:steps]
+                exog_values = exog.to_numpy().ravel()[:steps]
         else:
             exog_values = None
 
@@ -778,10 +778,10 @@ class ForecasterAutoreg(ForecasterBase):
             last_window_values = self.differentiator.fit_transform(last_window_values)
 
         if output_type == 'pandas':
-            last_window_values = pd.Series(
-                                     data  = last_window_values,
-                                     index = last_window_index,
-                                     name  = last_window.name
+            last_window_values = pd.DataFrame(
+                                     data    = last_window_values,
+                                     index   = last_window_index,
+                                     columns = last_window.columns
                                  )
 
         return last_window_values, exog_values, last_window_index
@@ -840,7 +840,7 @@ class ForecasterAutoreg(ForecasterBase):
     def predict(
         self,
         steps: int,
-        last_window: Optional[pd.Series]=None,
+        last_window: Optional[Union[pd.Series, pd.DataFrame]]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
     ) -> pd.Series:
         """
@@ -851,7 +851,7 @@ class ForecasterAutoreg(ForecasterBase):
         ----------
         steps : int
             Number of future steps predicted.
-        last_window : pandas Series, default `None`
+        last_window : pandas Series, pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
             If `last_window = None`, the values stored in `self.last_window` are
