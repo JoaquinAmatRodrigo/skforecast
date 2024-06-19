@@ -66,8 +66,6 @@ def create_and_compile_model(
         Loss function for model training.
     compile_kwargs : dict, default `{}` 
         Additional arguments for model compilation.
-    backend : str, default `"tensorflow"`
-        Backend to use with Keras. Options are `"tensorflow"`, `"jax"`, `"torch"`.
 
     Returns
     -------
