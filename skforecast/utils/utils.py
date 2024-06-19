@@ -828,7 +828,7 @@ def check_predict_input(
                 raise TypeError(
                     f"`exog` must be a pandas Series, DataFrame or dict. Got {type(exog)}."
                 )
-            if isinstance(exog_type, type(dict)):
+            if exog_type == dict and not isinstance(exog, dict):
                 raise TypeError(
                     f"Expected type for `exog`: {exog_type}. Got {type(exog)}."
                 )
