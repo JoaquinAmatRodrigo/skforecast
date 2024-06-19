@@ -5,7 +5,6 @@ import re
 import joblib
 import pytest
 import inspect
-import warnings
 import numpy as np
 import pandas as pd
 import skforecast
