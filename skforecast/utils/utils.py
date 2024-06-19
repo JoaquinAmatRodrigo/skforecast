@@ -382,7 +382,7 @@ def check_y(
 
 
 def check_exog(
-    exog: Any,
+    exog: Union[pd.Series, pd.DataFrame],
     allow_nan: bool=True,
     series_id: str="`exog`"
 ) -> None:
@@ -392,7 +392,7 @@ def check_exog(
     
     Parameters
     ----------
-    exog : Any
+    exog : pandas DataFrame, pandas Series
         Exogenous variable/s included as predictor/s.
     allow_nan : bool, default `True`
         If True, allows the presence of NaN values in `exog`. If False (default),
@@ -491,7 +491,7 @@ def check_exog_dtypes(
         for col in exog.select_dtypes(include='category'):
             if exog[col].cat.categories.dtype not in [int, np.int32, np.int64]:
                 raise TypeError(
-                    ("Categorical columns in exog must contain only integer values. "
+                    ("Categorical dtypes in exog must contain only integer values. "
                      "See skforecast docs for more info about how to include "
                      "categorical features https://skforecast.org/"
                      "latest/user_guides/categorical-features.html")
@@ -508,7 +508,7 @@ def check_exog_dtypes(
         if exog.dtype.name == 'category' and exog.cat.categories.dtype not in [int,
         np.int32, np.int64]:
             raise TypeError(
-                ("If exog is of type category, it must contain only integer values. "
+                ("Categorical dtypes in exog must contain only integer values. "
                  "See skforecast docs for more info about how to include "
                  "categorical features https://skforecast.org/"
                  "latest/user_guides/categorical-features.html")
@@ -784,9 +784,10 @@ def check_predict_input(
                      f"    `series` columns X train : {series_col_names}")
                 )
     else:
-        if not isinstance(last_window, pd.Series):
+        if not isinstance(last_window, (pd.Series, pd.DataFrame)):
             raise TypeError(
-                f"`last_window` must be a pandas Series. Got {type(last_window)}."
+                f"`last_window` must be a pandas Series or DataFrame. "
+                f"Got {type(last_window)}."
             )
 
     # Check last_window len, nulls and index (type and freq)
@@ -827,11 +828,15 @@ def check_predict_input(
                 raise TypeError(
                     f"`exog` must be a pandas Series, DataFrame or dict. Got {type(exog)}."
                 )
-
-        if not isinstance(exog, exog_type):
-            raise TypeError(
-                f"Expected type for `exog`: {exog_type}. Got {type(exog)}."
-            )
+            if exog_type == dict and not isinstance(exog, dict):
+                raise TypeError(
+                    f"Expected type for `exog`: {exog_type}. Got {type(exog)}."
+                )
+        else:
+            if not isinstance(exog, (pd.Series, pd.DataFrame)):
+                raise TypeError(
+                    f"`exog` must be a pandas Series or DataFrame. Got {type(exog)}."
+                )
 
         if isinstance(exog, dict):
             exogs_to_check = [(f"`exog` for series '{k}'", v) 
@@ -1075,7 +1080,7 @@ def preprocess_y(
                       step  = 1
                   )
 
-    y_values = y.to_numpy(copy=True) if return_values else None
+    y_values = y.to_numpy(copy=True).ravel() if return_values else None
 
     return y_values, y_index
 
@@ -1137,7 +1142,7 @@ def preprocess_last_window(
                                 step  = 1
                             )
 
-    last_window_values = last_window.to_numpy(copy=True) if return_values else None
+    last_window_values = last_window.to_numpy(copy=True).ravel() if return_values else None
 
     return last_window_values, last_window_index
 
@@ -1203,6 +1208,43 @@ def preprocess_exog(
     exog_values = exog.to_numpy(copy=True) if return_values else None
 
     return exog_values, exog_index
+
+
+def input_to_frame(
+        data: Union[pd.Series, pd.DataFrame],
+        input_name: str
+) -> pd.DataFrame:
+    """
+    Convert data to a pandas DataFrame. If data is a pandas Series, it is 
+    converted to a DataFrame with a single column. If data is a DataFrame, 
+    it is returned as is.
+
+    Parameters
+    ----------
+    data : pandas Series, pandas DataFrame
+        Input data.
+    input_name : str
+        Name of the input data. Accepted values are 'y', 'last_window' and 'exog'.
+
+    Returns
+    -------
+    input : pandas DataFrame
+        Input data as a DataFrame.
+
+    """
+
+    output_col_name = {
+        'y': 'y',
+        'last_window': 'y',
+        'exog': 'exog'
+    }
+
+    if isinstance(data, pd.Series):
+        data = data.to_frame(
+                    name=data.name if data.name is not None else output_col_name[input_name]
+                )
+
+    return data
 
 
 def cast_exog_dtypes(

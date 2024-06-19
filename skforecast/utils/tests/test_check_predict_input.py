@@ -444,7 +444,9 @@ def test_check_predict_input_TypeError_when_last_window_is_not_pandas_series():
     """
     """
     last_window = np.arange(5)
-    err_msg = re.escape(f"`last_window` must be a pandas Series. Got {type(last_window)}.")
+    err_msg = re.escape(
+        f"`last_window` must be a pandas Series or DataFrame. Got {type(last_window)}."
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
             forecaster_name  = 'ForecasterAutoreg',
@@ -628,20 +630,24 @@ def test_check_predict_input_TypeError_when_exog_is_not_pandas_series_or_datafra
 def test_check_predict_input_TypeError_when_exog_is_not_of_exog_type():
     """
     """
+    last_window = pd.Series(
+        np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq=freq),
+        name = '1'
+    ).to_frame()
     exog = pd.Series(np.arange(10))
-    exog_type = pd.DataFrame
+    exog_type = dict
 
     err_msg = re.escape(f"Expected type for `exog`: {exog_type}. Got {type(exog)}.")
     with pytest.raises(TypeError, match = err_msg):
         check_predict_input(
-            forecaster_name  = 'ForecasterAutoreg',
+            forecaster_name  = 'ForecasterAutoregMultiSeries',
             steps            = 5,
             fitted           = True,
             included_exog    = True,
             index_type       = pd.DatetimeIndex,
             index_freq       = freq,
             window_size      = 5,
-            last_window      = pd.Series(np.arange(10), index=pd.date_range(start='1/1/2018', periods=10, freq=freq)),
+            last_window      = last_window,
             last_window_exog = None,
             exog             = exog,
             exog_type        = exog_type,
@@ -649,8 +655,8 @@ def test_check_predict_input_TypeError_when_exog_is_not_of_exog_type():
             interval         = None,
             alpha            = None,
             max_steps        = None,
-            levels           = None,
-            series_col_names = None
+            levels           = ['1'],
+            series_col_names = ['1', '2']
         )
 
 

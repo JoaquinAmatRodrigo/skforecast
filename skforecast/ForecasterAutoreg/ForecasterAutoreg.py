@@ -31,6 +31,7 @@ from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
+from ..utils import input_to_frame
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
@@ -145,7 +146,7 @@ class ForecasterAutoreg(ForecasterBase):
         Size of the window extended by the order of differentiation. When using
         differentiation, the `window_size` is increased by the order of differentiation
         so that the predictors can be created correctly.
-    last_window : pandas Series
+    last_window : pandas DataFrame
         This window represents the most recent data observed by the predictor
         during its training phase. It contains the values needed to predict the
         next step immediately after the training data. These values are stored
@@ -206,7 +207,7 @@ class ForecasterAutoreg(ForecasterBase):
         Name used as an identifier of the forecaster.
     
     """
-    
+
     def __init__(
         self,
         regressor: object,
@@ -219,7 +220,7 @@ class ForecasterAutoreg(ForecasterBase):
         binner_kwargs: Optional[dict]=None,
         forecaster_id: Optional[Union[str, int]]=None
     ) -> None:
-        
+
         self.regressor                   = regressor
         self.transformer_y               = transformer_y
         self.transformer_exog            = transformer_exog
@@ -246,12 +247,12 @@ class ForecasterAutoreg(ForecasterBase):
         self.skforecast_version          = skforecast.__version__
         self.python_version              = sys.version.split(" ")[0]
         self.forecaster_id               = forecaster_id
-       
+
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
         self.window_size_diff = self.max_lag
-        
+
         self.binner_kwargs = binner_kwargs
         if binner_kwargs is None:
             self.binner_kwargs = {
@@ -273,7 +274,7 @@ class ForecasterAutoreg(ForecasterBase):
                 )
             self.window_size_diff += self.differentiation
             self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
-            
+
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name = type(self).__name__, 
             regressor       = regressor, 
@@ -285,7 +286,6 @@ class ForecasterAutoreg(ForecasterBase):
                               regressor  = regressor,
                               fit_kwargs = fit_kwargs
                           )
-
 
     def __repr__(
         self
@@ -313,7 +313,6 @@ class ForecasterAutoreg(ForecasterBase):
             f"Weight function included: {True if self.weight_func is not None else False} \n"
             f"Differentiation order: {self.differentiation} \n"
             f"Exogenous included: {self.included_exog} \n"
-            f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
@@ -329,7 +328,6 @@ class ForecasterAutoreg(ForecasterBase):
 
         return info
 
-    
     def _create_lags(
         self, 
         y: np.ndarray
@@ -358,23 +356,22 @@ class ForecasterAutoreg(ForecasterBase):
             Shape: (samples - max(self.lags), )
         
         """
-          
+
         n_splits = len(y) - self.max_lag
         if n_splits <= 0:
             raise ValueError(
                 (f"The maximum lag ({self.max_lag}) must be less than the length "
                  f"of the series ({len(y)}).")
             )
-        
+
         X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
 
         for i, lag in enumerate(self.lags):
             X_data[:, i] = y[self.max_lag - lag: -lag]
 
         y_data = y[self.max_lag:]
-        
-        return X_data, y_data
 
+        return X_data, y_data
 
     def create_train_X_y(
         self,
@@ -403,14 +400,16 @@ class ForecasterAutoreg(ForecasterBase):
             Shape: (len(y) - self.max_lag, )
         
         """
-        
+
         check_y(y=y)
+        y = input_to_frame(data=y, input_name='y')
+
         fit_transformer = False if self.fitted else True
-        y = transform_series(
-                series            = y,
+        y = transform_dataframe(
+                df                = y, 
                 transformer       = self.transformer_y,
                 fit               = fit_transformer,
-                inverse_transform = False
+                inverse_transform = False,
             )
         y_values, y_index = preprocess_y(y=y)
 
@@ -420,31 +419,23 @@ class ForecasterAutoreg(ForecasterBase):
             else:
                 differentiator = clone(self.differentiator)
                 y_values = differentiator.fit_transform(y_values)
-        
+
         if exog is not None:
-            
             check_exog(exog=exog, allow_nan=True)
+            exog = input_to_frame(data=exog, input_name='exog')
             if len(exog) != len(y):
                 raise ValueError(
                     (f"`exog` must have same number of samples as `y`. "
                      f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
                 )
-            
-            if isinstance(exog, pd.Series):
-                exog = transform_series(
-                           series            = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = fit_transformer,
-                           inverse_transform = False
-                       )
-            else:
-                exog = transform_dataframe(
-                           df                = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = fit_transformer,
-                           inverse_transform = False
-                       )
-            
+
+            exog = transform_dataframe(
+                        df                = exog,
+                        transformer       = self.transformer_exog,
+                        fit               = fit_transformer,
+                        inverse_transform = False
+                    )
+
             check_exog_dtypes(exog, call_check_exog=True)
 
             _, exog_index = preprocess_exog(exog=exog, return_values=False)
@@ -453,7 +444,7 @@ class ForecasterAutoreg(ForecasterBase):
                     ("Different index for `y` and `exog`. They must be equal "
                      "to ensure the correct alignment of values.")
                 )
-        
+
         X_train, y_train = self._create_lags(y=y_values)
         X_train_col_names = [f"lag_{i}" for i in self.lags]
         X_train = pd.DataFrame(
@@ -461,18 +452,18 @@ class ForecasterAutoreg(ForecasterBase):
                       columns = X_train_col_names,
                       index   = y_index[self.max_lag: ]
                   )
-        
+
         if exog is not None:
             # The first `self.max_lag` positions have to be removed from exog
             # since they are not in X_train.
             exog_to_train = exog.iloc[self.max_lag:, ]
             exog_to_train.index = exog_index[self.max_lag:]
             X_train = pd.concat((X_train, exog_to_train), axis=1)
-        
+
         # TODO: move self to fit method and make X_train_col_names a return
         if not self.fitted:
             self.X_train_col_names = X_train.columns.to_list()
-        
+
         y_train = pd.Series(
                       data  = y_train,
                       index = y_index[self.max_lag: ],
@@ -482,9 +473,8 @@ class ForecasterAutoreg(ForecasterBase):
         if self.differentiation is not None:
             X_train = X_train.iloc[self.differentiation: ]
             y_train = y_train.iloc[self.differentiation: ]
-                        
-        return X_train, y_train
 
+        return X_train, y_train
 
     def create_sample_weights(
         self,
@@ -528,7 +518,6 @@ class ForecasterAutoreg(ForecasterBase):
 
         return sample_weight
 
-        
     def fit(
         self,
         y: pd.Series,
@@ -561,7 +550,7 @@ class ForecasterAutoreg(ForecasterBase):
         None
         
         """
-        
+
         # Reset values in case the forecaster has already been fitted.
         self.index_type          = None
         self.index_freq          = None
@@ -597,9 +586,12 @@ class ForecasterAutoreg(ForecasterBase):
             self.included_exog = True
             self.exog_type = type(exog)
             self.exog_dtypes = get_exog_dtypes(exog=exog)
-            self.exog_col_names = \
-                 exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
-        
+            self.exog_col_names = (
+                exog.columns.to_list()
+                if isinstance(exog, pd.DataFrame)
+                else [exog.name]
+            )
+
         # This is done to save time during fit in functions such as backtesting()
         if store_in_sample_residuals:
             in_sample_predictions = pd.Series(
@@ -610,13 +602,16 @@ class ForecasterAutoreg(ForecasterBase):
                 y_true = y_train,
                 y_pred = in_sample_predictions
             )
-        
+
         # The last time window of training data is stored so that lags needed as
         # predictors in the first iteration of `predict()` can be calculated. It
         # also includes the values need to calculate the diferenctiation.
         if store_last_window:
-            self.last_window = y.iloc[-self.window_size_diff:].copy()
-
+            self.last_window = (
+                y.iloc[-self.window_size_diff:]
+                .copy()
+                .to_frame(name=y.name if y.name is not None else 'y')
+            )
 
     def _binning_in_sample_residuals(
         self,
@@ -660,7 +655,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         # Only up to 200 residuals are stored per bin
         for k, v in self.in_sample_residuals_by_bin.items():
-            # TODO: Include `random_state` in fit method to allow the user 
+            # TODO: Include `random_state` in fit method to allow the user
             # change the residual sample stored.
             rng = np.random.default_rng(seed=95123)
             if len(v) > 200:
@@ -751,22 +746,17 @@ class ForecasterAutoreg(ForecasterBase):
         )
 
         last_window = last_window.iloc[-self.window_size_diff:].copy()
+        last_window = input_to_frame(data=last_window, input_name='last_window')
 
         if exog is not None:
-            if isinstance(exog, pd.DataFrame):
-                exog = transform_dataframe(
-                           df                = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = False,
-                           inverse_transform = False
-                       )
-            else:
-                exog = transform_series(
-                           series            = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = False,
-                           inverse_transform = False
-                       )
+            exog = input_to_frame(data=exog, input_name='exog')
+            exog = exog.loc[:, self.exog_col_names]
+            exog = transform_dataframe(
+                        df                = exog,
+                        transformer       = self.transformer_exog,
+                        fit               = False,
+                        inverse_transform = False
+                   )
             check_exog_dtypes(exog=exog)
             if output_type == 'pandas':
                 exog_values = exog.iloc[:steps]
@@ -774,9 +764,9 @@ class ForecasterAutoreg(ForecasterBase):
                 exog_values = exog.to_numpy()[:steps]
         else:
             exog_values = None
-        
-        last_window = transform_series(
-                          series            = last_window,
+
+        last_window = transform_dataframe(
+                          df                = last_window,
                           transformer       = self.transformer_y,
                           fit               = False,
                           inverse_transform = False
@@ -880,13 +870,13 @@ class ForecasterAutoreg(ForecasterBase):
         last_window_values, exog_values, last_window_index = self.create_predict_inputs(
             steps=steps, last_window=last_window, exog=exog, output_type="numpy"
         )
-            
+        
         predictions = self._recursive_predict(
                           steps       = steps,
                           last_window = last_window_values,
                           exog        = exog_values
                       )
-        
+
         if self.differentiation is not None:
             predictions = self.differentiator.inverse_transform_next_window(predictions)
 
@@ -905,9 +895,8 @@ class ForecasterAutoreg(ForecasterBase):
                           fit               = False,
                           inverse_transform = True
                       )
-        
-        return predictions
 
+        return predictions
 
     def predict_bootstrapping(
         self,
@@ -1007,7 +996,7 @@ class ForecasterAutoreg(ForecasterBase):
             residuals_by_bin = self.out_sample_residuals_by_bin
 
         for i in range(n_boot):
-            # In each bootstraping iteration the initial last_window and exog 
+            # In each bootstraping iteration the initial last_window and exog
             # need to be restored.
             last_window_boot = last_window_values.copy()
             exog_boot = exog_values.copy() if exog is not None else None
@@ -1019,7 +1008,7 @@ class ForecasterAutoreg(ForecasterBase):
                                         size    = steps,
                                         replace = True
                                     )
-            
+
             for step in range(steps):
 
                 prediction = self._recursive_predict(
@@ -1065,7 +1054,6 @@ class ForecasterAutoreg(ForecasterBase):
                                         )
 
         return boot_predictions
-
 
     def predict_interval(
         self,
@@ -1135,7 +1123,7 @@ class ForecasterAutoreg(ForecasterBase):
         George Athanasopoulos.
         
         """
-        
+
         check_interval(interval=interval)
 
         predictions = self.predict(
@@ -1160,7 +1148,6 @@ class ForecasterAutoreg(ForecasterBase):
         predictions = pd.concat((predictions, predictions_interval), axis=1)
 
         return predictions
-
 
     def predict_quantiles(
         self,
@@ -1226,7 +1213,7 @@ class ForecasterAutoreg(ForecasterBase):
         George Athanasopoulos.
         
         """
-        
+
         check_interval(quantiles=quantiles)
 
         boot_predictions = self.predict_bootstrapping(
@@ -1243,7 +1230,6 @@ class ForecasterAutoreg(ForecasterBase):
         predictions.columns = [f'q_{q}' for q in quantiles]
 
         return predictions
-
 
     def predict_dist(
         self,
@@ -1326,7 +1312,6 @@ class ForecasterAutoreg(ForecasterBase):
 
         return predictions
 
-    
     def set_params(
         self, 
         params: dict
@@ -1349,7 +1334,6 @@ class ForecasterAutoreg(ForecasterBase):
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
 
-
     def set_fit_kwargs(
         self, 
         fit_kwargs: dict
@@ -1371,7 +1355,6 @@ class ForecasterAutoreg(ForecasterBase):
 
         self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
 
-        
     def set_lags(
         self, 
         lags: Union[int, list, np.ndarray, range]
@@ -1394,14 +1377,13 @@ class ForecasterAutoreg(ForecasterBase):
         None
         
         """
-        
+
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = max(self.lags)
         self.window_size_diff = max(self.lags)
         if self.differentiation is not None:
             self.window_size_diff += self.differentiation        
-
 
     def set_out_sample_residuals(
         self, 
@@ -1517,7 +1499,7 @@ class ForecasterAutoreg(ForecasterBase):
                             fit               = False,
                             inverse_transform = False
                         ).to_numpy()
-        
+
         if y_pred is None:
             # Residuals are not binned.
             if len(residuals) > 1000:
@@ -1572,7 +1554,7 @@ class ForecasterAutoreg(ForecasterBase):
                     # Only up to 200 residuals are stored per bin
                     sample = rng.choice(a=v, size=200, replace=False)
                     self.out_sample_residuals_by_bin[k] = sample
-                
+
             self.out_sample_residuals = np.concatenate(list(
                                             self.out_sample_residuals_by_bin.values()
                                         ))
@@ -1580,7 +1562,7 @@ class ForecasterAutoreg(ForecasterBase):
             for k in self.in_sample_residuals_by_bin.keys():
                 if k not in self.out_sample_residuals_by_bin:
                     self.out_sample_residuals_by_bin[k] = np.array([])
-            
+
             empty_bins = [k for k, v in self.out_sample_residuals_by_bin.items() if len(v) == 0]
             if empty_bins:
                 warnings.warn(
@@ -1597,7 +1579,6 @@ class ForecasterAutoreg(ForecasterBase):
                                                               size    = 200,
                                                               replace = True
                                                           )
-
 
     def get_feature_importances(
         self,
