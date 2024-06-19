@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.feature_selection import RFE
+from sklearn.preprocessing import StandardScaler
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.model_selection_multiseries import select_features_multiseries
@@ -221,7 +222,8 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_None():
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = LinearRegression(),
                      lags      = 5,
-                     encoding  = 'onehot'
+                     encoding  = 'onehot',
+                     transformer_series = StandardScaler()
                  )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
@@ -253,7 +255,8 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_None_Forecaster
                      regressor       = LinearRegression(),
                      fun_predictors  = lambda y: y[-1:-6:-1],
                      name_predictors = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
-                     window_size     = 5
+                     window_size     = 5,
+                     transformer_series = StandardScaler()
                  )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
@@ -314,7 +317,8 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_forc
                      regressor      = LinearRegression(),
                      fun_predictors = lambda y: y[-1:-6:-1],
                      window_size    = 5,
-                     encoding       = 'ordinal'
+                     encoding       = 'ordinal',
+                     transformer_series = StandardScaler()
                  )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
@@ -341,7 +345,8 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_forc
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = LinearRegression(),
                      lags      = 5,
-                     encoding  = 'onehot'
+                     encoding  = 'onehot',
+                     transformer_series = StandardScaler()
                  )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 

@@ -115,6 +115,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
                            '2': pd.Series(np.arange(7, dtype=float))})
     forecaster = ForecasterAutoregMultiSeries(
         LinearRegression(),
+        transformer_series=StandardScaler(),
         lags=3,
         encoding="onehot"
     )
@@ -185,6 +186,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_None_ordinal_encoding(e
                            '2': pd.Series(np.arange(7, dtype=float))})
     forecaster = ForecasterAutoregMultiSeries(
                     LinearRegression(),
+                    transformer_series=StandardScaler(),
                     lags=3,
                     encoding=encoding
                 )
@@ -2248,6 +2250,7 @@ def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               encoding           = 'ordinal',
+                                              transformer_series = StandardScaler(),
                                               differentiation    = 1)
     
     if fit_forecaster:

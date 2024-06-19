@@ -7,6 +7,7 @@ import pandas as pd
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import LinearRegression
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
+from sklearn.preprocessing import StandardScaler
 
 def create_predictors(y): # pragma: no cover
     """
@@ -72,7 +73,8 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression_StandardSca
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
                      window_size    = 5,
-                     encoding       = encoding 
+                     encoding       = encoding,
+                     transformer_series = StandardScaler()
                  )
     forecaster.fit(series=series)
     level = '1'

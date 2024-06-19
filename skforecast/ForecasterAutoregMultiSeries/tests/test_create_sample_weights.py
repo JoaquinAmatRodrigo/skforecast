@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
 
 
 def custom_weights(index):  # pragma: no cover
@@ -335,6 +336,7 @@ def test_create_sample_weights_output_using_weight_func_dict(weight_func, expect
     forecaster = ForecasterAutoregMultiSeries(
         regressor=LinearRegression(),
         lags=3,
+        transformer_series=StandardScaler(),
         weight_func=weight_func,
         encoding="ordinal",
     )
@@ -387,6 +389,7 @@ def test_create_sample_weights_output_using_weight_func_dict_different_series_le
     forecaster = ForecasterAutoregMultiSeries(
         regressor=LinearRegression(),
         lags=3,
+        transformer_series=StandardScaler(),
         encoding="ordinal",
         weight_func=weight_func,
     )
@@ -417,6 +420,7 @@ def test_create_sample_weights_output_using_series_weights_and_weight_func(
     forecaster = ForecasterAutoregMultiSeries(
         regressor=LinearRegression(),
         lags=3,
+        transformer_series=StandardScaler(),
         encoding=encoding,
         series_weights={"series_1": 1.0, "series_2": 2.0},
         weight_func=custom_weights,
@@ -450,6 +454,7 @@ def test_create_sample_weights_output_using_series_weights_and_weight_func_diffe
     forecaster = ForecasterAutoregMultiSeries(
         regressor=LinearRegression(),
         lags=3,
+        transformer_series=StandardScaler(),
         encoding=encoding,
         series_weights={"series_1": 1.0, "series_2": 2.0},
         weight_func=custom_weights,
@@ -480,6 +485,7 @@ def test_create_sample_weights_ValueError_when_weights_has_nan(encoding, X_train
     forecaster = ForecasterAutoregMultiSeries(
         regressor=LinearRegression(),
         lags=3,
+        transformer_series=StandardScaler(),
         encoding=encoding,
         weight_func=custom_weights_nan,
     )
@@ -510,6 +516,7 @@ def test_create_sample_weights_ValueError_when_weights_has_negative_values(
     forecaster = ForecasterAutoregMultiSeries(
         regressor=LinearRegression(),
         lags=3,
+        transformer_series=StandardScaler(),
         encoding=encoding,
         weight_func=custom_weights_negative,
     )
@@ -538,6 +545,7 @@ def test_create_sample_weights_ValueError_when_weights_all_zeros(encoding, X_tra
     forecaster = ForecasterAutoregMultiSeries(
         regressor=LinearRegression(),
         lags=3,
+        transformer_series=StandardScaler(),
         encoding=encoding,
         series_weights={"series_1": 0, "series_2": 0},
     )

@@ -1568,25 +1568,24 @@ def _bayesian_search_optuna(
         logging.getLogger("optuna").setLevel(logging.WARNING)
         optuna.logging.disable_default_handler()
 
+    # `metric_values` will be modified inside _objective function. 
+    # It is a trick to extract multiple values from _objective since
+    # only the optimized value can be returned.
+    metric_values = []
+
+    warnings.filterwarnings(
+        "ignore",
+        category=UserWarning,
+        message="Choices for a categorical distribution should be*"
+    )
+
     study = optuna.create_study(**kwargs_create_study)
 
     if 'sampler' not in kwargs_create_study.keys():
         study.sampler = TPESampler(seed=random_state)
 
-    # `metric_values` will be modified inside _objective function. 
-    # It is a trick to extract multiple values from _objective since
-    # only the optimized value can be returned.
-    metric_values = []
-    warnings.filterwarnings(
-        "ignore",
-        message=(
-            "^Choices for a categorical distribution should be a tuple of None, bool, "
-            "int, float and str for persistent storage but contains "
-        )
-    )
     study.optimize(_objective, n_trials=n_trials, **kwargs_study_optimize)
     best_trial = study.best_trial
-    warnings.filterwarnings('default')
 
     if output_file is not None:
         handler.close()
@@ -1597,6 +1596,7 @@ def _bayesian_search_optuna(
              f"  Search Space keys  : {list(search_space(best_trial).keys())}\n"
              f"  Trial objects keys : {list(best_trial.params.keys())}.")
         )
+    warnings.filterwarnings('default')
     
     lags_list = []
     params_list = []

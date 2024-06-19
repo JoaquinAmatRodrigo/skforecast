@@ -73,7 +73,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_5_
     Test output when regressor is LinearRegression 5 step ahead is predicted
     using in sample residuals.
     """
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y)
     expected = pd.DataFrame(
                    data    = np.array(
@@ -121,9 +121,10 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
         )
     transformer_y = StandardScaler()
     forecaster = ForecasterAutoreg(
-                    regressor = LinearRegression(),
-                    lags = 5,
-                    transformer_y = transformer_y,
+                     regressor     = LinearRegression(),
+                     lags          = 5,
+                     transformer_y = transformer_y,
+                     binner_kwargs = {'n_bins': 15}
                  )
     forecaster.fit(y=y)
     predictions = forecaster.predict_interval(steps=5)
@@ -166,7 +167,7 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
                      regressor        = LinearRegression(),
                      lags             = 5,
                      transformer_y    = transformer_y,
-                     transformer_exog = transformer_exog,
+                     transformer_exog = transformer_exog
                  )
     
     forecaster.fit(y=y, exog=exog)
@@ -189,7 +190,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_5_
     Test output when regressor is LinearRegression, steps=5, in_sample_residuals=False,
     binned_residuals=True.
     """
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y)
     forecaster.out_sample_residuals_by_bin = forecaster.in_sample_residuals_by_bin
     expected = pd.DataFrame(

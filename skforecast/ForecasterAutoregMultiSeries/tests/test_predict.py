@@ -703,7 +703,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_differentia
         predictions_1[k] = scaler_dict[k].inverse_transform(predictions_1[k].to_numpy().reshape(-1, 1))
     
     forecaster_2 = ForecasterAutoregMultiSeries(regressor=LinearRegression(), lags=15, 
-                                                differentiation=1)
+                                                differentiation=1, transformer_series = StandardScaler())
     forecaster_2.fit(series=series_dict_datetime, exog=exog_dict_datetime)
     predictions_2 = forecaster_2.predict(steps=steps, exog=exog_pred)
 

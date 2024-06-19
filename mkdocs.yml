@@ -54,7 +54,7 @@ nav:
     - Save and load forecaster: user_guides/save-load-forecaster.ipynb
     - Explainability: user_guides/explainability.ipynb
     - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
-    - Plot forecaster residuals: user_guides/plot-forecaster-residuals.ipynb
+    - Plotting: user_guides/plotting.ipynb
     - Datasets: user_guides/datasets.ipynb
 
   - Examples and tutorials:
