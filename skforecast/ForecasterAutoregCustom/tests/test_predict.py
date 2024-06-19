@@ -46,9 +46,9 @@ def test_predict_NotFittedError_when_fitted_is_False():
                  )
 
     err_msg = re.escape(
-                ("This Forecaster instance is not fitted yet. Call `fit` with "
-                 "appropriate arguments before using predict.")
-              )
+        ("This Forecaster instance is not fitted yet. Call `fit` with "
+         "appropriate arguments before using predict.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict(steps=5)
 
@@ -69,6 +69,7 @@ def test_predict_output_when_regressor_is_LinearRegression():
                    index = pd.RangeIndex(start=50, stop=55, step=1),
                    name = 'pred'
                )
+    
     pd.testing.assert_series_equal(results, expected)
 
 
@@ -104,7 +105,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_
     Test predict output when using LinearRegression as regressor, StandardScaler
     as transformer_y and StandardScaler as transformer_exog.
     """
-    y = pd.Series( np.array([-0.59,  0.02, -0.9 ,  1.09, -3.61,  0.72, -0.11, -0.4]))
+    y = pd.Series(np.array([-0.59,  0.02, -0.9 ,  1.09, -3.61,  0.72, -0.11, -0.4]))
     exog = pd.Series(np.array([7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4]), name='exog')
     exog_predict = exog.copy()
     exog_predict.index = pd.RangeIndex(start=8, stop=16)
@@ -159,10 +160,10 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_
     forecaster.fit(y=y, exog=exog)
     predictions = forecaster.predict(steps=5, exog=exog_predict)
     expected = pd.Series(
-                data = np.array([0.50619336, -0.09630298,  0.05254973,  0.12281153,  0.00221741]),
-                index = pd.RangeIndex(start=8, stop=13, step=1),
-                name = 'pred'
-               )
+        data = np.array([0.50619336, -0.09630298,  0.05254973,  0.12281153,  0.00221741]),
+        index = pd.RangeIndex(start=8, stop=13, step=1),
+        name = 'pred'
+    )
     
     pd.testing.assert_series_equal(predictions, expected)
 
@@ -171,9 +172,11 @@ def test_predict_output_when_categorical_features_native_implementation_HistGrad
     """
     Test predict output when using HistGradientBoostingRegressor and categorical variables.
     """
-    df_exog = pd.DataFrame({'exog_1': exog_categorical,
-                            'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
+    df_exog = pd.DataFrame(
+        {'exog_1': exog_categorical,
+         'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
+         'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)}
+    )
     
     exog_predict = df_exog.copy()
     exog_predict.index = pd.RangeIndex(start=50, stop=100)

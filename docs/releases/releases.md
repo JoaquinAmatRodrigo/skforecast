@@ -20,6 +20,8 @@ The main changes in this release are:
 
 + Support for `python 3.12`.
 
++ Create method `create_predict_inputs` in all forecasters to allow the user have more control over the inputs of the predict methods.
+
 + New plot function `plot_predicted_intervals` in the `plot` module to plot predicted intervals.
 
 **Changed**
@@ -27,6 +29,8 @@ The main changes in this release are:
 + Deprecated `python 3.8` compatibility.
 
 + Change default value of `n_bins` when initializing `ForecasterAutoreg` from 15 to 10.
+
++ Refactor `_recursive_predict` in all recursive forecasters.
 
 + Change default value of `transformer_series` when initializing `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` from `StandardScaler()` to `None`.
 
@@ -101,7 +105,6 @@ The main changes in this release are:
 + Added new forecaster `ForecasterRnn` to create forecasting models based on deep learning (RNN and LSTM).
 
 + Added new function `create_and_compile_model` to module `skforecast.ForecasterRnn.utils` to help to create and compile a RNN or LSTM models to be used in `ForecasterRnn`.
-
 
 **Changed**
 

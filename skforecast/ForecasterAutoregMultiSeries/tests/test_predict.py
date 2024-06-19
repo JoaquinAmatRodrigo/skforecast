@@ -372,15 +372,15 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
                      transformer_series = transformer_series,
                      transformer_exog   = transformer_exog,
                  )
-    forecaster.fit(series=series, exog=exog)
+    forecaster.fit(series=new_series, exog=exog)
     predictions = forecaster.predict(steps=5, exog=exog_predict)
 
     expected = pd.DataFrame(
-                   data    = np.array([[0.53267333, 0.55496412],
-                                       [0.44478046, 0.57787982],
-                                       [0.52579563, 0.66389117],
-                                       [0.57391142, 0.65789846],
-                                       [0.54633594, 0.5841187 ]]),
+                   data    = np.array([[0.52343425, 0.49560898],
+                                       [0.42697026, 0.53289813],
+                                       [0.48906322, 0.61304224],
+                                       [0.55395581, 0.61509108],
+                                       [0.52349107, 0.54297301]]),
                    index   = pd.RangeIndex(start=50, stop=55, step=1),
                    columns = ['1', '2']
                )

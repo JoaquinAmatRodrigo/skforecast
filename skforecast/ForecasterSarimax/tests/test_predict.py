@@ -42,9 +42,9 @@ def test_predict_NotFittedError_when_fitted_is_False():
     forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 1, 1)))
 
     err_msg = re.escape(
-                ("This Forecaster instance is not fitted yet. Call `fit` with "
-                 "appropriate arguments before using predict.")
-              )
+        ("This Forecaster instance is not fitted yet. Call `fit` with "
+         "appropriate arguments before using predict.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict(steps=5)
 
@@ -58,9 +58,9 @@ def test_predict_ValueError_when_ForecasterSarimax_last_window_exog_is_not_None_
     forecaster.fit(y=y, exog=exog)
     
     err_msg = re.escape(
-                ("To make predictions unrelated to the original data, both "
-                 "`last_window` and `last_window_exog` must be provided.")
-              )   
+        ("To make predictions unrelated to the original data, both "
+         "`last_window` and `last_window_exog` must be provided.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict(
             steps            = 5, 
@@ -79,10 +79,10 @@ def test_predict_ValueError_when_ForecasterSarimax_last_window_exog_is_None_and_
     forecaster.fit(y=y, exog=exog)
     
     err_msg = re.escape(
-                ("Forecaster trained with exogenous variable/s. To make predictions "
-                 "unrelated to the original data, same variable/s must be provided "
-                 "using `last_window_exog`.")
-              )   
+        ("Forecaster trained with exogenous variable/s. To make predictions "
+         "unrelated to the original data, same variable/s must be provided "
+         "using `last_window_exog`.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict(
             steps            = 5, 

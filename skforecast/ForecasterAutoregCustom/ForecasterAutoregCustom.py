@@ -24,12 +24,12 @@ from ..utils import check_y
 from ..utils import check_exog
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
+from ..utils import check_predict_input
 from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
 from ..utils import expand_index
-from ..utils import check_predict_input
 from ..utils import transform_series
 from ..utils import transform_dataframe
 from ..preprocessing import TimeSeriesDifferentiator
@@ -588,67 +588,21 @@ class ForecasterAutoregCustom(ForecasterBase):
             self.last_window = y.iloc[-self.window_size_diff:].copy()
 
 
-    def _recursive_predict(
-        self,
-        steps: int,
-        last_window: np.ndarray,
-        exog: Optional[np.ndarray]=None
-    ) -> np.ndarray:
-        """
-        Predict n steps ahead. It is an iterative process in which, each prediction,
-        is used as a predictor for the next step.
-        
-        Parameters
-        ----------
-        steps : int
-            Number of future steps predicted.
-        last_window : numpy ndarray
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
-        exog : numpy ndarray, default `None`
-            Exogenous variable/s included as predictor/s.
-
-        Returns
-        -------
-        predictions : numpy ndarray
-            Predicted values.
-        
-        """
-
-        predictions = np.full(shape=steps, fill_value=np.nan)
-
-        for i in range(steps):
-            X = self.fun_predictors(y=last_window).reshape(1, -1)
-            if np.isnan(X).any():
-                raise ValueError(
-                    f"`{self.fun_predictors.__name__}` is returning `NaN` values."
-                )
-            if exog is not None:
-                X = np.column_stack((X, exog[i, ].reshape(1, -1)))
-
-            with warnings.catch_warnings():
-                # Suppress scikit-learn warning: "X does not have valid feature names,
-                # but NoOpTransformer was fitted with feature names".
-                warnings.simplefilter("ignore")
-                prediction = self.regressor.predict(X)
-                predictions[i] = prediction.ravel()[0]
-
-            # Update `last_window` values. The first position is discarded and 
-            # the new prediction is added at the end.
-            last_window = np.append(last_window[1:], prediction)
-
-        return predictions
-        
-            
-    def predict(
+    def create_predict_inputs(
         self,
         steps: int,
         last_window: Optional[pd.Series]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
-    ) -> pd.Series:
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        output_type: str='pandas'
+    ) -> Tuple[
+            Union[pd.Series, np.ndarray],
+            Optional[Union[pd.Series, pd.DataFrame, np.ndarray]],
+            pd.Index
+        ]:
         """
-        Predict n steps ahead. It is an recursive process in which, each prediction,
-        is used as a predictor for the next step.
+        Create inputs needed for the first iteration of the prediction process. 
+        Since it is a recursive process, last window is updated at each 
+        iteration of the prediction process.
         
         Parameters
         ----------
@@ -662,11 +616,18 @@ class ForecasterAutoregCustom(ForecasterBase):
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
+        output_type : str, default `pandas`
+            Type of output. If `pandas`, the predictors are returned as a pandas
+            Series. If `numpy`, the predictors are returned as a numpy ndarray.
 
         Returns
         -------
-        predictions : pandas Series
-            Predicted values.
+        last_window_values : pandas Series, numpy ndarray
+            Series predictors.
+        exog_values : pandas Series, pandas DataFrame, numpy ndarray, default `None`
+            Exogenous variable/s included as predictor/s.
+        last_window_index : pandas Index
+            Index of `last_window_values`.
         
         """
 
@@ -711,7 +672,10 @@ class ForecasterAutoregCustom(ForecasterBase):
                            inverse_transform = False
                        )
             check_exog_dtypes(exog=exog)
-            exog_values = exog.to_numpy()[:steps]
+            if output_type == 'pandas':
+                exog_values = exog.iloc[:steps]
+            else:
+                exog_values = exog.to_numpy()[:steps]
         else:
             exog_values = None
         
@@ -726,6 +690,105 @@ class ForecasterAutoregCustom(ForecasterBase):
                                                 )
         if self.differentiation is not None:
             last_window_values = self.differentiator.fit_transform(last_window_values)
+
+        if output_type == 'pandas':
+            last_window_values = pd.Series(
+                                     data  = last_window_values,
+                                     index = last_window_index,
+                                     name  = last_window.name
+                                 )
+
+        return last_window_values, exog_values, last_window_index
+
+
+    def _recursive_predict(
+        self,
+        steps: int,
+        last_window: np.ndarray,
+        exog: Optional[np.ndarray]=None
+    ) -> np.ndarray:
+        """
+        Predict n steps ahead. It is an iterative process in which, each prediction,
+        is used as a predictor for the next step.
+        
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        last_window : numpy ndarray
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
+        exog : numpy ndarray, default `None`
+            Exogenous variable/s included as predictor/s.
+
+        Returns
+        -------
+        predictions : numpy ndarray
+            Predicted values.
+        
+        """
+
+        predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
+        last_window = np.concatenate((last_window, predictions))
+
+        for i in range(steps):
+            X = self.fun_predictors(
+                y=last_window[i:self.window_size_diff + i]
+            ).reshape(1, -1)
+            if np.isnan(X).any():
+                raise ValueError(
+                    f"`{self.fun_predictors.__name__}` is returning `NaN` values."
+                )
+            if exog is not None:
+                X = np.column_stack((X, exog[i, ].reshape(1, -1)))
+
+            with warnings.catch_warnings():
+                # Suppress scikit-learn warning: "X does not have valid feature names,
+                # but NoOpTransformer was fitted with feature names".
+                warnings.simplefilter("ignore")
+                prediction = self.regressor.predict(X).ravel()[0]
+                predictions[i] = prediction
+
+            # Update `last_window` values. The first position is discarded and 
+            # the new prediction is added at the end.
+            last_window[self.window_size_diff + i] = prediction
+
+        return predictions
+
+
+    def predict(
+        self,
+        steps: int,
+        last_window: Optional[pd.Series]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+    ) -> pd.Series:
+        """
+        Predict n steps ahead. It is an recursive process in which, each prediction,
+        is used as a predictor for the next step.
+        
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        last_window : pandas Series, default `None`
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
+            If `last_window = None`, the values stored in `self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
+
+        Returns
+        -------
+        predictions : pandas Series
+            Predicted values.
+        
+        """
+
+        last_window_values, exog_values, last_window_index = self.create_predict_inputs(
+            steps=steps, last_window=last_window, exog=exog, output_type="numpy"
+        )
             
         predictions = self._recursive_predict(
                           steps       = steps,
@@ -754,7 +817,7 @@ class ForecasterAutoregCustom(ForecasterBase):
 
         return predictions
 
-    
+
     def predict_bootstrapping(
         self,
         steps: int,
@@ -815,62 +878,10 @@ class ForecasterAutoregCustom(ForecasterBase):
                  "before `predict_interval()`, `predict_bootstrapping()`, "
                  "`predict_quantiles()` or `predict_dist()`.")
             )
-        
-        if last_window is None:
-            last_window = self.last_window
 
-        check_predict_input(
-            forecaster_name  = type(self).__name__,
-            steps            = steps,
-            fitted           = self.fitted,
-            included_exog    = self.included_exog,
-            index_type       = self.index_type,
-            index_freq       = self.index_freq,
-            window_size      = self.window_size_diff,
-            last_window      = last_window,
-            last_window_exog = None,
-            exog             = exog,
-            exog_type        = self.exog_type,
-            exog_col_names   = self.exog_col_names,
-            interval         = None,
-            alpha            = None,
-            max_steps        = None,
-            levels           = None,
-            series_col_names = None
+        last_window_values, exog_values, last_window_index = self.create_predict_inputs(
+            steps=steps, last_window=last_window, exog=exog, output_type="numpy"
         )
-
-        last_window = last_window.iloc[-self.window_size_diff:].copy()
-
-        if exog is not None:
-            if isinstance(exog, pd.DataFrame):
-                exog = transform_dataframe(
-                           df                = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = False,
-                           inverse_transform = False
-                       )
-            else:
-                exog = transform_series(
-                           series            = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = False,
-                           inverse_transform = False
-                       )
-            exog_values = exog.to_numpy()[:steps]
-        else:
-            exog_values = None
-        
-        last_window = transform_series(
-                          series            = last_window,
-                          transformer       = self.transformer_y,
-                          fit               = False,
-                          inverse_transform = False
-                      )
-        last_window_values, last_window_index = preprocess_last_window(
-                                                    last_window = last_window
-                                                )
-        if self.differentiation is not None:
-            last_window_values = self.differentiator.fit_transform(last_window_values)
 
         boot_predictions = np.full(
                                shape      = (steps, n_boot),
