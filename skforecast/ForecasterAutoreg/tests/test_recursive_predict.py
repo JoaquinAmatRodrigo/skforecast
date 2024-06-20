@@ -14,9 +14,10 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(50)))
     predictions = forecaster._recursive_predict(
-                    steps = 5,
-                    last_window = forecaster.last_window.to_numpy(),
-                    exog = None
+                      steps       = 5,
+                      last_window = forecaster.last_window.to_numpy().ravel(),
+                      exog        = None
                   )
+    
     expected = np.array([50., 51., 52., 53., 54.])
     assert (predictions == approx(expected))
