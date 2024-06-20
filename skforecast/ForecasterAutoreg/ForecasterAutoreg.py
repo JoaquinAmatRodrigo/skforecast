@@ -287,6 +287,7 @@ class ForecasterAutoreg(ForecasterBase):
                               fit_kwargs = fit_kwargs
                           )
 
+
     def __repr__(
         self
     ) -> str:
@@ -327,6 +328,7 @@ class ForecasterAutoreg(ForecasterBase):
         )
 
         return info
+
 
     def _create_lags(
         self, 
@@ -372,6 +374,7 @@ class ForecasterAutoreg(ForecasterBase):
         y_data = y[self.max_lag:]
 
         return X_data, y_data
+
 
     def create_train_X_y(
         self,
@@ -430,11 +433,11 @@ class ForecasterAutoreg(ForecasterBase):
                 )
 
             exog = transform_dataframe(
-                        df                = exog,
-                        transformer       = self.transformer_exog,
-                        fit               = fit_transformer,
-                        inverse_transform = False
-                    )
+                       df                = exog,
+                       transformer       = self.transformer_exog,
+                       fit               = fit_transformer,
+                       inverse_transform = False
+                   )
 
             check_exog_dtypes(exog, call_check_exog=True)
 
@@ -464,6 +467,7 @@ class ForecasterAutoreg(ForecasterBase):
         if not self.fitted:
             self.X_train_col_names = X_train.columns.to_list()
 
+        # TODO: DataFrame or Series?
         y_train = pd.Series(
                       data  = y_train,
                       index = y_index[self.max_lag: ],
@@ -475,6 +479,7 @@ class ForecasterAutoreg(ForecasterBase):
             y_train = y_train.iloc[self.differentiation: ]
 
         return X_train, y_train
+
 
     def create_sample_weights(
         self,
@@ -517,6 +522,7 @@ class ForecasterAutoreg(ForecasterBase):
                 )
 
         return sample_weight
+
 
     def fit(
         self,
@@ -613,10 +619,12 @@ class ForecasterAutoreg(ForecasterBase):
                 .to_frame(name=y.name if y.name is not None else 'y')
             )
 
+
     def _binning_in_sample_residuals(
         self,
         y_true: pd.Series,
         y_pred: pd.Series,
+        random_state: int=95123
     ) -> None:
         """
         Binning residuals according to the predicted value each residual is
@@ -631,7 +639,10 @@ class ForecasterAutoreg(ForecasterBase):
         y_true : pandas Series
             True values of the time series.
         y_pred : pandas Series
-            Predicted values of the time series.     
+            Predicted values of the time series.  
+        random_state : int, default `95123`
+            Set a seed for the random generator so that the stored sample 
+            residuals are always deterministic.
 
         Returns
         -------
@@ -657,7 +668,7 @@ class ForecasterAutoreg(ForecasterBase):
         for k, v in self.in_sample_residuals_by_bin.items():
             # TODO: Include `random_state` in fit method to allow the user
             # change the residual sample stored.
-            rng = np.random.default_rng(seed=95123)
+            rng = np.random.default_rng(seed=random_state)
             if len(v) > 200:
                 sample = rng.choice(a=v, size=200, replace=False)
                 self.in_sample_residuals_by_bin[k] = sample
@@ -898,6 +909,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         return predictions
 
+
     def predict_bootstrapping(
         self,
         steps: int,
@@ -1055,6 +1067,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         return boot_predictions
 
+
     def predict_interval(
         self,
         steps: int,
@@ -1149,6 +1162,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         return predictions
 
+
     def predict_quantiles(
         self,
         steps: int,
@@ -1231,6 +1245,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         return predictions
 
+
     def predict_dist(
         self,
         steps: int,
@@ -1312,6 +1327,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         return predictions
 
+
     def set_params(
         self, 
         params: dict
@@ -1334,6 +1350,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
 
+
     def set_fit_kwargs(
         self, 
         fit_kwargs: dict
@@ -1354,6 +1371,7 @@ class ForecasterAutoreg(ForecasterBase):
         """
 
         self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
+
 
     def set_lags(
         self, 
@@ -1384,6 +1402,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.window_size_diff = max(self.lags)
         if self.differentiation is not None:
             self.window_size_diff += self.differentiation        
+
 
     def set_out_sample_residuals(
         self, 
@@ -1563,7 +1582,8 @@ class ForecasterAutoreg(ForecasterBase):
                 if k not in self.out_sample_residuals_by_bin:
                     self.out_sample_residuals_by_bin[k] = np.array([])
 
-            empty_bins = [k for k, v in self.out_sample_residuals_by_bin.items() if len(v) == 0]
+            empty_bins = [k for k, v in self.out_sample_residuals_by_bin.items() 
+                          if len(v) == 0]
             if empty_bins:
                 warnings.warn(
                     (f"The following bins have no out of sample residuals: {empty_bins}. "
@@ -1579,6 +1599,7 @@ class ForecasterAutoreg(ForecasterBase):
                                                               size    = 200,
                                                               replace = True
                                                           )
+
 
     def get_feature_importances(
         self,
