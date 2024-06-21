@@ -1,7 +1,7 @@
 import pytest
 import pandas as pd
 import numpy as np
-import tensorflow as tf
+import keras
 from skforecast.ForecasterRnn.utils import create_and_compile_model
 
 # test with several parameters for dense_units and recurrent_units
@@ -34,8 +34,8 @@ def test_units(dense_units, recurrent_layer, recurrent_units):
     steps = 5
     levels = 1
     activation = "relu"
-    optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
-    loss = tf.keras.losses.MeanSquaredError()
+    optimizer = keras.optimizers.Adam(learning_rate=0.01)
+    loss = keras.losses.MeanSquaredError()
 
     # Call the function to create and compile the model
     model = create_and_compile_model(
@@ -56,7 +56,7 @@ def test_units(dense_units, recurrent_layer, recurrent_units):
         recurrent_units = [recurrent_units]
 
     # Assert that the model is an instance of tf.keras.models.Model
-    assert isinstance(model, tf.keras.models.Model)
+    assert isinstance(model, keras.models.Model)
 
     # Assert that the model has the correct number of layers
     if dense_units is None:
@@ -79,7 +79,7 @@ levels_data = "feature1"
 def test_correct_input_type():
     # Test if the function works with the correct input type
     model = create_and_compile_model(series_data, lags_data, steps_data, levels_data)
-    assert isinstance(model, tf.keras.models.Model)
+    assert isinstance(model, keras.models.Model)
 
 
 def test_incorrect_series_type():

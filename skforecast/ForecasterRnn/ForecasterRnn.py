@@ -14,6 +14,7 @@ import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import keras
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 from sklearn.preprocessing import MinMaxScaler
@@ -41,14 +42,15 @@ logging.basicConfig(
 # TODO. Test Grid search
 class ForecasterRnn(ForecasterBase):
     """
-    This class turns any regressor compatible with the TensorFlow API into a
-    TensorFlow RNN multi-serie multi-step forecaster. A unique model is created
-    to forecast all time steps and series. See documentation for more details.
+    This class turns any regressor compatible with the Keras API into a
+    Keras RNN multi-serie multi-step forecaster. A unique model is created
+    to forecast all time steps and series. Keras enables workflows on top of 
+    either JAX, TensorFlow, or PyTorch. See documentation for more details.
 
     Parameters
     ----------
-    regressor : regressor or pipeline compatible with the TensorFlow API
-        An instance of a regressor or pipeline compatible with the TensorFlow API.
+    regressor : regressor or pipeline compatible with the Keras API
+        An instance of a regressor or pipeline compatible with the Keras API.
     levels : str, list
         Name of one or more time series to be predicted. This determine the series
         the forecaster will be handling. If `None`, all series used during training
@@ -83,8 +85,8 @@ class ForecasterRnn(ForecasterBase):
         
     Attributes
     ----------
-    regressor : regressor or pipeline compatible with the TensorFlow API
-        An instance of a regressor or pipeline compatible with the TensorFlow API.
+    regressor : regressor or pipeline compatible with the Keras API
+        An instance of a regressor or pipeline compatible with the Keras API.
         An instance of this regressor is trained for each step. All of them
         are stored in `self.regressors_`.
     levels : str, list
@@ -218,7 +220,11 @@ class ForecasterRnn(ForecasterBase):
         layer_init = self.regressor.layers[0]
 
         if lags == "auto":
-            self.lags = np.arange(layer_init.input_shape[0][1]) + 1
+            if keras.__version__ < "3.0":
+                self.lags = np.arange(layer_init.input_shape[0][1]) + 1
+            else:
+                self.lags = np.arange(layer_init.output.shape[1]) + 1
+
             warnings.warn(
                 "Setting `lags` = 'auto'. `lags` are inferred from the regressor " 
                 "architecture. Avoid the warning with lags=lags."
@@ -239,7 +245,10 @@ class ForecasterRnn(ForecasterBase):
         layer_end = self.regressor.layers[-1]
 
         try:
-            self.series = layer_end.output_shape[-1]
+            if keras.__version__ < "3.0":
+                self.series = layer_end.output_shape[-1]
+            else:
+                self.series = layer_end.output.shape[-1]
         # if does not work, break the and raise an error the input shape should
         # be shape=(lags, n_series))
         except:
@@ -248,7 +257,10 @@ class ForecasterRnn(ForecasterBase):
             )
 
         if steps == "auto":
-            self.steps = np.arange(layer_end.output_shape[1]) + 1
+            if keras.__version__ < "3.0":
+                self.steps = np.arange(layer_end.output_shape[1]) + 1
+            else:
+                self.steps = np.arange(layer_end.output.shape[1]) + 1
             warnings.warn(
                 "`steps` default value = 'auto'. `steps` inferred from regressor "
                 "architecture. Avoid the warning with steps=steps."
@@ -263,7 +275,10 @@ class ForecasterRnn(ForecasterBase):
             )
 
         self.max_step = np.max(self.steps)
-        self.outputs = layer_end.output_shape[-1]
+        if keras.__version__ < "3.0":
+            self.outputs = layer_end.output_shape[-1]
+        else:
+            self.outputs = layer_end.output.shape[-1]
 
         if not isinstance(levels, (list, str, type(None))):
             raise TypeError(
