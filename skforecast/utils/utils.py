@@ -8,6 +8,7 @@
 import importlib
 import inspect
 import warnings
+from functools import wraps
 from copy import deepcopy
 from typing import Any, Callable, Optional, Tuple, Union
 import joblib
@@ -2789,3 +2790,19 @@ def set_skforecast_warnings(
     if suppress_warnings:
         for category in warn_skforecast_categories:
             warnings.filterwarnings(action, category=category)
+
+
+def add_y_train_argument(func):
+    @wraps(func)
+    def wrapper(*args, y_train=None, **kwargs):
+        return func(*args, **kwargs)
+
+    sig = inspect.signature(func)
+
+    if "y_train" not in sig.parameters:
+        new_params = list(sig.parameters.values()) + [
+            inspect.Parameter("y_train", inspect.Parameter.KEYWORD_ONLY, default=None)
+        ]
+        wrapper.__signature__ = sig.replace(parameters=new_params)
+
+    return wrapper

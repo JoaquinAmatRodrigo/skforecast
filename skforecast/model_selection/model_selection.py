@@ -32,6 +32,7 @@ from ..utils import check_backtesting_input
 from ..utils import initialize_lags_grid
 from ..utils import initialize_lags
 from ..utils import select_n_jobs_backtesting
+from ..utils import add_y_train_argument
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -280,7 +281,7 @@ def _get_metric(
         'mean_squared_log_error': mean_squared_log_error
     }
     
-    metric = metrics[metric]
+    metric = add_y_train_argument(metrics[metric])
     
     return metric
 
@@ -566,10 +567,18 @@ def _backtesting_forecaster(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
+    y_train_sets = []
+    for fold in folds:
+        train_iloc_start = fold[0][0]
+        train_iloc_end = fold[0][1]
+        y_train_sets.append(y.iloc[train_iloc_start:train_iloc_end])
+    y_train = pd.concat(y_train_sets).drop_duplicates
+
     metrics_values = [
         m(
             y_true = y.loc[backtest_predictions.index],
-            y_pred = backtest_predictions['pred']
+            y_pred = backtest_predictions['pred'],
+            y_train = y_train
         ) 
         for m in metrics
     ]
