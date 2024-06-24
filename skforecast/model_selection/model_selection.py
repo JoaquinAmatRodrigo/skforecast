@@ -26,13 +26,17 @@ from sklearn.metrics import (
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
+from ..metrics import (
+    mean_absolute_scaled_error,
+    root_mean_squared_scaled_error,
+    add_y_train_argument
+)
 from ..exceptions import LongTrainingWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..utils import check_backtesting_input
 from ..utils import initialize_lags_grid
 from ..utils import initialize_lags
 from ..utils import select_n_jobs_backtesting
-from ..utils import add_y_train_argument
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -247,42 +251,45 @@ def _create_backtesting_folds(
     return folds
 
 
-def _get_metric(
-    metric: str
-) -> Callable:
+def _get_metric(metric: str) -> Callable:
     """
     Get the corresponding scikit-learn function to calculate the metric.
-    
+
     Parameters
     ----------
     metric : str
-        Metric used to quantify the goodness of fit of the model. Available metrics: 
-        {'mean_squared_error', 'mean_absolute_error', 
-         'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
+        Metric used to quantify the goodness of fit of the model.
+
     Returns
     -------
     metric : Callable
         scikit-learn function to calculate the desired metric.
-    
+
     """
-    
-    if metric not in ['mean_squared_error', 'mean_absolute_error',
-                      'mean_absolute_percentage_error', 'mean_squared_log_error']:
-        raise ValueError(
-            (f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error', "
-             f"'mean_absolute_percentage_error' and 'mean_squared_log_error'. Got {metric}.")
-        )
-    
+    allowed_metrics = [
+        "mean_squared_error",
+        "mean_absolute_error",
+        "mean_absolute_percentage_error",
+        "mean_squared_log_error",
+        "mean_absolute_scaled_error",
+        "root_mean_squared_scaled_error",
+    ]
+
+    if metric not in allowed_metrics:
+        raise ValueError((f"Allowed metrics are: {allowed_metrics}. Got {metric}."))
+
     metrics = {
-        'mean_squared_error': mean_squared_error,
-        'mean_absolute_error': mean_absolute_error,
-        'mean_absolute_percentage_error': mean_absolute_percentage_error,
-        'mean_squared_log_error': mean_squared_log_error
+        "mean_squared_error": mean_squared_error,
+        "mean_absolute_error": mean_absolute_error,
+        "mean_absolute_percentage_error": mean_absolute_percentage_error,
+        "mean_squared_log_error": mean_squared_log_error,
+        "mean_absolute_scaled_error": mean_absolute_scaled_error,
+        "root_mean_squared_scaled_error": root_mean_squared_scaled_error,
     }
-    
-    metric = add_y_train_argument(metrics[metric])
-    
+
+    metric = metrics[metric]
+    metric = add_y_train_argument(metric)
+
     return metric
 
 
@@ -423,10 +430,18 @@ def _backtesting_forecaster(
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
     if not isinstance(metric, list):
-        metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
+        metrics = [
+            _get_metric(metric=metric)
+            if isinstance(metric, str)
+            else add_y_train_argument(metric)
+        ]
     else:
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m 
-                   for m in metric]
+        metrics = [
+            _get_metric(metric=m)
+            if isinstance(m, str)
+            else add_y_train_argument(m) 
+            for m in metric
+        ]
 
     store_in_sample_residuals = False if interval is None else True
 
@@ -572,7 +587,7 @@ def _backtesting_forecaster(
         train_iloc_start = fold[0][0]
         train_iloc_end = fold[0][1]
         y_train_sets.append(y.iloc[train_iloc_start:train_iloc_end])
-    y_train = pd.concat(y_train_sets).drop_duplicates
+    y_train = pd.concat(y_train_sets).drop_duplicates()
 
     metrics_values = [
         m(
