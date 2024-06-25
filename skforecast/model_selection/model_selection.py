@@ -240,17 +240,6 @@ def _create_backtesting_folds(
             validation_end    = data.index[fold[3][-1]]
             validation_length = len(fold[3])
 
-            # print(f"Fold: {i} {['(skipped)' if is_fold_skipped else ''][0]}")
-            # if not externally_fitted and has_training:
-            #     print(
-            #         f"    Training:   {training_start} -- {training_end}  (n={training_length})"
-            #     )
-            # else:
-            #     print("    Training:   no training in this fold")
-            # print(
-            #     f"    Validation: {validation_start} -- {validation_end}  (n={validation_length})"
-            # )
-
             print(f"Fold: {i}")
             if is_fold_skipped:
                 print("    Fold skipped")
