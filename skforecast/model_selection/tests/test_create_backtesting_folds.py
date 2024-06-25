@@ -1109,3 +1109,76 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder_differentia
 
     assert out == expected_out
     assert folds == expected
+
+
+def test_create_backtesting_folds_refit_fixed_no_gap_no_remainder_skip_folds_3(capfd):
+    """
+    Test _create_backtesting_folds output when refit is True, fixed_train_size is 
+    True, gap=0, not remainder and skip_folds=3.
+    """
+    y = pd.Series(np.arange(150))
+    y.index = pd.date_range(start='2022-01-01', periods=150, freq='D')
+    window_size = 2
+    initial_train_size = 70
+    test_size = 10
+    refit = True
+    fixed_train_size = True
+    gap = 0
+    skip_folds = 3
+
+    folds = _create_backtesting_folds(
+                data                  = y,
+                window_size           = window_size,
+                initial_train_size    = initial_train_size,
+                test_size             = test_size,
+                externally_fitted     = False,
+                refit                 = refit,
+                fixed_train_size      = fixed_train_size,
+                gap                   = gap,
+                skip_folds            = skip_folds,
+                allow_incomplete_fold = True,
+                return_all_indexes    = True,
+                differentiation       = None,
+                verbose               = True
+            )
+
+    out, _ = capfd.readouterr()
+
+    expected_out = (
+        "Information of backtesting process\n"
+        "----------------------------------\n"
+        "Number of observations used for initial training: 70\n"
+        "Number of observations used for backtesting: 80\n"
+        "    Number of folds: 8\n"
+        "    Number skipped folds: 5 [1, 2, 4, 5, 7]\n"
+        "    Number of steps per fold: 10\n"
+        "    Number of steps to exclude from the end of each train set before test (gap): 0\n"
+        "Fold: 0\n"
+        "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
+        "    Validation: 2022-03-12 00:00:00 -- 2022-03-21 00:00:00  (n=10)\n"
+        "Fold: 1\n"
+        "    Fold skipped\n"
+        "Fold: 2\n"
+        "    Fold skipped\n"
+        "Fold: 3\n"
+        "    Training:   2022-01-31 00:00:00 -- 2022-04-10 00:00:00  (n=70)\n"
+        "    Validation: 2022-04-11 00:00:00 -- 2022-04-20 00:00:00  (n=10)\n"
+        "Fold: 4\n"
+        "    Fold skipped\n"
+        "Fold: 5\n"
+        "    Fold skipped\n"
+        "Fold: 6\n"
+        "    Training:   2022-03-02 00:00:00 -- 2022-05-10 00:00:00  (n=70)\n"
+        "    Validation: 2022-05-11 00:00:00 -- 2022-05-20 00:00:00  (n=10)\n"
+        "Fold: 7\n"
+        "    Fold skipped\n"
+    )
+
+    expected = [
+        [range(0, 70), range(68, 70), range(70, 80), range(70, 80), False],
+        [range(30, 100), range(98, 100), range(100, 110), range(100, 110), True],
+        [range(60, 130), range(128, 130), range(130, 140), range(130, 140), True],
+    ]
+
+    assert out == expected_out
+    assert folds == expected
