@@ -48,6 +48,7 @@ def _create_backtesting_folds(
     refit: Union[bool, int]=False,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     return_all_indexes: bool=False,
     differentiation: Optional[int]=None,
@@ -105,6 +106,10 @@ def _create_backtesting_folds(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        Number of folds to skip. If `skip_folds` is an integer, every `skip_folds`
+        folds are skipped. If `skip_folds` is a list, the folds in the list are
+        skipped.
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -189,6 +194,13 @@ def _create_backtesting_folds(
     # This is done to allow parallelization when `refit` is `False`. The initial 
     # Forecaster fit is outside the auxiliary function.
     folds[0][4] = False
+
+    skip_index = []
+    if skip_folds is not None:
+        if isinstance(skip_folds, int) and skip_folds > 0:
+            skip_index = [i for i in range(len(folds)) if (i + 1) % (skip_folds + 1) == 0]
+        if isinstance(skip_folds, list):
+            skip_index = [i for i in skip_folds if i < len(folds)]        
     
     if verbose:
         print("Information of backtesting process")
@@ -203,6 +215,7 @@ def _create_backtesting_folds(
                 print(f"    First {differentiation} observation/s in training sets are used for differentiation")
         print(f"Number of observations used for backtesting: {len(data) - initial_train_size}")
         print(f"    Number of folds: {len(folds)}")
+        print(f"    Number skipped folds: {len(skip_index)} {skip_index if skip_index else ''}")
         print(f"    Number of steps per fold: {test_size}")
         print(f"    Number of steps to exclude from the end of each train set before test (gap): {gap}")
         if last_fold_excluded:
@@ -222,7 +235,7 @@ def _create_backtesting_folds(
             validation_end    = data.index[fold[3][-1]]
             validation_length = len(fold[3])
 
-            print(f"Fold: {i}")
+            print(f"Fold: {i} {['(skipped)' if i in skip_index else ''][0]}")
             if not externally_fitted:
                 print(
                     f"    Training:   {training_start} -- {training_end}  (n={training_length})"
@@ -232,6 +245,7 @@ def _create_backtesting_folds(
             )
         print("")
 
+    folds = [fold for i, fold in enumerate(folds) if i not in skip_index]
     if not return_all_indexes:
         # +1 to prevent iloc pandas from deleting the last observation
         folds = [
@@ -293,6 +307,7 @@ def _backtesting_forecaster(
     initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: Union[bool, int]=False,
@@ -351,6 +366,10 @@ def _backtesting_forecaster(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        Number of folds to skip. If `skip_folds` is an integer, every `skip_folds`
+        folds are skipped. If `skip_folds` is a list, the folds in the list are
+        skipped.
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -462,6 +481,7 @@ def _backtesting_forecaster(
                 refit                 = refit,
                 fixed_train_size      = fixed_train_size,
                 gap                   = gap,
+                skip_folds            = skip_folds,
                 allow_incomplete_fold = allow_incomplete_fold,
                 return_all_indexes    = False,
                 differentiation       = differentiation,
@@ -588,6 +608,7 @@ def backtesting_forecaster(
     initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     refit: Union[bool, int]=False,
@@ -646,6 +667,10 @@ def backtesting_forecaster(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        Number of folds to skip. If `skip_folds` is an integer, every `skip_folds`
+        folds are skipped. If `skip_folds` is a list, the folds in the list are
+        skipped.
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -748,6 +773,7 @@ def backtesting_forecaster(
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
+        skip_folds            = skip_folds,
         allow_incomplete_fold = allow_incomplete_fold,
         exog                  = exog,
         refit                 = refit,
