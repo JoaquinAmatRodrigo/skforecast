@@ -23,7 +23,7 @@ from optuna.samplers import TPESampler
 from ..exceptions import warn_skforecast_categories
 from ..exceptions import LongTrainingWarning
 from ..exceptions import IgnoredArgumentWarning
-from ..model_selection.model_selection import _get_metric
+from ..metrics import add_y_train_argument, _get_metric
 from ..model_selection.model_selection import _create_backtesting_folds
 from ..utils import check_backtesting_input
 from ..utils import select_n_jobs_backtesting

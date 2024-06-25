@@ -17,20 +17,10 @@ from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
 import optuna
 from optuna.samplers import TPESampler
-from sklearn.metrics import (
-    mean_squared_error,
-    mean_absolute_error,
-    mean_absolute_percentage_error,
-    mean_squared_log_error,
-)
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
-from ..metrics import (
-    mean_absolute_scaled_error,
-    root_mean_squared_scaled_error,
-    add_y_train_argument
-)
+from ..metrics import add_y_train_argument, _get_metric
 from ..exceptions import LongTrainingWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..utils import check_backtesting_input
@@ -249,48 +239,6 @@ def _create_backtesting_folds(
         ]
 
     return folds
-
-
-def _get_metric(metric: str) -> Callable:
-    """
-    Get the corresponding scikit-learn function to calculate the metric.
-
-    Parameters
-    ----------
-    metric : str
-        Metric used to quantify the goodness of fit of the model.
-
-    Returns
-    -------
-    metric : Callable
-        scikit-learn function to calculate the desired metric.
-
-    """
-    allowed_metrics = [
-        "mean_squared_error",
-        "mean_absolute_error",
-        "mean_absolute_percentage_error",
-        "mean_squared_log_error",
-        "mean_absolute_scaled_error",
-        "root_mean_squared_scaled_error",
-    ]
-
-    if metric not in allowed_metrics:
-        raise ValueError((f"Allowed metrics are: {allowed_metrics}. Got {metric}."))
-
-    metrics = {
-        "mean_squared_error": mean_squared_error,
-        "mean_absolute_error": mean_absolute_error,
-        "mean_absolute_percentage_error": mean_absolute_percentage_error,
-        "mean_squared_log_error": mean_squared_log_error,
-        "mean_absolute_scaled_error": mean_absolute_scaled_error,
-        "root_mean_squared_scaled_error": root_mean_squared_scaled_error,
-    }
-
-    metric = metrics[metric]
-    metric = add_y_train_argument(metric)
-
-    return metric
 
 
 def _backtesting_forecaster(
@@ -584,6 +532,7 @@ def _backtesting_forecaster(
 
     y_train_sets = []
     for fold in folds:
+        # TODO: skip folds without retrain to speed up
         train_iloc_start = fold[0][0]
         train_iloc_end = fold[0][1]
         y_train_sets.append(y.iloc[train_iloc_start:train_iloc_end])

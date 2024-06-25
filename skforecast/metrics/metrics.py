@@ -5,11 +5,57 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union
+from typing import Union, Callable
 import numpy as np
 import pandas as pd
 import inspect
 from functools import wraps
+from sklearn.metrics import (
+    mean_squared_error,
+    mean_absolute_error,
+    mean_absolute_percentage_error,
+    mean_squared_log_error,
+)
+
+def _get_metric(metric: str) -> Callable:
+    """
+    Get the corresponding scikit-learn function to calculate the metric.
+
+    Parameters
+    ----------
+    metric : str
+        Metric used to quantify the goodness of fit of the model.
+
+    Returns
+    -------
+    metric : Callable
+        scikit-learn function to calculate the desired metric.
+
+    """
+    allowed_metrics = [
+        "mean_squared_error",
+        "mean_absolute_error",
+        "mean_absolute_percentage_error",
+        "mean_squared_log_error",
+        "mean_absolute_scaled_error",
+        "root_mean_squared_scaled_error",
+    ]
+
+    if metric not in allowed_metrics:
+        raise ValueError((f"Allowed metrics are: {allowed_metrics}. Got {metric}."))
+
+    metrics = {
+        "mean_squared_error": mean_squared_error,
+        "mean_absolute_error": mean_absolute_error,
+        "mean_absolute_percentage_error": mean_absolute_percentage_error,
+        "mean_squared_log_error": mean_squared_log_error,
+        "mean_absolute_scaled_error": mean_absolute_scaled_error,
+        "root_mean_squared_scaled_error": root_mean_squared_scaled_error,
+    }
+
+    metric = add_y_train_argument(metrics[metric])
+
+    return metric
 
 
 def add_y_train_argument(func):

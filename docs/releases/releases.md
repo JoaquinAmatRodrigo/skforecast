@@ -16,6 +16,12 @@ The main changes in this release are:
 
 + <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/api/forecastermultiseries) and [`ForecasterAutoregMultiSeriesCustom`](https://skforecast.org/latest/api/forecastermultiseriescustom). In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
 
++ <span class="badge text-bg-feature">Feature</span> New module metrics with functions to calculate metrics for time series forecasting such as `mean_absolute_scaled_error` and `root_mean_squared_scaled_error`.
+
++ <span class="badge text-bg-api-change">API Change</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.
+
+
+
 **Added**
 
 + Support for `python 3.12`.
@@ -23,6 +29,8 @@ The main changes in this release are:
 + Create method `create_predict_inputs` in all forecasters to allow the user have more control over the inputs of the predict methods.
 
 + New plot function `plot_predicted_intervals` in the `plot` module to plot predicted intervals.
+
++ New module `metrics` with functions to calculate metrics for time series forecasting such as `mean_absolute_scaled_error` and `root_mean_squared_scaled_error`.
 
 **Changed**
 
@@ -33,6 +41,8 @@ The main changes in this release are:
 + Refactor `_recursive_predict` in all recursive forecasters.
 
 + Change default value of `transformer_series` when initializing `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` from `StandardScaler()` to `None`.
+
++ Function `_get_metric` moved from `model_selection` to `metrics`.
 
 **Fixed**
 
