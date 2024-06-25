@@ -105,11 +105,11 @@ def mean_absolute_scaled_error(
 
     Parameters
     ----------
-    y_true : Union[pd.Series, np.array]
+    y_true : pd.Series, np.array
         True values of the target variable.
-    y_pred : Union[pd.Series, np.array]
+    y_pred : pd.Series, np.array
         Predicted values of the target variable.
-    y_train : Union[pd.Series, np.array]
+    y_train : pd.Series, np.array
         True values of the target variable in the training set.
 
     Returns
@@ -135,11 +135,11 @@ def root_mean_squared_scaled_error(
 
     Parameters
     ----------
-    y_true : Union[pd.Series, np.array]
+    y_true : pd.Series, np.array
         True values of the target variable.
-    y_pred : Union[pd.Series, np.array]
+    y_pred : pd.Series, np.array
         Predicted values of the target variable.
-    y_train : Union[pd.Series, np.array]
+    y_train : pd.Series, np.array
         True values of the target variable in the training set.
 
     Returns

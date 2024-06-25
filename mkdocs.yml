@@ -75,6 +75,7 @@ nav:
     - model_selection_multiseries: api/model_selection_multiseries.md
     - model_selection_sarimax: api/model_selection_sarimax.md
     - preprocessing: api/preprocessing.md
+    - metrics: api/metrics.md
     - plot: api/plot.md
     - utils: api/utils.md
     - datasets: api/datasets.md
