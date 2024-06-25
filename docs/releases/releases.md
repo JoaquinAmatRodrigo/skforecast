@@ -24,6 +24,8 @@ The main changes in this release are:
 
 + New plot function `plot_predicted_intervals` in the `plot` module to plot predicted intervals.
 
++ New argument `skip_folds` in backtesting functions to skip some folds during backtesting. This can be useful to speed up the backtesting process.
+
 **Changed**
 
 + Deprecated `python 3.8` compatibility.

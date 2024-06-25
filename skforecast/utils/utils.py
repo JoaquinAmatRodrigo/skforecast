@@ -1818,6 +1818,7 @@ def check_backtesting_input(
     initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     refit: Union[bool, int]=False,
     interval: Optional[list]=None,
@@ -1858,6 +1859,12 @@ def check_backtesting_input(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        The step size for selecting elements to keep or list of folds to skip.
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -2075,6 +2082,21 @@ def check_backtesting_input(
         raise TypeError("`show_progress` must be a boolean: `True`, `False`.")
     if not isinstance(suppress_warnings, bool):
         raise TypeError("`suppress_warnings` must be a boolean: `True`, `False`.")
+    if not isinstance(skip_folds, (int, list, type(None))):
+        raise TypeError(
+            (f"`skip_folds` must be an integer greater than 0, a list of "
+             f"integers or `None`. Got {type(skip_folds)}.")
+        )
+    if isinstance(skip_folds, int) and skip_folds < 1:
+        raise TypeError(
+            (f"`skip_folds` must be an integer greater than 0, a list of "
+             f"integers or `None`. Got {skip_folds}.")
+        )
+    if isinstance(skip_folds, list) and 0 in skip_folds and not refit:
+        raise ValueError(
+            "`skip_folds` cannot contain the value 0 if `refit` is `False` "
+            "since the first fold is needed to train the forecaster."
+        )
 
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)
