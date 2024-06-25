@@ -21,7 +21,6 @@ The main changes in this release are:
 + <span class="badge text-bg-api-change">API Change</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.
 
 
-
 **Added**
 
 + Support for `python 3.12`.
