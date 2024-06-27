@@ -536,7 +536,8 @@ def _backtesting_forecaster(
         train_iloc_start = fold[0][0]
         train_iloc_end = fold[0][1]
         y_train_sets.append(y.iloc[train_iloc_start:train_iloc_end])
-    y_train = pd.concat(y_train_sets).drop_duplicates()
+    y_train = pd.concat(y_train_sets)
+    y_train = y_train[~y_train.index.duplicated(keep='first')]
 
     metrics_values = [
         m(

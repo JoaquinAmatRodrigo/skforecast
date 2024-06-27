@@ -31,15 +31,6 @@ from ..utils import initialize_lags
 from ..utils import initialize_lags_grid
 from ..utils import set_skforecast_warnings
 
-# import logging
-# logger = logging.getLogger(__name__)
-# logger.setLevel(logging.INFO)
-# console_handler = logging.StreamHandler()
-# console_handler.setLevel(logging.INFO)
-# formatter = logging.Formatter('%(name)-10s %(levelname)-5s %(message)s')
-# console_handler.setFormatter(formatter)
-# logger.addHandler(console_handler)
-
 
 def _initialize_levels_model_selection_multiseries(
     forecaster: object, 
@@ -402,10 +393,18 @@ def _backtesting_forecaster_multiseries(
              )
 
     if not isinstance(metric, list):
-        metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
+        metrics = [
+            _get_metric(metric=metric)
+            if isinstance(metric, str)
+            else add_y_train_argument(metric)
+        ]
     else:
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m 
-                   for m in metric]
+        metrics = [
+            _get_metric(metric=m)
+            if isinstance(m, str)
+            else add_y_train_argument(m) 
+            for m in metric
+        ]
 
     store_in_sample_residuals = False if interval is None else True
 
@@ -599,15 +598,25 @@ def _backtesting_forecaster_multiseries(
                 suffixes    = ("_true", "_pred"),
             ).dropna(axis=0, how="any")
 
+            level_train_sets = []
+            for fold in folds:
+                # TODO: skip folds without retrain to speed up
+                train_iloc_start = fold[0][0]
+                train_iloc_end = fold[0][1]
+                level_train_sets.append(series[level].iloc[train_iloc_start:train_iloc_end])
+            level_train = pd.concat(level_train_sets)
+            level_train = level_train[~level_train.index.duplicated(keep='first')]
             if not predictions_level.empty:
                 metrics_level = [
                     m(
                         y_true = predictions_level.iloc[:, 0],
                         y_pred = predictions_level.iloc[:, 1],
+                        y_train = level_train
                     )
                     for m in metrics
                 ]
                 metrics_levels.append(metrics_level)
+                print(metrics_level)
             else:
                 metrics_levels.append([None for _ in metrics])
         else:
