@@ -117,6 +117,16 @@ def mean_absolute_scaled_error(
     float
         MASE value.
     """
+    if not isinstance(y_true, (pd.Series, np.ndarray)):
+        raise TypeError("y_true must be a pandas Series or numpy array")
+    if not isinstance(y_pred, (pd.Series, np.ndarray)):
+        raise TypeError("y_pred must be a pandas Series or numpy array")
+    if not isinstance(y_train, (pd.Series, np.ndarray)):
+        raise TypeError("y_train must be a pandas Series or numpy array")
+    if len(y_true) != len(y_pred):
+        raise ValueError("y_true and y_pred must have the same length")
+    if len(y_true) == 0 or len(y_pred) == 0:
+        raise ValueError("y_true and y_pred must have at least one element")
 
     return np.mean(np.abs(y_true - y_pred)) / np.mean(np.abs(np.diff(y_train)))
 
@@ -147,6 +157,17 @@ def root_mean_squared_scaled_error(
     float
         RMSSE value.
     """
+
+    if not isinstance(y_true, (pd.Series, np.ndarray)):
+        raise TypeError("y_true must be a pandas Series or numpy array")
+    if not isinstance(y_pred, (pd.Series, np.ndarray)):
+        raise TypeError("y_pred must be a pandas Series or numpy array")
+    if not isinstance(y_train, (pd.Series, np.ndarray)):
+        raise TypeError("y_train must be a pandas Series or numpy array")
+    if len(y_true) != len(y_pred):
+        raise ValueError("y_true and y_pred must have the same length")
+    if len(y_true) == 0 or len(y_pred) == 0:
+        raise ValueError("y_true and y_pred must have at least one element")
 
     return np.sqrt(np.mean((y_true - y_pred) ** 2)) / np.sqrt(
         np.mean(np.diff(y_train) ** 2)
