@@ -617,7 +617,6 @@ def _backtesting_forecaster_multiseries(
                     for m in metrics
                 ]
                 metrics_levels.append(metrics_level)
-                print(metrics_level)
             else:
                 metrics_levels.append([None for _ in metrics])
         else:
