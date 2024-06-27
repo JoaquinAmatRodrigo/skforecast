@@ -598,20 +598,21 @@ def _backtesting_forecaster_multiseries(
                 suffixes    = ("_true", "_pred"),
             ).dropna(axis=0, how="any")
 
-            level_train_sets = []
+            train_indexes = []
             for fold in folds:
                 # TODO: skip folds without retrain to speed up
                 train_iloc_start = fold[0][0]
                 train_iloc_end = fold[0][1]
-                level_train_sets.append(series[level].iloc[train_iloc_start:train_iloc_end])
-            level_train = pd.concat(level_train_sets)
-            level_train = level_train[~level_train.index.duplicated(keep='first')]
+                train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
+            train_indexes = np.unique(np.concatenate(train_indexes))
+            y_train = series[level].iloc[train_indexes]
+            
             if not predictions_level.empty:
                 metrics_level = [
                     m(
                         y_true = predictions_level.iloc[:, 0],
                         y_pred = predictions_level.iloc[:, 1],
-                        y_train = level_train
+                        y_train = y_train
                     )
                     for m in metrics
                 ]

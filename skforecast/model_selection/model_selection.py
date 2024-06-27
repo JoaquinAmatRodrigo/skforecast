@@ -530,14 +530,14 @@ def _backtesting_forecaster(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    y_train_sets = []
+    train_indexes = []
     for fold in folds:
         # TODO: skip folds without retrain to speed up
         train_iloc_start = fold[0][0]
         train_iloc_end = fold[0][1]
-        y_train_sets.append(y.iloc[train_iloc_start:train_iloc_end])
-    y_train = pd.concat(y_train_sets)
-    y_train = y_train[~y_train.index.duplicated(keep='first')]
+        train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
+    train_indexes = np.unique(np.concatenate(train_indexes))
+    y_train = y.iloc[train_indexes]
 
     metrics_values = [
         m(
