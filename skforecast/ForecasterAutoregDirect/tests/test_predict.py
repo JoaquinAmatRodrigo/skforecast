@@ -33,9 +33,9 @@ def test_predict_exception_when_steps_list_contain_floats(steps):
     forecaster.fit(y=pd.Series(np.arange(10)))
 
     err_msg = re.escape(
-                    f"`steps` argument must be an int, a list of ints or `None`. "
-                    f"Got {type(steps)}."
-                )
+        (f"`steps` argument must be an int, a list of ints or `None`. "
+         f"Got {type(steps)}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.predict(steps=steps)
 
@@ -47,9 +47,9 @@ def test_predict_NotFittedError_when_fitted_is_False():
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=5)
 
     err_msg = re.escape(
-                ('This Forecaster instance is not fitted yet. Call `fit` with '
-                 'appropriate arguments before using predict.')
-              )
+        ("This Forecaster instance is not fitted yet. Call `fit` with "
+         "appropriate arguments before using predict.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict(steps=5)
 

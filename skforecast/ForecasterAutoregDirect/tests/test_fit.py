@@ -103,12 +103,16 @@ def test_fit_in_sample_residuals_not_stored(n_jobs):
 def test_fit_last_window_stored(store_last_window):
     """
     Test that values of last window are stored after fitting.
-    """    
+    """
+    y = pd.Series(np.arange(20), name='y')
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
-    forecaster.fit(y=pd.Series(np.arange(50)), store_last_window=store_last_window)
-    expected = pd.Series(np.array([47, 48, 49]), index=[47, 48, 49])
+    forecaster.fit(y=y, store_last_window=store_last_window)
+
+    expected = pd.Series(
+        np.array([17, 18, 19]), index=[17, 18, 19]
+    ).to_frame(name='y')
 
     if store_last_window:
-        pd.testing.assert_series_equal(forecaster.last_window, expected)
+        pd.testing.assert_frame_equal(forecaster.last_window, expected)
     else:
         assert forecaster.last_window == None
