@@ -1323,8 +1323,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if isinstance(exog, dict):
                 # Empty dataframe to be filled with the exog values of each level
                 empty_exog = pd.DataFrame(
-                                 data    = np.nan,
-                                 columns = self.exog_col_names,
+                                 data    = {col: pd.Series(dtype=dtype)
+                                            for col, dtype in self.exog_dtypes.items()},
                                  index   = prediction_index
                              )
             else:
