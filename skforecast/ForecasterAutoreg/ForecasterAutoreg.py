@@ -729,7 +729,7 @@ class ForecasterAutoreg(ForecasterBase):
         exog_values : pandas DataFrame, numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
         last_window_index : pandas Index
-            Index of `last_window_values`.
+            Last window Index.
         
         """
 

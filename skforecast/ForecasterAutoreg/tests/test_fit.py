@@ -10,6 +10,7 @@ from sklearn.linear_model import LinearRegression
 # Fixtures
 from .fixtures_ForecasterAutoreg import y
 
+
 def custom_weights(index): # pragma: no cover
     """
     Return 0 if index is one of '2022-01-05', '2022-01-06', 1 otherwise.
