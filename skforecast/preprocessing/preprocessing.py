@@ -334,9 +334,9 @@ def exog_long_to_dict(
     return exog_dict
 
 
-class DateTimeFeatures(BaseEstimator, TransformerMixin):
+class CalendarFeatures(BaseEstimator, TransformerMixin):
     """
-    A transformer for extracting datetime features from the index of a DataFrame.
+    A transformer for extracting calendar features from the DateTime index of a DataFrame.
 
     Parameters:
     ----------
@@ -355,7 +355,7 @@ class DateTimeFeatures(BaseEstimator, TransformerMixin):
         'minute',
         'second'
     ]
-        List of datetime features to extract from the index.
+        List of calendar features to extract from the index.
     
     max_values : dict, default={
         'month': 12,
@@ -367,7 +367,7 @@ class DateTimeFeatures(BaseEstimator, TransformerMixin):
         'minute': 60,
         'second': 60
     }
-        Dictionary of maximum values for the cyclic encoding of datetime features.
+        Dictionary of maximum values for the cyclic encoding of calendar features.
     """
 
     def __init__(self, cyclic_encoding=False, features=None, max_values=None):
@@ -401,7 +401,7 @@ class DateTimeFeatures(BaseEstimator, TransformerMixin):
     
     def transform(self, X):
         """
-        Transform method to extract and encode datetime features from the index.
+        Transform method to extract and encode calendar features from the index.
         
         Parameters:
         ----------
@@ -411,7 +411,7 @@ class DateTimeFeatures(BaseEstimator, TransformerMixin):
         Returns:
         -------
         DataFrame
-            DataFrame with the extracted (and optionally encoded) datetime features.
+            DataFrame with the extracted (and optionally encoded) calendar features.
         """
         if not isinstance(X, pd.DataFrame):
             raise ValueError("Input must be a DataFrame")
