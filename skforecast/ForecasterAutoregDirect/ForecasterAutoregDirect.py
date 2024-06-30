@@ -899,8 +899,11 @@ class ForecasterAutoregDirect(ForecasterBase):
         )
 
         idx = expand_index(index=last_window_index, steps=max(steps))
-        X_predict = pd.DataFrame(data=np.concatenate(Xs, axis=0), 
-                                 columns=Xs_col_names, index=idx)
+        X_predict = pd.DataFrame(
+                        data    = np.concatenate(Xs, axis=0), 
+                        columns = Xs_col_names, 
+                        index   = idx[np.array(steps)-1]
+                    )
 
         return X_predict
 

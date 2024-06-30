@@ -25,9 +25,9 @@ from .fixtures_ForecasterAutoregDirect import exog as exog_categorical
 
 @pytest.mark.parametrize("steps", [[1, 2.0, 3], [1, 4.]], 
                          ids=lambda steps: f'steps: {steps}')
-def test_predict_exception_when_steps_list_contain_floats(steps):
+def test_predict_TypeError_when_steps_list_contain_floats(steps):
     """
-    Test predict exception when steps is a list with floats.
+    Test predict TypeError when steps is a list with floats.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=5)
     forecaster.fit(y=pd.Series(np.arange(10)))
@@ -63,6 +63,7 @@ def test_predict_output_when_regressor_is_LinearRegression(steps):
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)
     forecaster.fit(y=pd.Series(np.arange(50)))
     results = forecaster.predict(steps=steps)
+
     expected = pd.Series(
                    data  = np.array([50., 51., 52.]),
                    index = pd.RangeIndex(start=50, stop=53, step=1),
@@ -80,6 +81,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_list_intersperse
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=5)
     forecaster.fit(y=pd.Series(np.arange(50)))
     results = forecaster.predict(steps=[1, 4])
+    
     expected = pd.Series(
                    data  = np.array([50., 53.]),
                    index = pd.RangeIndex(start=50, stop=55, step=1)[[0, 3]],
@@ -98,6 +100,7 @@ def test_predict_output_when_regressor_is_LinearRegression_using_last_window():
     last_window = pd.Series(data  = [47, 48, 49], 
                             index = pd.RangeIndex(start=47, stop=50, step=1))
     results = forecaster.predict(steps=[1, 2, 3, 4], last_window=last_window)
+
     expected = pd.Series(
                    data  = np.array([50., 51., 52., 53.]),
                    index = pd.RangeIndex(start=50, stop=54, step=1),
@@ -116,10 +119,13 @@ def test_predict_output_when_regressor_is_LinearRegression_using_exog():
         y=pd.Series(np.arange(50)),
         exog=pd.Series(np.arange(start=100, stop=150, step=1), name="exog")
     )
-    results = forecaster.predict(steps = 5, 
-                                 exog  = pd.Series(np.arange(start=25, stop=50, step=0.5),
-                                                   index=pd.RangeIndex(start=50, stop=100),
-                                                   name="exog"))
+    results = forecaster.predict(
+                  steps = 5, 
+                  exog  = pd.Series(np.arange(start=25, stop=50, step=0.5),
+                                    index=pd.RangeIndex(start=50, stop=100),
+                                    name="exog")
+              )
+    
     expected = pd.Series(
                    data  = np.array([18.750, 19.625, 20.500, 21.375, 22.250]),
                    index = pd.RangeIndex(start=50, stop=55, step=1),
@@ -139,14 +145,16 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y():
                       -0.61, -0.88])
         )
     transformer_y = StandardScaler()
+
     forecaster = ForecasterAutoregDirect(
-                     regressor = LinearRegression(),
-                     lags = 5,
-                     steps = 5,
+                     regressor     = LinearRegression(),
+                     lags          = 5,
+                     steps         = 5,
                      transformer_y = transformer_y,
                  )
     forecaster.fit(y=y)
     predictions = forecaster.predict()
+
     expected = pd.Series(
                    data  = np.array([0.27498792, 0.1134674 , 0.3824246 , 0.62852197, 0.44001725]),
                    index = pd.RangeIndex(start=20, stop=25, step=1),
@@ -178,21 +186,23 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_
 
     transformer_y = StandardScaler()
     transformer_exog = ColumnTransformer(
-                            [('scale', StandardScaler(), ['col_1']),
-                             ('onehot', OneHotEncoder(), ['col_2'])],
-                            remainder = 'passthrough',
-                            verbose_feature_names_out = False
+                           [('scale', StandardScaler(), ['col_1']),
+                            ('onehot', OneHotEncoder(), ['col_2'])],
+                           remainder = 'passthrough',
+                           verbose_feature_names_out = False
                        )
+    
     forecaster = ForecasterAutoregDirect(
-                     regressor = LinearRegression(),
-                     lags = 5,
-                     steps = 5,
-                     transformer_y = transformer_y,
+                     regressor        = LinearRegression(),
+                     lags             = 5,
+                     steps            = 5,
+                     transformer_y    = transformer_y,
                      transformer_exog = transformer_exog,
-                     n_jobs = n_jobs
+                     n_jobs           = n_jobs
                  )
     forecaster.fit(y=y, exog=exog)
     predictions = forecaster.predict(steps=[1, 2, 3, 4, 5], exog=exog_predict)
+
     expected = pd.Series(
                    data  = np.array([1.10855119, -0.83442443, 0.9434436 , 0.6676508 , 0.58666266]),
                    index = pd.RangeIndex(start=20, stop=25, step=1),
@@ -222,6 +232,7 @@ def test_predict_output_when_regressor_is_LinearRegression_and_weight_func():
                  )
     forecaster.fit(y=pd.Series(np.arange(50)))
     results = forecaster.predict(steps=3)
+
     expected = pd.Series(
                    data  = np.array([50., 51., 52.]),
                    index = pd.RangeIndex(start=50, stop=53, step=1),
