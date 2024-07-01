@@ -5,14 +5,12 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Optional, Callable
+from typing import Union, Tuple, Optional, Callable, Any
 import warnings
 import logging
 import sys
 import numpy as np
 import pandas as pd
-# TODO: Review
-# import sklearn
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
@@ -742,12 +740,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         steps: Optional[Union[int, list]]=None,
         last_window: Optional[Union[pd.Series, pd.DataFrame]]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame]]=None
-    ) -> Tuple[
-            list,
-            list,
-            pd.Index,
-            list
-        ]:
+    ) -> Tuple[list, list, pd.Index, list]:
         """
         Create the inputs needed for the prediction process.
         
@@ -849,7 +842,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         else:
             n_exog = exog.shape[1]
             Xs = [
-                np.hstack([X_lags, exog_values[(step-1)*n_exog:step*n_exog].reshape(1, -1)])
+                np.hstack(
+                    [X_lags, exog_values[(step-1)*n_exog : step*n_exog].reshape(1, -1)]
+                )
                 for step in steps
             ]
             Xs_col_names = Xs_col_names + exog.columns.to_list()
@@ -982,7 +977,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True,
-        binned_residuals: bool=False
+        binned_residuals: Any=None
     ) -> pd.DataFrame:
         """
         Generate multiple forecasting predictions using a bootstrapping process. 
@@ -1020,10 +1015,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
-        binned_residuals : bool, default `False`
-            If `True`, residuals used in each bootstrapping iteration are selected
-            conditioning on the predicted values. If `False`, residuals are selected
-            randomly without conditioning on the predicted values.
+        binned_residuals : Ignored
+            Not used, present here for API consistency by convention.
 
         Returns
         -------
@@ -1132,7 +1125,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True,
-        binned_residuals: bool=False
+        binned_residuals: Any=None
     ) -> pd.DataFrame:
         """
         Bootstrapping based predicted intervals.
@@ -1172,10 +1165,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
-        binned_residuals : bool, default `False`
-            If `True`, residuals used in each bootstrapping iteration are selected
-            conditioning on the predicted values. If `False`, residuals are selected
-            randomly without conditioning on the predicted values.
+        binned_residuals : Ignored
+            Not used, present here for API consistency by convention.
 
         Returns
         -------
@@ -1229,7 +1220,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True,
-        binned_residuals: bool=False
+        binned_residuals: Any=None
     ) -> pd.DataFrame:
         """
         Bootstrapping based predicted quantiles.
@@ -1268,10 +1259,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             sample residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
-        binned_residuals : bool, default `False`
-            If `True`, residuals used in each bootstrapping iteration are selected
-            conditioning on the predicted values. If `False`, residuals are selected
-            randomly without conditioning on the predicted values.
+        binned_residuals : Ignored
+            Not used, present here for API consistency by convention.
 
         Returns
         -------
@@ -1313,7 +1302,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         n_boot: int=500,
         random_state: int=123,
         in_sample_residuals: bool=True,
-        binned_residuals: bool=False
+        binned_residuals: Any=None
     ) -> pd.DataFrame:
         """
         Fit a given probability distribution for each step. After generating 
@@ -1352,10 +1341,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
-        binned_residuals : bool, default `False`
-            If `True`, residuals used in each bootstrapping iteration are selected
-            conditioning on the predicted values. If `False`, residuals are selected
-            randomly without conditioning on the predicted values.
+        binned_residuals : Ignored
+            Not used, present here for API consistency by convention.
 
         Returns
         -------

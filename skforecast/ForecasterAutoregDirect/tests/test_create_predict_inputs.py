@@ -100,7 +100,7 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_li
     assert results[3] == expected[3]
 
 
-def test_create_predict_inputs_output_when_regressor_is_LinearRegression_using_last_window():
+def test_create_predict_inputs_output_when_last_window():
     """
     Test _create_predict_inputs output when external last_window.
     """
@@ -268,9 +268,11 @@ def test_create_predict_inputs_output_when_categorical_features_native_implement
     Test _create_predict_inputs output when using HistGradientBoostingRegressor 
     and categorical variables.
     """
-    df_exog = pd.DataFrame({'exog_1': exog_categorical,
-                            'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
+    df_exog = pd.DataFrame({
+        'exog_1': exog_categorical,
+        'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
+        'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)}
+    )
     
     exog_predict = df_exog.copy()
     exog_predict.index = pd.RangeIndex(start=50, stop=100)
