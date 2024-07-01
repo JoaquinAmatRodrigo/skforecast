@@ -408,7 +408,9 @@ def check_exog(
     """
     
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
-        raise TypeError(f"{series_id} must be a pandas Series or DataFrame.")
+        raise TypeError(
+            f"{series_id} must be a pandas Series or DataFrame. Got {type(exog)}."
+        )
     
     if isinstance(exog, pd.Series) and exog.name is None:
         raise ValueError(f"When {series_id} is a pandas Series, it must have a name.")
