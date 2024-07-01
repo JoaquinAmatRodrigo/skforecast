@@ -1415,10 +1415,9 @@ def _evaluate_grid_hyperparameters_multiseries(
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
    
     if not isinstance(metric, list):
-        metric = [metric] 
-    # metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
-    #                for m in metric}
-    
+        metric = [metric]
+    metric_names = [(m if isinstance(m, str) else m.__name__) for m in metric]
+
     if len(metric) != len(set(metric)):
         raise ValueError(
             "When `metric` is a `list`, each metric name must be unique."
@@ -1441,6 +1440,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     lags_list = []
     lags_label_list = []
     params_list = []
+    metrics_list = []
     for lags_k, lags_v in lags_grid_tqdm:
 
         if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
@@ -1452,7 +1452,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         for params in param_grid:
 
             forecaster.set_params(params)
-            metrics_levels, predictions = backtesting_forecaster_multiseries(
+            metrics, _ = backtesting_forecaster_multiseries(
                 forecaster            = forecaster,
                 series                = series,
                 exog                  = exog,
@@ -1471,6 +1471,8 @@ def _evaluate_grid_hyperparameters_multiseries(
                 show_progress         = False,
                 suppress_warnings     = suppress_warnings
             )
+
+            metrics = metrics.reset_index(names='aggregation').drop(columns='levels')
 
             # n_predictions = (
             #     predictions
@@ -1491,6 +1493,7 @@ def _evaluate_grid_hyperparameters_multiseries(
             lags_list.append(lags_v)
             lags_label_list.append(lags_k)
             params_list.append(params)
+            metrics_list.append(metrics)
 
             # TODO: metrics are already aggregated in the backtesting
             # ------------------------------------------------------------------
@@ -1502,14 +1505,16 @@ def _evaluate_grid_hyperparameters_multiseries(
             #     )
             #     metric_dict[m_name].append(metric_weighted_average)
             # ------------------------------------------------------------------
-            metric_dict = metrics_levels.to_dict(orient='records')[0]
 
             if output_file is not None:
-                header = ['levels', 'lags', 'lags_label', 'params', 
-                          *metric_dict.keys(), *params.keys()]
+                header = ['aggregation', 'lags', 'lags_label', 'params', 
+                          *metric_names, *params.keys()]
                 row = [
-                    levels, lags_v, lags_k, params,
-                    *[metric[-1] for metric in metric_dict.values()],
+                    aggregate_metric,
+                    lags_v,
+                    lags_k,
+                    params,
+                    *metrics.loc[0, metric_names].to_list(),
                     *params.values()
                 ]
                 if not os.path.isfile(output_file):
@@ -1520,22 +1525,19 @@ def _evaluate_grid_hyperparameters_multiseries(
                     with open(output_file, 'a', newline='') as f:
                         f.write('\t'.join([str(r) for r in row]) + '\n')
 
-    results = pd.DataFrame({
-                  'levels'     : [levels]*len(lags_list),
-                  'lags'       : lags_list,
-                  'lags_label' : lags_label_list,
-                  'params'     : params_list,
-                  **metric_dict
-              })
-    
-    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
+    results = pd.concat(metrics_list, axis=0)
+    results.insert(1, 'lags', lags_list)
+    results.insert(2, 'lags_label', lags_label_list)
+    results.insert(3, 'params', params_list)
+    results = results.sort_values(by=metric_names[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
+    results = results.reset_index(drop=True)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
+        best_metric = results[metric_names[0]].iloc[0]
         
         if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
             forecaster.set_lags(best_lags)
@@ -1862,7 +1864,8 @@ def _bayesian_search_optuna_multiseries(
              )
   
     if not isinstance(metric, list):
-        metric = [metric] 
+        metric = [metric]
+    metric_names = [(m if isinstance(m, str) else m.__name__) for m in metric]
     
     if len(metric) != len(set(metric)):
         raise ValueError(
@@ -1897,7 +1900,7 @@ def _bayesian_search_optuna_multiseries(
             if "lags" in sample:
                 forecaster.set_lags(sample['lags'])
         
-        metrics_levels, _ = backtesting_forecaster_multiseries(
+        metrics, _ = backtesting_forecaster_multiseries(
             forecaster            = forecaster,
             series                = series,
             exog                  = exog,
@@ -1916,6 +1919,7 @@ def _bayesian_search_optuna_multiseries(
             suppress_warnings     = suppress_warnings
         )
 
+        metrics = metrics.reset_index(names='aggregation').drop(columns='levels')
         # n_predictions = (
         #     predictions
         #     .notna()
@@ -1930,15 +1934,15 @@ def _bayesian_search_optuna_multiseries(
         # ).dropna()
         
         # Store metrics in the variable `metric_values` defined outside _objective.
-        nonlocal metric_values
-        metric_values.append(metrics_levels)
+        nonlocal metrics_list
+        metrics_list.append(metrics)
 
         # metric_weighted_average = np.average(
         #     a = metrics_levels.iloc[:, 1],
         #     weights = metrics_levels['n_predictions']
         # )
 
-        return metrics_levels.iat[0, 0]
+        return metrics.iat[0, 1]
 
     if show_progress:
         kwargs_study_optimize['show_progress_bar'] = True
@@ -1960,7 +1964,7 @@ def _bayesian_search_optuna_multiseries(
     # `metric_values` will be modified inside _objective function. 
     # It is a trick to extract multiple values from _objective since
     # only the optimized value can be returned.
-    metric_values = []
+    metrics_list = []
 
     warnings.filterwarnings(
         "ignore",
@@ -1989,9 +1993,7 @@ def _bayesian_search_optuna_multiseries(
     
     lags_list = []
     params_list = []
-    metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
-                   for m in metric}
-    for i, trial in enumerate(study.get_trials()):
+    for trial in study.get_trials():
         regressor_params = {k: v for k, v in trial.params.items() if k != 'lags'}
         lags = trial.params.get(
                    'lags',
@@ -1999,15 +2001,6 @@ def _bayesian_search_optuna_multiseries(
                )
         params_list.append(regressor_params)
         lags_list.append(lags)
-        m_values = metric_values[i]
-        # for m in metric:
-        #     m_name = m if isinstance(m, str) else m.__name__
-        #     metric_weighted_average = np.average(
-        #         a = m_values[m_name],
-        #         weights = m_values['n_predictions']
-        #     )
-        #     metric_dict[m_name].append(metric_weighted_average)
-        metric_dict = metric.to_dict(orient='records')[0]
     
     if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeriesCustom',
                                          'ForecasterAutoregMultiVariate']:
@@ -2041,21 +2034,28 @@ def _bayesian_search_optuna_multiseries(
         
         lags_list = lags_list_initialized
 
-    results = pd.DataFrame({
-                  'levels': [levels]*len(lags_list),
-                  'lags'  : lags_list,
-                  'params': params_list,
-                  **metric_dict
-              })
+    # results = pd.DataFrame({
+    #               'levels': [levels]*len(lags_list),
+    #               'lags'  : lags_list,
+    #               'params': params_list,
+    #               **metric_dict
+    #           })
 
-    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
+    # results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
+    # results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
+
+    results = pd.concat(metrics_list, axis=0)
+    results.insert(1, 'lags', lags_list)
+    results.insert(2, 'params', params_list)
+    results = results.sort_values(by=metric_names[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
+    results = results.reset_index(drop=True)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
+        best_metric = results[metric_names[0]].iloc[0]
         
         if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
             forecaster.set_lags(best_lags)
