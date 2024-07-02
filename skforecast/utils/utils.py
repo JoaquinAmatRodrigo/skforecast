@@ -1817,7 +1817,6 @@ def check_backtesting_input(
     series: Optional[Union[pd.DataFrame, dict]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     initial_train_size: Optional[int]=None,
-    aggregate_metric: Optional[str]=None,
     fixed_train_size: bool=True,
     gap: int=0,
     allow_incomplete_fold: bool=True,
@@ -1855,12 +1854,6 @@ def check_backtesting_input(
         Number of samples in the initial train split. If `None` and `forecaster` 
         is already trained, no initial train is done and all data is used to 
         evaluate the model.
-    aggregate_metric : str, default `None`
-        If `None`, the metric is calculated for each level. If 'average', the
-        average of the metrics is calculated. If 'weighted_average', the average
-        of the metrics weighted by the number of predicted values of each level is
-        calculated. If 'pooling', the values of all levels are pooled and then the
-        metric is calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -2083,11 +2076,6 @@ def check_backtesting_input(
         raise TypeError("`show_progress` must be a boolean: `True`, `False`.")
     if not isinstance(suppress_warnings, bool):
         raise TypeError("`suppress_warnings` must be a boolean: `True`, `False`.")
-    if aggregate_metric not in [None, 'average', 'weighted_average', 'pooling']:
-        raise ValueError(
-            (f"`aggregate_metric` must be None, 'average', 'weighted_average' or "
-             f"'pooling'. Got {aggregate_metric}.")
-        )
 
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)
