@@ -23,13 +23,22 @@ from optuna.samplers import TPESampler
 from ..exceptions import warn_skforecast_categories
 from ..exceptions import LongTrainingWarning
 from ..exceptions import IgnoredArgumentWarning
-from ..metrics import add_y_train_argument, _get_metric
+from ..model_selection.model_selection import _get_metric
 from ..model_selection.model_selection import _create_backtesting_folds
 from ..utils import check_backtesting_input
 from ..utils import select_n_jobs_backtesting
 from ..utils import initialize_lags
 from ..utils import initialize_lags_grid
 from ..utils import set_skforecast_warnings
+
+# import logging
+# logger = logging.getLogger(__name__)
+# logger.setLevel(logging.INFO)
+# console_handler = logging.StreamHandler()
+# console_handler.setLevel(logging.INFO)
+# formatter = logging.Formatter('%(name)-10s %(levelname)-5s %(message)s')
+# console_handler.setFormatter(formatter)
+# logger.addHandler(console_handler)
 
 
 def _initialize_levels_model_selection_multiseries(
@@ -248,157 +257,6 @@ def _extract_data_folds_multiseries(
         yield series_train, series_last_window, levels_last_window, exog_train, exog_test, fold
 
 
-def _calculate_metrics_multiseries(
-        series : Union[pd.DataFrame, dict],
-        predictions: pd.DataFrame,
-        folds: list,
-        span_index : Union[pd.DatetimeIndex, pd.RangeIndex],
-        metrics: list,
-        levels: list,
-        add_aggregated_metric: bool=False
-):
-    """   
-    Calculate metrics for each level and also for all levels aggregated using
-    average, weighted average or pooling.
-
-    - average: the average (artihmetic mean) of all levels.
-    - weighted_average: the average of the metrics weighted by the number of
-    predicted values of each level.
-    - pooling: the values of all levels are pooled and then the metric is
-    calculated.
-
-    Parameters
-    ----------
-    series : pandas DataFrame, dict
-        Series data used for backtesting.
-    predictions : pandas DataFrame
-        Predictions generated during the backtesting process.
-    folds : list
-        Folds created during the backtesting process.
-    span_index : pandas DatetimeIndex, pandas RangeIndex
-        Full index from the minimum to the maximum index among all series.
-    metrics : list
-        List of metrics to calculate.
-    levels : list
-        Levels to calculate the metrics.
-    add_aggregated_metric : bool, default `False`
-        If `True`, return the aggregated metrics (average, weighted average and pooled)
-        are also returned.
-
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
-        predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
-        calculated.
-
-    Returns
-    -------
-    metrics_levels : pandas DataFrame
-        Value(s) of the metric(s).
-    """
-    
-    metric_names = [(m if isinstance(m, str) else m.__name__) for m in metrics]
-    y_true_pred_levels = []
-    y_train_levels = []
-    for level in levels:
-        if level in predictions.columns:
-            # TODO: avoid merges inside the loop, instead merge utpside and then filter
-            y_true_pred_level = pd.merge(
-                series[level],
-                predictions[level],
-                left_index  = True,
-                right_index = True,
-                how         = "inner",
-                suffixes    = ("_true", "_pred"),
-            ).dropna(axis=0, how="any")
-
-            train_indexes = []
-            for fold in folds:
-                train_iloc_start = fold[0][0]
-                train_iloc_end = fold[0][1]
-                train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
-            train_indexes = np.unique(np.concatenate(train_indexes))
-            train_indexes = span_index[train_indexes]
-            y_train = series[level].loc[series[level].index.intersection(train_indexes)]
-            y_true_pred_levels.append(y_true_pred_level)
-            y_train_levels.append(y_train)
-        else:
-            y_true_pred_levels.append(None)
-            y_train_levels.append(None)
-            
-    metrics_levels = []
-    for i, level in enumerate(levels):
-        if y_true_pred_levels[i] is not None and not y_true_pred_levels[i].empty:
-            metrics_level = [
-                m(
-                    y_true = y_true_pred_levels[i].iloc[:, 0],
-                    y_pred = y_true_pred_levels[i].iloc[:, 1],
-                    y_train = y_train_levels[i]
-                )
-                for m in metrics
-            ]
-            metrics_levels.append(metrics_level)
-        else:
-            metrics_levels.append([None for _ in metrics])
-
-    metrics_levels = pd.DataFrame(
-                        data    = metrics_levels,
-                        columns = [m if isinstance(m, str) else m.__name__
-                                    for m in metrics]
-                    )
-    metrics_levels.insert(0, 'levels', levels)
-
-    if add_aggregated_metric:
-        # aggragation: average
-        average = metrics_levels.drop(columns='levels').mean(skipna=True)
-        average = average.to_frame().transpose()
-        average['levels'] = 'average'
-
-        # aggregation: weighted_average
-        weighted_averages = {}
-        n_predictions_levels = predictions.notna().sum()
-        n_predictions_levels = n_predictions_levels.loc[metrics_levels['levels']]
-        for col in  metrics_levels.columns[1:]:
-            weighted_averages[col] = np.average(
-                metrics_levels[col],
-                weights=n_predictions_levels
-            )
-        weighted_average = pd.DataFrame(weighted_averages, index=[0])
-        weighted_average['levels'] = 'weighted_average'
-
-        # aggregation: pooling
-        y_true_pred_levels = np.concatenate(y_true_pred_levels)
-        y_train_levels_concat = np.concatenate(y_train_levels)
-        pooled = []
-        for m, m_name in zip(metrics, metric_names):
-            if m_name in ['mean_absolute_scaled_error', 'root_mean_squared_scaled_error']:
-                pooled.append(
-                    m(
-                        y_true = y_true_pred_levels[:, 0],
-                        y_pred = y_true_pred_levels[:, 1],
-                        y_train = y_train_levels
-                    )
-                )
-            else:
-                pooled.append(
-                    m(
-                        y_true = y_true_pred_levels[:, 0],
-                        y_pred = y_true_pred_levels[:, 1],
-                        y_train = y_train_levels_concat
-                    )
-                )
-        pooled = pd.DataFrame([pooled], columns=metric_names)
-        pooled['levels'] = 'pooling'
-
-        metrics_levels = pd.concat(
-            [metrics_levels, average, weighted_average, pooled],
-            axis=0,
-            ignore_index=True
-        )
-
-    return metrics_levels
-
-
 def _backtesting_forecaster_multiseries(
     forecaster: object,
     series: Union[pd.DataFrame, dict],
@@ -409,7 +267,6 @@ def _backtesting_forecaster_multiseries(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    add_aggregated_metric: bool=False,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     refit: Union[bool, int]=False,
     interval: Optional[list]=None,
@@ -471,15 +328,6 @@ def _backtesting_forecaster_multiseries(
         `test_size`. If `False`, the last fold is excluded.
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
-    add_aggregated_metric : bool, default `False`
-        If `True`, the aggregated metrics (average, weighted average and pooling)
-        over all levels are also returned.
-
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
-        predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
-        calculated.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
     refit : bool, int, default `False`
@@ -554,18 +402,10 @@ def _backtesting_forecaster_multiseries(
              )
 
     if not isinstance(metric, list):
-        metrics = [
-            _get_metric(metric=metric)
-            if isinstance(metric, str)
-            else add_y_train_argument(metric)
-        ]
+        metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
     else:
-        metrics = [
-            _get_metric(metric=m)
-            if isinstance(m, str)
-            else add_y_train_argument(m) 
-            for m in metric
-        ]
+        metrics = [_get_metric(metric=m) if isinstance(m, str) else m 
+                   for m in metric]
 
     store_in_sample_residuals = False if interval is None else True
 
@@ -747,15 +587,42 @@ def _backtesting_forecaster_multiseries(
             cols = cols + [f'{level}_lower_bound', f'{level}_upper_bound']
         backtest_predictions.loc[no_valid_index, cols] = np.nan
 
-    metrics_levels = _calculate_metrics_multiseries(
-        series            = series,
-        predictions       = backtest_predictions,
-        folds             = folds,
-        span_index        = span_index,
-        metrics           = metrics,
-        levels            = levels,
-        add_aggregated_metric  = add_aggregated_metric
+    metrics_levels = []
+    for level in levels:
+        if level in levels_in_backtest_predictions:
+            predictions_level = pd.merge(
+                series[level],
+                backtest_predictions[level],
+                left_index  = True,
+                right_index = True,
+                how         = "outer",
+                suffixes    = ("_true", "_pred"),
+            ).dropna(axis=0, how="any")
+
+            if not predictions_level.empty:
+                metrics_level = [
+                    m(
+                        y_true = predictions_level.iloc[:, 0],
+                        y_pred = predictions_level.iloc[:, 1],
+                    )
+                    for m in metrics
+                ]
+                metrics_levels.append(metrics_level)
+            else:
+                metrics_levels.append([None for _ in metrics])
+        else:
+            metrics_levels.append([None for _ in metrics])
+
+    metrics_levels = pd.concat(
+        [pd.DataFrame({'levels': levels}),
+         pd.DataFrame(
+             data    = metrics_levels,
+             columns = [m if isinstance(m, str) else m.__name__
+                        for m in metrics]
+         )],
+        axis=1
     )
+
     set_skforecast_warnings(suppress_warnings, action='default')
 
     return metrics_levels, backtest_predictions
@@ -771,7 +638,6 @@ def backtesting_forecaster_multiseries(
     gap: int=0,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
-    add_aggregated_metric: bool=False,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
     refit: Union[bool, int]=False,
     interval: Optional[list]=None,
@@ -834,15 +700,6 @@ def backtesting_forecaster_multiseries(
         `test_size`. If `False`, the last fold is excluded.
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
-    add_aggregated_metric : bool, default `False`
-        If `True`, the aggregated metrics (average, weighted average and pooling)
-        over all levels are also returned.
-
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
-        predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
-        calculated.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
     refit : bool, int, default `False`
@@ -934,7 +791,6 @@ def backtesting_forecaster_multiseries(
         steps                 = steps,
         levels                = levels,
         metric                = metric,
-        add_aggregated_metric = add_aggregated_metric,
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
@@ -961,7 +817,6 @@ def grid_search_forecaster_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: str='weighted_average',
     fixed_train_size: bool=True,
     gap: int=0,
     allow_incomplete_fold: bool=True,
@@ -1001,14 +856,6 @@ def grid_search_forecaster_multiseries(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
-    aggregate_metric : str, default `'weighted_average'`
-        Aggregation method used to combine the metric of all levels (series).
-
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
-        predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
-        calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -1019,7 +866,8 @@ def grid_search_forecaster_multiseries(
         `test_size`. If `False`, the last fold is excluded.
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
-        If `None`, all levels are taken into account.
+        If `None`, all levels are taken into account. The resulting metric will be
+        the average of the optimization of all levels.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
     lags_grid : list, dict, default `None`
@@ -1075,7 +923,6 @@ def grid_search_forecaster_multiseries(
                   param_grid            = param_grid,
                   steps                 = steps,
                   metric                = metric,
-                  aggregate_metric      = aggregate_metric,
                   initial_train_size    = initial_train_size,
                   fixed_train_size      = fixed_train_size,
                   gap                   = gap,
@@ -1102,7 +949,6 @@ def random_search_forecaster_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: str='weighted_average',
     fixed_train_size: bool=True,
     gap: int=0,
     allow_incomplete_fold: bool=True,
@@ -1144,14 +990,6 @@ def random_search_forecaster_multiseries(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
-    aggregate_metric : str, default `'weighted_average'`
-        Aggregation method used to combine the metric of all levels (series).
-
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
-        predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
-        calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -1162,7 +1000,8 @@ def random_search_forecaster_multiseries(
         `test_size`. If `False`, the last fold is excluded.
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
-        If `None`, all levels are taken into account.
+        If `None`, all levels are taken into account. The resulting metric will be
+        the average of the optimization of all levels.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
     lags_grid : list, dict, default `None`
@@ -1224,7 +1063,6 @@ def random_search_forecaster_multiseries(
                   param_grid            = param_grid,
                   steps                 = steps,
                   metric                = metric,
-                  aggregate_metric      = aggregate_metric,
                   initial_train_size    = initial_train_size,
                   fixed_train_size      = fixed_train_size,
                   gap                   = gap,
@@ -1251,7 +1089,6 @@ def _evaluate_grid_hyperparameters_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: str='weighted_average',
     fixed_train_size: bool=True,
     gap: int=0,
     allow_incomplete_fold: bool=True,
@@ -1290,14 +1127,6 @@ def _evaluate_grid_hyperparameters_multiseries(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
-    aggregate_metric : str, default `'weighted_average'`
-        Aggregation method used to combine the metric of all levels (series).
-
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
-        predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
-        calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -1308,7 +1137,8 @@ def _evaluate_grid_hyperparameters_multiseries(
         `test_size`. If `False`, the last fold is excluded.
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
-        If `None`, all levels are taken into account.
+        If `None`, all levels are taken into account. The resulting metric will be
+        the average of the optimization of all levels.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
     lags_grid : list, dict, default `None`
@@ -1359,12 +1189,6 @@ def _evaluate_grid_hyperparameters_multiseries(
             (f"`exog` must have same number of samples as `series`. "
              f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
         )
-    allowed_aggregate_metrics = ['average', 'weighted_average', 'pooling']
-    if aggregate_metric not in allowed_aggregate_metrics:
-        raise ValueError(
-            f"`aggregate_metric` must be one of {allowed_aggregate_metrics}. "
-            f"Got {aggregate_metric}."
-        )
     
     levels = _initialize_levels_model_selection_multiseries(
                  forecaster = forecaster,
@@ -1375,10 +1199,11 @@ def _evaluate_grid_hyperparameters_multiseries(
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
    
     if not isinstance(metric, list):
-        metric = [metric]
-    metric_names = [(m if isinstance(m, str) else m.__name__) for m in metric]
-
-    if len(metric) != len(set(metric)):
+        metric = [metric] 
+    metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
+                   for m in metric}
+    
+    if len(metric_dict) != len(metric):
         raise ValueError(
             "When `metric` is a `list`, each metric name must be unique."
         )
@@ -1400,7 +1225,6 @@ def _evaluate_grid_hyperparameters_multiseries(
     lags_list = []
     lags_label_list = []
     params_list = []
-    metrics_list = []
     for lags_k, lags_v in lags_grid_tqdm:
 
         if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
@@ -1412,14 +1236,13 @@ def _evaluate_grid_hyperparameters_multiseries(
         for params in param_grid:
 
             forecaster.set_params(params)
-            metrics, _ = backtesting_forecaster_multiseries(
+            metrics_levels, predictions = backtesting_forecaster_multiseries(
                 forecaster            = forecaster,
                 series                = series,
                 exog                  = exog,
                 steps                 = steps,
                 levels                = levels,
                 metric                = metric,
-                add_aggregated_metric = True,
                 initial_train_size    = initial_train_size,
                 fixed_train_size      = fixed_train_size,
                 gap                   = gap,
@@ -1431,22 +1254,40 @@ def _evaluate_grid_hyperparameters_multiseries(
                 show_progress         = False,
                 suppress_warnings     = suppress_warnings
             )
-            metrics = metrics.loc[metrics['levels'] == aggregate_metric, :]
+
+            n_predictions = (
+                predictions
+                .notna()
+                .sum()
+                .to_frame(name='n_predictions')
+                .reset_index(names='levels')
+            )
+            metrics_levels = metrics_levels.merge(
+                right = n_predictions,
+                how   = 'left',
+                on    = 'levels'
+            ).dropna()
+            
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('ignore', category=warn_category)
 
             lags_list.append(lags_v)
             lags_label_list.append(lags_k)
             params_list.append(params)
-            metrics_list.append(metrics)
+            for m in metric:
+                m_name = m if isinstance(m, str) else m.__name__
+                metric_weighted_average = np.average(
+                    a = metrics_levels[m_name],
+                    weights = metrics_levels['n_predictions']
+                )
+                metric_dict[m_name].append(metric_weighted_average)
 
             if output_file is not None:
-                header = ['aggregation', 'lags', 'lags_label', 'params', 
-                          *metric_names, *params.keys()]
+                header = ['levels', 'lags', 'lags_label', 'params', 
+                          *metric_dict.keys(), *params.keys()]
                 row = [
-                    aggregate_metric,
-                    lags_v,
-                    lags_k,
-                    params,
-                    *metrics.loc[0, metric_names].to_list(),
+                    levels, lags_v, lags_k, params,
+                    *[metric[-1] for metric in metric_dict.values()],
                     *params.values()
                 ]
                 if not os.path.isfile(output_file):
@@ -1457,20 +1298,22 @@ def _evaluate_grid_hyperparameters_multiseries(
                     with open(output_file, 'a', newline='') as f:
                         f.write('\t'.join([str(r) for r in row]) + '\n')
 
-    results = pd.concat(metrics_list, axis=0)
-    results = results.rename(columns={'levels': 'aggregation'})
-    results.insert(1, 'lags', lags_list)
-    results.insert(2, 'lags_label', lags_label_list)
-    results.insert(3, 'params', params_list)
-    results = results.sort_values(by=metric_names[0], ascending=True)
+    results = pd.DataFrame({
+                  'levels'     : [levels]*len(lags_list),
+                  'lags'       : lags_list,
+                  'lags_label' : lags_label_list,
+                  'params'     : params_list,
+                  **metric_dict
+              })
+    
+    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
-    results = results.reset_index(drop=True)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results[metric_names[0]].iloc[0]
+        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
         if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
             forecaster.set_lags(best_lags)
@@ -1499,7 +1342,6 @@ def bayesian_search_forecaster_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: Optional[str]=None,
     fixed_train_size: bool=True,
     gap: int=0,
     allow_incomplete_fold: bool=True,
@@ -1546,14 +1388,6 @@ def bayesian_search_forecaster_multiseries(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
-    aggregate_metric : str, default `'weighted_average'`
-        Aggregation method used to combine the metric of all levels (series).
-
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
-        predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
-        calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -1564,7 +1398,8 @@ def bayesian_search_forecaster_multiseries(
         `test_size`. If `False`, the last fold is excluded.
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
-        If `None`, all levels are taken into account.
+        If `None`, all levels are taken into account. The resulting metric will be
+        the average of the optimization of all levels.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
     lags_grid : deprecated
@@ -1642,13 +1477,6 @@ def bayesian_search_forecaster_multiseries(
             f"`engine` only allows 'optuna', got {engine}."
         )
 
-    allowed_aggregate_metrics = ['average', 'weighted_average', 'pooling']
-    if aggregate_metric not in allowed_aggregate_metrics:
-        raise ValueError(
-            f"`aggregate_metric` must be one of {allowed_aggregate_metrics}. "
-            f"Got {aggregate_metric}."
-        )
-
     results, best_trial = _bayesian_search_optuna_multiseries(
                               forecaster            = forecaster,
                               series                = series,
@@ -1657,7 +1485,6 @@ def bayesian_search_forecaster_multiseries(
                               search_space          = search_space,
                               steps                 = steps,
                               metric                = metric,
-                              aggregate_metric      = aggregate_metric,
                               refit                 = refit,
                               initial_train_size    = initial_train_size,
                               fixed_train_size      = fixed_train_size,
@@ -1685,7 +1512,6 @@ def _bayesian_search_optuna_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: Optional[str]=None,
     fixed_train_size: bool=True,
     gap: int=0,
     allow_incomplete_fold: bool=True,
@@ -1729,14 +1555,6 @@ def _bayesian_search_optuna_multiseries(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
-    aggregate_metric : str, default `'weighted_average'`
-        Aggregation method used to combine the metric of all levels (series).
-
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
-        predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
-        calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -1747,7 +1565,8 @@ def _bayesian_search_optuna_multiseries(
         `test_size`. If `False`, the last fold is excluded.
     levels : str, list, default `None`
         level (`str`) or levels (`list`) at which the forecaster is optimized. 
-        If `None`, all levels are taken into account.
+        If `None`, all levels are taken into account. The resulting metric will be
+        the average of the optimization of all levels.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
     refit : bool, int, default `False`
@@ -1808,10 +1627,11 @@ def _bayesian_search_optuna_multiseries(
              )
   
     if not isinstance(metric, list):
-        metric = [metric]
-    metric_names = [(m if isinstance(m, str) else m.__name__) for m in metric]
+        metric = [metric] 
+    metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
+                   for m in metric}
     
-    if len(metric) != len(set(metric)):
+    if len(metric_dict) != len(metric):
         raise ValueError(
             "When `metric` is a `list`, each metric name must be unique."
         )
@@ -1826,7 +1646,6 @@ def _bayesian_search_optuna_multiseries(
         steps                 = steps,
         levels                = levels,
         metric                = metric,
-        aggregate_metric      = aggregate_metric,
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
@@ -1844,14 +1663,13 @@ def _bayesian_search_optuna_multiseries(
             if "lags" in sample:
                 forecaster.set_lags(sample['lags'])
         
-        metrics, _ = backtesting_forecaster_multiseries(
+        metrics_levels, predictions = backtesting_forecaster_multiseries(
             forecaster            = forecaster,
             series                = series,
             exog                  = exog,
             steps                 = steps,
             levels                = levels,
             metric                = metric,
-            add_aggregated_metric = True,
             initial_train_size    = initial_train_size,
             fixed_train_size      = fixed_train_size,
             gap                   = gap,
@@ -1863,13 +1681,29 @@ def _bayesian_search_optuna_multiseries(
             suppress_warnings     = suppress_warnings
         )
 
-        metrics = metrics.loc[metrics['levels'] == aggregate_metric, :]
+        n_predictions = (
+            predictions
+            .notna()
+            .sum()
+            .to_frame(name='n_predictions')
+            .reset_index(names='levels')
+        )
+        metrics_levels = metrics_levels.merge(
+            right = n_predictions,
+            how   = 'left',
+            on    = 'levels'
+        ).dropna()
         
         # Store metrics in the variable `metric_values` defined outside _objective.
-        nonlocal metrics_list
-        metrics_list.append(metrics)
+        nonlocal metric_values
+        metric_values.append(metrics_levels)
 
-        return metrics.iat[0, 1]
+        metric_weighted_average = np.average(
+            a = metrics_levels.iloc[:, 1],
+            weights = metrics_levels['n_predictions']
+        )
+
+        return metric_weighted_average
 
     if show_progress:
         kwargs_study_optimize['show_progress_bar'] = True
@@ -1891,7 +1725,7 @@ def _bayesian_search_optuna_multiseries(
     # `metric_values` will be modified inside _objective function. 
     # It is a trick to extract multiple values from _objective since
     # only the optimized value can be returned.
-    metrics_list = []
+    metric_values = []
 
     warnings.filterwarnings(
         "ignore",
@@ -1920,7 +1754,7 @@ def _bayesian_search_optuna_multiseries(
     
     lags_list = []
     params_list = []
-    for trial in study.get_trials():
+    for i, trial in enumerate(study.get_trials()):
         regressor_params = {k: v for k, v in trial.params.items() if k != 'lags'}
         lags = trial.params.get(
                    'lags',
@@ -1928,6 +1762,14 @@ def _bayesian_search_optuna_multiseries(
                )
         params_list.append(regressor_params)
         lags_list.append(lags)
+        m_values = metric_values[i]
+        for m in metric:
+            m_name = m if isinstance(m, str) else m.__name__
+            metric_weighted_average = np.average(
+                a = m_values[m_name],
+                weights = m_values['n_predictions']
+            )
+            metric_dict[m_name].append(metric_weighted_average)
     
     if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeriesCustom',
                                          'ForecasterAutoregMultiVariate']:
@@ -1961,19 +1803,21 @@ def _bayesian_search_optuna_multiseries(
         
         lags_list = lags_list_initialized
 
-    results = pd.concat(metrics_list, axis=0)
-    results = results.rename(columns={'levels': 'aggregation'})
-    results.insert(1, 'lags', lags_list)
-    results.insert(2, 'params', params_list)
-    results = results.sort_values(by=metric_names[0], ascending=True)
+    results = pd.DataFrame({
+                  'levels': [levels]*len(lags_list),
+                  'lags'  : lags_list,
+                  'params': params_list,
+                  **metric_dict
+              })
+
+    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
-    results = results.reset_index(drop=True)
     
     if return_best:
         
         best_lags = results['lags'].iloc[0]
         best_params = results['params'].iloc[0]
-        best_metric = results[metric_names[0]].iloc[0]
+        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
         
         if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
             forecaster.set_lags(best_lags)

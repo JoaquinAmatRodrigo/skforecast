@@ -1,0 +1,7 @@
+aggregation	lags	lags_label	params	mean_squared_error	mean_absolute_error	alpha
+weighted_average	[1 2]	[1 2]	{'alpha': 0.01}	0.0675250297263438	0.24024775428576176	0.01
+weighted_average	[1 2]	[1 2]	{'alpha': 0.1}	0.06748857829831043	0.24018046733433265	0.1
+weighted_average	[1 2]	[1 2]	{'alpha': 1}	0.06713817133392573	0.23952743800450235	1
+weighted_average	[1 2 3 4]	[1 2 3 4]	{'alpha': 0.01}	0.06885287980216954	0.2412674009385362	0.01
+weighted_average	[1 2 3 4]	[1 2 3 4]	{'alpha': 0.1}	0.06879584481827175	0.24118612313700405	0.1
+weighted_average	[1 2 3 4]	[1 2 3 4]	{'alpha': 1}	0.06825963776512393	0.2404060775893907	1
