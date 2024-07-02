@@ -94,7 +94,7 @@ def add_y_train_argument(func):
 def mean_absolute_scaled_error(
     y_true: Union[pd.Series, np.array],
     y_pred: Union[pd.Series, np.array],
-    y_train: Union[pd.Series, np.array],
+    y_train: Union[list, pd.Series, np.array],
 ) -> float:
     """
     Mean Absolute Scaled Error (MASE)
@@ -102,6 +102,10 @@ def mean_absolute_scaled_error(
     a forecast. It is the mean absolute error of the forecast divided by the
     mean absolute error of a naive forecast in the training set. The naive
     forecast is the one obtained by shifting the time series by one period.
+    If y_train is a list of numpy arrays or pandas Series, it is considered
+    that each element is the true value of the target variable in the training
+    set for each time series. In this case, the naive forecast is calculated
+    for each time series separately.
 
     Parameters
     ----------
@@ -109,8 +113,10 @@ def mean_absolute_scaled_error(
         True values of the target variable.
     y_pred : pd.Series, np.array
         Predicted values of the target variable.
-    y_train : pd.Series, np.array
-        True values of the target variable in the training set.
+    y_train : list, pd.Series, np.array
+        True values of the target variable in the training set. If list, it
+        is consider that each element is the true value of the target variable
+        in the training set for each time series.
 
     Returns
     -------
@@ -121,20 +127,27 @@ def mean_absolute_scaled_error(
         raise TypeError("y_true must be a pandas Series or numpy array")
     if not isinstance(y_pred, (pd.Series, np.ndarray)):
         raise TypeError("y_pred must be a pandas Series or numpy array")
-    if not isinstance(y_train, (pd.Series, np.ndarray)):
-        raise TypeError("y_train must be a pandas Series or numpy array")
+    if not isinstance(y_train, (list, pd.Series, np.ndarray)):
+        raise TypeError("y_train must be a list, pandas Series or numpy array")
     if len(y_true) != len(y_pred):
         raise ValueError("y_true and y_pred must have the same length")
     if len(y_true) == 0 or len(y_pred) == 0:
         raise ValueError("y_true and y_pred must have at least one element")
 
-    return np.mean(np.abs(y_true - y_pred)) / np.mean(np.abs(np.diff(y_train)))
+    if isinstance(y_train, list):
+        naive_forecast = np.concatenate([np.diff(x) for x in y_train])
+        mase = np.mean(np.abs(y_true - y_pred)) / np.mean(np.abs(naive_forecast))
+
+    else:
+        mase = np.mean(np.abs(y_true - y_pred)) / np.mean(np.abs(np.diff(y_train)))
+
+    return mase
 
 
 def root_mean_squared_scaled_error(
     y_true: Union[pd.Series, np.array],
     y_pred: Union[pd.Series, np.array],
-    y_train: Union[pd.Series, np.array],
+    y_train: Union[list, pd.Series, np.array],
 ) -> float:
     """
     Root Mean Squared Scaled Error (RMSSE)
@@ -142,6 +155,10 @@ def root_mean_squared_scaled_error(
     a forecast. It is the root mean squared error of the forecast divided by
     the root mean squared error of a naive forecast in the training set. The
     naive forecast is the one obtained by shifting the time series by one period.
+    If y_train is a list of numpy arrays or pandas Series, it is considered
+    that each element is the true value of the target variable in the training
+    set for each time series. In this case, the naive forecast is calculated
+    for each time series separately.
 
     Parameters
     ----------
@@ -149,8 +166,10 @@ def root_mean_squared_scaled_error(
         True values of the target variable.
     y_pred : pd.Series, np.array
         Predicted values of the target variable.
-    y_train : pd.Series, np.array
-        True values of the target variable in the training set.
+    y_train : list, pd.Series, np.array
+        True values of the target variable in the training set. If list, it
+        is consider that each element is the true value of the target variable
+        in the training set for each time series.
 
     Returns
     -------
@@ -162,13 +181,17 @@ def root_mean_squared_scaled_error(
         raise TypeError("y_true must be a pandas Series or numpy array")
     if not isinstance(y_pred, (pd.Series, np.ndarray)):
         raise TypeError("y_pred must be a pandas Series or numpy array")
-    if not isinstance(y_train, (pd.Series, np.ndarray)):
-        raise TypeError("y_train must be a pandas Series or numpy array")
+    if not isinstance(y_train, (list, pd.Series, np.ndarray)):
+        raise TypeError("y_train must be a list, pandas Series or numpy array")
     if len(y_true) != len(y_pred):
         raise ValueError("y_true and y_pred must have the same length")
     if len(y_true) == 0 or len(y_pred) == 0:
         raise ValueError("y_true and y_pred must have at least one element")
 
-    return np.sqrt(np.mean((y_true - y_pred) ** 2)) / np.sqrt(
-        np.mean(np.diff(y_train) ** 2)
-    )
+    if isinstance(y_train, list):
+        naive_forecast = np.concatenate([np.diff(x) for x in y_train])
+        rmsse = np.sqrt(np.mean((y_true - y_pred) ** 2)) / np.sqrt(np.mean(naive_forecast ** 2))
+    else:
+        rmsse = np.sqrt(np.mean((y_true - y_pred) ** 2)) / np.sqrt(np.mean(np.diff(y_train) ** 2))
+    
+    return rmsse
