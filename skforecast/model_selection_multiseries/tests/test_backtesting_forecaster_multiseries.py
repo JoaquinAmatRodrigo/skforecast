@@ -30,7 +30,8 @@ exog_dict_train = {k: v.loc[:end_train,] for k, v in exog_dict.items()}
 series_dict_test = {k: v.loc[end_train:,] for k, v in series_dict.items()}
 exog_dict_test = {k: v.loc[end_train:,] for k, v in exog_dict.items()}
 series_with_nans = series.copy()
-series_with_nans.loc[:10, 'l2'] = np.nan
+#series_with_nans['l2'].iloc[:10] = np.nan
+series_with_nans.iloc[:10, series_with_nans.columns.get_loc('l2')] = np.nan
 
 def create_predictors(y): # pragma: no cover
     """
