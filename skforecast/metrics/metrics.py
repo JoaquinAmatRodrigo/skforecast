@@ -129,6 +129,13 @@ def mean_absolute_scaled_error(
         raise TypeError("y_pred must be a pandas Series or numpy array")
     if not isinstance(y_train, (list, pd.Series, np.ndarray)):
         raise TypeError("y_train must be a list, pandas Series or numpy array")
+    if isinstance(y_train, list):
+        for x in y_train:
+            if not isinstance(x, (pd.Series, np.ndarray)):
+                raise TypeError(
+                    "When `y_train` is a list, each element must be a pandas Series "
+                    "or numpy array"
+                )
     if len(y_true) != len(y_pred):
         raise ValueError("y_true and y_pred must have the same length")
     if len(y_true) == 0 or len(y_pred) == 0:
@@ -183,6 +190,13 @@ def root_mean_squared_scaled_error(
         raise TypeError("y_pred must be a pandas Series or numpy array")
     if not isinstance(y_train, (list, pd.Series, np.ndarray)):
         raise TypeError("y_train must be a list, pandas Series or numpy array")
+    if isinstance(y_train, list):
+        for x in y_train:
+            if not isinstance(x, (pd.Series, np.ndarray)):
+                raise TypeError(
+                    "When `y_train` is a list, each element must be a pandas Series "
+                    "or numpy array"
+                )
     if len(y_true) != len(y_pred):
         raise ValueError("y_true and y_pred must have the same length")
     if len(y_true) == 0 or len(y_pred) == 0:
