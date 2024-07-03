@@ -128,7 +128,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1', 'l2']]*6,
+        'aggregation': ['weighted_average']*6,
         'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
                    [1, 2], [1, 2], [1, 2]],
         'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
@@ -139,7 +139,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                                          0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
         'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
-        index = pd.Index([3, 4, 5, 2, 1, 0], dtype='int64')
+        index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -179,7 +179,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1', 'l2']]*6,
+        'aggregation': ['weighted_average']*6,
         'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
                    [1, 2], [1, 2], [1, 2]],
         'lags_label': ['lags_2', 'lags_2', 'lags_2', 
@@ -190,7 +190,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
                                          0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
         'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
-        index = pd.Index([3, 4, 5, 2, 1, 0], dtype='int64')
+        index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -231,14 +231,14 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2']],
+        'aggregation': ['weighted_average']*3,
         'lags'  : [[1, 2], [1, 2], [1, 2]],
         'lags_label': [[1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
         'mean_absolute_error': np.array([0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
         'alpha' : np.array([1., 0.1 , 0.01])
         },
-        index = pd.Index([2, 1, 0], dtype='int64')
+        index = pd.Index([0, 1, 2], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -281,7 +281,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1']]*6,
+        'aggregation': ['weighted_average']*6,
         'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
                    [1, 2], [1, 2], [1, 2]],
         'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
@@ -292,7 +292,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                                          0.2073988652614679, 0.20741562577568792, 0.2075484707375347]),                                                               
         'alpha': np.array([0.01, 0.1, 1., 0.01, 0.1, 1.])
         },
-        index = pd.Index([3, 4, 5, 0, 1, 2], dtype='int64')
+        index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -332,7 +332,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1', 'l2']]*6,
+        'aggregation': ['weighted_average']*6,
         'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
                    [1, 2], [1, 2], [1, 2]],
         'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
@@ -345,7 +345,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                                          0.21078779824759553, 0.21078653113227208, 0.21077344827205086]),
         'alpha': np.array([0.01, 0.1, 1., 0.01, 0.1, 1.])
         },
-        index = pd.Index([3, 4, 5, 0, 1, 2], dtype='int64')
+        index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)

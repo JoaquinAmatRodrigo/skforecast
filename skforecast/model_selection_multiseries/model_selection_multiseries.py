@@ -1378,7 +1378,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         metric = [metric]
     metric_names = [(m if isinstance(m, str) else m.__name__) for m in metric]
 
-    if len(metric) != len(set(metric)):
+    if len(metric_names) != len(set(metric_names)):
         raise ValueError(
             "When `metric` is a `list`, each metric name must be unique."
         )
@@ -1484,7 +1484,7 @@ def _evaluate_grid_hyperparameters_multiseries(
             f"  Lags: {best_lags} \n"
             f"  Parameters: {best_params}\n"
             f"  Backtesting metric: {best_metric}\n"
-            f"  Levels: {results['levels'].iloc[0]}\n"
+            f"  Levels: {levels}\n"
         )
 
     set_skforecast_warnings(suppress_warnings, action='default')
@@ -1811,7 +1811,7 @@ def _bayesian_search_optuna_multiseries(
         metric = [metric]
     metric_names = [(m if isinstance(m, str) else m.__name__) for m in metric]
     
-    if len(metric) != len(set(metric)):
+    if len(metric_names) != len(set(metric_names)):
         raise ValueError(
             "When `metric` is a `list`, each metric name must be unique."
         )
