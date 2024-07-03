@@ -1,0 +1,17 @@
+A new study created in memory with name: no-name-5dffebe9-ae5f-486a-8800-b6df1297f452
+Trial 0 failed with parameters: {'n_estimators': 17, 'min_samples_leaf': 0.19325882509735576, 'max_features': 'sqrt'} because of the following error: IndexError('index 0 is out of bounds for axis 0 with size 0').
+Traceback (most recent call last):
+  File "/home/ubuntu/anaconda3/envs/skforecast_13_py11/lib/python3.11/site-packages/optuna/study/_optimize.py", line 196, in _run_trial
+    value_or_values = func(trial)
+                      ^^^^^^^^^^^
+  File "/home/ubuntu/varios/skforecast/skforecast/model_selection_multiseries/model_selection_multiseries.py", line 1874, in _objective
+    return metrics.iat[0, 1]
+           ~~~~~~~~~~~^^^^^^
+  File "/home/ubuntu/anaconda3/envs/skforecast_13_py11/lib/python3.11/site-packages/pandas/core/indexing.py", line 2527, in __getitem__
+    return self.obj._get_value(*key, takeable=self._takeable)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/anaconda3/envs/skforecast_13_py11/lib/python3.11/site-packages/pandas/core/frame.py", line 4212, in _get_value
+    return series._values[index]
+           ~~~~~~~~~~~~~~^^^^^^^
+IndexError: index 0 is out of bounds for axis 0 with size 0
+Trial 0 failed with value None.

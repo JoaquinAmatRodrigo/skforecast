@@ -20,7 +20,6 @@ from sklearn.model_selection import ParameterSampler
 import optuna
 from optuna.samplers import TPESampler
 
-from ..exceptions import warn_skforecast_categories
 from ..exceptions import LongTrainingWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..metrics import add_y_train_argument, _get_metric
@@ -357,6 +356,9 @@ def _calculate_metrics_multiseries(
         # aggregation: weighted_average
         weighted_averages = {}
         n_predictions_levels = predictions.notna().sum()
+        print(n_predictions_levels.index)
+        print('metrics_levels')
+        print(metrics_levels['levels'])
         n_predictions_levels = n_predictions_levels.loc[metrics_levels['levels']]
         for col in  metrics_levels.columns[1:]:
             weighted_averages[col] = np.average(
@@ -1431,8 +1433,11 @@ def _evaluate_grid_hyperparameters_multiseries(
                 show_progress         = False,
                 suppress_warnings     = suppress_warnings
             )
-            metrics = metrics.loc[metrics['levels'] == aggregate_metric, :]
-
+            metrics = (
+                metrics
+                .loc[metrics['levels'] == aggregate_metric, :]
+                .reset_index(drop=True)
+            )
             lags_list.append(lags_v)
             lags_label_list.append(lags_k)
             params_list.append(params)
@@ -1499,7 +1504,7 @@ def bayesian_search_forecaster_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: Optional[str]=None,
+    aggregate_metric: str='weighted_average',
     fixed_train_size: bool=True,
     gap: int=0,
     allow_incomplete_fold: bool=True,
@@ -1685,7 +1690,7 @@ def _bayesian_search_optuna_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: Optional[str]=None,
+    aggregate_metric: str='weighted_average',
     fixed_train_size: bool=True,
     gap: int=0,
     allow_incomplete_fold: bool=True,

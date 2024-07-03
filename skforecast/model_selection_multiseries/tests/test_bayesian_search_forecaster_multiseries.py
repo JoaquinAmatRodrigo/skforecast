@@ -161,33 +161,33 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
               )[0]
     
     expected_results = pd.DataFrame(
-        np.array([[list(['l1', 'l2']), np.array([1, 2, 3, 4]),
+        np.array([['weighted_average', np.array([1, 2, 3, 4]),
             {'alpha': 0.23598059857016607}, 0.20880273566554797,
             0.23598059857016607],
-        [list(['l1', 'l2']), np.array([1, 2, 3, 4]),
+        ['weighted_average', np.array([1, 2, 3, 4]),
             {'alpha': 0.398196343012209}, 0.2088108334929226,
             0.398196343012209],
-        [list(['l1', 'l2']), np.array([1, 2, 3, 4]),
+        ['weighted_average', np.array([1, 2, 3, 4]),
             {'alpha': 0.4441865222328282}, 0.2088131177203144,
             0.4441865222328282],
-        [list(['l1', 'l2']), np.array([1, 2, 3, 4]),
+        ['weighted_average', np.array([1, 2, 3, 4]),
             {'alpha': 0.53623586010342}, 0.2088176743151537,
             0.53623586010342],
-        [list(['l1', 'l2']), np.array([1, 2, 3, 4]),
+        ['weighted_average', np.array([1, 2, 3, 4]),
             {'alpha': 0.7252189487445193}, 0.2088269659234972,
             0.7252189487445193],
-        [list(['l1', 'l2']), np.array([1, 2]), {'alpha': 0.5558016213920624},
+        ['weighted_average', np.array([1, 2]), {'alpha': 0.5558016213920624},
             0.20913532870732662, 0.5558016213920624],
-        [list(['l1', 'l2']), np.array([1, 2]), {'alpha': 0.6995044937418831},
+        ['weighted_average', np.array([1, 2]), {'alpha': 0.6995044937418831},
             0.20913908163271674, 0.6995044937418831],
-        [list(['l1', 'l2']), np.array([1, 2]), {'alpha': 0.7406154516747153},
+        ['weighted_average', np.array([1, 2]), {'alpha': 0.7406154516747153},
             0.20914015254956903, 0.7406154516747153],
-        [list(['l1', 'l2']), np.array([1, 2]), {'alpha': 0.8509374761370117},
+        ['weighted_average', np.array([1, 2]), {'alpha': 0.8509374761370117},
             0.20914302038975385, 0.8509374761370117],
-        [list(['l1', 'l2']), np.array([1, 2]), {'alpha': 0.9809565564007693},
+        ['weighted_average', np.array([1, 2]), {'alpha': 0.9809565564007693},
             0.20914638910039665, 0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([9, 3, 4, 6, 8, 1, 0, 5, 7, 2], dtype='int64')
+        columns=['aggregation', 'lags', 'params', 'mean_absolute_error', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float, 
         'alpha': float
@@ -234,38 +234,38 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
               )[0]
     
     expected_results = pd.DataFrame(
-        np.array([[list(['l1', 'l2']), 'custom function: create_predictors',
+        np.array([['weighted_average', 'custom function: create_predictors',
             {'alpha': 0.2345829390285611}, 0.21476183342122757,
             0.2345829390285611],
-        [list(['l1', 'l2']), 'custom function: create_predictors',
+        ['weighted_average', 'custom function: create_predictors',
             {'alpha': 0.29327794160087567}, 0.21476722307839208,
             0.29327794160087567],
-        [list(['l1', 'l2']), 'custom function: create_predictors',
+        ['weighted_average', 'custom function: create_predictors',
             {'alpha': 0.398196343012209}, 0.21477679099211167,
             0.398196343012209],
-        [list(['l1', 'l2']), 'custom function: create_predictors',
+        ['weighted_average', 'custom function: create_predictors',
             {'alpha': 0.42887539552321635}, 0.2147795727959785,
             0.42887539552321635],
-        [list(['l1', 'l2']), 'custom function: create_predictors',
+        ['weighted_average', 'custom function: create_predictors',
             {'alpha': 0.48612258246951734}, 0.21478474449018078,
             0.48612258246951734],
-        [list(['l1', 'l2']), 'custom function: create_predictors',
+        ['weighted_average', 'custom function: create_predictors',
             {'alpha': 0.5558016213920624}, 0.2147910057902114,
             0.5558016213920624],
-        [list(['l1', 'l2']), 'custom function: create_predictors',
+        ['weighted_average', 'custom function: create_predictors',
             {'alpha': 0.6879814411990146}, 0.21480278321679924,
             0.6879814411990146],
-        [list(['l1', 'l2']), 'custom function: create_predictors',
+        ['weighted_average', 'custom function: create_predictors',
             {'alpha': 0.6995044937418831}, 0.2148038037681593,
             0.6995044937418831],
-        [list(['l1', 'l2']), 'custom function: create_predictors',
+        ['weighted_average', 'custom function: create_predictors',
             {'alpha': 0.7222742800877074}, 0.2148058175049471,
             0.7222742800877074],
-        [list(['l1', 'l2']), 'custom function: create_predictors',
+        ['weighted_average', 'custom function: create_predictors',
             {'alpha': 0.9809565564007693}, 0.2148284279387544,
             0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([2, 1, 9, 5, 8, 3, 7, 0, 4, 6], dtype='int64')
+        columns=['aggregation', 'lags', 'params', 'mean_absolute_error', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float,
         'alpha': float
@@ -323,17 +323,17 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
         )
     
     expected = pd.DataFrame(
-        np.array([[list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+        np.array([['weighted_average',
             np.array([ 1,  7, 14]), {'n_estimators': 4, 'max_depth': 3},
             709.8836514262415, 4, 3],
-            [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+            ['weighted_average',
             np.array([ 1,  7, 14]), {'n_estimators': 3, 'max_depth': 3},
             721.1848222120482, 3, 3],
-            [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+            ['weighted_average',
             np.array([5]), {'n_estimators': 4, 'max_depth': 3},
             754.3537196425694, 4, 3]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth'],
-        index=pd.Index([0, 2, 1], dtype='int64')
+        columns=['aggregation', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth'],
+        index=pd.Index([0, 1, 2], dtype='int64')
     ).astype({
         'mean_absolute_error': float,
         'n_estimators': int,
@@ -396,18 +396,18 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
         )
     
     expected = pd.DataFrame(
-        np.array([[list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+        np.array([['weighted_average',
             'custom function: create_predictors_14',
             {'n_estimators': 4, 'max_depth': 3}, 709.5984345666709, 4, 3],
-            [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+            ['weighted_average',
             'custom function: create_predictors_14',
             {'n_estimators': 4, 'max_depth': 3}, 709.5984345666709, 4, 3],
-            [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+            ['weighted_average',
             'custom function: create_predictors_14',
             {'n_estimators': 2, 'max_depth': 4}, 746.7287691073261, 2, 4]],
             dtype=object),
         columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth'],
-        index=pd.Index([0, 2, 1], dtype='int64')
+        index=pd.Index([0, 1, 2], dtype='int64')
     ).astype({
         'mean_absolute_error': float,
         'n_estimators': int,
