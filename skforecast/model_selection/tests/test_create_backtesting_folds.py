@@ -1143,7 +1143,6 @@ def test_create_backtesting_folds_refit_fixed_no_gap_no_remainder_skip_folds_3(c
             )
 
     out, _ = capfd.readouterr()
-
     expected_out = (
         "Information of backtesting process\n"
         "----------------------------------\n"
