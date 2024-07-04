@@ -194,8 +194,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags
             {'n_estimators': 17, 'min_samples_leaf': 0.21035794225904136, 'max_features': 'log2'},
             0.21732156972764355, 17, 0.21035794225904136, 'log2']],
         dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'min_samples_leaf', 'max_features'],
-        index=pd.Index([9, 5, 0, 2, 7, 1, 8, 6, 3, 4], dtype='int64')
+        columns=['aggregation', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'min_samples_leaf', 'max_features'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float, 
         'n_estimators': int, 
@@ -268,8 +268,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
             0.21632482482968562, 0.8509374761370117],
         [list(['l1']), np.array([1, 2]), {'alpha': 0.9809565564007693},
             0.2163292127503296, 0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([9, 3, 4, 6, 8, 1, 0, 5, 7, 2], dtype='int64')
+        columns=['aggregation', 'lags', 'params', 'mean_absolute_error', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float, 
         'alpha': float
@@ -343,8 +343,8 @@ def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_create_st
             0.20916485106998073, 1.7018749522740233],
         [list(['l1', 'l2']), np.array([1, 2]), {'alpha': 1.9619131128015386},
             0.2091714215090992, 1.9619131128015386]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([9, 3, 4, 6, 8, 1, 0, 5, 7, 2], dtype='int64')
+        columns=['aggregation', 'lags', 'params', 'mean_absolute_error', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float,
         'alpha': float
@@ -415,7 +415,7 @@ def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_study_opt
         [list(['l1', 'l2']), np.array([1, 2, 3, 4]),
             {'n_estimators': 172, 'max_depth': 24, 'max_features': 'log2'},
             0.22300765864212552, 172, 24, 'log2']], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth', 'max_features'],
+        columns=['aggregation', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth', 'max_features'],
         index=pd.RangeIndex(start=0, stop=7, step=1)
     ).astype({
         'mean_absolute_error': float,
@@ -492,8 +492,8 @@ def test_results_output_bayesian_search_optuna_multiseries_when_lags_is_not_prov
         [list(['l1', 'l2']), np.array([1, 2, 3, 4]),
             {'alpha': 0.9809565564007693}, 0.2148284279387544,
             0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([2, 1, 9, 5, 8, 3, 7, 0, 4, 6], dtype='int64')
+        columns=['aggregation', 'lags', 'params', 'mean_absolute_error', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float,
         'alpha': float
@@ -568,8 +568,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
         [list(['l1', 'l2']), 'custom function: create_predictors',
             {'alpha': 0.9809565564007693}, 0.2148284279387544,
             0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([2, 1, 9, 5, 8, 3, 7, 0, 4, 6], dtype='int64')
+        columns=['aggregation', 'lags', 'params', 'mean_absolute_error', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float,
         'alpha': float
@@ -638,8 +638,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
         [list(['l1']), np.array([1, 2, 3, 4]),
             {'alpha': 0.23598059857016607}, 0.21912194726679404,
             0.23598059857016607]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([1, 0, 5, 7, 2, 8, 6, 4, 3, 9], dtype='int64')
+        columns=['aggregation', 'lags', 'params', 'mean_absolute_error', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float,
         'alpha': float
@@ -721,8 +721,8 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
         [list(['l1']), {'l1': np.array([1, 3]), 'l2': None},
             {'alpha': 0.190666813148965}, 0.22324045507529866,
             0.190666813148965]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([7, 8, 5, 6, 1, 9, 0, 2, 3, 4], dtype='int64')
+        columns=['aggregation', 'lags', 'params', 'mean_absolute_error', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float,
         'alpha': float

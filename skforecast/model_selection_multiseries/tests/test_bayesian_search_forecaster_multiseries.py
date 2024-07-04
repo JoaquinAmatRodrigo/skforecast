@@ -406,7 +406,7 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
             'custom function: create_predictors_14',
             {'n_estimators': 2, 'max_depth': 4}, 746.7287691073261, 2, 4]],
             dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth'],
+        columns=['aggregation', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth'],
         index=pd.Index([0, 1, 2], dtype='int64')
     ).astype({
         'mean_absolute_error': float,
