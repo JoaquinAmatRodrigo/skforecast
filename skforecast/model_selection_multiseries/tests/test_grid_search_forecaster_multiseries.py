@@ -49,6 +49,7 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
                   param_grid          = param_grid,
                   steps               = steps,
                   metric              = 'mean_absolute_error',
+                  aggregate_metric    = 'weighted_average',
                   initial_train_size  = len(series) - n_validation,
                   fixed_train_size    = False,
                   levels              = None,
@@ -64,11 +65,13 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
         'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
         'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_absolute_error': np.array([0.20968100463227382, 0.20969259779858337, 0.20977945312386406, 
-                                         0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
+        'mean_absolute_error__weighted_average':  np.array(
+            [0.20968100463227382, 0.20969259779858337, 0.20977945312386406, 
+             0.21077344827205086, 0.21078653113227208, 0.21078779824759553]
+        ),                                                               
         'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
-        index = pd.Index([3, 4, 5, 2, 1, 0], dtype='int64')
+        index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -97,6 +100,7 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeriesC
                   param_grid          = param_grid,
                   steps               = steps,
                   metric              = 'mean_absolute_error',
+                  aggregate_metric    = 'weighted_average',
                   initial_train_size  = len(series) - n_validation,
                   fixed_train_size    = False,
                   levels              = None,
@@ -112,10 +116,12 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeriesC
         'lags'  : ['custom predictors', 'custom predictors', 'custom predictors'],
         'lags_label': ['custom predictors', 'custom predictors', 'custom predictors'],
         'params': [{'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_absolute_error': np.array([0.21077344827205086, 0.21078653113227208, 0.21078779824759553]),                                                               
+        'mean_absolute_error__weighted_average':  np.array(
+            [0.21077344827205086, 0.21078653113227208, 0.21078779824759553]
+        ),                                                               
         'alpha' : np.array([1., 0.1, 0.01])
         },
-        index = pd.Index([2, 1, 0], dtype='int64')
+        index = pd.Index([0, 1, 2], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -145,6 +151,7 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate
                   param_grid          = param_grid,
                   steps               = steps,
                   metric              = 'mean_absolute_error',
+                  aggregate_metric    = 'weighted_average',
                   initial_train_size  = len(series) - n_validation,
                   fixed_train_size    = False,
                   levels              = None,
@@ -160,10 +167,12 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate
         'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'lags_label': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_absolute_error': np.array([0.20115194, 0.20183032, 0.20566862, 0.22224269, 0.22625017, 0.22644284]),                                                               
+        'mean_absolute_error__weighted_average':  np.array(
+            [0.20115194, 0.20183032, 0.20566862, 0.22224269, 0.22625017, 0.22644284]
+        ),                                                               
         'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
-        index = pd.Index([0, 1, 2, 5, 4, 3], dtype='int64')
+        index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
