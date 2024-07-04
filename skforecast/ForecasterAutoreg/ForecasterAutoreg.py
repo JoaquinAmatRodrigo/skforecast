@@ -830,44 +830,6 @@ class ForecasterAutoreg(ForecasterBase):
         return predictions
 
 
-    # def _predict(
-    #     self,
-    #     steps: int,
-    #     last_window_values: np.ndarray,
-    #     last_window_index: pd.Index,
-    #     exog_values: Optional[np.ndarray]=None
-    # ) -> pd.Series:
-    #     """        
-    #     """
-        
-    #     predictions = self._recursive_predict(
-    #                       steps       = steps,
-    #                       last_window = last_window_values,
-    #                       exog        = exog_values
-    #                   )
-
-    #     if self.differentiation is not None:
-    #         predictions = self.differentiator.inverse_transform_next_window(predictions)
-
-    #     predictions = pd.Series(
-    #                       data  = predictions,
-    #                       index = expand_index(
-    #                                   index = last_window_index,
-    #                                   steps = steps
-    #                               ),
-    #                       name = 'pred'
-    #                   )
-
-    #     predictions = transform_series(
-    #                       series            = predictions,
-    #                       transformer       = self.transformer_y,
-    #                       fit               = False,
-    #                       inverse_transform = True
-    #                   )
-
-    #     return predictions
-
-
     def create_predict_X(
         self,
         steps: int,
@@ -958,13 +920,6 @@ class ForecasterAutoreg(ForecasterBase):
         last_window_values, last_window_index, exog_values = self._create_predict_inputs(
             steps=steps, last_window=last_window, exog=exog
         )
-        
-        # predictions = self._predict(
-        #                   steps              = steps,
-        #                   last_window_values = last_window_values,
-        #                   last_window_index  = last_window_index,
-        #                   exog_values        = exog_values
-        #               )
         
         predictions = self._recursive_predict(
                           steps       = steps,
