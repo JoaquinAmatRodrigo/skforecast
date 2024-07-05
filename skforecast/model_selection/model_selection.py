@@ -107,7 +107,7 @@ def _create_backtesting_folds(
         Number of samples to be excluded after the end of each training set and 
         before the test set.
     skip_folds : int, list, default `None`
-        The step size for selecting elements to keep or list of folds to skip.
+        Folds to skip.
         If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
         is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
         and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
@@ -380,7 +380,6 @@ def _backtesting_forecaster(
         Number of samples to be excluded after the end of each training set and 
         before the test set.
     skip_folds : int, list, default `None`
-        The step size for selecting elements to keep or list of folds to skip.
         If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
         is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
         and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
@@ -683,7 +682,6 @@ def backtesting_forecaster(
         Number of samples to be excluded after the end of each training set and 
         before the test set.
     skip_folds : int, list, default `None`
-        The step size for selecting elements to keep or list of folds to skip.
         If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
         is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
         and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
