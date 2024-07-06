@@ -30,7 +30,7 @@ exog_dict_train = {k: v.loc[:end_train,] for k, v in exog_dict.items()}
 series_dict_test = {k: v.loc[end_train:,] for k, v in series_dict.items()}
 exog_dict_test = {k: v.loc[end_train:,] for k, v in exog_dict.items()}
 series_with_nans = series.copy()
-series_with_nans['l2'].iloc[:10] = np.nan
+series_with_nans.iloc[:10, series_with_nans.columns.get_loc('l2')] = np.nan
 
 def create_predictors(y): # pragma: no cover
     """
@@ -1254,6 +1254,86 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
         [1403.93625654, 2013.4379576 ,        np.nan, 7285.52781428],
         [1403.93625654, 2013.4379576 ,        np.nan, 7285.52781428]]),
         index=pd.date_range('2016-08-01', periods=10, freq='D'),
+        columns=['id_1000', 'id_1001', 'id_1003', 'id_1004']
+    )
+
+    pd.testing.assert_frame_equal(metrics, expected_metrics)
+    pd.testing.assert_frame_equal(predictions.head(10), expected_predictions)
+
+
+@pytest.mark.parametrize("forecaster", 
+    [ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags=14,
+        encoding='ordinal',
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    ), 
+    ForecasterAutoregMultiSeriesCustom(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        fun_predictors=create_predictors_14, 
+        window_size=14,
+        encoding='ordinal',
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    )], 
+    ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_series_and_exog_dict_with_mocked_skip_folds_2(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom when series and exog are
+    dictionaries (mocked done in Skforecast v0.12.0).
+    """
+    
+    metrics, predictions = backtesting_forecaster_multiseries(
+        forecaster            = forecaster,
+        series                = series_dict,
+        exog                  = exog_dict,
+        steps                 = 5,
+        metric                = 'mean_absolute_error',
+        initial_train_size    = len(series_dict_train['id_1000']),
+        fixed_train_size      = True,
+        gap                   = 0,
+        skip_folds            = 2,
+        allow_incomplete_fold = True,
+        refit                 = False,
+        n_jobs                = 'auto',
+        verbose               = True,
+        show_progress         = True,
+        suppress_warnings     = True
+    )
+
+    expected_metrics = pd.DataFrame(
+        data={
+        'levels': ['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004'],
+        'mean_absolute_error':[258.53959034, 1396.68222457, np.nan, 253.72012285,
+                               1367.69574404]
+        },
+        columns=['levels', 'mean_absolute_error']
+    )
+    expected_predictions = pd.DataFrame(
+        data=np.array([
+            [1438.14154717, 2090.79352613, 2166.9832933 , 7285.52781428],
+            [1438.14154717, 2089.11038884, 2074.55994929, 7488.18398744],
+            [1438.14154717, 2089.11038884, 2035.99448247, 7488.18398744],
+            [1403.93625654, 2089.11038884, 2035.99448247, 7488.18398744],
+            [1403.93625654, 2089.11038884, 2035.99448247, 7488.18398744],
+            [1432.18965392, 2013.4379576 ,        np.nan, 7488.18398744],
+            [1403.93625654, 2013.4379576 ,        np.nan, 7488.18398744],
+            [1403.93625654, 2136.7144822 ,        np.nan, 7250.69119259],
+            [1403.93625654, 2136.7144822 ,        np.nan, 7085.32315355],
+            [1438.14154717, 2013.4379576 ,        np.nan, 7285.52781428]]),
+        index=pd.DatetimeIndex([
+                '2016-08-01', '2016-08-02', '2016-08-03', '2016-08-04',
+                '2016-08-05', '2016-08-11', '2016-08-12', '2016-08-13',
+                '2016-08-14', '2016-08-15'],
+                dtype='datetime64[ns]', freq=None),
         columns=['id_1000', 'id_1001', 'id_1003', 'id_1004']
     )
 

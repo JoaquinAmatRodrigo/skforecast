@@ -31,14 +31,10 @@ from ..utils import initialize_lags
 from ..utils import initialize_lags_grid
 from ..utils import set_skforecast_warnings
 
-# import logging
-# logger = logging.getLogger(__name__)
-# logger.setLevel(logging.INFO)
-# console_handler = logging.StreamHandler()
-# console_handler.setLevel(logging.INFO)
-# formatter = logging.Formatter('%(name)-10s %(levelname)-5s %(message)s')
-# console_handler.setFormatter(formatter)
-# logger.addHandler(console_handler)
+logging.basicConfig(
+    format = '%(name)-10s %(levelname)-5s %(message)s', 
+    level  = logging.INFO,
+)
 
 
 def _initialize_levels_model_selection_multiseries(
@@ -265,6 +261,7 @@ def _backtesting_forecaster_multiseries(
     initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
@@ -323,6 +320,11 @@ def _backtesting_forecaster_multiseries(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -464,6 +466,7 @@ def _backtesting_forecaster_multiseries(
                 refit                 = refit,
                 fixed_train_size      = fixed_train_size,
                 gap                   = gap,
+                skip_folds            = skip_folds,
                 allow_incomplete_fold = allow_incomplete_fold,
                 return_all_indexes    = False,
                 verbose               = verbose
@@ -636,6 +639,7 @@ def backtesting_forecaster_multiseries(
     initial_train_size: Optional[int],
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
@@ -695,6 +699,11 @@ def backtesting_forecaster_multiseries(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -773,6 +782,7 @@ def backtesting_forecaster_multiseries(
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
+        skip_folds            = skip_folds,
         allow_incomplete_fold = allow_incomplete_fold,
         refit                 = refit,
         interval              = interval,
@@ -794,6 +804,7 @@ def backtesting_forecaster_multiseries(
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
+        skip_folds            = skip_folds,
         allow_incomplete_fold = allow_incomplete_fold,
         exog                  = exog,
         refit                 = refit,
@@ -819,6 +830,7 @@ def grid_search_forecaster_multiseries(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
@@ -861,6 +873,11 @@ def grid_search_forecaster_multiseries(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -926,6 +943,7 @@ def grid_search_forecaster_multiseries(
                   initial_train_size    = initial_train_size,
                   fixed_train_size      = fixed_train_size,
                   gap                   = gap,
+                  skip_folds            = skip_folds,
                   allow_incomplete_fold = allow_incomplete_fold,
                   levels                = levels,
                   exog                  = exog,
@@ -951,6 +969,7 @@ def random_search_forecaster_multiseries(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
@@ -995,6 +1014,11 @@ def random_search_forecaster_multiseries(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -1066,6 +1090,7 @@ def random_search_forecaster_multiseries(
                   initial_train_size    = initial_train_size,
                   fixed_train_size      = fixed_train_size,
                   gap                   = gap,
+                  skip_folds            = skip_folds,
                   allow_incomplete_fold = allow_incomplete_fold,
                   levels                = levels,
                   exog                  = exog,
@@ -1091,6 +1116,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
@@ -1132,6 +1158,11 @@ def _evaluate_grid_hyperparameters_multiseries(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -1246,6 +1277,7 @@ def _evaluate_grid_hyperparameters_multiseries(
                 initial_train_size    = initial_train_size,
                 fixed_train_size      = fixed_train_size,
                 gap                   = gap,
+                skip_folds            = skip_folds,
                 allow_incomplete_fold = allow_incomplete_fold,
                 refit                 = refit,
                 interval              = None,
@@ -1344,10 +1376,10 @@ def bayesian_search_forecaster_multiseries(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    lags_grid: Any='deprecated',
     refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
@@ -1393,6 +1425,11 @@ def bayesian_search_forecaster_multiseries(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -1402,11 +1439,6 @@ def bayesian_search_forecaster_multiseries(
         the average of the optimization of all levels.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
-    lags_grid : deprecated
-        **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
-        `search_space` to define the candidate values for the lags. This allows 
-        the lags to be optimized along with the other hyperparameters of the 
-        regressor in the bayesian search.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
@@ -1463,14 +1495,6 @@ def bayesian_search_forecaster_multiseries(
             (f"`exog` must have same number of samples as `series`. "
              f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
         )
-    
-    if lags_grid != 'deprecated':
-        warnings.warn(
-            ("The 'lags_grid' argument is deprecated and will be removed in a future version. "
-             "Use the 'search_space' argument to define the candidate values for the lags. "
-             "Example: {'lags' : trial.suggest_categorical('lags', [3, 5])}")
-        )
-        lags_grid = 'deprecated'
 
     if engine not in ['optuna']:
         raise ValueError(
@@ -1489,6 +1513,7 @@ def bayesian_search_forecaster_multiseries(
                               initial_train_size    = initial_train_size,
                               fixed_train_size      = fixed_train_size,
                               gap                   = gap,
+                              skip_folds            = skip_folds,
                               allow_incomplete_fold = allow_incomplete_fold,
                               n_trials              = n_trials,
                               random_state          = random_state,
@@ -1514,6 +1539,7 @@ def _bayesian_search_optuna_multiseries(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
@@ -1560,6 +1586,11 @@ def _bayesian_search_optuna_multiseries(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -1649,6 +1680,7 @@ def _bayesian_search_optuna_multiseries(
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
+        skip_folds            = skip_folds,
         allow_incomplete_fold = allow_incomplete_fold,
         refit                 = refit,
         n_jobs                = n_jobs,
@@ -1673,6 +1705,7 @@ def _bayesian_search_optuna_multiseries(
             initial_train_size    = initial_train_size,
             fixed_train_size      = fixed_train_size,
             gap                   = gap,
+            skip_folds            = skip_folds,
             allow_incomplete_fold = allow_incomplete_fold,
             refit                 = refit,
             n_jobs                = n_jobs,
@@ -2046,6 +2079,7 @@ def backtesting_forecaster_multivariate(
     initial_train_size: Optional[int],
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
@@ -2098,6 +2132,11 @@ def backtesting_forecaster_multivariate(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -2159,6 +2198,7 @@ def backtesting_forecaster_multivariate(
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
+        skip_folds            = skip_folds,
         allow_incomplete_fold = allow_incomplete_fold,
         levels                = levels,
         exog                  = exog,
@@ -2185,6 +2225,7 @@ def grid_search_forecaster_multivariate(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
@@ -2229,6 +2270,11 @@ def grid_search_forecaster_multivariate(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -2292,6 +2338,7 @@ def grid_search_forecaster_multivariate(
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
+        skip_folds            = skip_folds,
         allow_incomplete_fold = allow_incomplete_fold,
         levels                = levels,
         exog                  = exog,
@@ -2317,6 +2364,7 @@ def random_search_forecaster_multivariate(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
@@ -2363,6 +2411,11 @@ def random_search_forecaster_multivariate(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -2431,6 +2484,7 @@ def random_search_forecaster_multivariate(
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
+        skip_folds            = skip_folds,
         allow_incomplete_fold = allow_incomplete_fold,
         levels                = levels,
         exog                  = exog,
@@ -2458,10 +2512,10 @@ def bayesian_search_forecaster_multivariate(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    lags_grid: Any='deprecated',
     refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
@@ -2509,6 +2563,11 @@ def bayesian_search_forecaster_multivariate(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -2518,11 +2577,6 @@ def bayesian_search_forecaster_multivariate(
         the average of the optimization of all levels.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
-    lags_grid : deprecated
-        **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
-        `search_space` to define the candidate values for the lags. This allows 
-        the lags to be optimized along with the other hyperparameters of the 
-        regressor in the bayesian search.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
@@ -2579,8 +2633,7 @@ def bayesian_search_forecaster_multivariate(
                               forecaster            = forecaster,
                               series                = series,
                               exog                  = exog,
-                              levels                = levels, 
-                              lags_grid             = lags_grid,
+                              levels                = levels,
                               search_space          = search_space,
                               steps                 = steps,
                               metric                = metric,
@@ -2588,6 +2641,7 @@ def bayesian_search_forecaster_multivariate(
                               initial_train_size    = initial_train_size,
                               fixed_train_size      = fixed_train_size,
                               gap                   = gap,
+                              skip_folds            = skip_folds,
                               allow_incomplete_fold = allow_incomplete_fold,
                               n_trials              = n_trials,
                               random_state          = random_state,

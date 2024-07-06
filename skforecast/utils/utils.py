@@ -1818,6 +1818,7 @@ def check_backtesting_input(
     initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     refit: Union[bool, int]=False,
     interval: Optional[list]=None,
@@ -1858,6 +1859,11 @@ def check_backtesting_input(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -2005,6 +2011,21 @@ def check_backtesting_input(
     if not isinstance(gap, (int, np.integer)) or gap < 0:
         raise TypeError(
             f"`gap` must be an integer greater than or equal to 0. Got {gap}."
+        )
+    if not isinstance(skip_folds, (int, list, type(None))):
+        raise TypeError(
+            (f"`skip_folds` must be an integer greater than 0, a list of "
+             f"integers or `None`. Got {type(skip_folds)}.")
+        )
+    if isinstance(skip_folds, int) and skip_folds < 1:
+        raise ValueError(
+            (f"`skip_folds` must be an integer greater than 0, a list of "
+             f"integers or `None`. Got {skip_folds}.")
+        )
+    if isinstance(skip_folds, list) and 0 in skip_folds:
+        raise ValueError(
+            ("`skip_folds` cannot contain the value 0, the first fold is "
+             "needed to train the forecaster.")
         )
     if not isinstance(metric, (str, Callable, list)):
         raise TypeError(

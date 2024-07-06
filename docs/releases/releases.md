@@ -16,6 +16,8 @@ The main changes in this release are:
 
 + <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/api/forecastermultiseries) and [`ForecasterAutoregMultiSeriesCustom`](https://skforecast.org/latest/api/forecastermultiseriescustom). In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
 
++ <span class="badge text-bg-feature">Feature</span> New argument `skip_folds` in `model_selection` and `model_selection_multiseries` functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
+  
 **Added**
 
 + Support for `python 3.12`.
@@ -23,6 +25,8 @@ The main changes in this release are:
 + Create method `create_predict_inputs` in all forecasters to allow the user have more control over the inputs of the predict methods.
 
 + New plot function `plot_predicted_intervals` in the `plot` module to plot predicted intervals.
+
++ New argument `skip_folds` in `model_selection` and `model_selection_multiseries` functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
 
 **Changed**
 
@@ -33,6 +37,8 @@ The main changes in this release are:
 + Refactor `_recursive_predict` in all recursive forecasters.
 
 + Change default value of `transformer_series` when initializing `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` from `StandardScaler()` to `None`.
+
++ Change information message when `verbose` is `True` in `backtesting_forecaster` and `backtesting_forecaster_multiseries`.
 
 **Fixed**
 
