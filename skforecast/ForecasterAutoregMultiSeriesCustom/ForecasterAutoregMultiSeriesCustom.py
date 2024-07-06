@@ -1216,16 +1216,14 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         set_skforecast_warnings(suppress_warnings, action='default')
 
 
-    def create_predict_inputs(
+    def _create_predict_inputs(
         self,
         steps: int,
         levels: Optional[Union[str, list]]=None,
         last_window: Optional[pd.DataFrame]=None,
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
         predict_boot: bool=False,
-        in_sample_residuals: bool=True,
-        output_type: str='pandas',
-        suppress_warnings: bool=False
+        in_sample_residuals: bool=True
     ) -> Tuple[dict, dict, list, pd.Index, Optional[dict]]:
         """
         Create inputs needed for the first iteration of the prediction process. 
@@ -1255,14 +1253,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
-        output_type : str, default `pandas`
-            Type of output. If `pandas`, the values of `last_window_values_dict` 
-            and `exog_values_dict` dicts are returned as pandas objects. If 
-            `numpy`, the values are returned as numpy ndarrays.
-        suppress_warnings : bool, default `False`
-            If `True`, skforecast warnings will be suppressed during the prediction 
-            process. See skforecast.exceptions.warn_skforecast_categories for more
-            information.
 
         Returns
         -------
@@ -1281,8 +1271,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             `residuals` is `None`.
         
         """
-
-        set_skforecast_warnings(suppress_warnings, action='ignore')
 
         levels, input_levels_is_list = prepare_levels_multiseries(
                                            series_X_train = self.series_X_train,
@@ -1355,10 +1343,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                             inverse_transform = False
                         )
                 check_exog_dtypes(exog=exog)
-                if output_type == 'pandas':
-                    exog_values = exog.iloc[:steps]
-                else:
-                    exog_values = exog.to_numpy()[:steps]
+                exog_values = exog.to_numpy()[:steps]
         else:
             exog_values = None
         
@@ -1375,13 +1360,6 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             last_window_values = last_window_level.to_numpy()
             if self.differentiation is not None:
                 last_window_values = self.differentiator_[level].fit_transform(last_window_values)
-
-            if output_type == 'pandas':
-                last_window_values = pd.Series(
-                                         data  = last_window_values,
-                                         index = last_window_index,
-                                         name  = level
-                                     )
             
             last_window_values_dict[level] = last_window_values
             
@@ -1404,13 +1382,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
                     exog      = exog_values,
                     series_id = f"`exog` for series '{level}'"
                 )
-
-                if output_type == 'numpy':
-                    exog_values = exog_values.to_numpy()
+                exog_values = exog_values.to_numpy()
             
             exog_values_dict[level] = exog_values
-        
-        set_skforecast_warnings(suppress_warnings, action='default')
 
         return last_window_values_dict, exog_values_dict, levels, prediction_index, residuals
 
@@ -1479,6 +1453,107 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         return predictions
 
 
+    def create_predict_X(
+        self,
+        steps: int,
+        levels: Optional[Union[str, list]]=None,
+        last_window: Optional[pd.DataFrame]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
+        suppress_warnings: bool=False
+    ) -> dict:
+        """
+        Create the predictors needed to predict `steps` ahead. As it is a recursive
+        process, the predictors are created at each iteration of the prediction 
+        process.
+        
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        levels : str, list, default `None`
+            Time series to be predicted. If `None` all levels whose last window
+            ends at the same datetime index will be predicted together.
+        last_window : pandas DataFrame, default `None`
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
+            If `last_window = None`, the values stored in `self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
+
+        Returns
+        -------
+        X_predict_dict : dict
+            Dict in the form `{level: X_predict}` with the predictors for each 
+            step and series. The index is the same as the prediction index.
+        
+        """
+
+        set_skforecast_warnings(suppress_warnings, action='ignore')
+
+        (
+            last_window_values_dict,
+            exog_values_dict,
+            levels,
+            prediction_index,
+            _
+        ) = self._create_predict_inputs(
+            steps       = steps,
+            levels      = levels,
+            last_window = last_window,
+            exog        = exog
+        )
+
+        predictions = self.predict(
+                          steps             = steps,
+                          levels            = levels,
+                          last_window       = last_window,
+                          exog              = exog,
+                          suppress_warnings = suppress_warnings
+                      )
+        
+        X_predict_dict = {}
+        for level in levels:
+
+            full_predictors = np.concatenate(
+                (last_window_values_dict[level], predictions[level])
+            )
+
+            X_predict = [
+                self.fun_predictors(y=full_predictors[i:self.window_size_diff + i])
+                for i in range(steps)
+            ]
+
+            if self.encoding == 'onehot':
+                level_encoded = np.zeros(shape=(1, len(self.series_col_names)), dtype=float)
+                level_encoded[0][self.series_col_names.index(level)] = 1.
+            else:
+                level_encoded = np.array([self.encoding_mapping[level]], dtype='float64')
+
+            level_encoded = np.tile(level_encoded, (steps, 1))
+            X_predict = np.concatenate((X_predict, level_encoded), axis=1)
+            
+            if exog is not None:
+                X_predict = np.concatenate(
+                    [X_predict, exog_values_dict[level]], axis=1
+                )
+
+            X_predict_dict[level] = pd.DataFrame(
+                                        data    = X_predict,
+                                        columns = self.X_train_col_names,
+                                        index   = prediction_index
+                                    )
+        
+        set_skforecast_warnings(suppress_warnings, action='default')
+
+        return X_predict_dict
+
+
     def predict(
         self,
         steps: int,
@@ -1527,13 +1602,11 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             levels,
             prediction_index,
             _
-        ) = self.create_predict_inputs(
+        ) = self._create_predict_inputs(
             steps             = steps,
             levels            = levels,
             last_window       = last_window,
-            exog              = exog,
-            output_type       = "numpy",
-            suppress_warnings = suppress_warnings
+            exog              = exog
         )
 
         predictions = []
@@ -1642,15 +1715,13 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             levels,
             prediction_index,
             residuals
-        ) = self.create_predict_inputs(
+        ) = self._create_predict_inputs(
             steps               = steps,
             levels              = levels,
             last_window         = last_window,
             exog                = exog,
             predict_boot        = True,
-            in_sample_residuals = in_sample_residuals,
-            output_type         = "numpy",
-            suppress_warnings   = suppress_warnings
+            in_sample_residuals = in_sample_residuals
         )
 
         boot_predictions = {}
