@@ -401,13 +401,13 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
     expected = pd.DataFrame(
         np.array([[list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
         np.array([ 1,  7, 14]), {'n_estimators': 4, 'max_depth': 3}, 
-            709.8836514262415, 4, 3],
+            694.843611295513, 4, 3],
         [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
         np.array([ 1,  7, 14]), {'n_estimators': 3, 'max_depth': 3},
-            721.1848222120482, 3, 3],
+            704.8898538858386, 3, 3],
         [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
          np.array([5]), {'n_estimators': 4, 'max_depth': 3},
-            754.3537196425694, 4, 3]], dtype=object),
+            730.1888301097707, 4, 3]], dtype=object),
         columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth'],
         index=pd.Index([0, 2, 1], dtype='int64')
     ).astype({
@@ -415,7 +415,7 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
         'n_estimators': int,
         'max_depth': int
     })
-    
+
     results_search = results_search.astype({
         'mean_absolute_error': float,
         'n_estimators': int,

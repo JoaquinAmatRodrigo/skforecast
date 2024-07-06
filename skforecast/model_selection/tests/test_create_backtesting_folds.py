@@ -54,10 +54,10 @@ def test_create_backtesting_folds_no_refit_no_gap_no_remainder(capfd, return_all
         "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
         "    Validation: 2022-03-12 00:00:00 -- 2022-03-21 00:00:00  (n=10)\n"
         "Fold: 1\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-03-22 00:00:00 -- 2022-03-31 00:00:00  (n=10)\n"
         "Fold: 2\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-04-01 00:00:00 -- 2022-04-10 00:00:00  (n=10)\n\n"
     )
 
@@ -115,10 +115,10 @@ def test_create_backtesting_folds_no_refit_no_gap_allow_incomplete_fold_False(ca
         "    Training:   2022-01-01 00:00:00 -- 2022-03-06 00:00:00  (n=65)\n"
         "    Validation: 2022-03-07 00:00:00 -- 2022-03-16 00:00:00  (n=10)\n"
         "Fold: 1\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-03-17 00:00:00 -- 2022-03-26 00:00:00  (n=10)\n"
         "Fold: 2\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-03-27 00:00:00 -- 2022-04-05 00:00:00  (n=10)\n\n"
     )
 
@@ -179,13 +179,13 @@ def test_create_backtesting_folds_no_refit_gap_allow_incomplete_fold_True(capfd,
         "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
         "    Validation: 2022-03-17 00:00:00 -- 2022-03-23 00:00:00  (n=7)\n"
         "Fold: 1\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-03-24 00:00:00 -- 2022-03-30 00:00:00  (n=7)\n"
         "Fold: 2\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-03-31 00:00:00 -- 2022-04-06 00:00:00  (n=7)\n"
         "Fold: 3\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-04-07 00:00:00 -- 2022-04-10 00:00:00  (n=4)\n\n"
     )
 
@@ -249,28 +249,28 @@ def test_create_backtesting_folds_no_refit_no_initial_train_size_gap(capfd, retu
         "    Number of steps per fold: 10\n"
         "    Number of steps to exclude from the end of each train set before test (gap): 5\n\n"
         "Fold: 0\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 20 -- 29  (n=10)\n"
         "Fold: 1\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 30 -- 39  (n=10)\n"
         "Fold: 2\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 40 -- 49  (n=10)\n"
         "Fold: 3\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 50 -- 59  (n=10)\n"
         "Fold: 4\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 60 -- 69  (n=10)\n"
         "Fold: 5\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 70 -- 79  (n=10)\n"
         "Fold: 6\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 80 -- 89  (n=10)\n"
         "Fold: 7\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 90 -- 99  (n=10)\n\n"
     )
 
@@ -709,13 +709,13 @@ def test_create_backtesting_folds_refit_int_no_fixed_no_gap_no_remainder(capfd, 
         "    Training:   2022-01-01 00:00:00 -- 2022-03-01 00:00:00  (n=60)\n"
         "    Validation: 2022-03-02 00:00:00 -- 2022-03-11 00:00:00  (n=10)\n"
         "Fold: 1\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-03-12 00:00:00 -- 2022-03-21 00:00:00  (n=10)\n"
         "Fold: 2\n"
         "    Training:   2022-01-01 00:00:00 -- 2022-03-21 00:00:00  (n=80)\n"
         "    Validation: 2022-03-22 00:00:00 -- 2022-03-31 00:00:00  (n=10)\n"
         "Fold: 3\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-04-01 00:00:00 -- 2022-04-10 00:00:00  (n=10)\n\n"
     )
 
@@ -774,10 +774,10 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_no_gap_no_remainder
         "    Training:   2022-01-01 00:00:00 -- 2022-03-01 00:00:00  (n=60)\n"
         "    Validation: 2022-03-02 00:00:00 -- 2022-03-11 00:00:00  (n=10)\n"
         "Fold: 1\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-03-12 00:00:00 -- 2022-03-21 00:00:00  (n=10)\n"
         "Fold: 2\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-03-22 00:00:00 -- 2022-03-31 00:00:00  (n=10)\n"
         "Fold: 3\n"
         "    Training:   2022-01-31 00:00:00 -- 2022-03-31 00:00:00  (n=60)\n"
@@ -842,13 +842,13 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_T
         "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
         "    Validation: 2022-03-17 00:00:00 -- 2022-03-23 00:00:00  (n=7)\n"
         "Fold: 1\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-03-24 00:00:00 -- 2022-03-30 00:00:00  (n=7)\n"
         "Fold: 2\n"
         "    Training:   2022-01-01 00:00:00 -- 2022-03-25 00:00:00  (n=84)\n"
         "    Validation: 2022-03-31 00:00:00 -- 2022-04-06 00:00:00  (n=7)\n"
         "Fold: 3\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-04-07 00:00:00 -- 2022-04-10 00:00:00  (n=4)\n\n"
     )
 
@@ -909,10 +909,10 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
         "    Training:   0 -- 69  (n=70)\n"
         "    Validation: 75 -- 81  (n=7)\n"
         "Fold: 1\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 82 -- 88  (n=7)\n"
         "Fold: 2\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 89 -- 95  (n=7)\n"
         "Fold: 3\n"
         "    Training:   21 -- 90  (n=70)\n"
@@ -975,10 +975,10 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_F
         "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
         "    Validation: 2022-03-17 00:00:00 -- 2022-03-23 00:00:00  (n=7)\n"
         "Fold: 1\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-03-24 00:00:00 -- 2022-03-30 00:00:00  (n=7)\n"
         "Fold: 2\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 2022-03-31 00:00:00 -- 2022-04-06 00:00:00  (n=7)\n\n"
     )
 
@@ -1037,7 +1037,7 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
         "    Training:   0 -- 69  (n=70)\n"
         "    Validation: 75 -- 81  (n=7)\n"
         "Fold: 1\n"
-        "    Training:   no training in this fold\n"
+        "    Training:   No training in this fold\n"
         "    Validation: 82 -- 88  (n=7)\n"
         "Fold: 2\n"
         "    Training:   14 -- 83  (n=70)\n"
@@ -1111,7 +1111,18 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder_differentia
     assert folds == expected
 
 
-def test_create_backtesting_folds_refit_fixed_no_gap_no_remainder_skip_folds_3(capfd):
+@pytest.mark.parametrize("skip_folds",
+                         [3, [1, 2, 4, 5, 7]],
+                         ids = lambda skip_folds : f'{skip_folds}' )
+@pytest.mark.parametrize("return_all_indexes, expected",
+                         [(True, [[range(0, 70), range(68, 70), range(70, 80), range(70, 80), False],
+                                  [range(30, 100), range(98, 100), range(100, 110), range(100, 110), True],
+                                  [range(60, 130), range(128, 130), range(130, 140), range(130, 140), True]]),
+                          (False, [[[0, 70], [68, 70], [70, 80], [70, 80], False],
+                                   [[30, 100], [98, 100], [100, 110], [100, 110], True],
+                                   [[60, 130], [128, 130], [130, 140], [130, 140], True]])],
+                         ids = lambda argument : f'{argument}' )
+def test_create_backtesting_folds_refit_fixed_no_gap_no_remainder_skip_folds_3(capfd, skip_folds, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is True, fixed_train_size is 
     True, gap=0, not remainder and skip_folds=3.
@@ -1124,7 +1135,6 @@ def test_create_backtesting_folds_refit_fixed_no_gap_no_remainder_skip_folds_3(c
     refit = True
     fixed_train_size = True
     gap = 0
-    skip_folds = 3
 
     folds = _create_backtesting_folds(
                 data                  = y,
@@ -1137,47 +1147,41 @@ def test_create_backtesting_folds_refit_fixed_no_gap_no_remainder_skip_folds_3(c
                 gap                   = gap,
                 skip_folds            = skip_folds,
                 allow_incomplete_fold = True,
-                return_all_indexes    = True,
+                return_all_indexes    = return_all_indexes,
                 differentiation       = None,
                 verbose               = True
             )
 
     out, _ = capfd.readouterr()
     expected_out = (
-            'Information of backtesting process\n'
-            '----------------------------------\n'
-            'Number of observations used for initial training: 70\n'
-            'Number of observations used for backtesting: 80\n'
-            '    Number of folds: 8\n'
-            '    Number skipped folds: 5 [1, 2, 4, 5, 7]\n'
-            '    Number of steps per fold: 10\n'
-            '    Number of steps to exclude from the end of each train set before test (gap): 0\n\n'
-            'Fold: 0\n'
-            '    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n'
-            '    Validation: 2022-03-12 00:00:00 -- 2022-03-21 00:00:00  (n=10)\n'
-            'Fold: 1\n'
-            '    Fold skipped\n'
-            'Fold: 2\n'
-            '    Fold skipped\n'
-            'Fold: 3\n'
-            '    Training:   2022-01-31 00:00:00 -- 2022-04-10 00:00:00  (n=70)\n'
-            '    Validation: 2022-04-11 00:00:00 -- 2022-04-20 00:00:00  (n=10)\n'
-            'Fold: 4\n'
-            '    Fold skipped\n'
-            'Fold: 5\n'
-            '    Fold skipped\n'
-            'Fold: 6\n'
-            '    Training:   2022-03-02 00:00:00 -- 2022-05-10 00:00:00  (n=70)\n'
-            '    Validation: 2022-05-11 00:00:00 -- 2022-05-20 00:00:00  (n=10)\n'
-            'Fold: 7\n'
-            '    Fold skipped\n\n'
+        "Information of backtesting process\n"
+        "----------------------------------\n"
+        "Number of observations used for initial training: 70\n"
+        "Number of observations used for backtesting: 80\n"
+        "    Number of folds: 8\n"
+        "    Number skipped folds: 5 [1, 2, 4, 5, 7]\n"
+        "    Number of steps per fold: 10\n"
+        "    Number of steps to exclude from the end of each train set before test (gap): 0\n\n"
+        "Fold: 0\n"
+        "    Training:   2022-01-01 00:00:00 -- 2022-03-11 00:00:00  (n=70)\n"
+        "    Validation: 2022-03-12 00:00:00 -- 2022-03-21 00:00:00  (n=10)\n"
+        "Fold: 1\n"
+        "    Fold skipped\n"
+        "Fold: 2\n"
+        "    Fold skipped\n"
+        "Fold: 3\n"
+        "    Training:   2022-01-31 00:00:00 -- 2022-04-10 00:00:00  (n=70)\n"
+        "    Validation: 2022-04-11 00:00:00 -- 2022-04-20 00:00:00  (n=10)\n"
+        "Fold: 4\n"
+        "    Fold skipped\n"
+        "Fold: 5\n"
+        "    Fold skipped\n"
+        "Fold: 6\n"
+        "    Training:   2022-03-02 00:00:00 -- 2022-05-10 00:00:00  (n=70)\n"
+        "    Validation: 2022-05-11 00:00:00 -- 2022-05-20 00:00:00  (n=10)\n"
+        "Fold: 7\n"
+        "    Fold skipped\n\n"
     )
-
-    expected = [
-        [range(0, 70), range(68, 70), range(70, 80), range(70, 80), False],
-        [range(30, 100), range(98, 100), range(100, 110), range(100, 110), True],
-        [range(60, 130), range(128, 130), range(130, 140), range(130, 140), True],
-    ]
 
     assert out == expected_out
     assert folds == expected

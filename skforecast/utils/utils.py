@@ -2012,6 +2012,21 @@ def check_backtesting_input(
         raise TypeError(
             f"`gap` must be an integer greater than or equal to 0. Got {gap}."
         )
+    if not isinstance(skip_folds, (int, list, type(None))):
+        raise TypeError(
+            (f"`skip_folds` must be an integer greater than 0, a list of "
+             f"integers or `None`. Got {type(skip_folds)}.")
+        )
+    if isinstance(skip_folds, int) and skip_folds < 1:
+        raise ValueError(
+            (f"`skip_folds` must be an integer greater than 0, a list of "
+             f"integers or `None`. Got {skip_folds}.")
+        )
+    if isinstance(skip_folds, list) and 0 in skip_folds:
+        raise ValueError(
+            ("`skip_folds` cannot contain the value 0, the first fold is "
+             "needed to train the forecaster.")
+        )
     if not isinstance(metric, (str, Callable, list)):
         raise TypeError(
             (f"`metric` must be a string, a callable function, or a list containing "
@@ -2081,21 +2096,6 @@ def check_backtesting_input(
         raise TypeError("`show_progress` must be a boolean: `True`, `False`.")
     if not isinstance(suppress_warnings, bool):
         raise TypeError("`suppress_warnings` must be a boolean: `True`, `False`.")
-    if not isinstance(skip_folds, (int, list, type(None))):
-        raise TypeError(
-            (f"`skip_folds` must be an integer greater than 0, a list of "
-             f"integers or `None`. Got {type(skip_folds)}.")
-        )
-    if isinstance(skip_folds, int) and skip_folds < 1:
-        raise TypeError(
-            (f"`skip_folds` must be an integer greater than 0, a list of "
-             f"integers or `None`. Got {skip_folds}.")
-        )
-    if isinstance(skip_folds, list) and 0 in skip_folds and not refit:
-        raise ValueError(
-            "`skip_folds` cannot contain the value 0 if `refit` is `False` "
-            "since the first fold is needed to train the forecaster."
-        )
 
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)

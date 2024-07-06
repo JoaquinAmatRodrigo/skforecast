@@ -497,6 +497,123 @@ def test_check_backtesting_input_TypeError_when_gap_not_int_greater_or_equal_0(g
         )
 
 
+@pytest.mark.parametrize("skip_folds", 
+                         ['not_int', 2.3], 
+                         ids = lambda value : f'skip_folds: {value}' )
+def test_check_backtesting_input_TypeError_when_skip_folds_not_int_list_or_None(skip_folds):
+    """
+    Test TypeError is raised in check_backtesting_input if `skip_folds` is not an 
+    integer, a list of integers or None.
+    """
+    forecaster = ForecasterAutoreg(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+    
+    err_msg = re.escape(
+        (f"`skip_folds` must be an integer greater than 0, a list of "
+         f"integers or `None`. Got {type(skip_folds)}.")
+    )
+    with pytest.raises(TypeError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = y,
+            series                = None,
+            initial_train_size    = len(y[:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = skip_folds,
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            verbose               = False,
+            show_progress         = False,
+            suppress_warnings     = False
+        )
+
+
+@pytest.mark.parametrize("skip_folds", 
+                         [0, -1], 
+                         ids = lambda value : f'skip_folds: {value}' )
+def test_check_backtesting_input_ValueError_when_skip_folds_int_less_than_1(skip_folds):
+    """
+    Test ValueError is raised in check_backtesting_input if `skip_folds` is 
+    an integer less than 1.
+    """
+    forecaster = ForecasterAutoreg(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+    
+    err_msg = re.escape(
+        (f"`skip_folds` must be an integer greater than 0, a list of "
+         f"integers or `None`. Got {skip_folds}.")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = y,
+            series                = None,
+            initial_train_size    = len(y[:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = skip_folds,
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            verbose               = False,
+            show_progress         = False,
+            suppress_warnings     = False
+        )
+
+
+def test_check_backtesting_input_ValueError_when_skip_folds_list_with_0():
+    """
+    Test ValueError is raised in check_backtesting_input if `skip_folds` is 
+    a list containing the value 0.
+    """
+    forecaster = ForecasterAutoreg(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2
+                 )
+    
+    err_msg = re.escape(
+        ("`skip_folds` cannot contain the value 0, the first fold is "
+         "needed to train the forecaster.")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_backtesting_input(
+            forecaster            = forecaster,
+            steps                 = 3,
+            metric                = 'mean_absolute_error',
+            y                     = y,
+            series                = None,
+            initial_train_size    = len(y[:-12]),
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = [0, 2],
+            allow_incomplete_fold = False,
+            refit                 = False,
+            interval              = None,
+            n_boot                = 500,
+            random_state          = 123,
+            in_sample_residuals   = True,
+            verbose               = False,
+            show_progress         = False,
+            suppress_warnings     = False
+        )
+
+
 def test_check_backtesting_input_TypeError_when_metric_not_correct_type():
     """
     Test TypeError is raised in check_backtesting_input if `metric` is not string, 

@@ -270,11 +270,13 @@ def test_output_backtesting_forecaster_yes_exog_yes_remainder_with_mocked():
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
+
 def test_output_backtesting_forecaster_yes_exog_yes_remainder_skip_folds_with_mocked():
     """
     Test output of _backtesting_forecaster with backtesting mocked, interval no.
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked,
-    12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error'
+    12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error',
+    skip_folds=2
     """
     expected_metric = 0.04512295747656866
     expected_predictions = pd.DataFrame(
@@ -299,25 +301,68 @@ def test_output_backtesting_forecaster_yes_exog_yes_remainder_skip_folds_with_mo
     y_train = y[:-n_backtest]
 
     metric, backtest_predictions = _backtesting_forecaster(
-        forecaster=forecaster,
-        y=y,
-        exog=exog,
-        refit=True,
-        initial_train_size=len(y_train),
-        fixed_train_size=False,
-        steps=5,
-        skip_folds=2,
-        metric="mean_squared_error",
-        interval=None,
-        n_boot=500,
-        random_state=123,
-        in_sample_residuals=True,
-        verbose=False,
-    )
+                                        forecaster          = forecaster,
+                                        y                   = y,
+                                        exog                = exog,
+                                        refit               = True,
+                                        initial_train_size  = len(y_train),
+                                        fixed_train_size    = False,
+                                        steps               = 5,
+                                        skip_folds          = 2,
+                                        metric              = 'mean_squared_error',
+                                        interval            = None,
+                                        n_boot              = 500,
+                                        random_state        = 123,
+                                        in_sample_residuals = True,
+                                        verbose             = False
+                                   )
 
     assert expected_metric == approx(metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
-    
+
+
+def test_output_backtesting_forecaster_yes_exog_yes_remainder_skip_folds_intermittent_refit_with_mocked():
+    """
+    Test output of _backtesting_forecaster with backtesting mocked, interval no.
+    Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked,
+    24 observations to backtest, steps=3 (0 remainder), metric='mean_squared_error',
+    skip_folds=2 and intermittent refit.
+    """
+    expected_metric = 0.055092292428684
+    expected_predictions = pd.DataFrame(
+        {
+            "pred": np.array([
+                0.43818148, 0.67328031, 0.61839117, 0.61725831, 0.49333332,
+                0.39198592, 0.6550626 , 0.48837405, 0.54686219, 0.42804696,
+                0.4227273 , 0.5499255 ])
+        },
+        index=[26, 27, 28, 32, 33, 34, 38, 39, 40, 44, 45, 46],
+    )
+    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
+
+    n_backtest = 24
+    y_train = y[:-n_backtest]
+
+    metric, backtest_predictions = _backtesting_forecaster(
+                                        forecaster          = forecaster,
+                                        y                   = y,
+                                        exog                = exog,
+                                        refit               = 3,
+                                        initial_train_size  = len(y_train),
+                                        fixed_train_size    = False,
+                                        steps               = 3,
+                                        skip_folds          = 2,
+                                        metric              = 'mean_squared_error',
+                                        interval            = None,
+                                        n_boot              = 500,
+                                        random_state        = 123,
+                                        in_sample_residuals = True,
+                                        verbose             = False
+                                   )
+
+    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
 
 # ******************************************************************************
 # * Test _backtesting_forecaster Interval                                      *
