@@ -251,7 +251,7 @@ def _create_backtesting_folds(
                     f"    Validation: {validation_start} -- {validation_end}  (n={validation_length})"
                 )
             else:
-                print("    Training:   no training in this fold")
+                print("    Training:   No training in this fold")
                 print(
                     f"    Validation: {validation_start} -- {validation_end}  (n={validation_length})"
                 )
@@ -815,6 +815,7 @@ def grid_search_forecaster(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
@@ -855,6 +856,11 @@ def grid_search_forecaster(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -912,6 +918,7 @@ def grid_search_forecaster(
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
+        skip_folds            = skip_folds,
         allow_incomplete_fold = allow_incomplete_fold,
         exog                  = exog,
         lags_grid             = lags_grid,
@@ -935,6 +942,7 @@ def random_search_forecaster(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
@@ -977,6 +985,11 @@ def random_search_forecaster(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -1039,6 +1052,7 @@ def random_search_forecaster(
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
+        skip_folds            = skip_folds,
         allow_incomplete_fold = allow_incomplete_fold,
         exog                  = exog,
         lags_grid             = lags_grid,
@@ -1062,6 +1076,7 @@ def _evaluate_grid_hyperparameters(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     lags_grid: Optional[Union[list, dict]]=None,
@@ -1101,6 +1116,11 @@ def _evaluate_grid_hyperparameters(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -1198,6 +1218,7 @@ def _evaluate_grid_hyperparameters(
                                  initial_train_size    = initial_train_size,
                                  fixed_train_size      = fixed_train_size,
                                  gap                   = gap,
+                                 skip_folds            = skip_folds,
                                  allow_incomplete_fold = allow_incomplete_fold,
                                  exog                  = exog,
                                  refit                 = refit,
@@ -1271,9 +1292,9 @@ def bayesian_search_forecaster(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    lags_grid: Any='deprecated',
     refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
@@ -1317,18 +1338,18 @@ def bayesian_search_forecaster(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
-        regressed on exog[i]. 
-    lags_grid : deprecated
-        **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
-        `search_space` to define the candidate values for the lags. This way,
-        lags can be optimized together with the other parameters of the regressor
-        in the bayesian search.
+        regressed on exog[i].
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
         the Forecaster will be trained every that number of iterations.
@@ -1384,14 +1405,6 @@ def bayesian_search_forecaster(
              f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
         )
 
-    if lags_grid != 'deprecated':
-        warnings.warn(
-            ("The 'lags_grid' argument is deprecated and will be removed in a future version. "
-             "Use the 'search_space' argument to define the candidate values for the lags. "
-             "Example: {'lags' : trial.suggest_categorical('lags', [3, 5])}")
-        )
-        lags_grid = 'deprecated'
-
     if engine not in ['optuna']:
         raise ValueError(
             f"`engine` only allows 'optuna', got {engine}."
@@ -1401,7 +1414,6 @@ def bayesian_search_forecaster(
                               forecaster            = forecaster,
                               y                     = y,
                               exog                  = exog,
-                              lags_grid             = lags_grid,
                               search_space          = search_space,
                               steps                 = steps,
                               metric                = metric,
@@ -1409,6 +1421,7 @@ def bayesian_search_forecaster(
                               initial_train_size    = initial_train_size,
                               fixed_train_size      = fixed_train_size,
                               gap                   = gap,
+                              skip_folds            = skip_folds,
                               allow_incomplete_fold = allow_incomplete_fold,
                               n_trials              = n_trials,
                               random_state          = random_state,
@@ -1433,9 +1446,9 @@ def _bayesian_search_optuna(
     initial_train_size: int,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    lags_grid: Any='deprecated',
     refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
@@ -1478,6 +1491,11 @@ def _bayesian_search_optuna(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -1485,11 +1503,6 @@ def _bayesian_search_optuna(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    lags_grid : deprecated
-        **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
-        `search_space` to define the candidate values for the lags. This allows 
-        the lags to be optimized along with the other hyperparameters of the 
-        regressor in the bayesian search.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
         the Forecaster will be trained every that number of iterations.
@@ -1558,6 +1571,7 @@ def _bayesian_search_optuna(
         initial_train_size    = initial_train_size,
         fixed_train_size      = fixed_train_size,
         gap                   = gap,
+        skip_folds            = skip_folds,
         allow_incomplete_fold = allow_incomplete_fold,
         refit                 = refit,
         n_jobs                = n_jobs,
@@ -1579,6 +1593,7 @@ def _bayesian_search_optuna(
                          metric                = metric,
                          initial_train_size    = initial_train_size,
                          fixed_train_size      = fixed_train_size,
+                         skip_folds            = skip_folds,
                          gap                   = gap,
                          allow_incomplete_fold = allow_incomplete_fold,
                          refit                 = refit,
