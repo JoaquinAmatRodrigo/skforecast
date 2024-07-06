@@ -358,7 +358,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
     of different lengths.
     """
     new_series = series.copy()
-    new_series['2'].iloc[:10] = np.nan
+    new_series.iloc[:10, 1] = np.nan
 
     transformer_exog = ColumnTransformer(
                            [('scale', StandardScaler(), ['exog_1']),
