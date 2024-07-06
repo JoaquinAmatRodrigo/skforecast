@@ -784,12 +784,10 @@ class ForecasterAutoregCustom(ForecasterBase):
         full_predictors = np.concatenate((last_window_values, predictions))
         X_predict = np.full(shape=steps, fill_value=np.nan)
 
-        X_predict = []
-        for i in range(steps):
-            X = self.fun_predictors(
-                y=full_predictors[i:self.window_size_diff + i]
-            )
-            X_predict.append(X)
+        X_predict = [
+            self.fun_predictors(y=full_predictors[i:self.window_size_diff + i])
+            for i in range(steps)
+        ]
             
         if exog is not None:
             X_predict = np.concatenate((X_predict, exog_values), axis=1)
