@@ -836,10 +836,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 col for col in series_col_names if X_train[col].sum() > 0
             ]
         else:
-            _level_skforecast = X_train['_level_skforecast'].unique()
+            unique_levels = X_train['_level_skforecast'].unique()
             series_X_train = [
                 k for k, v in self.encoding_mapping.items()
-                if v in _level_skforecast
+                if v in unique_levels
             ]
 
         # The last time window of training data is stored so that lags needed as
