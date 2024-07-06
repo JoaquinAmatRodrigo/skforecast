@@ -1380,7 +1380,6 @@ def bayesian_search_forecaster_multiseries(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    lags_grid: Any='deprecated',
     refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
@@ -1440,11 +1439,6 @@ def bayesian_search_forecaster_multiseries(
         the average of the optimization of all levels.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
-    lags_grid : deprecated
-        **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
-        `search_space` to define the candidate values for the lags. This allows 
-        the lags to be optimized along with the other hyperparameters of the 
-        regressor in the bayesian search.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
@@ -1501,14 +1495,6 @@ def bayesian_search_forecaster_multiseries(
             (f"`exog` must have same number of samples as `series`. "
              f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
         )
-    
-    if lags_grid != 'deprecated':
-        warnings.warn(
-            ("The 'lags_grid' argument is deprecated and will be removed in a future version. "
-             "Use the 'search_space' argument to define the candidate values for the lags. "
-             "Example: {'lags' : trial.suggest_categorical('lags', [3, 5])}")
-        )
-        lags_grid = 'deprecated'
 
     if engine not in ['optuna']:
         raise ValueError(
@@ -1719,6 +1705,7 @@ def _bayesian_search_optuna_multiseries(
             initial_train_size    = initial_train_size,
             fixed_train_size      = fixed_train_size,
             gap                   = gap,
+            skip_folds            = skip_folds,
             allow_incomplete_fold = allow_incomplete_fold,
             refit                 = refit,
             n_jobs                = n_jobs,
@@ -2529,7 +2516,6 @@ def bayesian_search_forecaster_multivariate(
     allow_incomplete_fold: bool=True,
     levels: Optional[Union[str, list]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    lags_grid: Any='deprecated',
     refit: Union[bool, int]=False,
     n_trials: int=10,
     random_state: int=123,
@@ -2591,11 +2577,6 @@ def bayesian_search_forecaster_multivariate(
         the average of the optimization of all levels.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
-    lags_grid : deprecated
-        **Deprecated since version 0.12.0 and will be removed in 0.13.0.** Use
-        `search_space` to define the candidate values for the lags. This allows 
-        the lags to be optimized along with the other hyperparameters of the 
-        regressor in the bayesian search.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an 
         integer, the Forecaster will be trained every that number of iterations.
@@ -2652,8 +2633,7 @@ def bayesian_search_forecaster_multivariate(
                               forecaster            = forecaster,
                               series                = series,
                               exog                  = exog,
-                              levels                = levels, 
-                              lags_grid             = lags_grid,
+                              levels                = levels,
                               search_space          = search_space,
                               steps                 = steps,
                               metric                = metric,
