@@ -418,7 +418,7 @@ def fetch_dataset(
     
     if name not in datasets.keys():
         raise ValueError(
-            f"Dataset {name} not found. Available datasets are: {list(datasets.keys())}"
+            f"Dataset '{name}' not found. Available datasets are: {list(datasets.keys())}"
         )
     
     url = datasets[name]['url']
@@ -429,7 +429,7 @@ def fetch_dataset(
             df = pd.read_csv(url, sep=sep, **kwargs_read_csv)
         except:
             raise ValueError(
-                f"Error reading dataset {name} from {url}. Try to version = 'latest'"
+                f"Error reading dataset '{name}' from {url}. Try to version = 'latest'"
             )
 
     if url.endswith('.parquet'):
@@ -437,7 +437,7 @@ def fetch_dataset(
             df = pd.read_parquet(url)
         except:
             raise ValueError(
-                f"Error reading dataset {name} from {url}. Try to version = 'latest'"
+                f"Error reading dataset '{name}' from {url}. Try to version = 'latest'"
             )
         
     if url.startswith('https://drive.google.com'):
