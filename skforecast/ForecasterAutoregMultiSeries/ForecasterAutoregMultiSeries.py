@@ -805,7 +805,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             )
 
         if self.dropna_from_series:
-            if X_train.isnull().any().any():
+            if np.any(X_train.isnull().to_numpy()):
                 mask = X_train.notna().all(axis=1).to_numpy()
                 X_train = X_train.iloc[mask, ]
                 y_train = y_train.iloc[mask]
@@ -817,7 +817,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                      MissingValuesWarning
                 )
         else:
-            if X_train.isnull().any().any():
+            if np.any(X_train.isnull().to_numpy()):
                 warnings.warn(
                     ("NaNs detected in `X_train`. Some regressors do not allow "
                      "NaN values during training. If you want to drop them, "
@@ -836,9 +836,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 col for col in series_col_names if X_train[col].sum() > 0
             ]
         else:
+            unique_levels = X_train['_level_skforecast'].unique()
             series_X_train = [
                 k for k, v in self.encoding_mapping.items()
-                if v in X_train['_level_skforecast'].unique()
+                if v in unique_levels
             ]
 
         # The last time window of training data is stored so that lags needed as
