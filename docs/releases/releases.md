@@ -14,6 +14,8 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
++ <span class="badge text-bg-feature">Feature</span> Create the `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
+
 + <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/api/forecastermultiseries) and [`ForecasterAutoregMultiSeriesCustom`](https://skforecast.org/latest/api/forecastermultiseriescustom). In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
 
 + <span class="badge text-bg-feature">Feature</span> New argument `skip_folds` in `model_selection` and `model_selection_multiseries` functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
@@ -22,7 +24,9 @@ The main changes in this release are:
 
 + Support for `python 3.12`.
 
-+ Create method `create_predict_inputs` in all forecasters to allow the user have more control over the inputs of the predict methods.
++ Create the `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
+
++ Create the `_create_predict_inputs` method in all Forecasters to unify the inputs of the predict methods.
 
 + New plot function `plot_predicted_intervals` in the `plot` module to plot predicted intervals.
 

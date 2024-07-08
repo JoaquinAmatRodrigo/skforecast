@@ -408,7 +408,9 @@ def check_exog(
     """
     
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
-        raise TypeError(f"{series_id} must be a pandas Series or DataFrame.")
+        raise TypeError(
+            f"{series_id} must be a pandas Series or DataFrame. Got {type(exog)}."
+        )
     
     if isinstance(exog, pd.Series) and exog.name is None:
         raise ValueError(f"When {series_id} is a pandas Series, it must have a name.")
@@ -2776,6 +2778,52 @@ def prepare_residuals_multiseries(
             )
         
     return residuals
+
+
+def prepare_steps_direct(
+    max_step: int,
+    steps: Optional[Union[int, list]]=None
+) -> list:
+    """
+    Prepare list of steps to be predicted in Direct Forecasters.
+
+    Parameters
+    ----------
+    max_step : int
+        Maximum number of future steps the forecaster will predict 
+        when using method `predict()`.
+    steps : int, list, None, default `None`
+        Predict n steps. The value of `steps` must be less than or equal to the 
+        value of steps defined when initializing the forecaster. Starts at 1.
+    
+        - If `int`: Only steps within the range of 1 to int are predicted.
+        - If `list`: List of ints. Only the steps contained in the list 
+        are predicted.
+        - If `None`: As many steps are predicted as were defined at 
+        initialization.
+
+    Returns
+    -------
+    steps : list
+        Steps to be predicted.
+
+    """
+
+    if isinstance(steps, int):
+        steps = list(np.arange(steps) + 1)
+    elif steps is None:
+        steps = list(np.arange(max_step) + 1)
+    elif isinstance(steps, list):
+        steps = list(np.array(steps))
+    
+    for step in steps:
+        if not isinstance(step, (int, np.int64, np.int32)):
+            raise TypeError(
+                (f"`steps` argument must be an int, a list of ints or `None`. "
+                 f"Got {type(steps)}.")
+            )
+
+    return steps
 
 
 def set_skforecast_warnings(
