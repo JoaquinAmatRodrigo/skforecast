@@ -385,6 +385,104 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
     pd.testing.assert_frame_equal(expected, results_search)
 
 
+def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_multiple_metrics_aggregated_with_mocked():
+    """
+    Test output of bayesian_search_forecaster_multiseries in ForecasterAutoregMultiSeries
+    and ForecasterAutoregMultiSeriesCustom when series and exog are dictionaries and 
+    multiple aggregated metrics (mocked done in Skforecast v0.12.0).
+    """
+
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags=14,
+        encoding="ordinal",
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    )
+
+    lags_grid = [[5], [1, 7, 14]]
+
+    def search_space(trial):
+        search_space = {
+            "n_estimators": trial.suggest_int("n_estimators", 2, 5),
+            "max_depth": trial.suggest_int("max_depth", 2, 5),
+            "lags": trial.suggest_categorical("lags", lags_grid),
+        }
+
+        return search_space
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning, module="optuna")
+
+        results_search, _ = bayesian_search_forecaster_multiseries(
+            forecaster=forecaster,
+            series=series_dict,
+            exog=exog_dict,
+            search_space=search_space,
+            metric=['mean_absolute_error', 'mean_absolute_scaled_error'],
+            aggregate_metric=['weighted_average', 'average', 'pooling'],
+            initial_train_size=len(series_dict_train["id_1000"]),
+            steps=24,
+            refit=False,
+            n_trials=3,
+            return_best=False,
+            show_progress=False,
+            verbose=False,
+            suppress_warnings=True,
+        )
+
+    expected = pd.DataFrame({
+                    "levels": {
+                        0: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+                        1: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+                        2: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+                    },
+                    "lags": {0: np.array([1, 7, 14]), 1: np.array([1, 7, 14]), 2: np.array([5])},
+                    "params": {
+                        0: {"n_estimators": 4, "max_depth": 3},
+                        1: {"n_estimators": 3, "max_depth": 3},
+                        2: {"n_estimators": 4, "max_depth": 3},
+                    },
+                    "mean_absolute_error__weighted_average": {
+                        0: 749.8761502029433,
+                        1: 760.659082077477,
+                        2: 777.6874712018467,
+                    },
+                    "mean_absolute_error__average": {
+                        0: 709.8836514262415,
+                        1: 721.1848222120482,
+                        2: 754.3537196425694,
+                    },
+                    "mean_absolute_error__pooling": {
+                        0: 709.8836514262414,
+                        1: 721.1848222120483,
+                        2: 754.3537196425694,
+                    },
+                    "mean_absolute_scaled_error__weighted_average": {
+                        0: 1.7214020008755428,
+                        1: 1.7480018562024022,
+                        2: 1.8159623522099073,
+                    },
+                    "mean_absolute_scaled_error__average": {
+                        0: 2.0671251354627653,
+                        1: 2.099920474995049,
+                        2: 2.1945202856306465,
+                    },
+                    "mean_absolute_scaled_error__pooling": {
+                        0: 1.6864677542505797,
+                        1: 1.7133159005309597,
+                        2: 1.7921151176255248,
+                    },
+                    "n_estimators": {0: 4, 1: 3, 2: 4},
+                    "max_depth": {0: 3, 1: 3, 2: 3},
+                })
+
+    pd.testing.assert_frame_equal(expected, results_search)
+
+
 def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with_mocked_ForecasterAutoregMultiSeriesCustom():
     """
     Test output of bayesian_search_forecaster_multiseries in ForecasterAutoregMultiSeriesCustom 

@@ -280,6 +280,171 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
     })
 
     pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
+
+
+def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeries_with_multiple_metrics_aggregated():
+    """
+    Test output of _bayesian_search_optuna_multiseries in ForecasterAutoregMultiSeries
+    with multiple metrics and aggregated metrics (mocked done in skforecast v0.12.0).
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2,
+                     encoding  = 'onehot',
+                     transformer_series = StandardScaler()
+                 )
+
+    steps = 3
+    n_validation = 12
+
+    def search_space(trial):
+        search_space  = {
+            'alpha': trial.suggest_float('alpha', 1e-2, 1.0),
+            'lags' : trial.suggest_categorical('lags', [2, 4])
+        }
+        
+        return search_space
+
+    results = _bayesian_search_optuna_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  steps              = steps,
+                  search_space       = search_space,
+                  metric             = ['mean_absolute_error', 'mean_absolute_scaled_error'],
+                  aggregate_metric   = ['weighted_average', 'average', 'pooling'],
+                  refit              = True,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = True,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False
+              )[0]
+    
+    expected_results = pd.DataFrame({
+        "levels": {
+            0: ["l1", "l2"],
+            1: ["l1", "l2"],
+            2: ["l1", "l2"],
+            3: ["l1", "l2"],
+            4: ["l1", "l2"],
+            5: ["l1", "l2"],
+            6: ["l1", "l2"],
+            7: ["l1", "l2"],
+            8: ["l1", "l2"],
+            9: ["l1", "l2"],
+        },
+        "lags": {
+            0: np.array([1, 2]),
+            1: np.array([1, 2]),
+            2: np.array([1, 2]),
+            3: np.array([1, 2]),
+            4: np.array([1, 2]),
+            5: np.array([1, 2, 3, 4]),
+            6: np.array([1, 2, 3, 4]),
+            7: np.array([1, 2, 3, 4]),
+            8: np.array([1, 2, 3, 4]),
+            9: np.array([1, 2, 3, 4]),
+        },
+        "params": {
+            0: {"alpha": 0.5558016213920624},
+            1: {"alpha": 0.6995044937418831},
+            2: {"alpha": 0.7406154516747153},
+            3: {"alpha": 0.8509374761370117},
+            4: {"alpha": 0.9809565564007693},
+            5: {"alpha": 0.23598059857016607},
+            6: {"alpha": 0.398196343012209},
+            7: {"alpha": 0.4441865222328282},
+            8: {"alpha": 0.53623586010342},
+            9: {"alpha": 0.7252189487445193},
+        },
+        "mean_absolute_error__weighted_average": {
+            0: 0.21324663796176382,
+            1: 0.2132571094660072,
+            2: 0.21326009091608622,
+            3: 0.21326806055662118,
+            4: 0.2132773952926551,
+            5: 0.21476196207156512,
+            6: 0.21477679099211167,
+            7: 0.21478095843883202,
+            8: 0.2147892513261171,
+            9: 0.21480607764821474,
+        },
+        "mean_absolute_error__average": {
+            0: 0.21324663796176382,
+            1: 0.21325710946600718,
+            2: 0.21326009091608622,
+            3: 0.21326806055662115,
+            4: 0.2132773952926551,
+            5: 0.21476196207156514,
+            6: 0.21477679099211167,
+            7: 0.21478095843883202,
+            8: 0.21478925132611706,
+            9: 0.21480607764821472,
+        },
+        "mean_absolute_error__pooling": {
+            0: 0.21324663796176382,
+            1: 0.21325710946600726,
+            2: 0.21326009091608622,
+            3: 0.21326806055662115,
+            4: 0.21327739529265513,
+            5: 0.21476196207156514,
+            6: 0.21477679099211167,
+            7: 0.21478095843883202,
+            8: 0.21478925132611706,
+            9: 0.21480607764821472,
+        },
+        "mean_absolute_scaled_error__weighted_average": {
+            0: 0.7850408674109868,
+            1: 0.7850769204162228,
+            2: 0.7850871846200614,
+            3: 0.7851146198219785,
+            4: 0.7851467509994321,
+            5: 0.7897394420953061,
+            6: 0.7897964331491425,
+            7: 0.7898124493861658,
+            8: 0.7898443200957621,
+            9: 0.7899089846155858,
+        },
+        "mean_absolute_scaled_error__average": {
+            0: 0.7850408674109867,
+            1: 0.7850769204162228,
+            2: 0.7850871846200613,
+            3: 0.7851146198219786,
+            4: 0.785146750999432,
+            5: 0.7897394420953061,
+            6: 0.7897964331491426,
+            7: 0.7898124493861657,
+            8: 0.7898443200957622,
+            9: 0.7899089846155857,
+        },
+        "mean_absolute_scaled_error__pooling": {
+            0: 0.7724806513327171,
+            1: 0.7725185840968428,
+            2: 0.7725293843257277,
+            3: 0.7725582541506879,
+            4: 0.7725920690001996,
+            5: 0.7779698752966109,
+            6: 0.7780235926931046,
+            7: 0.7780386891653759,
+            8: 0.7780687299436625,
+            9: 0.7781296828776818,
+        },
+        "alpha": {
+            0: 0.5558016213920624,
+            1: 0.6995044937418831,
+            2: 0.7406154516747153,
+            3: 0.8509374761370117,
+            4: 0.9809565564007693,
+            5: 0.23598059857016607,
+            6: 0.398196343012209,
+            7: 0.4441865222328282,
+            8: 0.53623586010342,
+            9: 0.7252189487445193,
+        },
+    })
+
+    pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
     
 
 def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_create_study():
