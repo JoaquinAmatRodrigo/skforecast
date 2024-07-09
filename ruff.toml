@@ -7,3 +7,6 @@ max-doc-length = 88
 
 [pycodestyle]
 max-line-length = 100
+
+[format]
+quote-style = "single"
