@@ -251,7 +251,7 @@ def _extract_data_folds_multiseries(
 def _calculate_metrics_multiseries(
         series : Union[pd.DataFrame, dict],
         predictions: pd.DataFrame,
-        folds: list,
+        folds: Union[list, tqdm],
         span_index : Union[pd.DatetimeIndex, pd.RangeIndex],
         metrics: list,
         levels: list,
@@ -273,7 +273,7 @@ def _calculate_metrics_multiseries(
         Series data used for backtesting.
     predictions : pandas DataFrame
         Predictions generated during the backtesting process.
-    folds : list
+    folds : list, tqdm
         Folds created during the backtesting process.
     span_index : pandas DatetimeIndex, pandas RangeIndex
         Full index from the minimum to the maximum index among all series.
@@ -296,7 +296,25 @@ def _calculate_metrics_multiseries(
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s).
     """
-    
+
+    if not isinstance(series, (pd.DataFrame, dict)):
+        raise TypeError(
+            ("`series` must be a pandas DataFrame or a dictionary of pandas "
+             "DataFrames.")
+        )
+    if not isinstance(predictions, pd.DataFrame):
+        raise TypeError("`predictions` must be a pandas DataFrame.")
+    if not isinstance(folds, (list, tqdm)):
+        raise TypeError("`folds` must be a list or a tqdm object.")
+    if not isinstance(span_index, (pd.DatetimeIndex, pd.RangeIndex)):
+        raise TypeError("`span_index` must be a pandas DatetimeIndex or pandas RangeIndex.")
+    if not isinstance(metrics, list):
+        raise TypeError("`metrics` must be a list.")
+    if not isinstance(levels, list):
+        raise TypeError("`levels` must be a list.")
+    if not isinstance(add_aggregated_metric, bool):
+        raise TypeError("`add_aggregated_metric` must be a boolean.")
+        
     metric_names = [(m if isinstance(m, str) else m.__name__) for m in metrics]
     y_true_pred_levels = []
     y_train_levels = []
@@ -771,6 +789,7 @@ def _backtesting_forecaster_multiseries(
         levels                = levels,
         add_aggregated_metric = add_aggregated_metric
     )
+       
     set_skforecast_warnings(suppress_warnings, action='default')
 
     return metrics_levels, backtest_predictions
