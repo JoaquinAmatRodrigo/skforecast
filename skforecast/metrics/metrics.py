@@ -143,10 +143,10 @@ def mean_absolute_scaled_error(
 
     if isinstance(y_train, list):
         naive_forecast = np.concatenate([np.diff(x) for x in y_train])
-        mase = np.mean(np.abs(y_true - y_pred)) / np.mean(np.abs(naive_forecast))
+        mase = np.mean(np.abs(y_true - y_pred)) / np.nanmean(np.abs(naive_forecast))
 
     else:
-        mase = np.mean(np.abs(y_true - y_pred)) / np.mean(np.abs(np.diff(y_train)))
+        mase = np.mean(np.abs(y_true - y_pred)) / np.nanmean(np.abs(np.diff(y_train)))
 
     return mase
 
@@ -204,8 +204,8 @@ def root_mean_squared_scaled_error(
 
     if isinstance(y_train, list):
         naive_forecast = np.concatenate([np.diff(x) for x in y_train])
-        rmsse = np.sqrt(np.mean((y_true - y_pred) ** 2)) / np.sqrt(np.mean(naive_forecast ** 2))
+        rmsse = np.sqrt(np.mean((y_true - y_pred) ** 2)) / np.sqrt(np.nanmean(naive_forecast ** 2))
     else:
-        rmsse = np.sqrt(np.mean((y_true - y_pred) ** 2)) / np.sqrt(np.mean(np.diff(y_train) ** 2))
+        rmsse = np.sqrt(np.mean((y_true - y_pred) ** 2)) / np.sqrt(np.nanmean(np.diff(y_train) ** 2))
     
     return rmsse
