@@ -1,0 +1,9 @@
+[lint]
+select = ["E", "F"]
+ignore = ["E221", "E251", "E501"]
+
+[lint.pycodestyle]
+max-doc-length = 88
+
+[pycodestyle]
+max-line-length = 100
