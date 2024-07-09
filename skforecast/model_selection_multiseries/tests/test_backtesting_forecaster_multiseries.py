@@ -30,7 +30,6 @@ exog_dict_train = {k: v.loc[:end_train,] for k, v in exog_dict.items()}
 series_dict_test = {k: v.loc[end_train:,] for k, v in series_dict.items()}
 exog_dict_test = {k: v.loc[end_train:,] for k, v in exog_dict.items()}
 series_with_nans = series.copy()
-#series_with_nans['l2'].iloc[:10] = np.nan
 series_with_nans.iloc[:10, series_with_nans.columns.get_loc('l2')] = np.nan
 
 def create_predictors(y): # pragma: no cover
@@ -1248,8 +1247,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
         allow_incomplete_fold = True,
         refit                 = False,
         n_jobs                = 'auto',
-        verbose               = True,
-        show_progress         = True,
+        verbose               = False,
+        show_progress         = False,
         suppress_warnings     = True
     )
 
@@ -1276,6 +1275,177 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
         index=pd.date_range('2016-08-01', periods=10, freq='D'),
         columns=['id_1000', 'id_1001', 'id_1003', 'id_1004']
     )
+
+    pd.testing.assert_frame_equal(metrics, expected_metrics)
+    pd.testing.assert_frame_equal(predictions.head(10), expected_predictions)
+
+
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                       lags=2, transformer_series=None,
+                                                       encoding='onehot'), 
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                             fun_predictors=create_predictors, 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
+                         ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_aggregate_metrics_true(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom with no refit, remainder, multiple 
+    levels and add_aggregated_metric.
+    """
+    steps = 5
+    n_validation = 12
+
+    metrics, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster          = forecaster,
+                                               series              = series,
+                                               steps               = steps,
+                                               levels              = None,
+                                               metric              = ['mean_absolute_error', 'mean_absolute_scaled_error'],
+                                               add_aggregated_metric = True,
+                                               initial_train_size  = len(series) - n_validation,
+                                               refit               = False,
+                                               fixed_train_size    = False,
+                                               exog                = None,
+                                               interval            = None,
+                                               n_boot              = 500,
+                                               random_state        = 123,
+                                               in_sample_residuals = True,
+                                               verbose             = False
+                                           )
+    
+    expected_metrics = pd.DataFrame({
+                                "levels": ["l1", "l2", "average", "weighted_average", "pooling"],
+                                "mean_absolute_error": [
+                                    0.2114399595399619,
+                                    0.21941741445502347,
+                                    0.21542868699749268,
+                                    0.2154286869974927,
+                                    0.21542868699749265,
+                                ],
+                                "mean_absolute_scaled_error": [
+                                    0.9250668656254581,
+                                    0.7114558583005026,
+                                    0.8182613619629804,
+                                    0.8182613619629805,
+                                    0.8023811627024722,
+                                ],
+                            }
+                        )
+    expected_predictions = pd.DataFrame(
+                            {
+                                "l1": [
+                                    0.4978839,
+                                    0.46288427,
+                                    0.48433446,
+                                    0.48677605,
+                                    0.48562473,
+                                    0.50259242,
+                                    0.49536197,
+                                    0.48478881,
+                                    0.48496106,
+                                    0.48555902,
+                                    0.49673897,
+                                    0.4576795,
+                                ],
+                                "l2": [
+                                    0.50266337,
+                                    0.53045945,
+                                    0.50527774,
+                                    0.50315834,
+                                    0.50452649,
+                                    0.47372756,
+                                    0.51226827,
+                                    0.50650107,
+                                    0.50420766,
+                                    0.50448097,
+                                    0.52211914,
+                                    0.51092531,
+                                ],
+                            },
+                            index=pd.RangeIndex(start=38, stop=50, step=1),
+                            )
+                                   
+    pd.testing.assert_frame_equal(expected_metrics, metrics)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+@pytest.mark.parametrize("forecaster", 
+    [ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags=14,
+        encoding='ordinal',
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    ), 
+    ForecasterAutoregMultiSeriesCustom(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        fun_predictors=create_predictors_14, 
+        window_size=14,
+        encoding='ordinal',
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    )], 
+    ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_series_and_exog_dict_with_mocked_multiple_aggregated_metrics(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom when series and exog are
+    dictionaries and multiple aggregated metrics are calculated.
+    (mocked done in Skforecast v0.12.0).
+    """
+    
+    metrics, predictions = backtesting_forecaster_multiseries(
+        forecaster            = forecaster,
+        series                = series_dict,
+        exog                  = exog_dict,
+        steps                 = 24,
+        metric                = ['mean_absolute_error', 'mean_squared_error'],
+        add_aggregated_metric = True,
+        initial_train_size    = len(series_dict_train['id_1000']),
+        fixed_train_size      = True,
+        gap                   = 0,
+        allow_incomplete_fold = True,
+        refit                 = False,
+        n_jobs                = 'auto',
+        verbose               = False,
+        show_progress         = False,
+        suppress_warnings     = True
+    )
+
+    expected_metrics = pd.DataFrame(
+        data=np.array([['id_1000', 286.6227398656757, 105816.86051259708],
+        ['id_1001', 1364.7345740769094, 2175934.9583102698],
+        ['id_1003', 237.4894217124842, 95856.72602398091],
+        ['id_1004', 1267.85941538558, 2269796.338792736],
+        ['average', 789.1765377601623, 1161851.2209098958],
+        ['weighted_average', 745.7085483145497, 1024317.153152019],
+        ['pooling', 745.7085483145497, 1024317.1531520189]], dtype=object),
+        columns=['levels', 'mean_absolute_error', 'mean_squared_error']
+    ).astype({'mean_absolute_error': float, 'mean_squared_error': float})
+    
+    expected_predictions = pd.DataFrame(
+    data=np.array([[1438.14154717, 2090.79352613, 2166.9832933, 7285.52781428],
+                   [1438.14154717, 2089.11038884, 2074.55994929, 7488.18398744],
+                   [1438.14154717, 2089.11038884, 2035.99448247, 7488.18398744],
+                   [1403.93625654, 2089.11038884, 2035.99448247, 7488.18398744],
+                   [1403.93625654, 2089.11038884, 2035.99448247, 7488.18398744],
+                   [1403.93625654, 2076.10228838, 2035.99448247, 7250.69119259],
+                   [1403.93625654, 2076.10228838, np.nan, 7085.32315355],
+                   [1403.93625654, 2000.42985714, np.nan, 7285.52781428],
+                   [1403.93625654, 2013.4379576, np.nan, 7285.52781428],
+                   [1403.93625654, 2013.4379576, np.nan, 7285.52781428]]),
+    columns=['id_1000', 'id_1001', 'id_1003', 'id_1004'],
+    index=pd.date_range('2016-08-01', periods=10, freq='D')
+)
 
     pd.testing.assert_frame_equal(metrics, expected_metrics)
     pd.testing.assert_frame_equal(predictions.head(10), expected_predictions)
