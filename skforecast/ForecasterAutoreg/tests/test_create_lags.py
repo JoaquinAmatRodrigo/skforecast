@@ -16,9 +16,9 @@ def test_create_lags_exception_when_len_of_y_is_lower_than_maximum_lag():
     y = pd.Series(np.arange(5), name='y')
     forecaster = ForecasterAutoreg(LinearRegression(), lags=10)
     err_msg = re.escape(
-                (f'The maximum lag ({forecaster.max_lag}) must be less than the length '
-                 f'of the series ({len(y)}).')
-              )
+        (f"The maximum lag ({forecaster.max_lag}) must be less than the length "
+         f"of the series ({len(y)}).")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster._create_lags(y=y)
 

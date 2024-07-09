@@ -1,4 +1,4 @@
-# Unit test create_predict_inputs ForecasterAutoregMultiSeries
+# Unit test _create_predict_inputs ForecasterAutoregMultiSeries
 # ==============================================================================
 import re
 import pytest
@@ -47,29 +47,21 @@ def test_create_predict_inputs_NotFittedError_when_fitted_is_False():
          "appropriate arguments before using predict.")
     )
     with pytest.raises(NotFittedError, match = err_msg):
-        forecaster.create_predict_inputs(steps=5)
+        forecaster._create_predict_inputs(steps=5)
 
 
 def test_output_create_predict_inputs_when_regressor_is_LinearRegression():
     """
-    Test output create_predict_inputs when using LinearRegression as regressor.
+    Test output _create_predict_inputs when using LinearRegression as regressor.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
                                               transformer_series=None)
     forecaster.fit(series=series_2)
-    results = forecaster.create_predict_inputs(steps=5)
+    results = forecaster._create_predict_inputs(steps=5)
 
     expected = (
-        {'1': pd.Series(
-                  data = np.array([45., 46., 47., 48., 49.]),
-                  index = pd.RangeIndex(start=45, stop=50, step=1),
-                  name = '1'
-              ),
-         '2': pd.Series(
-                  data = np.array([95., 96., 97., 98., 99.]),
-                  index = pd.RangeIndex(start=45, stop=50, step=1),
-                  name = '2'
-              )
+        {'1': np.array([45., 46., 47., 48., 49.]),
+         '2': np.array([95., 96., 97., 98., 99.])
         },
         {'1': None, '2': None},
         ['1', '2'],
@@ -78,7 +70,7 @@ def test_output_create_predict_inputs_when_regressor_is_LinearRegression():
     )
 
     for k in expected[0].keys():
-        pd.testing.assert_series_equal(results[0][k], expected[0][k])
+        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
     for k in expected[1].keys():
         assert results[1] == expected[1]
     assert results[2] == expected[2]
@@ -88,7 +80,7 @@ def test_output_create_predict_inputs_when_regressor_is_LinearRegression():
 
 def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_transform_series():
     """
-    Test create_predict_inputs output when using LinearRegression as regressor 
+    Test _create_predict_inputs output when using LinearRegression as regressor 
     and StandardScaler.
     """
     forecaster = ForecasterAutoregMultiSeries(
@@ -97,15 +89,11 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
                      transformer_series = StandardScaler()
                  )
     forecaster.fit(series=series)
-    results = forecaster.create_predict_inputs(steps=5, levels='1')
+    results = forecaster._create_predict_inputs(steps=5, levels='1')
     
     expected = (
-        {'1': pd.Series(
-                  data = np.array([-1.0814183452563133, -0.08097053361357116, 2.0806640273868244, 
-                                   0.07582436346198025, 0.4776288428854555]),
-                  index = pd.RangeIndex(start=45, stop=50, step=1),
-                  name = '1'
-              )
+        {'1': np.array([-1.0814183452563133, -0.08097053361357116, 2.0806640273868244, 
+                         0.07582436346198025, 0.4776288428854555])
         },
         {'1': None},
         ['1'],
@@ -114,7 +102,7 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
     )
 
     for k in expected[0].keys():
-        pd.testing.assert_series_equal(results[0][k], expected[0][k])
+        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
     for k in expected[1].keys():
         assert results[1] == expected[1]
     assert results[2] == expected[2]
@@ -128,7 +116,7 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
                          ids = lambda tr : f'transformer_series type: {type(tr)}')
 def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog(transformer_series):
     """
-    Test create_predict_inputs output when using LinearRegression as regressor, 
+    Test _create_predict_inputs output when using LinearRegression as regressor, 
     StandardScaler as transformer_series and transformer_exog as transformer_exog.
     """
     transformer_exog = ColumnTransformer(
@@ -144,8 +132,7 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
                      transformer_exog   = transformer_exog,
                  )
     forecaster.fit(series=series, exog=exog)
-    results = forecaster.create_predict_inputs(steps=5, levels='1', 
-                                               exog=exog_predict, output_type='numpy')
+    results = forecaster._create_predict_inputs(steps=5, levels='1', exog=exog_predict)
     
     expected = (
         {'1': np.array([-1.0814183452563133, -0.08097053361357116, 2.0806640273868244, 
@@ -177,12 +164,12 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
                          ids = lambda tr : f'transformer_series type: {type(tr)}')
 def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog_different_length_series(transformer_series):
     """
-    Test create_predict_inputs output when using LinearRegression as regressor, StandardScaler
+    Test _create_predict_inputs output when using LinearRegression as regressor, StandardScaler
     as transformer_series and transformer_exog as transformer_exog with series 
     of different lengths.
     """
     new_series = series.copy()
-    new_series['2'].iloc[:10] = np.nan
+    new_series.iloc[:10, 1] = np.nan
 
     transformer_exog = ColumnTransformer(
                            [('scale', StandardScaler(), ['exog_1']),
@@ -197,26 +184,17 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
                      transformer_exog   = transformer_exog,
                  )
     forecaster.fit(series=new_series, exog=exog)
-    results = forecaster.create_predict_inputs(steps=5, exog=exog_predict)
+    results = forecaster._create_predict_inputs(steps=5, exog=exog_predict)
     
     expected = (
-        {'1': pd.Series(
-                  data = np.array([-1.08141835, -0.08097053, 2.08066403, 0.07582436, 0.47762884]),
-                  index = pd.RangeIndex(start=45, stop=50, step=1),
-                  name = '1'
-              ),
-         '2': pd.Series(
-                  data = np.array([0.73973379, -1.29936753, -0.36483376, -0.96090271, -0.57388468]),
-                  index = pd.RangeIndex(start=45, stop=50, step=1),
-                  name = '2'
-              )
+        {'1': np.array([-1.08141835, -0.08097053, 2.08066403, 0.07582436, 0.47762884]),
+         '2': np.array([0.73973379, -1.29936753, -0.36483376, -0.96090271, -0.57388468])
         },
-        {'1': pd.DataFrame({
-                  'exog_1': [-0.09575486, 0.44024531, -1.51774136, -1.43049014, -0.76323054],
-                  'exog_2_a': [1., 1., 1., 1., 1.],
-                  'exog_2_b': [0., 0., 0., 0., 0.]},
-                  index=pd.RangeIndex(start=50, stop=55, step=1)
-              )
+        {'1': np.array([[-0.09575486,  1., 0.],
+                        [ 0.44024531,  1., 0.],
+                        [-1.51774136,  1., 0.],
+                        [-1.43049014,  1., 0.],
+                        [-0.76323054,  1., 0.]])
         },
         ['1', '2'],
         pd.RangeIndex(start=50, stop=55, step=1),
@@ -224,9 +202,9 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
     )
 
     for k in expected[0].keys():
-        pd.testing.assert_series_equal(results[0][k], expected[0][k])
+        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
     for k in expected[1].keys():
-        pd.testing.assert_frame_equal(results[1][k], expected[1][k])
+        np.testing.assert_array_almost_equal(results[1][k], expected[1][k])
     assert results[2] == expected[2]
     pd.testing.assert_index_equal(results[3], expected[3])
     assert results[4] == expected[4]
@@ -234,7 +212,7 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
 
 def test_create_predict_inputs_output_when_categorical_features_native_implementation_HistGradientBoostingRegressor():
     """
-    Test create_predict_inputs output when using HistGradientBoostingRegressor and categorical variables.
+    Test _create_predict_inputs output when using HistGradientBoostingRegressor and categorical variables.
     """
     df_exog = pd.DataFrame(
         {'exog_1': exog['exog_1'],
@@ -270,34 +248,32 @@ def test_create_predict_inputs_output_when_categorical_features_native_implement
                      transformer_exog   = transformer_exog
                  )
     forecaster.fit(series=series, exog=df_exog)
-    results = forecaster.create_predict_inputs(steps=10, exog=exog_predict)
+    results = forecaster._create_predict_inputs(steps=10, exog=exog_predict)
     
     expected = (
-        {'1': pd.Series(
-                  data = np.array([0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]),
-                  index = pd.RangeIndex(start=45, stop=50, step=1),
-                  name = '1'
-              ),
-         '2': pd.Series(
-                  data = np.array([0.6917018 , 0.15112745, 0.39887629, 0.2408559 , 0.34345601]),
-                  index = pd.RangeIndex(start=45, stop=50, step=1),
-                  name = '2'
-              )
+        {'1': np.array([0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]),
+         '2': np.array([0.6917018 , 0.15112745, 0.39887629, 0.2408559 , 0.34345601])
         },
-        {'1': pd.DataFrame({
-                  'exog_2': np.array([0, 1, 2, 3, 4, 0, 1, 2, 3, 4], dtype=int),
-                  'exog_3': np.array([0, 1, 2, 3, 4, 0, 1, 2, 3, 4], dtype=int),
-                  'exog_1': [0.51312815, 0.66662455, 0.10590849, 0.13089495, 0.32198061,
-                             0.66156434, 0.84650623, 0.55325734, 0.85445249, 0.38483781]},
-                  index=pd.RangeIndex(start=50, stop=60, step=1)
-              ),
-         '2': pd.DataFrame({
-                  'exog_2': np.array([0, 1, 2, 3, 4, 0, 1, 2, 3, 4], dtype=int),
-                  'exog_3': np.array([0, 1, 2, 3, 4, 0, 1, 2, 3, 4], dtype=int),
-                  'exog_1': [0.51312815, 0.66662455, 0.10590849, 0.13089495, 0.32198061,
-                             0.66156434, 0.84650623, 0.55325734, 0.85445249, 0.38483781]},
-                  index=pd.RangeIndex(start=50, stop=60, step=1)
-              )
+        {'1': np.array([[0, 0, 0.51312815],
+                        [1, 1, 0.66662455],
+                        [2, 2, 0.10590849],
+                        [3, 3, 0.13089495],
+                        [4, 4, 0.32198061],
+                        [0, 0, 0.66156434],
+                        [1, 1, 0.84650623],
+                        [2, 2, 0.55325734],
+                        [3, 3, 0.85445249],
+                        [4, 4, 0.38483781]]),
+         '2': np.array([[0, 0, 0.51312815],
+                        [1, 1, 0.66662455],
+                        [2, 2, 0.10590849],
+                        [3, 3, 0.13089495],
+                        [4, 4, 0.32198061],
+                        [0, 0, 0.66156434],
+                        [1, 1, 0.84650623],
+                        [2, 2, 0.55325734],
+                        [3, 3, 0.85445249],
+                        [4, 4, 0.38483781]])
         },
         ['1', '2'],
         pd.RangeIndex(start=50, stop=60, step=1),
@@ -305,9 +281,9 @@ def test_create_predict_inputs_output_when_categorical_features_native_implement
     )
 
     for k in expected[0].keys():
-        pd.testing.assert_series_equal(results[0][k], expected[0][k])
+        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
     for k in expected[1].keys():
-        pd.testing.assert_frame_equal(results[1][k], expected[1][k])
+        np.testing.assert_array_almost_equal(results[1][k], expected[1][k])
     assert results[2] == expected[2]
     pd.testing.assert_index_equal(results[3], expected[3])
     assert results[4] == expected[4]
@@ -315,76 +291,54 @@ def test_create_predict_inputs_output_when_categorical_features_native_implement
 
 def test_create_predict_inputs_output_when_series_and_exog_dict():
     """
-    Test output ForecasterAutoregMultiSeries create_predict_inputs method when 
+    Test output ForecasterAutoregMultiSeries _create_predict_inputs method when 
     series and exog are dictionaries.
     """
     forecaster = ForecasterAutoregMultiSeries(
-        regressor=LGBMRegressor(
+        regressor          = LGBMRegressor(
             n_estimators=2, random_state=123, verbose=-1, max_depth=2
         ),
-        lags=5,
-        encoding='ordinal',
-        dropna_from_series=False,
-        transformer_series=StandardScaler(),
-        transformer_exog=StandardScaler(),
+        lags               = 5,
+        encoding           = 'ordinal',
+        dropna_from_series = False,
+        transformer_series = StandardScaler(),
+        transformer_exog   = StandardScaler(),
     )
     forecaster.fit(
         series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
     )
-    results = forecaster.create_predict_inputs(
-        steps=5, exog=exog_dict_test, suppress_warnings=True
-    )
+    results = forecaster._create_predict_inputs(steps=5, exog=exog_dict_test)
     
     expected = (
-        {'id_1000': pd.Series(
-                        data  = np.array([-0.3525861, -0.457091, -0.49618465, -1.07810218, -1.77580056]),
-                        index = pd.date_range(start='2016-07-27', periods=5, freq='D'),
-                        name  = 'id_1000'
-                    ),
-         'id_1001': pd.Series(
-                        data  = np.array([0.21800529, 0.36936645, 0.67896814, 1.16332175, 1.1523137]),
-                        index = pd.date_range(start='2016-07-27', periods=5, freq='D'),
-                        name  = 'id_1001'
-                    ),
-         'id_1003': pd.Series(
-                        data  = np.array([-0.62651976, -0.74685959, -1.03823091, -0.37837738, 3.39980134]),
-                        index = pd.date_range(start='2016-07-27', periods=5, freq='D'),
-                        name  = 'id_1003'
-                    ),
-         'id_1004': pd.Series(
-                        data  = np.array([ 0.61495753, 0.8322971, 0.6719899 , -0.24309812, -0.75073762]),
-                        index = pd.date_range(start='2016-07-27', periods=5, freq='D'),
-                        name  = 'id_1004'
-                    )
+        {'id_1000': np.array([-0.3525861, -0.457091, -0.49618465, -1.07810218, -1.77580056]),
+         'id_1001': np.array([0.21800529, 0.36936645, 0.67896814, 1.16332175, 1.1523137]),
+         'id_1003': np.array([-0.62651976, -0.74685959, -1.03823091, -0.37837738, 3.39980134]),
+         'id_1004': np.array([ 0.61495753, 0.8322971, 0.6719899 , -0.24309812, -0.75073762])
         },
-        {'id_1000': pd.DataFrame({
-                        'sin_day_of_week': [0.00821644, 1.11220226, 1.38486425, 0.62088235, -0.60444947],
-                        'cos_day_of_week': [1.42962482, 0.89634375, -0.30192795, -1.26286725, -1.26286725],
-                        'air_temperature': 5*[np.nan],
-                        'wind_speed': 5*[np.nan]},
-                        index=pd.date_range(start='2016-08-01', periods=5, freq='D')
-                    ),
-         'id_1001': pd.DataFrame({
-                        'sin_day_of_week': [0.00821644, 1.11220226, 1.38486425, 0.62088235, -0.60444947],
-                        'cos_day_of_week': [1.42962482, 0.89634375, -0.30192795, -1.26286725, -1.26286725],
-                        'air_temperature': [1.11141113002944, 1.1327558043882977, 1.1775868983168865, 1.0428336959958195, 1.0059977577330665],
-                        'wind_speed': [-0.8794352596577425, 0.005894796212821553, -0.35325839699185807, 0.842872836428647, -0.6231463305262476]},
-                        index=pd.date_range(start='2016-08-01', periods=5, freq='D')
-                    ),
-         'id_1003': pd.DataFrame({
-                        'sin_day_of_week': [0.00821644, 1.11220226, 1.38486425, 0.62088235, -0.60444947],
-                        'cos_day_of_week': 5*[np.nan],
-                        'air_temperature': [1.11141113002944, 1.1327558043882977, 1.1775868983168865, 1.0428336959958195, 1.0059977577330665],
-                        'wind_speed': [-0.8794352596577425, 0.005894796212821553, -0.35325839699185807, 0.842872836428647, -0.6231463305262476]},
-                        index=pd.date_range(start='2016-08-01', periods=5, freq='D')
-                    ),
-         'id_1004': pd.DataFrame({
-                        'sin_day_of_week': [0.00821644, 1.11220226, 1.38486425, 0.62088235, -0.60444947],
-                        'cos_day_of_week': [1.42962482, 0.89634375, -0.30192795, -1.26286725, -1.26286725],
-                        'air_temperature': [1.11141113002944, 1.1327558043882977, 1.1775868983168865, 1.0428336959958195, 1.0059977577330665],
-                        'wind_speed': [-0.8794352596577425, 0.005894796212821553, -0.35325839699185807, 0.842872836428647, -0.6231463305262476]},
-                        index=pd.date_range(start='2016-08-01', periods=5, freq='D')
-                    ),
+        {'id_1000': np.array([
+                        [0.00821644, 1.42962482, np.nan, np.nan],
+                        [1.11220226, 0.89634375, np.nan, np.nan],
+                        [1.38486425, -0.30192795, np.nan, np.nan],
+                        [0.62088235, -1.26286725, np.nan, np.nan],
+                        [-0.60444947, -1.26286725, np.nan, np.nan]]),
+         'id_1001': np.array([
+                        [0.00821644, 1.42962482, 1.11141113, -0.87943526],
+                        [1.11220226, 0.89634375, 1.1327558 , 0.0058948 ],
+                        [1.38486425, -0.30192795, 1.1775869 , -0.3532584 ],
+                        [0.62088235, -1.26286725, 1.0428337 , 0.84287284],
+                        [-0.60444947, -1.26286725, 1.00599776, -0.62314633]]),
+         'id_1003': np.array([
+                        [0.00821644, np.nan, 1.11141113, -0.87943526],
+                        [1.11220226, np.nan, 1.1327558 , 0.0058948 ],
+                        [1.38486425, np.nan, 1.1775869 , -0.3532584 ],
+                        [0.62088235, np.nan, 1.0428337 , 0.84287284],
+                        [-0.60444947, np.nan, 1.00599776, -0.62314633]]),
+         'id_1004': np.array([
+                        [0.00821644, 1.42962482, 1.11141113, -0.87943526],
+                        [1.11220226, 0.89634375, 1.1327558 , 0.0058948 ],
+                        [1.38486425, -0.30192795, 1.1775869 , -0.3532584 ],
+                        [0.62088235, -1.26286725, 1.0428337 , 0.84287284],
+                        [-0.60444947, -1.26286725, 1.00599776, -0.62314633]])
         },
         ['id_1000', 'id_1001', 'id_1003', 'id_1004'],
         pd.date_range(start='2016-08-01', periods=5, freq='D'),
@@ -392,10 +346,9 @@ def test_create_predict_inputs_output_when_series_and_exog_dict():
     )
 
     for k in expected[0].keys():
-        expected[0][k].index.name = 'timestamp'
-        pd.testing.assert_series_equal(results[0][k], expected[0][k])
+        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
     for k in expected[1].keys():
-        pd.testing.assert_frame_equal(results[1][k], expected[1][k])
+        np.testing.assert_array_almost_equal(results[1][k], expected[1][k])
     assert results[2] == expected[2]
     pd.testing.assert_index_equal(results[3], expected[3])
     assert results[4] == expected[4]
@@ -403,7 +356,7 @@ def test_create_predict_inputs_output_when_series_and_exog_dict():
 
 def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_exog_differentiation_is_1_and_transformer_series():
     """
-    Test create_predict_inputs output when using LinearRegression as regressor and differentiation=1,
+    Test _create_predict_inputs output when using LinearRegression as regressor and differentiation=1,
     and transformer_series is StandardScaler.
     """
     end_train = '2003-01-30 23:59:00'
@@ -440,47 +393,35 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_ex
                      differentiation    = 1
                  )
     forecaster.fit(series=series_dict_datetime, exog=exog_dict_datetime)
-    results = forecaster.create_predict_inputs(steps=steps, exog=exog_pred,
+    results = forecaster._create_predict_inputs(steps=steps, exog=exog_pred,
                                                predict_boot=True)
     
     expected = (
-        {'1': pd.Series(
-                  data = np.array([np.nan, 1.53099926e+00, -2.50175863e+00, -3.17051107e-02,
-                                   1.60372524e+00, 1.24398054e-03, 4.61947999e-01, 9.68409847e-01,
-                                   -5.62842287e-01, -5.10849917e-01, 5.01788973e-01, -1.79911269e+00,
-                                   1.74873121e-01, -6.01343264e-01, 2.94763400e-01, 1.51888875e+00]),
-                  index = pd.date_range(start='2003-01-15', periods=16, freq='D'),
-                  name = '1'
+        {'1': np.array([
+                    np.nan, 1.53099926e+00, -2.50175863e+00, -3.17051107e-02,
+                    1.60372524e+00, 1.24398054e-03, 4.61947999e-01, 9.68409847e-01,
+                    -5.62842287e-01, -5.10849917e-01, 5.01788973e-01, -1.79911269e+00,
+                    1.74873121e-01, -6.01343264e-01, 2.94763400e-01, 1.51888875e+00]
               ),
-         '2': pd.Series(
-                  data = np.array([np.nan, -2.93045496, 2.6268138, -2.00736345, -0.19086106,
-                                   1.46005589, -1.8403251 , 3.04806289, -0.99623011, 0.3712246,
-                                   -2.73026424, 2.23235938, -0.14532345, -1.53568303, -0.02273313,
-                                   2.09399597]),
-                  index = pd.date_range(start='2003-01-15', periods=16, freq='D'),
-                  name = '2'
+         '2': np.array([
+                    np.nan, -2.93045496, 2.6268138, -2.00736345, -0.19086106,
+                    1.46005589, -1.8403251 , 3.04806289, -0.99623011, 0.3712246,
+                    -2.73026424, 2.23235938, -0.14532345, -1.53568303, -0.02273313,
+                    2.09399597]
               )
         },
-        {'1': pd.DataFrame({
-                  'exog': np.array([
-                              -0.78916779,  0.07769117,  0.27283009,  0.35075195,  0.31597336,
-                              0.14091339,  1.28618144,  0.09164865, -0.50744682,  0.01522573,
-                              0.82813767,  0.15290495,  0.61532804, -0.06287136, -1.1896156 ,
-                              0.28674823, -0.64581528,  0.20879998,  1.80029302,  0.14269745
-                          ])
-                  },
-                  index=pd.date_range(start='2003-01-31', periods=steps, freq='D')
-              ),
-         '2': pd.DataFrame({
-                  'exog': np.array([
-                              -0.78916779,  0.07769117,  0.27283009,  0.35075195,  0.31597336,
-                              0.14091339,  1.28618144,  0.09164865, -0.50744682,  0.01522573,
-                              0.82813767,  0.15290495,  0.61532804, -0.06287136, -1.1896156 ,
-                              0.28674823, -0.64581528,  0.20879998,  1.80029302,  0.14269745
-                          ])
-                  },
-                  index=pd.date_range(start='2003-01-31', periods=steps, freq='D')
-              )
+        {'1': np.array([
+                [-0.78916779], [0.07769117], [0.27283009], [0.35075195], [0.31597336],
+                [0.14091339], [1.28618144], [0.09164865], [-0.50744682], [0.01522573],
+                [0.82813767], [0.15290495], [0.61532804], [-0.06287136], [-1.1896156],
+                [0.28674823], [-0.64581528], [0.20879998], [1.80029302], [0.14269745]
+              ]),
+          '2': np.array([
+                [-0.78916779], [0.07769117], [0.27283009], [0.35075195], [0.31597336],
+                [0.14091339], [1.28618144], [0.09164865], [-0.50744682], [0.01522573],
+                [0.82813767], [0.15290495], [0.61532804], [-0.06287136], [-1.1896156],
+                [0.28674823], [-0.64581528], [0.20879998], [1.80029302], [0.14269745]
+              ])
         },
         ['1', '2'],
         pd.date_range(start='2003-01-31', periods=steps, freq='D'),
@@ -493,9 +434,9 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_ex
     )
 
     for k in expected[0].keys():
-        pd.testing.assert_series_equal(results[0][k], expected[0][k])
+        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
     for k in expected[1].keys():
-        pd.testing.assert_frame_equal(results[1][k], expected[1][k])
+        np.testing.assert_array_almost_equal(results[1][k], expected[1][k])
     assert results[2] == expected[2]
     pd.testing.assert_index_equal(results[3], expected[3])
     for k in expected[4].keys():

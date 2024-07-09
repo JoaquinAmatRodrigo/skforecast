@@ -409,7 +409,9 @@ def check_exog(
     """
     
     if not isinstance(exog, (pd.Series, pd.DataFrame)):
-        raise TypeError(f"{series_id} must be a pandas Series or DataFrame.")
+        raise TypeError(
+            f"{series_id} must be a pandas Series or DataFrame. Got {type(exog)}."
+        )
     
     if isinstance(exog, pd.Series) and exog.name is None:
         raise ValueError(f"When {series_id} is a pandas Series, it must have a name.")
@@ -1819,6 +1821,7 @@ def check_backtesting_input(
     initial_train_size: Optional[int]=None,
     fixed_train_size: bool=True,
     gap: int=0,
+    skip_folds: Optional[Union[int, list]]=None,
     allow_incomplete_fold: bool=True,
     refit: Union[bool, int]=False,
     interval: Optional[list]=None,
@@ -1859,6 +1862,11 @@ def check_backtesting_input(
     gap : int, default `0`
         Number of samples to be excluded after the end of each training set and 
         before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
     allow_incomplete_fold : bool, default `True`
         Last fold is allowed to have a smaller number of samples than the 
         `test_size`. If `False`, the last fold is excluded.
@@ -2006,6 +2014,21 @@ def check_backtesting_input(
     if not isinstance(gap, (int, np.integer)) or gap < 0:
         raise TypeError(
             f"`gap` must be an integer greater than or equal to 0. Got {gap}."
+        )
+    if not isinstance(skip_folds, (int, list, type(None))):
+        raise TypeError(
+            (f"`skip_folds` must be an integer greater than 0, a list of "
+             f"integers or `None`. Got {type(skip_folds)}.")
+        )
+    if isinstance(skip_folds, int) and skip_folds < 1:
+        raise ValueError(
+            (f"`skip_folds` must be an integer greater than 0, a list of "
+             f"integers or `None`. Got {skip_folds}.")
+        )
+    if isinstance(skip_folds, list) and 0 in skip_folds:
+        raise ValueError(
+            ("`skip_folds` cannot contain the value 0, the first fold is "
+             "needed to train the forecaster.")
         )
     if not isinstance(metric, (str, Callable, list)):
         raise TypeError(
@@ -2471,19 +2494,13 @@ def check_preprocess_exog_multiseries(
     )
 
     # Check that all exog have the same dtypes for common columns
-    exog_dtype_dict = {col_name: set() 
-                       for col_name in exog_col_names}
-    for v in exog_dict.values():
-        if v is not None:
-            for col_name in v.columns:
-                exog_dtype_dict[col_name].add(v[col_name].dtype.name)
-
-    for col_name, dtypes in exog_dtype_dict.items():
-        if len(dtypes) > 1:
-            raise TypeError(
-                (f"Column '{col_name}' has different dtypes in different exog "
-                 f"DataFrames or Series.")
-            )
+    exog_dtypes_buffer = []
+    for df in exog_dict.values():
+        if df is not None:
+            exog_dtypes_buffer.append(df.dtypes)
+    exog_dtypes_buffer = np.concatenate(exog_dtypes_buffer)
+    if not np.all(exog_dtypes_buffer == exog_dtypes_buffer[0]):
+        raise TypeError("Some columns have different dtypes in different exog DataFrames or Series.")
 
     if len(set(exog_col_names) - set(series_col_names)) != len(exog_col_names):
         raise ValueError(
@@ -2762,6 +2779,52 @@ def prepare_residuals_multiseries(
             )
         
     return residuals
+
+
+def prepare_steps_direct(
+    max_step: int,
+    steps: Optional[Union[int, list]]=None
+) -> list:
+    """
+    Prepare list of steps to be predicted in Direct Forecasters.
+
+    Parameters
+    ----------
+    max_step : int
+        Maximum number of future steps the forecaster will predict 
+        when using method `predict()`.
+    steps : int, list, None, default `None`
+        Predict n steps. The value of `steps` must be less than or equal to the 
+        value of steps defined when initializing the forecaster. Starts at 1.
+    
+        - If `int`: Only steps within the range of 1 to int are predicted.
+        - If `list`: List of ints. Only the steps contained in the list 
+        are predicted.
+        - If `None`: As many steps are predicted as were defined at 
+        initialization.
+
+    Returns
+    -------
+    steps : list
+        Steps to be predicted.
+
+    """
+
+    if isinstance(steps, int):
+        steps = list(np.arange(steps) + 1)
+    elif steps is None:
+        steps = list(np.arange(max_step) + 1)
+    elif isinstance(steps, list):
+        steps = list(np.array(steps))
+    
+    for step in steps:
+        if not isinstance(step, (int, np.int64, np.int32)):
+            raise TypeError(
+                (f"`steps` argument must be an int, a list of ints or `None`. "
+                 f"Got {type(steps)}.")
+            )
+
+    return steps
 
 
 def set_skforecast_warnings(

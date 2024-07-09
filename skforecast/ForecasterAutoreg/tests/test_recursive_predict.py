@@ -20,4 +20,5 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression():
                   )
     
     expected = np.array([50., 51., 52., 53., 54.])
+    
     assert (predictions == approx(expected))

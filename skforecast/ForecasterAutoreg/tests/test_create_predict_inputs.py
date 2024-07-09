@@ -1,4 +1,4 @@
-# Unit test create_predict_inputs ForecasterAutoreg
+# Unit test _create_predict_inputs ForecasterAutoreg
 # ==============================================================================
 import re
 import pytest
@@ -34,38 +34,34 @@ def test_create_predict_inputs_NotFittedError_when_fitted_is_False():
          "appropriate arguments before using predict.")
     )
     with pytest.raises(NotFittedError, match = err_msg):
-        forecaster.create_predict_inputs(steps=5)
+        forecaster._create_predict_inputs(steps=5)
 
 
 def test_create_predict_inputs_when_regressor_is_LinearRegression():
     """
-    Test create_predict_inputs when using LinearRegression as regressor.
+    Test _create_predict_inputs when using LinearRegression as regressor.
     """
     forecaster = ForecasterAutoreg(
                      regressor = LinearRegression(),
                      lags      = 5
                  )
     forecaster.fit(y=pd.Series(np.arange(50, dtype=float), name='y'))
-    results = forecaster.create_predict_inputs(steps=5)
+    results = forecaster._create_predict_inputs(steps=5)
 
     expected = (
-        pd.DataFrame(
-            data    = np.array([45., 46., 47., 48., 49.]),
-            index   = pd.RangeIndex(start=45, stop=50, step=1),
-            columns = ['y']
-        ),
-        None,
-        pd.RangeIndex(start=45, stop=50, step=1)
+        np.array([45., 46., 47., 48., 49.]),
+        pd.RangeIndex(start=45, stop=50, step=1),
+        None
     )
     
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    assert results[1] is None
-    pd.testing.assert_index_equal(results[2], expected[2])
+    np.testing.assert_array_almost_equal(results[0], expected[0])
+    pd.testing.assert_index_equal(results[1], expected[1])
+    assert results[2] is None
 
 
 def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform_y():
     """
-    Test create_predict_inputs when using LinearRegression as regressor and StandardScaler.
+    Test _create_predict_inputs when using LinearRegression as regressor and StandardScaler.
     """
     y = pd.Series(
             np.array([-0.59,  0.02, -0.9 ,  1.09, -3.61,  0.72, -0.11, -0.4 ,  0.49,
@@ -80,22 +76,22 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
                      transformer_y = StandardScaler()
                  )
     forecaster.fit(y=y)
-    results = forecaster.create_predict_inputs(steps=5, output_type='numpy')
+    results = forecaster._create_predict_inputs(steps=5)
 
     expected = (
         np.array([-0.1056608, -0.30987914, -0.45194408, -0.28324197, -0.52297655]),
-        None,
-        pd.RangeIndex(start=15, stop=20, step=1)
+        pd.RangeIndex(start=15, stop=20, step=1),
+        None
     )
     
     np.testing.assert_array_almost_equal(results[0], expected[0])
-    assert results[1] is None
-    pd.testing.assert_index_equal(results[2], expected[2])
+    pd.testing.assert_index_equal(results[1], expected[1])
+    assert results[2] is None
 
 
 def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform_y_and_transform_exog_series():
     """
-    Test create_predict_inputs when using LinearRegression as regressor, StandardScaler
+    Test _create_predict_inputs when using LinearRegression as regressor, StandardScaler
     as transformer_y and StandardScaler as transformer_exog.
     """
     y = pd.Series(np.array([-0.59,  0.02, -0.9 ,  1.09, -3.61,  0.72, -0.11, -0.4]))
@@ -110,22 +106,22 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
                      transformer_exog = StandardScaler()
                  )
     forecaster.fit(y=y, exog=exog)
-    results = forecaster.create_predict_inputs(steps=5, exog=exog_predict, output_type='numpy')
+    results = forecaster._create_predict_inputs(steps=5, exog=exog_predict)
 
     expected = (
         np.array([1.16937289, -2.34810076, 0.89246539, 0.27129451, 0.0542589]),
-        np.array([[-1.76425513], [-1.00989936], [ 0.59254869], [ 0.45863938], [ 0.1640389 ]]),
-        pd.RangeIndex(start=3, stop=8, step=1)
+        pd.RangeIndex(start=3, stop=8, step=1),
+        np.array([[-1.76425513], [-1.00989936], [ 0.59254869], [ 0.45863938], [ 0.1640389 ]])
     )
     
     np.testing.assert_array_almost_equal(results[0], expected[0])
-    np.testing.assert_array_almost_equal(results[1], expected[1])
-    pd.testing.assert_index_equal(results[2], expected[2])
+    pd.testing.assert_index_equal(results[1], expected[1])
+    np.testing.assert_array_almost_equal(results[2], expected[2])
 
 
 def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform_y_and_transform_exog_df():
     """
-    Test create_predict_inputs when using LinearRegression as regressor, StandardScaler
+    Test _create_predict_inputs when using LinearRegression as regressor, StandardScaler
     as transformer_y and transformer_exog as transformer_exog.
     """
     y = pd.Series(
@@ -153,31 +149,26 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
                      transformer_exog = transformer_exog
                  )
     forecaster.fit(y=y, exog=exog)
-    results = forecaster.create_predict_inputs(steps=5, exog=exog_predict)
+    results = forecaster._create_predict_inputs(steps=5, exog=exog_predict)
     
     expected = (
-        pd.DataFrame(
-            data    = np.array([1.16937289, -2.34810076, 0.89246539,  0.27129451,  0.0542589]),
-            index   = pd.RangeIndex(start=3, stop=8, step=1),
-            columns = ['y']
-        ),
-        pd.DataFrame({
-            'col_1': [-1.76425513, -1.00989936,  0.59254869,  0.45863938,  0.1640389],
-            'col_2_a': [1., 1., 1., 1., 0.],
-            'col_2_b': [0., 0., 0., 0., 1.]},
-            index=pd.RangeIndex(start=8, stop=13, step=1)
-        ),
-        pd.RangeIndex(start=3, stop=8, step=1)
+        np.array([1.16937289, -2.34810076, 0.89246539,  0.27129451,  0.0542589]),
+        pd.RangeIndex(start=3, stop=8, step=1),
+        np.array([[-1.76425513,  1.        ,  0.        ],
+                  [-1.00989936,  1.        ,  0.        ],
+                  [ 0.59254869,  1.        ,  0.        ],
+                  [ 0.45863938,  1.        ,  0.        ],
+                  [ 0.1640389 ,  0.        ,  1.        ]])
     )
     
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
-    pd.testing.assert_index_equal(results[2], expected[2])
+    np.testing.assert_array_almost_equal(results[0], expected[0])
+    pd.testing.assert_index_equal(results[1], expected[1])
+    np.testing.assert_array_almost_equal(results[2], expected[2])
 
 
 def test_create_predict_inputs_when_categorical_features_native_implementation_HistGradientBoostingRegressor():
     """
-    Test create_predict_inputs when using HistGradientBoostingRegressor and categorical variables.
+    Test _create_predict_inputs when using HistGradientBoostingRegressor and categorical variables.
     """
     df_exog = pd.DataFrame(
         {'exog_1': exog_categorical,
@@ -213,35 +204,31 @@ def test_create_predict_inputs_when_categorical_features_native_implementation_H
                      transformer_exog = transformer_exog
                  )
     forecaster.fit(y=y_categorical, exog=df_exog)
-    results = forecaster.create_predict_inputs(steps=10, exog=exog_predict)
+    results = forecaster._create_predict_inputs(steps=10, exog=exog_predict)
     
     expected = (
-        pd.DataFrame(
-            data    = np.array([0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]),
-            index   = pd.RangeIndex(start=45, stop=50, step=1),
-            columns = ['y']
-        ),
-        pd.DataFrame({
-            'exog_2': [0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
-            'exog_3': [0, 1, 2, 3, 4, 0, 1, 2, 3, 4],
-            'exog_1': [0.12062867, 0.8263408 , 0.60306013, 0.54506801, 0.34276383,
-                       0.30412079, 0.41702221, 0.68130077, 0.87545684, 0.51042234]},
-            index=pd.RangeIndex(start=50, stop=60, step=1)
-        ).astype({
-            'exog_2': int,
-            'exog_3': int
-        }),
-        pd.RangeIndex(start=45, stop=50, step=1)
+        np.array([0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]),
+        pd.RangeIndex(start=45, stop=50, step=1),
+        np.array([[0.        , 0.        , 0.12062867],
+                  [1.        , 1.        , 0.8263408 ],
+                  [2.        , 2.        , 0.60306013],
+                  [3.        , 3.        , 0.54506801],
+                  [4.        , 4.        , 0.34276383],
+                  [0.        , 0.        , 0.30412079],
+                  [1.        , 1.        , 0.41702221],
+                  [2.        , 2.        , 0.68130077],
+                  [3.        , 3.        , 0.87545684],
+                  [4.        , 4.        , 0.51042234]])
     )
     
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
-    pd.testing.assert_index_equal(results[2], expected[2])
+    np.testing.assert_array_almost_equal(results[0], expected[0])
+    pd.testing.assert_index_equal(results[1], expected[1])
+    np.testing.assert_array_almost_equal(results[2], expected[2])
 
 
 def test_create_predict_inputs_when_regressor_is_LinearRegression_with_exog_differentiation_is_1_and_transformer_y():
     """
-    Test create_predict_inputs when using LinearRegression as regressor and differentiation=1,
+    Test _create_predict_inputs when using LinearRegression as regressor and differentiation=1,
     and transformer_y is StandardScaler.
     """
 
@@ -260,37 +247,35 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_exog_diff
                      differentiation = 1
                 )
     forecaster.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
-    results = forecaster.create_predict_inputs(steps=steps, exog=exog.loc[end_train:])
+    results = forecaster._create_predict_inputs(steps=steps, exog=exog.loc[end_train:])
     
     expected = (
-        pd.DataFrame(
-            data    = np.array([np.nan, 0.14355438, -0.56028323,  0.07558021, 0.04869748,
-                                0.09807633, -0.00584249,  0.17596768,  0.01630394,  0.09883014,
-                                0.02377842, -0.01018012,  0.10597971, -0.01463081, -0.48984868,
-                                0.07503713]),
-            index   = pd.date_range(start='2001-12-01', periods=16, freq='MS'),
-            columns = ['y']
+        np.array(
+            [np.nan, 0.14355438, -0.56028323,  0.07558021, 0.04869748,
+             0.09807633, -0.00584249,  0.17596768,  0.01630394,  0.09883014,
+             0.02377842, -0.01018012,  0.10597971, -0.01463081, -0.48984868,
+             0.07503713]
         ),
-        pd.DataFrame(
-            data = np.array([ 1.16172882,  0.29468848, -0.4399757 ,  1.25008389,  1.37496887,
-                             -0.41673182,  0.32732157,  1.57848827,  0.40402941,  1.34466867,
-                             -1.0724777 ,  0.14619469, -0.78475177, -2.97987806, -1.46735738,
-                              0.84295053,  0.37485   ,  0.03500746, -1.37307705,  1.43220391,
-                              0.76682773,  0.50114842,  0.839902  , -1.0012572 , -1.67885896,
-                             -0.81587204, -1.33508966, -0.42014975,  0.98579761, -0.17262001,
-                             -0.02161134, -0.62664312, -0.91997057, -1.14759504,  0.18661806,
-                              0.15897422, -3.20047182, -0.5236335 , -1.00620967,  0.12763016,
-                             -0.54508051,  0.13153937, -0.14105938, -0.16935134,  0.06279071,
-                             -0.55075912, -0.22425219,  2.00991015,  0.79230622, -0.55605221,
-                             -0.27088044, -0.39179496, -1.34347494, -0.07230096, -1.51146602,
-                             -0.66840335, -0.78148407, -0.27354003, -0.27128144, -0.6389055 ,
-                              0.19573233, -0.67321672,  1.1559056 ]),
-            index   = pd.date_range(start='2003-04-01', periods=63, freq='MS'),
-            columns = ['exog']
-        ),
-        pd.date_range(start='2001-12-01', periods=16, freq='MS')
+        pd.date_range(start='2001-12-01', periods=16, freq='MS'),
+        np.array([[ 1.16172882], [ 0.29468848], [-0.4399757 ], [ 1.25008389],
+                  [ 1.37496887], [-0.41673182], [ 0.32732157], [ 1.57848827],
+                  [ 0.40402941], [ 1.34466867], [-1.0724777 ], [ 0.14619469],
+                  [-0.78475177], [-2.97987806], [-1.46735738], [ 0.84295053],
+                  [ 0.37485   ], [ 0.03500746], [-1.37307705], [ 1.43220391],
+                  [ 0.76682773], [ 0.50114842], [ 0.839902  ], [-1.0012572 ],
+                  [-1.67885896], [-0.81587204], [-1.33508966], [-0.42014975], 
+                  [ 0.98579761], [-0.17262001], [-0.02161134], [-0.62664312],
+                  [-0.91997057], [-1.14759504], [ 0.18661806], [ 0.15897422], 
+                  [-3.20047182], [-0.5236335 ], [-1.00620967], [ 0.12763016], 
+                  [-0.54508051], [ 0.13153937], [-0.14105938], [-0.16935134], 
+                  [ 0.06279071], [-0.55075912], [-0.22425219], [ 2.00991015], 
+                  [ 0.79230622], [-0.55605221], [-0.27088044], [-0.39179496], 
+                  [-1.34347494], [-0.07230096], [-1.51146602], [-0.66840335], 
+                  [-0.78148407], [-0.27354003], [-0.27128144], [-0.6389055 ], 
+                  [ 0.19573233], [-0.67321672], [ 1.1559056 ]]
+        )
     )
     
-    pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
-    pd.testing.assert_index_equal(results[2], expected[2])
+    np.testing.assert_array_almost_equal(results[0], expected[0])
+    pd.testing.assert_index_equal(results[1], expected[1])
+    np.testing.assert_array_almost_equal(results[2], expected[2])

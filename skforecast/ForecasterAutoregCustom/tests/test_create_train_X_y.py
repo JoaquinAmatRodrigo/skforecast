@@ -86,8 +86,8 @@ def test_create_train_X_y_ValueError_when_len_y_is_less_than_window_size():
 
 
 @pytest.mark.parametrize("y                        , exog", 
-                         [(pd.Series(np.arange(50)), pd.Series(np.arange(10))), 
-                          (pd.Series(np.arange(10)), pd.Series(np.arange(50))), 
+                         [(pd.Series(np.arange(50)), pd.Series(np.arange(10), name='exog')), 
+                          (pd.Series(np.arange(10)), pd.Series(np.arange(50), name='exog')), 
                           (pd.Series(np.arange(10)), pd.DataFrame(np.arange(50).reshape(25,2)))])
 def test_create_train_X_y_ValueError_when_len_y_is_different_from_len_exog(y, exog):
     """
