@@ -8,6 +8,7 @@
 import importlib
 import inspect
 import warnings
+from functools import wraps
 from copy import deepcopy
 from typing import Any, Callable, Optional, Tuple, Union
 import joblib
@@ -1814,6 +1815,7 @@ def check_backtesting_input(
     forecaster: object,
     steps: int,
     metric: Union[str, Callable, list],
+    add_aggregated_metric: bool=True,
     y: Optional[pd.Series]=None,
     series: Optional[Union[pd.DataFrame, dict]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
@@ -1846,6 +1848,9 @@ def check_backtesting_input(
         Number of future steps predicted.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
+    add_aggregated_metric : bool, default `True`
+        If `True`, the aggregated metrics (average, weighted average and pooling)
+        over all levels are also returned (only multiseries).
     y : pandas Series, default `None`
         Training time series for uni-series forecasters.
     series : pandas DataFrame, dict, default `None`
@@ -2078,6 +2083,8 @@ def check_backtesting_input(
                     "`refit` is only allowed when `initial_train_size` is not `None`."
                 )
 
+    if not isinstance(add_aggregated_metric, bool):
+        raise TypeError("`add_aggregated_metric` must be a boolean: `True`, `False`.")
     if not isinstance(fixed_train_size, bool):
         raise TypeError("`fixed_train_size` must be a boolean: `True`, `False`.")
     if not isinstance(allow_incomplete_fold, bool):

@@ -64,6 +64,7 @@ def test_ValueError_bayesian_search_optuna_multiseries_metric_list_duplicate_nam
             steps              = steps,
             search_space       = search_space,
             metric             = ['mean_absolute_error', mean_absolute_error],
+            aggregate_metric   = 'weighted_average',
             refit              = True,
             initial_train_size = len(series) - n_validation,
             fixed_train_size   = True,
@@ -105,6 +106,7 @@ def test_ValueError_bayesian_search_optuna_multiseries_when_search_space_names_d
             steps              = steps,
             search_space       = search_space,
             metric             = 'mean_absolute_error',
+            aggregate_metric   = 'weighted_average',
             refit              = True,
             initial_train_size = len(series) - n_validation,
             fixed_train_size   = True,
@@ -152,6 +154,7 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags
                   steps              = steps,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
+                  aggregate_metric   = 'weighted_average',
                   refit              = True,
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = True,
@@ -194,10 +197,10 @@ def test_results_output_bayesian_search_optuna_multiseries_with_mocked_when_lags
             {'n_estimators': 17, 'min_samples_leaf': 0.21035794225904136, 'max_features': 'log2'},
             0.21732156972764355, 17, 0.21035794225904136, 'log2']],
         dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'min_samples_leaf', 'max_features'],
-        index=pd.Index([9, 5, 0, 2, 7, 1, 8, 6, 3, 4], dtype='int64')
+        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'n_estimators', 'min_samples_leaf', 'max_features'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error': float, 
+        'mean_absolute_error__weighted_average': float, 
         'n_estimators': int, 
         'min_samples_leaf': float
     })
@@ -237,6 +240,7 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                   levels             = levels,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
+                  aggregate_metric   = 'weighted_average',
                   refit              = True,
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = True,
@@ -268,11 +272,176 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
             0.21632482482968562, 0.8509374761370117],
         [list(['l1']), np.array([1, 2]), {'alpha': 0.9809565564007693},
             0.2163292127503296, 0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([9, 3, 4, 6, 8, 1, 0, 5, 7, 2], dtype='int64')
+        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error': float, 
+        'mean_absolute_error__weighted_average': float, 
         'alpha': float
+    })
+
+    pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
+
+
+def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeries_with_multiple_metrics_aggregated():
+    """
+    Test output of _bayesian_search_optuna_multiseries in ForecasterAutoregMultiSeries
+    with multiple metrics and aggregated metrics (mocked done in skforecast v0.12.0).
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2,
+                     encoding  = 'onehot',
+                     transformer_series = StandardScaler()
+                 )
+
+    steps = 3
+    n_validation = 12
+
+    def search_space(trial):
+        search_space  = {
+            'alpha': trial.suggest_float('alpha', 1e-2, 1.0),
+            'lags' : trial.suggest_categorical('lags', [2, 4])
+        }
+        
+        return search_space
+
+    results = _bayesian_search_optuna_multiseries(
+                  forecaster         = forecaster,
+                  series             = series,
+                  steps              = steps,
+                  search_space       = search_space,
+                  metric             = ['mean_absolute_error', 'mean_absolute_scaled_error'],
+                  aggregate_metric   = ['weighted_average', 'average', 'pooling'],
+                  refit              = True,
+                  initial_train_size = len(series) - n_validation,
+                  fixed_train_size   = True,
+                  n_trials           = 10,
+                  random_state       = 123,
+                  return_best        = False,
+                  verbose            = False
+              )[0]
+    
+    expected_results = pd.DataFrame({
+        "levels": {
+            0: ["l1", "l2"],
+            1: ["l1", "l2"],
+            2: ["l1", "l2"],
+            3: ["l1", "l2"],
+            4: ["l1", "l2"],
+            5: ["l1", "l2"],
+            6: ["l1", "l2"],
+            7: ["l1", "l2"],
+            8: ["l1", "l2"],
+            9: ["l1", "l2"],
+        },
+        "lags": {
+            0: np.array([1, 2]),
+            1: np.array([1, 2]),
+            2: np.array([1, 2]),
+            3: np.array([1, 2]),
+            4: np.array([1, 2]),
+            5: np.array([1, 2, 3, 4]),
+            6: np.array([1, 2, 3, 4]),
+            7: np.array([1, 2, 3, 4]),
+            8: np.array([1, 2, 3, 4]),
+            9: np.array([1, 2, 3, 4]),
+        },
+        "params": {
+            0: {"alpha": 0.5558016213920624},
+            1: {"alpha": 0.6995044937418831},
+            2: {"alpha": 0.7406154516747153},
+            3: {"alpha": 0.8509374761370117},
+            4: {"alpha": 0.9809565564007693},
+            5: {"alpha": 0.23598059857016607},
+            6: {"alpha": 0.398196343012209},
+            7: {"alpha": 0.4441865222328282},
+            8: {"alpha": 0.53623586010342},
+            9: {"alpha": 0.7252189487445193},
+        },
+        "mean_absolute_error__weighted_average": {
+            0: 0.21324663796176382,
+            1: 0.2132571094660072,
+            2: 0.21326009091608622,
+            3: 0.21326806055662118,
+            4: 0.2132773952926551,
+            5: 0.21476196207156512,
+            6: 0.21477679099211167,
+            7: 0.21478095843883202,
+            8: 0.2147892513261171,
+            9: 0.21480607764821474,
+        },
+        "mean_absolute_error__average": {
+            0: 0.21324663796176382,
+            1: 0.21325710946600718,
+            2: 0.21326009091608622,
+            3: 0.21326806055662115,
+            4: 0.2132773952926551,
+            5: 0.21476196207156514,
+            6: 0.21477679099211167,
+            7: 0.21478095843883202,
+            8: 0.21478925132611706,
+            9: 0.21480607764821472,
+        },
+        "mean_absolute_error__pooling": {
+            0: 0.21324663796176382,
+            1: 0.21325710946600726,
+            2: 0.21326009091608622,
+            3: 0.21326806055662115,
+            4: 0.21327739529265513,
+            5: 0.21476196207156514,
+            6: 0.21477679099211167,
+            7: 0.21478095843883202,
+            8: 0.21478925132611706,
+            9: 0.21480607764821472,
+        },
+        "mean_absolute_scaled_error__weighted_average": {
+            0: 0.7850408674109868,
+            1: 0.7850769204162228,
+            2: 0.7850871846200614,
+            3: 0.7851146198219785,
+            4: 0.7851467509994321,
+            5: 0.7897394420953061,
+            6: 0.7897964331491425,
+            7: 0.7898124493861658,
+            8: 0.7898443200957621,
+            9: 0.7899089846155858,
+        },
+        "mean_absolute_scaled_error__average": {
+            0: 0.7850408674109867,
+            1: 0.7850769204162228,
+            2: 0.7850871846200613,
+            3: 0.7851146198219786,
+            4: 0.785146750999432,
+            5: 0.7897394420953061,
+            6: 0.7897964331491426,
+            7: 0.7898124493861657,
+            8: 0.7898443200957622,
+            9: 0.7899089846155857,
+        },
+        "mean_absolute_scaled_error__pooling": {
+            0: 0.7724806513327171,
+            1: 0.7725185840968428,
+            2: 0.7725293843257277,
+            3: 0.7725582541506879,
+            4: 0.7725920690001996,
+            5: 0.7779698752966109,
+            6: 0.7780235926931046,
+            7: 0.7780386891653759,
+            8: 0.7780687299436625,
+            9: 0.7781296828776818,
+        },
+        "alpha": {
+            0: 0.5558016213920624,
+            1: 0.6995044937418831,
+            2: 0.7406154516747153,
+            3: 0.8509374761370117,
+            4: 0.9809565564007693,
+            5: 0.23598059857016607,
+            6: 0.398196343012209,
+            7: 0.4441865222328282,
+            8: 0.53623586010342,
+            9: 0.7252189487445193,
+        },
     })
 
     pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
@@ -308,6 +477,7 @@ def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_create_st
                   steps               = steps,
                   search_space        = search_space,
                   metric              = 'mean_absolute_error',
+                  aggregate_metric    = 'weighted_average',
                   refit               = False,
                   initial_train_size  = len(series) - n_validation,
                   n_trials            = 10,
@@ -343,10 +513,10 @@ def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_create_st
             0.20916485106998073, 1.7018749522740233],
         [list(['l1', 'l2']), np.array([1, 2]), {'alpha': 1.9619131128015386},
             0.2091714215090992, 1.9619131128015386]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([9, 3, 4, 6, 8, 1, 0, 5, 7, 2], dtype='int64')
+        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
         'alpha': float
     })
 
@@ -383,6 +553,7 @@ def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_study_opt
                   steps                 = steps,
                   search_space          = search_space,
                   metric                = 'mean_absolute_error',
+                  aggregate_metric      = 'weighted_average',
                   refit                 = False,
                   initial_train_size    = len(series) - n_validation,
                   n_trials              = 10,
@@ -415,10 +586,10 @@ def test_results_output_bayesian_search_optuna_multiseries_with_kwargs_study_opt
         [list(['l1', 'l2']), np.array([1, 2, 3, 4]),
             {'n_estimators': 172, 'max_depth': 24, 'max_features': 'log2'},
             0.22300765864212552, 172, 24, 'log2']], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth', 'max_features'],
+        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'n_estimators', 'max_depth', 'max_features'],
         index=pd.RangeIndex(start=0, stop=7, step=1)
     ).astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
         'n_estimators': int,
         'max_depth': int
     })
@@ -452,6 +623,7 @@ def test_results_output_bayesian_search_optuna_multiseries_when_lags_is_not_prov
                   steps              = steps,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
+                  aggregate_metric   = 'weighted_average',
                   refit              = True,
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = True,
@@ -492,10 +664,10 @@ def test_results_output_bayesian_search_optuna_multiseries_when_lags_is_not_prov
         [list(['l1', 'l2']), np.array([1, 2, 3, 4]),
             {'alpha': 0.9809565564007693}, 0.2148284279387544,
             0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([2, 1, 9, 5, 8, 3, 7, 0, 4, 6], dtype='int64')
+        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
         'alpha': float
     })
 
@@ -528,6 +700,7 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                   steps              = steps,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
+                  aggregate_metric   = 'weighted_average',
                   refit              = True,
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = True,
@@ -568,10 +741,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
         [list(['l1', 'l2']), 'custom function: create_predictors',
             {'alpha': 0.9809565564007693}, 0.2148284279387544,
             0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([2, 1, 9, 5, 8, 3, 7, 0, 4, 6], dtype='int64')
+        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
         'alpha': float
     })
 
@@ -607,6 +780,7 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                   steps              = steps,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
+                  aggregate_metric   = 'weighted_average',
                   refit              = True,
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = True,
@@ -638,10 +812,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
         [list(['l1']), np.array([1, 2, 3, 4]),
             {'alpha': 0.23598059857016607}, 0.21912194726679404,
             0.23598059857016607]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([1, 0, 5, 7, 2, 8, 6, 4, 3, 9], dtype='int64')
+        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
         'alpha': float
     })
 
@@ -680,6 +854,7 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
                   steps              = steps,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
+                  aggregate_metric   = 'weighted_average',
                   refit              = True,
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = True,
@@ -721,10 +896,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
         [list(['l1']), {'l1': np.array([1, 3]), 'l2': None},
             {'alpha': 0.190666813148965}, 0.22324045507529866,
             0.190666813148965]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([7, 8, 5, 6, 1, 9, 0, 2, 3, 4], dtype='int64')
+        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
         'alpha': float
     })
 
@@ -757,6 +932,7 @@ def test_evaluate_bayesian_search_optuna_multiseries_when_return_best_Forecaster
         steps              = steps,
         search_space       = search_space,
         metric             = 'mean_absolute_error',
+        aggregate_metric   = 'weighted_average',
         refit              = True,
         initial_train_size = len(series) - n_validation,
         fixed_train_size   = True,
@@ -799,6 +975,7 @@ def test_evaluate_bayesian_search_optuna_multiseries_when_return_best_Forecaster
         steps              = steps,
         search_space       = search_space,
         metric             = 'mean_absolute_error',
+        aggregate_metric   = 'weighted_average',
         refit              = True,
         initial_train_size = len(series) - n_validation,
         fixed_train_size   = True,
@@ -825,6 +1002,8 @@ def test_results_opt_best_output__bayesian_search_optuna_multiseries_with_output
                  )
     steps              = 3
     metric             = 'mean_absolute_error'
+    aggregate_metric   = 'weighted_average',
+    metric_names       = ['mean_absolute_error__weighted_average'],
     n_validation       = 12
     initial_train_size = len(series) - n_validation
     fixed_train_size   = True
@@ -840,6 +1019,8 @@ def test_results_opt_best_output__bayesian_search_optuna_multiseries_with_output
         series             = series,
         steps              = steps,
         metric             = metric,
+        aggregate_metric   = aggregate_metric,
+        metric_names       = metric_names,
         initial_train_size = initial_train_size,
         fixed_train_size   = fixed_train_size,
         refit              = refit,

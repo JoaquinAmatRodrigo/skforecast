@@ -19,6 +19,8 @@ The main changes in this release are:
 + <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/api/forecastermultiseries) and [`ForecasterAutoregMultiSeriesCustom`](https://skforecast.org/latest/api/forecastermultiseriescustom). In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
 
 + <span class="badge text-bg-feature">Feature</span> New argument `skip_folds` in `model_selection` and `model_selection_multiseries` functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
+
++ <span class="badge text-bg-api-change">API Change</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.
   
 **Added**
 
@@ -29,6 +31,8 @@ The main changes in this release are:
 + Create the `_create_predict_inputs` method in all Forecasters to unify the inputs of the predict methods.
 
 + New plot function `plot_predicted_intervals` in the `plot` module to plot predicted intervals.
+
++ New module `metrics` with functions to calculate metrics for time series forecasting such as `mean_absolute_scaled_error` and `root_mean_squared_scaled_error`.
 
 + New argument `skip_folds` in `model_selection` and `model_selection_multiseries` functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
 
@@ -41,6 +45,8 @@ The main changes in this release are:
 + Refactor `_recursive_predict` in all recursive forecasters.
 
 + Change default value of `transformer_series` when initializing `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` from `StandardScaler()` to `None`.
+
++ Function `_get_metric` moved from `model_selection` to `metrics`.
 
 + Change information message when `verbose` is `True` in `backtesting_forecaster` and `backtesting_forecaster_multiseries`.
 

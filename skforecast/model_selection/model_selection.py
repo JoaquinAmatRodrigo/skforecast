@@ -17,15 +17,10 @@ from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
 import optuna
 from optuna.samplers import TPESampler
-from sklearn.metrics import (
-    mean_squared_error,
-    mean_absolute_error,
-    mean_absolute_percentage_error,
-    mean_squared_log_error,
-)
 from sklearn.model_selection import ParameterGrid
 from sklearn.model_selection import ParameterSampler
 
+from ..metrics import add_y_train_argument, _get_metric
 from ..exceptions import LongTrainingWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..utils import check_backtesting_input
@@ -131,6 +126,7 @@ def _create_backtesting_folds(
         fit the Forecaster.
     
     """
+
     if isinstance(data, pd.Index):
         data = pd.Series(index=data)
     
@@ -271,45 +267,6 @@ def _create_backtesting_folds(
         ]
 
     return folds
-
-
-def _get_metric(
-    metric: str
-) -> Callable:
-    """
-    Get the corresponding scikit-learn function to calculate the metric.
-    
-    Parameters
-    ----------
-    metric : str
-        Metric used to quantify the goodness of fit of the model. Available metrics: 
-        {'mean_squared_error', 'mean_absolute_error', 
-         'mean_absolute_percentage_error', 'mean_squared_log_error'}
-    
-    Returns
-    -------
-    metric : Callable
-        scikit-learn function to calculate the desired metric.
-    
-    """
-    
-    if metric not in ['mean_squared_error', 'mean_absolute_error',
-                      'mean_absolute_percentage_error', 'mean_squared_log_error']:
-        raise ValueError(
-            (f"Allowed metrics are: 'mean_squared_error', 'mean_absolute_error', "
-             f"'mean_absolute_percentage_error' and 'mean_squared_log_error'. Got {metric}.")
-        )
-    
-    metrics = {
-        'mean_squared_error': mean_squared_error,
-        'mean_absolute_error': mean_absolute_error,
-        'mean_absolute_percentage_error': mean_absolute_percentage_error,
-        'mean_squared_log_error': mean_squared_log_error
-    }
-    
-    metric = metrics[metric]
-    
-    return metric
 
 
 def _backtesting_forecaster(
@@ -455,10 +412,18 @@ def _backtesting_forecaster(
         n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
     if not isinstance(metric, list):
-        metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
+        metrics = [
+            _get_metric(metric=metric)
+            if isinstance(metric, str)
+            else add_y_train_argument(metric)
+        ]
     else:
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m 
-                   for m in metric]
+        metrics = [
+            _get_metric(metric=m)
+            if isinstance(m, str)
+            else add_y_train_argument(m) 
+            for m in metric
+        ]
 
     store_in_sample_residuals = False if interval is None else True
 
@@ -600,10 +565,21 @@ def _backtesting_forecaster(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
+    train_indexes = []
+    for i, fold in enumerate(folds):
+        fit_fold = fold[-1]
+        if i == 0 or fit_fold:
+            train_iloc_start = fold[0][0]
+            train_iloc_end = fold[0][1]
+            train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
+    train_indexes = np.unique(np.concatenate(train_indexes))
+    y_train = y.iloc[train_indexes]
+
     metrics_values = [
         m(
             y_true = y.loc[backtest_predictions.index],
-            y_pred = backtest_predictions['pred']
+            y_pred = backtest_predictions['pred'],
+            y_train = y_train
         ) 
         for m in metrics
     ]
