@@ -968,9 +968,9 @@ def test_check_backtesting_input_TypeError_when_refit_not_bool_or_int(refit):
 
 
 @pytest.mark.parametrize("boolean_argument", 
-                         ['fixed_train_size', 'allow_incomplete_fold', 
-                          'in_sample_residuals', 'verbose', 'show_progress',
-                          'suppress_warnings'], 
+                         ['add_aggregated_metric', 'fixed_train_size', 
+                          'allow_incomplete_fold', 'in_sample_residuals', 
+                          'verbose', 'show_progress', 'suppress_warnings'], 
                          ids = lambda argument : f'{argument}' )
 def test_check_backtesting_input_TypeError_when_boolean_arguments_not_bool(boolean_argument):
     """
@@ -982,11 +982,14 @@ def test_check_backtesting_input_TypeError_when_boolean_arguments_not_bool(boole
                     lags      = 2
                  )
     
-    boolean_arguments = {'fixed_train_size': False,
-                         'allow_incomplete_fold': False,
-                         'in_sample_residuals': False,
-                         'verbose': False,
-                         'show_progress': False}
+    boolean_arguments = {
+        'add_aggregated_metric': False,
+        'fixed_train_size': False,
+        'allow_incomplete_fold': False,
+        'in_sample_residuals': False,
+        'verbose': False,
+        'show_progress': False
+    }
     boolean_arguments[boolean_argument] = 'not_bool'
     
     err_msg = re.escape(f"`{boolean_argument}` must be a boolean: `True`, `False`.")

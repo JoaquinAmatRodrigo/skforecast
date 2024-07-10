@@ -1501,9 +1501,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
 
     expected_metrics = pd.DataFrame(
         data={
-        'levels': ['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004'],
+        'levels': ['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004',
+                   'average', 'weighted_average', 'pooling'],
         'mean_absolute_error':[258.53959034, 1396.68222457, np.nan, 253.72012285,
-                               1367.69574404]
+                               1367.69574404, 819.1594204522052, 753.0251104677614,
+                               753.0251104677616]
         },
         columns=['levels', 'mean_absolute_error']
     )

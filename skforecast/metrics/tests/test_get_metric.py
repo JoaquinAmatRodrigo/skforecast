@@ -26,88 +26,43 @@ def test_get_metric_ValueError_when_metric_not_in_metrics_allowed():
         "root_mean_squared_scaled_error",
     ]
     
-    err_msg = re.escape(
-                (f"Allowed metrics are: {allowed_metrics}. Got {metric}.")
-              )
+    err_msg = re.escape(f"Allowed metrics are: {allowed_metrics}. Got {metric}.")
     with pytest.raises(ValueError, match = err_msg):
         _get_metric(metric)
 
 
-def test_get_metric_import_and_calculate_mean_squared_error_correctly():
+@pytest.mark.parametrize("metric_str, metric_callable", 
+                         [('mean_squared_error', mean_squared_error),
+                          ('mean_absolute_error', mean_absolute_error),
+                          ('mean_absolute_percentage_error', mean_absolute_percentage_error),
+                          ('mean_squared_log_error', mean_squared_log_error)], 
+                         ids = lambda dt : f'mertic_str, metric_callable: {dt}')
+def test_get_metric_output_for_all_metrics(metric_str, metric_callable):
     """
-    Test get_metric import and calculate mean_squared_error correctly.
+    Test output for all metrics allowed.
     """
-    metric_str = 'mean_squared_error'
-    metric = _get_metric(metric_str)
     y_true = np.array([3, -0.5, 2, 7])
     y_pred = np.array([2.5, 0.0, 2, 8])
-    expected = mean_squared_error(y_true=y_true, y_pred=y_pred)
 
+    metric = _get_metric(metric_str)
+    expected = metric_callable(y_true=y_true, y_pred=y_pred)
+    
     assert metric(y_true=y_true, y_pred=y_pred) == expected
 
 
-def test_get_metric_import_and_calculate_mean_absolute_error_correctly():
+@pytest.mark.parametrize("metric_str, metric_callable", 
+                         [('mean_absolute_scaled_error', mean_absolute_scaled_error),
+                          ('root_mean_squared_scaled_error', root_mean_squared_scaled_error)], 
+                         ids = lambda dt : f'mertic_str, metric_callable: {dt}')
+def test_get_metric_output_for_all_metrics_y_train(metric_str, metric_callable):
     """
-    Test get_metric import and calculate mean_absolute_error correctly.
+    Test output for all metrics allowed with y_train argument.
     """
-    metric_str = 'mean_absolute_error'
-    metric = _get_metric(metric_str)
-    y_true = np.array([3, -0.5, 2, 7])
-    y_pred = np.array([2.5, 0.0, 2, 8])
-    expected = mean_absolute_error(y_true=y_true, y_pred=y_pred)
-
-    assert metric(y_true=y_true, y_pred=y_pred) == expected
-
-
-def test_get_metric_import_and_calculate_mean_absolute_percentage_error_correctly():
-    """
-    Test get_metric import and calculate mean_absolute_percentage_error correctly.
-    """
-    metric_str = 'mean_absolute_percentage_error'
-    metric = _get_metric(metric_str)
-    y_true = np.array([3, -0.5, 2, 7])
-    y_pred = np.array([2.5, 0.0, 2, 8])
-    expected = mean_absolute_percentage_error(y_true=y_true, y_pred=y_pred)
-
-    assert metric(y_true=y_true, y_pred=y_pred) == expected
-
-
-def test_get_metric_import_and_calculate_mean_squared_log_error_correctly():
-    """
-    Test get_metric import and calculate mean_squared_log_error correctly.
-    """
-    metric_str = 'mean_squared_log_error'
-    metric = _get_metric(metric_str)
-    y_true = np.array([3, 5, 2.5, 7])
-    y_pred = np.array([2.5, 5, 4, 8])
-    expected = mean_squared_log_error(y_true=y_true, y_pred=y_pred)
-
-    assert metric(y_true=y_true, y_pred=y_pred) == expected
-
-
-def test_get_metric_import_and_calculate_mean_absolute_scaled_error_correctly():
-    """
-    Test get_metric import and calculate mean_absolute_scaled_error correctly.
-    """
-    metric_str = 'mean_absolute_scaled_error'
-    metric = _get_metric(metric_str)
     y_true = np.array([3, -0.5, 2, 7])
     y_pred = np.array([2.5, 0.0, 2, 8])
     y_train = np.array([2, 3, 4, 5])
-    expected = mean_absolute_scaled_error(y_true=y_true, y_pred=y_pred, y_train=y_train)
 
-    assert metric(y_true=y_true, y_pred=y_pred, y_train=y_train) == expected
-
-
-def test_get_metric_import_and_calculate_root_mean_squared_scaled_error_correctly():
-    """
-    Test get_metric import and calculate root_mean_squared_scaled_error correctly.
-    """
-    metric_str = 'root_mean_squared_scaled_error'
     metric = _get_metric(metric_str)
-    y_true = np.array([3, -0.5, 2, 7])
-    y_pred = np.array([2.5, 0.0, 2, 8])
-    y_train = np.array([2, 3, 4, 5])
-    expected = root_mean_squared_scaled_error(y_true=y_true, y_pred=y_pred, y_train=y_train)
-
+    expected = metric_callable(y_true=y_true, y_pred=y_pred, y_train=y_train)
+    
     assert metric(y_true=y_true, y_pred=y_pred, y_train=y_train) == expected

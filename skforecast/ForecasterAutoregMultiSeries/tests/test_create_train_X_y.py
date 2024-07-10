@@ -47,10 +47,10 @@ def test_create_train_X_y_ValueError_when_Forecaster_fitted_and_different_column
     })
 
     err_msg = re.escape(
-        (f"Once the Forecaster has been trained, `series` must have the "
-         f"same columns as the series used during training:\n" 
-         f" Got      : ['l1', 'l4']\n"
-         f" Expected : ['l1', 'l2']")
+        ("Once the Forecaster has been trained, `series` must have the "
+         "same columns as the series used during training:\n" 
+         " Got      : ['l1', 'l4']\n"
+         " Expected : ['l1', 'l2']")
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster._create_train_X_y(series=new_series)
@@ -97,10 +97,10 @@ def test_create_train_X_y_ValueError_when_Forecaster_fitted_and_different_exog_c
     new_exog = pd.Series(np.arange(10), name='exog2')
 
     err_msg = re.escape(
-        (f"Once the Forecaster has been trained, `exog` must have the "
-         f"same columns as the series used during training:\n" 
-         f" Got      : ['exog2']\n"
-         f" Expected : ['exog']")
+        ("Once the Forecaster has been trained, `exog` must have the "
+         "same columns as the series used during training:\n" 
+         " Got      : ['exog2']\n"
+         " Expected : ['exog']")
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster._create_train_X_y(series=series, exog=new_exog)

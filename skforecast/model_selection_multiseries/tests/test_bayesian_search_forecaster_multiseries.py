@@ -311,20 +311,20 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
         warnings.filterwarnings("ignore", category=UserWarning, module="optuna")
 
         results_search, best_trial = bayesian_search_forecaster_multiseries(
-            forecaster=forecaster,
-            series=series_dict,
-            exog=exog_dict,
-            search_space=search_space,
-            metric="mean_absolute_error",
-            aggregate_metric="weighted_average",
-            initial_train_size=len(series_dict_train["id_1000"]),
-            steps=24,
-            refit=False,
-            n_trials=3,
-            return_best=False,
-            show_progress=False,
-            verbose=False,
-            suppress_warnings=True,
+            forecaster         = forecaster,
+            series             = series_dict,
+            exog               = exog_dict,
+            search_space       = search_space,
+            metric             = "mean_absolute_error",
+            aggregate_metric   = "weighted_average",
+            initial_train_size = len(series_dict_train["id_1000"]),
+            steps              = 24,
+            refit              = False,
+            n_trials           = 3,
+            return_best        = False,
+            show_progress      = False,
+            verbose            = False,
+            suppress_warnings  = True,
         )
 
     expected = pd.DataFrame(
@@ -417,68 +417,68 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_mult
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning, module="optuna")
 
-        results_search, _ = bayesian_search_forecaster_multiseries(
-            forecaster=forecaster,
-            series=series_dict,
-            exog=exog_dict,
-            search_space=search_space,
-            metric=['mean_absolute_error', 'mean_absolute_scaled_error'],
-            aggregate_metric=['weighted_average', 'average', 'pooling'],
-            initial_train_size=len(series_dict_train["id_1000"]),
-            steps=24,
-            refit=False,
-            n_trials=3,
-            return_best=False,
-            show_progress=False,
-            verbose=False,
-            suppress_warnings=True,
+        results_search, best_trial = bayesian_search_forecaster_multiseries(
+            forecaster         = forecaster,
+            series             = series_dict,
+            exog               = exog_dict,
+            search_space       = search_space,
+            metric             = ['mean_absolute_error', 'mean_absolute_scaled_error'],
+            aggregate_metric   = ['weighted_average', 'average', 'pooling'],
+            initial_train_size = len(series_dict_train["id_1000"]),
+            steps              = 24,
+            refit              = False,
+            n_trials           = 3,
+            return_best        = False,
+            show_progress      = False,
+            verbose            = False,
+            suppress_warnings  = True,
         )
 
     expected = pd.DataFrame({
-                    "levels": {
-                        0: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
-                        1: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
-                        2: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
-                    },
-                    "lags": {0: np.array([1, 7, 14]), 1: np.array([1, 7, 14]), 2: np.array([5])},
-                    "params": {
-                        0: {"n_estimators": 4, "max_depth": 3},
-                        1: {"n_estimators": 3, "max_depth": 3},
-                        2: {"n_estimators": 4, "max_depth": 3},
-                    },
-                    "mean_absolute_error__weighted_average": {
-                        0: 749.8761502029433,
-                        1: 760.659082077477,
-                        2: 777.6874712018467,
-                    },
-                    "mean_absolute_error__average": {
-                        0: 709.8836514262415,
-                        1: 721.1848222120482,
-                        2: 754.3537196425694,
-                    },
-                    "mean_absolute_error__pooling": {
-                        0: 709.8836514262414,
-                        1: 721.1848222120483,
-                        2: 754.3537196425694,
-                    },
-                    "mean_absolute_scaled_error__weighted_average": {
-                        0: 1.7214020008755428,
-                        1: 1.7480018562024022,
-                        2: 1.8159623522099073,
-                    },
-                    "mean_absolute_scaled_error__average": {
-                        0: 2.0671251354627653,
-                        1: 2.099920474995049,
-                        2: 2.1945202856306465,
-                    },
-                    "mean_absolute_scaled_error__pooling": {
-                        0: 1.6864677542505797,
-                        1: 1.7133159005309597,
-                        2: 1.7921151176255248,
-                    },
-                    "n_estimators": {0: 4, 1: 3, 2: 4},
-                    "max_depth": {0: 3, 1: 3, 2: 3},
-                })
+        "levels": {
+            0: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+            1: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+            2: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+        },
+        "lags": {0: np.array([1, 7, 14]), 1: np.array([1, 7, 14]), 2: np.array([5])},
+        "params": {
+            0: {"n_estimators": 4, "max_depth": 3},
+            1: {"n_estimators": 3, "max_depth": 3},
+            2: {"n_estimators": 4, "max_depth": 3},
+        },
+        "mean_absolute_error__weighted_average": {
+            0: 749.8761502029433,
+            1: 760.659082077477,
+            2: 777.6874712018467,
+        },
+        "mean_absolute_error__average": {
+            0: 709.8836514262415,
+            1: 721.1848222120482,
+            2: 754.3537196425694,
+        },
+        "mean_absolute_error__pooling": {
+            0: 709.8836514262414,
+            1: 721.1848222120483,
+            2: 754.3537196425694,
+        },
+        "mean_absolute_scaled_error__weighted_average": {
+            0: 1.7214020008755428,
+            1: 1.7480018562024022,
+            2: 1.8159623522099073,
+        },
+        "mean_absolute_scaled_error__average": {
+            0: 2.0671251354627653,
+            1: 2.099920474995049,
+            2: 2.1945202856306465,
+        },
+        "mean_absolute_scaled_error__pooling": {
+            0: 1.6864677542505797,
+            1: 1.7133159005309597,
+            2: 1.7921151176255248,
+        },
+        "n_estimators": {0: 4, 1: 3, 2: 4},
+        "max_depth": {0: 3, 1: 3, 2: 3},
+    })
 
     pd.testing.assert_frame_equal(expected, results_search)
 
@@ -535,23 +535,31 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
     expected = pd.DataFrame(
         np.array([[list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
         np.array([ 1,  7, 14]), {'n_estimators': 4, 'max_depth': 3}, 
-            694.843611295513, 4, 3],
+            718.447039241195, 694.843611295513, 694.843611295513, 4, 3],
         [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
         np.array([ 1,  7, 14]), {'n_estimators': 3, 'max_depth': 3},
-            704.8898538858386, 3, 3],
+            726.7646039380159, 704.8898538858386, 704.8898538858386, 3, 3],
         [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
          np.array([5]), {'n_estimators': 4, 'max_depth': 3},
-            730.1888301097707, 4, 3]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth'],
-        index=pd.Index([0, 2, 1], dtype='int64')
+            735.3584948212444, 730.1888301097707, 730.1888301097707, 4, 3]], dtype=object),
+        columns=['levels', 'lags', 'params', 
+                 'mean_absolute_error__weighted_average', 
+                 'mean_absolute_error__average', 
+                 'mean_absolute_error__pooling',
+                 'n_estimators', 'max_depth'],
+        index=pd.Index([0, 1, 2], dtype='int64')
     ).astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
+        'mean_absolute_error__average': float,
+        'mean_absolute_error__pooling': float,
         'n_estimators': int,
         'max_depth': int
     })
 
     results_search = results_search.astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
+        'mean_absolute_error__average': float,
+        'mean_absolute_error__pooling': float,
         'n_estimators': int,
         'max_depth': int
     })

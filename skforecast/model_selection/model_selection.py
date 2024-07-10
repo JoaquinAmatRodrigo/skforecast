@@ -126,6 +126,7 @@ def _create_backtesting_folds(
         fit the Forecaster.
     
     """
+
     if isinstance(data, pd.Index):
         data = pd.Series(index=data)
     
@@ -565,11 +566,12 @@ def _backtesting_forecaster(
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
     train_indexes = []
-    for fold in folds:
-        # TODO: skip folds without retrain to speed up
-        train_iloc_start = fold[0][0]
-        train_iloc_end = fold[0][1]
-        train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
+    for i, fold in enumerate(folds):
+        fit_fold = fold[-1]
+        if i == 0 or fit_fold:
+            train_iloc_start = fold[0][0]
+            train_iloc_end = fold[0][1]
+            train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
     train_indexes = np.unique(np.concatenate(train_indexes))
     y_train = y.iloc[train_indexes]
 

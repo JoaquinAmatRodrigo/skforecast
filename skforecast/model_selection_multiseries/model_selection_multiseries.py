@@ -254,22 +254,22 @@ def _extract_data_folds_multiseries(
 
 
 def _calculate_metrics_multiseries(
-        series : Union[pd.DataFrame, dict],
-        predictions: pd.DataFrame,
-        folds: Union[list, tqdm],
-        span_index : Union[pd.DatetimeIndex, pd.RangeIndex],
-        metrics: list,
-        levels: list,
-        add_aggregated_metric: bool=True
-):
+    series : Union[pd.DataFrame, dict],
+    predictions: pd.DataFrame,
+    folds: Union[list, tqdm],
+    span_index : Union[pd.DatetimeIndex, pd.RangeIndex],
+    metrics: list,
+    levels: list,
+    add_aggregated_metric: bool=True
+) -> pd.DataFrame:
     """   
     Calculate metrics for each level and also for all levels aggregated using
     average, weighted average or pooling.
 
-    - average: the average (artihmetic mean) of all levels.
-    - weighted_average: the average of the metrics weighted by the number of
+    - 'average': the average (arithmetic mean) of all levels.
+    - 'weighted_average': the average of the metrics weighted by the number of
     predicted values of each level.
-    - pooling: the values of all levels are pooled and then the metric is
+    - 'pooling': the values of all levels are pooled and then the metric is
     calculated.
 
     Parameters
@@ -290,16 +290,17 @@ def _calculate_metrics_multiseries(
         If `True`, return the aggregated metrics (average, weighted average and pooled)
         are also returned.
 
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
         predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
+        - 'pooling': the values of all levels are pooled and then the metric is
         calculated.
 
     Returns
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s).
+    
     """
 
     if not isinstance(series, (pd.DataFrame, dict)):
@@ -319,13 +320,16 @@ def _calculate_metrics_multiseries(
         raise TypeError("`levels` must be a list.")
     if not isinstance(add_aggregated_metric, bool):
         raise TypeError("`add_aggregated_metric` must be a boolean.")
-        
+    
     metric_names = [(m if isinstance(m, str) else m.__name__) for m in metrics]
+
     y_true_pred_levels = []
     y_train_levels = []
     for level in levels:
+        y_true_pred_level = None
+        y_train = None
         if level in predictions.columns:
-            # TODO: avoid merges inside the loop, instead merge utpside and then filter
+            # TODO: avoid merges inside the loop, instead merge upside and then filter
             y_true_pred_level = pd.merge(
                 series[level],
                 predictions[level],
@@ -336,18 +340,18 @@ def _calculate_metrics_multiseries(
             ).dropna(axis=0, how="any")
 
             train_indexes = []
-            for fold in folds:
-                train_iloc_start = fold[0][0]
-                train_iloc_end = fold[0][1]
-                train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
+            for i, fold in enumerate(folds):
+                fit_fold = fold[-1]
+                if i == 0 or fit_fold:
+                    train_iloc_start = fold[0][0]
+                    train_iloc_end = fold[0][1]
+                    train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
             train_indexes = np.unique(np.concatenate(train_indexes))
             train_indexes = span_index[train_indexes]
             y_train = series[level].loc[series[level].index.intersection(train_indexes)]
-            y_true_pred_levels.append(y_true_pred_level)
-            y_train_levels.append(y_train)
-        else:
-            y_true_pred_levels.append(None)
-            y_train_levels.append(None)
+
+        y_true_pred_levels.append(y_true_pred_level)
+        y_train_levels.append(y_train)
             
     metrics_levels = []
     for i, level in enumerate(levels):
@@ -365,13 +369,14 @@ def _calculate_metrics_multiseries(
             metrics_levels.append([None for _ in metrics])
 
     metrics_levels = pd.DataFrame(
-                        data    = metrics_levels,
-                        columns = [m if isinstance(m, str) else m.__name__
+                         data    = metrics_levels,
+                         columns = [m if isinstance(m, str) else m.__name__
                                     for m in metrics]
-                    )
+                     )
     metrics_levels.insert(0, 'levels', levels)
 
     if add_aggregated_metric:
+
         # aggragation: average
         average = metrics_levels.drop(columns='levels').mean(skipna=True)
         average = average.to_frame().transpose()
@@ -407,6 +412,7 @@ def _calculate_metrics_multiseries(
         y_train_levels = list(y_train_levels)
         y_true_pred_levels = np.concatenate(y_true_pred_levels)
         y_train_levels_concat = np.concatenate(y_train_levels)
+
         pooled = []
         for m, m_name in zip(metrics, metric_names):
             if m_name in ['mean_absolute_scaled_error', 'root_mean_squared_scaled_error']:
@@ -519,10 +525,10 @@ def _backtesting_forecaster_multiseries(
         If `True`, the aggregated metrics (average, weighted average and pooling)
         over all levels are also returned.
 
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
         predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
+        - 'pooling': the values of all levels are pooled and then the metric is
         calculated.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
@@ -890,10 +896,10 @@ def backtesting_forecaster_multiseries(
         If `True`, the aggregated metrics (average, weighted average and pooling)
         over all levels are also returned.
 
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
         predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
+        - 'pooling': the values of all levels are pooled and then the metric is
         calculated.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
@@ -963,6 +969,7 @@ def backtesting_forecaster_multiseries(
         forecaster            = forecaster,
         steps                 = steps,
         metric                = metric,
+        add_aggregated_metric = add_aggregated_metric,
         series                = series,
         exog                  = exog,
         initial_train_size    = initial_train_size,
@@ -1060,10 +1067,10 @@ def grid_search_forecaster_multiseries(
         Aggregation method/s used to combine the metric/s of all levels (series).
         If list, the first aggregation method is used to select the best parameters.
 
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
         predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
+        - 'pooling': the values of all levels are pooled and then the metric is
         calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -1211,10 +1218,10 @@ def random_search_forecaster_multiseries(
         Aggregation method/s used to combine the metric/s of all levels (series).
         If list, the first aggregation method is used to select the best parameters.
 
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
         predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
+        - 'pooling': the values of all levels are pooled and then the metric is
         calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -1365,10 +1372,10 @@ def _evaluate_grid_hyperparameters_multiseries(
         Aggregation method/s used to combine the metric/s of all levels (series).
         If list, the first aggregation method is used to select the best parameters.
 
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
         predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
+        - 'pooling': the values of all levels are pooled and then the metric is
         calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -1442,8 +1449,8 @@ def _evaluate_grid_hyperparameters_multiseries(
     allowed_aggregate_metrics = ['average', 'weighted_average', 'pooling']
     if not set(aggregate_metric).issubset(allowed_aggregate_metrics):
         raise ValueError(
-            f"Allowed `aggregate_metric` are {allowed_aggregate_metrics}. "
-            f"Got {aggregate_metric}."
+            (f"Allowed `aggregate_metric` are {allowed_aggregate_metrics}. "
+             f"Got {aggregate_metric}.")
         )
     
     levels = _initialize_levels_model_selection_multiseries(
@@ -1518,13 +1525,10 @@ def _evaluate_grid_hyperparameters_multiseries(
                 suppress_warnings     = suppress_warnings
             )
 
-            metrics = (
-                metrics
-                .loc[metrics['levels'].isin(aggregate_metric), :]
-            )
+            metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
             metrics = pd.DataFrame(
-                        data = [metrics.iloc[:, 1:].transpose().stack().to_numpy()],
-                        columns=metric_names
+                          data    = [metrics.iloc[:, 1:].transpose().stack().to_numpy()],
+                          columns = metric_names
                       )
 
             for warn_category in warn_skforecast_categories:
@@ -1647,10 +1651,10 @@ def bayesian_search_forecaster_multiseries(
         Aggregation method/s used to combine the metric/s of all levels (series).
         If list, the first aggregation method is used to select the best parameters.
 
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
         predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
+        - 'pooling': the values of all levels are pooled and then the metric is
         calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -1818,10 +1822,10 @@ def _bayesian_search_optuna_multiseries(
         Aggregation method/s used to combine the metric/s of all levels (series).
         If list, the first aggregation method is used to select the best parameters.
 
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
         predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
+        - 'pooling': the values of all levels are pooled and then the metric is
         calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -1919,10 +1923,10 @@ def _bayesian_search_optuna_multiseries(
     ]
 
     levels = _initialize_levels_model_selection_multiseries(
-                forecaster = forecaster,
-                series     = series,
-                levels     = levels
-            )
+                 forecaster = forecaster,
+                 series     = series,
+                 levels     = levels
+             )
 
     # Objective function using backtesting_forecaster_multiseries
     def _objective(
@@ -1955,33 +1959,30 @@ def _bayesian_search_optuna_multiseries(
                 forecaster.set_lags(sample['lags'])
         
         metrics, _ = backtesting_forecaster_multiseries(
-            forecaster            = forecaster,
-            series                = series,
-            exog                  = exog,
-            steps                 = steps,
-            levels                = levels,
-            metric                = metric,
-            add_aggregated_metric = True,
-            initial_train_size    = initial_train_size,
-            fixed_train_size      = fixed_train_size,
-            gap                   = gap,
-            skip_folds            = skip_folds,
-            allow_incomplete_fold = allow_incomplete_fold,
-            refit                 = refit,
-            n_jobs                = n_jobs,
-            verbose               = verbose,
-            show_progress         = False,
-            suppress_warnings     = suppress_warnings
-        )
+                         forecaster            = forecaster,
+                         series                = series,
+                         exog                  = exog,
+                         steps                 = steps,
+                         levels                = levels,
+                         metric                = metric,
+                         add_aggregated_metric = True,
+                         initial_train_size    = initial_train_size,
+                         fixed_train_size      = fixed_train_size,
+                         gap                   = gap,
+                         skip_folds            = skip_folds,
+                         allow_incomplete_fold = allow_incomplete_fold,
+                         refit                 = refit,
+                         n_jobs                = n_jobs,
+                         verbose               = verbose,
+                         show_progress         = False,
+                         suppress_warnings     = suppress_warnings
+                     )
 
-        metrics = (
-                metrics
-                .loc[metrics['levels'].isin(aggregate_metric), :]
-            )
+        metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
         metrics = pd.DataFrame(
-                    data = [metrics.iloc[:, 1:].transpose().stack().to_numpy()],
-                    columns=metric_names
-                    )
+                      data    = [metrics.iloc[:, 1:].transpose().stack().to_numpy()],
+                      columns = metric_names
+                  )
         
         # Store metrics in the variable `metrics_list` defined outside _objective.
         nonlocal metrics_list
@@ -2373,10 +2374,10 @@ def backtesting_forecaster_multivariate(
         If `True`, the metric is calculated for each level and an aggregated metric
         is calculated using the `aggregate_metric` method.
 
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
         predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
+        - 'pooling': the values of all levels are pooled and then the metric is
         calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -2522,10 +2523,10 @@ def grid_search_forecaster_multivariate(
         Aggregation method/s used to combine the metric/s of all levels (series).
         If list, the first aggregation method is used to select the best parameters.
 
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
         predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
+        - 'pooling': the values of all levels are pooled and then the metric is
         calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -2674,10 +2675,10 @@ def random_search_forecaster_multivariate(
         Aggregation method/s used to combine the metric/s of all levels (series).
         If list, the first aggregation method is used to select the best parameters.
 
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
         predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
+        - 'pooling': the values of all levels are pooled and then the metric is
         calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -2837,10 +2838,10 @@ def bayesian_search_forecaster_multivariate(
         Aggregation method/s used to combine the metric/s of all levels (series).
         If list, the first aggregation method is used to select the best parameters.
 
-        - average: the average (artihmetic mean) of all levels.
-        - weighted_average: the average of the metrics weighted by the number of
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
         predicted values of each level.
-        - pooling: the values of all levels are pooled and then the metric is
+        - 'pooling': the values of all levels are pooled and then the metric is
         calculated.
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
