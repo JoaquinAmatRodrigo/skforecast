@@ -2500,13 +2500,10 @@ def check_preprocess_exog_multiseries(
     )
 
     # Check that all exog have the same dtypes for common columns
-    exog_dtypes_buffer = []
-    for df in exog_dict.values():
-        if df is not None:
-            exog_dtypes_buffer.append(df.dtypes)
-    exog_dtypes_buffer = np.concatenate(exog_dtypes_buffer)
-    if not np.all(exog_dtypes_buffer == exog_dtypes_buffer[0]):
-        raise TypeError("Some columns have different dtypes in different exog DataFrames or Series.")
+    exog_dtypes_buffer = [df.dtypes for df in exog_dict.values() if df is not None]
+    exog_dtypes_buffer = pd.concat(exog_dtypes_buffer, axis=1)
+    if not exog_dtypes_buffer.nunique(axis=1).eq(1).all():
+        raise TypeError("Exogenous variables must have the same dtypes in all series.")
 
     if len(set(exog_col_names) - set(series_col_names)) != len(exog_col_names):
         raise ValueError(

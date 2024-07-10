@@ -351,10 +351,7 @@ def test_TypeError_check_preprocess_exog_multiseries_when_exog_dict_with_differe
         '2': exog['exog_1'].astype(str).copy()
     }
 
-    err_msg = re.escape(
-        ("Column 'exog_1' has different dtypes in different exog "
-         "DataFrames or Series.")
-    )
+    err_msg = re.escape("Exogenous variables must have the same dtypes in all series.")
     with pytest.raises(TypeError, match = err_msg):
         check_preprocess_exog_multiseries(
             input_series_is_dict = False,
