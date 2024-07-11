@@ -2489,6 +2489,14 @@ def check_preprocess_exog_multiseries(
                     (f"All exog must have a Pandas DatetimeIndex as index with the "
                      f"same frequency. Check exog for series: {not_valid_index}")
                 )
+            
+        # Check that all exog have the same dtypes for common columns
+        exog_dtypes_buffer = [df.dtypes for df in exog_dict.values() if df is not None]
+        exog_dtypes_buffer = pd.concat(exog_dtypes_buffer, axis=1)
+        exog_dtypes_nunique = exog_dtypes_buffer.nunique(axis=1).eq(1)
+        if not exog_dtypes_nunique.all():
+            non_unique_dtyeps_exogs = exog_dtypes_nunique[exog_dtypes_nunique != 1].index.to_list()
+            raise TypeError(f"Exog/s: {non_unique_dtyeps_exogs} have different dtypes in different series.")
 
     exog_col_names = list(
         set(
@@ -2498,12 +2506,6 @@ def check_preprocess_exog_multiseries(
             for column in df.columns.to_list()
         )
     )
-
-    # Check that all exog have the same dtypes for common columns
-    exog_dtypes_buffer = [df.dtypes for df in exog_dict.values() if df is not None]
-    exog_dtypes_buffer = pd.concat(exog_dtypes_buffer, axis=1)
-    if not exog_dtypes_buffer.nunique(axis=1).eq(1).all():
-        raise TypeError("Exogenous variables must have the same dtypes in all series.")
 
     if len(set(exog_col_names) - set(series_col_names)) != len(exog_col_names):
         raise ValueError(
