@@ -30,6 +30,7 @@ from ..exceptions import SkforecastVersionWarning
 
 optional_dependencies = {
     'sarimax': [
+        'numpy>=1.20.3, <2.0',
         'pmdarima>=2.0, <2.1',
         'statsmodels>=0.12, <0.15'
     ],
