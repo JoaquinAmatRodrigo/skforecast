@@ -36,6 +36,8 @@ The main changes in this release are:
 
 + New argument `skip_folds` in `model_selection` and `model_selection_multiseries` functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
 
++ New function `plot_prediction_intervals` in module `plot`.
+
 **Changed**
 
 + Deprecated `python 3.8` compatibility.
