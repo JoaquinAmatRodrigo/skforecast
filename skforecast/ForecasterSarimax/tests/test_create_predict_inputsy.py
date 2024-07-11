@@ -45,7 +45,7 @@ def test_create_predict_inputs_NotFittedError_when_fitted_is_False():
          "appropriate arguments before using predict.")
     )
     with pytest.raises(NotFittedError, match = err_msg):
-        forecaster.create_predict_inputs(steps=5)
+        forecaster._create_predict_inputs(steps=5)
 
 
 def test_create_predict_inputs_ValueError_when_ForecasterSarimax_last_window_exog_is_not_None_and_last_window_is_not_provided():
@@ -61,7 +61,7 @@ def test_create_predict_inputs_ValueError_when_ForecasterSarimax_last_window_exo
          "`last_window` and `last_window_exog` must be provided.")
     )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.create_predict_inputs(
+        forecaster._create_predict_inputs(
             steps            = 5, 
             exog             = exog_predict, 
             last_window      = None, 
@@ -83,7 +83,7 @@ def test_create_predict_inputs_ValueError_when_ForecasterSarimax_last_window_exo
          "using `last_window_exog`.")
     )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.create_predict_inputs(
+        forecaster._create_predict_inputs(
             steps            = 5, 
             exog             = exog_lw_predict, 
             last_window      = y_lw, 
@@ -97,7 +97,7 @@ def test_create_predict_inputs_output_ForecasterSarimax():
     """
     forecaster = ForecasterSarimax(regressor = Sarimax())
     forecaster.fit(y=y)
-    results = forecaster.create_predict_inputs(steps=5)
+    results = forecaster._create_predict_inputs(steps=5)
 
     expected = (
         None,
@@ -114,7 +114,7 @@ def test_create_predict_inputs_output_ForecasterSarimax_with_exog():
     """
     forecaster = ForecasterSarimax(regressor = Sarimax())
     forecaster.fit(y=y, exog=exog)
-    results = forecaster.create_predict_inputs(steps=5, exog=exog_predict)
+    results = forecaster._create_predict_inputs(steps=5, exog=exog_predict)
 
     expected = (
         None,
@@ -140,7 +140,7 @@ def test_create_predict_inputs_output_ForecasterSarimax_with_transform_y():
                      transformer_y = StandardScaler()
                  )
     forecaster.fit(y=y)
-    results = forecaster.create_predict_inputs(steps=5)
+    results = forecaster._create_predict_inputs(steps=5)
 
     expected = (
         None,
@@ -169,7 +169,7 @@ def test_create_predict_inputs_output_ForecasterSarimax_with_transform_y_and_tra
                      transformer_exog = transformer_exog
                  )
     forecaster.fit(y=y, exog=df_exog)
-    results = forecaster.create_predict_inputs(steps=5, exog=df_exog_predict)
+    results = forecaster._create_predict_inputs(steps=5, exog=df_exog_predict)
 
     expected = (
         None,
@@ -208,7 +208,7 @@ def test_create_predict_inputs_ValueError_when_last_window_index_does_not_follow
          f"    `last_window` index start : 2022-03-01 00:00:00.")
     )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.create_predict_inputs(steps=5, last_window=lw_test)
+        forecaster._create_predict_inputs(steps=5, last_window=lw_test)
 
 
 def test_create_predict_inputs_ValueError_when_last_window_exog_index_does_not_follow_training_set():
@@ -239,7 +239,7 @@ def test_create_predict_inputs_ValueError_when_last_window_exog_index_does_not_f
          f"    `last_window_exog` index start : 2022-03-01 00:00:00.")
     )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.create_predict_inputs(
+        forecaster._create_predict_inputs(
             steps            = 5, 
             exog             = exog_pred_test, 
             last_window      = lw_test,
@@ -253,7 +253,7 @@ def test_create_predict_inputs_output_ForecasterSarimax_with_last_window():
     """    
     forecaster = ForecasterSarimax(regressor = Sarimax())
     forecaster.fit(y=y_datetime)
-    results = forecaster.create_predict_inputs(steps=5, last_window=y_lw_datetime)
+    results = forecaster._create_predict_inputs(steps=5, last_window=y_lw_datetime)
 
     expected = (
         pd.Series(
@@ -286,7 +286,7 @@ def test_create_predict_inputs_output_ForecasterSarimax_with_last_window_and_exo
     """
     forecaster = ForecasterSarimax(regressor = Sarimax())
     forecaster.fit(y=y_datetime, exog=exog_datetime)
-    results = forecaster.create_predict_inputs(
+    results = forecaster._create_predict_inputs(
                   steps            = 5, 
                   exog             = exog_lw_predict_datetime, 
                   last_window      = y_lw_datetime, 
@@ -350,7 +350,7 @@ def test_create_predict_inputs_output_ForecasterSarimax_with_last_window_and_exo
                      transformer_exog = transformer_exog
                  )
     forecaster.fit(y=y_datetime, exog=df_exog_datetime)
-    results = forecaster.create_predict_inputs(
+    results = forecaster._create_predict_inputs(
                   steps            = 5, 
                   exog             = df_exog_lw_predict_datetime, 
                   last_window      = y_lw_datetime, 

@@ -41,7 +41,7 @@ def test_get_metric_output_for_all_metrics(metric_str, metric_callable):
     """
     Test output for all metrics allowed.
     """
-    y_true = np.array([3, -0.5, 2, 7])
+    y_true = np.array([3, 1, 2, 7])
     y_pred = np.array([2.5, 0.0, 2, 8])
 
     metric = _get_metric(metric_str)

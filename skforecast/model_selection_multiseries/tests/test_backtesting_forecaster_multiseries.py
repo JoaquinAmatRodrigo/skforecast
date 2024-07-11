@@ -1421,16 +1421,32 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
         suppress_warnings     = True
     )
 
-    expected_metrics = pd.DataFrame(
-        data=np.array([['id_1000', 286.6227398656757, 105816.86051259708],
-        ['id_1001', 1364.7345740769094, 2175934.9583102698],
-        ['id_1003', 237.4894217124842, 95856.72602398091],
-        ['id_1004', 1267.85941538558, 2269796.338792736],
-        ['average', 789.1765377601623, 1161851.2209098958],
-        ['weighted_average', 745.7085483145497, 1024317.153152019],
-        ['pooling', 745.7085483145497, 1024317.1531520189]], dtype=object),
-        columns=['levels', 'mean_absolute_error', 'mean_squared_error']
-    ).astype({'mean_absolute_error': float, 'mean_squared_error': float})
+    expected_metrics = pd.DataFrame({
+                        'levels': {0: 'id_1000',
+                        1: 'id_1001',
+                        2: 'id_1002',
+                        3: 'id_1003',
+                        4: 'id_1004',
+                        5: 'average',
+                        6: 'weighted_average',
+                        7: 'pooling'},
+                        'mean_absolute_error': {0: 286.6227398656757,
+                        1: 1364.7345740769094,
+                        2: np.nan,
+                        3: 237.4894217124842,
+                        4: 1267.85941538558,
+                        5: 789.1765377601623,
+                        6: 745.7085483145497,
+                        7: 745.7085483145497},
+                        'mean_squared_error': {0: 105816.86051259708,
+                        1: 2175934.9583102698,
+                        2: np.nan,
+                        3: 95856.72602398091,
+                        4: 2269796.338792736,
+                        5: 1161851.2209098958,
+                        6: 1024317.153152019,
+                        7: 1024317.1531520189}
+                })
     
     expected_predictions = pd.DataFrame(
     data=np.array([[1438.14154717, 2090.79352613, 2166.9832933, 7285.52781428],

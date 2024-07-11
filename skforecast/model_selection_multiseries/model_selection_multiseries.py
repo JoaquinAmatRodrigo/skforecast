@@ -391,15 +391,16 @@ def _calculate_metrics_multiseries(
             .to_frame(name='n_predictions')
             .reset_index(names='levels')
         )
-        metrics_levels = metrics_levels.merge(n_predictions_levels, on='levels', how='inner')
+        metrics_levels_no_missing = (
+            metrics_levels.merge(n_predictions_levels, on='levels', how='inner')
+        )
         for col in metric_names:
             weighted_averages[col] = np.average(
-                metrics_levels[col],
-                weights=metrics_levels['n_predictions']
+                metrics_levels_no_missing[col],
+                weights=metrics_levels_no_missing['n_predictions']
             )
         weighted_average = pd.DataFrame(weighted_averages, index=[0])
         weighted_average['levels'] = 'weighted_average'
-        metrics_levels = metrics_levels.drop(columns='n_predictions')
 
         # aggregation: pooling
         y_true_pred_levels, y_train_levels = zip(

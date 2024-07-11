@@ -75,6 +75,8 @@ predictions = pd.DataFrame(
     index=pd.date_range(start="2012-01-26", periods=25)
 )
 
+predictions_missing_level = predictions.drop(columns="item_3").copy()
+
 predictions_different_lenght = pd.DataFrame(
     data={
         "item_1": [
@@ -304,5 +306,44 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_predict
             ],
         }
     )
+
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_one_level_is_not_predicted(
+    metrics=[mean_absolute_error, mean_absolute_scaled_error]
+):
+
+    metrics = [add_y_train_argument(metric) for metric in metrics]
+    results = _calculate_metrics_multiseries(
+        series=data,
+        predictions=predictions_missing_level,
+        folds=folds,
+        span_index=span_index,
+        metrics=metrics,
+        levels=levels,
+        add_aggregated_metric=True,
+    )
+
+    expected = pd.DataFrame({
+        'levels': {0: 'item_1',
+        1: 'item_2',
+        2: 'item_3',
+        3: 'average',
+        4: 'weighted_average',
+        5: 'pooling'},
+        'mean_absolute_error': {0: 1.47756696,
+        1: 3.48012924,
+        2: np.nan,
+        3: 2.4788481,
+        4: 2.4788481,
+        5: 2.4788481},
+        'mean_absolute_scaled_error': {0: 0.6109141681923469,
+        1: 1.170112564935368,
+        2: np.nan,
+        3: 0.8905133665638575,
+        4: 0.8905133665638574,
+        5: 0.9193177167796042}
+    })
 
     pd.testing.assert_frame_equal(results, expected)
