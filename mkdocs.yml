@@ -161,10 +161,23 @@ theme:
         name: Switch to light mode
 
 markdown_extensions:
+  # Python Markdown
+  - abbr
   - admonition
   - attr_list
   - codehilite
   - footnotes
+  - pymdownx.details
+  - md_in_html
+  - toc:
+      permalink: true
+
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
   - pymdownx.details
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
@@ -173,12 +186,17 @@ markdown_extensions:
       use_pygments: true
       linenums: true
   - pymdownx.inlinehilite
-  - pymdownx.magiclink
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
   - pymdownx.superfences
-  - pymdownx.tabbed
-  - toc:
-      permalink: true
-
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - pymdownx.magiclink
+  
 extra:
   version:
     provider: mike
