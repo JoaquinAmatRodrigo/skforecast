@@ -16,7 +16,9 @@ def test_check_exog_TypeError_when_exog_not_series_or_dataframe(exog):
     Check TypeError is raised when exog is not a pandas Series or a
     pandas DataFrame.
     """
-    err_msg = re.escape("`exog` must be a pandas Series or DataFrame.")
+    err_msg = re.escape(
+        f"`exog` must be a pandas Series or DataFrame. Got {type(exog)}."
+    )
     with pytest.raises(TypeError, match = err_msg):
         check_exog(exog=exog)
 

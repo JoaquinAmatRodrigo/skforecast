@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
-
+from sklearn.preprocessing import StandardScaler
 
 def test_create_train_X_y_output_when_series_and_exog_is_None():
     """
@@ -16,6 +16,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
     forecaster = ForecasterAutoregMultiSeries(
         regressor = LinearRegression(),
         lags      = 3,
+        transformer_series=StandardScaler(),
         encoding  = "onehot"
     )
 

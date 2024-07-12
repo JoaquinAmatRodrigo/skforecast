@@ -74,6 +74,7 @@ def test_ValueError_bayesian_search_forecaster_multiseries_when_return_best_and_
             search_space       = search_space,
             steps              = 3,
             metric             = 'mean_absolute_error',
+            aggregate_metric   = 'weighted_average',
             refit              = True,
             initial_train_size = len(series[:-12]),
             fixed_train_size   = True,
@@ -111,6 +112,7 @@ def test_bayesian_search_forecaster_multiseries_ValueError_when_engine_not_optun
             search_space       = search_space,
             steps              = 3,
             metric             = 'mean_absolute_error',
+            aggregate_metric   = 'weighted_average',
             refit              = True,
             initial_train_size = len(series[:-12]),
             fixed_train_size   = True,
@@ -131,7 +133,8 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
                      lags      = 2,
-                     encoding  = 'onehot'
+                     encoding  = 'onehot',
+                     transformer_series = StandardScaler()
                  )
     steps = 3
     n_validation = 12
@@ -150,6 +153,7 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
                   steps              = steps,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
+                  aggregate_metric   = 'weighted_average',
                   refit              = False,
                   initial_train_size = len(series) - n_validation,
                   n_trials           = 10,
@@ -185,10 +189,10 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
             0.20914302038975385, 0.8509374761370117],
         [list(['l1', 'l2']), np.array([1, 2]), {'alpha': 0.9809565564007693},
             0.20914638910039665, 0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([9, 3, 4, 6, 8, 1, 0, 5, 7, 2], dtype='int64')
+        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error': float, 
+        'mean_absolute_error__weighted_average': float, 
         'alpha': float
     })
 
@@ -205,7 +209,8 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
                      regressor      = Ridge(random_state=123),
                      fun_predictors = create_predictors,
                      window_size    = 4,
-                     encoding       = 'onehot'
+                     encoding       = 'onehot',
+                     transformer_series = StandardScaler()
                  )
     steps = 3
     n_validation = 12
@@ -221,6 +226,7 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
                   steps              = steps,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
+                  aggregate_metric   = 'weighted_average',
                   refit              = True,
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = True,
@@ -262,10 +268,10 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
         [list(['l1', 'l2']), 'custom function: create_predictors',
             {'alpha': 0.9809565564007693}, 0.2148284279387544,
             0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([2, 1, 9, 5, 8, 3, 7, 0, 4, 6], dtype='int64')
+        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
         'alpha': float
     })
 
@@ -274,9 +280,214 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
 
 def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with_mocked():
     """
-    Test output of bayesian_search_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    Test output of bayesian_search_forecaster_multiseries in ForecasterAutoregMultiSeries
     and ForecasterAutoregMultiSeriesCustom when series and exog are
     dictionaries (mocked done in Skforecast v0.12.0).
+    """
+
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags=14,
+        encoding="ordinal",
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    )
+
+    lags_grid = [[5], [1, 7, 14]]
+
+    def search_space(trial):
+        search_space = {
+            "n_estimators": trial.suggest_int("n_estimators", 2, 5),
+            "max_depth": trial.suggest_int("max_depth", 2, 5),
+            "lags": trial.suggest_categorical("lags", lags_grid),
+        }
+
+        return search_space
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning, module="optuna")
+
+        results_search, best_trial = bayesian_search_forecaster_multiseries(
+            forecaster         = forecaster,
+            series             = series_dict,
+            exog               = exog_dict,
+            search_space       = search_space,
+            metric             = "mean_absolute_error",
+            aggregate_metric   = "weighted_average",
+            initial_train_size = len(series_dict_train["id_1000"]),
+            steps              = 24,
+            refit              = False,
+            n_trials           = 3,
+            return_best        = False,
+            show_progress      = False,
+            verbose            = False,
+            suppress_warnings  = True,
+        )
+
+    expected = pd.DataFrame(
+        np.array(
+            [
+                [
+                    list(["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"]),
+                    np.array([1, 7, 14]),
+                    {"n_estimators": 4, "max_depth": 3},
+                    709.8836514262415,
+                    4,
+                    3,
+                ],
+                [
+                    list(["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"]),
+                    np.array([1, 7, 14]),
+                    {"n_estimators": 3, "max_depth": 3},
+                    721.1848222120482,
+                    3,
+                    3,
+                ],
+                [
+                    list(["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"]),
+                    np.array([5]),
+                    {"n_estimators": 4, "max_depth": 3},
+                    754.3537196425694,
+                    4,
+                    3,
+                ],
+            ],
+            dtype=object,
+        ),
+        columns=[
+            "levels",
+            "lags",
+            "params",
+            "mean_absolute_error__weighted_average",
+            "n_estimators",
+            "max_depth",
+        ],
+        index=pd.Index([0, 1, 2], dtype="int64"),
+    ).astype(
+        {
+            "mean_absolute_error__weighted_average": float,
+            "n_estimators": int,
+            "max_depth": int,
+        }
+    )
+
+    results_search = results_search.astype(
+        {
+            "mean_absolute_error__weighted_average": float,
+            "n_estimators": int,
+            "max_depth": int,
+        }
+    )
+
+    pd.testing.assert_frame_equal(expected, results_search)
+
+
+def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_multiple_metrics_aggregated_with_mocked():
+    """
+    Test output of bayesian_search_forecaster_multiseries in ForecasterAutoregMultiSeries
+    and ForecasterAutoregMultiSeriesCustom when series and exog are dictionaries and 
+    multiple aggregated metrics (mocked done in Skforecast v0.12.0).
+    """
+
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags=14,
+        encoding="ordinal",
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    )
+
+    lags_grid = [[5], [1, 7, 14]]
+
+    def search_space(trial):
+        search_space = {
+            "n_estimators": trial.suggest_int("n_estimators", 2, 5),
+            "max_depth": trial.suggest_int("max_depth", 2, 5),
+            "lags": trial.suggest_categorical("lags", lags_grid),
+        }
+
+        return search_space
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("ignore", category=UserWarning, module="optuna")
+
+        results_search, best_trial = bayesian_search_forecaster_multiseries(
+            forecaster         = forecaster,
+            series             = series_dict,
+            exog               = exog_dict,
+            search_space       = search_space,
+            metric             = ['mean_absolute_error', 'mean_absolute_scaled_error'],
+            aggregate_metric   = ['weighted_average', 'average', 'pooling'],
+            initial_train_size = len(series_dict_train["id_1000"]),
+            steps              = 24,
+            refit              = False,
+            n_trials           = 3,
+            return_best        = False,
+            show_progress      = False,
+            verbose            = False,
+            suppress_warnings  = True,
+        )
+
+    expected = pd.DataFrame({
+        "levels": {
+            0: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+            1: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+            2: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+        },
+        "lags": {0: np.array([1, 7, 14]), 1: np.array([1, 7, 14]), 2: np.array([5])},
+        "params": {
+            0: {"n_estimators": 4, "max_depth": 3},
+            1: {"n_estimators": 3, "max_depth": 3},
+            2: {"n_estimators": 4, "max_depth": 3},
+        },
+        "mean_absolute_error__weighted_average": {
+            0: 749.8761502029433,
+            1: 760.659082077477,
+            2: 777.6874712018467,
+        },
+        "mean_absolute_error__average": {
+            0: 709.8836514262415,
+            1: 721.1848222120482,
+            2: 754.3537196425694,
+        },
+        "mean_absolute_error__pooling": {
+            0: 709.8836514262414,
+            1: 721.1848222120483,
+            2: 754.3537196425694,
+        },
+        "mean_absolute_scaled_error__weighted_average": {
+            0: 1.7214020008755428,
+            1: 1.7480018562024022,
+            2: 1.8159623522099073,
+        },
+        "mean_absolute_scaled_error__average": {
+            0: 2.0671251354627653,
+            1: 2.099920474995049,
+            2: 2.1945202856306465,
+        },
+        "mean_absolute_scaled_error__pooling": {
+            0: 1.6864677542505797,
+            1: 1.7133159005309597,
+            2: 1.7921151176255248,
+        },
+        "n_estimators": {0: 4, 1: 3, 2: 4},
+        "max_depth": {0: 3, 1: 3, 2: 3},
+    })
+
+    pd.testing.assert_frame_equal(expected, results_search)
+
+
+def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with_mocked_skip_folds():
+    """
+    Test output of bayesian_search_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom when series and exog are
+    dictionaries (mocked done in Skforecast v0.12.0) and skip_folds.
     """
 
     forecaster = ForecasterAutoregMultiSeries(
@@ -313,6 +524,7 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
             initial_train_size = len(series_dict_train['id_1000']),
             steps              = 24,
             refit              = False,
+            skip_folds         = 2,
             n_trials           = 3,
             return_best        = False,
             show_progress      = False,
@@ -322,24 +534,32 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
     
     expected = pd.DataFrame(
         np.array([[list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
-            np.array([ 1,  7, 14]), {'n_estimators': 4, 'max_depth': 3},
-            709.8836514262415, 4, 3],
-            [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
-            np.array([ 1,  7, 14]), {'n_estimators': 3, 'max_depth': 3},
-            721.1848222120482, 3, 3],
-            [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
-            np.array([5]), {'n_estimators': 4, 'max_depth': 3},
-            754.3537196425694, 4, 3]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth'],
-        index=pd.Index([0, 2, 1], dtype='int64')
+        np.array([ 1,  7, 14]), {'n_estimators': 4, 'max_depth': 3}, 
+            718.447039241195, 694.843611295513, 694.843611295513, 4, 3],
+        [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+        np.array([ 1,  7, 14]), {'n_estimators': 3, 'max_depth': 3},
+            726.7646039380159, 704.8898538858386, 704.8898538858386, 3, 3],
+        [list(['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004']),
+         np.array([5]), {'n_estimators': 4, 'max_depth': 3},
+            735.3584948212444, 730.1888301097707, 730.1888301097707, 4, 3]], dtype=object),
+        columns=['levels', 'lags', 'params', 
+                 'mean_absolute_error__weighted_average', 
+                 'mean_absolute_error__average', 
+                 'mean_absolute_error__pooling',
+                 'n_estimators', 'max_depth'],
+        index=pd.Index([0, 1, 2], dtype='int64')
     ).astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
+        'mean_absolute_error__average': float,
+        'mean_absolute_error__pooling': float,
         'n_estimators': int,
         'max_depth': int
     })
-    
+
     results_search = results_search.astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
+        'mean_absolute_error__average': float,
+        'mean_absolute_error__pooling': float,
         'n_estimators': int,
         'max_depth': int
     })
@@ -383,6 +603,7 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
             exog               = exog_dict,
             search_space       = search_space,
             metric             = 'mean_absolute_error',
+            aggregate_metric   = 'weighted_average',
             initial_train_size = len(series_dict_train['id_1000']),
             steps              = 24,
             refit              = False,
@@ -404,16 +625,16 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
             'custom function: create_predictors_14',
             {'n_estimators': 2, 'max_depth': 4}, 746.7287691073261, 2, 4]],
             dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'n_estimators', 'max_depth'],
-        index=pd.Index([0, 2, 1], dtype='int64')
+        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'n_estimators', 'max_depth'],
+        index=pd.Index([0, 1, 2], dtype='int64')
     ).astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
         'n_estimators': int,
         'max_depth': int
     })
     
     results_search = results_search.astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
         'n_estimators': int,
         'max_depth': int
     })
@@ -451,6 +672,7 @@ def test_results_output_bayesian_search_forecaster_multivariate_optuna_engine_Fo
                   steps              = steps,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
+                  aggregate_metric   = 'weighted_average',
                   refit              = False,
                   initial_train_size = len(series) - n_validation,
                   n_trials           = 10,
@@ -486,10 +708,10 @@ def test_results_output_bayesian_search_forecaster_multivariate_optuna_engine_Fo
             0.20143363961627603, 0.8509374761370117],
         [list(['l1']), np.array([1, 2]), {'alpha': 0.9809565564007693},
             0.20148678375852938, 0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([9, 3, 4, 6, 8, 1, 0, 5, 7, 2], dtype='int64')
+        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error': float,
+        'mean_absolute_error__weighted_average': float,
         'alpha': float
     })
 

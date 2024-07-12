@@ -5,7 +5,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Dict, List, Tuple, Any, Optional, Callable
+from typing import Union, Tuple, Any, Optional, Callable
 import warnings
 import logging
 import sys
@@ -31,11 +31,13 @@ from ..utils import check_y
 from ..utils import check_exog
 from ..utils import get_exog_dtypes
 from ..utils import check_exog_dtypes
+from ..utils import prepare_steps_direct
 from ..utils import check_predict_input
 from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
+from ..utils import input_to_frame
 from ..utils import exog_to_direct
 from ..utils import exog_to_direct_numpy
 from ..utils import expand_index
@@ -149,9 +151,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     window_size_diff : int
         This attribute has the same value as window_size as this Forecaster 
         doesn't support differentiation. Present here for API consistency.
-    last_window : pandas Series
-        Last window seen by the forecaster during training. It stores the values 
-        needed to predict the next `step` immediately after the training data.   
+    last_window : pandas DataFrame
+        Last window the forecaster has seen during training. It stores the
+        values needed to predict `steps` immediately after the training data.
     index_type : type
         Type of index of the input used in training.
     index_freq : str
@@ -327,7 +329,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                           )
         else:
             self.n_jobs = n_jobs if n_jobs > 0 else cpu_count()
-    
+
 
     def __repr__(
         self
@@ -357,7 +359,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             f"Multivariate series (names): {self.series_col_names} \n"
             f"Maximum steps predicted: {self.steps} \n"
             f"Exogenous included: {self.included_exog} \n"
-            f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
@@ -526,21 +527,19 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                  f"lag, {self.max_lag}, if no more data is available.")
             )
 
+        fit_transformer = False
         if not self.fitted:
+            fit_transformer = True
             self.transformer_series_ = initialize_transformer_series(
-                                           series_col_names = series_col_names,
+                                           series_col_names   = series_col_names,
                                            transformer_series = self.transformer_series
                                        )
 
         exog_col_names = None
         if exog is not None:
-            if not isinstance(exog, (pd.Series, pd.DataFrame)):
-                raise TypeError(
-                    f"`exog` must be a pandas Series or DataFrame. Got {type(exog)}."
-                )
-            
-            exog_col_names = \
-                exog.columns.to_list() if isinstance(exog, pd.DataFrame) else [exog.name]
+            check_exog(exog=exog, allow_nan=True)
+            exog = input_to_frame(data=exog, input_name='exog')
+            exog_col_names = exog.columns.to_list()
             if len(set(exog_col_names) - set(series_col_names)) != len(exog_col_names):
                 raise ValueError(
                     (f"`exog` cannot contain a column named the same as one of "
@@ -554,27 +553,18 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                     (f"`exog` must have same number of samples as `series`. "
                      f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
                 )
-            check_exog(exog=exog, allow_nan=True)
+            
             # Need here for filter_train_X_y_for_step to work without fitting
-            self.included_exog = True 
-            if isinstance(exog, pd.Series):
-                exog = transform_series(
-                           series            = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = True,
-                           inverse_transform = False
-                       )
-            else:
-                exog = transform_dataframe(
-                           df                = exog,
-                           transformer       = self.transformer_exog,
-                           fit               = True,
-                           inverse_transform = False
-                       )
+            self.included_exog = True
+
+            exog = transform_dataframe(
+                       df                = exog,
+                       transformer       = self.transformer_exog,
+                       fit               = fit_transformer,
+                       inverse_transform = False
+                   )
                 
-            check_exog(exog=exog, allow_nan=False)
-            check_exog_dtypes(exog)
-            self.exog_dtypes = get_exog_dtypes(exog=exog)
+            check_exog_dtypes(exog, call_check_exog=True)
 
             _, exog_index = preprocess_exog(exog=exog, return_values=False)
             if not (exog.index[:len(series)] == series.index).all():
@@ -592,7 +582,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             y = transform_series(
                     series            = y,
                     transformer       = self.transformer_series_[col],
-                    fit               = True,
+                    fit               = fit_transformer,
                     inverse_transform = False
                 )
             y_values, y_index = preprocess_y(y=y)
@@ -937,17 +927,13 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         self.regressors_ = {step: regressor 
                             for step, regressor, _ in results_fit}
+            
+        self.series_col_names = series_col_names
+        self.series_X_train = series_X_train
 
         if store_in_sample_residuals:
             self.in_sample_residuals = {step: residuals 
                                         for step, _, residuals in results_fit}
-            
-        self.series_col_names = series_col_names
-        self.series_X_train = series_X_train
-        if exog is not None:
-            self.included_exog = True
-            self.exog_type = type(exog)
-            self.exog_col_names = exog_col_names
         
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -960,11 +946,199 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             self.index_freq = X_train.index.freqstr
         else: 
             self.index_freq = X_train.index.step
+        
+        if exog is not None:
+            self.included_exog = True
+            self.exog_type = type(exog)
+            self.exog_dtypes = get_exog_dtypes(exog=exog)
+            self.exog_col_names = exog_col_names
 
         if store_last_window:            
             self.last_window = series.iloc[-self.max_lag:, ][self.series_X_train].copy()
         
         set_skforecast_warnings(suppress_warnings, action='default')
+
+
+    def _create_predict_inputs(
+        self,
+        steps: Optional[Union[int, list]]=None,
+        last_window: Optional[pd.DataFrame]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+    ) -> Tuple[list, list, pd.Index, list]:
+        """
+        Create the inputs needed for the prediction process.
+        
+        Parameters
+        ----------
+        steps : int, list, None, default `None`
+            Predict n steps. The value of `steps` must be less than or equal to the 
+            value of steps defined when initializing the forecaster. Starts at 1.
+        
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
+        last_window : pandas Series, pandas DataFrame, default `None`
+            Series values used to create the predictors (lags) needed to 
+            predict `steps`.
+            If `last_window = None`, the values stored in `self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
+
+        Returns
+        -------
+        Xs : list
+            List of numpy arrays with the predictors for each step.
+        steps : list
+            Steps to predict.
+        last_window_index : pandas Index
+            Last window Index.
+        Xs_col_names : list
+            Names of the columns of the matrix created internally for prediction.
+        
+        """
+        
+        steps = prepare_steps_direct(
+                    steps    = steps,
+                    max_step = self.steps
+                )
+
+        if last_window is None:
+            last_window = self.last_window
+        
+        check_predict_input(
+            forecaster_name  = type(self).__name__,
+            steps            = steps,
+            fitted           = self.fitted,
+            included_exog    = self.included_exog,
+            index_type       = self.index_type,
+            index_freq       = self.index_freq,
+            window_size      = self.window_size,
+            last_window      = last_window,
+            last_window_exog = None,
+            exog             = exog,
+            exog_type        = self.exog_type,
+            exog_col_names   = self.exog_col_names,
+            interval         = None,
+            alpha            = None,
+            max_steps        = self.steps,
+            levels           = None,
+            series_col_names = self.series_X_train
+        )
+
+        last_window = last_window.iloc[-self.window_size:, ][self.series_X_train].copy()
+        
+        if exog is not None:
+            exog = input_to_frame(data=exog, input_name='exog')
+            exog = exog.loc[:, self.exog_col_names]
+            exog = transform_dataframe(
+                       df                = exog,
+                       transformer       = self.transformer_exog,
+                       fit               = False,
+                       inverse_transform = False
+                   )
+            check_exog_dtypes(exog=exog)
+            exog_values = exog_to_direct_numpy(
+                              exog  = exog.to_numpy()[:max(steps)],
+                              steps = max(steps)
+                          )[0]
+        else:
+            exog_values = None
+        
+        Xs_col_names = []
+        X_lags = np.array([[]], dtype=float)
+        for serie in self.series_X_train:
+            last_window_serie = transform_series(
+                                    series            = last_window[serie],
+                                    transformer       = self.transformer_series_[serie],
+                                    fit               = False,
+                                    inverse_transform = False
+                                )       
+            last_window_values, last_window_index = preprocess_last_window(
+                                                        last_window = last_window_serie
+                                                    )
+            
+            Xs_col_names.extend([f"{serie}_lag_{lag}" for lag in self.lags_[serie]])
+            X_lags = np.hstack(
+                         [X_lags, last_window_values[-self.lags_[serie]].reshape(1, -1)]
+                     )
+
+        if exog is None:
+            Xs = [X_lags] * len(steps)
+        else:
+            n_exog = exog.shape[1]
+            Xs = [
+                np.hstack(
+                    [X_lags, exog_values[(step-1)*n_exog : step*n_exog].reshape(1, -1)]
+                )
+                for step in steps
+            ]
+            Xs_col_names = Xs_col_names + exog.columns.to_list()
+
+        return Xs, steps, last_window_index, Xs_col_names
+
+
+    def create_predict_X(
+        self,
+        steps: Optional[Union[int, list]]=None,
+        last_window: Optional[pd.DataFrame]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        suppress_warnings: bool=False
+    ) -> pd.DataFrame:
+        """
+        Create the predictors needed to predict `steps` ahead.
+        
+        Parameters
+        ----------
+        steps : int, list, None, default `None`
+            Predict n steps. The value of `steps` must be less than or equal to the 
+            value of steps defined when initializing the forecaster. Starts at 1.
+        
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
+        last_window : pandas DataFrame, default `None`
+            Series values used to create the predictors (lags) needed to 
+            predict `steps`.
+            If `last_window = None`, the values stored in `self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
+
+        Returns
+        -------
+        X_predict : pandas DataFrame
+            Pandas DataFrame with the predictors for each step. The index 
+            is the same as the prediction index.
+        
+        """
+
+        set_skforecast_warnings(suppress_warnings, action='ignore')
+
+        Xs, steps, last_window_index, Xs_col_names = self._create_predict_inputs(
+            steps=steps, last_window=last_window, exog=exog
+        )
+
+        idx = expand_index(index=last_window_index, steps=max(steps))
+        X_predict = pd.DataFrame(
+                        data    = np.concatenate(Xs, axis=0), 
+                        columns = Xs_col_names, 
+                        index   = idx[np.array(steps)-1]
+                    )
+        
+        set_skforecast_warnings(suppress_warnings, action='default')
+
+        return X_predict
 
 
     def predict(
@@ -990,8 +1164,87 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             - If `None`: As many steps are predicted as were defined at 
             initialization.
         last_window : pandas DataFrame, default `None`
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
+            Series values used to create the predictors (lags) needed to 
+            predict `steps`.
+            If `last_window = None`, the values stored in `self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
+        levels : Ignored
+            Not used, present here for API consistency by convention.
+
+        Returns
+        -------
+        predictions : pandas DataFrame
+            Predicted values.
+
+        """
+
+        set_skforecast_warnings(suppress_warnings, action='ignore')
+
+        Xs, steps, last_window_index, _ = self._create_predict_inputs(
+            steps=steps, last_window=last_window, exog=exog
+        )
+
+        predictions = np.full(shape=len(steps), fill_value=np.nan)
+        regressors = [self.regressors_[step] for step in steps]
+        with warnings.catch_warnings():
+            # Suppress scikit-learn warning: "X does not have valid feature names,
+            # but NoOpTransformer was fitted with feature names".
+            warnings.simplefilter("ignore")
+            predictions = [
+                regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)
+            ]
+
+        idx = expand_index(index=last_window_index, steps=max(steps))
+        predictions = pd.DataFrame(
+                          data    = predictions,
+                          columns = [self.level],
+                          index   = idx[np.array(steps)-1]
+                      )
+
+        predictions = transform_dataframe(
+                          df                = predictions,
+                          transformer       = self.transformer_series_[self.level],
+                          fit               = False,
+                          inverse_transform = True
+                      )
+        
+        set_skforecast_warnings(suppress_warnings, action='default')
+
+        return predictions
+
+
+    def predict_old(
+        self,
+        steps: Optional[Union[int, list]]=None,
+        last_window: Optional[pd.DataFrame]=None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
+        suppress_warnings: bool=False,
+        levels: Any=None
+    ) -> pd.DataFrame:
+        """
+        Predict n steps ahead
+
+        Parameters
+        ----------
+        steps : int, list, None, default `None`
+            Predict n steps. The value of `steps` must be less than or equal to the 
+            value of steps defined when initializing the forecaster. Starts at 1.
+        
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
+        last_window : pandas DataFrame, default `None`
+            Series values used to create the predictors (lags) needed to 
+            predict `steps`.
             If `last_window = None`, the values stored in `self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
@@ -1025,6 +1278,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 raise TypeError(
                     (f"`steps` argument must be an int, a list of ints or `None`. "
                      f"Got {type(steps)}.")
+                )
+        
+        steps = prepare_steps_direct(
+                    steps    = steps,
+                    max_step = self.steps
                 )
 
         if last_window is None:
@@ -1164,8 +1422,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             - If `None`: As many steps are predicted as were defined at 
             initialization.
         last_window : pandas DataFrame, default `None`
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
+            Series values used to create the predictors (lags) needed to 
+            predict `steps`.
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
@@ -1321,8 +1579,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             - If `None`: As many steps are predicted as were defined at 
             initialization.
         last_window : pandas DataFrame, default `None`
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
+            Series values used to create the predictors (lags) needed to 
+            predict `steps`.
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
@@ -1424,8 +1682,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             - If `None`: As many steps are predicted as were defined at 
             initialization.
         last_window : pandas DataFrame, default `None`
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
+            Series values used to create the predictors (lags) needed to 
+            predict `steps`.
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
@@ -1519,8 +1777,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             - If `None`: As many steps are predicted as were defined at 
             initialization.
         last_window : pandas DataFrame, default `None`
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
+            Series values used to create the predictors (lags) needed to 
+            predict `steps`.
             If `last_window = None`, the values stored in` self.last_window` are
             used to calculate the initial predictors, and the predictions start
             right after training data.

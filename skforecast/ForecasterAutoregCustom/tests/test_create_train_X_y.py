@@ -38,7 +38,7 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
                  )
     
     err_msg = re.escape(
-        ("If exog is of type category, it must contain only integer values. "
+        ("Categorical dtypes in exog must contain only integer values. "
          "See skforecast docs for more info about how to include categorical "
          "features https://skforecast.org/"
          "latest/user_guides/categorical-features.html")
@@ -86,8 +86,8 @@ def test_create_train_X_y_ValueError_when_len_y_is_less_than_window_size():
 
 
 @pytest.mark.parametrize("y                        , exog", 
-                         [(pd.Series(np.arange(50)), pd.Series(np.arange(10))), 
-                          (pd.Series(np.arange(10)), pd.Series(np.arange(50))), 
+                         [(pd.Series(np.arange(50)), pd.Series(np.arange(10), name='exog')), 
+                          (pd.Series(np.arange(10)), pd.Series(np.arange(50), name='exog')), 
                           (pd.Series(np.arange(10)), pd.DataFrame(np.arange(50).reshape(25,2)))])
 def test_create_train_X_y_ValueError_when_len_y_is_different_from_len_exog(y, exog):
     """

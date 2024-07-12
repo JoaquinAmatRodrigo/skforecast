@@ -8,7 +8,6 @@ import pandas as pd
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from sklearn.linear_model import LinearRegression
 
-
 def create_predictors(y): # pragma: no cover
     """
     Create first 5 lags of a time series.
@@ -51,10 +50,11 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression():
                  )
     forecaster.fit(y=pd.Series(np.arange(50)))
     predictions = forecaster._recursive_predict(
-                    steps = 5,
-                    last_window = forecaster.last_window.values,
-                    exog = None
+                      steps       = 5,
+                      last_window = forecaster.last_window.to_numpy().ravel(),
+                      exog        = None
                   )
+    
     expected = np.array([50., 51., 52., 53., 54.])
     
     assert (predictions == approx(expected))

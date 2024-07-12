@@ -8,11 +8,11 @@
 from typing import Union, Any, Optional, Tuple, Callable
 import pandas as pd
 import re
+import os
 from ..utils import check_optional_dependency
 
 try:
-    import tensorflow as tf
-    from tensorflow import keras
+    import keras
     from keras.models import Model
     from keras.layers import Dense, Input, Reshape, LSTM, SimpleRNN
     from keras.optimizers import Adam
@@ -34,7 +34,7 @@ def create_and_compile_model(
     optimizer: object=Adam(learning_rate=0.01),
     loss: object=MeanSquaredError(),
     compile_kwars: dict={},
-) -> tf.keras.models.Model:
+) -> keras.models.Model:
     """
     Creates a neural network model for time series prediction with flexible recurrent layers.
 
@@ -64,14 +64,31 @@ def create_and_compile_model(
         Optimization algorithm and learning rate.
     loss : object, default `MeanSquaredError()`
         Loss function for model training.
+    compile_kwargs : dict, default `{}` 
+        Additional arguments for model compilation.
 
     Returns
     -------
-    model : tf.keras.models.Model
+    model : keras.models.Model
         Compiled neural network model.
     
     """
-
+    
+    if keras.__version__ > "3":
+        print(f"keras version: {keras.__version__}")
+        print(f"Using backend: {keras.backend.backend()}")
+        if keras.backend.backend() == "tensorflow":
+            import tensorflow
+            print(f"tensorflow version: {tensorflow.__version__}")
+        elif keras.backend.backend() == "torch":
+            import torch
+            print(f"torch version: {torch.__version__}")
+        elif keras.backend.backend() == "jax":
+            import jax
+            print(f"jax version: {jax.__version__}")
+        else:
+            print("Backend not recognized")
+            
     err_msg = f"`series` must be a pandas DataFrame. Got {type(series)}."
 
     if not isinstance(series, pd.DataFrame):
@@ -158,7 +175,7 @@ def create_and_compile_model(
     # Output layer
     x = Dense(levels * steps, activation="linear")(x)
     # model = Model(inputs=input_layer, outputs=x)
-    output_layer = tf.keras.layers.Reshape((steps, levels))(x)
+    output_layer = keras.layers.Reshape((steps, levels))(x)
     model = Model(inputs=input_layer, outputs=output_layer)
 
     # Compile the model if optimizer, loss or compile_kwargs are passed

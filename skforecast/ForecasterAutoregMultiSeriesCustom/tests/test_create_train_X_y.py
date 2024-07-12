@@ -51,7 +51,7 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
                  )
 
     err_msg = re.escape(
-        ("Categorical columns in exog must contain only integer values. "
+        ("Categorical dtypes in exog must contain only integer values. "
          "See skforecast docs for more info about how to include "
          "categorical features https://skforecast.org/"
          "latest/user_guides/categorical-features.html")
@@ -179,7 +179,8 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
                      regressor      = LinearRegression(),
                      fun_predictors = create_predictors_3,
                      window_size    = 3,
-                     encoding       = 'onehot'
+                     encoding       = 'onehot',
+                     transformer_series = StandardScaler()
                  )
 
     results = forecaster._create_train_X_y(series=series)
@@ -252,7 +253,8 @@ def test_create_train_X_y_output_when_series_and_exog_is_None_ordinal_encoding(e
                      fun_predictors  = create_predictors_3,
                      window_size     = 3,
                      name_predictors = ['lag_1', 'lag_2', 'lag_3'],
-                     encoding        = encoding
+                     encoding        = encoding,
+                     transformer_series = StandardScaler()
                  )
 
     results = forecaster._create_train_X_y(series=series)
@@ -2424,7 +2426,8 @@ def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and
                      fun_predictors     = create_predictors_3,
                      window_size        = 3,
                      encoding           = 'ordinal',
-                     differentiation    = 1
+                     differentiation    = 1,
+                     transformer_series = StandardScaler()
                  )
     
     if fit_forecaster:

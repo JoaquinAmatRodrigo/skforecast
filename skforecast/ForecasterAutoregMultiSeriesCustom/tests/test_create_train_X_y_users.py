@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from sklearn.linear_model import LinearRegression
+from sklearn.preprocessing import StandardScaler
 
 def create_predictors_3(y): # pragma: no cover
     """
@@ -25,7 +26,8 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
         regressor      = LinearRegression(),
         fun_predictors = create_predictors_3,
         window_size    = 3,
-        encoding       = "onehot"
+        encoding       = "onehot",
+        transformer_series = StandardScaler(),
     )
 
     results = forecaster.create_train_X_y(series=series)

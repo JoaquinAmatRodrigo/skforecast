@@ -123,9 +123,9 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', lags=2, steps=2)
 
     err_msg = re.escape(
-        ("If exog is of type category, it must contain only integer values. "
-         "See skforecast docs for more info about how to include categorical "
-         "features https://skforecast.org/"
+        ("Categorical dtypes in exog must contain only integer values. "
+         "See skforecast docs for more info about how to include "
+         "categorical features https://skforecast.org/"
          "latest/user_guides/categorical-features.html")
     )
     with pytest.raises(TypeError, match = err_msg):
@@ -190,7 +190,7 @@ def test_create_train_X_y_ValueError_when_exog_columns_same_as_series_col_names(
 
 
 @pytest.mark.parametrize("exog", 
-                         [pd.Series(np.arange(15)), 
+                         [pd.Series(np.arange(15), name='exog'), 
                           pd.DataFrame(np.arange(50).reshape(25, 2))])
 def test_create_train_X_y_ValueError_when_series_and_exog_have_different_length(exog):
     """

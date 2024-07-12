@@ -35,7 +35,7 @@ Welcome to the skforecast user guides! This comprehensive collection of guides i
 - [Explainability](https://skforecast.org/latest/user_guides/explainability)
 - [Forecasting with XGBoost and LightGBM](https://skforecast.org/latest/user_guides/forecasting-xgboost-lightgbm)
 - [Skforecast in GPU](https://skforecast.org/latest/user_guides/skforecast-in-GPU)
-- [Plot forecaster residuals](https://skforecast.org/latest/user_guides/plot-forecaster-residuals)
+- [Plotting](https://skforecast.org/latest/user_guides/plotting)
 
 ## Additional Resources
 - [Input data](https://skforecast.org/latest/user_guides/input-data)

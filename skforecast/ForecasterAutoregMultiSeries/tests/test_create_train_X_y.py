@@ -23,7 +23,7 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
 
     err_msg = re.escape(
-        ("Categorical columns in exog must contain only integer values. "
+        ("Categorical dtypes in exog must contain only integer values. "
          "See skforecast docs for more info about how to include "
          "categorical features https://skforecast.org/"
          "latest/user_guides/categorical-features.html")
@@ -47,10 +47,10 @@ def test_create_train_X_y_ValueError_when_Forecaster_fitted_and_different_column
     })
 
     err_msg = re.escape(
-        (f"Once the Forecaster has been trained, `series` must have the "
-         f"same columns as the series used during training:\n" 
-         f" Got      : ['l1', 'l4']\n"
-         f" Expected : ['l1', 'l2']")
+        ("Once the Forecaster has been trained, `series` must have the "
+         "same columns as the series used during training:\n" 
+         " Got      : ['l1', 'l4']\n"
+         " Expected : ['l1', 'l2']")
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster._create_train_X_y(series=new_series)
@@ -97,10 +97,10 @@ def test_create_train_X_y_ValueError_when_Forecaster_fitted_and_different_exog_c
     new_exog = pd.Series(np.arange(10), name='exog2')
 
     err_msg = re.escape(
-        (f"Once the Forecaster has been trained, `exog` must have the "
-         f"same columns as the series used during training:\n" 
-         f" Got      : ['exog2']\n"
-         f" Expected : ['exog']")
+        ("Once the Forecaster has been trained, `exog` must have the "
+         "same columns as the series used during training:\n" 
+         " Got      : ['exog2']\n"
+         " Expected : ['exog']")
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster._create_train_X_y(series=series, exog=new_exog)
@@ -115,6 +115,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
                            '2': pd.Series(np.arange(7, dtype=float))})
     forecaster = ForecasterAutoregMultiSeries(
         LinearRegression(),
+        transformer_series=StandardScaler(),
         lags=3,
         encoding="onehot"
     )
@@ -185,6 +186,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_None_ordinal_encoding(e
                            '2': pd.Series(np.arange(7, dtype=float))})
     forecaster = ForecasterAutoregMultiSeries(
                     LinearRegression(),
+                    transformer_series=StandardScaler(),
                     lags=3,
                     encoding=encoding
                 )
@@ -2248,6 +2250,7 @@ def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               encoding           = 'ordinal',
+                                              transformer_series = StandardScaler(),
                                               differentiation    = 1)
     
     if fit_forecaster:

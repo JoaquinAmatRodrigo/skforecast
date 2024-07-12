@@ -4,7 +4,7 @@ import pandas as pd
 import numpy as np
 import pytest
 from skforecast.ForecasterRnn import ForecasterRnn
-import tensorflow as tf
+import keras
 from skforecast.ForecasterRnn.utils import create_and_compile_model
 import matplotlib.pyplot as plt
 
@@ -19,8 +19,8 @@ lags = 3
 steps = 4
 levels = ["1", "2"]
 activation = "relu"
-optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
-loss = tf.keras.losses.MeanSquaredError()
+optimizer = keras.optimizers.Adam(learning_rate=0.01)
+loss = keras.losses.MeanSquaredError()
 recurrent_units = 100
 dense_units = [128, 64]
 
