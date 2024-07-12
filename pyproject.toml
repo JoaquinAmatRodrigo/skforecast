@@ -1,16 +1,16 @@
 [project]
 name = "skforecast"
 version = "0.13.0"
-description="Forecasting time series with machinbe learning (Scikit-learn, CatBoost, LightGBM, XGBoost, Keras...)."
+description = "Forecasting time series with machinbe learning (Scikit-learn, CatBoost, LightGBM, XGBoost, Keras...)."
 readme = "README.md"
 authors = [
     { name = "Joaquin Amat Rodrigo", email = "j.amatrodrigo@gmail.com" },
-    { name = "Javier Escobar Ortiz", email = "javier.escobar.ortiz@gmail.com" }
+    { name = "Javier Escobar Ortiz", email = "javier.escobar.ortiz@gmail.com" },
 ]
 
 maintainers = [
     { name = "Joaquin Amat Rodrigo", email = "j.amatrodrigo@gmail.com" },
-    { name = "Javier Escobar Ortiz", email = "javier.escobar.ortiz@gmail.com" }
+    { name = "Javier Escobar Ortiz", email = "javier.escobar.ortiz@gmail.com" },
 ]
 
 classifiers = [
@@ -24,7 +24,7 @@ classifiers = [
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
-    "License :: OSI Approved :: BSD License"
+    "License :: OSI Approved :: BSD License",
 ]
 keywords = [
     "data-science",
@@ -48,14 +48,9 @@ requires-python = ">=3.9"
 
 [project.optional-dependencies]
 sarimax = [
-    "numpy>=1.20.3, <2.0", # Ensuring compatibility with pmdarima
+    "numpy>=1.20.3, <2.0",      # Ensuring compatibility with pmdarima
     "pmdarima>=2.0, <2.1",
     "statsmodels>=0.12, <0.15",
-]
-
-deeplearning = [
-    "matplotlib>=3.3, <3.10",
-    "keras>=2.6, <4.0",
 ]
 
 plotting = [
@@ -64,8 +59,13 @@ plotting = [
     "statsmodels>=0.12, <0.15",
 ]
 
+deeplearning = [
+    "matplotlib>=3.3, <3.10", 
+    "keras>=2.6, <4.0"
+]
+
 all = [
-    "numpy>=1.20.3, <2.0", # Ensuring compatibility with pmdarima
+    "numpy>=1.20.3, <2.0",      # Ensuring compatibility with pmdarima
     "pmdarima>=2.0, <2.1",
     "matplotlib>=3.3, <3.10",
     "seaborn>=0.11, <0.14",
@@ -74,7 +74,7 @@ all = [
 ]
 
 full = [
-    "numpy>=1.20.3, <2.0", # Ensuring compatibility with pmdarima
+    "numpy>=1.20.3, <2.0",      # Ensuring compatibility with pmdarima
     "pmdarima>=2.0, <2.1",
     "matplotlib>=3.3, <3.10",
     "seaborn>=0.11, <0.14",
@@ -97,7 +97,7 @@ test = [
     "pytest-cov>=4.0, <5.1",
     "pytest-xdist>=3.3, <3.7",
     "lightgbm>=4.0, <4.5",
-    "tomli>=2.0, <2.1"
+    "tomli>=2.0, <2.1",
 ]
 
 
