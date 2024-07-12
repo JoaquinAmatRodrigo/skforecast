@@ -1,7 +1,7 @@
 [project]
 name = "skforecast"
 version = "0.13.0"
-description="Forecasting time series with scikit-learn regressors. It also works with any regressor compatible with the scikit-learn API (pipelines, CatBoost, LightGBM, XGBoost, Ranger...)."
+description="Forecasting time series with machinbe learning (Scikit-learn, CatBoost, LightGBM, XGBoost, Keras...)."
 readme = "README.md"
 authors = [
     { name = "Joaquin Amat Rodrigo", email = "j.amatrodrigo@gmail.com" },
@@ -14,6 +14,11 @@ maintainers = [
 ]
 
 classifiers = [
+    "Operating System :: MacOS",
+    "Operating System :: Microsoft :: Windows",
+    "Operating System :: POSIX",
+    "Operating System :: Unix",
+    "Programming Language :: Python",
     "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
