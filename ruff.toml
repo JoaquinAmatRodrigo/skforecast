@@ -19,7 +19,7 @@ select = [
   "PT007",   # Checks for the type of parameter values passed to pytest.mark.parametrize.
   "PT018",   # Checks for assertions that combine multiple independent condition
 ]
-ignore = ["E221", "E251", "E501"]
+ignore = ["E221", "E251", "E501", "UP034"]
 
 [lint.pycodestyle]
 max-doc-length = 88
@@ -29,3 +29,4 @@ max-line-length = 100
 
 [format]
 quote-style = "single"
+docstring-code-format = false

@@ -97,6 +97,7 @@ test = [
     "pytest-cov>=4.0, <5.1",
     "pytest-xdist>=3.3, <3.7",
     "lightgbm>=4.0, <4.5",
+    "tensorflow>=2.13, <2.18",
     "tomli>=2.0, <2.1",
 ]
 
