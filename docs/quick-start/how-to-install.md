@@ -27,12 +27,12 @@ pip install git+https://github.com/JoaquinAmatRodrigo/skforecast#master
 
 The following dependencies are installed with the default installation:
 
-+ numpy>=1.20, <1.27
-+ pandas>=1.2, <2.3
-+ tqdm>=4.57, <4.67
-+ scikit-learn>=1.2, <1.5
-+ optuna>=2.10, <3.7
-+ joblib>=1.1, <1.5
++ numpy>=1.20.3
++ pandas>=1.5
++ tqdm>=4.57
++ scikit-learn>=1.2
++ optuna>=2.10
++ joblib>=1.1
 
 
 ## **Optional dependencies**
@@ -61,7 +61,7 @@ pip install skforecast[sarimax]
 pip install skforecast[plotting]
 ```
 
-+ matplotlib>=3.3, <3.9
++ matplotlib>=3.3, <3.10
 + seaborn>=0.11, <0.14
 + statsmodels>=0.12, <0.15
 
@@ -72,5 +72,5 @@ pip install skforecast[plotting]
 pip install skforecast[deeplearning]
 ```
 
-+ matplotlib>=3.3, <3.9
++ matplotlib>=3.3, <3.10
 + keras>=2.6, <4.0

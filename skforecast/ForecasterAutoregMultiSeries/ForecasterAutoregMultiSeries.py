@@ -334,9 +334,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.window_size_diff = self.max_lag
 
         self.weight_func, self.source_code_weight_func, self.series_weights = initialize_weights(
-            forecaster_name = type(self).__name__, 
-            regressor       = regressor, 
-            weight_func     = weight_func, 
+            forecaster_name = type(self).__name__,
+            regressor       = regressor,
+            weight_func     = weight_func,
             series_weights  = series_weights
         )
 
@@ -454,8 +454,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
 
     def _create_lags(
-        self, 
-        y: np.ndarray, 
+        self,
+        y: np.ndarray,
         series_name: str
     ) -> Tuple[np.ndarray, np.ndarray]:
         """
@@ -480,7 +480,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Shape: (samples - max(self.lags), len(self.lags))
         y_data : numpy ndarray
             1d numpy ndarray with the values of the time series related to each 
-            row of `X_data`. 
+            row of `X_data`.
             Shape: (samples - max(self.lags), )
         
         """
@@ -663,7 +663,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if self.fitted and not (series_col_names == self.series_col_names):
             raise ValueError(
                 (f"Once the Forecaster has been trained, `series` must have the "
-                 f"same columns as the series used during training:\n" 
+                 f"same columns as the series used during training:\n"
                  f" Got      : {series_col_names}\n"
                  f" Expected : {self.series_col_names}")
             )
@@ -689,7 +689,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     if not set(exog_col_names) == set(self.exog_col_names):
                         raise ValueError(
                             (f"Once the Forecaster has been trained, `exog` must have the "
-                             f"same columns as the series used during training:\n" 
+                             f"same columns as the series used during training:\n"
                              f" Got      : {exog_col_names}\n"
                              f" Expected : {self.exog_col_names}")
                         )
@@ -704,7 +704,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             self.differentiator_ = {serie: None for serie in series_col_names}
         else:
             if not self.fitted:
-                self.differentiator_ = {serie: clone(self.differentiator) 
+                self.differentiator_ = {serie: clone(self.differentiator)
                                         for serie in series_col_names}
 
         series_dict, exog_dict = align_series_and_exog_multiseries(
@@ -811,7 +811,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 y_train = y_train.iloc[mask]
                 warnings.warn(
                     ("NaNs detected in `X_train`. They have been dropped. If "
-                     "you want to keep them, set `forecaster.dropna_from_series = False`. " 
+                     "you want to keep them, set `forecaster.dropna_from_series = False`. "
                      "Same rows have been removed from `y_train` to maintain alignment. "
                      "This caused by series with interspersed NaNs."),
                      MissingValuesWarning
@@ -972,8 +972,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
             self.series_weights_ = {col: 1. for col in series_col_names}
             self.series_weights_.update(
-                (k, v) 
-                for k, v in self.series_weights.items() 
+                (k, v)
+                for k, v in self.series_weights.items()
                 if k in self.series_weights_
             )
 
@@ -995,7 +995,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         if self.weight_func is not None:
             if isinstance(self.weight_func, Callable):
-                self.weight_func_ = {col: copy(self.weight_func) 
+                self.weight_func_ = {col: copy(self.weight_func)
                                      for col in series_col_names}
             else:
                 # Series not present in weight_func have a weight of 1 in all their samples
@@ -1009,8 +1009,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 self.weight_func_ = {col: lambda x: np.ones_like(x, dtype=float) 
                                      for col in series_col_names}
                 self.weight_func_.update(
-                    (k, v) 
-                    for k, v in self.weight_func.items() 
+                    (k, v)
+                    for k, v in self.weight_func.items()
                     if k in self.weight_func_
                 )
 
@@ -1158,7 +1158,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.index_type = type(series_indexes[series_col_names[0]])
         if isinstance(series_indexes[series_col_names[0]], pd.DatetimeIndex):
             self.index_freq = series_indexes[series_col_names[0]].freqstr
-        else: 
+        else:
             self.index_freq = series_indexes[series_col_names[0]].step
 
         if exog is not None:
@@ -1184,8 +1184,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     # Only up to 1000 residuals are stored
                     rng = np.random.default_rng(seed=123)
                     in_sample_residuals[col] = rng.choice(
-                                                   a       = in_sample_residuals[col], 
-                                                   size    = 1000, 
+                                                   a       = in_sample_residuals[col],
+                                                   size    = 1000,
                                                    replace = False
                                                )
         else:
@@ -1736,7 +1736,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                      steps       = 1,
                                      level       = level,
                                      last_window = last_window_boot,
-                                     exog        = exog_boot 
+                                     exog        = exog_boot
                                  )
 
                     prediction_with_residual = prediction + sample_residuals[step]
@@ -1770,7 +1770,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                                   )
 
             boot_predictions[level] = level_boot_predictions
-        
+
         set_skforecast_warnings(suppress_warnings, action='default')
 
         return boot_predictions
@@ -2150,7 +2150,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.window_size = max(self.lags)
         self.window_size_diff = max(self.lags)
         if self.differentiation is not None:
-            self.window_size_diff += self.differentiation  
+            self.window_size_diff += self.differentiation
 
 
     def set_out_sample_residuals(
@@ -2190,7 +2190,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if not isinstance(residuals, dict) or not all(isinstance(x, np.ndarray) for x in residuals.values()):
             raise TypeError(
                 (f"`residuals` argument must be a dict of numpy ndarrays in the form "
-                 "`{level: residuals}`. " 
+                 "`{level: residuals}`. "
                  f"Got {type(residuals)}.")
             )
 
@@ -2206,15 +2206,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
             warnings.warn(
                 (
-                    f"Only residuals of levels " 
+                    f"Only residuals of levels "
                     f"{set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} "
                     f"are updated."
                 ), IgnoredArgumentWarning
             )
 
         residuals = {
-            key: value 
-            for key, value in residuals.items() 
+            key: value
+            for key, value in residuals.items()
             if key in self.out_sample_residuals.keys()
         }
 

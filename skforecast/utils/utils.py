@@ -30,15 +30,16 @@ from ..exceptions import SkforecastVersionWarning
 
 optional_dependencies = {
     'sarimax': [
+        'numpy>=1.20.3, <2.0',
         'pmdarima>=2.0, <2.1',
         'statsmodels>=0.12, <0.15'
     ],
     'deeplearning': [
-        'matplotlib>=3.3, <3.9',
+        'matplotlib>=3.3, <3.10',
         'keras>=2.6, <4.0',
     ],
     'plotting': [
-        'matplotlib>=3.3, <3.9', 
+        'matplotlib>=3.3, <3.10', 
         'seaborn>=0.11, <0.14', 
         'statsmodels>=0.12, <0.15'
     ]
