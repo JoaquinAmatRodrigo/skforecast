@@ -725,11 +725,20 @@ def check_predict_input(
                  "column name or `None`.")
             )
 
-        levels_to_check = levels_forecaster if forecaster_name == 'ForecasterRnn' else series_col_names
-        if len(set(levels) - set(levels_to_check)) != 0:
-            raise ValueError(
-                (f"`levels` names must be included in the series used during fit "
-                 f"({levels_to_check}). Got {levels}.")
+        levels_to_check = (
+            levels_forecaster if forecaster_name == 'ForecasterRnn'
+            else series_col_names
+        )
+        unknown_levels = set(levels) - set(levels_to_check)
+        if len(unknown_levels) != 0:
+            # raise ValueError(
+            #     (f"`levels` names must be included in the series used during fit "
+            #      f"({levels_to_check}). Got {levels}.")
+            # )
+            warnings.warn(
+                f"`levels` {unknown_levels} were not included in training. "
+                f"Unknown levels are theatened as NaN, which may cause the "
+                f"prediction to fail if the regressor does not accept NaN values."
             )
 
     if exog is None and included_exog:

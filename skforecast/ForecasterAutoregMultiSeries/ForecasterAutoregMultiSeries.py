@@ -1337,7 +1337,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
             last_window_level = transform_series(
                                     series            = last_window[level],
-                                    transformer       = self.transformer_series_[level],
+                                    transformer       = self.transformer_series_.get(level, None),
                                     fit               = False,
                                     inverse_transform = False
                                 )
@@ -1405,7 +1405,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
         last_window = np.concatenate((last_window, predictions))
-        level_encoded = np.array([self.encoding_mapping[level]], dtype='float64')
+        level_encoded = np.array([self.encoding_mapping.get(level, None)], dtype='float64')
 
         for i in range(steps):
 
@@ -1413,7 +1413,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             if self.encoding == 'onehot':
                 levels_dummies = np.zeros(shape=(1, len(self.series_col_names)), dtype=float)
-                levels_dummies[0][self.series_col_names.index(level)] = 1.
+                if level in self.series_col_names:
+                    levels_dummies[0][self.series_col_names.index(level)] = 1.
                 X = np.column_stack((X, levels_dummies.reshape(1, -1)))
             else:
                 X = np.column_stack((X, level_encoded))
@@ -1513,7 +1514,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 level_encoded = np.zeros(shape=(1, len(self.series_col_names)), dtype=float)
                 level_encoded[0][self.series_col_names.index(level)] = 1.
             else:
-                level_encoded = np.array([self.encoding_mapping[level]], dtype='float64')
+                level_encoded = np.array([self.encoding_mapping.get(level, None)], dtype='float64')
 
             level_encoded = np.tile(level_encoded, (steps, 1))
             X_predict = np.concatenate((X_predict, level_encoded), axis=1)
@@ -1610,7 +1611,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             preds_level = transform_series(
                               series            = preds_level,
-                              transformer       = self.transformer_series_[level],
+                              transformer       = self.transformer_series_.get(level, None),
                               fit               = False,
                               inverse_transform = True
                           )
