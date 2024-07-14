@@ -212,6 +212,7 @@ class ForecasterAutoreg(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
+        datetime_features: Optional[Union[Callable, object, list]]=None,
         transformer_y: Optional[object]=None,
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Callable]=None,
@@ -236,6 +237,8 @@ class ForecasterAutoreg(ForecasterBase):
         self.exog_type                   = None
         self.exog_dtypes                 = None
         self.exog_col_names              = None
+        self.included_datetime_features  = False
+        self.datetime_features_col_names = None
         self.X_train_col_names           = None
         self.in_sample_residuals         = None
         self.out_sample_residuals        = None
@@ -287,6 +290,18 @@ class ForecasterAutoreg(ForecasterBase):
                               fit_kwargs = fit_kwargs
                           )
 
+        # TODO: move to utils
+        if callable(datetime_features):
+            datetime_features = [(datetime_features, {})]
+        if isinstance(datetime_features, tuple):
+            datetime_features = [datetime_features]
+        if isinstance(datetime_features, list):
+            self.datetime_features = [
+                (item, {}) if callable(item) else item for item in datetime_features
+            ]
+        else:
+            self.datetime_features = None
+
 
     def __repr__(
         self
@@ -315,6 +330,8 @@ class ForecasterAutoreg(ForecasterBase):
             f"Differentiation order: {self.differentiation} \n"
             f"Exogenous included: {self.included_exog} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
+            f"Datetime features: {[(item[0].__name__, item[1]) for item in self.datetime_features] if self.datetime_features is not None else None} \n"
+            f"Datetime features names: {self.datetime_features_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
@@ -455,6 +472,14 @@ class ForecasterAutoreg(ForecasterBase):
                       columns = X_train_col_names,
                       index   = y_index[self.max_lag: ]
                   )
+        
+        datetime_features_col_names = None
+        if self.datetime_features is not None:
+            datetime_features = [
+                f(X_train, **kwargs) for f, kwargs in self.datetime_features
+            ]
+            X_train = pd.concat((X_train, *datetime_features), axis=1)
+            datetime_features_col_names = X_train.columns.to_list()[len(X_train_col_names):]
 
         if exog is not None:
             # The first `self.max_lag` positions have to be removed from exog
@@ -466,7 +491,8 @@ class ForecasterAutoreg(ForecasterBase):
         # TODO: move self to fit method and make X_train_col_names a return
         if not self.fitted:
             self.X_train_col_names = X_train.columns.to_list()
-
+            self.datetime_features_col_names = datetime_features_col_names
+                    
         # TODO: DataFrame or Series?
         y_train = pd.Series(
                       data  = y_train,
