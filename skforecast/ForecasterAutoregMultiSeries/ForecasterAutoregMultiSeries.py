@@ -1171,6 +1171,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if store_in_sample_residuals:
 
             residuals = y_train - self.regressor.predict(X_train)
+            in_sample_residuals['unknown_level'] = residuals.to_numpy()
 
             for col in series_X_train:
                 if self.encoding == 'onehot':
@@ -1180,14 +1181,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     in_sample_residuals[col] = (
                         residuals.loc[X_train['_level_skforecast'] == encoded_value].to_numpy()
                     )
-                if len(in_sample_residuals[col]) > 1000:
+            for k in in_sample_residuals.keys():
+                if len(in_sample_residuals[k]) > 1000:
                     # Only up to 1000 residuals are stored
                     rng = np.random.default_rng(seed=123)
-                    in_sample_residuals[col] = rng.choice(
-                                                   a       = in_sample_residuals[col], 
-                                                   size    = 1000, 
-                                                   replace = False
-                                               )
+                    in_sample_residuals[k] = rng.choice(
+                                                a       = in_sample_residuals[k], 
+                                                size    = 1000, 
+                                                replace = False
+                                             )
         else:
             for col in series_X_train:
                 in_sample_residuals[col] = None
@@ -1761,7 +1763,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                          columns = [f"pred_boot_{i}" for i in range(n_boot)]
                                      )
 
-            if self.transformer_series_[level]:
+            if self.transformer_series_.get(level, None):
                 for col in level_boot_predictions.columns:
                     level_boot_predictions[col] = transform_series(
                                                       series            = level_boot_predictions[col],

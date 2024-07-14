@@ -27,6 +27,7 @@ from ..exceptions import MissingExogWarning
 from ..exceptions import DataTypeWarning
 from ..exceptions import IgnoredArgumentWarning
 from ..exceptions import SkforecastVersionWarning
+from ..exceptions import UnknownLevelWarning
 
 optional_dependencies = {
     'sarimax': [
@@ -730,15 +731,22 @@ def check_predict_input(
             else series_col_names
         )
         unknown_levels = set(levels) - set(levels_to_check)
-        if len(unknown_levels) != 0:
+        if len(unknown_levels) != 0 and last_window is not None:
             # raise ValueError(
             #     (f"`levels` names must be included in the series used during fit "
             #      f"({levels_to_check}). Got {levels}.")
             # )
             warnings.warn(
-                f"`levels` {unknown_levels} were not included in training. "
+                (f"`levels` {unknown_levels} were not included in training. "
                 f"Unknown levels are theatened as NaN, which may cause the "
-                f"prediction to fail if the regressor does not accept NaN values."
+                f"prediction to fail if the regressor does not accept NaN values."),
+                UnknownLevelWarning
+
+            )
+        elif len(unknown_levels) != 0 and last_window is None:
+            raise ValueError(
+                f"If new levels (levels not present in training) are used, "
+                f"`last_window` must be provided. New levels are {unknown_levels}."
             )
 
     if exog is None and included_exog:
@@ -2674,9 +2682,10 @@ def preprocess_levels_self_last_window_multiseries(
 
         if not levels:
             raise ValueError(
-                ("No series to predict. None of the series are present in "
-                 "`last_window` attribute. Provide `last_window` as argument "
-                 "in predict method.")
+                f"No series to predict. None of the series "
+                f"{levels + list(not_available_last_window)} "
+                f"are present in `last_window` attribute. Provide `last_window` "
+                f"as argument in predict method."
             )
 
     last_index_levels = [
@@ -2749,10 +2758,19 @@ def prepare_residuals_multiseries(
     """
 
     if use_in_sample:
-        if not set(levels).issubset(set(in_sample_residuals.keys())):
-            raise ValueError(
-                (f"Not `forecaster.in_sample_residuals` for levels: "
-                 f"{set(levels) - set(in_sample_residuals.keys())}.")
+        # if not set(levels).issubset(set(in_sample_residuals.keys())):
+            # raise ValueError(
+            #     (f"Not `forecaster.in_sample_residuals` for levels: "
+            #      f"{set(levels) - set(in_sample_residuals.keys())}.")
+            # )
+        unknown_levels = set(levels) - set(in_sample_residuals.keys())
+        if unknown_levels:
+            warnings.warn(
+                (f"`levels` {unknown_levels} are not present in `forecaster.in_sample_residuals`, "
+                f"most likely because they were not present in the training data. "
+                f"A random sample of the residuals from other levels will be used."
+                f"This may lead to inaccurate intervals for the unknown levels."),
+                UnknownLevelWarning
             )
         residuals = in_sample_residuals
     else:
@@ -2765,21 +2783,32 @@ def prepare_residuals_multiseries(
                  "`predict_dist()`.")
             )
         else:
-            if not set(levels).issubset(set(out_sample_residuals.keys())):
-                raise ValueError(
-                    (f"Not `forecaster.out_sample_residuals` for levels: "
-                     f"{set(levels) - set(out_sample_residuals.keys())}. "
-                     f"Use method `set_out_sample_residuals()`.")
+            # if not set(levels).issubset(set(out_sample_residuals.keys())):
+            #     raise ValueError(
+            #         (f"Not `forecaster.out_sample_residuals` for levels: "
+            #          f"{set(levels) - set(out_sample_residuals.keys())}. "
+            #          f"Use method `set_out_sample_residuals()`.")
+            #     )
+            unknown_levels = set(levels) - set(out_sample_residuals.keys())
+            if unknown_levels:
+                warnings.warn(
+                    (f"`levels` {unknown_levels} are not present in `forecaster.out_sample_residuals`. "
+                    f"Use method `set_out_sample_residuals()` before `predict_interval()` to "
+                    f"set residuals for these levels. Otherwise, a random sample of the out-sample "
+                    f"residuals from other levels will be used. This may lead to inaccurate "
+                    f"intervals for the unknown levels."),
+                UnknownLevelWarning
                 )
-        residuals = out_sample_residuals
+            residuals = out_sample_residuals
 
     check_residuals = (
         "forecaster.in_sample_residuals" if use_in_sample
         else "forecaster.out_sample_residuals"
     )
     for level in levels:
-        if (level not in residuals.keys() or 
-            residuals[level] is None or 
+        if level in unknown_levels:
+            residuals[level] = residuals['unknown_level']
+        if (residuals[level] is None or 
             len(residuals[level]) == 0):
             raise ValueError(
                 (f"Not available residuals for level '{level}'. "
