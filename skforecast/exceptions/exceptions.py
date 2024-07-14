@@ -77,6 +77,21 @@ class LongTrainingWarning(UserWarning):
             "warnings.simplefilter('ignore', category=LongTrainingWarning)"
         )
         return self.message + " " + extra_message
+    
+class UnknownLevelWarning(UserWarning):
+    """
+    Warning used to notify that a level being predicted was not part of the
+    training data.
+    """
+    def __init__(self, message):
+        self.message = message
+
+    def __str__(self):
+        extra_message = (
+            "\n You can suppress this warning using: "
+            "warnings.simplefilter('ignore', category=UnknownLevelWarning)"
+        )
+        return self.message + " " + extra_message
 
 
 class IgnoredArgumentWarning(UserWarning):
@@ -115,6 +130,7 @@ warn_skforecast_categories = [
     MissingValuesWarning,
     MissingExogWarning,
     DataTypeWarning,
+    UnknownLevelWarning,
     LongTrainingWarning,
     IgnoredArgumentWarning,
     SkforecastVersionWarning
