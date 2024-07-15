@@ -65,7 +65,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - `int`: include lags from 1 to `lags` (included).
         - `list`, `1d numpy ndarray` or `range`: include only lags present in 
         `lags`, all elements must be int.
-    encoding : str, default `'ordinal_category'`
+    encoding : str, None, default `'ordinal_category'`
         Encoding used to identify the different series. 
         
         - If `'ordinal'`, a single column is created with integer values from 0 
@@ -74,6 +74,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         values from 0 to n_series - 1 and the column is transformed into 
         pandas.category dtype so that it can be used as a categorical variable. 
         - If `'onehot'`, a binary column is created for each series.
+        - If None, no column is created to identify the series. Internally, the
+        series are identified as an integer from 0 to n_series - 1, but no column
+        is created in the training matrices.
         **New in version 0.12.0**
     transformer_series : transformer (preprocessor), dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -141,6 +144,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         values from 0 to n_series - 1 and the column is transformed into 
         pandas.category dtype so that it can be used as a categorical variable. 
         - If `'onehot'`, a binary column is created for each series.
+        - If None, no column is created to identify the series. Internally, the
+        series are identified as an integer from 0 to n_series - 1, but no column
+        is created in the training matrices.
         **New in version 0.12.0**
     encoder : sklearn.preprocessing
         Scikit-learn preprocessing encoder used to encode the series.
@@ -281,7 +287,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
-        encoding: str='ordinal_category',
+        encoding: Optional[str]='ordinal_category',
         transformer_series: Optional[Union[object, dict]]=None,
         transformer_exog: Optional[object]=None,
         weight_func: Optional[Union[Callable, dict]]=None,
@@ -354,10 +360,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                               fit_kwargs = fit_kwargs
                           )
 
-        if self.encoding not in ['ordinal', 'ordinal_category', 'onehot']:
+        if self.encoding not in ['ordinal', 'ordinal_category', 'onehot', None]:
             raise ValueError(
                 (f"Argument `encoding` must be one of the following values: 'ordinal', "
-                 f"'ordinal_category', 'onehot'. Got '{self.encoding}'.")
+                 f"'ordinal_category', 'onehot' or None. Got '{self.encoding}'.")
             )
 
         if self.encoding == 'onehot':
@@ -1139,15 +1145,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                             X_train          = X_train
                         )
 
+        X_train_regressor = X_train if self.encoding is not None else X_train.drop(columns='_level_skforecast')
         if sample_weight is not None:
             self.regressor.fit(
-                X             = X_train,
+                X             = X_train_regressor,
                 y             = y_train,
                 sample_weight = sample_weight,
                 **self.fit_kwargs
             )
         else:
-            self.regressor.fit(X=X_train, y=y_train, **self.fit_kwargs)
+            self.regressor.fit(X=X_train_regressor, y=y_train, **self.fit_kwargs)
 
         self.series_col_names = series_col_names
         self.series_X_train = series_X_train
@@ -1191,7 +1198,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                                 replace = False
                                              )
         else:
-            for col in series_X_train:
+            for col in series_X_train + ['_unknown_level']:
                 in_sample_residuals[col] = None
 
         self.in_sample_residuals = in_sample_residuals
@@ -1375,6 +1382,75 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         return last_window_values_dict, exog_values_dict, levels, prediction_index, residuals
 
 
+    def _recursive_predict_new(
+        self,
+        steps: int,
+        level: str,
+        last_window: np.ndarray,
+        exog: Optional[np.ndarray]=None
+    ) -> np.ndarray:
+        """
+        Predict n steps ahead. It is an iterative process in which, each prediction,
+        is used as a predictor for the next step.
+        
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        level : str
+            Time series to be predicted.
+        last_window : numpy ndarray
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
+        exog : numpy ndarray, default `None`
+            Exogenous variable/s included as predictor/s.
+
+        Returns
+        -------
+        predictions : numpy ndarray
+            Predicted values.
+        
+        """
+        
+        if self.encoding == 'onehot':
+            levels_dummies = np.zeros(shape=len(self.series_col_names), dtype=float)
+            if level in self.series_col_names:
+                levels_dummies[self.series_col_names.index(level)] = 1.
+            level_encoded = levels_dummies
+        else:
+            level_encoded = np.array([self.encoding_mapping.get(level, None)], dtype='float64')
+
+        last_window_shape = last_window.shape[0]
+        level_encoded_shape = level_encoded.shape[0]
+        exog_shape = exog.shape[1] if exog is not None else 0
+        
+        predictors_shape = last_window_shape + level_encoded_shape + exog_shape
+        predictors = np.full(shape=predictors_shape, fill_value=np.nan, dtype=float)
+        predictors[last_window_shape:last_window_shape + level_encoded_shape] = level_encoded
+
+        predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
+        last_window = np.concatenate((last_window, predictions))
+
+        for i in range(steps):
+
+            predictors[:last_window_shape] = last_window[-self.lags - (steps - i)]
+            if exog is not None:
+                predictors[-exog_shape:] = exog[i, ]
+
+            with warnings.catch_warnings():
+                # Suppress scikit-learn warning: "X does not have valid feature names,
+                # but NoOpTransformer was fitted with feature names".
+                warnings.simplefilter("ignore")
+                prediction = self.regressor.predict(predictors.reshape(1, -1)).ravel()[0]
+                predictions[i] = prediction
+
+            # Update `last_window` values. The first position is discarded and
+            # the new prediction is added at the end.
+            last_window[-(steps - i)] = prediction
+
+        return predictions
+
+
     def _recursive_predict(
         self,
         steps: int,
@@ -1407,7 +1483,67 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
         last_window = np.concatenate((last_window, predictions))
-        level_encoded = np.array([self.encoding_mapping.get(level, None)], dtype='float64')
+        if self.encoding == 'onehot':
+            levels_dummies = np.zeros(shape=len(self.series_col_names), dtype=float)
+            if level in self.series_col_names:
+                levels_dummies[self.series_col_names.index(level)] = 1.
+            level_encoded = levels_dummies
+        else:
+            level_encoded = np.array([self.encoding_mapping.get(level, None)], dtype='float64')
+
+        for i in range(steps):
+
+            X = np.concatenate((last_window[-self.lags - (steps - i)], level_encoded))
+            if exog is not None:
+                X = np.concatenate((X, exog[i, ]))
+
+            with warnings.catch_warnings():
+                # Suppress scikit-learn warning: "X does not have valid feature names,
+                # but NoOpTransformer was fitted with feature names".
+                warnings.simplefilter("ignore")
+                prediction = self.regressor.predict(X.reshape(1, -1)).ravel()[0]
+                predictions[i] = prediction
+
+            # Update `last_window` values. The first position is discarded and
+            # the new prediction is added at the end.
+            last_window[-(steps - i)] = prediction
+
+        return predictions
+    
+
+    def _recursive_predict_old(
+        self,
+        steps: int,
+        level: str,
+        last_window: np.ndarray,
+        exog: Optional[np.ndarray]=None
+    ) -> np.ndarray:
+        """
+        Predict n steps ahead. It is an iterative process in which, each prediction,
+        is used as a predictor for the next step.
+        
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        level : str
+            Time series to be predicted.
+        last_window : numpy ndarray
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
+        exog : numpy ndarray, default `None`
+            Exogenous variable/s included as predictor/s.
+
+        Returns
+        -------
+        predictions : numpy ndarray
+            Predicted values.
+        
+        """
+
+        predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
+        last_window = np.concatenate((last_window, predictions))
+        level_encoded = np.array([self.encoding_mapping[level]], dtype='float64')
 
         for i in range(steps):
 
@@ -1415,8 +1551,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             if self.encoding == 'onehot':
                 levels_dummies = np.zeros(shape=(1, len(self.series_col_names)), dtype=float)
-                if level in self.series_col_names:
-                    levels_dummies[0][self.series_col_names.index(level)] = 1.
+                levels_dummies[0][self.series_col_names.index(level)] = 1.
                 X = np.column_stack((X, levels_dummies.reshape(1, -1)))
             else:
                 X = np.column_stack((X, level_encoded))
