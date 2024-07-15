@@ -1171,7 +1171,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if store_in_sample_residuals:
 
             residuals = y_train - self.regressor.predict(X_train)
-            in_sample_residuals['unknown_level'] = residuals.to_numpy()
+            in_sample_residuals['_unknown_level'] = residuals.to_numpy()
 
             for col in series_X_train:
                 if self.encoding == 'onehot':
@@ -2265,6 +2265,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                       ))
 
             self.out_sample_residuals[level] = residuals_level
+
+        rng = np.random.default_rng(seed=random_state)
+        self.out_sample_residuals['_unknown_level'] = rng.choice(
+            a       = np.concatenate(list(self.out_sample_residuals.values())),
+            size    = 1000,
+            replace = False
+        )
 
 
     def get_feature_importances(

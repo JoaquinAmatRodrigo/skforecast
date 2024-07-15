@@ -614,7 +614,7 @@ def check_predict_input(
     index_type: type,
     index_freq: str,
     window_size: int,
-    last_window: Optional[Union[pd.Series, pd.DataFrame]]=None,
+    last_window: Union[pd.Series, pd.DataFrame, None],
     last_window_exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
     exog_type: Optional[type]=None,
@@ -651,7 +651,7 @@ def check_predict_input(
     window_size: int
         Size of the window needed to create the predictors. It is equal to 
         `max_lag`.
-    last_window : pandas Series, pandas DataFrame, default `None`
+    last_window : pandas Series, pandas DataFrame, None
         Values of the series used to create the predictors (lags) need in the 
         first iteration of prediction (t + 1).
     last_window_exog : pandas Series, pandas DataFrame, default `None`
@@ -732,21 +732,11 @@ def check_predict_input(
         )
         unknown_levels = set(levels) - set(levels_to_check)
         if len(unknown_levels) != 0 and last_window is not None:
-            # raise ValueError(
-            #     (f"`levels` names must be included in the series used during fit "
-            #      f"({levels_to_check}). Got {levels}.")
-            # )
             warnings.warn(
                 (f"`levels` {unknown_levels} were not included in training. "
-                f"Unknown levels are theatened as NaN, which may cause the "
+                f"Unknown levels are encoded as NaN, which may cause the "
                 f"prediction to fail if the regressor does not accept NaN values."),
                 UnknownLevelWarning
-
-            )
-        elif len(unknown_levels) != 0 and last_window is None:
-            raise ValueError(
-                f"If new levels (levels not present in training) are used, "
-                f"`last_window` must be provided. New levels are {unknown_levels}."
             )
 
     if exog is None and included_exog:
@@ -2758,11 +2748,6 @@ def prepare_residuals_multiseries(
     """
 
     if use_in_sample:
-        # if not set(levels).issubset(set(in_sample_residuals.keys())):
-            # raise ValueError(
-            #     (f"Not `forecaster.in_sample_residuals` for levels: "
-            #      f"{set(levels) - set(in_sample_residuals.keys())}.")
-            # )
         unknown_levels = set(levels) - set(in_sample_residuals.keys())
         if unknown_levels:
             warnings.warn(
@@ -2772,7 +2757,7 @@ def prepare_residuals_multiseries(
                 f"This may lead to inaccurate intervals for the unknown levels."),
                 UnknownLevelWarning
             )
-        residuals = in_sample_residuals
+        residuals = in_sample_residuals.copy()
     else:
         if out_sample_residuals is None:
             raise ValueError(
@@ -2783,12 +2768,6 @@ def prepare_residuals_multiseries(
                  "`predict_dist()`.")
             )
         else:
-            # if not set(levels).issubset(set(out_sample_residuals.keys())):
-            #     raise ValueError(
-            #         (f"Not `forecaster.out_sample_residuals` for levels: "
-            #          f"{set(levels) - set(out_sample_residuals.keys())}. "
-            #          f"Use method `set_out_sample_residuals()`.")
-            #     )
             unknown_levels = set(levels) - set(out_sample_residuals.keys())
             if unknown_levels:
                 warnings.warn(
@@ -2797,9 +2776,9 @@ def prepare_residuals_multiseries(
                     f"set residuals for these levels. Otherwise, a random sample of the out-sample "
                     f"residuals from other levels will be used. This may lead to inaccurate "
                     f"intervals for the unknown levels."),
-                UnknownLevelWarning
+                    UnknownLevelWarning
                 )
-            residuals = out_sample_residuals
+            residuals = out_sample_residuals.copy()
 
     check_residuals = (
         "forecaster.in_sample_residuals" if use_in_sample
@@ -2807,7 +2786,7 @@ def prepare_residuals_multiseries(
     )
     for level in levels:
         if level in unknown_levels:
-            residuals[level] = residuals['unknown_level']
+            residuals[level] = residuals['_unknown_level']
         if (residuals[level] is None or 
             len(residuals[level]) == 0):
             raise ValueError(
