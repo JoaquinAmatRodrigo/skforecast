@@ -334,141 +334,22 @@ def exog_long_to_dict(
     return exog_dict
 
 
-# class CalendarFeatures(BaseEstimator, TransformerMixin):
-#     """
-#     A transformer for extracting calendar features from the DateTime index of a pandas
-#     DataFrame or Series. It can also apply cyclic encoding to the extracted features.
-
-#     Parameters:
-#     ----------
-#     cyclic_encoding : bool, default=False
-#         If True, applies cyclic encoding to specified datetime features.
-    
-#     features : list of str, default=[
-#         'year', 
-#         'month',
-#         'week',
-#         'day_of_week',
-#         'day_of_month',
-#         'day_of_year',
-#         'weekend',
-#         'hour',
-#         'minute',
-#         'second'
-#     ]
-#         List of calendar features to extract from the index.
-    
-#     max_values : dict, default={
-#         'month': 12,
-#         'week': 52,
-#         'day_of_week': 6, # 0 is Monday
-#         'day_of_month': 31,
-#         'day_of_year': 366,
-#         'hour': 24,
-#         'minute': 60,
-#         'second': 60
-#     }
-#         Dictionary of maximum values for the cyclic encoding of calendar features.
-#     """
-
-#     def __init__(self, cyclic_encoding=False, features=None, max_values=None):
-#         self.cyclic_encoding = cyclic_encoding
-#         self.features = features if features is not None else [
-#             'year', 
-#             'month',
-#             'week',
-#             'day_of_week',
-#             'day_of_month',
-#             'day_of_year',
-#             'weekend',
-#             'hour',
-#             'minute',
-#             'second'
-#         ]
-#         self.max_values = max_values if max_values is not None else {
-#             'month': 12,
-#             'week': 52,
-#             'day_of_week': 6, # 0 is Monday
-#             'day_of_month': 31,
-#             'day_of_year': 366,
-#             'hour': 24,
-#             'minute': 60,
-#             'second': 60
-#         }
-
-#     def fit(self, X, y=None):
-#         """Fit method - does nothing and is here for compatibility with sklearn pipeline."""
-#         return self
-    
-#     def transform(self, X):
-#         """
-#         Transform method to extract and encode calendar features from the index.
-        
-#         Parameters:
-#         ----------
-#         X : DataFrame
-#             Input dataframe with a datetime index.
-        
-#         Returns:
-#         -------
-#         DataFrame
-#             DataFrame with the extracted (and optionally encoded) calendar features.
-#         """
-#         if not isinstance(X, (pd.DataFrame, pd.Series)):
-#             raise ValueError("Input must be a pandas DataFrame or Series")
-#         if not isinstance(X.index, pd.DatetimeIndex):
-#             raise ValueError("Input must have a datetime index")
-    
-#         X_new = pd.DataFrame(index=X.index)
-
-#         datetime_attrs = {
-#             'year': 'year',
-#             'month': 'month',
-#             'week': lambda idx: idx.isocalendar().week,
-#             'day_of_week': 'dayofweek',
-#             'day_of_year': 'dayofyear',
-#             'day_of_month': 'day',
-#             'weekend': lambda idx: idx.weekday >= 5,
-#             'hour': 'hour',
-#             'minute': 'minute',
-#             'second': 'second'
-#         }
-
-#         for feature, attr in datetime_attrs.items():
-#             if feature in self.features:
-#                 try:
-#                     if callable(attr):
-#                         X_new[feature] = attr(X.index)
-#                     else:
-#                         X_new[feature] = getattr(X.index, attr)
-#                 except AttributeError as e:
-#                     pass
-
-#         if self.cyclic_encoding:
-#             for feature, max_val in self.max_values.items():
-#                 if feature in X_new.columns:
-#                     X_new[f'{feature}_sin'] = np.sin(2 * np.pi * X_new[feature] / max_val)
-#                     X_new[f'{feature}_cos'] = np.cos(2 * np.pi * X_new[feature] / max_val)
-#                     X_new = X_new.drop(feature, axis=1)
-
-#         return X_new
-
 def extract_calendar_features(
         X: Union[pd.DataFrame, pd.Series],
-        cyclic_encoding: bool=False,
         features: list=None,
+        encoding: str='cyclic',
         max_values: dict=None
     ):
     """
-    Function for extracting calendar features from the DateTime index of a pandas
-    DataFrame or Series.
+    Extract calendar features from the DateTime index of a pandas DataFrame or Series.
 
     Parameters
     ----------
     X : pandas DataFrame or Series
         Input DataFrame or Series with a datetime index.
-    cyclic_encoding : bool, default=False
-        If True, applies cyclic encoding to specified datetime features.
+    encoding : str, default='cyclic'
+        Encoding method for the extracted features. Options are None, 'cyclic' or
+        'onehot'.
     features : list of str, default=[
         'year', 
         'month',
@@ -504,6 +385,8 @@ def extract_calendar_features(
         raise ValueError("Input must be a pandas DataFrame or Series")
     if not isinstance(X.index, pd.DatetimeIndex):
         raise ValueError("Input must have a datetime index")
+    if encoding not in ['cyclic', 'onehot', None]:
+        raise ValueError("Encoding must be one of 'cyclic', 'onehot' or None")
 
     features = features if features is not None else [
         'year', 
@@ -547,18 +430,22 @@ def extract_calendar_features(
         if feature in features:
             try:
                 if callable(attr):
-                    X_new[feature] = attr(X.index)
+                    X_new[feature] = attr(X.index).astype(int)
                 else:
-                    X_new[feature] = getattr(X.index, attr)
+                    X_new[feature] = getattr(X.index, attr).astype(int)
             except AttributeError as e:
                 pass
 
-    if cyclic_encoding:
+    if encoding == 'cyclic':
         for feature, max_val in max_values.items():
             if feature in X_new.columns:
                 X_new[f'{feature}_sin'] = np.sin(2 * np.pi * X_new[feature] / max_val)
                 X_new[f'{feature}_cos'] = np.cos(2 * np.pi * X_new[feature] / max_val)
                 X_new = X_new.drop(feature, axis=1)
+    elif encoding == 'onehot':
+        X_new = pd.get_dummies(
+            X_new, columns=features, drop_first=False, sparse=False, dtype=int
+        )
 
     return X_new
 
@@ -566,13 +453,10 @@ def extract_calendar_features(
 class CalendarFeatures(BaseEstimator, TransformerMixin):
     """
     A transformer for extracting calendar features from the DateTime index of a pandas
-    DataFrame or Series. It can also apply cyclic encoding to the extracted features.
+    DataFrame or Series. It can also apply encoding to the extracted features.
 
     Parameters:
-    ----------
-    cyclic_encoding : bool, default=False
-        If True, applies cyclic encoding to specified datetime features.
-    
+    ----------    
     features : list of str, default=[
         'year', 
         'month',
@@ -586,7 +470,9 @@ class CalendarFeatures(BaseEstimator, TransformerMixin):
         'second'
     ]
         List of calendar features to extract from the index.
-    
+    encoding : str, default='cyclic'
+            Encoding method for the extracted features. Options are None, 'cyclic' or
+            'onehot'.
     max_values : dict, default={
         'month': 12,
         'week': 52,
@@ -600,8 +486,8 @@ class CalendarFeatures(BaseEstimator, TransformerMixin):
         Dictionary of maximum values for the cyclic encoding of calendar features.
     """
 
-    def __init__(self, cyclic_encoding=False, features=None, max_values=None):
-        self.cyclic_encoding = cyclic_encoding
+    def __init__(self, features=None, encoding='cyclic', max_values=None):
+        self.encoding = encoding
         self.features = features
         self.max_values = max_values
 
@@ -611,7 +497,7 @@ class CalendarFeatures(BaseEstimator, TransformerMixin):
     def transform(self, X):
         return extract_calendar_features(
             X=X,
-            cyclic_encoding=self.cyclic_encoding,
+            encoding=self.encoding,
             features=self.features,
             max_values=self.max_values
         )
