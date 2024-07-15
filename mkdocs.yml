@@ -40,7 +40,7 @@ nav:
     - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
     - Foreasting baseline: user_guides/forecasting-baseline.ipynb
     - Exogenous variables: user_guides/exogenous-variables.ipynb
-    - Custom predictors: user_guides/custom-predictors.ipynb
+    - Window and custom features: user_guides/window-features-and-custom-features.ipynb
     - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
     - Backtesting forecaster: user_guides/backtesting.ipynb
     - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb

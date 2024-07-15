@@ -5,7 +5,7 @@ Welcome to the skforecast user guides! This comprehensive collection of guides i
 ## Single series Forecasters
 - [Recursive multi-step forecasting](https://skforecast.org/latest/user_guides/autoregresive-forecaster)
 - [Direct multi-step forecasting](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting)
-- [Forecasting with custom predictors](https://skforecast.org/latest/user_guides/custom-predictors)
+- [Forecasting with window and custom features](https://skforecast.org/latest/user_guides/window-features-and-custom-features)
 - [ARIMA and SARIMAX forecasting](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima)
 - [Foreasting baseline](https://skforecast.org/latest/user_guides/forecasting-baseline)
 
