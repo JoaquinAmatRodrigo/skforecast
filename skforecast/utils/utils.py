@@ -2149,6 +2149,7 @@ def select_n_jobs_backtesting(
     'ForecasterAutoregMultiSeriesCustom', then n_jobs=cpu_count().
     - If forecaster is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
     then n_jobs=1.
+    - If regressor is a LightGBM regressor, then n_jobs=1.
 
     Parameters
     ----------
@@ -2167,6 +2168,7 @@ def select_n_jobs_backtesting(
     """
 
     forecaster_name = type(forecaster).__name__
+    regressor_name = type(forecaster.regressor).__name__
 
     if isinstance(forecaster.regressor, Pipeline):
         regressor_name = type(forecaster.regressor[-1]).__name__
@@ -2184,14 +2186,17 @@ def select_n_jobs_backtesting(
         n_jobs = 1
     else:
         if forecaster_name in ['ForecasterAutoreg', 'ForecasterAutoregCustom']:
-            if regressor_name in linear_regressors:
+            if regressor_name in linear_regressors or regressor_name == 'LGBMRegressor':
                 n_jobs = 1
             else:
                 n_jobs = joblib.cpu_count() if refit else 1
         elif forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
             n_jobs = 1
         elif forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
-            n_jobs = joblib.cpu_count()
+            if regressor_name == 'LGBMRegressor':
+                n_jobs = 1
+            else:
+                n_jobs = joblib.cpu_count()
         elif forecaster_name in ['ForecasterSarimax', 'ForecasterEquivalentDate']:
             n_jobs = 1
         else:
@@ -2211,7 +2216,8 @@ def select_n_jobs_fit_forecaster(
     The number of jobs is chosen as follows:
     
     - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
-    and regressor_name is a linear regressor, then n_jobs=1, otherwise n_jobs=cpu_count().
+    and regressor_name is a linear regressor or LGBMRegressor then n_jobs=1,
+    otherwise n_jobs=cpu_count().
     
     Parameters
     ----------
@@ -2235,7 +2241,7 @@ def select_n_jobs_fit_forecaster(
 
     if forecaster_name in ['ForecasterAutoregDirect', 
                            'ForecasterAutoregMultiVariate']:
-        if regressor_name in linear_regressors:
+        if regressor_name in linear_regressors or regressor_name == 'LGBMRegressor':
             n_jobs = 1
         else:
             n_jobs = joblib.cpu_count()
