@@ -60,6 +60,8 @@ The main changes in this release are:
 
 + Change information message when `verbose` is `True` in `backtesting_forecaster` and `backtesting_forecaster_multiseries`.
 
++ `select_n_jobs_backtesting` and `select_n_jobs_fit` return `n_jobs = 1` if regressor is `LGBMRegressor`. This is because `lightgbm` is highly optimized for gradient boosting and parallelizes operations at a very fine-grained level, making additional parallelization unnecessary and potentially harmful due to resource contention.
+
 **Fixed**
 
 

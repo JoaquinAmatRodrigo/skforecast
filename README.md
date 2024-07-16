@@ -29,7 +29,7 @@
 
 # About The Project
 
-**Skforecast** is a Python library that eases using scikit-learn regressors as single and multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (LightGBM, XGBoost, CatBoost, ...).
+**Skforecast** is a Python library that eases using machine learning models as single and multi-step forecasters. It works with any regressor compatible with the scikit-learn API (LightGBM, XGBoost, CatBoost, ...).
 
 **Why use skforecast?**
 
@@ -85,9 +85,12 @@ If you want to learn more about the installation process, dependencies and optio
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [ ] New features.
+- [x] Support for `python 3.12`.
+- [x] Deprecated `python 3.8` support.
+- [x] New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
+- [x] New module `metrics` with functions to calculate metrics for time series forecasting such as `mean_absolute_scaled_error` and `root_mean_squared_scaled_error`.
+- [x] New argument `add_aggregated_metric` in `backtesting_forecaster_multiseries` to include, in addition to the metrics for each level, the aggregated metric of all levels  using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).
 - [ ] Bug fixes and performance improvements.
-
 
 # Forecasters
 
