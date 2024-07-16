@@ -2131,25 +2131,25 @@ def select_n_jobs_backtesting(
 
     The number of jobs is chosen as follows:
 
-    - If `refit` is an integer, then n_jobs=1. This is because parallelization doesn't 
+    - If `refit` is an integer, then `n_jobs = 1`. This is because parallelization doesn't 
     work with intermittent refit.
     - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
-    regressor is a linear regressor, then n_jobs=1.
+    regressor is a linear regressor, then `n_jobs = 1`.
     - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor is not a linear regressor and refit=`True`, then
-    n_jobs=cpu_count() - 1.
+    regressor is not a linear regressor and `refit = True`, then
+    `n_jobs = cpu_count() - 1`.
     - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor is not a linear regressor and refit=`False`, then
-    n_jobs=1.
+    regressor is not a linear regressor and `refit = False`, then
+    `n_jobs = 1`.
     - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
-    and refit=`True`, then n_jobs=cpu_count() - 1.
+    and `refit = True`, then `n_jobs = cpu_count() - 1`.
     - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
-    and refit=`False`, then n_jobs=1.
+    and `refit = False`, then `n_jobs = 1`.
     - If forecaster is 'ForecasterAutoregMultiSeries' or 
-    'ForecasterAutoregMultiSeriesCustom', then n_jobs=cpu_count() - 1.
+    'ForecasterAutoregMultiSeriesCustom', then `n_jobs = cpu_count() - 1`.
     - If forecaster is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
-    then n_jobs=1.
-    - If regressor is a LightGBM regressor, then n_jobs=1. This is because `lightgbm`
+    then `n_jobs = 1`.
+    - If regressor is a `LGBMRegressor`, then `n_jobs = 1`. This is because `lightgbm`
     implementation already utilizes all available computational resources efficiently,
     adding additional parallelization does not yield additional benefits and could even
     degrade performance.
@@ -2157,9 +2157,7 @@ def select_n_jobs_backtesting(
     Parameters
     ----------
     forecaster : Forecaster
-        Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
-        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+        Forecaster model.
     refit : bool, int
         If the forecaster is refitted during the backtesting process.
 
@@ -2218,9 +2216,9 @@ def select_n_jobs_fit_forecaster(
     The number of jobs is chosen as follows:
     
     - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
-    and regressor_name is a linear regressor then n_jobs=1, otherwise n_jobs=cpu_count() - 1.
+    and regressor_name is a linear regressor then `n_jobs = 1`, otherwise `n_jobs = cpu_count() - 1`.
 
-    - If LGBMRegressor then n_jobs=1. This is because `lightgbm` implementation already
+    - If `LGBMRegressor` then `n_jobs = 1`. This is because `lightgbm` implementation already
     utilizes all available computational resources efficiently, adding additional
     parallelization does not yield additional benefits and could even degrade performance.
     
