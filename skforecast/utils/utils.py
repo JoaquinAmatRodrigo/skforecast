@@ -2137,19 +2137,22 @@ def select_n_jobs_backtesting(
     regressor is a linear regressor, then n_jobs=1.
     - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
     regressor is not a linear regressor and refit=`True`, then
-    n_jobs=cpu_count().
+    n_jobs=cpu_count() - 1.
     - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
     regressor is not a linear regressor and refit=`False`, then
     n_jobs=1.
     - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
-    and refit=`True`, then n_jobs=cpu_count().
+    and refit=`True`, then n_jobs=cpu_count() - 1.
     - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and refit=`False`, then n_jobs=1.
     - If forecaster is 'ForecasterAutoregMultiSeries' or 
-    'ForecasterAutoregMultiSeriesCustom', then n_jobs=cpu_count().
+    'ForecasterAutoregMultiSeriesCustom', then n_jobs=cpu_count() - 1.
     - If forecaster is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
     then n_jobs=1.
-    - If regressor is a LightGBM regressor, then n_jobs=1.
+    - If regressor is a LightGBM regressor, then n_jobs=1. This is because `lightgbm`
+    implementation already utilizes all available computational resources efficiently,
+    adding additional parallelization does not yield additional benefits and could even
+    degrade performance.
 
     Parameters
     ----------
@@ -2168,7 +2171,6 @@ def select_n_jobs_backtesting(
     """
 
     forecaster_name = type(forecaster).__name__
-    regressor_name = type(forecaster.regressor).__name__
 
     if isinstance(forecaster.regressor, Pipeline):
         regressor_name = type(forecaster.regressor[-1]).__name__
@@ -2189,14 +2191,14 @@ def select_n_jobs_backtesting(
             if regressor_name in linear_regressors or regressor_name == 'LGBMRegressor':
                 n_jobs = 1
             else:
-                n_jobs = joblib.cpu_count() if refit else 1
+                n_jobs = joblib.cpu_count() - 1 if refit else 1
         elif forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
             n_jobs = 1
         elif forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
             if regressor_name == 'LGBMRegressor':
                 n_jobs = 1
             else:
-                n_jobs = joblib.cpu_count()
+                n_jobs = joblib.cpu_count() - 1
         elif forecaster_name in ['ForecasterSarimax', 'ForecasterEquivalentDate']:
             n_jobs = 1
         else:
@@ -2216,8 +2218,11 @@ def select_n_jobs_fit_forecaster(
     The number of jobs is chosen as follows:
     
     - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
-    and regressor_name is a linear regressor or LGBMRegressor then n_jobs=1,
-    otherwise n_jobs=cpu_count().
+    and regressor_name is a linear regressor then n_jobs=1, otherwise n_jobs=cpu_count() - 1.
+
+    - If LGBMRegressor then n_jobs=1. This is because `lightgbm` implementation already
+    utilizes all available computational resources efficiently, adding additional
+    parallelization does not yield additional benefits and could even degrade performance.
     
     Parameters
     ----------
@@ -2244,7 +2249,7 @@ def select_n_jobs_fit_forecaster(
         if regressor_name in linear_regressors or regressor_name == 'LGBMRegressor':
             n_jobs = 1
         else:
-            n_jobs = joblib.cpu_count()
+            n_jobs = joblib.cpu_count() - 1
     else:
         n_jobs = 1
 
