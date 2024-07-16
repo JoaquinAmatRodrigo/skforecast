@@ -4,7 +4,7 @@ ignore = ["E221", "E251", "E501"]
 
 [pycodestyle]
 max-doc-length = 88
-max-line-length = 100
+max-line-length = 88
 
 [format]
 quote-style = "single"
