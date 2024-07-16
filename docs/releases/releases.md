@@ -34,6 +34,8 @@ The main changes in this release are:
 
 + Change default value of `transformer_series` when initializing `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` from `StandardScaler()` to `None`.
 
++ New class `DateTimeFeatureTransformer` and function `create_date_features` in the `preprocessing` module to create datetime and calendar features from a datetime index.
+
 **Fixed**
 
 
