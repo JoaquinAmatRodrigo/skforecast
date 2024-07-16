@@ -2149,10 +2149,10 @@ def select_n_jobs_backtesting(
     'ForecasterAutoregMultiSeriesCustom', then `n_jobs = cpu_count() - 1`.
     - If forecaster is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
     then `n_jobs = 1`.
-    - If regressor is a `LGBMRegressor`, then `n_jobs = 1`. This is because `lightgbm`
-    implementation already utilizes all available computational resources efficiently,
-    adding additional parallelization does not yield additional benefits and could even
-    degrade performance.
+    - If regressor is a `LGBMRegressor`, then `n_jobs = 1`. This is because `lightgbm` 
+    is highly optimized for gradient boosting and parallelizes operations at a very 
+    fine-grained level, making additional parallelization unnecessary and 
+    potentially harmful due to resource contention.
 
     Parameters
     ----------
@@ -2218,9 +2218,10 @@ def select_n_jobs_fit_forecaster(
     - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and regressor_name is a linear regressor then `n_jobs = 1`, otherwise `n_jobs = cpu_count() - 1`.
 
-    - If `LGBMRegressor` then `n_jobs = 1`. This is because `lightgbm` implementation already
-    utilizes all available computational resources efficiently, adding additional
-    parallelization does not yield additional benefits and could even degrade performance.
+    - If `LGBMRegressor` then `n_jobs = 1`. This is because `lightgbm` 
+    is highly optimized for gradient boosting and parallelizes operations at a very 
+    fine-grained level, making additional parallelization unnecessary and 
+    potentially harmful due to resource contention.
     
     Parameters
     ----------
