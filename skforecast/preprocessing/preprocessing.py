@@ -337,7 +337,7 @@ def exog_long_to_dict(
 def create_datetime_features(
     X: Union[pd.DataFrame, pd.Series],
     features: List[str] = None,
-    encoding: str = "cyclic",
+    encoding: str = "cyclical",
     max_values: Dict[str, int] = None,
 ) -> pd.DataFrame:
     """
@@ -347,8 +347,8 @@ def create_datetime_features(
     ----------
     X : pandas DataFrame or Series
         Input DataFrame or Series with a datetime index.
-    encoding : str, default='cyclic'
-        Encoding method for the extracted features. Options are None, 'cyclic' or 'onehot'.
+    encoding : str, default='cyclical'
+        Encoding method for the extracted features. Options are None, 'cyclical' or 'onehot'.
     features : list of str, default=[
         'year',
         'month',
@@ -372,7 +372,7 @@ def create_datetime_features(
         'minute': 60,
         'second': 60
     }
-        Dictionary of maximum values for the cyclic encoding of datetime features.
+        Dictionary of maximum values for the cyclical encoding of datetime features.
 
     Returns
     -------
@@ -384,8 +384,8 @@ def create_datetime_features(
         raise ValueError("Input must be a pandas DataFrame or Series")
     if not isinstance(X.index, pd.DatetimeIndex):
         raise ValueError("Input must have a datetime index")
-    if encoding not in ["cyclic", "onehot", None]:
-        raise ValueError("Encoding must be one of 'cyclic', 'onehot' or None")
+    if encoding not in ["cyclical", "onehot", None]:
+        raise ValueError("Encoding must be one of 'cyclical', 'onehot' or None")
 
     default_features = [
         "year",
@@ -441,7 +441,7 @@ def create_datetime_features(
             attr(X.index) if callable(attr) else getattr(X.index, attr).astype(int)
         )
 
-    if encoding == "cyclic":
+    if encoding == "cyclical":
         cols_to_drop = []
         for feature, max_val in max_values.items():
             if feature in X_new.columns:
@@ -477,8 +477,8 @@ class DateTimeFeatureTransformer(BaseEstimator, TransformerMixin):
         'second'
     ]
         List of calendar features to extract from the index.
-    encoding : str, default='cyclic'
-            Encoding method for the extracted features. Options are None, 'cyclic' or
+    encoding : str, default='cyclical'
+            Encoding method for the extracted features. Options are None, 'cyclical' or
             'onehot'.
     max_values : dict, default={
         'month': 12,
@@ -490,13 +490,13 @@ class DateTimeFeatureTransformer(BaseEstimator, TransformerMixin):
         'minute': 60,
         'second': 60
     }
-        Dictionary of maximum values for the cyclic encoding of calendar features.
+        Dictionary of maximum values for the cyclical encoding of calendar features.
     """
 
-    def __init__(self, features=None, encoding="cyclic", max_values=None):
+    def __init__(self, features=None, encoding="cyclical", max_values=None):
 
-        if encoding not in ["cyclic", "onehot", None]:
-            raise ValueError("Encoding must be one of 'cyclic', 'onehot' or None")
+        if encoding not in ["cyclical", "onehot", None]:
+            raise ValueError("Encoding must be one of 'cyclical', 'onehot' or None")
 
         self.features = (
             features

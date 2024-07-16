@@ -51,7 +51,7 @@ def test_create_datetime_features_no_datetime_index():
 
 def test_create_datetime_features_invalid_encoding():
     """
-    Test that create_datetime_features raises a ValueError when encoding is not one of 'cyclic', 'onehot' or None.
+    Test that create_datetime_features raises a ValueError when encoding is not one of 'cyclical', 'onehot' or None.
     """
     df = pd.DataFrame(
         np.random.rand(5, 3),
@@ -60,7 +60,7 @@ def test_create_datetime_features_invalid_encoding():
     )
 
     with pytest.raises(
-        ValueError, match="Encoding must be one of 'cyclic', 'onehot' or None"
+        ValueError, match="Encoding must be one of 'cyclical', 'onehot' or None"
     ):
         create_datetime_features(df, encoding="invalid encoding")
 
@@ -84,9 +84,9 @@ def test_create_datetime_features_invalid_feature_name():
         create_datetime_features(df, features=["invalid_feature"])
 
 
-def test_create_datetime_features_output_columns_when_cyclic_encoding():
+def test_create_datetime_features_output_columns_when_cyclical_encoding():
     """
-    Test that create_datetime_features returns the expected columns when encoding is 'cyclic'.
+    Test that create_datetime_features returns the expected columns when encoding is 'cyclical'.
     """
     df = pd.DataFrame(
         np.random.rand(5, 3),
@@ -94,7 +94,7 @@ def test_create_datetime_features_output_columns_when_cyclic_encoding():
         index=pd.date_range(start="1/1/2022", end="1/5/2022", freq="D"),
     )
 
-    results = create_datetime_features(df, encoding="cyclic")
+    results = create_datetime_features(df, encoding="cyclical")
     expected_features = [
         "year",
         "weekend",
@@ -164,10 +164,10 @@ def test_create_datetime_features_output_columns_when_None_encoding():
     assert len(results) == len(df)
 
 
-def test_create_datetime_features_output_when_features_year_month_encoding_cyclic():
+def test_create_datetime_features_output_when_features_year_month_encoding_cyclical():
     """
     Test that create_datetime_features returns the expected columns when features
-     is ['year', 'month'] and encoding is 'cyclic'.
+     is ['year', 'month'] and encoding is 'cyclical'.
     """
     df = pd.DataFrame(
         np.random.rand(5, 3),
@@ -176,7 +176,7 @@ def test_create_datetime_features_output_when_features_year_month_encoding_cycli
     )
 
     results = create_datetime_features(
-        df, features=["year", "month", "weekend"], encoding="cyclic"
+        df, features=["year", "month", "weekend"], encoding="cyclical"
     )
     expected = pd.DataFrame(
         {
@@ -306,10 +306,10 @@ def test_create_datetime_features_output_when_features_year_month_encoding_None(
     pd.testing.assert_frame_equal(results, expected)
 
 
-def test_create_datetime_features_output_when_features_year_month_encoding_cyclic_and_custom_max_values():
+def test_create_datetime_features_output_when_features_year_month_encoding_cyclical_and_custom_max_values():
     """
     Test that create_datetime_features returns the expected columns when features
-    is ['year', 'month'] and encoding is 'cyclic' with custom max values.
+    is ['year', 'month'] and encoding is 'cyclical' with custom max values.
     """
 
     df = pd.DataFrame(
@@ -323,7 +323,7 @@ def test_create_datetime_features_output_when_features_year_month_encoding_cycli
     results = create_datetime_features(
         df,
         features=["year", "month", "weekend"],
-        encoding="cyclic",
+        encoding="cyclical",
         max_values={"month": 6},
     )
 
