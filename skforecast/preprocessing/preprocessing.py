@@ -428,20 +428,27 @@ def create_datetime_features(
         "second": "second",
     }
 
+    not_supported_features = set(features) - set(datetime_attrs.keys())
+    if not_supported_features:
+        raise ValueError(
+            f"Features {not_supported_features} are not supported. "
+            f"Supported features are {list(datetime_attrs.keys())}."
+        )
+
     for feature in features:
-        if feature not in datetime_attrs:
-            raise ValueError(f"Feature '{feature}' is not supported.")
         attr = datetime_attrs[feature]
         X_new[feature] = (
             attr(X.index) if callable(attr) else getattr(X.index, attr).astype(int)
         )
 
     if encoding == "cyclic":
+        cols_to_drop = []
         for feature, max_val in max_values.items():
             if feature in X_new.columns:
                 X_new[f"{feature}_sin"] = np.sin(2 * np.pi * X_new[feature] / max_val)
                 X_new[f"{feature}_cos"] = np.cos(2 * np.pi * X_new[feature] / max_val)
-                X_new.drop(columns=[feature], inplace=True)
+                cols_to_drop.append(feature)
+        X_new = X_new.drop(columns=cols_to_drop)
     elif encoding == "onehot":
         X_new = pd.get_dummies(
             X_new, columns=features, drop_first=False, sparse=False, dtype=int
@@ -487,6 +494,10 @@ class DateTimeFeatureTransformer(BaseEstimator, TransformerMixin):
     """
 
     def __init__(self, features=None, encoding="cyclic", max_values=None):
+
+        if encoding not in ["cyclic", "onehot", None]:
+            raise ValueError("Encoding must be one of 'cyclic', 'onehot' or None")
+
         self.features = (
             features
             if features is not None
