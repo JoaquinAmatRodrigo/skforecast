@@ -406,7 +406,7 @@ def create_datetime_features(
         "week": 52,
         "day_of_week": 7,
         "day_of_month": 31,
-        "day_of_year": 366,
+        "day_of_year": 365,
         "hour": 24,
         "minute": 60,
         "second": 60,
@@ -485,7 +485,7 @@ class DateTimeFeatureTransformer(BaseEstimator, TransformerMixin):
         'week': 52,
         'day_of_week': 7,
         'day_of_month': 31,
-        'day_of_year': 366,
+        'day_of_year': 365,
         'hour': 24,
         'minute': 60,
         'second': 60
@@ -521,9 +521,9 @@ class DateTimeFeatureTransformer(BaseEstimator, TransformerMixin):
             else {
                 "month": 12,
                 "week": 52,
-                "day_of_week": 7,  # 0 is Monday
+                "day_of_week": 7,
                 "day_of_month": 31,
-                "day_of_year": 366,
+                "day_of_year": 365,
                 "hour": 24,
                 "minute": 60,
                 "second": 60,
