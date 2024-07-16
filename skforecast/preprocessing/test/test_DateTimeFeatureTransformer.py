@@ -67,7 +67,7 @@ def test_create_datetime_features_invalid_encoding():
 
 def test_create_datetime_features_invalid_feature_name():
     """
-    Test that DateTimeFeatureTransformer raises a ValueError when a feature name is 
+    Test that DateTimeFeatureTransformer raises a ValueError when a feature name is
     not valid.
     """
     df = pd.DataFrame(
@@ -83,7 +83,6 @@ def test_create_datetime_features_invalid_feature_name():
     )
     with pytest.raises(ValueError, match=err_msg):
         DateTimeFeatureTransformer(features=["invalid_feature"]).fit_transform(df)
-
 
 
 def test_create_datetime_features_output_columns_when_cyclic_encoding():
@@ -128,10 +127,10 @@ def test_create_datetime_features_output_columns_when_onehot_encoding():
     """
     index = pd.date_range(start="2021-01-01", end="2023-01-01", freq="H")
     df = pd.DataFrame(
-            np.random.rand(len(index), 3),
-            columns=["col_1", "col_2", "col_3"],
-            index=index,
-        )
+        np.random.rand(len(index), 3),
+        columns=["col_1", "col_2", "col_3"],
+        index=index,
+    )
 
     results = DateTimeFeatureTransformer(encoding="onehot").fit_transform(df)
 
@@ -177,9 +176,9 @@ def test_create_datetime_features_output_when_features_year_month_encoding_cycli
         index=pd.date_range(start="1/1/2022", end="1/5/2022", freq="D"),
     )
 
-    results = DateTimeFeatureTransformer().fit_transform(
-        df, features=["year", "month", "weekend"], encoding="cyclic"
-    )
+    results = DateTimeFeatureTransformer(
+        features=["year", "month", "weekend"], encoding="cyclic"
+    ).fit_transform(df)
     expected = pd.DataFrame(
         {
             "year": {
@@ -215,6 +214,7 @@ def test_create_datetime_features_output_when_features_year_month_encoding_cycli
 
     pd.testing.assert_frame_equal(results, expected)
 
+
 def test_create_datetime_features_output_when_features_year_month_encoding_onehot():
     """
     Test that DateTimeFeatureTransformer returns the expected columns when features
@@ -226,8 +226,10 @@ def test_create_datetime_features_output_when_features_year_month_encoding_oneho
         index=pd.date_range(start="1/1/2022", end="1/5/2022", freq="D"),
     )
 
-    results = DateTimeFeatureTransformer().fit_transform(
-        df, features=["year", "month", "weekend"], encoding="onehot"
+    results = DateTimeFeatureTransformer(
+        features=["year", "month", "weekend"], encoding="onehot"
+    ).fit_transform(
+        df,
     )
     expected = pd.DataFrame(
         {
@@ -276,8 +278,10 @@ def test_create_datetime_features_output_when_features_year_month_encoding_None(
         index=pd.date_range(start="1/1/2022", end="1/5/2022", freq="D"),
     )
 
-    results = DateTimeFeatureTransformer().fit_transform(
-        df, features=["year", "month", "weekend"], encoding=None
+    results = DateTimeFeatureTransformer(
+        features=["year", "month", "weekend"], encoding=None
+    ).fit_transform(
+        df,
     )
     expected = pd.DataFrame(
         {
@@ -322,12 +326,11 @@ def test_create_datetime_features_output_when_features_year_month_encoding_cycli
         ),
     )
 
-    results = DateTimeFeatureTransformer().fit_transform(
-        df,
+    results = DateTimeFeatureTransformer(
         features=["year", "month", "weekend"],
         encoding="cyclic",
         max_values={"month": 6},
-    )
+    ).fit_transform(df)
 
     expected = pd.DataFrame(
         {
