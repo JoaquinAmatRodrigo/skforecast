@@ -15,6 +15,7 @@ from sklearn.metrics import (
     mean_absolute_error,
     mean_absolute_percentage_error,
     mean_squared_log_error,
+    median_absolute_error,
 )
 
 
@@ -41,6 +42,7 @@ def _get_metric(metric: str) -> Callable:
         "mean_squared_log_error",
         "mean_absolute_scaled_error",
         "root_mean_squared_scaled_error",
+        "median_absolute_error",
     ]
 
     if metric not in allowed_metrics:
@@ -53,6 +55,7 @@ def _get_metric(metric: str) -> Callable:
         "mean_squared_log_error": mean_squared_log_error,
         "mean_absolute_scaled_error": mean_absolute_scaled_error,
         "root_mean_squared_scaled_error": root_mean_squared_scaled_error,
+        "median_absolute_error": median_absolute_error,
     }
 
     metric = add_y_train_argument(metrics[metric])
