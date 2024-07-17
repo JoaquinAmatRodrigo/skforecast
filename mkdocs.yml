@@ -137,7 +137,7 @@ theme:
     text: Open Sans
     code: Ubuntu Mono
   highlightjs: true
-  logo: img/logo-skforecast-orange-no-backgound.png
+  logo: img/logo-skforecast.png
   palette:
     # # Palette toggle for automatic mode
     # - media: "(prefers-color-scheme)"
