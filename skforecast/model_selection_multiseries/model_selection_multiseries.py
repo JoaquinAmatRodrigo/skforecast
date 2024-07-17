@@ -336,8 +336,8 @@ def _calculate_metrics_multiseries(
                 left_index  = True,
                 right_index = True,
                 how         = "inner",
-                suffixes    = ("_true", "_pred"),
             ).dropna(axis=0, how="any")
+            y_true_pred_level.columns = ['y_true', 'y_pred']
 
             train_indexes = []
             for i, fold in enumerate(folds):
@@ -411,24 +411,24 @@ def _calculate_metrics_multiseries(
             ]
         )
         y_train_levels = list(y_train_levels)
-        y_true_pred_levels = np.concatenate(y_true_pred_levels)
-        y_train_levels_concat = np.concatenate(y_train_levels)
+        y_true_pred_levels = pd.concat(y_true_pred_levels)
+        y_train_levels_concat = pd.concat(y_train_levels)
 
         pooled = []
         for m, m_name in zip(metrics, metric_names):
             if m_name in ['mean_absolute_scaled_error', 'root_mean_squared_scaled_error']:
                 pooled.append(
                     m(
-                        y_true = y_true_pred_levels[:, 0],
-                        y_pred = y_true_pred_levels[:, 1],
+                        y_true = y_true_pred_levels.loc[:, 'y_true'],
+                        y_pred = y_true_pred_levels.loc[:, 'y_pred'],
                         y_train = y_train_levels
                     )
                 )
             else:
                 pooled.append(
                     m(
-                        y_true = y_true_pred_levels[:, 0],
-                        y_pred = y_true_pred_levels[:, 1],
+                        y_true = y_true_pred_levels.loc[:, 'y_true'],
+                        y_pred = y_true_pred_levels.loc[:, 'y_pred'],
                         y_train = y_train_levels_concat
                     )
                 )

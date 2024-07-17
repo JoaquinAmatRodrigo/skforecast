@@ -113,6 +113,16 @@ folds = [
 
 levels = ["item_1", "item_2", "item_3"]
 
+def custom_metric(y_true, y_pred):
+    """
+    Calculate the mean absolute error excluding predictions between '2012-01-05'
+    and '2012-01-10'.
+    """
+    mask = (y_true.index < '2012-01-05') | (y_true.index > '2012-01-10')
+    metric = mean_absolute_error(y_true[mask], y_pred[mask])
+    
+    return metric
+
 
 def test_calculate_metrics_multiseries_input_types():
     """
@@ -193,6 +203,9 @@ def test_calculate_metrics_multiseries_input_types():
 def test_calculate_metrics_multiseries_output_when_no_aggregated_metric(
     metrics=[mean_absolute_error, mean_absolute_scaled_error]
 ):
+    """
+    Test output of _calculate_metrics_multiseries when add_aggregated_metric=False
+    """
 
     metrics = [add_y_train_argument(metric) for metric in metrics]
     results = _calculate_metrics_multiseries(
@@ -219,6 +232,9 @@ def test_calculate_metrics_multiseries_output_when_no_aggregated_metric(
 def test_calculate_metrics_multiseries_output_when_aggregated_metric(
     metrics=[mean_absolute_error, mean_absolute_scaled_error]
 ):
+    """
+    Test output of _calculate_metrics_multiseries when add_aggregated_metric=True
+    """
 
     metrics = [add_y_train_argument(metric) for metric in metrics]
     results = _calculate_metrics_multiseries(
@@ -257,6 +273,48 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric(
                 0.812401,
                 0.799851,
             ],
+        }
+    )
+
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_customer_metric(
+    metrics=[custom_metric],
+):
+    """
+    Test output of _calculate_metrics_multiseries when add_aggregated_metric=True
+    """
+
+    metrics = [add_y_train_argument(metric) for metric in metrics]
+    results = _calculate_metrics_multiseries(
+        series=data,
+        predictions=predictions,
+        folds=folds,
+        span_index=span_index,
+        metrics=metrics,
+        levels=levels,
+        add_aggregated_metric=True,
+    )
+
+    expected = pd.DataFrame(
+        {
+            "levels": {
+                0: "item_1",
+                1: "item_2",
+                2: "item_3",
+                3: "average",
+                4: "weighted_average",
+                5: "pooling",
+            },
+            "custom_metric": {
+                0: 1.47756696,
+                1: 3.48012924,
+                2: 2.9423860000000004,
+                3: 2.6333607333333333,
+                4: 2.6333607333333333,
+                5: 2.6333607333333338,
+            },
         }
     )
 
