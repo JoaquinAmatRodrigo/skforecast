@@ -113,7 +113,7 @@ folds = [
 
 levels = ["item_1", "item_2", "item_3"]
 
-def custom_metric(y_true, y_pred):
+def custom_metric(y_true, y_pred): # pragma: no cover
     """
     Calculate the mean absolute error excluding predictions between '2012-01-05'
     and '2012-01-10'.
@@ -324,7 +324,8 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_custome
 def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_predictions_have_different_length(
     metrics=[mean_absolute_error, mean_absolute_scaled_error]
 ):
-
+    """
+    """
     metrics = [add_y_train_argument(metric) for metric in metrics]
     results = _calculate_metrics_multiseries(
         series=data,
@@ -371,7 +372,9 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_predict
 def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_one_level_is_not_predicted(
     metrics=[mean_absolute_error, mean_absolute_scaled_error]
 ):
-
+    """
+    
+    """
     metrics = [add_y_train_argument(metric) for metric in metrics]
     results = _calculate_metrics_multiseries(
         series=data,
