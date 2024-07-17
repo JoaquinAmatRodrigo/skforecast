@@ -43,6 +43,7 @@ nav:
     - Window and custom features: user_guides/window-features-and-custom-features.ipynb
     - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
     - Backtesting forecaster: user_guides/backtesting.ipynb
+    - Metrics: user_guides/metrics.ipynb
     - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
     - Scikit-learn Transformers and Pipelines: user_guides/sklearn-transformers-and-pipeline.ipynb
     - Probabilistic forecasting: user_guides/probabilistic-forecasting.ipynb
