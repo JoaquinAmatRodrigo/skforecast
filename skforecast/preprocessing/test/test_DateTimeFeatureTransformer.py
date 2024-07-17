@@ -34,24 +34,27 @@ features_all_onehot = (
 
 def test_create_datetime_features_invalid_input_type():
     """
-    Test that DateTimeFeatureTransformer raises a ValueError when input is not a pandas DataFrame or Series.
+    Test that DateTimeFeatureTransformer raises a ValueError when input is not 
+    a pandas DataFrame or Series.
     """
-    with pytest.raises(ValueError, match="Input must be a pandas DataFrame or Series"):
+    with pytest.raises(TypeError, match="Input `X` must be a pandas Series or DataFrame"):
         DateTimeFeatureTransformer().fit_transform([1, 2, 3])
 
 
 def test_create_datetime_features_no_datetime_index():
     """
-    Test that DateTimeFeatureTransformer raises a ValueError when input does not have a datetime index.
+    Test that DateTimeFeatureTransformer raises a ValueError when input does not 
+    have a pandas DatetimeIndex index.
     """
     df = pd.DataFrame({"a": [1, 2, 3]})
-    with pytest.raises(ValueError, match="Input must have a datetime index"):
+    with pytest.raises(TypeError, match="Input `X` must have a pandas DatetimeIndex"):
         DateTimeFeatureTransformer().fit_transform(df)
 
 
 def test_create_datetime_features_invalid_encoding():
     """
-    Test that DateTimeFeatureTransformer raises a ValueError when encoding is not one of 'cyclical', 'onehot' or None.
+    Test that DateTimeFeatureTransformer raises a ValueError when encoding is not 
+    one of 'cyclical', 'onehot' or None.
     """
     df = pd.DataFrame(
         np.random.rand(5, 3),
