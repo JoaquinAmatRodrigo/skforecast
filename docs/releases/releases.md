@@ -54,6 +54,8 @@ The main changes in this release are:
 
 **Fixed**
 
++ Bug fix in `backtesting_forecaster_multiseries` using a [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/api/forecastermultiseries) that includes differentiation.
+
 
 ## 0.12.1 <small>May 20, 2024</small> { id="0.12.1" }
 
