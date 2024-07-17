@@ -1,6 +1,5 @@
 # Unit test fit ForecasterAutoregMultiSeries
 # ==============================================================================
-import re
 import pytest
 import numpy as np
 import pandas as pd
@@ -85,8 +84,9 @@ def test_forecaster_DatetimeIndex_index_freq_stored():
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
-    expected = series.index.freqstr
     results = forecaster.index_freq
+
+    expected = series.index.freqstr
 
     assert results == expected
 
@@ -100,8 +100,9 @@ def test_forecaster_index_step_stored():
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
-    expected = series.index.step
     results = forecaster.index_freq
+
+    expected = series.index.step
 
     assert results == expected
 
@@ -116,9 +117,11 @@ def test_fit_in_sample_residuals_stored():
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series, store_in_sample_residuals=True)
-    expected = {'1': np.array([-4.4408921e-16, 0.0000000e+00]),
-                '2': np.array([0., 0.])}
     results = forecaster.in_sample_residuals
+
+    expected = {'1': np.array([-4.4408921e-16, 0.0000000e+00]),
+                '2': np.array([0., 0.]),
+                '_unknown_level': np.array([-4.4408921e-16, 0.0000000e+00, 0., 0.])}
 
     assert isinstance(results, dict)
     assert np.all(isinstance(x, np.ndarray) for x in results.values())
@@ -163,8 +166,9 @@ def test_fit_in_sample_residuals_not_stored():
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series, store_in_sample_residuals=False)
-    expected = {'1': None, '2': None}
     results = forecaster.in_sample_residuals
+
+    expected = {'1': None, '2': None, '_unknown_level': None}
 
     assert isinstance(results, dict)
     assert results.keys() == expected.keys()

@@ -11,8 +11,7 @@ from sklearn.preprocessing import StandardScaler
 
 # Fixtures
 series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
-                       'l2': pd.Series(np.arange(10))
-                       })
+                       'l2': pd.Series(np.arange(10))})
 
 
 @pytest.mark.parametrize("residuals", [[1, 2, 3], {'1': [1,2,3,4]}], 
@@ -118,9 +117,14 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no
 
     forecaster.set_out_sample_residuals(residuals=residuals)
     forecaster.set_out_sample_residuals(residuals=new_residuals, append=False)
-
-    expected = {'l1': np.arange(20), 'l2': np.arange(20)}
     results = forecaster.out_sample_residuals
+
+    expected = {
+        'l1': np.arange(20), 
+        'l2': np.arange(20), 
+        '_unknown_level': np.concatenate((np.arange(20), np.arange(20)))
+        
+    }
 
     assert expected.keys() == results.keys()
     assert all(all(expected[k] == results[k]) for k in expected.keys())
@@ -137,10 +141,15 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_ap
     
     forecaster.set_out_sample_residuals(residuals=residuals)
     forecaster.set_out_sample_residuals(residuals=residuals, append=True)
-
-    expected = {'l1': np.append(np.arange(10), np.arange(10)),
-                'l2': np.append(np.arange(10), np.arange(10))}
     results = forecaster.out_sample_residuals
+
+    expected = {
+        'l1': np.concatenate((np.arange(10), np.arange(10))), 
+        'l2': np.concatenate((np.arange(10), np.arange(10))), 
+        '_unknown_level': np.concatenate(
+            (np.arange(10), np.arange(10), np.arange(10), np.arange(10))
+        )
+    }
 
     assert expected.keys() == results.keys()
     assert all(all(expected[k] == results[k]) for k in expected.keys())
@@ -158,7 +167,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
     forecaster.set_out_sample_residuals(residuals=residuals)
     results = forecaster.out_sample_residuals
 
-    assert list(results.keys()) == ['l1', 'l2']
+    assert list(results.keys()) == ['l1', 'l2', '_unknown_level']
     assert all(len(value)==1000 for value in results.values())
 
 
@@ -175,14 +184,27 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000_and
     forecaster.set_out_sample_residuals(residuals = residuals)
     forecaster.set_out_sample_residuals(residuals = residuals_2,
                                         append    = True)
+    results = forecaster.out_sample_residuals
 
     expected = {}
     for key, value in residuals_2.items():
         rng = np.random.default_rng(seed=123)
         expected_2 = rng.choice(a=value, size=1000, replace=False)
         expected[key] = np.hstack([np.arange(10), expected_2])[:1000]
-
-    results = forecaster.out_sample_residuals
+    
+    residuals_unknown_level = [
+        v for k, v in expected.items() 
+        if v is not None and k != '_unknown_level'
+    ]
+    if residuals_unknown_level:
+        residuals_unknown_level = np.concatenate(residuals_unknown_level)
+        if len(residuals_unknown_level) > 1000:
+            rng = np.random.default_rng(seed=123)
+            expected['_unknown_level'] = rng.choice(
+                                             a       = residuals_unknown_level,
+                                             size    = 1000,
+                                             replace = False
+                                         )
 
     assert expected.keys() == results.keys()
     assert all(all(expected[k] == results[k]) for k in expected.keys())

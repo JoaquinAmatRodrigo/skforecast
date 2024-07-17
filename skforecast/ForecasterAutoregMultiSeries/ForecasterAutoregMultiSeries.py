@@ -1158,7 +1158,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         self.series_col_names = series_col_names
         self.series_X_train = series_X_train
-        self.X_train_col_names = X_train.columns.to_list()
+        self.X_train_col_names = X_train_regressor.columns.to_list()
         self.fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range = {k: v[[0, -1]] for k, v in series_indexes.items()}
@@ -1177,7 +1177,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         in_sample_residuals = {}
         if store_in_sample_residuals:
 
-            residuals = y_train - self.regressor.predict(X_train)
+            residuals = y_train - self.regressor.predict(X_train_regressor)
             in_sample_residuals['_unknown_level'] = residuals.to_numpy()
 
             for col in series_X_train:
@@ -1412,21 +1412,25 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
         
-        if self.encoding == 'onehot':
-            levels_dummies = np.zeros(shape=len(self.series_col_names), dtype=float)
-            if level in self.series_col_names:
-                levels_dummies[self.series_col_names.index(level)] = 1.
-            level_encoded = levels_dummies
+        if self.encoding is not None:
+            if self.encoding == 'onehot':
+                levels_dummies = np.zeros(shape=len(self.series_col_names), dtype=float)
+                if level in self.series_col_names:
+                    levels_dummies[self.series_col_names.index(level)] = 1.
+                level_encoded = levels_dummies
+            else:
+                level_encoded = np.array([self.encoding_mapping.get(level, None)], dtype='float64')
+            level_encoded_shape = level_encoded.shape[0]
         else:
-            level_encoded = np.array([self.encoding_mapping.get(level, None)], dtype='float64')
+            level_encoded_shape = 0
 
         last_window_shape = last_window.shape[0]
-        level_encoded_shape = level_encoded.shape[0]
         exog_shape = exog.shape[1] if exog is not None else 0
         
         predictors_shape = last_window_shape + level_encoded_shape + exog_shape
         predictors = np.full(shape=predictors_shape, fill_value=np.nan, dtype=float)
-        predictors[last_window_shape:last_window_shape + level_encoded_shape] = level_encoded
+        if self.encoding is not None:
+            predictors[last_window_shape:last_window_shape + level_encoded_shape] = level_encoded
 
         predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
         last_window = np.concatenate((last_window, predictions))
@@ -1483,17 +1487,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
         last_window = np.concatenate((last_window, predictions))
-        if self.encoding == 'onehot':
-            levels_dummies = np.zeros(shape=len(self.series_col_names), dtype=float)
-            if level in self.series_col_names:
-                levels_dummies[self.series_col_names.index(level)] = 1.
-            level_encoded = levels_dummies
-        else:
-            level_encoded = np.array([self.encoding_mapping.get(level, None)], dtype='float64')
+        if self.encoding is not None:
+            if self.encoding == 'onehot':
+                levels_dummies = np.zeros(shape=len(self.series_col_names), dtype=float)
+                if level in self.series_col_names:
+                    levels_dummies[self.series_col_names.index(level)] = 1.
+                level_encoded = levels_dummies
+            else:
+                level_encoded = np.array([self.encoding_mapping.get(level, None)], dtype='float64')
 
         for i in range(steps):
 
-            X = np.concatenate((last_window[-self.lags - (steps - i)], level_encoded))
+            X = last_window[-self.lags - (steps - i)]
+            if self.encoding is not None:
+                X = np.concatenate((X, level_encoded))
             if exog is not None:
                 X = np.concatenate((X, exog[i, ]))
 
@@ -1502,68 +1509,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 prediction = self.regressor.predict(X.reshape(1, -1)).ravel()[0]
-                predictions[i] = prediction
-
-            # Update `last_window` values. The first position is discarded and
-            # the new prediction is added at the end.
-            last_window[-(steps - i)] = prediction
-
-        return predictions
-    
-
-    def _recursive_predict_old(
-        self,
-        steps: int,
-        level: str,
-        last_window: np.ndarray,
-        exog: Optional[np.ndarray]=None
-    ) -> np.ndarray:
-        """
-        Predict n steps ahead. It is an iterative process in which, each prediction,
-        is used as a predictor for the next step.
-        
-        Parameters
-        ----------
-        steps : int
-            Number of future steps predicted.
-        level : str
-            Time series to be predicted.
-        last_window : numpy ndarray
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
-        exog : numpy ndarray, default `None`
-            Exogenous variable/s included as predictor/s.
-
-        Returns
-        -------
-        predictions : numpy ndarray
-            Predicted values.
-        
-        """
-
-        predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
-        last_window = np.concatenate((last_window, predictions))
-        level_encoded = np.array([self.encoding_mapping[level]], dtype='float64')
-
-        for i in range(steps):
-
-            X = last_window[-self.lags - (steps - i)].reshape(1, -1)
-
-            if self.encoding == 'onehot':
-                levels_dummies = np.zeros(shape=(1, len(self.series_col_names)), dtype=float)
-                levels_dummies[0][self.series_col_names.index(level)] = 1.
-                X = np.column_stack((X, levels_dummies.reshape(1, -1)))
-            else:
-                X = np.column_stack((X, level_encoded))
-
-            if exog is not None:
-                X = np.column_stack((X, exog[i, ].reshape(1, -1)))
-
-            with warnings.catch_warnings():
-                # Suppress scikit-learn warning: "X does not have valid feature names,
-                # but NoOpTransformer was fitted with feature names".
-                warnings.simplefilter("ignore")
-                prediction = self.regressor.predict(X).ravel()[0]
                 predictions[i] = prediction
 
             # Update `last_window` values. The first position is discarded and
@@ -1647,14 +1592,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             idx = np.arange(-steps, 0)[:, None] - self.lags
             X_predict = full_predictors[idx + len(full_predictors)]
 
-            if self.encoding == 'onehot':
-                level_encoded = np.zeros(shape=(1, len(self.series_col_names)), dtype=float)
-                level_encoded[0][self.series_col_names.index(level)] = 1.
-            else:
-                level_encoded = np.array([self.encoding_mapping.get(level, None)], dtype='float64')
+            if self.encoding is not None:
+                if self.encoding == 'onehot':
+                    level_encoded = np.zeros(shape=(1, len(self.series_col_names)), dtype=float)
+                    level_encoded[0][self.series_col_names.index(level)] = 1.
+                else:
+                    level_encoded = np.array([self.encoding_mapping.get(level, None)], dtype='float64')
 
-            level_encoded = np.tile(level_encoded, (steps, 1))
-            X_predict = np.concatenate((X_predict, level_encoded), axis=1)
+                level_encoded = np.tile(level_encoded, (steps, 1))
+                X_predict = np.concatenate((X_predict, level_encoded), axis=1)
             
             if exog is not None:
                 X_predict = np.concatenate(
@@ -2401,12 +2347,25 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             self.out_sample_residuals[level] = residuals_level
 
-        rng = np.random.default_rng(seed=random_state)
-        self.out_sample_residuals['_unknown_level'] = rng.choice(
-            a       = np.concatenate(list(self.out_sample_residuals.values())),
-            size    = 1000,
-            replace = False
-        )
+        print(self.out_sample_residuals)
+
+        residuals_unknown_level = [
+            v for k, v in self.out_sample_residuals.items() 
+            if v is not None and k != '_unknown_level'
+        ]
+        if residuals_unknown_level:
+            residuals_unknown_level = np.concatenate(residuals_unknown_level)
+            if len(residuals_unknown_level) > 1000:
+                rng = np.random.default_rng(seed=random_state)
+                residuals_unknown_level = rng.choice(
+                                              a       = residuals_unknown_level,
+                                              size    = 1000,
+                                              replace = False
+                                          )
+        else:
+            residuals_unknown_level = None
+        
+        self.out_sample_residuals['_unknown_level'] = residuals_unknown_level
 
 
     def get_feature_importances(
