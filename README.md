@@ -29,7 +29,7 @@
 
 # About The Project
 
-**Skforecast** is a Python library that eases using machine learning models as single and multi-step forecasters. It works with any regressor compatible with the scikit-learn API (LightGBM, XGBoost, CatBoost, ...).
+**Skforecast** is a Python library for time series forecasting using machine learning models. It works with any regressor compatible with the scikit-learn API, including popular options like LightGBM, XGBoost, CatBoost, Keras, and many others.
 
 **Why use skforecast?**
 
