@@ -46,6 +46,8 @@ The main changes in this release are:
 
 + New function `plot_prediction_intervals` in module `plot`.
 
++ New class `DateTimeFeatureTransformer` and function `create_date_features` in the `preprocessing` module to create datetime and calendar features from a datetime index.
+
 **Changed**
 
 + Deprecated `python 3.8` compatibility.

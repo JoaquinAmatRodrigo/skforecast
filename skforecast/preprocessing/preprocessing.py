@@ -5,7 +5,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Any
+from typing import Any, Union, List, Dict, Optional
 from typing_extensions import Self
 import numpy as np
 import pandas as pd
@@ -332,3 +332,251 @@ def exog_long_to_dict(
         exog_dict = {k: v.dropna(how="all", axis=1) for k, v in exog_dict.items()}
 
     return exog_dict
+
+
+def create_datetime_features(
+    X: Union[pd.Series, pd.DataFrame],
+    features: list=None,
+    encoding: str="cyclical",
+    max_values: dict=None,
+) -> pd.DataFrame:
+    """
+    Extract datetime features from the DateTime index of a pandas DataFrame or Series.
+
+    Parameters
+    ----------
+    X : pandas Series, pandas DataFrame
+        Input DataFrame or Series with a datetime index.
+    features : list, default `[
+        'year',
+        'month',
+        'week',
+        'day_of_week',
+        'day_of_month',
+        'day_of_year',
+        'weekend',
+        'hour',
+        'minute',
+        'second'
+    ]`
+        List of calendar features (strings) to extract from the index.
+    encoding : str, default `'cyclical'`
+        Encoding method for the extracted features. Options are None, 'cyclical' or
+        'onehot'.
+    max_values : dict, default {
+        'month': 12,
+        'week': 52,
+        'day_of_week': 7,
+        'day_of_month': 31,
+        'day_of_year': 365,
+        'hour': 24,
+        'minute': 60,
+        'second': 60
+    }
+        Dictionary of maximum values for the cyclical encoding of calendar features.
+
+    Returns
+    -------
+    X_new : pandas DataFrame
+        DataFrame with the extracted (and optionally encoded) datetime features.
+    
+    """
+
+    if not isinstance(X, (pd.DataFrame, pd.Series)):
+        raise TypeError("Input `X` must be a pandas Series or DataFrame")
+    if not isinstance(X.index, pd.DatetimeIndex):
+        raise TypeError("Input `X` must have a pandas DatetimeIndex")
+    if encoding not in ["cyclical", "onehot", None]:
+        raise ValueError("Encoding must be one of 'cyclical', 'onehot' or None")
+
+    default_features = [
+        "year",
+        "month",
+        "week",
+        "day_of_week",
+        "day_of_month",
+        "day_of_year",
+        "weekend",
+        "hour",
+        "minute",
+        "second",
+    ]
+    features = features or default_features
+
+    default_max_values = {
+        "month": 12,
+        "week": 52,
+        "day_of_week": 7,
+        "day_of_month": 31,
+        "day_of_year": 365,
+        "hour": 24,
+        "minute": 60,
+        "second": 60,
+    }
+    max_values = max_values or default_max_values
+
+    X_new = pd.DataFrame(index=X.index)
+
+    datetime_attrs = {
+        "year": "year",
+        "month": "month",
+        "week": lambda idx: idx.isocalendar().week,
+        "day_of_week": "dayofweek",
+        "day_of_year": "dayofyear",
+        "day_of_month": "day",
+        "weekend": lambda idx: (idx.weekday >= 5).astype(int),
+        "hour": "hour",
+        "minute": "minute",
+        "second": "second",
+    }
+
+    not_supported_features = set(features) - set(datetime_attrs.keys())
+    if not_supported_features:
+        raise ValueError(
+            f"Features {not_supported_features} are not supported. "
+            f"Supported features are {list(datetime_attrs.keys())}."
+        )
+
+    for feature in features:
+        attr = datetime_attrs[feature]
+        X_new[feature] = (
+            attr(X.index) if callable(attr) else getattr(X.index, attr).astype(int)
+        )
+
+    if encoding == "cyclical":
+        cols_to_drop = []
+        for feature, max_val in max_values.items():
+            if feature in X_new.columns:
+                X_new[f"{feature}_sin"] = np.sin(2 * np.pi * X_new[feature] / max_val)
+                X_new[f"{feature}_cos"] = np.cos(2 * np.pi * X_new[feature] / max_val)
+                cols_to_drop.append(feature)
+        X_new = X_new.drop(columns=cols_to_drop)
+    elif encoding == "onehot":
+        X_new = pd.get_dummies(
+            X_new, columns=features, drop_first=False, sparse=False, dtype=int
+        )
+
+    return X_new
+
+
+class DateTimeFeatureTransformer(BaseEstimator, TransformerMixin):
+    """
+    A transformer for extracting datetime features from the DateTime index of a
+    pandas DataFrame or Series. It can also apply encoding to the extracted features.
+
+    Parameters
+    ----------
+    features : list, default `[
+        'year',
+        'month',
+        'week',
+        'day_of_week',
+        'day_of_month',
+        'day_of_year',
+        'weekend',
+        'hour',
+        'minute',
+        'second'
+    ]`
+        List of calendar features (strings) to extract from the index.
+    encoding : str, default `'cyclical'`
+        Encoding method for the extracted features. Options are None, 'cyclical' or
+        'onehot'.
+    max_values : dict, default {
+        'month': 12,
+        'week': 52,
+        'day_of_week': 7,
+        'day_of_month': 31,
+        'day_of_year': 365,
+        'hour': 24,
+        'minute': 60,
+        'second': 60
+    }
+        Dictionary of maximum values for the cyclical encoding of calendar features.
+    
+    Attributes
+    ----------
+    features : list
+        List of calendar features to extract from the index.
+    encoding : str
+        Encoding method for the extracted features.
+    max_values : dict
+        Dictionary of maximum values for the cyclical encoding of calendar features.
+    
+    """
+
+    def __init__(
+        self,
+        features: Optional[list]=None,
+        encoding: Optional[str]="cyclical",
+        max_values: Optional[dict]=None
+    ) -> None:
+
+        if encoding not in ["cyclical", "onehot", None]:
+            raise ValueError("Encoding must be one of 'cyclical', 'onehot' or None")
+
+        self.features = (
+            features
+            if features is not None
+            else [
+                "year",
+                "month",
+                "week",
+                "day_of_week",
+                "day_of_month",
+                "day_of_year",
+                "weekend",
+                "hour",
+                "minute",
+                "second",
+            ]
+        )
+        self.encoding = encoding
+        self.max_values = (
+            max_values
+            if max_values is not None
+            else {
+                "month": 12,
+                "week": 52,
+                "day_of_week": 7,
+                "day_of_month": 31,
+                "day_of_year": 365,
+                "hour": 24,
+                "minute": 60,
+                "second": 60,
+            }
+        )
+
+    def fit(self, X, y=None):
+        """
+        A no-op method to satisfy the scikit-learn API.
+        """
+        return self
+
+    def transform(
+        self,
+        X: Union[pd.Series, pd.DataFrame]
+    ) -> pd.DataFrame:
+        """
+        Create datetime features from the DateTime index of a pandas DataFrame or Series.
+
+        Parameters
+        ----------
+        X : pandas Series, pandas DataFrame
+            Input DataFrame or Series with a datetime index.
+        
+        Returns
+        -------
+        X_new : pandas DataFrame
+            DataFrame with the extracted (and optionally encoded) datetime features.
+
+        """
+
+        X_new = create_datetime_features(
+                    X          = X,
+                    encoding   = self.encoding,
+                    features   = self.features,
+                    max_values = self.max_values,
+                )
+
+        return X_new
