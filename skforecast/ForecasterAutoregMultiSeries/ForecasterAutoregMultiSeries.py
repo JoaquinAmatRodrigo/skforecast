@@ -2347,8 +2347,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             self.out_sample_residuals[level] = residuals_level
 
-        print(self.out_sample_residuals)
-
         residuals_unknown_level = [
             v for k, v in self.out_sample_residuals.items() 
             if v is not None and k != '_unknown_level'

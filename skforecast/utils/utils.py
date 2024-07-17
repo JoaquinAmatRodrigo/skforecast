@@ -2659,31 +2659,11 @@ def preprocess_levels_self_last_window_multiseries(
     available_last_windows = set() if last_window is None else set(last_window.keys())
     not_available_last_window = set(levels) - available_last_windows
     if not_available_last_window:
-        warnings.warn(
-            (f"Levels {not_available_last_window} are excluded from "
-             f"prediction since they were not stored in `last_window` "
-             f"attribute during training. If you don't want to retrain "
-             f"the Forecaster, provide `last_window` as argument."),
-            IgnoredArgumentWarning
-        )
-        levels = [level for level in levels 
-                  if level not in not_available_last_window]
-
-        if not levels:
-            raise ValueError(
-                f"No series to predict. None of the series "
-                f"{levels + list(not_available_last_window)} "
-                f"are present in `last_window` attribute. Provide `last_window` "
-                f"as argument in predict method."
-            )
-    # TODO: Change to one warning and one exception
-    if not_available_last_window:
         levels = [level for level in levels 
                   if level not in not_available_last_window]
         if not levels:
             raise ValueError(
-                (f"No series to predict. None of the series "
-                 f"{levels + list(not_available_last_window)} "
+                (f"No series to predict. None of the series {not_available_last_window} "
                  f"are present in `last_window` attribute. Provide `last_window` "
                  f"as argument in predict method.")
             )
