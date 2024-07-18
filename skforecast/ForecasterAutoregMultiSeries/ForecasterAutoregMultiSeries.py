@@ -1304,7 +1304,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             alpha            = None,
             max_steps        = None,
             levels           = levels,
-            series_col_names = self.series_col_names
+            series_col_names = self.series_col_names,
+            encoding         = self.encoding
         )
 
         last_window = last_window.iloc[-self.window_size_diff:, ].copy()

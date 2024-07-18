@@ -94,7 +94,7 @@ def test_predict_ValueError_when_not_available_self_last_window_for_levels(store
     forecaster.fit(series=series_2, store_last_window=store_last_window)
 
     err_msg = re.escape(
-        ("No series to predict. None of the series ['2'] are present in "
+        ("No series to predict. None of the series {'2'} are present in "
          "`last_window` attribute. Provide `last_window` as argument "
          "in predict method.")
     )

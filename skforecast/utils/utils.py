@@ -623,7 +623,8 @@ def check_predict_input(
     max_steps: Optional[int]=None,
     levels: Optional[Union[str, list]]=None,
     levels_forecaster: Optional[Union[str, list]]=None,
-    series_col_names: Optional[list]=None
+    series_col_names: Optional[list]=None,
+    encoding: Optional[str]=None
 ) -> None:
     """
     Check all inputs of predict method. This is a helper function to validate
@@ -681,6 +682,9 @@ def check_predict_input(
         Names of the columns used during fit (`ForecasterAutoregMultiSeries`, 
         `ForecasterAutoregMultiSeriesCustom`, `ForecasterAutoregMultiVariate`
         and `ForecasterRnn`).
+    encoding : str, default `None`
+        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`, 
+        `ForecasterAutoregMultiSeriesCustom`).
 
     Returns
     -------
@@ -730,12 +734,12 @@ def check_predict_input(
             else series_col_names
         )
         unknown_levels = set(levels) - set(levels_to_check)
-        if len(unknown_levels) != 0 and last_window is not None:
+        if len(unknown_levels) != 0 and last_window is not None and encoding is not None:
             warnings.warn(
                 (f"`levels` {unknown_levels} were not included in training. "
-                f"Unknown levels are encoded as NaN, which may cause the "
-                f"prediction to fail if the regressor does not accept NaN values."),
-                UnknownLevelWarning
+                 f"Unknown levels are encoded as NaN, which may cause the "
+                 f"prediction to fail if the regressor does not accept NaN values."),
+                 UnknownLevelWarning
             )
 
     if exog is None and included_exog:
@@ -2750,31 +2754,29 @@ def prepare_residuals_multiseries(
         if unknown_levels:
             warnings.warn(
                 (f"`levels` {unknown_levels} are not present in `forecaster.in_sample_residuals`, "
-                f"most likely because they were not present in the training data. "
-                f"A random sample of the residuals from other levels will be used."
-                f"This may lead to inaccurate intervals for the unknown levels."),
-                UnknownLevelWarning
+                 f"most likely because they were not present in the training data. "
+                 f"A random sample of the residuals from other levels will be used. "
+                 f"This can lead to inaccurate intervals for the unknown levels."),
+                 UnknownLevelWarning
             )
         residuals = in_sample_residuals.copy()
     else:
         if out_sample_residuals is None:
             raise ValueError(
                 ("`forecaster.out_sample_residuals` is `None`. Use "
-                 "`in_sample_residuals=True` or method "
-                 "`set_out_sample_residuals()` before `predict_interval()`, "
-                 "`predict_bootstrapping()`,`predict_quantiles()` or "
-                 "`predict_dist()`.")
+                 "`in_sample_residuals=True` or the  `set_out_sample_residuals()` "
+                 "method before predicting.")
             )
         else:
             unknown_levels = set(levels) - set(out_sample_residuals.keys())
             if unknown_levels:
                 warnings.warn(
                     (f"`levels` {unknown_levels} are not present in `forecaster.out_sample_residuals`. "
-                    f"Use method `set_out_sample_residuals()` before `predict_interval()` to "
-                    f"set residuals for these levels. Otherwise, a random sample of the out-sample "
-                    f"residuals from other levels will be used. This may lead to inaccurate "
-                    f"intervals for the unknown levels."),
-                    UnknownLevelWarning
+                     f"A random sample of the residuals from other levels will be used. "
+                     f"This can lead to inaccurate intervals for the unknown levels. "
+                     f"Otherwise, Use the `set_out_sample_residuals()` method before "
+                     f"predicting to set the residuals for these levels."),
+                     UnknownLevelWarning
                 )
             residuals = out_sample_residuals.copy()
 

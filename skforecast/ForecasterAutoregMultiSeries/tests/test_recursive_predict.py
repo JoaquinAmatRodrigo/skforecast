@@ -10,7 +10,7 @@ from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.preprocessing import StandardScaler
 
 @pytest.mark.parametrize("encoding",
-                         ["ordinal", "ordinal_category", "onehot"],
+                         ["ordinal", "ordinal_category", "onehot", None],
                          ids=lambda dt: f"encoding: {dt}")
 def test_recursive_predict_output_when_regressor_is_LinearRegression(encoding):
     """
@@ -46,7 +46,7 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression(encoding):
 
 
 @pytest.mark.parametrize("encoding",
-                         ["ordinal", "ordinal_category", "onehot"],
+                         ["ordinal", "ordinal_category", "onehot", None],
                          ids=lambda dt: f"encoding: {dt}")
 def test_recursive_predict_output_when_regressor_is_Ridge_StandardScaler(encoding):
     """

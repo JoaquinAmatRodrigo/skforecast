@@ -11,6 +11,7 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.linear_model import LinearRegression
 
 from skforecast.exceptions import IgnoredArgumentWarning
+from skforecast.exceptions import UnknownLevelWarning
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 # Fixtures
@@ -136,34 +137,64 @@ def test_predict_bootstrapping_IgnoredArgumentWarning_when_levels_is_list_and_di
                       in_sample_residuals = True
                   )
 
-    expected_1 = pd.DataFrame(
-                     data    = np.array([[0.17482136, 0.59548022, 0.40159385, 0.37372285]]),
-                     columns = [f"pred_boot_{i}" for i in range(4)],
-                     index   = pd.date_range(start='2020-02-20', periods=1)
-                 )
-
-    expected = {'1': expected_1 }
+    expected = {
+        '1' : pd.DataFrame(
+                  data    = np.array([[0.17482136, 0.59548022, 0.40159385, 0.37372285]]),
+                  columns = [f"pred_boot_{i}" for i in range(4)],
+                  index   = pd.date_range(start='2020-02-20', periods=1)
+              )
+    }
 
     pd.testing.assert_frame_equal(results['1'], expected['1'])
 
 
-def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_any_level():
+def test_predict_bootstrapping_UnknownLevelWarning_when_not_in_sample_residuals_for_level():
     """
-    Test ValueError is raised when in_sample_residuals=True but there is no
-    residuals for any level.
+    Test UnknownLevelWarning is raised when predicting an unknown level and 
+    in_sample_residuals is True (using _unknown_level residuals).
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fit(series=series)
-    forecaster.in_sample_residuals = {2: np.array([1, 2, 3])}
-
-    #TODO: change this test to predict a unknown level and warning user new warnign
-
-    err_msg = re.escape(
-        (f"Not `forecaster.in_sample_residuals` for levels: "
-         f"{set(['1', '2']) - set(forecaster.in_sample_residuals.keys())}.")
+    forecaster = ForecasterAutoregMultiSeries(
+        LinearRegression(), lags=3, encoding=None
     )
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict_bootstrapping(steps=1, levels=None, in_sample_residuals=True)
+    forecaster.fit(series=series)
+    last_window = pd.DataFrame(forecaster.last_window)
+    last_window['3'] = last_window['1']
+
+    warn_msg = re.escape(
+        ("`levels` {'3'} are not present in `forecaster.in_sample_residuals`, "
+         "most likely because they were not present in the training data. "
+         "A random sample of the residuals from other levels will be used. "
+         "This can lead to inaccurate intervals for the unknown levels.")
+    )
+    with pytest.warns(UnknownLevelWarning, match = warn_msg):
+        results = forecaster.predict_bootstrapping(
+                      steps               = 1,
+                      levels              = ['1', '2', '3'],
+                      last_window         = last_window,
+                      n_boot              = 4,
+                      in_sample_residuals = True
+                  )
+
+    expected = {
+        '1' : pd.DataFrame(
+                  data    = np.array([[0.1694383 , 0.48615202, 0.30470943, 0.40157124]]),
+                  columns = [f"pred_boot_{i}" for i in range(4)],
+                  index   = pd.RangeIndex(50, 51)
+              ),
+        '2' : pd.DataFrame(
+                  data    = np.array([[0.24342804, 0.60007019, 0.6322595 , 0.49183118]]),
+                  columns = [f"pred_boot_{i}" for i in range(4)],
+                  index   = pd.RangeIndex(50, 51)
+              ),
+        '3' : pd.DataFrame(
+                  data    = np.array([[0.42475802, 0.41335124, 0.45959615, 0.71109941]]),
+                  columns = [f"pred_boot_{i}" for i in range(4)],
+                  index   = pd.RangeIndex(50, 51)
+              )
+    }
+
+    for key in results.keys():
+        pd.testing.assert_frame_equal(results[key], expected[key])
 
 
 def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
@@ -176,10 +207,8 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
 
     err_msg = re.escape(
         ("`forecaster.out_sample_residuals` is `None`. Use "
-         "`in_sample_residuals=True` or method "
-         "`set_out_sample_residuals()` before `predict_interval()`, "
-         "`predict_bootstrapping()`,`predict_quantiles()` or "
-         "`predict_dist()`.")
+         "`in_sample_residuals=True` or the  `set_out_sample_residuals()` "
+         "method before predicting.")
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, levels='1', in_sample_residuals=False)
@@ -190,20 +219,52 @@ def test_predict_bootstrapping_ValueError_when_not_out_sample_residuals_for_all_
     Test ValueError is raised when in_sample_residuals=False and
     forecaster.out_sample_residuals is not available for all levels.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3, encoding=None)
     forecaster.fit(series=series)
-    residuals = {'2': np.array([1, 2, 3, 4, 5]), 
-                 '3': np.array([1, 2, 3, 4, 5])}
-    forecaster.out_sample_residuals = residuals
-    levels = ['1']
+    new_residuals = {
+        '1': np.array([1, 2, 3, 4, 5]), 
+        '2': np.array([1, 2, 3, 4, 5])
+    }
+    forecaster.set_out_sample_residuals(new_residuals)
+    last_window = pd.DataFrame(forecaster.last_window)
+    last_window['3'] = last_window['1']
 
-    err_msg = re.escape(
-        (f"Not `forecaster.out_sample_residuals` for levels: "
-         f"{set(levels) - set(forecaster.out_sample_residuals.keys())}. "
-         f"Use method `set_out_sample_residuals()`.")
+    warn_msg = re.escape(
+        ("`levels` {'3'} are not present in `forecaster.out_sample_residuals`. "
+         "A random sample of the residuals from other levels will be used. "
+         "This can lead to inaccurate intervals for the unknown levels. "
+         "Otherwise, Use the `set_out_sample_residuals()` method before "
+         "predicting to set the residuals for these levels."),
     )
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict_bootstrapping(steps=1, levels=levels, in_sample_residuals=False)
+    with pytest.warns(UnknownLevelWarning, match = warn_msg):
+        results = forecaster.predict_bootstrapping(
+                      steps               = 1,
+                      levels              = ['1', '2', '3'],
+                      last_window         = last_window,
+                      n_boot              = 4,
+                      in_sample_residuals = False
+                  )
+
+    expected = {
+        '1' : pd.DataFrame(
+                  data    = np.array([[2.48307367, 2.48307367, 3.48307367, 1.48307367]]),
+                  columns = [f"pred_boot_{i}" for i in range(4)],
+                  index   = pd.RangeIndex(50, 51)
+              ),
+        '2' : pd.DataFrame(
+                  data    = np.array([[2.5061193, 2.5061193, 3.5061193, 1.5061193]]),
+                  columns = [f"pred_boot_{i}" for i in range(4)],
+                  index   = pd.RangeIndex(50, 51)
+              ),
+        '3' : pd.DataFrame(
+                  data    = np.array([[4.48307367, 4.48307367, 5.48307367, 2.48307367]]),
+                  columns = [f"pred_boot_{i}" for i in range(4)],
+                  index   = pd.RangeIndex(50, 51)
+              )
+    }
+
+    for key in results.keys():
+        pd.testing.assert_frame_equal(results[key], expected[key])
 
 
 @pytest.mark.parametrize("transformer_series", 

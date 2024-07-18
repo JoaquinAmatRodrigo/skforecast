@@ -175,7 +175,8 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
 
 @pytest.mark.parametrize("encoding, dtype", 
                          [('ordinal'         , int), 
-                          ('ordinal_category', 'category')], 
+                          ('ordinal_category', 'category'),
+                          (None              , int)], 
                          ids = lambda dt : f'encoding, dtype: {dt}')
 def test_create_train_X_y_output_when_series_and_exog_is_None_ordinal_encoding(encoding, dtype):
     """
@@ -324,7 +325,8 @@ def test_create_train_X_y_output_when_series_and_exog_no_pandas_index():
 
 @pytest.mark.parametrize("encoding, dtype", 
                          [('ordinal'         , int), 
-                          ('ordinal_category', 'category')], 
+                          ('ordinal_category', 'category'),
+                          (None              , int)], 
                          ids = lambda dt : f'encoding, dtype: {dt}')
 def test_create_train_X_y_output_when_series_and_exog_no_pandas_index_ordinal_encoding(encoding, dtype):
     """
@@ -880,7 +882,8 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
 
 @pytest.mark.parametrize("encoding, dtype", 
                          [('ordinal'         , int), 
-                          ('ordinal_category', 'category')], 
+                          ('ordinal_category', 'category'),
+                          (None              , int),], 
                          ids = lambda dt : f'encoding, dtype: {dt}')
 def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_index(encoding, dtype):
     """
@@ -2056,7 +2059,9 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
 
 @pytest.mark.parametrize(
     "encoding, dtype",
-    [("ordinal", int), ("ordinal_category", "category")],
+    [("ordinal", int), 
+     ("ordinal_category", "category"),
+     (None, int)],
     ids=lambda dt: f"encoding, dtype: {dt}",
 )
 def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
@@ -2213,7 +2218,8 @@ def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
 @pytest.mark.parametrize("encoding, encoding_mapping", 
                          [('ordinal'         , {'1': 0, '2': 1}), 
                           ('ordinal_category', {'1': 0, '2': 1}),
-                          ('onehot'          , {'1': 0, '2': 1})], 
+                          ('onehot'          , {'1': 0, '2': 1}),
+                          (None              , {'1': 0, '2': 1})], 
                          ids = lambda dt : f'encoding, mapping: {dt}')
 def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping):
     """
@@ -2231,10 +2237,13 @@ def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping):
     assert forecaster.encoding_mapping == encoding_mapping
 
 
+@pytest.mark.parametrize("encoding", 
+                         ['ordinal', None], 
+                         ids = lambda encoding : f'encoding: {encoding}')
 @pytest.mark.parametrize("fit_forecaster", 
                          [True, False], 
                          ids = lambda fitted : f'fit_forecaster: {fitted}')
-def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and_already_trained(fit_forecaster):
+def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and_already_trained(encoding, fit_forecaster):
     """
     Test the output of _create_train_X_y when differentiation=1 and already 
     trained forecaster.
@@ -2249,7 +2258,7 @@ def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and
     series["l3"].index = pd.date_range("1990-01-03", periods=5, freq="D")
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
-                                              encoding           = 'ordinal',
+                                              encoding           = encoding,
                                               transformer_series = StandardScaler(),
                                               differentiation    = 1)
     
