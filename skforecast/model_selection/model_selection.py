@@ -289,7 +289,7 @@ def _backtesting_forecaster(
     n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True
-) -> Tuple[Union[float, list], pd.DataFrame]:
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting of forecaster model.
 
@@ -384,7 +384,7 @@ def _backtesting_forecaster(
 
     Returns
     -------
-    metrics_value : float, list
+    metrics_value : pd.DataFrame
         Value(s) of the metric(s).
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -585,9 +585,11 @@ def _backtesting_forecaster(
         for m in metrics
     ]
 
-    if not isinstance(metric, list):
-        metrics_values = metrics_values[0]
-
+    metrics_values = pd.DataFrame(
+        data    = [metrics_values],
+        columns = [m.__name__ for m in metrics]
+    )
+    
     return metrics_values, backtest_predictions
 
 
@@ -611,7 +613,7 @@ def backtesting_forecaster(
     n_jobs: Union[int, str]='auto',
     verbose: bool=False,
     show_progress: bool=True
-) -> Tuple[Union[float, list], pd.DataFrame]:
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting of forecaster model.
 
@@ -706,7 +708,7 @@ def backtesting_forecaster(
 
     Returns
     -------
-    metrics_value : float, list
+    metrics_value : pd.DataFrame
         Value(s) of the metric(s).
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -1208,6 +1210,7 @@ def _evaluate_grid_hyperparameters(
                                  verbose               = verbose,
                                  show_progress         = False
                              )[0]
+            metrics_values = metrics_values.iloc[0, :].to_list()
             warnings.filterwarnings('ignore', category=RuntimeWarning, 
                                     message= "The forecaster will be fit.*")
             
