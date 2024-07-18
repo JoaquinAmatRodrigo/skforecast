@@ -384,7 +384,7 @@ def _backtesting_forecaster(
 
     Returns
     -------
-    metrics_value : pd.DataFrame
+    metrics_value : pandas DataFrame
         Value(s) of the metric(s).
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -708,7 +708,7 @@ def backtesting_forecaster(
 
     Returns
     -------
-    metrics_value : pd.DataFrame
+    metrics_value : pandas DataFrame
         Value(s) of the metric(s).
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -1587,6 +1587,7 @@ def _bayesian_search_optuna(
                          verbose               = verbose,
                          show_progress         = False
                      )
+        metrics = metrics.iloc[0, :].to_list()
         
         # Store metrics in the variable `metric_values` defined outside _objective.
         nonlocal metric_values
