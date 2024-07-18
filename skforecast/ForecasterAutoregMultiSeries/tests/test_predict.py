@@ -763,3 +763,85 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differe
     predictions_2 = forecaster_2.predict(steps=steps, exog=exog.loc[end_train:])
 
     pd.testing.assert_frame_equal(predictions_1, predictions_2)
+
+
+def test_predict_output_when_series_and_exog_dict_encoding_None():
+    """
+    Test output ForecasterAutoregMultiSeries predict method when series and 
+    exog are dictionaries and encoding is None and unknown level with no exog.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags=14,
+        encoding=None,
+        dropna_from_series=False,
+        transformer_series=None,
+        transformer_exog=StandardScaler(),
+    )
+    forecaster.fit(
+        series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
+    )
+
+    levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
+    last_window = pd.DataFrame(
+        {k: v for k, v in forecaster.last_window.items() if k in levels}
+    )
+    last_window['id_1005'] = last_window['id_1004']
+    predictions = forecaster.predict(
+        steps=5, levels=levels, last_window=last_window,
+        exog=exog_dict_test, suppress_warnings=True
+    )
+
+    expected = pd.DataFrame(
+        data=np.array([
+            [2796.7268212 , 3205.84100287, 3367.37706412, 3367.37706412, 3367.37706412],
+            [2796.7268212 , 3367.37706412, 3367.37706412, 3367.37706412, 3367.37706412],
+            [2796.7268212 , 3367.37706412, 3367.37706412, 3367.37706412, 3367.37706412],
+            [2796.7268212 , 3367.37706412, 3367.37706412, 3367.37706412, 3367.37706412],
+            [2796.7268212 , 3367.37706412, 3367.37706412, 3367.37706412, 3367.37706412]
+        ]),
+        index=pd.date_range(start="2016-08-01", periods=5, freq="D"),
+        columns=["id_1000", "id_1001", "id_1003", "id_1004", "id_1005"],
+    )
+
+    pd.testing.assert_frame_equal(predictions, expected)
+
+
+def test_predict_output_when_series_and_exog_dict_encoding_None_transformer_series():
+    """
+    Test output ForecasterAutoregMultiSeries predict method when series and 
+    exog are dictionaries.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags=14,
+        encoding='ordinal',
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    )
+    forecaster.fit(
+        series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
+    )
+    predictions = forecaster.predict(
+        steps=5, exog=exog_dict_test, suppress_warnings=True
+    )
+    expected = pd.DataFrame(
+        data=np.array(
+            [
+                [1438.14154717, 2090.79352613, 2166.9832933, 7285.52781428],
+                [1438.14154717, 2089.11038884, 2074.55994929, 7488.18398744],
+                [1438.14154717, 2089.11038884, 2035.99448247, 7488.18398744],
+                [1403.93625654, 2089.11038884, 2035.99448247, 7488.18398744],
+                [1403.93625654, 2089.11038884, 2035.99448247, 7488.18398744],
+            ]
+        ),
+        index=pd.date_range(start="2016-08-01", periods=5, freq="D"),
+        columns=["id_1000", "id_1001", "id_1003", "id_1004"],
+    )
+
+    pd.testing.assert_frame_equal(predictions, expected)

@@ -889,7 +889,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def create_train_X_y(
         self,
         series: Union[pd.DataFrame, dict],
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
+        suppress_warnings: bool=False
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Create training matrices from multiple time series and exogenous
@@ -909,6 +910,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Training values (predictors).
         y_train : pandas Series
             Values (target) of the time series related to each row of `X_train`.
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the creation
+            of the training matrices. See skforecast.exceptions.warn_skforecast_categories 
+            for more information.
 
         Notes
         -----
@@ -926,6 +931,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
 
+        set_skforecast_warnings(suppress_warnings, action='ignore')
+
         output = self._create_train_X_y(
                      series            = series, 
                      exog              = exog, 
@@ -934,6 +941,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         X_train = output[0]
         y_train = output[1]
+        
+        set_skforecast_warnings(suppress_warnings, action='default')
 
         return X_train, y_train
 
@@ -1360,30 +1369,33 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if isinstance(exog, dict):
                 # Fill the empty dataframe with the exog values of each level
                 # and transform them if necessary
-                exog_values = exog[level]
-                if isinstance(exog_values, pd.Series):
-                    exog_values = exog_values.to_frame()
+                exog_values = exog.get(level, None)
+                if exog_values is not None:
+                    if isinstance(exog_values, pd.Series):
+                        exog_values = exog_values.to_frame()
 
-                exog_values = empty_exog.fillna(exog_values)
-                exog_values = transform_dataframe(
-                                  df                = exog_values,
-                                  transformer       = self.transformer_exog,
-                                  fit               = False,
-                                  inverse_transform = False
-                              )
-                
-                check_exog_dtypes(
-                    exog      = exog_values,
-                    series_id = f"`exog` for series '{level}'"
-                )
-                exog_values = exog_values.to_numpy()
+                    exog_values = empty_exog.fillna(exog_values)
+                    exog_values = transform_dataframe(
+                                    df                = exog_values,
+                                    transformer       = self.transformer_exog,
+                                    fit               = False,
+                                    inverse_transform = False
+                                )
+                    
+                    check_exog_dtypes(
+                        exog      = exog_values,
+                        series_id = f"`exog` for series '{level}'"
+                    )
+                    exog_values = exog_values.to_numpy()
+                else:
+                    exog_values = empty_exog.to_numpy()
             
             exog_values_dict[level] = exog_values
 
         return last_window_values_dict, exog_values_dict, levels, prediction_index, residuals
 
 
-    def _recursive_predict_new(
+    def _recursive_predict(
         self,
         steps: int,
         level: str,
@@ -1425,7 +1437,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         else:
             level_encoded_shape = 0
 
-        last_window_shape = last_window.shape[0]
+        last_window_shape = self.window_size
         exog_shape = exog.shape[1] if exog is not None else 0
         
         predictors_shape = last_window_shape + level_encoded_shape + exog_shape
@@ -1447,69 +1459,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore")
                 prediction = self.regressor.predict(predictors.reshape(1, -1)).ravel()[0]
-                predictions[i] = prediction
-
-            # Update `last_window` values. The first position is discarded and
-            # the new prediction is added at the end.
-            last_window[-(steps - i)] = prediction
-
-        return predictions
-
-
-    def _recursive_predict(
-        self,
-        steps: int,
-        level: str,
-        last_window: np.ndarray,
-        exog: Optional[np.ndarray]=None
-    ) -> np.ndarray:
-        """
-        Predict n steps ahead. It is an iterative process in which, each prediction,
-        is used as a predictor for the next step.
-        
-        Parameters
-        ----------
-        steps : int
-            Number of future steps predicted.
-        level : str
-            Time series to be predicted.
-        last_window : numpy ndarray
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
-        exog : numpy ndarray, default `None`
-            Exogenous variable/s included as predictor/s.
-
-        Returns
-        -------
-        predictions : numpy ndarray
-            Predicted values.
-        
-        """
-
-        predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
-        last_window = np.concatenate((last_window, predictions))
-        if self.encoding is not None:
-            if self.encoding == 'onehot':
-                levels_dummies = np.zeros(shape=len(self.series_col_names), dtype=float)
-                if level in self.series_col_names:
-                    levels_dummies[self.series_col_names.index(level)] = 1.
-                level_encoded = levels_dummies
-            else:
-                level_encoded = np.array([self.encoding_mapping.get(level, None)], dtype='float64')
-
-        for i in range(steps):
-
-            X = last_window[-self.lags - (steps - i)]
-            if self.encoding is not None:
-                X = np.concatenate((X, level_encoded))
-            if exog is not None:
-                X = np.concatenate((X, exog[i, ]))
-
-            with warnings.catch_warnings():
-                # Suppress scikit-learn warning: "X does not have valid feature names,
-                # but NoOpTransformer was fitted with feature names".
-                warnings.simplefilter("ignore")
-                prediction = self.regressor.predict(X.reshape(1, -1)).ravel()[0]
                 predictions[i] = prediction
 
             # Update `last_window` values. The first position is discarded and

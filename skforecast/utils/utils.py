@@ -812,7 +812,7 @@ def check_predict_input(
     if last_window.isnull().any().all():
         warnings.warn(
             ("`last_window` has missing values. Most of machine learning models do "
-             "not allow missing values. `predict` method may fail."), 
+             "not allow missing values. Prediction method may fail."), 
              MissingValuesWarning
         )
     _, last_window_index = preprocess_last_window(
@@ -852,6 +852,14 @@ def check_predict_input(
                 )
 
         if isinstance(exog, dict):
+            no_exog_levels = set(levels) - set(exog.keys())
+            if no_exog_levels:
+                warnings.warn(
+                    (f"`exog` does not contain keys for levels {no_exog_levels}. "
+                     f"Missing levels are filled with NaN. Most of machine learning "
+                     f"models do not allow missing values. Prediction method may fail."),
+                     MissingExogWarning
+                )
             exogs_to_check = [(f"`exog` for series '{k}'", v) 
                               for k, v in exog.items() if v is not None]
         else:
@@ -867,7 +875,7 @@ def check_predict_input(
             if exog_to_check.isnull().any().any():
                 warnings.warn(
                     (f"{exog_name} has missing values. Most of machine learning models "
-                     f"do not allow missing values. `predict` method may fail."), 
+                     f"do not allow missing values. Prediction method may fail."), 
                      MissingValuesWarning
                 )
 
@@ -880,7 +888,7 @@ def check_predict_input(
                         (f"{exog_name} doesn't have as many values as steps "
                          f"predicted, {last_step}. Missing values are filled "
                          f"with NaN. Most of machine learning models do not "
-                         f"allow missing values. `predict` method may fail."),
+                         f"allow missing values. Prediction method may fail."),
                          MissingValuesWarning
                     )
                 else: 
@@ -991,7 +999,7 @@ def check_predict_input(
             if last_window_exog.isnull().any().all():
                 warnings.warn(
                 ("`last_window_exog` has missing values. Most of machine learning "
-                 "models do not allow missing values. `predict` method may fail."),
+                 "models do not allow missing values. Prediction method may fail."),
                 MissingValuesWarning
             )
             _, last_window_exog_index = preprocess_last_window(
@@ -1297,7 +1305,7 @@ def cast_exog_dtypes(
     elif isinstance(exog, pd.DataFrame):
         for col, initial_dtype in exog_dtypes.items():
             if exog[col].dtypes != initial_dtype:
-                if initial_dtype == "category" and exog[col].dtypes==float:
+                if initial_dtype == "category" and exog[col].dtypes == float:
                     exog[col] = exog[col].astype(int).astype("category")
                 else:
                     exog[col] = exog[col].astype(initial_dtype)
