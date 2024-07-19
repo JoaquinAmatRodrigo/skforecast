@@ -28,15 +28,15 @@ def test_backtesting_with_ForecasterEquivalentDate():
         verbose            = False,
         n_jobs             = 'auto'
     )
-
+    expected_metric = pd.DataFrame({'mean_absolute_error': [0.2537094475]})
     expected = pd.DataFrame(
-        data    = np.array([0.48878949, 0.78924075, 0.58151378, 0.3353507 , 0.56024382,
+        data    = np.array([0.48878949, 0.78924075, 0.58151378, 0.3353507, 0.56024382,
                             0.53047716, 0.27214019, 0.20185749, 0.41263271, 0.58140185,
-                            0.36325295, 0.64156648, 0.57765904, 0.5523543 , 0.57413684,
-                            0.31761006, 0.39406999, 0.56082619, 0.61893703, 0.5664064 ]),
+                            0.36325295, 0.64156648, 0.57765904, 0.5523543, 0.57413684,
+                            0.31761006, 0.39406999, 0.56082619, 0.61893703, 0.5664064]),
         index   = pd.date_range(start='2000-01-31', periods=20, freq='D'),
         columns = ['pred']
     )
 
-    assert metric == 0.2537094475
+    pd.testing.assert_frame_equal(metric, expected_metric)
     pd.testing.assert_frame_equal(predictions, expected)
