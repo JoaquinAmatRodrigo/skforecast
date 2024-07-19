@@ -215,6 +215,8 @@ def initialize_transformer_series(
     
     """
 
+    series_col_names = series_col_names + ['_unknown_level']
+
     if transformer_series is None:
         transformer_series_ = {serie: None for serie in series_col_names}
     elif not isinstance(transformer_series, dict):
@@ -227,14 +229,25 @@ def initialize_transformer_series(
             (k, v) for k, v in deepcopy(transformer_series).items() 
             if k in transformer_series_
         )
+
         series_not_in_transformer_series = (
             set(series_col_names) - set(transformer_series.keys())
         )
+        unknown_not_in_transformer_series = '_unknown_level' in series_not_in_transformer_series 
+        series_not_in_transformer_series = series_not_in_transformer_series - {'_unknown_level'}
         if series_not_in_transformer_series:
             warnings.warn(
                 (f"{series_not_in_transformer_series} not present in `transformer_series`."
-                 f" No transformation is applied to these series."),
-                 IgnoredArgumentWarning
+                f" No transformation is applied to these series."),
+                IgnoredArgumentWarning
+            )
+        if unknown_not_in_transformer_series:
+            warnings.warn(
+                ("If `transformer_series` is a `dict`, a transformer must be "
+                 "provided to transform series that do not exist during training. "
+                 "Add the key '_unknown_level' to `transformer_series`. "
+                 "For example: {'_unknown_level': your_transformer}."),
+                 UnknownLevelWarning
             )
 
     return transformer_series_
@@ -735,12 +748,19 @@ def check_predict_input(
         )
         unknown_levels = set(levels) - set(levels_to_check)
         if len(unknown_levels) != 0 and last_window is not None and encoding is not None:
-            warnings.warn(
-                (f"`levels` {unknown_levels} were not included in training. "
-                 f"Unknown levels are encoded as NaN, which may cause the "
-                 f"prediction to fail if the regressor does not accept NaN values."),
-                 UnknownLevelWarning
-            )
+            if encoding == 'onehot':
+                warnings.warn(
+                    (f"`levels` {unknown_levels} were not included in training. The resulting "
+                     f"one-hot encoded columns for this feature will be all zeros."),
+                     UnknownLevelWarning
+                )
+            else:
+                warnings.warn(
+                    (f"`levels` {unknown_levels} were not included in training. "
+                     f"Unknown levels are encoded as NaN, which may cause the "
+                     f"prediction to fail if the regressor does not accept NaN values."),
+                     UnknownLevelWarning
+                )
 
     if exog is None and included_exog:
         raise ValueError(

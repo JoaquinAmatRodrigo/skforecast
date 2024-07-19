@@ -718,6 +718,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                      input_series_is_dict = input_series_is_dict,
                                      exog_dict            = exog_dict
                                  )
+        
+        if not self.fitted and self.transformer_series_['_unknown_level']:
+            self.transformer_series_['_unknown_level'].fit(
+                np.concatenate(list(series_dict.values())).reshape(-1, 1)
+            )
 
         # TODO: parallelize
         # ======================================================================
@@ -1353,15 +1358,17 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         last_window_values_dict = {}
         exog_values_dict = {}
         for level in levels:
-            
+
             last_window_level = transform_series(
-                                    series            = last_window[level],
-                                    transformer       = self.transformer_series_.get(level, None),
-                                    fit               = False,
-                                    inverse_transform = False
-                                )
+                series            = last_window[level],
+                transformer       = self.transformer_series_.get(level, self.transformer_series_['_unknown_level']),
+                fit               = False,
+                inverse_transform = False
+            )
             last_window_values = last_window_level.to_numpy()
             if self.differentiation is not None:
+                if level not in self.differentiator_.keys():
+                    self.differentiator_[level] = clone(self.differentiator)
                 last_window_values = self.differentiator_[level].fit_transform(last_window_values)
             
             last_window_values_dict[level] = last_window_values
@@ -1388,7 +1395,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     )
                     exog_values = exog_values.to_numpy()
                 else:
-                    exog_values = empty_exog.to_numpy()
+                    exog_values = empty_exog.to_numpy(copy=True)
             
             exog_values_dict[level] = exog_values
 
@@ -1643,11 +1650,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                           )
 
             preds_level = transform_series(
-                              series            = preds_level,
-                              transformer       = self.transformer_series_.get(level, None),
-                              fit               = False,
-                              inverse_transform = True
-                          )
+                series            = preds_level,
+                transformer       = self.transformer_series_.get(level, self.transformer_series_['_unknown_level']),
+                fit               = False,
+                inverse_transform = True
+            )
 
             predictions.append(preds_level)
 
@@ -1794,14 +1801,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                          columns = [f"pred_boot_{i}" for i in range(n_boot)]
                                      )
 
-            if self.transformer_series_.get(level, None):
+            if self.transformer_series_.get(level, self.transformer_series_['_unknown_level']):
                 for col in level_boot_predictions.columns:
                     level_boot_predictions[col] = transform_series(
-                                                      series            = level_boot_predictions[col],
-                                                      transformer       = self.transformer_series_[level],
-                                                      fit               = False,
-                                                      inverse_transform = True
-                                                  )
+                        series            = level_boot_predictions[col],
+                        transformer       = self.transformer_series_.get(level, self.transformer_series_['_unknown_level']),
+                        fit               = False,
+                        inverse_transform = True
+                    )
 
             boot_predictions[level] = level_boot_predictions
         
@@ -2247,36 +2254,37 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             )
 
         residuals = {
-            key: value 
-            for key, value in residuals.items() 
-            if key in self.out_sample_residuals.keys()
+            k: v 
+            for k, v in residuals.items() 
+            if k in self.out_sample_residuals.keys() and k != '_unknown_level'
         }
 
         for level, value in residuals.items():
 
             residuals_level = value
+            transformer_level = self.transformer_series_[level]
 
-            if not transform and self.transformer_series_[level] is not None:
+            if not transform and transformer_level is not None:
                 warnings.warn(
                     (f"Argument `transform` is set to `False` but forecaster was "
-                     f"trained using a transformer {self.transformer_series_[level]} "
+                     f"trained using a transformer {transformer_level} "
                      f"for level {level}. Ensure that the new residuals are "
                      f"already transformed or set `transform=True`.")
                 )
 
-            if transform and self.transformer_series_ and self.transformer_series_[level]:
+            if transform and self.transformer_series_ and transformer_level:
                 warnings.warn(
                     (f"Residuals will be transformed using the same transformer used "
                      f"when training the forecaster for level {level} : "
-                     f"({self.transformer_series_[level]}). Ensure that the new "
+                     f"({transformer_level}). Ensure that the new "
                      f"residuals are on the same scale as the original time series.")
                 )
                 residuals_level = transform_series(
-                                      series            = pd.Series(residuals_level, name='residuals'),
-                                      transformer       = self.transformer_series_[level],
-                                      fit               = False,
-                                      inverse_transform = False
-                                  ).to_numpy()
+                    series            = pd.Series(residuals_level, name='residuals'),
+                    transformer       = transformer_level,
+                    fit               = False,
+                    inverse_transform = False
+                ).to_numpy()
 
             if len(residuals_level) > 1000:
                 rng = np.random.default_rng(seed=random_state)
