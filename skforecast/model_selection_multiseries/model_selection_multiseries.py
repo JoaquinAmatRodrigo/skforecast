@@ -287,8 +287,8 @@ def _calculate_metrics_multiseries(
     levels : list
         Levels to calculate the metrics.
     add_aggregated_metric : bool, default `True`
-        If `True`, return the aggregated metrics (average, weighted average and pooled)
-        are also returned.
+        If `True`, and multiple series (`levels`) are predicted, the aggregated
+        metrics (average, weighted average and pooled) are also returned.
 
         - 'average': the average (arithmetic mean) of all levels.
         - 'weighted_average': the average of the metrics weighted by the number of
@@ -375,7 +375,7 @@ def _calculate_metrics_multiseries(
                      )
     metrics_levels.insert(0, 'levels', levels)
 
-    if add_aggregated_metric:
+    if add_aggregated_metric and len(levels) > 1:
 
         # aggragation: average
         average = metrics_levels.drop(columns='levels').mean(skipna=True)
