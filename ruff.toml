@@ -1,6 +1,6 @@
 [lint]
 select = ["E", "F"]
-ignore = ["E221", "E251", "E501"]
+ignore = ["E221", "E251", "E501", "E241"]
 
 [pycodestyle]
 max-doc-length = 88
