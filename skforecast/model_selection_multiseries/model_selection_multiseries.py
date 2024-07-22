@@ -690,16 +690,16 @@ def _backtesting_forecaster_multiseries(
             )
 
     if refit:
-        n_of_fits = int(len(folds)/refit)
+        n_of_fits = int(len(folds) / refit)
         if type(forecaster).__name__ != 'ForecasterAutoregMultiVariate' and n_of_fits > 50:
             warnings.warn(
                 (f"The forecaster will be fit {n_of_fits} times. This can take substantial "
                  f"amounts of time. If not feasible, try with `refit = False`.\n"),
                 LongTrainingWarning
             )
-        elif type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' and n_of_fits*forecaster.steps > 50:
+        elif type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' and n_of_fits * forecaster.steps > 50:
             warnings.warn(
-                (f"The forecaster will be fit {n_of_fits*forecaster.steps} times "
+                (f"The forecaster will be fit {n_of_fits * forecaster.steps} times "
                  f"({n_of_fits} folds * {forecaster.steps} regressors). This can take "
                  f"substantial amounts of time. If not feasible, try with `refit = False`.\n"),
                 LongTrainingWarning

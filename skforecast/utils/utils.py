@@ -114,9 +114,7 @@ def initialize_weights(
     Parameters
     ----------
     forecaster_name : str
-        Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
-        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+        Forecaster name.
     regressor : regressor or pipeline compatible with the scikit-learn API
         Regressor of the forecaster.
     weight_func : Callable, dict
@@ -185,7 +183,9 @@ def initialize_weights(
 
 
 def initialize_transformer_series(
+    forecaster_name: str,
     series_col_names: list,
+    encoding: Optional[str]=None,
     transformer_series: Optional[Union[object, dict]]=None
 ) -> dict:
     """
@@ -200,8 +200,13 @@ def initialize_transformer_series(
 
     Parameters
     ----------
+    forecaster_name : str
+        Forecaster name.
     series_col_names : list
         Names of the series (levels) used during training.
+    encoding : str, default `None`
+        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`, 
+        `ForecasterAutoregMultiSeriesCustom`).
     transformer_series : object, dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -215,7 +220,16 @@ def initialize_transformer_series(
     
     """
 
-    series_col_names = series_col_names + ['_unknown_level']
+    multiseries_forecasters = [
+        'ForecasterAutoregMultiSeries',
+        'ForecasterAutoregMultiSeriesCustom'
+    ]
+
+    if forecaster_name in multiseries_forecasters:
+        if encoding is None:
+            series_col_names = ['_unknown_level']
+        else:
+            series_col_names = series_col_names + ['_unknown_level']
 
     if transformer_series is None:
         transformer_series_ = {serie: None for serie in series_col_names}
@@ -230,25 +244,28 @@ def initialize_transformer_series(
             if k in transformer_series_
         )
 
+        # series_not_in_transformer_series = (
+        #     set(series_col_names) - set(transformer_series.keys())
+        # )
+        # unknown_not_in_transformer_series = '_unknown_level' in series_not_in_transformer_series 
+        # series_not_in_transformer_series = series_not_in_transformer_series - {'_unknown_level'}
         series_not_in_transformer_series = (
             set(series_col_names) - set(transformer_series.keys())
-        )
-        unknown_not_in_transformer_series = '_unknown_level' in series_not_in_transformer_series 
-        series_not_in_transformer_series = series_not_in_transformer_series - {'_unknown_level'}
+        ) - {'_unknown_level'}
         if series_not_in_transformer_series:
             warnings.warn(
                 (f"{series_not_in_transformer_series} not present in `transformer_series`."
                 f" No transformation is applied to these series."),
                 IgnoredArgumentWarning
             )
-        if unknown_not_in_transformer_series:
-            warnings.warn(
-                ("If `transformer_series` is a `dict`, a transformer must be "
-                 "provided to transform series that do not exist during training. "
-                 "Add the key '_unknown_level' to `transformer_series`. "
-                 "For example: {'_unknown_level': your_transformer}."),
-                 UnknownLevelWarning
-            )
+        # if unknown_not_in_transformer_series:
+        #     warnings.warn(
+        #         ("If `transformer_series` is a `dict`, a transformer must be "
+        #          "provided to transform series that do not exist during training. "
+        #          "Add the key '_unknown_level' to `transformer_series`. "
+        #          "For example: {'_unknown_level': your_transformer}."),
+        #          UnknownLevelWarning
+        #     )
 
     return transformer_series_
 
@@ -880,8 +897,11 @@ def check_predict_input(
                      f"models do not allow missing values. Prediction method may fail."),
                      MissingExogWarning
                 )
-            exogs_to_check = [(f"`exog` for series '{k}'", v) 
-                              for k, v in exog.items() if v is not None]
+            exogs_to_check = [
+                (f"`exog` for series '{k}'", v) 
+                for k, v in exog.items() 
+                if v is not None and k in levels
+            ]
         else:
             exogs_to_check = [('`exog`', exog)]
 
@@ -1527,10 +1547,12 @@ def transform_series(
         transformer = deepcopy(transformer)
         transformer.feature_names_in_ = np.array([data.columns[0]], dtype=object)
 
-    if inverse_transform:
-        values_transformed = transformer.inverse_transform(data)
-    else:
-        values_transformed = transformer.transform(data)   
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=UserWarning)
+        if inverse_transform:
+            values_transformed = transformer.inverse_transform(data)
+        else:
+            values_transformed = transformer.transform(data)   
 
     if hasattr(values_transformed, 'toarray'):
         # If the returned values are in sparse matrix format, it is converted to dense array.
@@ -2745,8 +2767,9 @@ def preprocess_levels_self_last_window_multiseries(
 def prepare_residuals_multiseries(
     levels: list,
     use_in_sample: bool,
-    in_sample_residuals: Optional[dict]=None,
-    out_sample_residuals: Optional[dict]=None
+    encoding: Optional[str] = None,
+    in_sample_residuals: Optional[dict] = None,
+    out_sample_residuals: Optional[dict] = None
 ) -> Tuple[list, bool]:
     """
     Prepare residuals for bootstrapping prediction in multiseries Forecasters.
@@ -2758,6 +2781,9 @@ def prepare_residuals_multiseries(
     use_in_sample : bool
         Indicates if in_sample_residuals are used. Same as `in_sample_residuals`
         argument in predict method.
+    encoding : str, default `None`
+        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`, 
+        `ForecasterAutoregMultiSeriesCustom`).
     in_sample_residuals : dict, default `None`
         Residuals of the model when predicting training data. Only stored up to
         1000 values in the form `{level: residuals}`. If `transformer_series` 
@@ -2779,7 +2805,7 @@ def prepare_residuals_multiseries(
 
     if use_in_sample:
         unknown_levels = set(levels) - set(in_sample_residuals.keys())
-        if unknown_levels:
+        if unknown_levels and encoding is not None:
             warnings.warn(
                 (f"`levels` {unknown_levels} are not present in `forecaster.in_sample_residuals`, "
                  f"most likely because they were not present in the training data. "
@@ -2797,7 +2823,7 @@ def prepare_residuals_multiseries(
             )
         else:
             unknown_levels = set(levels) - set(out_sample_residuals.keys())
-            if unknown_levels:
+            if unknown_levels and encoding is not None:
                 warnings.warn(
                     (f"`levels` {unknown_levels} are not present in `forecaster.out_sample_residuals`. "
                      f"A random sample of the residuals from other levels will be used. "
@@ -2815,8 +2841,7 @@ def prepare_residuals_multiseries(
     for level in levels:
         if level in unknown_levels:
             residuals[level] = residuals['_unknown_level']
-        if (residuals[level] is None or 
-            len(residuals[level]) == 0):
+        if residuals[level] is None or len(residuals[level]) == 0:
             raise ValueError(
                 (f"Not available residuals for level '{level}'. "
                  f"Check `{check_residuals}`.")
