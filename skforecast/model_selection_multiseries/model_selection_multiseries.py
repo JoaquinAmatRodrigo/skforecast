@@ -375,7 +375,10 @@ def _calculate_metrics_multiseries(
                      )
     metrics_levels.insert(0, 'levels', levels)
 
-    if add_aggregated_metric and len(levels) > 1:
+    if len(levels) < 2:
+        add_aggregated_metric = False
+
+    if add_aggregated_metric:
 
         # aggragation: average
         average = metrics_levels.drop(columns='levels').mean(skipna=True)
@@ -1464,6 +1467,8 @@ def _evaluate_grid_hyperparameters_multiseries(
                  levels     = levels
              )
 
+    add_aggregated_metric = True if len(levels) > 1 else False
+
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
    
     if not isinstance(metric, list):
@@ -1475,11 +1480,13 @@ def _evaluate_grid_hyperparameters_multiseries(
             "When `metric` is a `list`, each metric name must be unique."
         )
 
-    metric_names = [
-        f"{metric_name}__{aggregation}"
-        for metric_name in metric_names
-        for aggregation in aggregate_metric
-    ]
+    if add_aggregated_metric:
+        metric_names = [
+            f"{metric_name}__{aggregation}"
+            for metric_name in metric_names
+            for aggregation in aggregate_metric
+        ]
+
     print(
         f"{len(param_grid)*len(lags_grid)} models compared for {len(levels)} level(s). "
         f"Number of iterations: {len(param_grid)*len(lags_grid)}."
@@ -1516,7 +1523,7 @@ def _evaluate_grid_hyperparameters_multiseries(
                 steps                 = steps,
                 levels                = levels,
                 metric                = metric,
-                add_aggregated_metric = True,
+                add_aggregated_metric = add_aggregated_metric,
                 initial_train_size    = initial_train_size,
                 fixed_train_size      = fixed_train_size,
                 gap                   = gap,
@@ -1530,7 +1537,10 @@ def _evaluate_grid_hyperparameters_multiseries(
                 suppress_warnings     = suppress_warnings
             )
 
-            metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
+            if add_aggregated_metric:
+                metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
+            else:
+                metrics = metrics.loc[metrics['levels'] == levels[0], :]
             metrics = pd.DataFrame(
                           data    = [metrics.iloc[:, 1:].transpose().stack().to_numpy()],
                           columns = metric_names
