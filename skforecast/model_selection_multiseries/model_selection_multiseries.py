@@ -1938,6 +1938,13 @@ def _bayesian_search_optuna_multiseries(
             f"Allowed `aggregate_metric` are {allowed_aggregate_metrics}. "
             f"Got {aggregate_metric}."
         )
+    
+    levels = _initialize_levels_model_selection_multiseries(
+                 forecaster = forecaster,
+                 series     = series,
+                 levels     = levels
+             )
+    add_aggregated_metric = True if len(levels) > 1 else False
 
     if not isinstance(metric, list):
         metric = [metric]
@@ -1948,17 +1955,12 @@ def _bayesian_search_optuna_multiseries(
             "When `metric` is a `list`, each metric name must be unique."
         )
     
-    metric_names = [
-        f"{metric_name}__{aggregation}"
-        for metric_name in metric_names
-        for aggregation in aggregate_metric
-    ]
-
-    levels = _initialize_levels_model_selection_multiseries(
-                 forecaster = forecaster,
-                 series     = series,
-                 levels     = levels
-             )
+    if add_aggregated_metric:
+        metric_names = [
+            f"{metric_name}__{aggregation}"
+            for metric_name in metric_names
+            for aggregation in aggregate_metric
+        ]
 
     # Objective function using backtesting_forecaster_multiseries
     def _objective(
@@ -1970,6 +1972,7 @@ def _bayesian_search_optuna_multiseries(
         steps                 = steps,
         levels                = levels,
         metric                = metric,
+        add_aggregated_metric = add_aggregated_metric,
         aggregate_metric      = aggregate_metric,
         metric_names          = metric_names,
         initial_train_size    = initial_train_size,
@@ -1997,7 +2000,7 @@ def _bayesian_search_optuna_multiseries(
                          steps                 = steps,
                          levels                = levels,
                          metric                = metric,
-                         add_aggregated_metric = True,
+                         add_aggregated_metric = add_aggregated_metric,
                          initial_train_size    = initial_train_size,
                          fixed_train_size      = fixed_train_size,
                          gap                   = gap,
@@ -2010,7 +2013,12 @@ def _bayesian_search_optuna_multiseries(
                          suppress_warnings     = suppress_warnings
                      )
 
-        metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
+        # metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
+
+        if add_aggregated_metric:
+            metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
+        else:
+            metrics = metrics.loc[metrics['levels'] == levels[0], :]
         metrics = pd.DataFrame(
                       data    = [metrics.iloc[:, 1:].transpose().stack().to_numpy()],
                       columns = metric_names
