@@ -55,9 +55,7 @@ def initialize_lags(
     Parameters
     ----------
     forecaster_name : str
-        Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
-        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+        Forecaster name.
     lags : Any
         Lags used as predictors.
 
@@ -664,10 +662,7 @@ def check_predict_input(
     Parameters
     ----------
     forecaster_name : str
-        Forecaster name. ForecasterAutoreg, ForecasterAutoregCustom, 
-        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate,
-        ForecasterRnn
+        Forecaster name.
     steps : int, list
         Number of future steps predicted.
     fitted: bool
@@ -2275,7 +2270,7 @@ def select_n_jobs_fit_forecaster(
     Parameters
     ----------
     forecaster_name : str
-        The type of Forecaster.
+        Forecaster name.
     regressor_name : str
         The type of regressor.
 

@@ -51,6 +51,7 @@ logging.basicConfig(
     level  = logging.INFO,
 )
 
+
 class ForecasterAutoregMultiSeries(ForecasterBase):
     """
     This class turns any regressor compatible with the scikit-learn API into a
@@ -288,15 +289,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
-        encoding: Optional[str]='ordinal_category',
-        transformer_series: Optional[Union[object, dict]]=None,
-        transformer_exog: Optional[object]=None,
-        weight_func: Optional[Union[Callable, dict]]=None,
-        series_weights: Optional[dict]=None,
-        differentiation: Optional[int]=None,
-        dropna_from_series: bool=False,
-        fit_kwargs: Optional[dict]=None,
-        forecaster_id: Optional[Union[str, int]]=None
+        encoding: Optional[str] = 'ordinal_category',
+        transformer_series: Optional[Union[object, dict]] = None,
+        transformer_exog: Optional[object] = None,
+        weight_func: Optional[Union[Callable, dict]] = None,
+        series_weights: Optional[dict] = None,
+        differentiation: Optional[int] = None,
+        dropna_from_series: bool = False,
+        fit_kwargs: Optional[dict] = None,
+        forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
 
         self.regressor               = regressor
@@ -399,13 +400,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     ("When `encoding` is None, `transformer_series` must be a single "
                      "transformer (not `dict`) as it is applied to all series.")
                 )
-            elif '_unknown_level' not in self.transformer_series.keys():
+            if '_unknown_level' not in self.transformer_series.keys():
                 raise ValueError(
                     ("If `transformer_series` is a `dict`, a transformer must be "
                      "provided to transform series that do not exist during training. "
                      "Add the key '_unknown_level' to `transformer_series`. "
-                     "For example: {'_unknown_level': your_transformer}."),
-                     UnknownLevelWarning
+                     "For example: {'_unknown_level': your_transformer}.")
                 )
 
 
@@ -528,7 +528,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         y: pd.Series,
         ignore_exog: bool,
-        exog: Optional[pd.DataFrame]=None
+        exog: Optional[pd.DataFrame] = None
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series]:
         """
         Create training matrices from univariate time series and exogenous
@@ -623,8 +623,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def _create_train_X_y(
         self,
         series: Union[pd.DataFrame, dict],
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        store_last_window: Union[bool, list]=True,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+        store_last_window: Union[bool, list] = True,
     ) -> Tuple[pd.DataFrame, pd.Series, dict, list, list, list, dict, dict]:
         """
         Create training matrices from multiple time series and exogenous
@@ -918,8 +918,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def create_train_X_y(
         self,
         series: Union[pd.DataFrame, dict],
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        suppress_warnings: bool=False
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+        suppress_warnings: bool = False
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Create training matrices from multiple time series and exogenous
@@ -980,7 +980,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         series_col_names: list,
         X_train: pd.DataFrame
-    )-> np.ndarray:
+    ) -> np.ndarray:
         """
         Crate weights for each observation according to the forecaster's attributes
         `series_weights` and `weight_func`. The resulting weights are product of both
@@ -1096,10 +1096,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def fit(
         self,
         series: Union[pd.DataFrame, dict],
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        store_last_window: Union[bool, list]=True,
-        store_in_sample_residuals: bool=True,
-        suppress_warnings: bool=False
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+        store_last_window: Union[bool, list] = True,
+        store_in_sample_residuals: bool = True,
+        suppress_warnings: bool = False
     ) -> None:
         """
         Training Forecaster. See Notes section for more details depending on 
@@ -1254,11 +1254,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def _create_predict_inputs(
         self,
         steps: int,
-        levels: Optional[Union[str, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        predict_boot: bool=False,
-        in_sample_residuals: bool=True
+        levels: Optional[Union[str, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+        predict_boot: bool = False,
+        in_sample_residuals: bool = True
     ) -> Tuple[dict, dict, list, pd.Index, Optional[dict]]:
         """
         Create inputs needed for the first iteration of the prediction process. 
@@ -1437,7 +1437,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         steps: int,
         level: str,
         last_window: np.ndarray,
-        exog: Optional[np.ndarray]=None
+        exog: Optional[np.ndarray] = None
     ) -> np.ndarray:
         """
         Predict n steps ahead. It is an iterative process in which, each prediction,
@@ -1508,10 +1508,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def create_predict_X(
         self,
         steps: int,
-        levels: Optional[Union[str, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        suppress_warnings: bool=False
+        levels: Optional[Union[str, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+        suppress_warnings: bool = False
     ) -> dict:
         """
         Create the predictors needed to predict `steps` ahead. As it is a recursive
@@ -1608,10 +1608,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def predict(
         self,
         steps: int,
-        levels: Optional[Union[str, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        suppress_warnings: bool=False
+        levels: Optional[Union[str, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+        suppress_warnings: bool = False
     ) -> pd.DataFrame:
         """
         Predict n steps ahead. It is an recursive process in which, each prediction,
@@ -1698,13 +1698,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def predict_bootstrapping(
         self,
         steps: int,
-        levels: Optional[Union[str, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        n_boot: int=500,
-        random_state: int=123,
-        in_sample_residuals: bool=True,
-        suppress_warnings: bool=False
+        levels: Optional[Union[str, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+        n_boot: int = 500,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        suppress_warnings: bool = False
     ) -> dict:
         """
         Generate multiple forecasting predictions using a bootstrapping process. 
@@ -1851,14 +1851,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def predict_interval(
         self,
         steps: int,
-        levels: Optional[Union[str, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        interval: list=[5, 95],
-        n_boot: int=500,
-        random_state: int=123,
-        in_sample_residuals: bool=True,
-        suppress_warnings: bool=False
+        levels: Optional[Union[str, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+        interval: list = [5, 95],
+        n_boot: int = 500,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        suppress_warnings: bool = False
     ) -> pd.DataFrame:
         """
         Iterative process in which, each prediction, is used as a predictor
@@ -1942,7 +1942,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                suppress_warnings   = suppress_warnings
                            )
 
-        interval = np.array(interval)/100
+        interval = np.array(interval) / 100
         predictions = []
 
         for level in preds.columns:
@@ -1961,14 +1961,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def predict_quantiles(
         self,
         steps: int,
-        levels: Optional[Union[str, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        quantiles: list=[0.05, 0.5, 0.95],
-        n_boot: int=500,
-        random_state: int=123,
-        in_sample_residuals: bool=True,
-        suppress_warnings: bool=False
+        levels: Optional[Union[str, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+        quantiles: list = [0.05, 0.5, 0.95],
+        n_boot: int = 500,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        suppress_warnings: bool = False
     ) -> pd.DataFrame:
         """
         Calculate the specified quantiles for each step. After generating 
@@ -2057,13 +2057,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         steps: int,
         distribution: object,
-        levels: Optional[Union[str, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-        n_boot: int=500,
-        random_state: int=123,
-        in_sample_residuals: bool=True,
-        suppress_warnings: bool=False
+        levels: Optional[Union[str, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+        n_boot: int = 500,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        suppress_warnings: bool = False
     ) -> pd.DataFrame:
         """
         Fit a given probability distribution for each step. After generating 
@@ -2228,10 +2228,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def set_out_sample_residuals(
         self, 
         residuals: dict,
-        append: bool=True,
-        transform: bool=True,
-        random_state: int=123
-    )-> None:
+        append: bool = True,
+        transform: bool = True,
+        random_state: int = 123
+    ) -> None:
         """
         Set new values to the attribute `out_sample_residuals`. Out of sample
         residuals are meant to be calculated using observations that did not
@@ -2280,10 +2280,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                      "is made. All residuals are stored in the '_unknown_level' key."),
                      UnknownLevelWarning
                 )
-                residuals = [
-                    v for k, v in residuals.items() 
-                    if v is not None
-                ]
+                residuals = [v for v in residuals.values() if v is not None]
                 if residuals:
                     residuals = np.concatenate(residuals)
                 residuals = {'_unknown_level': residuals}
@@ -2310,7 +2307,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             residuals_level = value
             transformer_level = self.transformer_series_[level]
-            level_str = f"level {level}" if self.encoding is not None else 'all levels'
+            level_str = f"level '{level}'" if self.encoding is not None else 'all levels'
 
             if not transform and transformer_level is not None:
                 warnings.warn(
@@ -2375,7 +2372,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     def get_feature_importances(
         self,
-        sort_importance: bool=True
+        sort_importance: bool = True
     ) -> pd.DataFrame:
         """
         Return feature importances of the regressor stored in the
