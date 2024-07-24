@@ -708,10 +708,10 @@ def test_results_output_bayesian_search_forecaster_multivariate_optuna_engine_Fo
             0.20143363961627603, 0.8509374761370117],
         [list(['l1']), np.array([1, 2]), {'alpha': 0.9809565564007693},
             0.20148678375852938, 0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error__weighted_average': float,
+        'mean_absolute_error': float,
         'alpha': float
     })
 
