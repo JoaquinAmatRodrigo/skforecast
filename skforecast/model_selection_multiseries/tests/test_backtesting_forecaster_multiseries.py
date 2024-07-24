@@ -32,7 +32,7 @@ exog_dict_test = {k: v.loc[end_train:,] for k, v in exog_dict.items()}
 series_with_nans = series.copy()
 series_with_nans.iloc[:10, series_with_nans.columns.get_loc('l2')] = np.nan
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 2 lags of a time series.
     """
@@ -40,7 +40,7 @@ def create_predictors(y): # pragma: no cover
 
     return lags
 
-def create_predictors_14(y): # pragma: no cover
+def create_predictors_14(y):  # pragma: no cover
     """
     Create first 14 lags of a time series.
     """
@@ -1519,9 +1519,9 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
         data={
         'levels': ['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004',
                    'average', 'weighted_average', 'pooling'],
-        'mean_absolute_error':[258.53959034, 1396.68222457, np.nan, 253.72012285,
-                               1367.69574404, 819.1594204522052, 753.0251104677614,
-                               753.0251104677616]
+        'mean_absolute_error': [258.53959034, 1396.68222457, np.nan, 253.72012285,
+                                1367.69574404, 819.1594204522052, 753.0251104677614,
+                                753.0251104677616]
         },
         columns=['levels', 'mean_absolute_error']
     )

@@ -9,6 +9,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.linear_model import LinearRegression
+from lightgbm import LGBMRegressor
 
 from skforecast.exceptions import IgnoredArgumentWarning
 from skforecast.exceptions import UnknownLevelWarning
@@ -71,7 +72,7 @@ def test_predict_bootstrapping_IgnoredArgumentWarning_when_not_available_self_la
                      index   = pd.RangeIndex(start=50, stop=51)
                  )
 
-    expected = {'1': expected_1 }
+    expected = {'1': expected_1}
 
     pd.testing.assert_frame_equal(results['1'], expected['1'])
 
@@ -138,11 +139,11 @@ def test_predict_bootstrapping_IgnoredArgumentWarning_when_levels_is_list_and_di
                   )
 
     expected = {
-        '1' : pd.DataFrame(
-                  data    = np.array([[0.17482136, 0.59548022, 0.40159385, 0.37372285]]),
-                  columns = [f"pred_boot_{i}" for i in range(4)],
-                  index   = pd.date_range(start='2020-02-20', periods=1)
-              )
+        '1': pd.DataFrame(
+                 data    = np.array([[0.17482136, 0.59548022, 0.40159385, 0.37372285]]),
+                 columns = [f"pred_boot_{i}" for i in range(4)],
+                 index   = pd.date_range(start='2020-02-20', periods=1)
+             )
     }
 
     pd.testing.assert_frame_equal(results['1'], expected['1'])
@@ -154,11 +155,75 @@ def test_predict_bootstrapping_UnknownLevelWarning_when_not_in_sample_residuals_
     in_sample_residuals is True (using _unknown_level residuals).
     """
     forecaster = ForecasterAutoregMultiSeries(
-        LinearRegression(), lags=3, encoding=None
+        LGBMRegressor(verbose=-1), lags=3, encoding='ordinal'
     )
     forecaster.fit(series=series)
     last_window = pd.DataFrame(forecaster.last_window)
     last_window['3'] = last_window['1']
+
+    warn_msg = re.escape(
+        ("`levels` {'3'} were not included in training. "
+         "Unknown levels are encoded as NaN, which may cause the "
+        "prediction to fail if the regressor does not accept NaN values.")
+    )
+    with pytest.warns(UnknownLevelWarning, match = warn_msg):
+        results = forecaster.predict_bootstrapping(
+                      steps               = 1,
+                      levels              = ['1', '2', '3'],
+                      last_window         = last_window,
+                      n_boot              = 4,
+                      in_sample_residuals = True
+                  )
+
+    warn_msg = re.escape(
+        ("`levels` {'3'} are not present in `forecaster.in_sample_residuals`, "
+         "most likely because they were not present in the training data. "
+         "A random sample of the residuals from other levels will be used. "
+         "This can lead to inaccurate intervals for the unknown levels.")
+    )
+    with pytest.warns(UnknownLevelWarning, match = warn_msg):
+        results = forecaster.predict_bootstrapping(
+                      steps               = 1,
+                      levels              = ['1', '2', '3'],
+                      last_window         = last_window,
+                      n_boot              = 4,
+                      in_sample_residuals = True
+                  )
+
+    expected = {
+        '1': pd.DataFrame(
+                 data    = np.array([[0.2557472, 0.45547833, 0.40141629, 0.41792497]]),
+                 columns = [f"pred_boot_{i}" for i in range(4)],
+                 index   = pd.RangeIndex(50, 51)
+             ),
+        '2': pd.DataFrame(
+                 data    = np.array([[0.3186409, 0.68423258, 0.65611321, 0.56456426]]),
+                 columns = [f"pred_boot_{i}" for i in range(4)],
+                 index   = pd.RangeIndex(50, 51)
+             ),
+        '3': pd.DataFrame(
+                 data    = np.array([[0.52102511, 0.29834891, 0.51943208, 0.54486619]]),
+                 columns = [f"pred_boot_{i}" for i in range(4)],
+                 index   = pd.RangeIndex(50, 51)
+             )
+    }
+
+    for key in results.keys():
+        pd.testing.assert_frame_equal(results[key], expected[key])
+
+
+def test_predict_bootstrapping_encoding_None_unknown_level():
+    """
+    Test UnknownLevelWarning is raised when predicting an unknown level and 
+    encoding is None (using _unknown_level residuals).
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+        LGBMRegressor(verbose=-1), lags=3, encoding=None
+    )
+    forecaster.fit(series=series)
+    last_window = pd.DataFrame(forecaster.last_window)
+    last_window['3'] = last_window['1']
+
     results = forecaster.predict_bootstrapping(
                   steps               = 1,
                   levels              = ['1', '2', '3'],
@@ -168,21 +233,63 @@ def test_predict_bootstrapping_UnknownLevelWarning_when_not_in_sample_residuals_
               )
 
     expected = {
-        '1' : pd.DataFrame(
-                  data    = np.array([[0.1694383 , 0.48615202, 0.30470943, 0.40157124]]),
-                  columns = [f"pred_boot_{i}" for i in range(4)],
-                  index   = pd.RangeIndex(50, 51)
-              ),
-        '2' : pd.DataFrame(
-                  data    = np.array([[0.24342804, 0.60007019, 0.6322595 , 0.49183118]]),
-                  columns = [f"pred_boot_{i}" for i in range(4)],
-                  index   = pd.RangeIndex(50, 51)
-              ),
-        '3' : pd.DataFrame(
-                  data    = np.array([[0.42475802, 0.41335124, 0.45959615, 0.71109941]]),
-                  columns = [f"pred_boot_{i}" for i in range(4)],
-                  index   = pd.RangeIndex(50, 51)
+        '1': pd.DataFrame(
+                 data    = np.array([[0.46049943, 0.27232912, 0.4773099, 0.51544113]]),
+                 columns = [f"pred_boot_{i}" for i in range(4)],
+                 index   = pd.RangeIndex(50, 51)
+             ),
+        '2': pd.DataFrame(
+                 data    = np.array([[0.49599521, 0.3078249, 0.51280568, 0.55093691]]),
+                 columns = [f"pred_boot_{i}" for i in range(4)],
+                 index   = pd.RangeIndex(50, 51)
+             ),
+        '3': pd.DataFrame(
+                 data    = np.array([[0.46049943, 0.27232912, 0.4773099, 0.51544113]]),
+                 columns = [f"pred_boot_{i}" for i in range(4)],
+                 index   = pd.RangeIndex(50, 51)
+             )
+    }
+
+    for key in results.keys():
+        pd.testing.assert_frame_equal(results[key], expected[key])
+
+
+def test_predict_bootstrapping_encoding_None_unknown_level_differentiation():
+    """
+    Test UnknownLevelWarning is raised when predicting an unknown level and 
+    encoding is None (using _unknown_level residuals) and differentiation=1.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+        LGBMRegressor(verbose=-1), lags=3, encoding=None, differentiation=1
+    )
+    forecaster.fit(series=series)
+    last_window = pd.DataFrame(forecaster.last_window)
+    last_window['3'] = last_window['1'] * 0.9
+
+    results = forecaster.predict_bootstrapping(
+                  steps               = 1,
+                  levels              = ['1', '2', '3'],
+                  last_window         = last_window,
+                  n_boot              = 5,
+                  in_sample_residuals = True
               )
+
+    expected = {
+        '1': pd.DataFrame(
+                 data    = np.array([[0.85193261, 0.65669636, 0.40904666, 0.48671657, 0.64058698]]),
+                 columns = [f"pred_boot_{i}" for i in range(5)],
+                 index   = pd.RangeIndex(50, 51)
+             ),
+        '2': pd.DataFrame(
+                 data    = np.array([[0.36430545, 0.16906919, -0.07858051, -0.00091059, 0.15295982]]),
+                 columns = [f"pred_boot_{i}" for i in range(5)],
+                 index   = pd.RangeIndex(50, 51)
+             ),
+        '3': pd.DataFrame(
+                 data    = np.array([[0.79064316, 0.59540691, 0.34775721, 0.42542712, 0.57929753]]),
+                 columns = [f"pred_boot_{i}" for i in range(5)],
+                 index   = pd.RangeIndex(50, 51)
+             )
     }
 
     for key in results.keys():
@@ -237,21 +344,21 @@ def test_predict_bootstrapping_ValueError_when_not_out_sample_residuals_for_all_
               )
 
     expected = {
-        '1' : pd.DataFrame(
-                  data    = np.array([[2.48307367, 2.48307367, 3.48307367, 1.48307367]]),
-                  columns = [f"pred_boot_{i}" for i in range(4)],
-                  index   = pd.RangeIndex(50, 51)
-              ),
-        '2' : pd.DataFrame(
-                  data    = np.array([[2.5061193, 2.5061193, 3.5061193, 1.5061193]]),
-                  columns = [f"pred_boot_{i}" for i in range(4)],
-                  index   = pd.RangeIndex(50, 51)
-              ),
-        '3' : pd.DataFrame(
-                  data    = np.array([[4.48307367, 4.48307367, 5.48307367, 2.48307367]]),
-                  columns = [f"pred_boot_{i}" for i in range(4)],
-                  index   = pd.RangeIndex(50, 51)
-              )
+        '1': pd.DataFrame(
+              data    = np.array([[4.48307367, 4.48307367, 5.48307367, 2.48307367]]),
+              columns = [f"pred_boot_{i}" for i in range(4)],
+              index   = pd.RangeIndex(50, 51)
+          ),
+        '2': pd.DataFrame(
+              data    = np.array([[4.5061193, 4.5061193, 5.5061193, 2.5061193]]),
+              columns = [f"pred_boot_{i}" for i in range(4)],
+              index   = pd.RangeIndex(50, 51)
+          ),
+        '3': pd.DataFrame(
+              data    = np.array([[4.48307367, 4.48307367, 5.48307367, 2.48307367]]),
+              columns = [f"pred_boot_{i}" for i in range(4)],
+              index   = pd.RangeIndex(50, 51)
+          )
     }
 
     for key in results.keys():

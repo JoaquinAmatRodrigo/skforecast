@@ -42,9 +42,9 @@ def test_ValueError_evaluate_grid_hyperparameters_multiseries_when_return_best_a
     exog = series.iloc[:30, 0]
 
     err_msg = re.escape(
-            (f"`exog` must have same number of samples as `series`. "
-             f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
-        )
+        (f"`exog` must have same number of samples as `series`. "
+         f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
+    )
     with pytest.raises(ValueError, match = err_msg):
         _evaluate_grid_hyperparameters_multiseries(
             forecaster         = forecaster,
@@ -53,6 +53,39 @@ def test_ValueError_evaluate_grid_hyperparameters_multiseries_when_return_best_a
             param_grid         = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
             steps              = 4,
             metric             = 'mean_absolute_error',
+            initial_train_size = 12,
+            fixed_train_size   = False,
+            levels             = None,
+            lags_grid          = [2, 4],
+            refit              = False,
+            return_best        = True,
+            verbose            = False
+        )
+
+
+def test_ValueError_evaluate_grid_hyperparameters_multiseries_when_not_allowed_aggregate_metric():
+    """
+    Test ValueError is raised in _evaluate_grid_hyperparameters_multiseries when 
+    `aggregate_metric` has not a valid value.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 3,
+                     encoding  = 'onehot'
+                 )
+
+    err_msg = re.escape(
+        ("Allowed `aggregate_metric` are: ['average', 'weighted_average', 'pooling']. "
+         "Got: ['not_valid'].")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        _evaluate_grid_hyperparameters_multiseries(
+            forecaster         = forecaster,
+            series             = series,
+            param_grid         = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
+            steps              = 4,
+            metric             = 'mean_absolute_error',
+            aggregate_metric   = 'not_valid',
             initial_train_size = 12,
             fixed_train_size   = False,
             levels             = None,
@@ -91,6 +124,7 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_metric_list_du
             return_best        = False,
             verbose            = False
         )
+
 
 # ForecasterAutoregMultiSeries
 # ======================================================================================================================
@@ -285,7 +319,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
 
 @pytest.mark.parametrize("levels", 
                          ['l1', ['l1']], 
-                         ids = lambda value : f'levels: {value}' )
+                         ids = lambda value: f'levels: {value}' )
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_levels_str_list_with_mocked(levels):
     """
     Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeries 
@@ -393,7 +427,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1', 'l2']]*6,
+        'levels': [['l1', 'l2']] * 6,
         'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
                    [1, 2], [1, 2], [1, 2]],
         'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 

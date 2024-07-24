@@ -280,7 +280,7 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = LinearRegression(),
                      lags               = 5,
-                     transformer_series = {'1': StandardScaler(), '2': MinMaxScaler()}
+                     transformer_series = {'1': StandardScaler(), '2': MinMaxScaler(), '_unknown_level': StandardScaler()}
                  )
     forecaster.fit(series=series)
     predictions = forecaster.predict_interval(steps=5, levels=['1'])

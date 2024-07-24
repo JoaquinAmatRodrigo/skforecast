@@ -183,8 +183,8 @@ def initialize_weights(
 def initialize_transformer_series(
     forecaster_name: str,
     series_col_names: list,
-    encoding: Optional[str]=None,
-    transformer_series: Optional[Union[object, dict]]=None
+    encoding: Optional[str] = None,
+    transformer_series: Optional[Union[object, dict]] = None
 ) -> dict:
     """
     Initialize `transformer_series_` attribute for the Forecasters Multiseries.
@@ -270,7 +270,7 @@ def initialize_transformer_series(
 
 def initialize_lags_grid(
     forecaster: object, 
-    lags_grid: Optional[Union[list, dict]]=None
+    lags_grid: Optional[Union[list, dict]] = None
 ) -> Tuple[dict, str]:
     """
     Initialize lags grid and lags label for model selection. 
@@ -326,7 +326,7 @@ def initialize_lags_grid(
 
 def check_select_fit_kwargs(
     regressor: object,
-    fit_kwargs: Optional[dict]=None
+    fit_kwargs: Optional[dict] = None
 ) -> dict:
     """
     Check if `fit_kwargs` is a dict and select only the keys that are used by
@@ -375,7 +375,7 @@ def check_select_fit_kwargs(
             del fit_kwargs['sample_weight']
 
         # Select only the keyword arguments allowed by the regressor's `fit` method.
-        fit_kwargs = {k:v for k, v in fit_kwargs.items()
+        fit_kwargs = {k: v for k, v in fit_kwargs.items()
                       if k in inspect.signature(regressor.fit).parameters}
 
     return fit_kwargs
@@ -383,7 +383,7 @@ def check_select_fit_kwargs(
 
 def check_y(
     y: Any,
-    series_id: str="`y`"
+    series_id: str = "`y`"
 ) -> None:
     """
     Raise Exception if `y` is not pandas Series or if it has missing values.
@@ -412,8 +412,8 @@ def check_y(
 
 def check_exog(
     exog: Union[pd.Series, pd.DataFrame],
-    allow_nan: bool=True,
-    series_id: str="`exog`"
+    allow_nan: bool = True,
+    series_id: str = "`exog`"
 ) -> None:
     """
     Raise Exception if `exog` is not pandas Series or pandas DataFrame.
@@ -483,8 +483,8 @@ def get_exog_dtypes(
 
 def check_exog_dtypes(
     exog: Union[pd.DataFrame, pd.Series],
-    call_check_exog: bool=True,
-    series_id: str="`exog`"
+    call_check_exog: bool = True,
+    series_id: str = "`exog`"
 ) -> None:
     """
     Raise Exception if `exog` has categorical columns with non integer values.
@@ -549,9 +549,9 @@ def check_exog_dtypes(
 
 
 def check_interval(
-    interval: list=None,
-    quantiles: float=None,
-    alpha: float=None
+    interval: list = None,
+    quantiles: float = None,
+    alpha: float = None
 ) -> None:
     """
     Check provided confidence interval sequence is valid.
@@ -642,17 +642,17 @@ def check_predict_input(
     index_freq: str,
     window_size: int,
     last_window: Union[pd.Series, pd.DataFrame, None],
-    last_window_exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    exog_type: Optional[type]=None,
-    exog_col_names: Optional[list]=None,
-    interval: Optional[list]=None,
-    alpha: Optional[float]=None,
-    max_steps: Optional[int]=None,
-    levels: Optional[Union[str, list]]=None,
-    levels_forecaster: Optional[Union[str, list]]=None,
-    series_col_names: Optional[list]=None,
-    encoding: Optional[str]=None
+    last_window_exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    exog_type: Optional[type] = None,
+    exog_col_names: Optional[list] = None,
+    interval: Optional[list] = None,
+    alpha: Optional[float] = None,
+    max_steps: Optional[int] = None,
+    levels: Optional[Union[str, list]] = None,
+    levels_forecaster: Optional[Union[str, list]] = None,
+    series_col_names: Optional[list] = None,
+    encoding: Optional[str] = None
 ) -> None:
     """
     Check all inputs of predict method. This is a helper function to validate
@@ -759,20 +759,27 @@ def check_predict_input(
             else series_col_names
         )
         unknown_levels = set(levels) - set(levels_to_check)
-        if len(unknown_levels) != 0 and last_window is not None and encoding is not None:
-            if encoding == 'onehot':
-                warnings.warn(
-                    (f"`levels` {unknown_levels} were not included in training. The resulting "
-                     f"one-hot encoded columns for this feature will be all zeros."),
-                     UnknownLevelWarning
+        if forecaster_name == 'ForecasterRnn':
+            if len(unknown_levels) != 0:
+                raise ValueError(
+                    (f"`levels` names must be included in the series used during fit "
+                     f"({levels_to_check}). Got {levels}.")
                 )
-            else:
-                warnings.warn(
-                    (f"`levels` {unknown_levels} were not included in training. "
-                     f"Unknown levels are encoded as NaN, which may cause the "
-                     f"prediction to fail if the regressor does not accept NaN values."),
-                     UnknownLevelWarning
-                )
+        else:
+            if len(unknown_levels) != 0 and last_window is not None and encoding is not None:
+                if encoding == 'onehot':
+                    warnings.warn(
+                        (f"`levels` {unknown_levels} were not included in training. The resulting "
+                         f"one-hot encoded columns for this feature will be all zeros."),
+                         UnknownLevelWarning
+                    )
+                else:
+                    warnings.warn(
+                        (f"`levels` {unknown_levels} were not included in training. "
+                         f"Unknown levels are encoded as NaN, which may cause the "
+                         f"prediction to fail if the regressor does not accept NaN values."),
+                         UnknownLevelWarning
+                    )
 
     if exog is None and included_exog:
         raise ValueError(
@@ -1033,9 +1040,9 @@ def check_predict_input(
                 )
             if last_window_exog.isnull().any().all():
                 warnings.warn(
-                ("`last_window_exog` has missing values. Most of machine learning "
-                 "models do not allow missing values. Prediction method may fail."),
-                MissingValuesWarning
+                    ("`last_window_exog` has missing values. Most of machine learning "
+                     "models do not allow missing values. Prediction method may fail."),
+                     MissingValuesWarning
             )
             _, last_window_exog_index = preprocess_last_window(
                                             last_window   = last_window_exog.iloc[:0],
@@ -1064,10 +1071,8 @@ def check_predict_input(
             else:
                 if last_window_exog.name is None:
                     raise ValueError(
-                        (
-                            "When `last_window_exog` is a pandas Series, it must have a "
-                            "name. Got None."
-                        )
+                        ("When `last_window_exog` is a pandas Series, it must have a "
+                         "name. Got None.")
                     )
 
                 if last_window_exog.name not in exog_col_names:
@@ -1081,7 +1086,7 @@ def check_predict_input(
 
 def preprocess_y(
     y: Union[pd.Series, pd.DataFrame],
-    return_values: bool=True
+    return_values: bool = True
 ) -> Tuple[Union[None, np.ndarray], pd.Index]:
     """
     Return values and index of series separately. Index is overwritten 
@@ -1143,7 +1148,7 @@ def preprocess_y(
 
 def preprocess_last_window(
     last_window: Union[pd.Series, pd.DataFrame],
-    return_values: bool=True
+    return_values: bool = True
  ) -> Tuple[np.ndarray, pd.Index]:
     """
     Return values and index of series separately. Index is overwritten 
@@ -1205,7 +1210,7 @@ def preprocess_last_window(
 
 def preprocess_exog(
     exog: Union[pd.Series, pd.DataFrame],
-    return_values: bool=True
+    return_values: bool = True
 ) -> Tuple[Union[None, np.ndarray], pd.Index]:
     """
     Return values and index of series or data frame separately. Index is
@@ -1306,7 +1311,7 @@ def input_to_frame(
 def cast_exog_dtypes(
     exog: Union[pd.Series, pd.DataFrame],
     exog_dtypes: dict,
-) -> Union[pd.Series, pd.DataFrame]: # pragma: no cover
+) -> Union[pd.Series, pd.DataFrame]:  # pragma: no cover
     """
     Cast `exog` to a specified types. This is done because, for a forecaster to 
     accept a categorical exog, it must contain only integer values. Due to the 
@@ -1333,7 +1338,7 @@ def cast_exog_dtypes(
     """
 
     # Remove keys from exog_dtypes not in exog.columns
-    exog_dtypes = {k:v for k, v in exog_dtypes.items() if k in exog.columns}
+    exog_dtypes = {k: v for k, v in exog_dtypes.items() if k in exog.columns}
     
     if isinstance(exog, pd.Series) and exog.dtypes != list(exog_dtypes.values())[0]:
         exog = exog.astype(list(exog_dtypes.values())[0])
@@ -1351,7 +1356,7 @@ def cast_exog_dtypes(
 def exog_to_direct(
     exog: Union[pd.Series, pd.DataFrame],
     steps: int
-)-> pd.DataFrame:
+) -> pd.DataFrame:
     """
     Transforms `exog` to a pandas DataFrame with the shape needed for Direct
     forecasting.
@@ -1383,7 +1388,7 @@ def exog_to_direct(
     for i in range(steps):
         exog_column_transformed = exog.iloc[i : n_rows - (steps - 1 - i), ]
         exog_column_transformed.index = pd.RangeIndex(len(exog_column_transformed))
-        exog_column_transformed.columns = [f"{col}_step_{i+1}" 
+        exog_column_transformed.columns = [f"{col}_step_{i + 1}" 
                                            for col in exog_column_transformed.columns]
         exog_transformed.append(exog_column_transformed)
 
@@ -1400,7 +1405,7 @@ def exog_to_direct(
 def exog_to_direct_numpy(
     exog: np.ndarray,
     steps: int
-)-> np.ndarray:
+) -> np.ndarray:
     """
     Transforms `exog` to numpy ndarray with the shape needed for Direct
     forecasting.
@@ -1490,8 +1495,8 @@ def expand_index(
 def transform_series(
     series: pd.Series,
     transformer,
-    fit: bool=False,
-    inverse_transform: bool=False
+    fit: bool = False,
+    inverse_transform: bool = False
 ) -> Union[pd.Series, pd.DataFrame]:
     """      
     Transform raw values of pandas Series with a scikit-learn alike transformer
@@ -1574,8 +1579,8 @@ def transform_series(
 def transform_dataframe(
     df: pd.DataFrame,
     transformer,
-    fit: bool=False,
-    inverse_transform: bool=False
+    fit: bool = False,
+    inverse_transform: bool = False
 ) -> pd.DataFrame:
     """      
     Transform raw values of pandas DataFrame with a scikit-learn alike
@@ -1645,8 +1650,8 @@ def transform_dataframe(
 def save_forecaster(
     forecaster: object, 
     file_name: str,
-    save_custom_functions: bool=True, 
-    verbose: bool=True
+    save_custom_functions: bool = True, 
+    verbose: bool = True
 ) -> None:
     """
     Save forecaster model using joblib. If custom functions are used to create
@@ -1706,7 +1711,7 @@ def save_forecaster(
 
 def load_forecaster(
     file_name: str,
-    verbose: bool=True
+    verbose: bool = True
 ) -> object:
     """
     Load forecaster model using joblib. If the forecaster was saved with custom
@@ -1750,7 +1755,7 @@ def load_forecaster(
 
 def _find_optional_dependency(
     package_name: str, 
-    optional_dependencies: dict=optional_dependencies
+    optional_dependencies: dict = optional_dependencies
 ) -> Tuple[str, str]:
     """
     Find if a package is an optional dependency. If True, find the version and 
@@ -1814,8 +1819,8 @@ def multivariate_time_series_corr(
     time_series: pd.Series,
     other: pd.DataFrame,
     lags: Union[int, list, np.array],
-    method: str='pearson'
-)-> pd.DataFrame:
+    method: str = 'pearson'
+) -> pd.DataFrame:
     """
     Compute correlation between a time_series and the lagged values of other 
     time series. 
@@ -1870,25 +1875,25 @@ def check_backtesting_input(
     forecaster: object,
     steps: int,
     metric: Union[str, Callable, list],
-    add_aggregated_metric: bool=True,
-    y: Optional[pd.Series]=None,
-    series: Optional[Union[pd.DataFrame, dict]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    initial_train_size: Optional[int]=None,
-    fixed_train_size: bool=True,
-    gap: int=0,
-    skip_folds: Optional[Union[int, list]]=None,
-    allow_incomplete_fold: bool=True,
-    refit: Union[bool, int]=False,
-    interval: Optional[list]=None,
-    alpha: Optional[float]=None,
-    n_boot: int=500,
-    random_state: int=123,
-    in_sample_residuals: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=False,
-    show_progress: bool=True,
-    suppress_warnings: bool=False
+    add_aggregated_metric: bool = True,
+    y: Optional[pd.Series] = None,
+    series: Optional[Union[pd.DataFrame, dict]] = None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    initial_train_size: Optional[int] = None,
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    refit: Union[bool, int] = False,
+    interval: Optional[list] = None,
+    alpha: Optional[float] = None,
+    n_boot: int = 500,
+    random_state: int = 123,
+    in_sample_residuals: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = False,
+    show_progress: bool = True,
+    suppress_warnings: bool = False
 ) -> None:
     """
     This is a helper function to check most inputs of backtesting functions in 
@@ -2576,7 +2581,7 @@ def check_preprocess_exog_multiseries(
 def align_series_and_exog_multiseries(
     series_dict: dict,
     input_series_is_dict: bool,
-    exog_dict: dict=None
+    exog_dict: dict = None
 ) -> Tuple[Union[pd.Series, pd.DataFrame], Union[pd.Series, pd.DataFrame]]:
     """
     Align series and exog according to their index. If needed, reindexing is
@@ -2646,7 +2651,7 @@ def align_series_and_exog_multiseries(
 
 def prepare_levels_multiseries(
     series_X_train: list,
-    levels: Optional[Union[str, list]]=None
+    levels: Optional[Union[str, list]] = None
 ) -> Tuple[list, bool]:
     """
     Prepare list of levels to be predicted in multiseries Forecasters.
@@ -2853,7 +2858,7 @@ def prepare_residuals_multiseries(
 
 def prepare_steps_direct(
     max_step: int,
-    steps: Optional[Union[int, list]]=None
+    steps: Optional[Union[int, list]] = None
 ) -> list:
     """
     Prepare list of steps to be predicted in Direct Forecasters.
@@ -2899,7 +2904,7 @@ def prepare_steps_direct(
 
 def set_skforecast_warnings(
     suppress_warnings: bool,
-    action: str='default'
+    action: str = 'default'
 ) -> None:
     """
     Set skforecast warnings action.

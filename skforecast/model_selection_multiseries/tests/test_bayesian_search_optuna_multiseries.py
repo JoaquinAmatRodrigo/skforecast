@@ -22,12 +22,12 @@ from tqdm import tqdm
 from functools import partialmethod
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 4 lags of a time series.
     """
@@ -35,6 +35,47 @@ def create_predictors(y): # pragma: no cover
     lags = y[-1:-5:-1]
 
     return lags
+
+
+def test_ValueError_bayesian_search_optuna_multiseries_when_not_allowed_aggregate_metric():
+    """
+    Test ValueError is raised in _bayesian_search_optuna_multiseries when 
+    `aggregate_metric` has not a valid value.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2,
+                     encoding  = 'onehot'
+                 )
+
+    steps = 3
+    n_validation = 12
+    
+    def search_space(trial):  # pragma: no cover
+        search_space  = {'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0)}
+
+        return search_space
+
+    err_msg = re.escape(
+        ("Allowed `aggregate_metric` are: ['average', 'weighted_average', 'pooling']. "
+         "Got: ['not_valid'].")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        _bayesian_search_optuna_multiseries(
+            forecaster         = forecaster,
+            series             = series,
+            steps              = steps,
+            search_space       = search_space,
+            metric             = 'mean_absolute_error',
+            aggregate_metric   = 'not_valid',
+            refit              = True,
+            initial_train_size = len(series) - n_validation,
+            fixed_train_size   = True,
+            n_trials           = 10,
+            random_state       = 123,
+            return_best        = False,
+            verbose            = False,
+        )
 
 
 def test_ValueError_bayesian_search_optuna_multiseries_metric_list_duplicate_names():
@@ -51,7 +92,7 @@ def test_ValueError_bayesian_search_optuna_multiseries_metric_list_duplicate_nam
     steps = 3
     n_validation = 12
     
-    def search_space(trial): # pragma: no cover
+    def search_space(trial):  # pragma: no cover
         search_space  = {'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0)}
 
         return search_space
@@ -1147,7 +1188,7 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeriesCustom_o
         
         return search_space
 
-    output_file = 'test_bayesian_search_optuna_multiseries_output_file.txt'
+    output_file = 'test_bayesian_search_optuna_multiseries_output_file_2.txt'
     results = _bayesian_search_optuna_multiseries(
                   forecaster         = forecaster,
                   series             = series,
@@ -1192,7 +1233,7 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiVariate_output
         
         return search_space
 
-    output_file = 'test_bayesian_search_optuna_multiseries_output_file.txt'
+    output_file = 'test_bayesian_search_optuna_multiseries_output_file_3.txt'
     results = _bayesian_search_optuna_multiseries(
                   forecaster         = forecaster,
                   series             = series,

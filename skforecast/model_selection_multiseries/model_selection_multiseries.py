@@ -40,7 +40,7 @@ logging.basicConfig(
 def _initialize_levels_model_selection_multiseries(
     forecaster: object, 
     series: Union[pd.DataFrame, dict],
-    levels: Optional[Union[str, list]]=None
+    levels: Optional[Union[str, list]] = None
 ) -> list:
     """
     Initialize levels for model_selection_multiseries functions.
@@ -106,9 +106,9 @@ def _extract_data_folds_multiseries(
     folds: list,
     span_index: Union[pd.DatetimeIndex, pd.RangeIndex],
     window_size: int,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    dropna_last_window: bool=False,
-    externally_fitted: bool=False
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    dropna_last_window: bool = False,
+    externally_fitted: bool = False
 ) -> Generator[
         Tuple[
             Union[pd.Series, pd.DataFrame, dict],
@@ -254,13 +254,13 @@ def _extract_data_folds_multiseries(
 
 
 def _calculate_metrics_multiseries(
-    series : Union[pd.DataFrame, dict],
+    series: Union[pd.DataFrame, dict],
     predictions: pd.DataFrame,
     folds: Union[list, tqdm],
-    span_index : Union[pd.DatetimeIndex, pd.RangeIndex],
+    span_index: Union[pd.DatetimeIndex, pd.RangeIndex],
     metrics: list,
     levels: list,
-    add_aggregated_metric: bool=True
+    add_aggregated_metric: bool = True
 ) -> pd.DataFrame:
     """   
     Calculate metrics for each level and also for all levels aggregated using
@@ -449,23 +449,23 @@ def _backtesting_forecaster_multiseries(
     series: Union[pd.DataFrame, dict],
     steps: int,
     metric: Union[str, Callable, list],
-    initial_train_size: Optional[int]=None,
-    fixed_train_size: bool=True,
-    gap: int=0,
-    skip_folds: Optional[Union[int, list]]=None,
-    allow_incomplete_fold: bool=True,
-    levels: Optional[Union[str, list]]=None,
-    add_aggregated_metric: bool=True,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    refit: Union[bool, int]=False,
-    interval: Optional[list]=None,
-    n_boot: int=500,
-    random_state: int=123,
-    in_sample_residuals: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=False,
-    show_progress: bool=True,
-    suppress_warnings: bool=False
+    initial_train_size: Optional[int] = None,
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    levels: Optional[Union[str, list]] = None,
+    add_aggregated_metric: bool = True,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    refit: Union[bool, int] = False,
+    interval: Optional[list] = None,
+    n_boot: int = 500,
+    random_state: int = 123,
+    in_sample_residuals: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = False,
+    show_progress: bool = True,
+    suppress_warnings: bool = False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting for multi-series and multivariate forecasters.
@@ -636,8 +636,8 @@ def _backtesting_forecaster_multiseries(
         fold_initial_train = [
             [0, initial_train_size],
             [initial_train_size - window_size, initial_train_size],
-            [0, 0], # dummy values
-            [0, 0], # dummy values
+            [0, 0],  # dummy values
+            [0, 0],  # dummy values
             True
         ]
         data_fold = _extract_data_folds_multiseries(
@@ -829,22 +829,22 @@ def backtesting_forecaster_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: Optional[int],
-    fixed_train_size: bool=True,
-    gap: int=0,
-    skip_folds: Optional[Union[int, list]]=None,
-    allow_incomplete_fold: bool=True,
-    levels: Optional[Union[str, list]]=None,
-    add_aggregated_metric: bool=True,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    refit: Union[bool, int]=False,
-    interval: Optional[list]=None,
-    n_boot: int=500,
-    random_state: int=123,
-    in_sample_residuals: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=False,
-    show_progress: bool=True,
-    suppress_warnings: bool=False
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    levels: Optional[Union[str, list]] = None,
+    add_aggregated_metric: bool = True,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    refit: Union[bool, int] = False,
+    interval: Optional[list] = None,
+    n_boot: int = 500,
+    random_state: int = 123,
+    in_sample_residuals: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = False,
+    show_progress: bool = True,
+    suppress_warnings: bool = False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting for multi-series and multivariate forecasters.
@@ -1033,21 +1033,21 @@ def grid_search_forecaster_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: Union[str, list]=['weighted_average', 'average', 'pooling'],
-    fixed_train_size: bool=True,
-    gap: int=0,
-    skip_folds: Optional[Union[int, list]]=None,
-    allow_incomplete_fold: bool=True,
-    levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    lags_grid: Optional[Union[list, dict]]=None,
-    refit: Union[bool, int]=False,
-    return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=True,
-    show_progress: bool=True,
-    suppress_warnings: bool=False,
-    output_file: Optional[str]=None
+    aggregate_metric: Union[str, list] = ['weighted_average', 'average', 'pooling'],
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    levels: Optional[Union[str, list]] = None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    lags_grid: Optional[Union[list, dict]] = None,
+    refit: Union[bool, int] = False,
+    return_best: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = True,
+    show_progress: bool = True,
+    suppress_warnings: bool = False,
+    output_file: Optional[str] = None
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a Forecaster object.
@@ -1183,23 +1183,23 @@ def random_search_forecaster_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: Union[str, list]=['weighted_average', 'average', 'pooling'],
-    fixed_train_size: bool=True,
-    gap: int=0,
-    skip_folds: Optional[Union[int, list]]=None,
-    allow_incomplete_fold: bool=True,
-    levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    lags_grid: Optional[Union[list, dict]]=None,
-    refit: Union[bool, int]=False,
-    n_iter: int=10,
-    random_state: int=123,
-    return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=True,
-    show_progress: bool=True,
-    suppress_warnings: bool=False,
-    output_file: Optional[str]=None
+    aggregate_metric: Union[str, list] = ['weighted_average', 'average', 'pooling'],
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    levels: Optional[Union[str, list]] = None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    lags_grid: Optional[Union[list, dict]] = None,
+    refit: Union[bool, int] = False,
+    n_iter: int = 10,
+    random_state: int = 123,
+    return_best: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = True,
+    show_progress: bool = True,
+    suppress_warnings: bool = False,
+    output_file: Optional[str] = None
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -1341,21 +1341,21 @@ def _evaluate_grid_hyperparameters_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: Union[str, list]=['weighted_average', 'average', 'pooling'],
-    fixed_train_size: bool=True,
-    gap: int=0,
-    skip_folds: Optional[Union[int, list]]=None,
-    allow_incomplete_fold: bool=True,
-    levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    lags_grid: Optional[Union[list, dict]]=None,
-    refit: Union[bool, int]=False,
-    return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=True,
-    show_progress: bool=True,
-    suppress_warnings: bool=False,
-    output_file: Optional[str]=None
+    aggregate_metric: Union[str, list] = ['weighted_average', 'average', 'pooling'],
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    levels: Optional[Union[str, list]] = None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    lags_grid: Optional[Union[list, dict]] = None,
+    refit: Union[bool, int] = False,
+    return_best: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = True,
+    show_progress: bool = True,
+    suppress_warnings: bool = False,
+    output_file: Optional[str] = None
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using multi-series backtesting.
@@ -1463,8 +1463,8 @@ def _evaluate_grid_hyperparameters_multiseries(
     allowed_aggregate_metrics = ['average', 'weighted_average', 'pooling']
     if not set(aggregate_metric).issubset(allowed_aggregate_metrics):
         raise ValueError(
-            (f"Allowed `aggregate_metric` are {allowed_aggregate_metrics}. "
-             f"Got {aggregate_metric}.")
+            (f"Allowed `aggregate_metric` are: {allowed_aggregate_metrics}. "
+             f"Got: {aggregate_metric}.")
         )
     
     levels = _initialize_levels_model_selection_multiseries(
@@ -1490,12 +1490,12 @@ def _evaluate_grid_hyperparameters_multiseries(
         for aggregation in aggregate_metric
     ]
     print(
-        f"{len(param_grid)*len(lags_grid)} models compared for {len(levels)} level(s). "
-        f"Number of iterations: {len(param_grid)*len(lags_grid)}."
+        f"{len(param_grid) * len(lags_grid)} models compared for {len(levels)} level(s). "
+        f"Number of iterations: {len(param_grid) * len(lags_grid)}."
     )
 
     if show_progress:
-        lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0) #ncols=90
+        lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0)  # ncols=90
         param_grid = tqdm(param_grid, desc='params grid', position=1, leave=False)
     else:
         lags_grid_tqdm = lags_grid.items()
@@ -1573,7 +1573,7 @@ def _evaluate_grid_hyperparameters_multiseries(
                         f.write('\t'.join([str(r) for r in row]) + '\n')
 
     results = pd.concat(metrics_list, axis=0)
-    results.insert(0, 'levels', [levels]*len(results))
+    results.insert(0, 'levels', [levels] * len(results))
     results.insert(1, 'lags', lags_list)
     results.insert(2, 'lags_label', lags_label_list)
     results.insert(3, 'params', params_list)
@@ -1614,25 +1614,25 @@ def bayesian_search_forecaster_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: Union[str, list]=['weighted_average', 'average', 'pooling'],
-    fixed_train_size: bool=True,
-    gap: int=0,
-    skip_folds: Optional[Union[int, list]]=None,
-    allow_incomplete_fold: bool=True,
-    levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    refit: Union[bool, int]=False,
-    n_trials: int=10,
-    random_state: int=123,
-    return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=True,
-    show_progress: bool=True,
-    suppress_warnings: bool=False,
-    output_file: Optional[str]=None,
-    engine: str='optuna',
-    kwargs_create_study: dict={},
-    kwargs_study_optimize: dict={}
+    aggregate_metric: Union[str, list] = ['weighted_average', 'average', 'pooling'],
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    levels: Optional[Union[str, list]] = None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    refit: Union[bool, int] = False,
+    n_trials: int = 10,
+    random_state: int = 123,
+    return_best: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = True,
+    show_progress: bool = True,
+    suppress_warnings: bool = False,
+    output_file: Optional[str] = None,
+    engine: str = 'optuna',
+    kwargs_create_study: dict = {},
+    kwargs_study_optimize: dict = {}
 ) -> Tuple[pd.DataFrame, object]:
     """
     Bayesian optimization for a Forecaster object using multi-series backtesting 
@@ -1788,24 +1788,24 @@ def _bayesian_search_optuna_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: Union[str, list]=['weighted_average', 'average', 'pooling'],
-    fixed_train_size: bool=True,
-    gap: int=0,
-    skip_folds: Optional[Union[int, list]]=None,
-    allow_incomplete_fold: bool=True,
-    levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    refit: Union[bool, int]=False,
-    n_trials: int=10,
-    random_state: int=123,
-    return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=True,
-    show_progress: bool=True,
-    suppress_warnings: bool=False,
-    output_file: Optional[str]=None,
-    kwargs_create_study: dict={},
-    kwargs_study_optimize: dict={}
+    aggregate_metric: Union[str, list] = ['weighted_average', 'average', 'pooling'],
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    levels: Optional[Union[str, list]] = None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    refit: Union[bool, int] = False,
+    n_trials: int = 10,
+    random_state: int = 123,
+    return_best: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = True,
+    show_progress: bool = True,
+    suppress_warnings: bool = False,
+    output_file: Optional[str] = None,
+    kwargs_create_study: dict = {},
+    kwargs_study_optimize: dict = {}
 ) -> Tuple[pd.DataFrame, object]:
     """
     Bayesian optimization for a Forecaster object using multi-series backtesting 
@@ -1919,8 +1919,8 @@ def _bayesian_search_optuna_multiseries(
     allowed_aggregate_metrics = ['average', 'weighted_average', 'pooling']
     if not set(aggregate_metric).issubset(allowed_aggregate_metrics):
         raise ValueError(
-            f"Allowed `aggregate_metric` are {allowed_aggregate_metrics}. "
-            f"Got {aggregate_metric}."
+            (f"Allowed `aggregate_metric` are: {allowed_aggregate_metrics}. "
+             f"Got: {aggregate_metric}.")
         )
 
     if not isinstance(metric, list):
@@ -2097,7 +2097,7 @@ def _bayesian_search_optuna_multiseries(
         lags_list = lags_list_initialized
 
     results = pd.concat(metrics_list, axis=0)
-    results.insert(0, 'levels', [levels]*len(results))
+    results.insert(0, 'levels', [levels] * len(results))
     results.insert(1, 'lags', lags_list)
     results.insert(2, 'params', params_list)
     results = results.sort_values(by=metric_names[0], ascending=True)
@@ -2134,12 +2134,12 @@ def select_features_multiseries(
     forecaster: object,
     selector: object,
     series: Union[pd.DataFrame, dict],
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    select_only: Optional[str]=None,
-    force_inclusion: Optional[Union[list, str]]=None,
-    subsample: Union[int, float]=0.5,
-    random_state: int=123,
-    verbose: bool=True,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    select_only: Optional[str] = None,
+    force_inclusion: Optional[Union[list, str]] = None,
+    subsample: Union[int, float] = 0.5,
+    random_state: int = 123,
+    verbose: bool = True,
 ) -> Union[list, list]:
     """
     Feature selection using any of the sklearn.feature_selection module selectors 
@@ -2264,7 +2264,7 @@ def select_features_multiseries(
         X_train = X_train.drop(columns=encoding_cols)
 
     if isinstance(subsample, float):
-        subsample = int(len(X_train)*subsample)
+        subsample = int(len(X_train) * subsample)
 
     rng = np.random.default_rng(seed=random_state)
     sample = rng.choice(X_train.index, size=subsample, replace=False)
@@ -2314,7 +2314,7 @@ def select_features_multiseries(
 
     if verbose:
         print(f"Recursive feature elimination ({selector.__class__.__name__})")
-        print("--------------------------------" + "-"*len(selector.__class__.__name__))
+        print("--------------------------------" + "-" * len(selector.__class__.__name__))
         print(f"Total number of records available: {X_train.shape[0]}")
         print(f"Total number of records used for feature selection: {X_train_sample.shape[0]}")
         print(f"Number of features available: {len(autoreg_cols) + len(exog_cols)}") 
@@ -2335,22 +2335,22 @@ def backtesting_forecaster_multivariate(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: Optional[int],
-    add_aggregated_metric: bool=True,
-    fixed_train_size: bool=True,
-    gap: int=0,
-    skip_folds: Optional[Union[int, list]]=None,
-    allow_incomplete_fold: bool=True,
-    levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    refit: Union[bool, int]=False,
-    interval: Optional[list]=None,
-    n_boot: int=500,
-    random_state: int=123,
-    in_sample_residuals: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=False,
-    show_progress: bool=True,
-    suppress_warnings: bool=False
+    add_aggregated_metric: bool = True,
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    levels: Optional[Union[str, list]] = None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    refit: Union[bool, int] = False,
+    interval: Optional[list] = None,
+    n_boot: int = 500,
+    random_state: int = 123,
+    in_sample_residuals: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = False,
+    show_progress: bool = True,
+    suppress_warnings: bool = False
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     This function is an alias of backtesting_forecaster_multiseries.
@@ -2493,21 +2493,21 @@ def grid_search_forecaster_multivariate(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: Union[str, list]=['weighted_average', 'average', 'pooling'],
-    fixed_train_size: bool=True,
-    gap: int=0,
-    skip_folds: Optional[Union[int, list]]=None,
-    allow_incomplete_fold: bool=True,
-    levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    lags_grid: Optional[Union[list, dict]]=None,
-    refit: Union[bool, int]=False,
-    return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=True,
-    show_progress: bool=True,
-    suppress_warnings: bool=False,
-    output_file: Optional[str]=None
+    aggregate_metric: Union[str, list] = ['weighted_average', 'average', 'pooling'],
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    levels: Optional[Union[str, list]] = None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    lags_grid: Optional[Union[list, dict]] = None,
+    refit: Union[bool, int] = False,
+    return_best: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = True,
+    show_progress: bool = True,
+    suppress_warnings: bool = False,
+    output_file: Optional[str] = None
 ) -> pd.DataFrame:
     """
     This function is an alias of grid_search_forecaster_multiseries.
@@ -2644,23 +2644,23 @@ def random_search_forecaster_multivariate(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: Union[str, list]=['weighted_average', 'average', 'pooling'],
-    fixed_train_size: bool=True,
-    gap: int=0,
-    skip_folds: Optional[Union[int, list]]=None,
-    allow_incomplete_fold: bool=True,
-    levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    lags_grid: Optional[Union[list, dict]]=None,
-    refit: Union[bool, int]=False,
-    n_iter: int=10,
-    random_state: int=123,
-    return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=True,
-    show_progress: bool=True,
-    suppress_warnings: bool=False,
-    output_file: Optional[str]=None
+    aggregate_metric: Union[str, list] = ['weighted_average', 'average', 'pooling'],
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    levels: Optional[Union[str, list]] = None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    lags_grid: Optional[Union[list, dict]] = None,
+    refit: Union[bool, int] = False,
+    n_iter: int = 10,
+    random_state: int = 123,
+    return_best: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = True,
+    show_progress: bool = True,
+    suppress_warnings: bool = False,
+    output_file: Optional[str] = None
 ) -> pd.DataFrame:
     """
     This function is an alias of random_search_forecaster_multiseries.
@@ -2804,25 +2804,25 @@ def bayesian_search_forecaster_multivariate(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    aggregate_metric: Union[str, list]=['weighted_average', 'average', 'pooling'],
-    fixed_train_size: bool=True,
-    gap: int=0,
-    skip_folds: Optional[Union[int, list]]=None,
-    allow_incomplete_fold: bool=True,
-    levels: Optional[Union[str, list]]=None,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]]=None,
-    refit: Union[bool, int]=False,
-    n_trials: int=10,
-    random_state: int=123,
-    return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=True,
-    show_progress: bool=True,
-    suppress_warnings: bool=False,
-    output_file: Optional[str]=None,
-    engine: str='optuna',
-    kwargs_create_study: dict={},
-    kwargs_study_optimize: dict={}
+    aggregate_metric: Union[str, list] = ['weighted_average', 'average', 'pooling'],
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    levels: Optional[Union[str, list]] = None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    refit: Union[bool, int] = False,
+    n_trials: int = 10,
+    random_state: int = 123,
+    return_best: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = True,
+    show_progress: bool = True,
+    suppress_warnings: bool = False,
+    output_file: Optional[str] = None,
+    engine: str = 'optuna',
+    kwargs_create_study: dict = {},
+    kwargs_study_optimize: dict = {}
 ) -> Tuple[pd.DataFrame, object]:
     """
     This function is an alias of bayesian_search_forecaster_multiseries.
