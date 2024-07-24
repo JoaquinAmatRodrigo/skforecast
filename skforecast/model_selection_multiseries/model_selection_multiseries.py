@@ -2013,8 +2013,6 @@ def _bayesian_search_optuna_multiseries(
                          suppress_warnings     = suppress_warnings
                      )
 
-        # metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
-
         if add_aggregated_metric:
             metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
         else:
