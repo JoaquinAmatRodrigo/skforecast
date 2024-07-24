@@ -72,7 +72,7 @@ The main changes in this release are:
 
 + `select_n_jobs_backtesting` and `select_n_jobs_fit` in <code>[utils]</code> return `n_jobs = 1` if regressor is `LGBMRegressor`. This is because `lightgbm` is highly optimized for gradient boosting and parallelizes operations at a very fine-grained level, making additional parallelization unnecessary and potentially harmful due to resource contention.
 
-+ `metrics` returned by `backtesting_forecaster` is a `pandas DataFrame` with one column per metric instead of a `list`.
++ `metrics` returned by <code>[backtesting_forecaster]</code> is a `pandas DataFrame` with one column per metric instead of a `list`.
 
 **Fixed**
 

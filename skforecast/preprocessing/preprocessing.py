@@ -336,9 +336,9 @@ def exog_long_to_dict(
 
 def create_datetime_features(
     X: Union[pd.Series, pd.DataFrame],
-    features: list=None,
-    encoding: str="cyclical",
-    max_values: dict=None,
+    features: list = None,
+    encoding: str = "cyclical",
+    max_values: dict = None,
 ) -> pd.DataFrame:
     """
     Extract datetime features from the DateTime index of a pandas DataFrame or Series.
