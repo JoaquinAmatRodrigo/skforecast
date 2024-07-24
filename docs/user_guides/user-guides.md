@@ -24,6 +24,7 @@ Welcome to the skforecast user guides! This comprehensive collection of guides i
 ## Model Evaluation and Tuning
 - [Backtesting forecaster](https://skforecast.org/latest/user_guides/backtesting)
 - [Hyperparameter tuning and lags selection](https://skforecast.org/latest/user_guides/hyperparameter-tuning-and-lags-selection)
+- [Time Series Forecasting Metrics](https://skforecast.org/latest/user_guides/metrics)
 
 ## Probabilistic Forecasting
 - [Probabilistic forecasting](https://skforecast.org/latest/user_guides/probabilistic-forecasting)
