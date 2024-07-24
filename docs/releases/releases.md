@@ -14,47 +14,55 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
-+ <span class="badge text-bg-feature">Feature</span> Create the `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
++ <span class="badge text-bg-feature">Feature</span> Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code> are able to predict series not seen during training. This is useful when the user wants to predict a new series that was not included in the training data.
 
-+ <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/api/forecastermultiseries) and [`ForecasterAutoregMultiSeriesCustom`](https://skforecast.org/latest/api/forecastermultiseriescustom). In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
++ <span class="badge text-bg-feature">Feature</span> `encoding` can be set to `None` in Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. This option does not add an encoding column(s) to the regressor training matrix.
 
-+ <span class="badge text-bg-feature">Feature</span> New argument `skip_folds` in `model_selection` and `model_selection_multiseries` functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
++ <span class="badge text-bg-feature">Feature</span> New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
 
-+ <span class="badge text-bg-api-change">API Change</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.
++ <span class="badge text-bg-feature">Feature</span> New argument `skip_folds` in <code>[model_selection]</code> and <code>[model_selection_multiseries]</code> functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
+
++ <span class="badge text-bg-feature">Feature</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.
+
++ <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
   
 **Added**
 
 + Support for `python 3.12`.
 
-+ Create the `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
++ New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
 
 + Create the `_create_predict_inputs` method in all Forecasters to unify the inputs of the predict methods.
 
-+ New plot function `plot_predicted_intervals` in the `plot` module to plot predicted intervals.
++ New plot function <code>[plot_prediction_intervals]</code> in the <code>[plot]</code> module to plot predicted intervals.
 
-+ New module `metrics` with functions to calculate metrics for time series forecasting such as `mean_absolute_scaled_error` and `root_mean_squared_scaled_error`.
++ New module <code>[metrics]</code> with functions to calculate metrics for time series forecasting such as `mean_absolute_scaled_error` and `root_mean_squared_scaled_error`.
 
-+ New argument `skip_folds` in `model_selection` and `model_selection_multiseries` functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
++ New argument `skip_folds` in <code>[model_selection]</code> and <code>[model_selection_multiseries]</code> functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
 
-+ New function `plot_prediction_intervals` in module `plot`.
++ New function <code>[plot_prediction_intervals]</code> in module <code>[plot]</code>.
+
++ Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code> are able to predict series not seen during training. This is useful when the user wants to predict a new series that was not included in the training data.
+
++ `encoding` can be set to `None` in Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. This option does not add an encoding column(s) to the regressor training matrix.
 
 **Changed**
 
 + Deprecated `python 3.8` compatibility.
 
-+ Change default value of `n_bins` when initializing `ForecasterAutoreg` from 15 to 10.
++ Change default value of `n_bins` when initializing <code>[ForecasterAutoreg]</code> from 15 to 10.
 
 + Refactor `_recursive_predict` in all recursive forecasters.
 
-+ Change default value of `transformer_series` when initializing `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` from `StandardScaler()` to `None`.
++ Change default value of `transformer_series` when initializing <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code> from `StandardScaler()` to `None`.
 
-+ Function `_get_metric` moved from `model_selection` to `metrics`.
++ Function `_get_metric` moved from <code>[model_selection]</code> to <code>[metrics]</code>.
 
-+ Change information message when `verbose` is `True` in `backtesting_forecaster` and `backtesting_forecaster_multiseries`.
++ Change information message when `verbose` is `True` in <code>[backtesting_forecaster]</code> and <code>[backtesting_forecaster_multiseries]</code>.
 
 **Fixed**
 
-+ Bug fix in `backtesting_forecaster_multiseries` using a [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/api/forecastermultiseries) that includes differentiation.
++ Bug fix in <code>[backtesting_forecaster_multiseries]</code> using a <code>[ForecasterAutoregMultiSeries]</code> or <code>[ForecasterAutoregMultiSeriesCustom]</code> that includes differentiation.
 
 
 ## 0.12.1 <small>May 20, 2024</small> { id="0.12.1" }
@@ -69,7 +77,7 @@ The main changes in this release are:
 
 **Fixed**
 
-+ Bug fix when storing `last_window` using a [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/api/forecastermultiseries) that includes differentiation.
++ Bug fix when storing `last_window` using a [`ForecasterAutoregMultiSeries`] that includes differentiation.
 
 
 ## 0.12.0 <small>May 05, 2024</small> { id="0.12.0" }
@@ -793,3 +801,65 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 
  
 **Fixed**
+
+
+
+<!-- Links to API Reference -->
+<!-- Forecasters -->
+[ForecasterAutoreg]: https://skforecast.org/latest/api/forecasterautoreg
+[ForecasterAutoregCustom]: https://skforecast.org/latest/api/forecasterautoregcustom
+[ForecasterAutoregDirect]: https://skforecast.org/latest/api/forecasterautoregdirect
+[ForecasterAutoregMultiSeries]: https://skforecast.org/latest/api/forecastermultiseries
+[ForecasterAutoregMultiSeriesCustom]: https://skforecast.org/latest/api/forecastermultiseriescustom
+[ForecasterAutoregMultiVariate]: https://skforecast.org/latest/api/forecastermultivariate
+[ForecasterRNN]: https://skforecast.org/latest/api/forecasterrnn
+[ForecasterSarimax]: https://skforecast.org/latest/api/forecastersarimax
+[Sarimax]: https://skforecast.org/latest/api/sarimax
+[ForecasterEquivalentDate]: https://skforecast.org/latest/api/forecasterbaseline#skforecast.ForecasterBaseline.ForecasterEquivalentDate
+
+<!-- metrics -->
+[metrics]: https://skforecast.org/latest/api/metrics
+[add_y_train_argument]: https://skforecast.org/latest/api/metrics#skforecast.metrics.metrics.add_y_train_argument
+[mean_absolute_scaled_error]: https://skforecast.org/latest/api/metrics#skforecast.metrics.metrics.mean_absolute_scaled_error
+[root_mean_squared_scaled_error]: https://skforecast.org/latest/api/metrics#skforecast.metrics.metrics.root_mean_squared_scaled_error
+
+<!-- model_selection -->
+[model_selection]: https://skforecast.org/latest/api/model_selection
+[backtesting_forecaster]: https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.backtesting_forecaster
+[grid_search_forecaster]: https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.grid_search_forecaster
+[random_search_forecaster]: https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.random_search_forecaster
+[bayesian_search_forecaster]: https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.bayesian_search_forecaster
+[select_features]: https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.select_features
+
+<!-- model_selection_multiseries -->
+[model_selection_multiseries]: https://skforecast.org/latest/api/model_selection_multiseries
+[backtesting_forecaster_multiseries]: https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.backtesting_forecaster_multiseries
+[grid_search_forecaster_multiseries]: https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.grid_search_forecaster_multiseries
+[random_search_forecaster_multiseries]: https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.random_search_forecaster_multiseries
+[bayesian_search_forecaster_multiseries]: https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.bayesian_search_forecaster_multiseries
+[select_features_multiseries]: https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.select_features_multiseries
+
+<!-- model_selection_sarimax -->
+[model_selection_sarimax]: https://skforecast.org/latest/api/model_selection_sarimax
+[backtesting_sarimax]: https://skforecast.org/latest/api/model_selection_sarimax#skforecast.model_selection_sarimax.model_selection_sarimax.backtesting_sarimax
+[grid_search_sarimax]: https://skforecast.org/latest/api/model_selection_sarimax#skforecast.model_selection_sarimax.model_selection_sarimax.grid_search_sarimax
+[random_search_sarimax]: https://skforecast.org/latest/api/model_selection_sarimax#skforecast.model_selection_sarimax.model_selection_sarimax.random_search_sarimax
+
+<!-- preprocessing -->
+[preprocessing]: https://skforecast.org/latest/api/preprocessing
+[TimeSeriesDifferentiator]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.TimeSeriesDifferentiator
+[series_long_to_dict]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.series_long_to_dict
+[exog_long_to_dict]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.exog_long_to_dict
+
+<!-- plot -->
+[plot]: https://skforecast.org/latest/api/plot
+[set_dark_theme]: https://skforecast.org/latest/api/plot#skforecast.plot.plot.set_dark_theme
+[plot_residuals]: https://skforecast.org/latest/api/plot#skforecast.plot.plot.plot_residuals
+[plot_multivariate_time_series_corr]: https://skforecast.org/latest/api/plot#skforecast.plot.plot.plot_multivariate_time_series_corr
+[plot_prediction_distribution]: https://skforecast.org/latest/api/plot#skforecast.plot.plot.plot_prediction_distribution
+[plot_prediction_intervals]: https://skforecast.org/latest/api/plot#skforecast.plot.plot.plot_prediction_intervals
+
+<!-- datasets -->
+[datasets]: https://skforecast.org/latest/api/datasets
+[fetch_dataset]: https://skforecast.org/latest/api/datasets#skforecast.datasets.fetch_dataset
+[load_demo_dataset]: https://skforecast.org/latest/api/datasets#skforecast.datasets.load_demo_dataset
