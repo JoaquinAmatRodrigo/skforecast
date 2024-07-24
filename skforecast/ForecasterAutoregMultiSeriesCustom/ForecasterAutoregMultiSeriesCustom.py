@@ -294,16 +294,16 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         regressor: object,
         fun_predictors: Callable, 
         window_size: int,
-        name_predictors: Optional[list]=None,
-        encoding: str='ordinal_category',
-        transformer_series: Optional[Union[object, dict]]=None,
-        transformer_exog: Optional[object]=None,
-        weight_func: Optional[Union[Callable, dict]]=None,
-        series_weights: Optional[dict]=None,
-        differentiation: Optional[int]=None,
-        dropna_from_series: bool=False,
-        fit_kwargs: Optional[dict]=None,
-        forecaster_id: Optional[Union[str, int]]=None
+        name_predictors: Optional[list] = None,
+        encoding: str = 'ordinal_category',
+        transformer_series: Optional[Union[object, dict]] = None,
+        transformer_exog: Optional[object] = None,
+        weight_func: Optional[Union[Callable, dict]] = None,
+        series_weights: Optional[dict] = None,
+        differentiation: Optional[int] = None,
+        dropna_from_series: bool = False,
+        fit_kwargs: Optional[dict] = None,
+        forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
         
         self.regressor                  = regressor
@@ -1443,7 +1443,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
-                warnings.simplefilter("ignore")
+                warnings.simplefilter("ignore", category=UserWarning)
                 prediction = self.regressor.predict(X).ravel()[0]
                 predictions[i] = prediction
 

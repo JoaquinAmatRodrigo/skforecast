@@ -112,8 +112,8 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
 
 @pytest.mark.parametrize("transformer_series", 
                          [StandardScaler(),
-                          {'1': StandardScaler(), '2': StandardScaler()}], 
-                         ids = lambda tr : f'transformer_series type: {type(tr)}')
+                          {'1': StandardScaler(), '2': StandardScaler(), '_unknown_level': StandardScaler()}], 
+                         ids = lambda tr: f'transformer_series type: {type(tr)}')
 def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog(transformer_series):
     """
     Test _create_predict_inputs output when using LinearRegression as regressor, 
@@ -160,8 +160,8 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
 
 @pytest.mark.parametrize("transformer_series", 
                          [StandardScaler(),
-                          {'1': StandardScaler(), '2': StandardScaler()}], 
-                         ids = lambda tr : f'transformer_series type: {type(tr)}')
+                          {'1': StandardScaler(), '2': StandardScaler(), '_unknown_level': StandardScaler()}], 
+                         ids = lambda tr: f'transformer_series type: {type(tr)}')
 def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog_different_length_series(transformer_series):
     """
     Test _create_predict_inputs output when using LinearRegression as regressor, StandardScaler
@@ -216,8 +216,8 @@ def test_create_predict_inputs_output_when_categorical_features_native_implement
     """
     df_exog = pd.DataFrame(
         {'exog_1': exog['exog_1'],
-         'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-         'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)}
+         'exog_2': ['a', 'b', 'c', 'd', 'e'] * 10,
+         'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J'] * 10)}
     )
     
     exog_predict = df_exog.copy()
@@ -313,7 +313,7 @@ def test_create_predict_inputs_output_when_series_and_exog_dict():
         {'id_1000': np.array([-0.3525861, -0.457091, -0.49618465, -1.07810218, -1.77580056]),
          'id_1001': np.array([0.21800529, 0.36936645, 0.67896814, 1.16332175, 1.1523137]),
          'id_1003': np.array([-0.62651976, -0.74685959, -1.03823091, -0.37837738, 3.39980134]),
-         'id_1004': np.array([ 0.61495753, 0.8322971, 0.6719899 , -0.24309812, -0.75073762])
+         'id_1004': np.array([0.61495753, 0.8322971, 0.6719899, -0.24309812, -0.75073762])
         },
         {'id_1000': np.array([
                         [0.00821644, 1.42962482, np.nan, np.nan],
@@ -405,7 +405,7 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_ex
               ),
          '2': np.array([
                     np.nan, -2.93045496, 2.6268138, -2.00736345, -0.19086106,
-                    1.46005589, -1.8403251 , 3.04806289, -0.99623011, 0.3712246,
+                    1.46005589, -1.8403251, 3.04806289, -0.99623011, 0.3712246,
                     -2.73026424, 2.23235938, -0.14532345, -1.53568303, -0.02273313,
                     2.09399597]
               )
@@ -441,3 +441,163 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_ex
     pd.testing.assert_index_equal(results[3], expected[3])
     for k in expected[4].keys():
         np.testing.assert_array_almost_equal(results[4][k], expected[4][k])
+
+
+def test_create_predict_inputs_output_when_series_and_exog_dict_unknown_level():
+    """
+    Test output ForecasterAutoregMultiSeries _create_predict_inputs method when 
+    series and exog are dictionaries and unknown level.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor          = LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags               = 5,
+        encoding           = 'ordinal',
+        dropna_from_series = False,
+        transformer_series = StandardScaler(),
+        transformer_exog   = StandardScaler(),
+    )
+    forecaster.fit(
+        series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
+    )
+    levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
+    last_window = pd.DataFrame(
+        {k: v for k, v in forecaster.last_window.items() if k in levels}
+    )
+    last_window['id_1005'] = last_window['id_1004']
+    exog_dict_test_2 = exog_dict_test.copy()
+    exog_dict_test_2['id_1005'] = exog_dict_test_2['id_1004']
+    results = forecaster._create_predict_inputs(
+        steps=5, levels=levels, last_window=last_window, exog=exog_dict_test_2
+    )
+    
+    expected = (
+        {'id_1000': np.array([-0.3525861, -0.457091, -0.49618465, -1.07810218, -1.77580056]),
+         'id_1001': np.array([0.21800529, 0.36936645, 0.67896814, 1.16332175, 1.1523137]),
+         'id_1003': np.array([-0.62651976, -0.74685959, -1.03823091, -0.37837738, 3.39980134]),
+         'id_1004': np.array([0.61495753, 0.8322971, 0.6719899, -0.24309812, -0.75073762]),
+         'id_1005': np.array([2.38367241, 2.56743042, 2.4318926, 1.65819658, 1.22899343])
+        },
+        {'id_1000': np.array([
+                        [0.00821644, 1.42962482, np.nan, np.nan],
+                        [1.11220226, 0.89634375, np.nan, np.nan],
+                        [1.38486425, -0.30192795, np.nan, np.nan],
+                        [0.62088235, -1.26286725, np.nan, np.nan],
+                        [-0.60444947, -1.26286725, np.nan, np.nan]]),
+         'id_1001': np.array([
+                        [0.00821644, 1.42962482, 1.11141113, -0.87943526],
+                        [1.11220226, 0.89634375, 1.1327558 , 0.0058948 ],
+                        [1.38486425, -0.30192795, 1.1775869 , -0.3532584 ],
+                        [0.62088235, -1.26286725, 1.0428337 , 0.84287284],
+                        [-0.60444947, -1.26286725, 1.00599776, -0.62314633]]),
+         'id_1003': np.array([
+                        [0.00821644, np.nan, 1.11141113, -0.87943526],
+                        [1.11220226, np.nan, 1.1327558 , 0.0058948 ],
+                        [1.38486425, np.nan, 1.1775869 , -0.3532584 ],
+                        [0.62088235, np.nan, 1.0428337 , 0.84287284],
+                        [-0.60444947, np.nan, 1.00599776, -0.62314633]]),
+         'id_1004': np.array([
+                        [0.00821644, 1.42962482, 1.11141113, -0.87943526],
+                        [1.11220226, 0.89634375, 1.1327558 , 0.0058948 ],
+                        [1.38486425, -0.30192795, 1.1775869 , -0.3532584 ],
+                        [0.62088235, -1.26286725, 1.0428337 , 0.84287284],
+                        [-0.60444947, -1.26286725, 1.00599776, -0.62314633]]),
+         'id_1005': np.array([
+                        [0.00821644, 1.42962482, 1.11141113, -0.87943526],
+                        [1.11220226, 0.89634375, 1.1327558 , 0.0058948 ],
+                        [1.38486425, -0.30192795, 1.1775869 , -0.3532584 ],
+                        [0.62088235, -1.26286725, 1.0428337 , 0.84287284],
+                        [-0.60444947, -1.26286725, 1.00599776, -0.62314633]])
+        },
+        ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005'],
+        pd.date_range(start='2016-08-01', periods=5, freq='D'),
+        None
+    )
+
+    for k in expected[0].keys():
+        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
+    for k in expected[1].keys():
+        np.testing.assert_array_almost_equal(results[1][k], expected[1][k])
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
+    assert results[4] == expected[4]
+
+
+def test_create_predict_inputs_output_when_series_and_exog_dict_unknown_level_encoding_None():
+    """
+    Test output ForecasterAutoregMultiSeries _create_predict_inputs method when 
+    series and exog are dictionaries and unknown level with encoding=None.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor          = LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags               = 5,
+        encoding           = None,
+        dropna_from_series = False,
+        transformer_series = StandardScaler(),
+        transformer_exog   = StandardScaler(),
+    )
+    forecaster.fit(
+        series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
+    )
+    levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
+    last_window = pd.DataFrame(
+        {k: v for k, v in forecaster.last_window.items() if k in levels}
+    )
+    last_window['id_1005'] = last_window['id_1004']
+    results = forecaster._create_predict_inputs(
+        steps=5, levels=levels, last_window=last_window, exog=exog_dict_test
+    )
+    
+    expected = (
+        {'id_1000': np.array([-0.77768307, -0.79277912, -0.79842631, -0.88248605, -0.98327068]),
+         'id_1001': np.array([-0.39572285, -0.34793695, -0.25019327, -0.09727905, -0.10075438]),
+         'id_1003': np.array([-0.56650418, -0.59023234, -0.64768383, -0.51757641,  0.22739054]),
+         'id_1004': np.array([2.38367241, 2.56743042, 2.4318926, 1.65819658, 1.22899343]),
+         'id_1005': np.array([2.38367241, 2.56743042, 2.4318926, 1.65819658, 1.22899343])
+        },
+        {'id_1000': np.array([
+                        [0.00821644, 1.42962482, np.nan, np.nan],
+                        [1.11220226, 0.89634375, np.nan, np.nan],
+                        [1.38486425, -0.30192795, np.nan, np.nan],
+                        [0.62088235, -1.26286725, np.nan, np.nan],
+                        [-0.60444947, -1.26286725, np.nan, np.nan]]),
+         'id_1001': np.array([
+                        [0.00821644, 1.42962482, 1.11141113, -0.87943526],
+                        [1.11220226, 0.89634375, 1.1327558 , 0.0058948 ],
+                        [1.38486425, -0.30192795, 1.1775869 , -0.3532584 ],
+                        [0.62088235, -1.26286725, 1.0428337 , 0.84287284],
+                        [-0.60444947, -1.26286725, 1.00599776, -0.62314633]]),
+         'id_1003': np.array([
+                        [0.00821644, np.nan, 1.11141113, -0.87943526],
+                        [1.11220226, np.nan, 1.1327558 , 0.0058948 ],
+                        [1.38486425, np.nan, 1.1775869 , -0.3532584 ],
+                        [0.62088235, np.nan, 1.0428337 , 0.84287284],
+                        [-0.60444947, np.nan, 1.00599776, -0.62314633]]),
+         'id_1004': np.array([
+                        [0.00821644, 1.42962482, 1.11141113, -0.87943526],
+                        [1.11220226, 0.89634375, 1.1327558 , 0.0058948 ],
+                        [1.38486425, -0.30192795, 1.1775869 , -0.3532584 ],
+                        [0.62088235, -1.26286725, 1.0428337 , 0.84287284],
+                        [-0.60444947, -1.26286725, 1.00599776, -0.62314633]]),
+         'id_1005': np.array([
+                        [np.nan, np.nan, np.nan, np.nan],
+                        [np.nan, np.nan, np.nan, np.nan],
+                        [np.nan, np.nan, np.nan, np.nan],
+                        [np.nan, np.nan, np.nan, np.nan],
+                        [np.nan, np.nan, np.nan, np.nan]])
+        },
+        ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005'],
+        pd.date_range(start='2016-08-01', periods=5, freq='D'),
+        None
+    )
+
+    for k in expected[0].keys():
+        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
+    for k in expected[1].keys():
+        np.testing.assert_array_almost_equal(results[1][k], expected[1][k])
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
+    assert results[4] == expected[4]

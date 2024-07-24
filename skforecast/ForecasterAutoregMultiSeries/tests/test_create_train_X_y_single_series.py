@@ -12,7 +12,7 @@ from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 @pytest.mark.parametrize("ignore_exog", 
                          [True, False], 
-                         ids = lambda ie : f'ignore_exog: {ie}')
+                         ids = lambda ie: f'ignore_exog: {ie}')
 def test_create_train_X_y_single_series_output_when_series_and_exog_is_None(ignore_exog):
     """
     Test the output of _create_train_X_y_single_series when exog is None. 
@@ -159,8 +159,8 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_DataFrame
     y = pd.Series(np.arange(7, dtype=float), name='l1')
     y.index = pd.date_range("1990-01-01", periods=7, freq='D')
     exog = pd.DataFrame({
-               'exog_1' : np.arange(100, 107, dtype=float),
-               'exog_2' : np.arange(1000, 1007, dtype=float)},
+               'exog_1': np.arange(100, 107, dtype=float),
+               'exog_2': np.arange(1000, 1007, dtype=float)},
                index = pd.date_range("1990-01-01", periods=7, freq='D')
            )
 
@@ -210,8 +210,8 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_DataFrame
     y = pd.Series(np.arange(10, dtype=float), name='l1')
     y.iloc[6:8] = np.nan
     exog = pd.DataFrame({
-               'exog_1' : np.arange(100, 110, dtype=float),
-               'exog_2' : np.arange(1000, 1010, dtype=float)}
+               'exog_1': np.arange(100, 110, dtype=float),
+               'exog_2': np.arange(1000, 1010, dtype=float)}
            )
     exog.iloc[2:7, 0] = np.nan
 
@@ -354,7 +354,7 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_and_differen
 
 @pytest.mark.parametrize("fitted", 
                          [True, False], 
-                         ids = lambda fitted : f'fitted: {fitted}')
+                         ids = lambda fitted: f'fitted: {fitted}')
 def test_create_train_X_y_single_series_output_when_series_and_exog_and_differentitation_2(fitted):
     """
     Test the output of _create_train_X_y_single_series when exog is a 

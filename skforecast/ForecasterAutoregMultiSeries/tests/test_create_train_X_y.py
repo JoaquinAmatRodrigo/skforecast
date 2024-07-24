@@ -175,7 +175,8 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
 
 @pytest.mark.parametrize("encoding, dtype", 
                          [('ordinal'         , int), 
-                          ('ordinal_category', 'category')], 
+                          ('ordinal_category', 'category'),
+                          (None              , int)], 
                          ids = lambda dt : f'encoding, dtype: {dt}')
 def test_create_train_X_y_output_when_series_and_exog_is_None_ordinal_encoding(encoding, dtype):
     """
@@ -324,7 +325,8 @@ def test_create_train_X_y_output_when_series_and_exog_no_pandas_index():
 
 @pytest.mark.parametrize("encoding, dtype", 
                          [('ordinal'         , int), 
-                          ('ordinal_category', 'category')], 
+                          ('ordinal_category', 'category'),
+                          (None              , int)], 
                          ids = lambda dt : f'encoding, dtype: {dt}')
 def test_create_train_X_y_output_when_series_and_exog_no_pandas_index_ordinal_encoding(encoding, dtype):
     """
@@ -880,7 +882,8 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
 
 @pytest.mark.parametrize("encoding, dtype", 
                          [('ordinal'         , int), 
-                          ('ordinal_category', 'category')], 
+                          ('ordinal_category', 'category'),
+                          (None              , int),], 
                          ids = lambda dt : f'encoding, dtype: {dt}')
 def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_index(encoding, dtype):
     """
@@ -1096,8 +1099,8 @@ def test_create_train_X_y_output_when_exog_is_None_and_transformer_exog_is_not_N
 
 @pytest.mark.parametrize("transformer_series", 
                          [StandardScaler(),
-                          {'1': StandardScaler(), '2': StandardScaler()}], 
-                         ids = lambda tr : f'transformer_series type: {type(tr)}')
+                          {'1': StandardScaler(), '2': StandardScaler(), '_unknown_level': StandardScaler()}], 
+                         ids = lambda tr: f'transformer_series type: {type(tr)}')
 def test_create_train_X_y_output_when_transformer_series_and_transformer_exog(transformer_series):
     """
     Test the output of _create_train_X_y when using transformer_series and 
@@ -1298,8 +1301,8 @@ def test_create_train_X_y_output_when_series_different_length_and_exog_is_datafr
 
 @pytest.mark.parametrize("transformer_series", 
                          [StandardScaler(),
-                          {'l1': StandardScaler(), 'l2': StandardScaler(), 'l3': StandardScaler()}], 
-                         ids = lambda tr : f'transformer_series type: {type(tr)}')
+                          {'l1': StandardScaler(), 'l2': StandardScaler(), 'l3': StandardScaler(), '_unknown_level': StandardScaler()}], 
+                         ids = lambda tr: f'transformer_series type: {type(tr)}')
 def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_with_different_series_lengths(transformer_series):
     """
     Test the output of _create_train_X_y when using transformer_series and 
@@ -2056,7 +2059,9 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
 
 @pytest.mark.parametrize(
     "encoding, dtype",
-    [("ordinal", int), ("ordinal_category", "category")],
+    [("ordinal", int), 
+     ("ordinal_category", "category"),
+     (None, int)],
     ids=lambda dt: f"encoding, dtype: {dt}",
 )
 def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
@@ -2213,7 +2218,8 @@ def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
 @pytest.mark.parametrize("encoding, encoding_mapping", 
                          [('ordinal'         , {'1': 0, '2': 1}), 
                           ('ordinal_category', {'1': 0, '2': 1}),
-                          ('onehot'          , {'1': 0, '2': 1})], 
+                          ('onehot'          , {'1': 0, '2': 1}),
+                          (None              , {'1': 0, '2': 1})], 
                          ids = lambda dt : f'encoding, mapping: {dt}')
 def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping):
     """
@@ -2233,7 +2239,7 @@ def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping):
 
 @pytest.mark.parametrize("fit_forecaster", 
                          [True, False], 
-                         ids = lambda fitted : f'fit_forecaster: {fitted}')
+                         ids = lambda fitted: f'fit_forecaster: {fitted}')
 def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and_already_trained(fit_forecaster):
     """
     Test the output of _create_train_X_y when differentiation=1 and already 
@@ -2282,6 +2288,214 @@ def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and
         pd.Series(
             data  = np.array([0.34815531, 0.34815531, 0.34815531, 0.34815531,
                               0.34815531, 0.34815531, 0.70710678, 0.70710678]),
+            index = pd.Index(
+                        pd.DatetimeIndex(
+                            ['1990-01-05', '1990-01-06',
+                             '1990-01-07', '1990-01-08',
+                             '1990-01-09', '1990-01-10',
+                             '1990-01-09', '1990-01-07']
+                        )
+                    ),
+            name  = 'y',
+            dtype = float
+        ),
+        {'l1': pd.date_range("1990-01-01", periods=10, freq='D'),
+         'l2': pd.date_range("1990-01-05", periods=5, freq='D'),
+         'l3': pd.date_range("1990-01-03", periods=5, freq='D')},
+        ['l1', 'l2', 'l3'],
+        ['l1', 'l2', 'l3'],
+        None,
+        None,
+        {'l1': pd.Series(
+                   data  = np.array([6., 7., 8., 9.]),
+                   index = pd.date_range("1990-01-07", periods=4, freq='D'),
+                   name  = 'l1',
+                   dtype = float
+               ),
+         'l2': pd.Series(
+                   data  = np.array([16., 17., 18., 19.]),
+                   index = pd.date_range("1990-01-06", periods=4, freq='D'),
+                   name  = 'l2',
+                   dtype = float
+               ),
+         'l3': pd.Series(
+                   data  = np.array([21., 22., 23., 24.]),
+                   index = pd.date_range("1990-01-04", periods=4, freq='D'),
+                   name  = 'l3',
+                   dtype = float
+               )
+        }
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert isinstance(results[5], type(None))
+    assert isinstance(results[6], type(None))
+    for k in results[7].keys():
+        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+
+
+@pytest.mark.parametrize("fit_forecaster", 
+                         [True, False], 
+                         ids = lambda fitted: f'fit_forecaster: {fitted}')
+def test_create_train_X_y_output_when_series_and_exog_and_already_trained_encoding_None(fit_forecaster):
+    """
+    Test the output of _create_train_X_y when encoding None and already 
+    trained forecaster.
+    """
+    series = {
+        "l1": pd.Series(np.arange(10, dtype=float)),
+        "l2": pd.Series(np.arange(15, 20, dtype=float)),
+        "l3": pd.Series(np.arange(20, 25, dtype=float)),
+    }
+    series["l1"].index = pd.date_range("1990-01-01", periods=10, freq="D")
+    series["l2"].index = pd.date_range("1990-01-05", periods=5, freq="D")
+    series["l3"].index = pd.date_range("1990-01-03", periods=5, freq="D")
+    
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              encoding           = None,
+                                              transformer_series = StandardScaler())
+    
+    if fit_forecaster:
+        forecaster.fit(series=series)
+
+    results = forecaster._create_train_X_y(series=series)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[-1.24514561, -1.36966017, -1.49417474, 0.],
+                             [-1.12063105, -1.24514561, -1.36966017, 0.],
+                             [-0.99611649, -1.12063105, -1.24514561, 0.],
+                             [-0.87160193, -0.99611649, -1.12063105, 0.],
+                             [-0.74708737, -0.87160193, -0.99611649, 0.],
+                             [-0.62257281, -0.74708737, -0.87160193, 0.],
+                             [-0.49805825, -0.62257281, -0.74708737, 0.],
+                             [ 0.62257281,  0.49805825,  0.37354368, 1.],
+                             [ 0.74708737,  0.62257281,  0.49805825, 1.],
+                             [ 1.24514561,  1.12063105,  0.99611649, 2.],
+                             [ 1.36966017,  1.24514561,  1.12063105, 2.]]),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-04', '1990-01-05', '1990-01-06', '1990-01-07', 
+                               '1990-01-08', '1990-01-09', '1990-01-10',
+                               '1990-01-08', '1990-01-09', 
+                               '1990-01-06', '1990-01-07']
+                          )
+                      ),
+            columns = ['lag_1', 'lag_2', 'lag_3', '_level_skforecast']
+        ).astype({'_level_skforecast': int}
+        ),
+        pd.Series(
+            data  = np.array([
+                        -1.12063105, -0.99611649, -0.87160193, -0.74708737, -0.62257281,
+                        -0.49805825, -0.37354368,  0.74708737,  0.87160193,  1.36966017,
+                        1.49417474]),
+            index = pd.Index(
+                        pd.DatetimeIndex(
+                            ['1990-01-04', '1990-01-05', '1990-01-06',
+                             '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
+                             '1990-01-08', '1990-01-09', 
+                             '1990-01-06', '1990-01-07']
+                        )
+                    ),
+            name  = 'y',
+            dtype = float
+        ),
+        {'l1': pd.date_range("1990-01-01", periods=10, freq='D'),
+         'l2': pd.date_range("1990-01-05", periods=5, freq='D'),
+         'l3': pd.date_range("1990-01-03", periods=5, freq='D')},
+        ['l1', 'l2', 'l3'],
+        ['l1', 'l2', 'l3'],
+        None,
+        None,
+        {'l1': pd.Series(
+                   data  = np.array([7., 8., 9.]),
+                   index = pd.date_range("1990-01-08", periods=3, freq='D'),
+                   name  = 'l1',
+                   dtype = float
+               ),
+         'l2': pd.Series(
+                   data  = np.array([17., 18., 19.]),
+                   index = pd.date_range("1990-01-07", periods=3, freq='D'),
+                   name  = 'l2',
+                   dtype = float
+               ),
+         'l3': pd.Series(
+                   data  = np.array([22., 23., 24.]),
+                   index = pd.date_range("1990-01-05", periods=3, freq='D'),
+                   name  = 'l3',
+                   dtype = float
+               )
+        }
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert isinstance(results[5], type(None))
+    assert isinstance(results[6], type(None))
+    for k in results[7].keys():
+        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+
+
+@pytest.mark.parametrize("fit_forecaster", 
+                         [True, False], 
+                         ids = lambda fitted: f'fit_forecaster: {fitted}')
+def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and_already_trained_encoding_None(fit_forecaster):
+    """
+    Test the output of _create_train_X_y when differentiation=1,
+    encoding None and already trained forecaster.
+    """
+    series = {
+        "l1": pd.Series(np.arange(10, dtype=float)),
+        "l2": pd.Series(np.arange(15, 20, dtype=float)),
+        "l3": pd.Series(np.arange(20, 25, dtype=float)),
+    }
+    series["l1"].index = pd.date_range("1990-01-01", periods=10, freq="D")
+    series["l2"].index = pd.date_range("1990-01-05", periods=5, freq="D")
+    series["l3"].index = pd.date_range("1990-01-03", periods=5, freq="D")
+    
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              encoding           = None,
+                                              transformer_series = StandardScaler(),
+                                              differentiation    = 1)
+    
+    if fit_forecaster:
+        forecaster.fit(series=series)
+
+    results = forecaster._create_train_X_y(series=series)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[0.12451456, 0.12451456, 0.12451456, 0],
+                             [0.12451456, 0.12451456, 0.12451456, 0],
+                             [0.12451456, 0.12451456, 0.12451456, 0],
+                             [0.12451456, 0.12451456, 0.12451456, 0],
+                             [0.12451456, 0.12451456, 0.12451456, 0],
+                             [0.12451456, 0.12451456, 0.12451456, 0],
+                             [0.12451456, 0.12451456, 0.12451456, 1],
+                             [0.12451456, 0.12451456, 0.12451456, 2]]),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08',
+                               '1990-01-09', '1990-01-10',
+                               '1990-01-09', 
+                               '1990-01-07']
+                          )
+                      ),
+            columns = ['lag_1', 'lag_2', 'lag_3', '_level_skforecast']
+        ).astype({'_level_skforecast': int}
+        ),
+        pd.Series(
+            data  = np.array([0.12451456, 0.12451456, 0.12451456, 0.12451456,
+                              0.12451456, 0.12451456, 0.12451456, 0.12451456]),
             index = pd.Index(
                         pd.DatetimeIndex(
                             ['1990-01-05', '1990-01-06',

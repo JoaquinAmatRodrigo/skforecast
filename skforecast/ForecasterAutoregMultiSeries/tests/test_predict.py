@@ -94,7 +94,7 @@ def test_predict_ValueError_when_not_available_self_last_window_for_levels(store
     forecaster.fit(series=series_2, store_last_window=store_last_window)
 
     err_msg = re.escape(
-        ("No series to predict. None of the series are present in "
+        ("No series to predict. None of the series {'2'} are present in "
          "`last_window` attribute. Provide `last_window` as argument "
          "in predict method.")
     )
@@ -300,7 +300,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = LinearRegression(),
                      lags               = 5,
-                     transformer_series = {'1': StandardScaler(), '2': MinMaxScaler()}
+                     transformer_series = {'1': StandardScaler(), '2': MinMaxScaler(), '_unknown_level': StandardScaler()}
                  )
     forecaster.fit(series=series)
     predictions = forecaster.predict(steps=5, levels=['1'], suppress_warnings=True)
@@ -316,8 +316,8 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
 
 @pytest.mark.parametrize("transformer_series", 
                          [StandardScaler(),
-                          {'1': StandardScaler(), '2': StandardScaler()}], 
-                         ids = lambda tr : f'transformer_series type: {type(tr)}')
+                          {'1': StandardScaler(), '2': StandardScaler(), '_unknown_level': StandardScaler()}], 
+                         ids = lambda tr: f'transformer_series type: {type(tr)}')
 def test_predict_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog(transformer_series):
     """
     Test predict output when using LinearRegression as regressor, StandardScaler
@@ -349,8 +349,8 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_series
 
 @pytest.mark.parametrize("transformer_series", 
                          [StandardScaler(),
-                          {'1': StandardScaler(), '2': StandardScaler()}], 
-                         ids = lambda tr : f'transformer_series type: {type(tr)}')
+                          {'1': StandardScaler(), '2': StandardScaler(), '_unknown_level': StandardScaler()}], 
+                         ids = lambda tr: f'transformer_series type: {type(tr)}')
 def test_predict_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog_different_length_series(transformer_series):
     """
     Test predict output when using LinearRegression as regressor, StandardScaler
@@ -393,8 +393,8 @@ def test_predict_output_when_categorical_features_native_implementation_HistGrad
     Test predict output when using HistGradientBoostingRegressor and categorical variables.
     """
     df_exog = pd.DataFrame({'exog_1': exog['exog_1'],
-                            'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
+                            'exog_2': ['a', 'b', 'c', 'd', 'e'] * 10,
+                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J'] * 10)})
     
     exog_predict = df_exog.copy()
     exog_predict.index = pd.RangeIndex(start=50, stop=100)
@@ -449,8 +449,8 @@ def test_predict_output_when_categorical_features_native_implementation_LGBMRegr
     Test predict output when using LGBMRegressor and categorical variables.
     """
     df_exog = pd.DataFrame({'exog_1': exog['exog_1'],
-                            'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
+                            'exog_2': ['a', 'b', 'c', 'd', 'e'] * 10,
+                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J'] * 10)})
     
     exog_predict = df_exog.copy()
     exog_predict.index = pd.RangeIndex(start=50, stop=100)
@@ -504,8 +504,8 @@ def test_predict_output_when_categorical_features_native_implementation_LGBMRegr
     categorical_features='auto'.
     """
     df_exog = pd.DataFrame({'exog_1': exog['exog_1'],
-                            'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
+                            'exog_2': ['a', 'b', 'c', 'd', 'e'] * 10,
+                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J'] * 10)})
     
     exog_predict = df_exog.copy()
     exog_predict.index = pd.RangeIndex(start=50, stop=100)
@@ -628,7 +628,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differe
     last_value_train = series.loc[:end_train].iloc[[-1]]
     predictions_1 = pd.concat([last_value_train, predictions_diff]).cumsum()[1:]
 
-    forecaster_2 = ForecasterAutoregMultiSeries(regressor=LinearRegression(),lags=15, 
+    forecaster_2 = ForecasterAutoregMultiSeries(regressor=LinearRegression(), lags=15, 
                                                 differentiation=1, transformer_series=None)
     forecaster_2.fit(series=series.loc[:end_train], exog=exog.loc[:end_train])
     predictions_2 = forecaster_2.predict(steps=steps, exog=exog.loc[end_train + 1:])
@@ -746,7 +746,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differe
     end_train = '2003-01-30 23:59:00'
     steps = len(series_dt.loc[end_train:])
 
-    forecaster_1 = ForecasterAutoregMultiSeries(regressor=LinearRegression(),lags=15,
+    forecaster_1 = ForecasterAutoregMultiSeries(regressor=LinearRegression(), lags=15,
                                                 transformer_series=None)
     forecaster_1.fit(series=df_diff_2.loc[:end_train], exog=exog_diff_2.loc[:end_train])
     predictions_diff_2 = forecaster_1.predict(steps=steps, exog=exog_diff_2.loc[end_train:])
@@ -763,3 +763,135 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differe
     predictions_2 = forecaster_2.predict(steps=steps, exog=exog.loc[end_train:])
 
     pd.testing.assert_frame_equal(predictions_1, predictions_2)
+
+
+def test_predict_output_when_series_and_exog_dict_encoding_None_unknown_level():
+    """
+    Test output ForecasterAutoregMultiSeries predict method when series and 
+    exog are dictionaries and encoding is None and unknown level with no exog.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags=14,
+        encoding=None,
+        dropna_from_series=False,
+        transformer_series=None,
+        transformer_exog=StandardScaler(),
+    )
+    forecaster.fit(
+        series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
+    )
+
+    levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
+    last_window = pd.DataFrame(
+        {k: v for k, v in forecaster.last_window.items() if k in levels}
+    )
+    last_window['id_1005'] = last_window['id_1004']
+    predictions = forecaster.predict(
+        steps=5, levels=levels, last_window=last_window,
+        exog=exog_dict_test, suppress_warnings=True
+    )
+
+    expected = pd.DataFrame(
+        data=np.array([
+            [2796.7268212, 3205.84100287, 3367.37706412, 3367.37706412, 3367.37706412],
+            [2796.7268212, 3367.37706412, 3367.37706412, 3367.37706412, 3367.37706412],
+            [2796.7268212, 3367.37706412, 3367.37706412, 3367.37706412, 3367.37706412],
+            [2796.7268212, 3367.37706412, 3367.37706412, 3367.37706412, 3367.37706412],
+            [2796.7268212, 3367.37706412, 3367.37706412, 3367.37706412, 3367.37706412]
+        ]),
+        index=pd.date_range(start="2016-08-01", periods=5, freq="D"),
+        columns=["id_1000", "id_1001", "id_1003", "id_1004", "id_1005"],
+    )
+
+    pd.testing.assert_frame_equal(predictions, expected)
+
+
+def test_predict_output_when_series_and_exog_dict_encoding_None_transformer_series_unknown_level():
+    """
+    Test output ForecasterAutoregMultiSeries predict method when series and 
+    exog are dictionaries and encoding is None and transformer_series is StandardScaler.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=30, random_state=123, verbose=-1, max_depth=4
+        ),
+        lags=14,
+        encoding=None,
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    )
+    forecaster.fit(
+        series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
+    )
+
+    levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
+    last_window = pd.DataFrame(
+        {k: v for k, v in forecaster.last_window.items() if k in levels}
+    )
+    last_window['id_1005'] = last_window['id_1004'] * 0.9
+    exog_dict_test_2 = exog_dict_test.copy()
+    exog_dict_test_2['id_1005'] = exog_dict_test_2['id_1001']
+    predictions = forecaster.predict(
+        steps=5, levels=levels, last_window=last_window,
+        exog=exog_dict_test_2, suppress_warnings=True
+    )
+    expected = pd.DataFrame(
+        data=np.array([
+            [1540.61279683, 3160.95721541, 3121.57888505, 7369.19869868, 7011.48712882],
+            [1533.43616081, 3157.30206473, 2976.43108071, 8430.97835738, 8401.89546128],
+            [1466.94536267, 3215.9383148 , 2991.20843378, 8565.22794876, 8506.18236246],
+            [1427.46483497, 3512.06387649, 2806.20216519, 8343.01317975, 8561.27068389],
+            [1411.73980543, 3275.61791117, 1959.1294473 , 8360.01068926, 7633.82955233]]),
+        index=pd.date_range(start="2016-08-01", periods=5, freq="D"),
+        columns=["id_1000", "id_1001", "id_1003", "id_1004", "id_1005"],
+    )
+
+    pd.testing.assert_frame_equal(predictions, expected)
+
+
+def test_predict_output_when_series_and_exog_dict_unknown_level():
+    """
+    Test output ForecasterAutoregMultiSeries predict method when series and 
+    exog are dictionaries and unknown level.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=30, random_state=123, verbose=-1, max_depth=4
+        ),
+        lags=14,
+        encoding='onehot',
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    )
+    forecaster.fit(
+        series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
+    )
+
+    levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
+    last_window = pd.DataFrame(
+        {k: v for k, v in forecaster.last_window.items() if k in levels}
+    )
+    last_window['id_1005'] = last_window['id_1004'] * 0.9
+    exog_dict_test_2 = exog_dict_test.copy()
+    exog_dict_test_2['id_1005'] = exog_dict_test_2['id_1001']
+    predictions = forecaster.predict(
+        steps=5, levels=levels, last_window=last_window,
+        exog=exog_dict_test_2, suppress_warnings=True
+    )
+    expected = pd.DataFrame(
+        data=np.array([
+            [1304.2309796 , 2644.73379395, 2701.05594333, 7945.05087807, 5205.57559308],
+            [1392.59928753, 2568.92887871, 2359.72594108, 8621.18012343, 4984.6226338 ],
+            [1382.45586783, 2547.98711684, 2183.68744956, 8629.41415317, 5042.36744269],
+            [1327.47844464, 2435.07501779, 2195.06397394, 8821.30311188, 5263.32818457],
+            [1275.08383614, 2136.9392887 , 2179.36225552, 8683.04017596, 5366.43442996]]),
+        index=pd.date_range(start="2016-08-01", periods=5, freq="D"),
+        columns=["id_1000", "id_1001", "id_1003", "id_1004", "id_1005"],
+    )
+
+    pd.testing.assert_frame_equal(predictions, expected)

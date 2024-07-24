@@ -635,9 +635,10 @@ def _backtesting_forecaster_multiseries(
     if initial_train_size is not None:
         # First model training, this is done to allow parallelization when `refit`
         # is `False`. The initial Forecaster fit is outside the auxiliary function.
+        window_size = forecaster.window_size_diff
         fold_initial_train = [
             [0, initial_train_size],
-            [initial_train_size - forecaster.window_size, initial_train_size],
+            [initial_train_size - window_size, initial_train_size],
             [0, 0],  # dummy values
             [0, 0],  # dummy values
             True
@@ -646,7 +647,7 @@ def _backtesting_forecaster_multiseries(
                         series             = series,
                         folds              = [fold_initial_train],
                         span_index         = span_index,
-                        window_size        = forecaster.window_size,
+                        window_size        = window_size,
                         exog               = exog,
                         dropna_last_window = forecaster.dropna_from_series,
                         externally_fitted  = False
@@ -660,14 +661,20 @@ def _backtesting_forecaster_multiseries(
             store_in_sample_residuals = store_in_sample_residuals,
             suppress_warnings         = suppress_warnings
         )
-        window_size = forecaster.window_size
         externally_fitted = False
     else:
         # Although not used for training, first observations are needed to create
         # the initial predictors
-        window_size = forecaster.window_size
+        window_size = forecaster.window_size_diff
         initial_train_size = window_size
         externally_fitted = True
+
+    # TODO: remove when all forecaster include differentiation
+    if type(forecaster).__name__ in ['ForecasterAutoregMultiSeries', 
+                                     'ForecasterAutoregMultiSeriesCustom']:
+        differentiation = forecaster.differentiation
+    else:
+        differentiation = None
 
     folds = _create_backtesting_folds(
                 data                  = span_index,
@@ -681,33 +688,24 @@ def _backtesting_forecaster_multiseries(
                 skip_folds            = skip_folds,
                 allow_incomplete_fold = allow_incomplete_fold,
                 return_all_indexes    = False,
+                differentiation       = differentiation,
                 verbose               = verbose
             )
 
     if refit:
         n_of_fits = int(len(folds) / refit)
-        if (
-            type(forecaster).__name__ != "ForecasterAutoregMultiVariate"
-            and n_of_fits > 50
-        ):
+        if type(forecaster).__name__ != 'ForecasterAutoregMultiVariate' and n_of_fits > 50:
             warnings.warn(
-                (
-                    f"The forecaster will be fit {n_of_fits} times. This can take substantial "
-                    f"amounts of time. If not feasible, try with `refit = False`.\n"
-                ),
+                (f"The forecaster will be fit {n_of_fits} times. This can take substantial "
+                 f"amounts of time. If not feasible, try with `refit = False`.\n"),
                 LongTrainingWarning,
             )
-        elif (
-            type(forecaster).__name__ == "ForecasterAutoregMultiVariate"
-            and n_of_fits * forecaster.steps > 50
-        ):
+        elif type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' and n_of_fits * forecaster.steps > 50:
             warnings.warn(
-                (
-                    f"The forecaster will be fit {n_of_fits * forecaster.steps} times "
-                    f"({n_of_fits} folds * {forecaster.steps} regressors). This can take "
-                    f"substantial amounts of time. If not feasible, try with `refit = False`.\n"
-                ),
-                LongTrainingWarning,
+                (f"The forecaster will be fit {n_of_fits * forecaster.steps} times "
+                 f"({n_of_fits} folds * {forecaster.steps} regressors). This can take "
+                 f"substantial amounts of time. If not feasible, try with `refit = False`.\n"),
+                LongTrainingWarning
             )
 
     if show_progress:
@@ -717,7 +715,7 @@ def _backtesting_forecaster_multiseries(
                      series             = series,
                      folds              = folds,
                      span_index         = span_index,
-                     window_size        = forecaster.window_size,
+                     window_size        = window_size,
                      exog               = exog,
                      dropna_last_window = forecaster.dropna_from_series,
                      externally_fitted  = externally_fitted
@@ -760,6 +758,7 @@ def _backtesting_forecaster_multiseries(
         levels_predict = [level for level in levels 
                           if level in last_window_levels]
         if interval is None:
+
             pred = forecaster.predict(
                        steps             = steps, 
                        levels            = levels_predict, 
@@ -1470,8 +1469,8 @@ def _evaluate_grid_hyperparameters_multiseries(
     allowed_aggregate_metrics = ['average', 'weighted_average', 'pooling']
     if not set(aggregate_metric).issubset(allowed_aggregate_metrics):
         raise ValueError(
-            (f"Allowed `aggregate_metric` are {allowed_aggregate_metrics}. "
-             f"Got {aggregate_metric}.")
+            (f"Allowed `aggregate_metric` are: {allowed_aggregate_metrics}. "
+             f"Got: {aggregate_metric}.")
         )
     
     levels = _initialize_levels_model_selection_multiseries(
@@ -1935,8 +1934,8 @@ def _bayesian_search_optuna_multiseries(
     allowed_aggregate_metrics = ['average', 'weighted_average', 'pooling']
     if not set(aggregate_metric).issubset(allowed_aggregate_metrics):
         raise ValueError(
-            f"Allowed `aggregate_metric` are {allowed_aggregate_metrics}. "
-            f"Got {aggregate_metric}."
+            (f"Allowed `aggregate_metric` are: {allowed_aggregate_metrics}. "
+             f"Got: {aggregate_metric}.")
         )
     
     levels = _initialize_levels_model_selection_multiseries(

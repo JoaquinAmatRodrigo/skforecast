@@ -56,7 +56,7 @@ def test_preprocess_levels_self_last_window_multiseries_ValueError_when_not_avai
     input_levels_is_list = False
 
     err_msg = re.escape(
-        ("No series to predict. None of the series are present in "
+        ("No series to predict. None of the series {'2'} are present in "
          "`last_window` attribute. Provide `last_window` as argument "
          "in predict method.")
     )

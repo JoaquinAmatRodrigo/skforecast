@@ -18,7 +18,7 @@ series = pd.DataFrame({'1': pd.Series(np.arange(10)),
                        '2': pd.Series(np.arange(10))})
 
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 3 lags of a time series.
     """
