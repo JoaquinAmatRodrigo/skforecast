@@ -10,6 +10,7 @@ from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 from sklearn.metrics import mean_squared_log_error
+from sklearn.metrics import median_absolute_error
 
 
 def test_get_metric_ValueError_when_metric_not_in_metrics_allowed():
@@ -24,6 +25,7 @@ def test_get_metric_ValueError_when_metric_not_in_metrics_allowed():
         "mean_squared_log_error",
         "mean_absolute_scaled_error",
         "root_mean_squared_scaled_error",
+        "median_absolute_error"
     ]
     
     err_msg = re.escape(f"Allowed metrics are: {allowed_metrics}. Got {metric}.")
@@ -35,7 +37,8 @@ def test_get_metric_ValueError_when_metric_not_in_metrics_allowed():
                          [('mean_squared_error', mean_squared_error),
                           ('mean_absolute_error', mean_absolute_error),
                           ('mean_absolute_percentage_error', mean_absolute_percentage_error),
-                          ('mean_squared_log_error', mean_squared_log_error)], 
+                          ('mean_squared_log_error', mean_squared_log_error),
+                          ('median_absolute_error', median_absolute_error)], 
                          ids = lambda dt : f'mertic_str, metric_callable: {dt}')
 def test_get_metric_output_for_all_metrics(metric_str, metric_callable):
     """

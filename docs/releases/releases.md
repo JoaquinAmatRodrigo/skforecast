@@ -22,7 +22,11 @@ The main changes in this release are:
 
 + <span class="badge text-bg-feature">Feature</span> New argument `skip_folds` in <code>[model_selection]</code> and <code>[model_selection_multiseries]</code> functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
 
-+ <span class="badge text-bg-feature">Feature</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.
++ <span class="badge text-bg-feature">Feature</span> New argument `add_aggregated_metric` in <code>[backtesting_forecaster_multiseries]</code> to include, in addition to the metrics for each level, the aggregated metric of all levels using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).
+
++ <span class="badge text-bg-feature">Feature</span> New module <code>[metrics]</code> with functions to calculate metrics for time series forecasting such as <code>[mean_absolute_scaled_error]</code> and <code>[root_mean_squared_scaled_error]</code>.
+
++ <span class="badge text-bg-api-change">API Change</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.
 
 + <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
   
@@ -32,7 +36,7 @@ The main changes in this release are:
 
 + New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
 
-+ Create the `_create_predict_inputs` method in all Forecasters to unify the inputs of the predict methods.
++ New `_create_predict_inputs` method in all Forecasters to unify the inputs of the predict methods.
 
 + New plot function <code>[plot_prediction_intervals]</code> in the <code>[plot]</code> module to plot predicted intervals.
 
@@ -45,6 +49,12 @@ The main changes in this release are:
 + Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code> are able to predict series not seen during training. This is useful when the user wants to predict a new series that was not included in the training data.
 
 + `encoding` can be set to `None` in Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. This option does not add an encoding column(s) to the regressor training matrix.
+
++ New argument `add_aggregated_metric` in <code>[backtesting_forecaster_multiseries]</code> to include, in addition to the metrics for each level, the aggregated metric of all levels using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).
+
++ New argument `aggregate_metric` in <code>[grid_search_forecaster_multiseries]</code>, <code>[random_search_forecaster_multiseries]</code> and <code>[bayesian_search_forecaster_multiseries]</code> to select the aggregation method used to combine the metric(s) of all levels during the hyperparameter search. The available methods are: mean (arithmetic mean), weighted (weighted by the number of predicted values of each level) and pool (the values of all levels are pooled and then the metric is calculated). If more than one metric and/or aggregation method is used, all are reported in the results, but the first of each is used to select the best model.
+
++ New class <code>[DateTimeFeatureTransformer]</code> and function <code>[create_datetime_features]</code> in the <code>[preprocessing]</code> module to create datetime and calendar features from a datetime index.
 
 **Changed**
 
@@ -59,6 +69,10 @@ The main changes in this release are:
 + Function `_get_metric` moved from <code>[model_selection]</code> to <code>[metrics]</code>.
 
 + Change information message when `verbose` is `True` in <code>[backtesting_forecaster]</code> and <code>[backtesting_forecaster_multiseries]</code>.
+
++ `select_n_jobs_backtesting` and `select_n_jobs_fit` in <code>[utils]</code> return `n_jobs = 1` if regressor is `LGBMRegressor`. This is because `lightgbm` is highly optimized for gradient boosting and parallelizes operations at a very fine-grained level, making additional parallelization unnecessary and potentially harmful due to resource contention.
+
++ `metrics` returned by `backtesting_forecaster` is a `pandas DataFrame` with one column per metric instead of a `list`.
 
 **Fixed**
 
@@ -850,6 +864,8 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 [TimeSeriesDifferentiator]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.TimeSeriesDifferentiator
 [series_long_to_dict]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.series_long_to_dict
 [exog_long_to_dict]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.exog_long_to_dict
+[DateTimeFeatureTransformer]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.DateTimeFeatureTransformer
+[create_datetime_features]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.create_datetime_features
 
 <!-- plot -->
 [plot]: https://skforecast.org/latest/api/plot
@@ -863,3 +879,6 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 [datasets]: https://skforecast.org/latest/api/datasets
 [fetch_dataset]: https://skforecast.org/latest/api/datasets#skforecast.datasets.fetch_dataset
 [load_demo_dataset]: https://skforecast.org/latest/api/datasets#skforecast.datasets.load_demo_dataset
+
+<!-- utils -->
+[utils]: https://skforecast.org/latest/api/utils

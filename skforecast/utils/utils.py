@@ -30,15 +30,16 @@ from ..exceptions import UnknownLevelWarning
 
 optional_dependencies = {
     'sarimax': [
+        'numpy>=1.20.3, <2.0',
         'pmdarima>=2.0, <2.1',
         'statsmodels>=0.12, <0.15'
     ],
     'deeplearning': [
-        'matplotlib>=3.3, <3.9',
+        'matplotlib>=3.3, <3.10',
         'keras>=2.6, <4.0',
     ],
     'plotting': [
-        'matplotlib>=3.3, <3.9', 
+        'matplotlib>=3.3, <3.10', 
         'seaborn>=0.11, <0.14', 
         'statsmodels>=0.12, <0.15'
     ]
@@ -2190,31 +2191,33 @@ def select_n_jobs_backtesting(
 
     The number of jobs is chosen as follows:
 
-    - If `refit` is an integer, then n_jobs=1. This is because parallelization doesn't 
+    - If `refit` is an integer, then `n_jobs = 1`. This is because parallelization doesn't 
     work with intermittent refit.
     - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
-    regressor is a linear regressor, then n_jobs=1.
+    regressor is a linear regressor, then `n_jobs = 1`.
     - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor is not a linear regressor and refit=`True`, then
-    n_jobs=cpu_count().
+    regressor is not a linear regressor and `refit = True`, then
+    `n_jobs = cpu_count() - 1`.
     - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor is not a linear regressor and refit=`False`, then
-    n_jobs=1.
+    regressor is not a linear regressor and `refit = False`, then
+    `n_jobs = 1`.
     - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
-    and refit=`True`, then n_jobs=cpu_count().
+    and `refit = True`, then `n_jobs = cpu_count() - 1`.
     - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
-    and refit=`False`, then n_jobs=1.
+    and `refit = False`, then `n_jobs = 1`.
     - If forecaster is 'ForecasterAutoregMultiSeries' or 
-    'ForecasterAutoregMultiSeriesCustom', then n_jobs=cpu_count().
+    'ForecasterAutoregMultiSeriesCustom', then `n_jobs = cpu_count() - 1`.
     - If forecaster is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
-    then n_jobs=1.
+    then `n_jobs = 1`.
+    - If regressor is a `LGBMRegressor`, then `n_jobs = 1`. This is because `lightgbm` 
+    is highly optimized for gradient boosting and parallelizes operations at a very 
+    fine-grained level, making additional parallelization unnecessary and 
+    potentially harmful due to resource contention.
 
     Parameters
     ----------
     forecaster : Forecaster
-        Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
-        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+        Forecaster model.
     refit : bool, int
         If the forecaster is refitted during the backtesting process.
 
@@ -2243,14 +2246,17 @@ def select_n_jobs_backtesting(
         n_jobs = 1
     else:
         if forecaster_name in ['ForecasterAutoreg', 'ForecasterAutoregCustom']:
-            if regressor_name in linear_regressors:
+            if regressor_name in linear_regressors or regressor_name == 'LGBMRegressor':
                 n_jobs = 1
             else:
-                n_jobs = joblib.cpu_count() if refit else 1
+                n_jobs = joblib.cpu_count() - 1 if refit else 1
         elif forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
             n_jobs = 1
         elif forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
-            n_jobs = joblib.cpu_count()
+            if regressor_name == 'LGBMRegressor':
+                n_jobs = 1
+            else:
+                n_jobs = joblib.cpu_count() - 1
         elif forecaster_name in ['ForecasterSarimax', 'ForecasterEquivalentDate']:
             n_jobs = 1
         else:
@@ -2270,7 +2276,12 @@ def select_n_jobs_fit_forecaster(
     The number of jobs is chosen as follows:
     
     - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
-    and regressor_name is a linear regressor, then n_jobs=1, otherwise n_jobs=cpu_count().
+    and regressor_name is a linear regressor then `n_jobs = 1`, otherwise `n_jobs = cpu_count() - 1`.
+
+    - If `LGBMRegressor` then `n_jobs = 1`. This is because `lightgbm` 
+    is highly optimized for gradient boosting and parallelizes operations at a very 
+    fine-grained level, making additional parallelization unnecessary and 
+    potentially harmful due to resource contention.
     
     Parameters
     ----------
@@ -2294,10 +2305,10 @@ def select_n_jobs_fit_forecaster(
 
     if forecaster_name in ['ForecasterAutoregDirect', 
                            'ForecasterAutoregMultiVariate']:
-        if regressor_name in linear_regressors:
+        if regressor_name in linear_regressors or regressor_name == 'LGBMRegressor':
             n_jobs = 1
         else:
-            n_jobs = joblib.cpu_count()
+            n_jobs = joblib.cpu_count() - 1
     else:
         n_jobs = 1
 

@@ -172,7 +172,7 @@ def test_output_random_search_forecaster_multiseries_ForecasterAutoregMultiVaria
         'lags_label': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params': [{'alpha': 1e-05}, {'alpha': 0.03593813663804626}, {'alpha': 16.681005372000556},
                    {'alpha': 16.681005372000556}, {'alpha': 0.03593813663804626}, {'alpha': 1e-05}],
-        'mean_absolute_error__weighted_average':  np.array([0.20107097, 0.20135665, 0.20991177, 0.21121154, 0.22640335, 0.22645387]),                                                               
+        'mean_absolute_error':  np.array([0.20107097, 0.20135665, 0.20991177, 0.21121154, 0.22640335, 0.22645387]),                                                               
         'alpha' : np.array([1.00000000e-05, 3.59381366e-02, 1.66810054e+01, 1.66810054e+01, 3.59381366e-02, 1.00000000e-05])
         },
         index=pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
