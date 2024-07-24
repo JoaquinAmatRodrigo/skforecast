@@ -14,21 +14,25 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
-+ <span class="badge text-bg-feature">Feature</span> Create the `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
-
-+ <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/api/forecastermultiseries) and [`ForecasterAutoregMultiSeriesCustom`](https://skforecast.org/latest/api/forecastermultiseriescustom). In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
++ <span class="badge text-bg-feature">Feature</span> New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
 
 + <span class="badge text-bg-feature">Feature</span> New argument `skip_folds` in `model_selection` and `model_selection_multiseries` functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
 
++ <span class="badge text-bg-feature">Feature</span> New argument `add_aggregated_metric` in `backtesting_forecaster_multiseries` to include, in addition to the metrics for each level, the aggregated metric of all levels  using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).
+
++ <span class="badge text-bg-feature">Feature</span> New module `metrics` with functions to calculate metrics for time series forecasting such as `mean_absolute_scaled_error` and `root_mean_squared_scaled_error`.
+
 + <span class="badge text-bg-api-change">API Change</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.
+
++ <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/api/forecastermultiseries) and [`ForecasterAutoregMultiSeriesCustom`](https://skforecast.org/latest/api/forecastermultiseriescustom). In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
   
 **Added**
 
 + Support for `python 3.12`.
 
-+ Create the `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
++ New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
 
-+ Create the `_create_predict_inputs` method in all Forecasters to unify the inputs of the predict methods.
++ New `_create_predict_inputs` method in all Forecasters to unify the inputs of the predict methods.
 
 + New plot function `plot_predicted_intervals` in the `plot` module to plot predicted intervals.
 
@@ -36,7 +40,13 @@ The main changes in this release are:
 
 + New argument `skip_folds` in `model_selection` and `model_selection_multiseries` functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
 
++ New argument `add_aggregated_metric` in `backtesting_forecaster_multiseries` to include, in addition to the metrics for each level, the aggregated metric of all levels  using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).
+
++ New argument `aggregate_metric` in `grid_search_forecaster_multiseries`, `bayesian_search_forecaster_multiseries` and `random_search_forecaster_multiseries` to select the aggregation method used to combine the metric(s) of all levels during the hyperparameter search. The available methods are: mean (arithmetic mean), weighted (weighted by the number of predicted values of each level) and pool (the values of all levels are pooled and then the metric is calculated). If more than one metric and/or aggregation method is used, all are reported in the results, but the first of each is used to select the best model.
+
 + New function `plot_prediction_intervals` in module `plot`.
+
++ New class `DateTimeFeatureTransformer` and function `create_date_features` in the `preprocessing` module to create datetime and calendar features from a datetime index.
 
 **Changed**
 
@@ -51,6 +61,10 @@ The main changes in this release are:
 + Function `_get_metric` moved from `model_selection` to `metrics`.
 
 + Change information message when `verbose` is `True` in `backtesting_forecaster` and `backtesting_forecaster_multiseries`.
+
++ `select_n_jobs_backtesting` and `select_n_jobs_fit` return `n_jobs = 1` if regressor is `LGBMRegressor`. This is because `lightgbm` is highly optimized for gradient boosting and parallelizes operations at a very fine-grained level, making additional parallelization unnecessary and potentially harmful due to resource contention.
+
++ `metrics` returned by `backtesting_forecaster` is a pandas DataFrame with one column per metric instead of a list.
 
 **Fixed**
 

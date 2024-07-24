@@ -30,7 +30,7 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoreg_wi
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     ForecasterAutoreg.
     """
-    expected_metric = 0.0646438286283131
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.0646438286283131]})
     expected_predictions = pd.DataFrame({
         'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 
                          0.39585199, 0.55935949, 0.45263533, 0.4578669 , 
@@ -56,7 +56,7 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoreg_wi
                                        verbose             = False
                                    )
                                    
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -77,7 +77,7 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoregCus
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     ForecasterAutoregCustom.
     """
-    expected_metric = 0.06464382862831312
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.06464382862831312]})
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.39585199, 0.55935949, 
                      0.45263533, 0.4578669 , 0.36988237, 0.57912951, 0.48686057, 0.45709952])
@@ -104,7 +104,7 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoregCus
                                         verbose             = False
                                    )
                                    
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -115,7 +115,7 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoregDir
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     ForecasterAutoregDirect.
     """
-    expected_metric = 0.06999891546733726
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.06999891546733726]})
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.5468482 , 0.44670961, 0.57651222, 0.52511275, 0.39745044, 0.53365885, 
                      0.39390143, 0.47002119, 0.38080838, 0.56987255, 0.42302249, 0.45580163])
@@ -142,7 +142,7 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoregDir
                                         verbose             = False
                                    )
                                    
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -152,7 +152,7 @@ def test_output_backtesting_forecaster_no_exog_no_initial_train_size_with_mocked
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
     no initial_train_size, steps=1, ForecasterAutoreg.
     """
-    expected_metric = 0.05194702533929101
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.05194702533929101]})
     expected_predictions = pd.DataFrame({
         'pred':np.array([0.50394528, 0.53092847, 0.51638165, 0.47382814, 0.61996956,
                          0.47685471, 0.52565717, 0.50842469, 0.4925563 , 0.55717972,
@@ -184,7 +184,7 @@ def test_output_backtesting_forecaster_no_exog_no_initial_train_size_with_mocked
                                         in_sample_residuals = True,
                                         verbose             = False
                                    )                
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -194,7 +194,7 @@ def test_output_backtesting_forecaster_no_exog_yes_remainder_with_mocked():
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error'
     """
-    expected_metric = 0.07085869503962372
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.07085869503962372]})
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.48308861, 0.54252612, 
                      0.46139434, 0.44730047, 0.50031862, 0.49831103, 0.55613172, 0.42970914])
@@ -216,7 +216,7 @@ def test_output_backtesting_forecaster_no_exog_yes_remainder_with_mocked():
                                         in_sample_residuals = True,
                                         verbose             = False
                                    )         
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -226,7 +226,7 @@ def test_output_backtesting_forecaster_yes_exog_no_remainder_with_mocked():
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     """
-    expected_metric = 0.05585411566592716
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.05585411566592716]})
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.41316188, 0.51416101, 
                      0.42705363, 0.4384041 , 0.42611891, 0.59547291, 0.5170294 , 0.4982889 ])
@@ -249,7 +249,7 @@ def test_output_backtesting_forecaster_yes_exog_no_remainder_with_mocked():
                                         verbose             = False
                                    )
 
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -259,7 +259,7 @@ def test_output_backtesting_forecaster_yes_exog_yes_remainder_with_mocked():
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error'
     """
-    expected_metric = 0.06313056651237414
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.06313056651237414]})
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.50035119, 0.49157332, 
                      0.43327346, 0.42420804, 0.53389427, 0.51693094, 0.60207937, 0.48227974])
@@ -281,7 +281,7 @@ def test_output_backtesting_forecaster_yes_exog_yes_remainder_with_mocked():
                                         in_sample_residuals = True,
                                         verbose             = False
                                    )
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -291,7 +291,7 @@ def test_output_backtesting_forecaster_yes_exog_yes_remainder_skip_folds_with_mo
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked,
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error'
     """
-    expected_metric = 0.044538146622722964
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.044538146622722964]})
     expected_predictions = pd.DataFrame(
         {
             "pred": np.array(
@@ -326,7 +326,7 @@ def test_output_backtesting_forecaster_yes_exog_yes_remainder_skip_folds_with_mo
         in_sample_residuals=True,
         verbose=True,
     )
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -341,7 +341,7 @@ def test_output_backtesting_forecaster_interval_no_exog_no_remainder_with_mocked
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
     'in_sample_residuals = True'
     """
-    expected_metric = 0.06464382862831312
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.06464382862831312]})
     expected_predictions = pd.DataFrame(
         data = np.array([
             [0.55717779, 0.19882822, 0.95368172],
@@ -377,7 +377,7 @@ def test_output_backtesting_forecaster_interval_no_exog_no_remainder_with_mocked
                                         verbose             = False,
                                         show_progress       = False
                                    )                             
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -388,7 +388,7 @@ def test_output_backtesting_forecaster_interval_no_exog_yes_remainder_with_mocke
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error',
     'in_sample_residuals = True'
     """
-    expected_metric = 0.07085869503962372
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.07085869503962372]})
     expected_predictions = pd.DataFrame(
         data = np.array([
                 [0.55717779, 0.19882822, 0.95368172],
@@ -423,7 +423,7 @@ def test_output_backtesting_forecaster_interval_no_exog_yes_remainder_with_mocke
                                         in_sample_residuals = True,
                                         verbose             = False
                                    )
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -434,7 +434,7 @@ def test_output_backtesting_forecaster_interval_yes_exog_no_remainder_with_mocke
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
     'in_sample_residuals = True'
     """
-    expected_metric = 0.05585411566592716
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.05585411566592716]})
     expected_predictions = pd.DataFrame(
     data = np.array([
             [0.59059622, 0.24619375, 0.95777604],
@@ -471,7 +471,7 @@ def test_output_backtesting_forecaster_interval_yes_exog_no_remainder_with_mocke
                                         verbose             = False
                                    )
     
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -482,7 +482,7 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_with_mock
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error',
     'in_sample_residuals = True'
     """
-    expected_metric = 0.06313056651237414
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.06313056651237414]})
     expected_predictions = pd.DataFrame(
         data = np.array([
             [0.59059622, 0.24619375, 0.95777604],
@@ -517,7 +517,7 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_with_mock
                                         verbose             = False,
                                         show_progress       = False
                                    )
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -532,13 +532,13 @@ def test_output_backtesting_forecaster_interval_out_sample_residuals_no_exog_no_
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
     'in_sample_residuals = False'
     """
-    expected_metric = 0.0646438286283131
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.0646438286283131]})
     expected_predictions = pd.DataFrame({
-        'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.39585199, 0.55935949, 
+        'pred': np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.39585199, 0.55935949, 
                          0.45263533, 0.4578669 , 0.36988237, 0.57912951, 0.48686057, 0.45709952]),
-        'lower_bound':np.array([0.63654358, 0.62989756, 0.67156167, 0.70363265, 0.47521778, 0.75570567, 
+        'lower_bound': np.array([0.63654358, 0.62989756, 0.67156167, 0.70363265, 0.47521778, 0.75570567, 
                                 0.57449933, 0.63204489, 0.44924816, 0.7754757 , 0.60872458, 0.63127751]),
-        'upper_bound':np.array([1.54070487, 1.5131313 , 1.56749058, 1.62564968, 1.37937907, 1.63893941, 
+        'upper_bound': np.array([1.54070487, 1.5131313 , 1.56749058, 1.62564968, 1.37937907, 1.63893941, 
                                 1.47042824, 1.55406192, 1.35340944, 1.65870943, 1.50465348, 1.55329453])
                                                                             }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
@@ -563,7 +563,7 @@ def test_output_backtesting_forecaster_interval_out_sample_residuals_no_exog_no_
                                         verbose             = False
                                    )
 
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -585,10 +585,10 @@ def test_callable_metric_backtesting_forecaster_no_exog_no_remainder_with_mocked
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     """
-    expected_metric = 0.005603130564222017
+    expected_metric = pd.DataFrame({"my_metric": [0.005603130564222017]})
     expected_predictions = pd.DataFrame({
     'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.39585199, 0.55935949, 
-                     0.45263533, 0.4578669 , 0.36988237, 0.57912951, 0.48686057, 0.45709952])
+                     0.45263533, 0.4578669, 0.36988237, 0.57912951, 0.48686057, 0.45709952])
                                                                 }, index=pd.RangeIndex(start=38, stop=50, step=1))
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
@@ -610,7 +610,7 @@ def test_callable_metric_backtesting_forecaster_no_exog_no_remainder_with_mocked
                                         verbose             = False
                                    )
 
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -620,9 +620,12 @@ def test_list_metrics_backtesting_forecaster_no_exog_no_remainder_with_mocked():
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     """
-    expected_metrics = [0.0646438286283131, 0.0646438286283131]
+    expected_metrics = pd.DataFrame({
+        "mean_absolute_error": [0.20796216],
+        "mean_squared_error": [0.0646438286283131]
+    })
     expected_predictions = pd.DataFrame({
-    'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.39585199, 0.55935949, 
+    'pred': np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.39585199, 0.55935949, 
                      0.45263533, 0.4578669 , 0.36988237, 0.57912951, 0.48686057, 0.45709952])
                                                                 }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
@@ -638,7 +641,7 @@ def test_list_metrics_backtesting_forecaster_no_exog_no_remainder_with_mocked():
                                         refit               = False,
                                         initial_train_size  = len(y_train),
                                         steps               = 4,
-                                        metric              = ['mean_squared_error', mean_squared_error],
+                                        metric              = ['mean_absolute_error', mean_squared_error],
                                         interval            = None,
                                         n_boot              = 500,
                                         random_state        = 123,
@@ -646,7 +649,7 @@ def test_list_metrics_backtesting_forecaster_no_exog_no_remainder_with_mocked():
                                         verbose             = False
                                    )
 
-    assert expected_metrics == approx(metrics)
+    pd.testing.assert_frame_equal(expected_metrics, metrics)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -662,27 +665,67 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_gap_with_
     20 observations to backtest, steps=5 and gap=3, metric='mean_squared_error',
     'in_sample_residuals = True'
     """
-    expected_metric = 0.07965887934114284
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.07965887934114284]})
     expected_predictions = pd.DataFrame(
-        data = np.array([[ 0.65022999,  0.27183154,  1.06503914],
-                         [ 0.52364637,  0.19453326,  0.923044  ],
-                         [ 0.46809256,  0.12440678,  0.75395058],
-                         [ 0.48759732,  0.12107577,  0.83145059],
-                         [ 0.47172445,  0.14533367,  0.74697552],
-                         [ 0.57585845,  0.19746   ,  0.99066759],
-                         [ 0.53592933,  0.20681622,  0.93532696],
-                         [ 0.48995122,  0.14626544,  0.77580924],
-                         [ 0.45271317,  0.08619163,  0.79656645],
-                         [ 0.49519413,  0.16880335,  0.7704452 ],
-                         [ 0.27167824, -0.10672021,  0.68648739],
-                         [ 0.27813822, -0.05097489,  0.67753585],
-                         [ 0.31569424, -0.02799154,  0.60155226],
-                         [ 0.3983224 ,  0.03180086,  0.74217568],
-                         [ 0.34822681,  0.02183603,  0.62347788],
-                         [ 0.62098686,  0.24258841,  1.035796  ],
-                         [ 0.47190757,  0.14279445,  0.87130519]]),
-        columns = ['pred', 'lower_bound', 'upper_bound'],
-        index = pd.RangeIndex(start=33, stop=50, step=1)
+        {
+            "pred": {
+                33: 0.6502299892039047,
+                34: 0.5236463733888286,
+                35: 0.4680925560056311,
+                36: 0.48759731640448023,
+                37: 0.4717244484701478,
+                38: 0.5758584470242223,
+                39: 0.5359293308956417,
+                40: 0.48995122056218404,
+                41: 0.4527131747771053,
+                42: 0.49519412870799573,
+                43: 0.2716782430953111,
+                44: 0.2781382241553876,
+                45: 0.31569423787508544,
+                46: 0.39832240179281636,
+                47: 0.3482268061581242,
+                48: 0.6209868551179476,
+                49: 0.4719075668681217,
+            },
+            "lower_bound": {
+                33: 0.2718315398459972,
+                34: 0.19453326150156153,
+                35: 0.12440677892063873,
+                36: 0.12107577460096824,
+                37: 0.14533367434351524,
+                38: 0.19745999766631478,
+                39: 0.2068162190083746,
+                40: 0.14626544347719167,
+                41: 0.08619163297359334,
+                42: 0.1688033545813632,
+                43: -0.10672020626259643,
+                44: -0.05097488773187947,
+                45: -0.027991539209906935,
+                46: 0.031800859989304375,
+                47: 0.021836032031491648,
+                48: 0.2425884057600401,
+                49: 0.14279445498085463,
+            },
+            "upper_bound": {
+                33: 1.065039136744312,
+                34: 0.9230439995748042,
+                35: 0.7539505750052855,
+                36: 0.8314505919311639,
+                37: 0.7469755216091047,
+                38: 0.9906675945646294,
+                39: 0.9353269570816173,
+                40: 0.7758092395618383,
+                41: 0.796566450303789,
+                42: 0.7704452018469528,
+                43: 0.6864873906357182,
+                44: 0.6775358503413632,
+                45: 0.6015522568747398,
+                46: 0.7421756773195001,
+                47: 0.6234778792970812,
+                48: 1.0357960026583548,
+                49: 0.8713051930540974,
+            },
+        }
     )
     forecaster = ForecasterAutoregDirect(
                      regressor = LinearRegression(), 
@@ -707,7 +750,7 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_gap_with_
                                         in_sample_residuals   = True,
                                         verbose               = False
                                    )
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
@@ -723,23 +766,23 @@ def test_output_backtesting_forecaster_interval_yes_exog_not_allow_remainder_gap
     exog_with_index = exog.copy()
     exog_with_index.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
 
-    expected_metric = 0.08826806818628832
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.08826806818628832]})
     expected_predictions = pd.DataFrame(
-        data = np.array([[ 0.65022999,  0.27183154,  1.06503914],
-                         [ 0.52364637,  0.19453326,  0.923044  ],
-                         [ 0.46809256,  0.12440678,  0.75395058],
-                         [ 0.48759732,  0.12107577,  0.83145059],
-                         [ 0.47172445,  0.14533367,  0.74697552],
-                         [ 0.57585845,  0.19746   ,  0.99066759],
-                         [ 0.53592933,  0.20681622,  0.93532696],
-                         [ 0.48995122,  0.14626544,  0.77580924],
-                         [ 0.45271317,  0.08619163,  0.79656645],
-                         [ 0.49519413,  0.16880335,  0.7704452 ],
-                         [ 0.27167824, -0.10672021,  0.68648739],
-                         [ 0.27813822, -0.05097489,  0.67753585],
-                         [ 0.31569424, -0.02799154,  0.60155226],
-                         [ 0.3983224 ,  0.03180086,  0.74217568],
-                         [ 0.34822681,  0.02183603,  0.62347788]]),
+        data = np.array([[0.65022999,  0.27183154,  1.06503914],
+                         [0.52364637,  0.19453326,  0.923044  ],
+                         [0.46809256,  0.12440678,  0.75395058],
+                         [0.48759732,  0.12107577,  0.83145059],
+                         [0.47172445,  0.14533367,  0.74697552],
+                         [0.57585845,  0.19746   ,  0.99066759],
+                         [0.53592933,  0.20681622,  0.93532696],
+                         [0.48995122,  0.14626544,  0.77580924],
+                         [0.45271317,  0.08619163,  0.79656645],
+                         [0.49519413,  0.16880335,  0.7704452 ],
+                         [0.27167824, -0.10672021,  0.68648739],
+                         [0.27813822, -0.05097489,  0.67753585],
+                         [0.31569424, -0.02799154,  0.60155226],
+                         [0.3983224 ,  0.03180086,  0.74217568],
+                         [0.34822681,  0.02183603,  0.62347788]]),
         columns = ['pred', 'lower_bound', 'upper_bound'],
         index = pd.date_range(start='2022-02-03', periods=15, freq='D')
     )
@@ -768,5 +811,5 @@ def test_output_backtesting_forecaster_interval_yes_exog_not_allow_remainder_gap
                                    )
     backtest_predictions = backtest_predictions.asfreq('D')
 
-    assert expected_metric == approx(metric)
+    pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)

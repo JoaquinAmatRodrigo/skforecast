@@ -1,6 +1,5 @@
 # Unit test grid_search_forecaster_multiseries
 # ==============================================================================
-import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
@@ -12,12 +11,12 @@ from skforecast.model_selection_multiseries import grid_search_forecaster_multiv
 
 from tqdm import tqdm
 from functools import partialmethod
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 2 lags of a time series.
     """
@@ -266,13 +265,13 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate
     
     expected_results = pd.DataFrame({
         'levels': [['l1'], ['l1'], ['l1'], ['l1'], ['l1'], ['l1']],
-        'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'lags': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'lags_label': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_absolute_error__weighted_average':  np.array(
+        'mean_absolute_error':  np.array(
             [0.20115194, 0.20183032, 0.20566862, 0.22224269, 0.22625017, 0.22644284]
         ),                                                               
-        'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
+        'alpha': np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
         index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
     )

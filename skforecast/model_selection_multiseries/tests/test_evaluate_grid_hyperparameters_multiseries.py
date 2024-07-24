@@ -15,12 +15,13 @@ from skforecast.model_selection_multiseries.model_selection_multiseries import _
 
 from tqdm import tqdm
 from functools import partialmethod
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
 
-def create_predictors(y): # pragma: no cover
+
+def create_predictors(y):  # pragma: no cover
     """
     Create first 4 lags of a time series.
     """
@@ -319,7 +320,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
 
 @pytest.mark.parametrize("levels", 
                          ['l1', ['l1']], 
-                         ids = lambda value: f'levels: {value}' )
+                         ids = lambda value: f'levels: {value}')
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_levels_str_list_with_mocked(levels):
     """
     Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeries 
@@ -374,7 +375,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                 {"alpha": 0.1},
                 {"alpha": 1},
             ],
-            "mean_absolute_error__weighted_average": np.array(
+            "mean_absolute_error": np.array(
                 [
                     0.20669393332187616,
                     0.20671040715338015,
@@ -428,7 +429,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2']] * 6,
-        'lags'  : [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
+        'lags': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
                    [1, 2], [1, 2], [1, 2]],
         'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
                         [1, 2], [1, 2], [1, 2]],
@@ -531,7 +532,7 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_
     assert os.path.isfile(output_file)
     output_file_content = pd.read_csv(output_file, sep="\t", low_memory=False)
     output_file_content = output_file_content.sort_values(
-        by="mean_absolute_error__weighted_average"
+        by="mean_absolute_error"
     ).reset_index(drop=True)
     output_file_content = output_file_content.astype(
         {"levels": str, "lags": str, "params": str}
@@ -625,7 +626,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2']],
-        'lags'  : ['custom predictors', 'custom predictors', 'custom predictors'],
+        'lags': ['custom predictors', 'custom predictors', 'custom predictors'],
         'lags_label': ['custom predictors', 'custom predictors', 'custom predictors'],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
         'mean_absolute_error__weighted_average': np.array(
@@ -641,7 +642,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
 
 @pytest.mark.parametrize("levels", 
                          ['l1', ['l1']], 
-                         ids = lambda value : f'levels: {value}' )
+                         ids = lambda value: f'levels: {value}')
 def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_levels_str_list_with_mocked(levels):
     """
     Test output of _evaluate_grid_hyperparameters_multiseries in ForecasterAutoregMultiSeriesCustom 
@@ -678,13 +679,13 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     
     expected_results = pd.DataFrame({
         'levels': [['l1'], ['l1'], ['l1']],
-        'lags'  : ['custom predictors', 'custom predictors', 'custom predictors'],
+        'lags': ['custom predictors', 'custom predictors', 'custom predictors'],
         'lags_label': ['custom predictors', 'custom predictors', 'custom predictors'],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-        'mean_absolute_error__weighted_average': np.array(
+        'mean_absolute_error': np.array(
             [0.20669393332187616, 0.20671040715338015, 0.20684013292264494]
         ),                                                               
-        'alpha' : np.array([0.01, 0.1, 1.])
+        'alpha': np.array([0.01, 0.1, 1.])
         },
         index=pd.Index([0, 1, 2], dtype='int64')
     )
@@ -728,7 +729,7 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
     
     expected_results = pd.DataFrame({
         'levels': [['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2']],
-        'lags'  : ['custom predictors', 'custom predictors', 'custom predictors'],
+        'lags': ['custom predictors', 'custom predictors', 'custom predictors'],
         'lags_label': ['custom predictors', 'custom predictors', 'custom predictors'],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
         'mean_squared_error__weighted_average': np.array(
@@ -824,7 +825,7 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesC
 
     assert os.path.isfile(output_file)
     output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
-    output_file_content = output_file_content.sort_values(by='mean_absolute_error__weighted_average').reset_index(drop=True)
+    output_file_content = output_file_content.sort_values(by='mean_absolute_error').reset_index(drop=True)
     output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'params': str})
     pd.testing.assert_frame_equal(results, output_file_content)
     os.remove(output_file)
@@ -1023,7 +1024,6 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                   param_grid         = param_grid,
                   steps              = steps,
                   metric             = 'mean_absolute_error',
-                  aggregate_metric   = 'weighted_average',
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = False,
                   levels             = None,
@@ -1035,16 +1035,16 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1']]*6,
-        'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'levels': [['l1']] * 6,
+        'lags': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'lags_label': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
                    {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_absolute_error__weighted_average': np.array(
+        'mean_absolute_error': np.array(
             [0.20115194, 0.20183032, 0.20566862,
              0.22224269, 0.22625017, 0.22644284]
         ),                                                               
-        'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
+        'alpha': np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
         index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
     )
@@ -1076,7 +1076,6 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                   param_grid         = param_grid,
                   steps              = steps,
                   metric             = 'mean_absolute_error',
-                  aggregate_metric   = 'weighted_average',
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = False,
                   levels             = None,
@@ -1088,16 +1087,16 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1']]*6,
-        'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'levels': [['l1']] * 6,
+        'lags': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'lags_label': ['lags_1', 'lags_1', 'lags_1', 'lags_2', 'lags_2', 'lags_2'],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
                    {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_absolute_error__weighted_average': np.array(
+        'mean_absolute_error': np.array(
             [0.20115194, 0.20183032, 0.20566862,
              0.22224269, 0.22625017, 0.22644284]
             ),                                                               
-        'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
+        'alpha': np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
         index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
     )
@@ -1130,7 +1129,6 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                   param_grid         = param_grid,
                   steps              = steps,
                   metric             = mean_absolute_error,
-                  aggregate_metric   = 'weighted_average',
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = False,
                   levels             = None,
@@ -1142,12 +1140,12 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1']]*3,
-        'lags'  : [[1, 2], [1, 2], [1, 2]],
+        'levels': [['l1']] * 3,
+        'lags': [[1, 2], [1, 2], [1, 2]],
         'lags_label': [[1, 2], [1, 2], [1, 2]],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1.}],
-        'mean_absolute_error__weighted_average': np.array([0.20115194, 0.20183032, 0.20566862]),                                                               
-        'alpha' : np.array([0.01, 0.1 , 1.])
+        'mean_absolute_error': np.array([0.20115194, 0.20183032, 0.20566862]),                                                               
+        'alpha': np.array([0.01, 0.1, 1.])
     },
         index = pd.Index([0, 1, 2], dtype='int64')
     )
@@ -1179,7 +1177,6 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                   param_grid         = param_grid,
                   steps              = steps,
                   metric             = mean_absolute_error,
-                  aggregate_metric   = 'weighted_average',
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = False,
                   levels             = None,
@@ -1191,8 +1188,8 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1']]*9,
-        'lags'  : [{'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
+        'levels': [['l1']] * 9,
+        'lags': [{'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
                    {'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
                    {'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
                    {'l1': np.array([1, 3]), 'l2': np.array([1, 2, 3])},
@@ -1211,14 +1208,14 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                         {'l1': np.array([1, 2]), 'l2': np.array([1, 4])},
                         {'l1': np.array([1, 2]), 'l2': np.array([1, 4])}],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1.}, 
-                   {'alpha': 1.}  , {'alpha': 0.1}, {'alpha': 0.01}, 
-                   {'alpha': 1.}  , {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_absolute_error__weighted_average': np.array(
-            [0.2053202 , 0.20555199, 0.20677802, 
+                   {'alpha': 1.}, {'alpha': 0.1}, {'alpha': 0.01}, 
+                   {'alpha': 1.}, {'alpha': 0.1}, {'alpha': 0.01}],
+        'mean_absolute_error': np.array(
+            [0.2053202, 0.20555199, 0.20677802, 
              0.21443621, 0.21801147, 0.21863968, 
              0.22401526, 0.22830217, 0.22878132]
             ),                                                               
-        'alpha' : np.array([0.01, 0.1 , 1.  , 1.  , 0.1 , 0.01, 1.  , 0.1 , 0.01])
+        'alpha': np.array([0.01, 0.1, 1., 1., 0.1, 0.01, 1., 0.1, 0.01])
         },
         index = pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8], dtype='int64')
     )
@@ -1257,7 +1254,6 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                   param_grid         = param_grid,
                   steps              = steps,
                   metric             = mean_absolute_error,
-                  aggregate_metric   = 'weighted_average',
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = False,
                   levels             = None,
@@ -1269,8 +1265,8 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1']]*18,
-        'lags'  : [{'l1': np.array([1, 2]), 'l2': None},
+        'levels': [['l1']] * 18,
+        'lags': [{'l1': np.array([1, 2]), 'l2': None},
                    {'l1': np.array([1, 2]), 'l2': None},
                    {'l1': np.array([1, 2]), 'l2': None},
                    {'l1': np.array([1, 2]), 'l2': np.array([1, 2, 3])},
@@ -1300,13 +1296,13 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                    {'alpha': 1}, {'alpha': 1}, {'alpha': 0.1}, 
                    {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 0.01}, 
                    {'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_absolute_error__weighted_average': np.array(
-            [0.20155258, 0.20208154, 0.20516149, 0.2053202 , 0.20555199,
+        'mean_absolute_error': np.array(
+            [0.20155258, 0.20208154, 0.20516149, 0.2053202, 0.20555199,
              0.20677802, 0.21005165, 0.21007475, 0.21071924, 0.21353688,
-             0.21443621, 0.21622784, 0.2166998 , 0.21801147, 0.21863968,
+             0.21443621, 0.21622784, 0.2166998, 0.21801147, 0.21863968,
              0.22401526, 0.22830217, 0.22878132]),
-        'alpha' : np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  , 1.  , 1.  ,
-       0.1 , 0.01, 0.1 , 0.01, 1.  , 0.1 , 0.01])
+        'alpha': np.array([0.01, 0.1, 1., 0.01, 0.1, 1., 0.01, 0.1, 1., 1., 1.,
+       0.1, 0.01, 0.1, 0.01, 1., 0.1, 0.01])
         },
         index = pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17], dtype='int64')
     )
@@ -1338,7 +1334,6 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                   param_grid         = param_grid,
                   steps              = steps,
                   metric             = [mean_squared_error, 'mean_absolute_error'],
-                  aggregate_metric   = 'weighted_average',
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = False,
                   levels             = None,
@@ -1350,16 +1345,16 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
               )
     
     expected_results = pd.DataFrame({
-        'levels': [['l1']]*6,
-        'lags'  : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
+        'levels': [['l1']] * 6,
+        'lags': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'lags_label': [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
         'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
                    {'alpha': 1.}, {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_squared_error__weighted_average': np.array([0.06260985, 0.06309219, 0.06627699, 
+        'mean_squared_error': np.array([0.06260985, 0.06309219, 0.06627699, 
                                         0.08032378, 0.08400047, 0.08448937]),
-        'mean_absolute_error__weighted_average': np.array(
+        'mean_absolute_error': np.array(
             [0.20115194, 0.20183032, 0.20566862, 0.22224269, 0.22625017, 0.22644284]),
-        'alpha' : np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
+        'alpha': np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
         index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
     )
@@ -1455,7 +1450,7 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate
 
     assert os.path.isfile(output_file)
     output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
-    output_file_content = output_file_content.sort_values(by='mean_absolute_error__weighted_average').reset_index(drop=True)
+    output_file_content = output_file_content.sort_values(by='mean_absolute_error').reset_index(drop=True)
     output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'lags_label': str, 'params': str})
     pd.testing.assert_frame_equal(results, output_file_content)
     os.remove(output_file)
@@ -1485,7 +1480,6 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate
                   param_grid         = param_grid,
                   steps              = steps,
                   metric             = [mean_squared_error, 'mean_absolute_error'],
-                  aggregate_metric   = 'weighted_average',
                   initial_train_size = len(series) - n_validation,
                   fixed_train_size   = False,
                   levels             = None,
@@ -1502,7 +1496,7 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate
     assert os.path.isfile(output_file)
     output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
     output_file_content = output_file_content.sort_values(
-        by="mean_squared_error__weighted_average"
+        by="mean_squared_error"
     ).reset_index(drop=True)
     output_file_content = output_file_content.astype({'levels': str, 'lags': str, 'lags_label': str, 'params': str})
     pd.testing.assert_frame_equal(results, output_file_content)

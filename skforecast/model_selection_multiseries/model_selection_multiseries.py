@@ -5,7 +5,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Callable, Generator, Any
+from typing import Union, Tuple, Optional, Callable, Generator
 import os
 import re
 from copy import deepcopy
@@ -287,8 +287,8 @@ def _calculate_metrics_multiseries(
     levels : list
         Levels to calculate the metrics.
     add_aggregated_metric : bool, default `True`
-        If `True`, return the aggregated metrics (average, weighted average and pooled)
-        are also returned.
+        If `True`, and multiple series (`levels`) are predicted, the aggregated
+        metrics (average, weighted average and pooled) are also returned.
 
         - 'average': the average (arithmetic mean) of all levels.
         - 'weighted_average': the average of the metrics weighted by the number of
@@ -336,8 +336,8 @@ def _calculate_metrics_multiseries(
                 left_index  = True,
                 right_index = True,
                 how         = "inner",
-                suffixes    = ("_true", "_pred"),
             ).dropna(axis=0, how="any")
+            y_true_pred_level.columns = ['y_true', 'y_pred']
 
             train_indexes = []
             for i, fold in enumerate(folds):
@@ -375,6 +375,9 @@ def _calculate_metrics_multiseries(
                      )
     metrics_levels.insert(0, 'levels', levels)
 
+    if len(levels) < 2:
+        add_aggregated_metric = False
+
     if add_aggregated_metric:
 
         # aggragation: average
@@ -411,24 +414,24 @@ def _calculate_metrics_multiseries(
             ]
         )
         y_train_levels = list(y_train_levels)
-        y_true_pred_levels = np.concatenate(y_true_pred_levels)
-        y_train_levels_concat = np.concatenate(y_train_levels)
+        y_true_pred_levels = pd.concat(y_true_pred_levels)
+        y_train_levels_concat = pd.concat(y_train_levels)
 
         pooled = []
         for m, m_name in zip(metrics, metric_names):
             if m_name in ['mean_absolute_scaled_error', 'root_mean_squared_scaled_error']:
                 pooled.append(
                     m(
-                        y_true = y_true_pred_levels[:, 0],
-                        y_pred = y_true_pred_levels[:, 1],
+                        y_true = y_true_pred_levels.loc[:, 'y_true'],
+                        y_pred = y_true_pred_levels.loc[:, 'y_pred'],
                         y_train = y_train_levels
                     )
                 )
             else:
                 pooled.append(
                     m(
-                        y_true = y_true_pred_levels[:, 0],
-                        y_pred = y_true_pred_levels[:, 1],
+                        y_true = y_true_pred_levels.loc[:, 'y_true'],
+                        y_pred = y_true_pred_levels.loc[:, 'y_pred'],
                         y_train = y_train_levels_concat
                     )
                 )
@@ -523,8 +526,8 @@ def _backtesting_forecaster_multiseries(
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
     add_aggregated_metric : bool, default `False`
-        If `True`, the aggregated metrics (average, weighted average and pooling)
-        over all levels are also returned.
+        If `True`, and multiple series (`levels`) are predicted, the aggregated
+        metrics (average, weighted average and pooled) are also returned.
 
         - 'average': the average (arithmetic mean) of all levels.
         - 'weighted_average': the average of the metrics weighted by the number of
@@ -695,7 +698,7 @@ def _backtesting_forecaster_multiseries(
             warnings.warn(
                 (f"The forecaster will be fit {n_of_fits} times. This can take substantial "
                  f"amounts of time. If not feasible, try with `refit = False`.\n"),
-                LongTrainingWarning
+                LongTrainingWarning,
             )
         elif type(forecaster).__name__ == 'ForecasterAutoregMultiVariate' and n_of_fits * forecaster.steps > 50:
             warnings.warn(
@@ -904,8 +907,8 @@ def backtesting_forecaster_multiseries(
     levels : str, list, default `None`
         Time series to be predicted. If `None` all levels will be predicted.
     add_aggregated_metric : bool, default `True`
-        If `True`, the aggregated metrics (average, weighted average and pooling)
-        over all levels are also returned.
+        If `True`, and multiple series (`levels`) are predicted, the aggregated
+        metrics (average, weighted average and pooled) are also returned.
 
         - 'average': the average (arithmetic mean) of all levels.
         - 'weighted_average': the average of the metrics weighted by the number of
@@ -1076,8 +1079,9 @@ def grid_search_forecaster_multiseries(
     initial_train_size : int 
         Number of samples in the initial train split.
     aggregate_metric : str, list, default `['weighted_average', 'average', 'pooling']`
-        Aggregation method/s used to combine the metric/s of all levels (series).
-        If list, the first aggregation method is used to select the best parameters.
+        Aggregation method/s used to combine the metric/s of all levels (series)
+        when multiple levels are predicted. If list, the first aggregation method
+        is used to select the best parameters.
 
         - 'average': the average (arithmetic mean) of all levels.
         - 'weighted_average': the average of the metrics weighted by the number of
@@ -1228,8 +1232,9 @@ def random_search_forecaster_multiseries(
     initial_train_size : int 
         Number of samples in the initial train split.
     aggregate_metric : str, list, default `['weighted_average', 'average', 'pooling']`
-        Aggregation method/s used to combine the metric/s of all levels (series).
-        If list, the first aggregation method is used to select the best parameters.
+        Aggregation method/s used to combine the metric/s of all levels (series)
+        when multiple levels are predicted. If list, the first aggregation method
+        is used to select the best parameters.
 
         - 'average': the average (arithmetic mean) of all levels.
         - 'weighted_average': the average of the metrics weighted by the number of
@@ -1383,8 +1388,9 @@ def _evaluate_grid_hyperparameters_multiseries(
     initial_train_size : int 
         Number of samples in the initial train split.
     aggregate_metric : str, list, default `['weighted_average', 'average', 'pooling']`
-        Aggregation method/s used to combine the metric/s of all levels (series).
-        If list, the first aggregation method is used to select the best parameters.
+        Aggregation method/s used to combine the metric/s of all levels (series)
+        when multiple levels are predicted. If list, the first aggregation method
+        is used to select the best parameters.
 
         - 'average': the average (arithmetic mean) of all levels.
         - 'weighted_average': the average of the metrics weighted by the number of
@@ -1473,6 +1479,8 @@ def _evaluate_grid_hyperparameters_multiseries(
                  levels     = levels
              )
 
+    add_aggregated_metric = True if len(levels) > 1 else False
+
     lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
    
     if not isinstance(metric, list):
@@ -1484,11 +1492,13 @@ def _evaluate_grid_hyperparameters_multiseries(
             "When `metric` is a `list`, each metric name must be unique."
         )
 
-    metric_names = [
-        f"{metric_name}__{aggregation}"
-        for metric_name in metric_names
-        for aggregation in aggregate_metric
-    ]
+    if add_aggregated_metric:
+        metric_names = [
+            f"{metric_name}__{aggregation}"
+            for metric_name in metric_names
+            for aggregation in aggregate_metric
+        ]
+
     print(
         f"{len(param_grid) * len(lags_grid)} models compared for {len(levels)} level(s). "
         f"Number of iterations: {len(param_grid) * len(lags_grid)}."
@@ -1525,7 +1535,7 @@ def _evaluate_grid_hyperparameters_multiseries(
                 steps                 = steps,
                 levels                = levels,
                 metric                = metric,
-                add_aggregated_metric = True,
+                add_aggregated_metric = add_aggregated_metric,
                 initial_train_size    = initial_train_size,
                 fixed_train_size      = fixed_train_size,
                 gap                   = gap,
@@ -1539,7 +1549,10 @@ def _evaluate_grid_hyperparameters_multiseries(
                 suppress_warnings     = suppress_warnings
             )
 
-            metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
+            if add_aggregated_metric:
+                metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
+            else:
+                metrics = metrics.loc[metrics['levels'] == levels[0], :]
             metrics = pd.DataFrame(
                           data    = [metrics.iloc[:, 1:].transpose().stack().to_numpy()],
                           columns = metric_names
@@ -1663,8 +1676,9 @@ def bayesian_search_forecaster_multiseries(
     initial_train_size : int 
         Number of samples in the initial train split.
     aggregate_metric : str, list, default `['weighted_average', 'average', 'pooling']`
-        Aggregation method/s used to combine the metric/s of all levels (series).
-        If list, the first aggregation method is used to select the best parameters.
+        Aggregation method/s used to combine the metric/s of all levels (series)
+        when multiple levels are predicted. If list, the first aggregation method
+        is used to select the best parameters.
 
         - 'average': the average (arithmetic mean) of all levels.
         - 'weighted_average': the average of the metrics weighted by the number of
@@ -1835,8 +1849,9 @@ def _bayesian_search_optuna_multiseries(
     initial_train_size : int 
         Number of samples in the initial train split.
     aggregate_metric : str, list, default `['weighted_average', 'average', 'pooling']`
-        Aggregation method/s used to combine the metric/s of all levels (series).
-        If list, the first aggregation method is used to select the best parameters.
+        Aggregation method/s used to combine the metric/s of all levels (series)
+        when multiple levels are predicted. If list, the first aggregation method
+        is used to select the best parameters.
 
         - 'average': the average (arithmetic mean) of all levels.
         - 'weighted_average': the average of the metrics weighted by the number of
@@ -1922,6 +1937,13 @@ def _bayesian_search_optuna_multiseries(
             (f"Allowed `aggregate_metric` are: {allowed_aggregate_metrics}. "
              f"Got: {aggregate_metric}.")
         )
+    
+    levels = _initialize_levels_model_selection_multiseries(
+                 forecaster = forecaster,
+                 series     = series,
+                 levels     = levels
+             )
+    add_aggregated_metric = True if len(levels) > 1 else False
 
     if not isinstance(metric, list):
         metric = [metric]
@@ -1932,17 +1954,12 @@ def _bayesian_search_optuna_multiseries(
             "When `metric` is a `list`, each metric name must be unique."
         )
     
-    metric_names = [
-        f"{metric_name}__{aggregation}"
-        for metric_name in metric_names
-        for aggregation in aggregate_metric
-    ]
-
-    levels = _initialize_levels_model_selection_multiseries(
-                 forecaster = forecaster,
-                 series     = series,
-                 levels     = levels
-             )
+    if add_aggregated_metric:
+        metric_names = [
+            f"{metric_name}__{aggregation}"
+            for metric_name in metric_names
+            for aggregation in aggregate_metric
+        ]
 
     # Objective function using backtesting_forecaster_multiseries
     def _objective(
@@ -1954,6 +1971,7 @@ def _bayesian_search_optuna_multiseries(
         steps                 = steps,
         levels                = levels,
         metric                = metric,
+        add_aggregated_metric = add_aggregated_metric,
         aggregate_metric      = aggregate_metric,
         metric_names          = metric_names,
         initial_train_size    = initial_train_size,
@@ -1981,7 +1999,7 @@ def _bayesian_search_optuna_multiseries(
                          steps                 = steps,
                          levels                = levels,
                          metric                = metric,
-                         add_aggregated_metric = True,
+                         add_aggregated_metric = add_aggregated_metric,
                          initial_train_size    = initial_train_size,
                          fixed_train_size      = fixed_train_size,
                          gap                   = gap,
@@ -1994,7 +2012,10 @@ def _bayesian_search_optuna_multiseries(
                          suppress_warnings     = suppress_warnings
                      )
 
-        metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
+        if add_aggregated_metric:
+            metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
+        else:
+            metrics = metrics.loc[metrics['levels'] == levels[0], :]
         metrics = pd.DataFrame(
                       data    = [metrics.iloc[:, 1:].transpose().stack().to_numpy()],
                       columns = metric_names
@@ -2538,8 +2559,9 @@ def grid_search_forecaster_multivariate(
     initial_train_size : int 
         Number of samples in the initial train split.
     aggregate_metric : str, list, default `['weighted_average', 'average', 'pooling']`
-        Aggregation method/s used to combine the metric/s of all levels (series).
-        If list, the first aggregation method is used to select the best parameters.
+        Aggregation method/s used to combine the metric/s of all levels (series)
+        when multiple levels are predicted. If list, the first aggregation method
+        is used to select the best parameters.
 
         - 'average': the average (arithmetic mean) of all levels.
         - 'weighted_average': the average of the metrics weighted by the number of
@@ -2691,8 +2713,9 @@ def random_search_forecaster_multivariate(
     initial_train_size : int 
         Number of samples in the initial train split.
     aggregate_metric : str, list, default `['weighted_average', 'average', 'pooling']`
-        Aggregation method/s used to combine the metric/s of all levels (series).
-        If list, the first aggregation method is used to select the best parameters.
+        Aggregation method/s used to combine the metric/s of all levels (series)
+        when multiple levels are predicted. If list, the first aggregation method
+        is used to select the best parameters.
 
         - 'average': the average (arithmetic mean) of all levels.
         - 'weighted_average': the average of the metrics weighted by the number of
@@ -2855,8 +2878,9 @@ def bayesian_search_forecaster_multivariate(
     initial_train_size : int 
         Number of samples in the initial train split.
     aggregate_metric : str, list, default `['weighted_average', 'average', 'pooling']`
-        Aggregation method/s used to combine the metric/s of all levels (series).
-        If list, the first aggregation method is used to select the best parameters.
+        Aggregation method/s used to combine the metric/s of all levels (series)
+        when multiple levels are predicted. If list, the first aggregation method
+        is used to select the best parameters.
 
         - 'average': the average (arithmetic mean) of all levels.
         - 'weighted_average': the average of the metrics weighted by the number of

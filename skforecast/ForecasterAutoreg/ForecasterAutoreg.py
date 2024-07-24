@@ -1065,7 +1065,7 @@ class ForecasterAutoreg(ForecasterBase):
                 prediction = self._recursive_predict(
                                  steps       = 1,
                                  last_window = last_window_boot,
-                                 exog        = exog_boot 
+                                 exog        = exog_boot
                              )
                 if binned_residuals:
                     predicted_bin = (
