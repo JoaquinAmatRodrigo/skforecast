@@ -395,6 +395,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             X_train_predictors_names = [
                 f"custom_predictor_{i}" for i in range(X_train.shape[1])
             ]
+            self.name_predictors = X_train_predictors_names
         else:
             if len(self.name_predictors) != X_train.shape[1]:
                 raise ValueError(

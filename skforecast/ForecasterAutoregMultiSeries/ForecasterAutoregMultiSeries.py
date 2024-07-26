@@ -1474,20 +1474,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         else:
             level_encoded_shape = 0
 
-        last_window_shape = self.window_size
+        lags_shape = len(self.lags)
         exog_shape = exog.shape[1] if exog is not None else 0
         
-        predictors_shape = last_window_shape + level_encoded_shape + exog_shape
+        predictors_shape = lags_shape + level_encoded_shape + exog_shape
         predictors = np.full(shape=predictors_shape, fill_value=np.nan, dtype=float)
         if self.encoding is not None:
-            predictors[last_window_shape:last_window_shape + level_encoded_shape] = level_encoded
+            predictors[lags_shape:lags_shape + level_encoded_shape] = level_encoded
 
         predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
         last_window = np.concatenate((last_window, predictions))
 
         for i in range(steps):
 
-            predictors[:last_window_shape] = last_window[-self.lags - (steps - i)]
+            predictors[:lags_shape] = last_window[-self.lags - (steps - i)]
             if exog is not None:
                 predictors[-exog_shape:] = exog[i, ]
 
