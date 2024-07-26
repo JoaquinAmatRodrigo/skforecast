@@ -22,7 +22,7 @@ transformer_exog = ColumnTransformer(
                        verbose_feature_names_out = False
                    )
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 3 lags of a time series.
     """
@@ -55,7 +55,8 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                   levels              = level,
                   exog                = exog_predict,
                   n_boot              = 4,
-                  in_sample_residuals = True
+                  in_sample_residuals = True,
+                  suppress_warnings   = True
               )
     
     expected = pd.DataFrame(

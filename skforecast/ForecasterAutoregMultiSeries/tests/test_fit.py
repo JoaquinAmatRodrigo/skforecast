@@ -200,7 +200,8 @@ def test_fit_same_residuals_when_residuals_greater_than_1000(encoding):
     forecaster.fit(series=series, store_in_sample_residuals=True)
     results_1 = forecaster.in_sample_residuals
     
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
+                                              encoding=encoding)
     forecaster.fit(series=series, store_in_sample_residuals=True)
     results_2 = forecaster.in_sample_residuals
 
@@ -327,6 +328,7 @@ def test_fit_encoding_mapping(encoding, encoding_mapping):
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(7, dtype=float)), 
                            '2': pd.Series(np.arange(7, dtype=float))})
+    
     forecaster = ForecasterAutoregMultiSeries(
                      LinearRegression(),
                      lags     = 3,

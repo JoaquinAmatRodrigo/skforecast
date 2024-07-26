@@ -3,10 +3,10 @@
 import pytest
 import numpy as np
 import pandas as pd
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import LinearRegression
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
-from sklearn.preprocessing import StandardScaler
 
 
 @pytest.mark.parametrize("encoding",
@@ -19,9 +19,12 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression(encoding):
     series = pd.DataFrame({'1': pd.Series(np.arange(start=0, stop=50)), 
                            '2': pd.Series(np.arange(start=50, stop=100))})
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5,
-                                              encoding=encoding,
-                                              transformer_series=None)
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor          = LinearRegression(),
+                     lags               = 5,
+                     encoding           = encoding,
+                     transformer_series = None
+                 )
     forecaster.fit(series=series)
     level = '1'
     predictions_1 = forecaster._recursive_predict(
@@ -56,9 +59,12 @@ def test_recursive_predict_output_when_regressor_is_Ridge_StandardScaler(encodin
     series = pd.DataFrame({'1': pd.Series(np.arange(start=0, stop=50)), 
                            '2': pd.Series(np.arange(start=50, stop=100))})
 
-    forecaster = ForecasterAutoregMultiSeries(Ridge(random_state=123), lags=5,
-                                              transformer_series=StandardScaler(),
-                                              encoding=encoding)
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor          = Ridge(random_state=123),
+                     lags               = [1, 5],
+                     encoding           = encoding,
+                     transformer_series = StandardScaler()
+                 )
     forecaster.fit(series=series)
     level = '1'
     predictions_1 = forecaster._recursive_predict(
@@ -67,7 +73,7 @@ def test_recursive_predict_output_when_regressor_is_Ridge_StandardScaler(encodin
                         last_window = forecaster.last_window[level].to_numpy(),
                         exog        = None
                     )
-    expected_1 = np.array([47.07918986, 47.49389001, 47.79185048, 47.94978724, 47.93977217])
+    expected_1 = np.array([46.8874583, 46.33497711, 46.55721213, 47.16416632, 47.96216963])
 
     level = '2'
     predictions_2 = forecaster._recursive_predict(
@@ -76,7 +82,7 @@ def test_recursive_predict_output_when_regressor_is_Ridge_StandardScaler(encodin
                         last_window = forecaster.last_window[level].to_numpy(),
                         exog        = None
                     )
-    expected_2 = np.array([96.94237815, 97.32979082, 97.59502126, 97.71369989, 97.65659655])
+    expected_2 = np.array([96.54682709, 95.82519059, 95.96342415, 96.52866375, 97.30595186])
 
     np.testing.assert_array_almost_equal(predictions_1, expected_1)
     np.testing.assert_array_almost_equal(predictions_2, expected_2)
@@ -90,9 +96,12 @@ def test_recursive_predict_output_when_regressor_is_Ridge_StandardScaler_encodin
     series = pd.DataFrame({'1': pd.Series(np.arange(start=0, stop=50)), 
                            '2': pd.Series(np.arange(start=50, stop=100))})
 
-    forecaster = ForecasterAutoregMultiSeries(Ridge(random_state=123), lags=5,
-                                              transformer_series=StandardScaler(),
-                                              encoding=None)
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor          = Ridge(random_state=123),
+                     lags               = [1, 5],
+                     encoding           = None,
+                     transformer_series = StandardScaler()
+                 )
     forecaster.fit(series=series)
     level = '1'
     predictions_1 = forecaster._recursive_predict(
@@ -101,7 +110,7 @@ def test_recursive_predict_output_when_regressor_is_Ridge_StandardScaler_encodin
                         last_window = forecaster.last_window[level].to_numpy(),
                         exog        = None
                     )
-    expected_1 = np.array([46.99448965, 47.3924591, 47.67030269, 47.80405119, 47.76495265])
+    expected_1 = np.array([46.83128368, 46.25031411, 46.45861438, 47.05926117, 47.85494363])
 
     level = '2'
     predictions_2 = forecaster._recursive_predict(
@@ -110,7 +119,7 @@ def test_recursive_predict_output_when_regressor_is_Ridge_StandardScaler_encodin
                         last_window = forecaster.last_window[level].to_numpy(),
                         exog        = None
                     )
-    expected_2 = np.array([96.87810851, 97.25285591, 97.50284385, 97.60317853, 97.52399897])
+    expected_2 = np.array([96.54134313, 95.81624394, 95.95289729, 96.51792835, 97.29590622])
 
     np.testing.assert_array_almost_equal(predictions_1, expected_1)
     np.testing.assert_array_almost_equal(predictions_2, expected_2)

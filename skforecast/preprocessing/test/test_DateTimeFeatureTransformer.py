@@ -213,7 +213,9 @@ def test_create_datetime_features_output_when_features_year_month_encoding_cycli
                 pd.Timestamp("2022-01-05 00:00:00"): 0.8660254037844387,
             },
         }
-    ).asfreq("D")
+    ).asfreq("D").astype(
+        {'year': int, 'weekend': int}
+    )
 
     pd.testing.assert_frame_equal(results, expected)
 
@@ -265,7 +267,9 @@ def test_create_datetime_features_output_when_features_year_month_encoding_oneho
                 pd.Timestamp("2022-01-05 00:00:00"): 0,
             },
         }
-    ).asfreq("D")
+    ).asfreq("D").astype(
+        {'year_2022': int, 'month_1': int, 'weekend_0': int, 'weekend_1': int}
+    )
 
     pd.testing.assert_frame_equal(results, expected)
 
@@ -310,7 +314,9 @@ def test_create_datetime_features_output_when_features_year_month_encoding_None(
                 pd.Timestamp("2022-01-05 00:00:00"): 0,
             },
         }
-    ).asfreq("D")
+    ).asfreq("D").astype(
+        {'year': int, 'month': int, 'weekend': int}
+    )
 
     pd.testing.assert_frame_equal(results, expected)
 
@@ -366,6 +372,8 @@ def test_create_datetime_features_output_when_features_year_month_encoding_cycli
                 pd.Timestamp("2022-05-31 00:00:00"): 0.5000000000000001,
             },
         }
+    ).astype(
+        {'year': int, 'weekend': int}
     )
 
     pd.testing.assert_frame_equal(results, expected)

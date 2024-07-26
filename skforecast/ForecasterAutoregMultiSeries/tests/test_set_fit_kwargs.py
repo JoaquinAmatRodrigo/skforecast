@@ -1,7 +1,7 @@
 # Unit test set_fit_kwargs ForecasterAutoregMultiSeries
 # ==============================================================================
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from lightgbm import LGBMRegressor
+from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 
 def test_set_fit_kwargs():
