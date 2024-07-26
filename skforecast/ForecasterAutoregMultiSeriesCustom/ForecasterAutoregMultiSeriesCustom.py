@@ -563,7 +563,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         y_train_values  = []
         for i in range(len(y_values) - self.window_size_diff):
 
-            temp_X_index = np.arange(i + differentiation, self.window_size_diff + i)
+            temp_X_index = np.arange(differentiation + i, self.window_size_diff + i)
             temp_y_index  = self.window_size_diff + i
 
             X_train_values.append(self.fun_predictors(y=y_values[temp_X_index]))
@@ -1503,7 +1503,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         for i in range(steps):
 
             predictors[:custom_predictors_shape] = self.fun_predictors(
-                y=last_window[i + differentiation:self.window_size_diff + i]
+                y=last_window[differentiation + i:self.window_size_diff + i]
             )
             if exog is not None:
                 predictors[-exog_shape:] = exog[i, ]
@@ -1596,7 +1596,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
             X_predict = [
                 self.fun_predictors(
-                    y=full_predictors[i + differentiation:self.window_size_diff + i]
+                    y=full_predictors[differentiation + i:self.window_size_diff + i]
                 )
                 for i in range(steps)
             ]
