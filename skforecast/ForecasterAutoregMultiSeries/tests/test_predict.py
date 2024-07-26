@@ -565,15 +565,15 @@ def test_predict_output_when_series_and_exog_dict():
     exog are dictionaries.
     """
     forecaster = ForecasterAutoregMultiSeries(
-        regressor=LGBMRegressor(
-            n_estimators=2, random_state=123, verbose=-1, max_depth=2
-        ),
-        lags=14,
-        encoding='ordinal',
-        dropna_from_series=False,
-        transformer_series=StandardScaler(),
-        transformer_exog=StandardScaler(),
-    )
+                     regressor          = LGBMRegressor(
+                         n_estimators=2, random_state=123, verbose=-1, max_depth=2
+                     ),
+                     lags               = 14,
+                     encoding           = 'ordinal',
+                     dropna_from_series = False,
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = StandardScaler()
+                 )
     forecaster.fit(
         series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
     )
@@ -771,15 +771,16 @@ def test_predict_output_when_series_and_exog_dict_encoding_None_unknown_level():
     exog are dictionaries and encoding is None and unknown level with no exog.
     """
     forecaster = ForecasterAutoregMultiSeries(
-        regressor=LGBMRegressor(
-            n_estimators=2, random_state=123, verbose=-1, max_depth=2
-        ),
-        lags=14,
-        encoding=None,
-        dropna_from_series=False,
-        transformer_series=None,
-        transformer_exog=StandardScaler(),
-    )
+                     regressor          = LGBMRegressor(
+                         n_estimators=30, random_state=123, verbose=-1, max_depth=4
+                     ),
+                     lags               = [1, 7, 14],
+                     encoding           = None,
+                     dropna_from_series = False,
+                     differentiation    = 1,
+                     transformer_series = None,
+                     transformer_exog   = StandardScaler()
+                 )
     forecaster.fit(
         series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
     )
@@ -788,7 +789,7 @@ def test_predict_output_when_series_and_exog_dict_encoding_None_unknown_level():
     last_window = pd.DataFrame(
         {k: v for k, v in forecaster.last_window.items() if k in levels}
     )
-    last_window['id_1005'] = last_window['id_1004']
+    last_window['id_1005'] = last_window['id_1004'] * 0.9
     predictions = forecaster.predict(
         steps=5, levels=levels, last_window=last_window,
         exog=exog_dict_test, suppress_warnings=True
@@ -796,12 +797,11 @@ def test_predict_output_when_series_and_exog_dict_encoding_None_unknown_level():
 
     expected = pd.DataFrame(
         data=np.array([
-            [2796.7268212, 3205.84100287, 3367.37706412, 3367.37706412, 3367.37706412],
-            [2796.7268212, 3367.37706412, 3367.37706412, 3367.37706412, 3367.37706412],
-            [2796.7268212, 3367.37706412, 3367.37706412, 3367.37706412, 3367.37706412],
-            [2796.7268212, 3367.37706412, 3367.37706412, 3367.37706412, 3367.37706412],
-            [2796.7268212, 3367.37706412, 3367.37706412, 3367.37706412, 3367.37706412]
-        ]),
+            [1351.44874045, 3267.13419659, 3843.06135374, 7220.15909652, 5776.91782212],
+            [1411.73786344, 3537.21728977, 3823.777024  , 7541.54119992, 6083.61461454],
+            [1367.56233886, 3595.37617537, 3861.96220571, 7599.93110962, 6018.65643062],
+            [1349.98221742, 3730.36025071, 3900.14738742, 7997.86353537, 6213.61087632],
+            [1330.33321825, 3752.7395927 , 3850.39111741, 7923.44398373, 6128.67898851]]),
         index=pd.date_range(start="2016-08-01", periods=5, freq="D"),
         columns=["id_1000", "id_1001", "id_1003", "id_1004", "id_1005"],
     )
@@ -815,15 +815,15 @@ def test_predict_output_when_series_and_exog_dict_encoding_None_transformer_seri
     exog are dictionaries and encoding is None and transformer_series is StandardScaler.
     """
     forecaster = ForecasterAutoregMultiSeries(
-        regressor=LGBMRegressor(
-            n_estimators=30, random_state=123, verbose=-1, max_depth=4
-        ),
-        lags=14,
-        encoding=None,
-        dropna_from_series=False,
-        transformer_series=StandardScaler(),
-        transformer_exog=StandardScaler(),
-    )
+                     regressor          = LGBMRegressor(
+                         n_estimators=30, random_state=123, verbose=-1, max_depth=4
+                     ),
+                     lags               = 14,
+                     encoding           = None,
+                     dropna_from_series = False,
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = StandardScaler()
+                 )
     forecaster.fit(
         series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
     )
@@ -859,15 +859,15 @@ def test_predict_output_when_series_and_exog_dict_unknown_level():
     exog are dictionaries and unknown level.
     """
     forecaster = ForecasterAutoregMultiSeries(
-        regressor=LGBMRegressor(
-            n_estimators=30, random_state=123, verbose=-1, max_depth=4
-        ),
-        lags=14,
-        encoding='onehot',
-        dropna_from_series=False,
-        transformer_series=StandardScaler(),
-        transformer_exog=StandardScaler(),
-    )
+                     regressor          = LGBMRegressor(
+                         n_estimators=30, random_state=123, verbose=-1, max_depth=4
+                     ),
+                     lags               = [1, 7, 14],
+                     encoding           = 'onehot',
+                     dropna_from_series = False,
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = StandardScaler()
+                 )
     forecaster.fit(
         series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
     )
@@ -885,11 +885,11 @@ def test_predict_output_when_series_and_exog_dict_unknown_level():
     )
     expected = pd.DataFrame(
         data=np.array([
-            [1304.2309796 , 2644.73379395, 2701.05594333, 7945.05087807, 5205.57559308],
-            [1392.59928753, 2568.92887871, 2359.72594108, 8621.18012343, 4984.6226338 ],
-            [1382.45586783, 2547.98711684, 2183.68744956, 8629.41415317, 5042.36744269],
-            [1327.47844464, 2435.07501779, 2195.06397394, 8821.30311188, 5263.32818457],
-            [1275.08383614, 2136.9392887 , 2179.36225552, 8683.04017596, 5366.43442996]]),
+            [1444.89638131, 2608.52179991, 2594.53128524, 7607.65586239, 5178.02908923],
+            [1426.33025646, 2522.90927921, 2240.71166036, 7993.7648681 , 4793.03739895],
+            [1419.2856951 , 2451.51448204, 2183.50817345, 8473.84457748, 4721.84643207],
+            [1368.78988907, 2477.40763584, 2180.37278483, 8528.07173563, 4559.15070243],
+            [1324.15676752, 2566.91100046, 2186.03652396, 8767.76813577, 4966.9971064 ]]),
         index=pd.date_range(start="2016-08-01", periods=5, freq="D"),
         columns=["id_1000", "id_1001", "id_1003", "id_1004", "id_1005"],
     )

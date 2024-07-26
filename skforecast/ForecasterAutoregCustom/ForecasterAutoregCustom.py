@@ -346,7 +346,9 @@ class ForecasterAutoregCustom(ForecasterBase):
             )
         y_values, y_index = preprocess_y(y=y)
 
+        differentiation = 0
         if self.differentiation is not None:
+            differentiation = self.differentiation
             if not self.fitted:
                 y_values = self.differentiator.fit_transform(y_values)
             else:
@@ -380,10 +382,10 @@ class ForecasterAutoregCustom(ForecasterBase):
        
         X_train  = []
         y_train  = []
-        for i in range(len(y) - self.window_size):
+        for i in range(len(y) - self.window_size_diff):
 
-            train_index = np.arange(i, self.window_size + i)
-            test_index  = self.window_size + i
+            train_index = np.arange(differentiation + i, self.window_size_diff + i)
+            test_index  = self.window_size_diff + i
 
             X_train.append(self.fun_predictors(y=y_values[train_index]))
             y_train.append(y_values[test_index])
@@ -395,6 +397,7 @@ class ForecasterAutoregCustom(ForecasterBase):
             X_train_predictors_names = [
                 f"custom_predictor_{i}" for i in range(X_train.shape[1])
             ]
+            self.name_predictors = X_train_predictors_names
         else:
             if len(self.name_predictors) != X_train.shape[1]:
                 raise ValueError(
@@ -416,14 +419,14 @@ class ForecasterAutoregCustom(ForecasterBase):
         X_train = pd.DataFrame(
                       data    = X_train,
                       columns = X_train_predictors_names,
-                      index   = y_index[self.window_size: ]
+                      index   = y_index[self.window_size_diff:]
                   )
         
         if exog is not None:
-            # The first `self.window_size` positions have to be removed from exog
+            # The first `self.window_size_diff` positions have to be removed from exog
             # since they are not in X_train.
-            exog_to_train = exog.iloc[self.window_size:, ]
-            exog_to_train.index = exog_index[self.window_size:]
+            exog_to_train = exog.iloc[self.window_size_diff:, ]
+            exog_to_train.index = exog_index[self.window_size_diff:]
             X_train = pd.concat((X_train, exog_to_train), axis=1)
 
         # TODO: move self to fit method and make X_train_col_names a return
@@ -433,13 +436,9 @@ class ForecasterAutoregCustom(ForecasterBase):
         # TODO: DataFrame or Series?
         y_train = pd.Series(
                       data  = y_train,
-                      index = y_index[self.window_size: ],
+                      index = y_index[self.window_size_diff:],
                       name  = 'y'
                   )
-
-        if self.differentiation is not None:
-            X_train = X_train.iloc[self.differentiation: ]
-            y_train = y_train.iloc[self.differentiation: ]
         
         if X_train[X_train_predictors_names].isna().any().any():
             raise ValueError(
@@ -452,7 +451,7 @@ class ForecasterAutoregCustom(ForecasterBase):
     def create_sample_weights(
         self,
         X_train: pd.DataFrame,
-    )-> np.ndarray:
+    ) -> np.ndarray:
         """
         Crate weights for each observation according to the forecaster's attribute
         `weight_func`.
@@ -710,13 +709,14 @@ class ForecasterAutoregCustom(ForecasterBase):
         
         """
 
+        differentiation = self.differentiation if self.differentiation is not None else 0
         predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
         last_window = np.concatenate((last_window, predictions))
 
         for i in range(steps):
 
             X = self.fun_predictors(
-                y=last_window[i:self.window_size_diff + i]
+                y=last_window[differentiation + i:self.window_size_diff + i]
             ).reshape(1, -1)
             if np.isnan(X).any():
                 raise ValueError(
@@ -781,11 +781,14 @@ class ForecasterAutoregCustom(ForecasterBase):
                           exog        = exog
                       )
         
+        differentiation = self.differentiation if self.differentiation is not None else 0
         full_predictors = np.concatenate((last_window_values, predictions))
         X_predict = np.full(shape=steps, fill_value=np.nan)
 
         X_predict = [
-            self.fun_predictors(y=full_predictors[i:self.window_size_diff + i])
+            self.fun_predictors(
+                y=full_predictors[differentiation + i:self.window_size_diff + i]
+            )
             for i in range(steps)
         ]
             

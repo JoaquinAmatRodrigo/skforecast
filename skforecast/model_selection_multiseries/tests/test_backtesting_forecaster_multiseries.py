@@ -48,6 +48,17 @@ def create_predictors_14(y):  # pragma: no cover
 
     return lags
 
+def create_predictors_1_7_14(y):  # pragma: no cover
+    """
+    Create lags 1 and 5 of a time series.
+    """
+    lag_1 = y[-1]
+    lag_7 = y[-7]
+    lag_14 = y[-14]
+    lags = np.hstack([lag_1, lag_7, lag_14])
+
+    return lags
+
 
 def test_backtesting_forecaster_multiseries_TypeError_when_forecaster_not_a_forecaster_multiseries():
     """
@@ -1542,6 +1553,91 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                 '2016-08-05', '2016-08-11', '2016-08-12', '2016-08-13',
                 '2016-08-14', '2016-08-15'],
                 dtype='datetime64[ns]', freq=None),
+        columns=['id_1000', 'id_1001', 'id_1003', 'id_1004']
+    )
+
+    pd.testing.assert_frame_equal(metrics, expected_metrics)
+    pd.testing.assert_frame_equal(predictions.head(10), expected_predictions)
+
+
+@pytest.mark.parametrize("forecaster", 
+    [ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=30, random_state=123, verbose=-1, max_depth=4
+        ),
+        lags=[1, 7, 14],
+        encoding=None,
+        differentiation=1,
+        dropna_from_series=False,
+        transformer_series=None,
+        transformer_exog=StandardScaler(),
+    ), 
+    ForecasterAutoregMultiSeriesCustom(
+        regressor=LGBMRegressor(
+            n_estimators=30, random_state=123, verbose=-1, max_depth=4
+        ),
+        fun_predictors=create_predictors_1_7_14, 
+        window_size=14,
+        encoding=None,
+        differentiation=1,
+        dropna_from_series=False,
+        transformer_series=None,
+        transformer_exog=StandardScaler(),
+    )], 
+    ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_series_and_exog_dict_encoding_None_differentiation(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom when series and exog are
+    dictionaries, encoding=None, and differentiation=1 (mocked done in Skforecast v0.13.0).
+    """
+    
+    metrics, predictions = backtesting_forecaster_multiseries(
+        forecaster            = forecaster,
+        series                = series_dict,
+        exog                  = exog_dict,
+        steps                 = 24,
+        metric                = ['mean_absolute_error', 'mean_absolute_scaled_error'],
+        initial_train_size    = len(series_dict_train['id_1000']),
+        fixed_train_size      = True,
+        gap                   = 0,
+        allow_incomplete_fold = True,
+        refit                 = False,
+        n_jobs                = 'auto',
+        verbose               = True,
+        show_progress         = True,
+        suppress_warnings     = True
+    )
+
+    expected_metrics = pd.DataFrame(
+        data={
+            'levels': [
+                'id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004',
+                'average', 'weighted_average', 'pooling'
+            ],
+            'mean_absolute_error': [
+                234.51032919, 1145.83513569, np.nan, 1342.06986733,
+                1025.76779699, 937.0457823, 818.85514869, 818.85514869
+            ],
+            'mean_absolute_scaled_error': [
+                1.06505383, 3.25617103, np.nan, 5.62127465,
+                0.85811137, 2.70015272, 2.6047229, 1.9453509
+            ]
+        }
+    )
+    expected_predictions = pd.DataFrame(
+        data=np.array([
+            [1351.44874045, 3267.13419659, 3843.06135374, 7220.15909652],
+            [1411.73786344, 3537.21728977, 3823.777024  , 7541.54119992],
+            [1367.56233886, 3595.37617537, 3861.96220571, 7599.93110962],
+            [1349.98221742, 3730.36025071, 3900.14738742, 7997.86353537],
+            [1330.33321825, 3752.7395927 , 3850.39111741, 7923.44398373],
+            [1045.2013386 , 2652.15007539, 4227.38385608, 6651.39787084],
+            [ 801.6084919 , 2059.57604816,        np.nan, 5625.61804572],
+            [1473.95692547, 3159.99921219,        np.nan, 6740.53028097],
+            [1596.51499989, 3449.40467366,        np.nan, 7172.21235605],
+            [1572.31317919, 3507.56355926,        np.nan, 7506.35124681]]),
+        index=pd.date_range('2016-08-01', periods=10, freq='D'),
         columns=['id_1000', 'id_1001', 'id_1003', 'id_1004']
     )
 

@@ -651,9 +651,9 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_bool_st
             index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
         ).assign(
-            _level_skforecast = [0]*5 + [1]*5,
-            exog_1 = v_exog_1*5 + v_exog_1*5, 
-            exog_2 = v_exog_2*5 + v_exog_2*5
+            _level_skforecast = [0] * 5 + [1] * 5,
+            exog_1 = v_exog_1 * 5 + v_exog_1 * 5, 
+            exog_2 = v_exog_2 * 5 + v_exog_2 * 5
         ).astype({'_level_skforecast': int}
         ).astype(
             {'_level_skforecast': 'category', 
@@ -2005,10 +2005,10 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
             index = pd.Index(
                         pd.DatetimeIndex(
                             ['1990-01-05', '1990-01-06',
-                            '1990-01-07', '1990-01-08',
-                            '1990-01-09', '1990-01-10',
-                            '1990-01-08', '1990-01-09', 
-                            '1990-01-06', '1990-01-07']
+                             '1990-01-07', '1990-01-08',
+                             '1990-01-09', '1990-01-10',
+                             '1990-01-08', '1990-01-09', 
+                             '1990-01-06', '1990-01-07']
                         )
                     ),
             name  = 'y',

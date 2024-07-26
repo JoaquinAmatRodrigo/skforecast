@@ -6,7 +6,7 @@ from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMulti
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
-def create_predictors_3(y): # pragma: no cover
+def create_predictors_3(y):  # pragma: no cover
     """
     Create first 3 lags of a time series.
     """

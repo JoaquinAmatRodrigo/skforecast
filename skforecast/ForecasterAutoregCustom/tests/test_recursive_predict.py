@@ -1,19 +1,31 @@
 # Unit test _recursive_predict ForecasterAutoregCustom
 # ==============================================================================
-from pytest import approx
 import pytest
 import re
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import Ridge
 from sklearn.linear_model import LinearRegression
+from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 5 lags of a time series.
     """
 
     lags = y[-1:-6:-1]
+
+    return lags
+
+def create_predictors_1_5(y):  # pragma: no cover
+    """
+    Create lags 1 and 5 of a time series.
+    """
+
+    lag_1 = y[-1]
+    lag_5 = y[-5]
+    lags = np.hstack([lag_1, lag_5])
 
     return lags  
 
@@ -56,5 +68,28 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression():
                   )
     
     expected = np.array([50., 51., 52., 53., 54.])
+
+    np.testing.assert_array_almost_equal(predictions, expected)
+
+
+def test_recursive_predict_output_when_regressor_is_Ridge_StandardScaler():
+    """
+    Test _recursive_predict output when using Ridge as regressor and
+    StandardScaler.
+    """
+    forecaster = ForecasterAutoregCustom(
+                     regressor      = Ridge(random_state=123),
+                     fun_predictors = create_predictors_1_5,
+                     window_size    = 5,
+                     transformer_y = StandardScaler()
+                 )
+    forecaster.fit(y=pd.Series(np.arange(50), name='y'))
+    predictions = forecaster._recursive_predict(
+                      steps       = 5,
+                      last_window = forecaster.last_window.to_numpy().ravel(),
+                      exog        = None
+                  )
     
-    assert (predictions == approx(expected))
+    expected = np.array([46.571365, 45.866715, 46.012391, 46.577477, 47.34943])
+
+    np.testing.assert_array_almost_equal(predictions, expected)

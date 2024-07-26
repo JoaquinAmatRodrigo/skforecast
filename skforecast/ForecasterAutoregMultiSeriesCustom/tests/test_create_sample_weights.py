@@ -4,11 +4,12 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
+from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
+from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 3 lags of a time series.
     """
@@ -260,6 +261,7 @@ X_train_ordinal_category_diferent_length["_level_skforecast"] = (
         ("ordinal", X_train_ordinal),
         ("ordinal_category", X_train_ordinal_category),
         ("onehot", X_train_onehot),
+        (None, X_train_ordinal)
     ],
     ids=lambda dt: f"encoding, X_train: {dt}",
 )
@@ -293,6 +295,7 @@ def test_create_sample_weights_output_using_series_weights(encoding, X_train):
         ("ordinal", X_train_ordinal),
         ("ordinal_category", X_train_ordinal_category),
         ("onehot", X_train_onehot),
+        (None, X_train_ordinal)
     ],
     ids=lambda dt: f"encoding, X_train: {dt}",
 )
@@ -312,7 +315,6 @@ def test_create_sample_weights_output_using_weight_func(encoding, X_train):
         series_col_names=["series_1", "series_2"],
         X_train=X_train,
     )
-
     expected = np.array([1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1])
 
     assert np.array_equal(results, expected)
@@ -349,6 +351,7 @@ def test_create_sample_weights_output_using_weight_func_dict(weight_func, expect
                      fun_predictors = create_predictors,
                      window_size    = 3,
                      encoding       = "ordinal",
+                     transformer_series = StandardScaler(),
                      weight_func    = weight_func
                  )
     forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
@@ -398,11 +401,12 @@ def test_create_sample_weights_output_using_weight_func_dict_different_series_le
     Test `sample_weights` creation using `weight_func` with series of different lengths.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = LinearRegression(),
-                     fun_predictors = create_predictors,
-                     window_size    = 3,
-                     encoding       = "ordinal",
-                     weight_func    = weight_func
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     encoding           = "ordinal",
+                     transformer_series = StandardScaler(),
+                     weight_func        = weight_func
                  )
     forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
     results = forecaster.create_sample_weights(
@@ -419,6 +423,7 @@ def test_create_sample_weights_output_using_weight_func_dict_different_series_le
         ("ordinal", X_train_ordinal),
         ("ordinal_category", X_train_ordinal_category),
         ("onehot", X_train_onehot),
+        (None, X_train_ordinal)
     ],
     ids=lambda dt: f"encoding, X_train: {dt}",
 )
@@ -429,12 +434,13 @@ def test_create_sample_weights_output_using_series_weights_and_weight_func(
     Test `sample_weights` creation using `series_weights` and `weight_func`.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = LinearRegression(),
-                     fun_predictors = create_predictors,
-                     window_size    = 3,
-                     encoding       = encoding,
-                     series_weights = {"series_1": 1.0, "series_2": 2.0},
-                     weight_func    = custom_weights
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     encoding           = encoding,
+                     transformer_series = StandardScaler(),
+                     series_weights     = {"series_1": 1.0, "series_2": 2.0},
+                     weight_func        = custom_weights
                  )
     forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
     results = forecaster.create_sample_weights(
@@ -452,6 +458,7 @@ def test_create_sample_weights_output_using_series_weights_and_weight_func(
         ("ordinal", X_train_ordinal_diferent_length),
         ("ordinal_category", X_train_ordinal_category_diferent_length),
         ("onehot", X_train_onehot_diferent_length),
+        (None, X_train_ordinal_diferent_length)
     ],
     ids=lambda dt: f"encoding, X_train: {dt}",
 )
@@ -463,17 +470,19 @@ def test_create_sample_weights_output_using_series_weights_and_weight_func_diffe
     with series of different lengths.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = LinearRegression(),
-                     fun_predictors = create_predictors,
-                     window_size    = 3,
-                     encoding       = encoding,
-                     series_weights = {"series_1": 1.0, "series_2": 2.0},
-                     weight_func    = custom_weights
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     encoding           = encoding,
+                     transformer_series = StandardScaler(),
+                     series_weights     = {"series_1": 1.0, "series_2": 2.0},
+                     weight_func        = custom_weights
                  )
     forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
     results = forecaster.create_sample_weights(
         series_col_names=["series_1", "series_2"], X_train=X_train
     )
+    
     expected = np.array([1, 0, 0, 0, 1, 1, 1, 0, 2, 2, 2], dtype=float)
 
     assert np.array_equal(results, expected)
@@ -485,6 +494,7 @@ def test_create_sample_weights_output_using_series_weights_and_weight_func_diffe
         ("ordinal", X_train_ordinal),
         ("ordinal_category", X_train_ordinal_category),
         ("onehot", X_train_onehot),
+        (None, X_train_ordinal)
     ],
     ids=lambda dt: f"encoding, X_train: {dt}",
 )
@@ -493,14 +503,15 @@ def test_create_sample_weights_ValueError_when_weights_has_nan(encoding, X_train
     Test sample_weights ValueError when sample_weight contains NaNs.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = LinearRegression(),
-                     fun_predictors = create_predictors,
-                     window_size    = 3,
-                     encoding       = encoding,
-                     weight_func    = custom_weights_nan
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     encoding           = encoding,
+                     transformer_series = StandardScaler(),
+                     weight_func        = custom_weights_nan
                  )
     forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
-    
+
     err_msg = re.escape("The resulting `weights` cannot have NaN values.")
     with pytest.raises(ValueError, match=err_msg):
         forecaster.create_sample_weights(
@@ -514,6 +525,7 @@ def test_create_sample_weights_ValueError_when_weights_has_nan(encoding, X_train
         ("ordinal", X_train_ordinal),
         ("ordinal_category", X_train_ordinal_category),
         ("onehot", X_train_onehot),
+        (None, X_train_ordinal)
     ],
     ids=lambda dt: f"encoding, X_train: {dt}",
 )
@@ -524,14 +536,15 @@ def test_create_sample_weights_ValueError_when_weights_has_negative_values(
     Test sample_weights ValueError when sample_weight contains negative values.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = LinearRegression(),
-                     fun_predictors = create_predictors,
-                     window_size    = 3,
-                     encoding       = encoding,
-                     weight_func    = custom_weights_negative
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     encoding           = encoding,
+                     transformer_series = StandardScaler(),
+                     weight_func        = custom_weights_negative
                  )
     forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
-    
+
     err_msg = re.escape("The resulting `weights` cannot have negative values.")
     with pytest.raises(ValueError, match=err_msg):
         forecaster.create_sample_weights(
@@ -545,6 +558,7 @@ def test_create_sample_weights_ValueError_when_weights_has_negative_values(
         ("ordinal", X_train_ordinal),
         ("ordinal_category", X_train_ordinal_category),
         ("onehot", X_train_onehot),
+        (None, X_train_ordinal)
     ],
     ids=lambda dt: f"encoding, X_train: {dt}",
 )
@@ -553,11 +567,12 @@ def test_create_sample_weights_ValueError_when_weights_all_zeros(encoding, X_tra
     Test sample_weights ValueError when the sum of the weights is zero.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor      = LinearRegression(),
-                     fun_predictors = create_predictors,
-                     window_size    = 3,
-                     encoding       = encoding,
-                     series_weights = {"series_1": 0, "series_2": 0}
+                     regressor          = LinearRegression(),
+                     fun_predictors     = create_predictors,
+                     window_size        = 3,
+                     encoding           = encoding,
+                     transformer_series = StandardScaler(),
+                     series_weights     = {"series_1": 0, "series_2": 0}
                  )
     forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
 

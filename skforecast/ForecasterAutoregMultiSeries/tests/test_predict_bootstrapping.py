@@ -146,7 +146,8 @@ def test_predict_bootstrapping_IgnoredArgumentWarning_when_levels_is_list_and_di
              )
     }
 
-    pd.testing.assert_frame_equal(results['1'], expected['1'])
+    for k in results.keys():
+        pd.testing.assert_frame_equal(results[k], expected[k])
 
 
 def test_predict_bootstrapping_UnknownLevelWarning_when_not_in_sample_residuals_for_level():
@@ -313,10 +314,10 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
         forecaster.predict_bootstrapping(steps=1, levels='1', in_sample_residuals=False)
 
 
-def test_predict_bootstrapping_ValueError_when_not_out_sample_residuals_for_all_levels():
+def test_predict_bootstrapping_UnknownLevelWarning_out_sample_residuals_with_encoding_None():
     """
-    Test ValueError is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals is not available for all levels.
+    Test UnknownLevelWarning is raised when encoding is None and 
+    out_sample_residuals is set.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3, 
                                               encoding=None)

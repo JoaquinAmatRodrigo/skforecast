@@ -597,7 +597,8 @@ def test_create_predict_X_output_when_series_and_exog_dict_encoding_None():
 
     expected = {
         'id_1000': pd.DataFrame(
-                       data = np.array([[-9.83270685e-01, -8.82486054e-01, -7.98426315e-01,
+                       data = np.array([
+                                [-9.83270685e-01, -8.82486054e-01, -7.98426315e-01,
                                     -7.92779121e-01, -7.77683073e-01,  8.21644127e-03,
                                     1.42962482e+00,             np.nan,             np.nan],
                                 [ 2.84684766e+03, -9.83270685e-01, -8.82486054e-01,
@@ -695,7 +696,7 @@ def test_create_predict_X_output_when_series_and_exog_dict_unknown_level():
         encoding           = 'ordinal',
         dropna_from_series = False,
         transformer_series = StandardScaler(),
-        transformer_exog   = StandardScaler(),
+        transformer_exog   = StandardScaler()
     )
     forecaster.fit(
         series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
