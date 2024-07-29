@@ -982,6 +982,9 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
 
         X_train = output[0]
         y_train = output[1]
+
+        if self.encoding is None:
+            X_train = X_train.drop(columns='_level_skforecast')
         
         set_skforecast_warnings(suppress_warnings, action='default')
 
