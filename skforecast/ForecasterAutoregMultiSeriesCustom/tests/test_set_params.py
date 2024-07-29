@@ -1,9 +1,9 @@
 # Unit test set_params ForecasterAutoregMultiSeriesCustom
 # ==============================================================================
-from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from sklearn.linear_model import LinearRegression
+from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 3 lags of a time series.
     """
@@ -25,7 +25,7 @@ def test_set_params():
     expected = {'copy_X': True,
                 'fit_intercept': False,
                 'n_jobs': None,
-                'normalize': 'deprecated', #For sklearn < 1.2
+                'normalize': 'deprecated',  # For sklearn < 1.2
                 'positive': False
                }
     results = forecaster.regressor.get_params()

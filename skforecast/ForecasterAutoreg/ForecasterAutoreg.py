@@ -819,7 +819,7 @@ class ForecasterAutoreg(ForecasterBase):
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
-                warnings.simplefilter("ignore")
+                warnings.simplefilter("ignore", category=UserWarning)
                 prediction = self.regressor.predict(X).ravel()[0]
                 predictions[i] = prediction
 
@@ -1065,7 +1065,7 @@ class ForecasterAutoreg(ForecasterBase):
                 prediction = self._recursive_predict(
                                  steps       = 1,
                                  last_window = last_window_boot,
-                                 exog        = exog_boot 
+                                 exog        = exog_boot
                              )
                 if binned_residuals:
                     predicted_bin = (

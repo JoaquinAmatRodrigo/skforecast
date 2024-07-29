@@ -22,12 +22,12 @@ from tqdm import tqdm
 from functools import partialmethod
 
 optuna.logging.set_verbosity(optuna.logging.WARNING)
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 4 lags of a time series.
     """
@@ -35,6 +35,47 @@ def create_predictors(y): # pragma: no cover
     lags = y[-1:-5:-1]
 
     return lags
+
+
+def test_ValueError_bayesian_search_optuna_multiseries_when_not_allowed_aggregate_metric():
+    """
+    Test ValueError is raised in _bayesian_search_optuna_multiseries when 
+    `aggregate_metric` has not a valid value.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor = Ridge(random_state=123),
+                     lags      = 2,
+                     encoding  = 'onehot'
+                 )
+
+    steps = 3
+    n_validation = 12
+    
+    def search_space(trial):  # pragma: no cover
+        search_space  = {'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0)}
+
+        return search_space
+
+    err_msg = re.escape(
+        ("Allowed `aggregate_metric` are: ['average', 'weighted_average', 'pooling']. "
+         "Got: ['not_valid'].")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        _bayesian_search_optuna_multiseries(
+            forecaster         = forecaster,
+            series             = series,
+            steps              = steps,
+            search_space       = search_space,
+            metric             = 'mean_absolute_error',
+            aggregate_metric   = 'not_valid',
+            refit              = True,
+            initial_train_size = len(series) - n_validation,
+            fixed_train_size   = True,
+            n_trials           = 10,
+            random_state       = 123,
+            return_best        = False,
+            verbose            = False,
+        )
 
 
 def test_ValueError_bayesian_search_optuna_multiseries_metric_list_duplicate_names():
@@ -51,7 +92,7 @@ def test_ValueError_bayesian_search_optuna_multiseries_metric_list_duplicate_nam
     steps = 3
     n_validation = 12
     
-    def search_space(trial): # pragma: no cover
+    def search_space(trial):  # pragma: no cover
         search_space  = {'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0)}
 
         return search_space
@@ -272,10 +313,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
             0.21632482482968562, 0.8509374761370117],
         [list(['l1']), np.array([1, 2]), {'alpha': 0.9809565564007693},
             0.2163292127503296, 0.9809565564007693]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error__weighted_average': float, 
+        'mean_absolute_error': float, 
         'alpha': float
     })
 
@@ -812,10 +853,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
         [list(['l1']), np.array([1, 2, 3, 4]),
             {'alpha': 0.23598059857016607}, 0.21912194726679404,
             0.23598059857016607]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error__weighted_average': float,
+        'mean_absolute_error': float,
         'alpha': float
     })
 
@@ -896,10 +937,10 @@ def test_results_output_bayesian_search_optuna_multiseries_ForecasterAutoregMult
         [list(['l1']), {'l1': np.array([1, 3]), 'l2': None},
             {'alpha': 0.190666813148965}, 0.22324045507529866,
             0.190666813148965]], dtype=object),
-        columns=['levels', 'lags', 'params', 'mean_absolute_error__weighted_average', 'alpha'],
+        columns=['levels', 'lags', 'params', 'mean_absolute_error', 'alpha'],
         index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
-        'mean_absolute_error__weighted_average': float,
+        'mean_absolute_error': float,
         'alpha': float
     })
 
@@ -922,7 +963,7 @@ def test_evaluate_bayesian_search_optuna_multiseries_when_return_best_Forecaster
     n_validation = 12
     
     def search_space(trial):
-        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)}
+        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
 
         return search_space
 
@@ -1095,9 +1136,9 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeries_output_
 
     def search_space(trial):
         search_space  = {
-            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'n_estimators': trial.suggest_int('n_estimators', 10, 20),
             'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
-            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+            'max_features': trial.suggest_categorical('max_features', ['log2', 'sqrt'])
         }
         
         return search_space
@@ -1140,14 +1181,14 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiSeriesCustom_o
 
     def search_space(trial):
         search_space  = {
-            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'n_estimators': trial.suggest_int('n_estimators', 10, 20),
             'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
-            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+            'max_features': trial.suggest_categorical('max_features', ['log2', 'sqrt'])
         }
         
         return search_space
 
-    output_file = 'test_bayesian_search_optuna_multiseries_output_file.txt'
+    output_file = 'test_bayesian_search_optuna_multiseries_output_file_2.txt'
     results = _bayesian_search_optuna_multiseries(
                   forecaster         = forecaster,
                   series             = series,
@@ -1185,14 +1226,14 @@ def test_bayesian_search_optuna_multiseries_ForecasterAutoregMultiVariate_output
 
     def search_space(trial):
         search_space  = {
-            'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+            'n_estimators': trial.suggest_int('n_estimators', 10, 20),
             'min_samples_leaf': trial.suggest_float('min_samples_leaf', 0.1, 1., log=True),
-            'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+            'max_features': trial.suggest_categorical('max_features', ['log2', 'sqrt'])
         }
         
         return search_space
 
-    output_file = 'test_bayesian_search_optuna_multiseries_output_file.txt'
+    output_file = 'test_bayesian_search_optuna_multiseries_output_file_3.txt'
     results = _bayesian_search_optuna_multiseries(
                   forecaster         = forecaster,
                   series             = series,

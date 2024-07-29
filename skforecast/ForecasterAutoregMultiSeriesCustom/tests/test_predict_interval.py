@@ -1,18 +1,18 @@
 # Unit test predict_interval ForecasterAutoregMultiSeriesCustom
 # ==============================================================================
-import re
 import pytest
+import joblib
 import numpy as np
 import pandas as pd
-import joblib
 from pathlib import Path
-from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.linear_model import LinearRegression
 from lightgbm import LGBMRegressor
+
+from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 
 # Fixtures
 from .fixtures_ForecasterAutoregMultiSeriesCustom import series
@@ -29,7 +29,7 @@ exog_dict_test = {k: v.loc[end_train:,] for k, v in exog_dict.items()}
 series_2 = pd.DataFrame({'1': pd.Series(np.arange(10)), 
                          '2': pd.Series(np.arange(10))})
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 3 lags of a time series.
     """
@@ -37,13 +37,14 @@ def create_predictors(y): # pragma: no cover
 
     return lags
 
-def create_predictors_14_lags(y): # pragma: no cover
+def create_predictors_14_lags(y):  # pragma: no cover
     """
     Create first 14 lags of a time series.
     """
     lags = y[-1:-15:-1]
 
     return lags
+
 
 @pytest.fixture(params=[('1'  , np.array([[10., 20., 20.]])), 
                         (['2'], np.array([[10., 30., 30.]])),
@@ -92,7 +93,8 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_1_in_sample_
     forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
     forecaster.in_sample_residuals['2'] = np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)
 
-    predictions = forecaster.predict_interval(steps=1, levels=expected_pandas_dataframe[0], in_sample_residuals=True)
+    predictions = forecaster.predict_interval(steps=1, levels=expected_pandas_dataframe[0], 
+                                              in_sample_residuals=True, suppress_warnings=True)
     expected = expected_pandas_dataframe[1]
 
     pd.testing.assert_frame_equal(predictions, expected)
@@ -321,7 +323,7 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
                      regressor          = LinearRegression(),
                      fun_predictors     = create_predictors,
                      window_size        = 3,
-                     transformer_series = {'1': StandardScaler(), '2': MinMaxScaler()}
+                     transformer_series = {'1': StandardScaler(), '2': MinMaxScaler(), '_unknown_level': StandardScaler()}
                  )
     forecaster.fit(series=series)
     predictions = forecaster.predict_interval(steps=5, levels=['1'])
@@ -424,6 +426,159 @@ def test_predict_interval_output_when_series_and_exog_dict():
             'id_1004',
             'id_1004_lower_bound',
             'id_1004_upper_bound'
+        ]
+    )
+
+    pd.testing.assert_frame_equal(predictions, expected)
+
+
+def test_predict_interval_output_when_series_and_exog_dict_unknown_level():
+    """
+    Test output ForecasterAutoregMultiSeries predict_interval method when series and 
+    exog are dictionaries and unknown_level.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor          = LGBMRegressor(
+                         n_estimators=30, random_state=123, verbose=-1, max_depth=4
+                     ),
+                     fun_predictors     = create_predictors_14_lags,
+                     window_size        = 14,
+                     encoding           = 'ordinal',
+                     dropna_from_series = False,
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = StandardScaler(),
+                 )
+    forecaster.fit(
+        series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
+    )
+
+    levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
+    last_window = pd.DataFrame(
+        {k: v for k, v in forecaster.last_window.items() if k in levels}
+    )
+    last_window['id_1005'] = last_window['id_1004'] * 0.9
+    exog_dict_test_2 = exog_dict_test.copy()
+    exog_dict_test_2['id_1005'] = exog_dict_test_2['id_1001']
+    predictions = forecaster.predict_interval(
+        steps=5, levels=levels, exog=exog_dict_test_2, last_window=last_window,
+        suppress_warnings=True, n_boot=10, interval=[5, 95]
+    )
+    expected = pd.DataFrame(
+        data=np.array([
+            [1330.53853595, 1234.54638554, 1466.01101346, 2655.95253058,
+             1806.16587168, 2980.80800441, 2645.09087689, 2436.33118532,
+             2896.8958089 , 7897.51938494, 6475.8689303 , 8520.39336408,
+             4890.22840888, 2714.04801977, 6113.89932062],
+            [1401.63085157, 1297.33464356, 1604.49157285, 2503.75247961,
+             1390.65424338, 2780.38027935, 2407.17525054, 2218.88594845,
+             3064.37772365, 8577.09840856, 7096.41496521, 8763.40553896,
+             4756.81020006, 3777.92035635, 5477.79419038],
+            [1387.26572882, 1225.39562421, 1530.74271605, 2446.28038665,
+             1274.09842569, 3059.12744785, 2314.08602238, 2067.62137868,
+             2805.34679097, 8619.98311729, 6304.39688754, 9186.66428031,
+             4947.44052717, 3826.16081797, 5253.17164831],
+            [1310.82275942, 1228.56216954, 1517.4560568 , 2389.3764241 ,
+             1613.21336702, 3084.63006301, 2245.05149747, 1759.35788172,
+             2358.47886659, 8373.80334337, 7640.47624518, 8833.97112851,
+             4972.50918694, 3180.5809587 , 7426.8270528 ],
+            [1279.37274512, 1236.62366009, 1452.44787801, 2185.06104284,
+             1240.87596129, 2946.07346052, 2197.45288166, 1622.570817  ,
+             2074.46153095, 8536.31820994, 7357.82403861, 8997.25758537,
+             5213.7612468 , 3840.69918874, 6307.8333356 ]]),
+        index=pd.date_range(start="2016-08-01", periods=5, freq="D"),
+        columns=[
+            'id_1000',
+            'id_1000_lower_bound',
+            'id_1000_upper_bound',
+            'id_1001',
+            'id_1001_lower_bound',
+            'id_1001_upper_bound',
+            'id_1003',
+            'id_1003_lower_bound',
+            'id_1003_upper_bound',
+            'id_1004',
+            'id_1004_lower_bound',
+            'id_1004_upper_bound',
+            'id_1005',
+            'id_1005_lower_bound',
+            'id_1005_upper_bound'
+        ]
+    )
+
+    pd.testing.assert_frame_equal(predictions, expected)
+
+
+def test_predict_interval_output_when_series_and_exog_dict_encoding_None_unknown_level():
+    """
+    Test output ForecasterAutoregMultiSeries predict_interval method when series and 
+    exog are dictionaries, encoding is None and unknown_level.
+    """
+    forecaster = ForecasterAutoregMultiSeriesCustom(
+                     regressor          = LGBMRegressor(
+                         n_estimators=30, random_state=123, verbose=-1, max_depth=4
+                     ),
+                     fun_predictors     = create_predictors_14_lags,
+                     window_size        = 14,
+                     encoding           = None,
+                     differentiation    = 1,
+                     dropna_from_series = False,
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = StandardScaler(),
+                 )
+    forecaster.fit(
+        series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
+    )
+
+    levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
+    last_window = pd.DataFrame(
+        {k: v for k, v in forecaster.last_window.items() if k in levels}
+    )
+    last_window['id_1005'] = last_window['id_1004'] * 0.9
+    exog_dict_test_2 = exog_dict_test.copy()
+    exog_dict_test_2['id_1005'] = exog_dict_test_2['id_1001']
+    predictions = forecaster.predict_interval(
+        steps=5, levels=levels, exog=exog_dict_test_2, last_window=last_window,
+        suppress_warnings=True, n_boot=10, interval=[5, 95]
+    )
+    expected = pd.DataFrame(
+        data=np.array([
+            [1261.93265537,  784.41616115, 1503.55050672, 3109.36774743,
+             2631.85125321, 3350.98559877, 3565.43804407, 3087.92154985,
+             3807.05589541, 7581.0124551 , 7103.49596088, 7822.63030645,
+             6929.60563584, 6452.08914162, 7171.22348719],
+            [1312.20749816,  637.9184331 , 1456.55230372, 3370.63276557,
+             2696.34370051, 3514.97757113, 3486.84974947, 2795.52389009,
+             3631.19455503, 7877.71418945, 7243.41987007, 8022.05899501,
+             7226.30737019, 6592.01305081, 7370.65217575],
+            [1269.60061174,  336.37560258, 1749.69442106, 3451.58214186,
+             2469.45506604, 3906.21421331, 3265.50308765, 2392.65631312,
+             3745.59689697, 7903.88998388, 6991.82265856, 8383.9837932 ,
+             7211.07145676, 6299.00413144, 7691.16526608],
+            [1216.71296132, -803.46566696, 2451.85576454, 3420.93162585,
+             1399.08558266, 4684.62426649, 3279.93748551, 1338.36404222,
+             4737.69647581, 7895.69977262, 5978.62410616, 9257.08365774,
+             7260.90982474, 5309.65908504, 8564.26513062],
+            [1199.80671909, -341.36057715, 2287.58311122, 3410.88134138,
+             1737.91607302, 4481.53218781, 3385.66459202, 1835.69033892,
+             4698.25050698, 7915.94534006, 6423.67830994, 9122.23338527,
+             7281.15539217, 5770.52244805, 8429.41485815]]),
+        index=pd.date_range(start="2016-08-01", periods=5, freq="D"),
+        columns=[
+            'id_1000',
+            'id_1000_lower_bound',
+            'id_1000_upper_bound',
+            'id_1001',
+            'id_1001_lower_bound',
+            'id_1001_upper_bound',
+            'id_1003',
+            'id_1003_lower_bound',
+            'id_1003_upper_bound',
+            'id_1004',
+            'id_1004_lower_bound',
+            'id_1004_upper_bound',
+            'id_1005',
+            'id_1005_lower_bound',
+            'id_1005_upper_bound'
         ]
     )
 

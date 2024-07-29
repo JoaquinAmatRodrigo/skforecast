@@ -13,7 +13,7 @@ from skforecast.model_selection import bayesian_search_forecaster
 # Fixtures
 from .fixtures_model_selection import y
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 4 lags of a time series, used in ForecasterAutoregCustom.
     """

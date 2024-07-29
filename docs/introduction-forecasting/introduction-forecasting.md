@@ -57,7 +57,7 @@ When working with time series, it is seldom needed to predict only the next elem
 
 ### Recursive multi-step forecasting
 
-Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown, a recursive process is applied in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting and can be easily generated with the [`ForecasterAutoreg`](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html) and [`ForecasterAutoregCustom`](https://skforecast.org/latest/user_guides/custom-predictors.html) classes.
+Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown, a recursive process is applied in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting and can be easily generated with the [`ForecasterAutoreg`](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html) and [`ForecasterAutoregCustom`](https://skforecast.org/latest/user_guides/window-features-and-custom-features.html) classes.
 
 <p style="text-align: center">
 <img src="../img/diagram-recursive-mutistep-forecasting.png" style="width: 650px">
@@ -104,7 +104,7 @@ To predict the next *n* steps, the strategy of [recursive multi-step forecasting
 <font size="2.5"> <i>Diagram of recursive forecasting with multiple independent time series.</i></font>
 </p>
 
-The [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html) and [`ForecasterAutoregMultiSeriesCustom`](https://skforecast.org/latest/user_guides/custom-predictors.html#forecasterautoregmultiseriescustom) classes cover this process. 
+The [`ForecasterAutoregMultiSeries`](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html) and [`ForecasterAutoregMultiSeriesCustom`](https://skforecast.org/latest/user_guides/window-features-and-custom-features.html#forecasterautoregmultiseriescustom) classes cover this process. 
 
 ### Dependent Multi-Series Forecasting (multivariate time series)
 
@@ -137,10 +137,10 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 |[ForecasterSarimax]           |✔️||✔️||✔️|✔️|✔️||
 
 [ForecasterAutoreg]: https://skforecast.org/latest/user_guides/autoregresive-forecaster.html
-[ForecasterAutoregCustom]: https://skforecast.org/latest/user_guides/custom-predictors.html
+[ForecasterAutoregCustom]: https://skforecast.org/latest/user_guides/window-features-and-custom-features.html
 [ForecasterAutoregDirect]: https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html
 [ForecasterMultiSeries]: https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html
-[ForecasterMultiSeriesCustom]: https://skforecast.org/latest/user_guides/custom-predictors.html
+[ForecasterMultiSeriesCustom]: https://skforecast.org/latest/user_guides/window-features-and-custom-features.html#forecasterautoregmultiseriescustom
 [ForecasterMultiVariate]: https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html
 [ForecasterRNN]: https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm
 [ForecasterSarimax]: https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html

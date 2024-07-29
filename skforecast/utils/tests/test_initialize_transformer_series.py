@@ -9,7 +9,14 @@ from skforecast.utils import initialize_transformer_series
 from skforecast.exceptions import IgnoredArgumentWarning
 
 
-def test_initialize_transformer_series_when_transformer_series_is_None():
+@pytest.mark.parametrize(
+    "forecaster_name, encoding, expected", 
+    [('ForecasterAutoregMultiSeries', 'onehot', {'col1': None, 'col2': None, '_unknown_level': None}),
+     ('ForecasterAutoregMultiSeries', None, {'_unknown_level': None}),
+     ('ForecasterAutoregMultiVariate', None, {'col1': None, 'col2': None}),
+     ('ForecasterRNN', None, {'col1': None, 'col2': None})], 
+    ids=lambda params: f'params: {params}')
+def test_initialize_transformer_series_when_transformer_series_is_None(forecaster_name, encoding, expected):
     """
     Test initialize_transformer_series when `transformer_series` is None.
     """
@@ -17,14 +24,23 @@ def test_initialize_transformer_series_when_transformer_series_is_None():
     transformer_series = None
     
     transformer_series_ = initialize_transformer_series(
-                              series_col_names = series_col_names,
+                              forecaster_name    = forecaster_name,
+                              series_col_names   = series_col_names,
+                              encoding           = encoding,
                               transformer_series = transformer_series
                           )
 
-    assert transformer_series_ == {'col1': None, 'col2': None}
+    assert transformer_series_ == expected
 
 
-def test_initialize_transformer_series_when_transformer_series_is_StandardScaler():
+@pytest.mark.parametrize(
+    "forecaster_name, encoding, expected", 
+    [('ForecasterAutoregMultiSeries', 'onehot', {'col1': StandardScaler(), 'col2': StandardScaler(), '_unknown_level': StandardScaler()}),
+     ('ForecasterAutoregMultiSeries', None, {'_unknown_level': StandardScaler()}),
+     ('ForecasterAutoregMultiVariate', None, {'col1': StandardScaler(), 'col2': StandardScaler()}),
+     ('ForecasterRNN', None, {'col1': StandardScaler(), 'col2': StandardScaler()})], 
+    ids=lambda params: f'params: {params}')
+def test_initialize_transformer_series_when_transformer_series_is_StandardScaler(forecaster_name, encoding, expected):
     """
     Test initialize_transformer_series when `transformer_series` is a StandardScaler.
     """
@@ -32,54 +48,85 @@ def test_initialize_transformer_series_when_transformer_series_is_StandardScaler
     transformer_series = StandardScaler()
     
     transformer_series_ = initialize_transformer_series(
-                              series_col_names = series_col_names,
+                              forecaster_name    = forecaster_name,
+                              series_col_names   = series_col_names,
+                              encoding           = encoding,
                               transformer_series = transformer_series
                           )
 
-    assert list(transformer_series_.keys()) == ['col1', 'col2']
-    for col in series_col_names:
-        assert isinstance(transformer_series_[col], StandardScaler)
+    assert transformer_series_.keys() == expected.keys()
+    for k in expected.keys():
+        assert isinstance(transformer_series_[k], StandardScaler)
 
 
-def test_initialize_transformer_series_when_transformer_series_is_dict():
+@pytest.mark.parametrize(
+    "forecaster_name, encoding, expected", 
+    [('ForecasterAutoregMultiSeries', 'onehot', {'col1': StandardScaler(), 'col2': StandardScaler(), '_unknown_level': StandardScaler()}),
+     ('ForecasterAutoregMultiVariate', None, {'col1': StandardScaler(), 'col2': StandardScaler()}),
+     ('ForecasterRNN', None, {'col1': StandardScaler(), 'col2': StandardScaler()})], 
+    ids=lambda params: f'params: {params}')
+def test_initialize_transformer_series_when_transformer_series_is_dict(forecaster_name, encoding, expected):
     """
     Test initialize_transformer_series when `transformer_series` is a dict.
+    Encoding can not be None when transformer_series is a dict.
     """
     series_col_names = ['col1', 'col2']
-    transformer_series = {'col1': StandardScaler(), 
-                          'col2': StandardScaler()}
+    if forecaster_name == 'ForecasterAutoregMultiSeries':
+        transformer_series = {'col1': StandardScaler(), 
+                              'col2': StandardScaler(), 
+                              '_unknown_level': StandardScaler()}
+    else:
+        transformer_series = {'col1': StandardScaler(), 
+                              'col2': StandardScaler()}
     
     transformer_series_ = initialize_transformer_series(
-                              series_col_names = series_col_names,
+                              forecaster_name    = forecaster_name,
+                              series_col_names   = series_col_names,
+                              encoding           = encoding,
                               transformer_series = transformer_series
                           )
 
-    assert list(transformer_series_.keys()) == ['col1', 'col2']
-    for col in series_col_names:
-        assert isinstance(transformer_series_[col], StandardScaler)
+    assert transformer_series_.keys() == expected.keys()
+    for k in expected.keys():
+        assert isinstance(transformer_series_[k], StandardScaler)
 
 
-def test_initialize_transformer_series_IgnoredArgumentWarning_when_levels_of_transformer_series_not_equal_to_series_col_names():
+@pytest.mark.parametrize(
+    "forecaster_name, encoding, expected", 
+    [('ForecasterAutoregMultiSeries', 'onehot', {'col1': StandardScaler(), 'col2': None, '_unknown_level': StandardScaler()}),
+     ('ForecasterAutoregMultiVariate', None, {'col1': StandardScaler(), 'col2': None}),
+     ('ForecasterRNN', None, {'col1': StandardScaler(), 'col2': None})], 
+    ids=lambda params: f'params: {params}')
+def test_initialize_transformer_series_IgnoredArgumentWarning_when_levels_of_transformer_series_not_equal_to_series_col_names(forecaster_name, encoding, expected):
     """
     Test IgnoredArgumentWarning is raised when `transformer_series` is a dict and its keys 
     are not the same as series_col_names.
     """
     series_col_names = ['col1', 'col2']
-    transformer_series = {'col1': StandardScaler(), 
-                          'col3': StandardScaler()}
+    if forecaster_name == 'ForecasterAutoregMultiSeries':
+        transformer_series = {'col1': StandardScaler(), 
+                              'col3': StandardScaler(), 
+                              '_unknown_level': StandardScaler()}
+    else:
+        transformer_series = {'col1': StandardScaler(), 
+                              'col3': StandardScaler()}
     
     series_not_in_transformer_series = set(['col2'])
-    
     warn_msg = re.escape(
         (f"{series_not_in_transformer_series} not present in `transformer_series`."
          f" No transformation is applied to these series.")
     )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         transformer_series_ = initialize_transformer_series(
-                                  series_col_names = series_col_names,
+                                  forecaster_name    = forecaster_name,
+                                  series_col_names   = series_col_names,
+                                  encoding           = encoding,
                                   transformer_series = transformer_series
                               )
 
-    assert list(transformer_series_.keys()) == ['col1', 'col2']
-    assert isinstance(transformer_series_['col1'], StandardScaler)
-    assert isinstance(transformer_series_['col2'], type(None))
+    assert transformer_series_.keys() == expected.keys()
+    for k in expected.keys():
+        if expected[k] is None:
+            assert isinstance(transformer_series_[k], type(None))
+        else:
+            assert isinstance(transformer_series_[k], StandardScaler)

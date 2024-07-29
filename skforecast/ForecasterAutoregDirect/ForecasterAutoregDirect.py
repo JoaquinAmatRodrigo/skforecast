@@ -947,7 +947,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         with warnings.catch_warnings():
             # Suppress scikit-learn warning: "X does not have valid feature names,
             # but NoOpTransformer was fitted with feature names".
-            warnings.simplefilter("ignore")
+            warnings.simplefilter("ignore", category=UserWarning)
             predictions = [
                 regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)
             ]

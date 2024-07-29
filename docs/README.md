@@ -27,7 +27,7 @@
 
 ## About The Project
 
-**Skforecast** is a Python library that eases using scikit-learn regressors as single and multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (LightGBM, XGBoost, CatBoost, ...).
+**Skforecast** is a Python library for time series forecasting using machine learning models. It works with any regressor compatible with the scikit-learn API, including popular options like LightGBM, XGBoost, CatBoost, Keras, and many others.
 
 **Why use skforecast?**
 
@@ -72,10 +72,10 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 |[ForecasterSarimax]           |✔️||✔️||✔️|✔️|✔️||
 
 [ForecasterAutoreg]: https://skforecast.org/latest/user_guides/autoregresive-forecaster.html
-[ForecasterAutoregCustom]: https://skforecast.org/latest/user_guides/custom-predictors.html
+[ForecasterAutoregCustom]: https://skforecast.org/latest/user_guides/window-features-and-custom-features.html
 [ForecasterAutoregDirect]: https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html
 [ForecasterMultiSeries]: https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html
-[ForecasterMultiSeriesCustom]: https://skforecast.org/latest/user_guides/custom-predictors.html
+[ForecasterMultiSeriesCustom]: https://skforecast.org/latest/user_guides/window-features-and-custom-features.html#forecasterautoregmultiseriescustom
 [ForecasterMultiVariate]: https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html
 [ForecasterRNN]: https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm
 [ForecasterSarimax]: https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html
@@ -104,6 +104,8 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 <i class="fa-solid fa-sitemap fa" style="font-size: 25px; color:#00cc99;"></i> [**Forecasting with gradient boosting: XGBoost, LightGBM and CatBoost**](https://www.cienciadedatos.net/documentos/py39-forecasting-time-series-with-skforecast-xgboost-lightgbm-catboost.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Imy8ZM3DqPXg7UllRDH9gqWb_XSrqzzh)
 
+<i class="fa-solid fa-diagram-project fa-rotate-90" style="font-size: 25px; color:#74C0FC;"></i> [**Forecasting with XGBoost**](https://www.cienciadedatos.net/documentos/https://cienciadedatos.net/documentos/py56-forecasting-time-series-with-xgboost)
+
 <i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Global Forecasting Models: Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
 
 <i class="fa-light fa-chart-line fa" style="font-size: 25px; color:#f26e1d;"></i>  [**Probabilistic forecasting models**](https://www.cienciadedatos.net/documentos/py42-probabilistic-forecasting.html)
@@ -111,6 +113,9 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 <i class="fa-solid fa-layer-group" style="color: #001633;"></i> [**Forecasting with Deep Learning**](https://cienciadedatos.net/documentos/py54-forecasting-with-deep-learning)
 
 <i class="fa-solid fa-arrow-trend-up" style="color: #fbbb09;"></i> [**Modelling time series trend with tree based models**](https://www.cienciadedatos.net/documentos/py49-modelling-time-series-trend-with-tree-based-models.html)
+
+
+<i class="fa-solid fa-chart-gantt" style="color: #ff004f;"></i> [**Interpretable forecasting models**](https://www.cienciadedatos.net/documentos/py57-interpretable-forecasting-models.html)
 
 <i class="fa-solid fa-wave-square" style="color: #fbbb09;"></i> [**Intermittent demand forecasting**](https://www.cienciadedatos.net/documentos/py48-intermittent-demand-forecasting.html)
 

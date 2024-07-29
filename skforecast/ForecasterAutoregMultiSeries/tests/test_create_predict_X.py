@@ -126,8 +126,8 @@ def test_create_predict_X_output_when_regressor_is_LinearRegression_with_transfo
 
 @pytest.mark.parametrize("transformer_series", 
                          [StandardScaler(),
-                          {'1': StandardScaler(), '2': StandardScaler()}], 
-                         ids = lambda tr : f'transformer_series type: {type(tr)}')
+                          {'1': StandardScaler(), '2': StandardScaler(), '_unknown_level': StandardScaler()}], 
+                         ids = lambda tr: f'transformer_series type: {type(tr)}')
 def test_create_predict_X_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog(transformer_series):
     """
     Test create_predict_X output when using LinearRegression as regressor, 
@@ -174,8 +174,8 @@ def test_create_predict_X_output_when_regressor_is_LinearRegression_with_transfo
 
 @pytest.mark.parametrize("transformer_series", 
                          [StandardScaler(),
-                          {'1': StandardScaler(), '2': StandardScaler()}], 
-                         ids = lambda tr : f'transformer_series type: {type(tr)}')
+                          {'1': StandardScaler(), '2': StandardScaler(), '_unknown_level': StandardScaler()}], 
+                         ids = lambda tr: f'transformer_series type: {type(tr)}')
 def test_create_predict_X_output_when_regressor_is_LinearRegression_with_transform_series_and_transform_exog_different_length_series(transformer_series):
     """
     Test create_predict_X output when using LinearRegression as regressor, StandardScaler
@@ -567,6 +567,416 @@ def test_create_predict_X_output_when_regressor_is_LinearRegression_with_exog_di
                  columns = ['lag_1', 'lag_2', 'lag_3', '_level_skforecast', 'exog'], 
                  index = pd.date_range(start='2003-01-31', periods=steps, freq='D')
              )
+    }
+
+    for k in expected.keys():
+        pd.testing.assert_frame_equal(results[k], expected[k])
+
+
+def test_create_predict_X_output_when_series_and_exog_dict_encoding_None():
+    """
+    Test output ForecasterAutoregMultiSeries create_predict_X method when 
+    series and exog are dictionaries and encoding is None.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor          = LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags               = 5,
+        encoding           = None,
+        dropna_from_series = False,
+        transformer_series = StandardScaler(),
+        transformer_exog   = StandardScaler()
+    )
+    forecaster.fit(
+        series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
+    )
+    results = forecaster.create_predict_X(
+        steps=5, exog=exog_dict_test, suppress_warnings=True
+    )
+
+    expected = {
+        'id_1000': pd.DataFrame(
+                       data = np.array([
+                                [-9.83270685e-01, -8.82486054e-01, -7.98426315e-01,
+                                    -7.92779121e-01, -7.77683073e-01,  8.21644127e-03,
+                                    1.42962482e+00,             np.nan,             np.nan],
+                                [ 2.84684766e+03, -9.83270685e-01, -8.82486054e-01,
+                                    -7.98426315e-01, -7.92779121e-01,  1.11220226e+00,
+                                    8.96343746e-01,             np.nan,             np.nan],
+                                [ 2.84684766e+03,  2.84684766e+03, -9.83270685e-01,
+                                    -8.82486054e-01, -7.98426315e-01,  1.38486425e+00,
+                                    -3.01927953e-01,             np.nan,            np.nan],
+                                [ 2.95894007e+03,  2.84684766e+03,  2.84684766e+03,
+                                    -9.83270685e-01, -8.82486054e-01,  6.20882352e-01,
+                                    -1.26286725e+00,             np.nan,             np.nan],
+                                [ 2.95894007e+03,  2.95894007e+03,  2.84684766e+03,
+                                    2.84684766e+03, -9.83270685e-01, -6.04449469e-01,
+                                    -1.26286725e+00,             np.nan,             np.nan]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  'sin_day_of_week', 'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   ),
+        'id_1001': pd.DataFrame(
+                       data = np.array([[-1.00754379e-01, -9.72790502e-02, -2.50193273e-01,
+                                            -3.47936948e-01, -3.95722853e-01,  8.21644127e-03,
+                                            1.42962482e+00,  1.11141113e+00, -8.79435260e-01],
+                                        [ 3.16462868e+03, -1.00754379e-01, -9.72790502e-02,
+                                            -2.50193273e-01, -3.47936948e-01,  1.11220226e+00,
+                                            8.96343746e-01,  1.13275580e+00,  5.89479621e-03],
+                                        [ 2.95894007e+03,  3.16462868e+03, -1.00754379e-01,
+                                            -9.72790502e-02, -2.50193273e-01,  1.38486425e+00,
+                                            -3.01927953e-01,  1.17758690e+00, -3.53258397e-01],
+                                        [ 3.16462868e+03,  2.95894007e+03,  3.16462868e+03,
+                                            -1.00754379e-01, -9.72790502e-02,  6.20882352e-01,
+                                            -1.26286725e+00,  1.04283370e+00,  8.42872836e-01],
+                                        [ 3.16462868e+03,  3.16462868e+03,  2.95894007e+03,
+                                            3.16462868e+03, -1.00754379e-01, -6.04449469e-01,
+                                            -1.26286725e+00,  1.00599776e+00, -6.23146331e-01]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  'sin_day_of_week', 'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   ),
+        'id_1003': pd.DataFrame(
+                       data = np.array([[ 2.27390539e-01, -5.17576412e-01, -6.47683828e-01,
+                                            -5.90232336e-01, -5.66504184e-01,  8.21644127e-03,
+                                            np.nan,  1.11141113e+00, -8.79435260e-01],
+                                        [ 2.84684766e+03,  2.27390539e-01, -5.17576412e-01,
+                                            -6.47683828e-01, -5.90232336e-01,  1.11220226e+00,
+                                            np.nan,  1.13275580e+00,  5.89479621e-03],
+                                        [ 3.16462868e+03,  2.84684766e+03,  2.27390539e-01,
+                                            -5.17576412e-01, -6.47683828e-01,  1.38486425e+00,
+                                            np.nan,  1.17758690e+00, -3.53258397e-01],
+                                        [ 2.95894007e+03,  3.16462868e+03,  2.84684766e+03,
+                                            2.27390539e-01, -5.17576412e-01,  6.20882352e-01,
+                                            np.nan,  1.04283370e+00,  8.42872836e-01],
+                                        [ 3.16462868e+03,  2.95894007e+03,  3.16462868e+03,
+                                            2.84684766e+03,  2.27390539e-01, -6.04449469e-01,
+                                            np.nan,  1.00599776e+00, -6.23146331e-01]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  'sin_day_of_week', 'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   ),
+        'id_1004': pd.DataFrame(
+                       data = np.array([[ 1.22899343e+00,  1.65819658e+00,  2.43189260e+00,
+                                            2.56743042e+00,  2.38367241e+00,  8.21644127e-03,
+                                            1.42962482e+00,  1.11141113e+00, -8.79435260e-01],
+                                        [ 3.42642783e+03,  1.22899343e+00,  1.65819658e+00,
+                                            2.43189260e+00,  2.56743042e+00,  1.11220226e+00,
+                                            8.96343746e-01,  1.13275580e+00,  5.89479621e-03],
+                                        [ 3.16462868e+03,  3.42642783e+03,  1.22899343e+00,
+                                            1.65819658e+00,  2.43189260e+00,  1.38486425e+00,
+                                            -3.01927953e-01,  1.17758690e+00, -3.53258397e-01],
+                                        [ 3.16462868e+03,  3.16462868e+03,  3.42642783e+03,
+                                            1.22899343e+00,  1.65819658e+00,  6.20882352e-01,
+                                            -1.26286725e+00,  1.04283370e+00,  8.42872836e-01],
+                                        [ 3.16462868e+03,  3.16462868e+03,  3.16462868e+03,
+                                            3.42642783e+03,  1.22899343e+00, -6.04449469e-01,
+                                            -1.26286725e+00,  1.00599776e+00, -6.23146331e-01]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  'sin_day_of_week', 'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   )
+    }
+
+    for k in expected.keys():
+        pd.testing.assert_frame_equal(results[k], expected[k])
+
+
+def test_create_predict_X_output_when_series_and_exog_dict_unknown_level():
+    """
+    Test output ForecasterAutoregMultiSeries create_predict_X method when 
+    series and exog are dictionaries and unknown level.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor          = LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags               = 5,
+        encoding           = 'ordinal',
+        dropna_from_series = False,
+        transformer_series = StandardScaler(),
+        transformer_exog   = StandardScaler()
+    )
+    forecaster.fit(
+        series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
+    )
+    levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
+    last_window = pd.DataFrame(
+        {k: v for k, v in forecaster.last_window.items() if k in levels}
+    )
+    last_window['id_1005'] = last_window['id_1004']
+    results = forecaster.create_predict_X(
+        steps=5, levels=levels, last_window=last_window, exog=exog_dict_test, suppress_warnings=True
+    )
+
+    expected = {
+        'id_1000': pd.DataFrame(
+                       data = np.array([
+                           [-1.77580056e+00, -1.07810218e+00, -4.96184646e-01,
+                            -4.57091003e-01, -3.52586104e-01,  0.00000000e+00,
+                             8.21644127e-03,  1.42962482e+00,          np.nan,
+                                     np.nan],
+                           [ 1.44369849e+03, -1.77580056e+00, -1.07810218e+00,
+                            -4.96184646e-01, -4.57091003e-01,  0.00000000e+00,
+                             1.11220226e+00,  8.96343746e-01,          np.nan,
+                                     np.nan],
+                           [ 1.44369849e+03,  1.44369849e+03, -1.77580056e+00,
+                            -1.07810218e+00, -4.96184646e-01,  0.00000000e+00,
+                             1.38486425e+00, -3.01927953e-01,          np.nan,
+                                     np.nan],
+                           [ 1.44369849e+03,  1.44369849e+03,  1.44369849e+03,
+                            -1.77580056e+00, -1.07810218e+00,  0.00000000e+00,
+                             6.20882352e-01, -1.26286725e+00,          np.nan,
+                                     np.nan],
+                           [ 1.44369849e+03,  1.44369849e+03,  1.44369849e+03,
+                             1.44369849e+03, -1.77580056e+00,  0.00000000e+00,
+                            -6.04449469e-01, -1.26286725e+00,          np.nan,
+                                     np.nan]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  '_level_skforecast', 'sin_day_of_week', 
+                                  'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   ),
+        'id_1001': pd.DataFrame(
+                       data = np.array([
+                           [ 1.15231370e+00,  1.16332175e+00,  6.78968143e-01,
+                             3.69366454e-01,  2.18005286e-01,  1.00000000e+00,
+                             8.21644127e-03,  1.42962482e+00,  1.11141113e+00,
+                            -8.79435260e-01],
+                           [ 2.14116223e+03,  1.15231370e+00,  1.16332175e+00,
+                             6.78968143e-01,  3.69366454e-01,  1.00000000e+00,
+                             1.11220226e+00,  8.96343746e-01,  1.13275580e+00,
+                             5.89479621e-03],
+                           [ 2.02558287e+03,  2.14116223e+03,  1.15231370e+00,
+                             1.16332175e+00,  6.78968143e-01,  1.00000000e+00,
+                             1.38486425e+00, -3.01927953e-01,  1.17758690e+00,
+                            -3.53258397e-01],
+                           [ 2.02558287e+03,  2.02558287e+03,  2.14116223e+03,
+                             1.15231370e+00,  1.16332175e+00,  1.00000000e+00,
+                             6.20882352e-01, -1.26286725e+00,  1.04283370e+00,
+                             8.42872836e-01],
+                           [ 2.02558287e+03,  2.02558287e+03,  2.02558287e+03,
+                             2.14116223e+03,  1.15231370e+00,  1.00000000e+00,
+                            -6.04449469e-01, -1.26286725e+00,  1.00599776e+00,
+                            -6.23146331e-01]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  '_level_skforecast', 'sin_day_of_week', 
+                                  'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   ),
+        'id_1003': pd.DataFrame(
+                       data = np.array([
+                           [ 3.39980134e+00, -3.78377384e-01, -1.03823091e+00,
+                            -7.46859590e-01, -6.26519755e-01,  3.00000000e+00,
+                             8.21644127e-03,          np.nan,  1.11141113e+00,
+                            -8.79435260e-01],
+                           [ 2.20078503e+03,  3.39980134e+00, -3.78377384e-01,
+                            -1.03823091e+00, -7.46859590e-01,  3.00000000e+00,
+                             1.11220226e+00,          np.nan,  1.13275580e+00,
+                             5.89479621e-03],
+                           [ 2.13316531e+03,  2.20078503e+03,  3.39980134e+00,
+                            -3.78377384e-01, -1.03823091e+00,  3.00000000e+00,
+                             1.38486425e+00,          np.nan,  1.17758690e+00,
+                            -3.53258397e-01],
+                           [ 2.09026933e+03,  2.13316531e+03,  2.20078503e+03,
+                             3.39980134e+00, -3.78377384e-01,  3.00000000e+00,
+                             6.20882352e-01,          np.nan,  1.04283370e+00,
+                             8.42872836e-01],
+                           [ 2.09026933e+03,  2.09026933e+03,  2.13316531e+03,
+                             2.20078503e+03,  3.39980134e+00,  3.00000000e+00,
+                            -6.04449469e-01,          np.nan,  1.00599776e+00,
+                            -6.23146331e-01]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  '_level_skforecast', 'sin_day_of_week', 
+                                  'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   ),
+        'id_1004': pd.DataFrame(
+                       data = np.array([
+                           [-7.50737618e-01, -2.43098121e-01,  6.71989902e-01,
+                             8.32297096e-01,  6.14957530e-01,  4.00000000e+00,
+                             8.21644127e-03,  1.42962482e+00,  1.11141113e+00,
+                            -8.79435260e-01],
+                           [ 7.31805276e+03, -7.50737618e-01, -2.43098121e-01,
+                             6.71989902e-01,  8.32297096e-01,  4.00000000e+00,
+                             1.11220226e+00,  8.96343746e-01,  1.13275580e+00,
+                             5.89479621e-03],
+                           [ 7.31805276e+03,  7.31805276e+03, -7.50737618e-01,
+                            -2.43098121e-01,  6.71989902e-01,  4.00000000e+00,
+                             1.38486425e+00, -3.01927953e-01,  1.17758690e+00,
+                            -3.53258397e-01],
+                           [ 7.31805276e+03,  7.31805276e+03,  7.31805276e+03,
+                            -7.50737618e-01, -2.43098121e-01,  4.00000000e+00,
+                             6.20882352e-01, -1.26286725e+00,  1.04283370e+00,
+                             8.42872836e-01],
+                           [ 7.31805276e+03,  7.31805276e+03,  7.31805276e+03,
+                             7.31805276e+03, -7.50737618e-01,  4.00000000e+00,
+                            -6.04449469e-01, -1.26286725e+00,  1.00599776e+00,
+                            -6.23146331e-01]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  '_level_skforecast', 'sin_day_of_week', 
+                                  'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   ),
+        'id_1005': pd.DataFrame(
+                       data = np.array([
+                           [1.22899343e+00, 1.65819658e+00, 2.43189260e+00, 2.56743042e+00,
+                            2.38367241e+00,         np.nan,         np.nan,         np.nan,
+                                    np.nan,         np.nan],
+                            [3.37437763e+03, 1.22899343e+00, 1.65819658e+00, 2.43189260e+00,
+                             2.56743042e+00,         np.nan,         np.nan,         np.nan,
+                                     np.nan,         np.nan],
+                            [3.00828166e+03, 3.37437763e+03, 1.22899343e+00, 1.65819658e+00,
+                             2.43189260e+00,         np.nan,         np.nan,         np.nan,
+                                     np.nan,         np.nan],
+                            [3.00828166e+03, 3.00828166e+03, 3.37437763e+03, 1.22899343e+00,
+                             1.65819658e+00,         np.nan,         np.nan,         np.nan,
+                                     np.nan,         np.nan],
+                            [3.00828166e+03, 3.00828166e+03, 3.00828166e+03, 3.37437763e+03,
+                             1.22899343e+00,         np.nan,         np.nan,         np.nan,
+                                     np.nan,         np.nan]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  '_level_skforecast', 'sin_day_of_week', 
+                                  'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   )
+    }
+
+    for k in expected.keys():
+        pd.testing.assert_frame_equal(results[k], expected[k])
+
+
+def test_create_predict_X_output_when_series_and_exog_dict_encoding_None_unknown_level():
+    """
+    Test output ForecasterAutoregMultiSeries create_predict_X method when 
+    series and exog are dictionaries and encoding is None and unknown level.
+    """
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor          = LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags               = 5,
+        encoding           = None,
+        dropna_from_series = False,
+        transformer_series = StandardScaler(),
+        transformer_exog   = StandardScaler()
+    )
+    forecaster.fit(
+        series=series_dict_train, exog=exog_dict_train, suppress_warnings=True
+    )
+    levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
+    last_window = pd.DataFrame(
+        {k: v for k, v in forecaster.last_window.items() if k in levels}
+    )
+    last_window['id_1005'] = last_window['id_1004']
+    exog_dict_test_2 = exog_dict_test.copy()
+    exog_dict_test_2['id_1005'] = exog_dict_test_2['id_1004']
+    results = forecaster.create_predict_X(
+        steps=5, levels=levels, last_window=last_window, exog=exog_dict_test_2, suppress_warnings=True
+    )
+
+    expected = {
+        'id_1000': pd.DataFrame(
+                       data = np.array([[-9.83270685e-01, -8.82486054e-01, -7.98426315e-01,
+                                    -7.92779121e-01, -7.77683073e-01,  8.21644127e-03,
+                                    1.42962482e+00,             np.nan,             np.nan],
+                                [ 2.84684766e+03, -9.83270685e-01, -8.82486054e-01,
+                                    -7.98426315e-01, -7.92779121e-01,  1.11220226e+00,
+                                    8.96343746e-01,             np.nan,             np.nan],
+                                [ 2.84684766e+03,  2.84684766e+03, -9.83270685e-01,
+                                    -8.82486054e-01, -7.98426315e-01,  1.38486425e+00,
+                                    -3.01927953e-01,             np.nan,            np.nan],
+                                [ 2.95894007e+03,  2.84684766e+03,  2.84684766e+03,
+                                    -9.83270685e-01, -8.82486054e-01,  6.20882352e-01,
+                                    -1.26286725e+00,             np.nan,             np.nan],
+                                [ 2.95894007e+03,  2.95894007e+03,  2.84684766e+03,
+                                    2.84684766e+03, -9.83270685e-01, -6.04449469e-01,
+                                    -1.26286725e+00,             np.nan,             np.nan]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  'sin_day_of_week', 'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   ),
+        'id_1001': pd.DataFrame(
+                       data = np.array([[-1.00754379e-01, -9.72790502e-02, -2.50193273e-01,
+                                            -3.47936948e-01, -3.95722853e-01,  8.21644127e-03,
+                                            1.42962482e+00,  1.11141113e+00, -8.79435260e-01],
+                                        [ 3.16462868e+03, -1.00754379e-01, -9.72790502e-02,
+                                            -2.50193273e-01, -3.47936948e-01,  1.11220226e+00,
+                                            8.96343746e-01,  1.13275580e+00,  5.89479621e-03],
+                                        [ 2.95894007e+03,  3.16462868e+03, -1.00754379e-01,
+                                            -9.72790502e-02, -2.50193273e-01,  1.38486425e+00,
+                                            -3.01927953e-01,  1.17758690e+00, -3.53258397e-01],
+                                        [ 3.16462868e+03,  2.95894007e+03,  3.16462868e+03,
+                                            -1.00754379e-01, -9.72790502e-02,  6.20882352e-01,
+                                            -1.26286725e+00,  1.04283370e+00,  8.42872836e-01],
+                                        [ 3.16462868e+03,  3.16462868e+03,  2.95894007e+03,
+                                            3.16462868e+03, -1.00754379e-01, -6.04449469e-01,
+                                            -1.26286725e+00,  1.00599776e+00, -6.23146331e-01]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  'sin_day_of_week', 'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   ),
+        'id_1003': pd.DataFrame(
+                       data = np.array([[ 2.27390539e-01, -5.17576412e-01, -6.47683828e-01,
+                                            -5.90232336e-01, -5.66504184e-01,  8.21644127e-03,
+                                            np.nan,  1.11141113e+00, -8.79435260e-01],
+                                        [ 2.84684766e+03,  2.27390539e-01, -5.17576412e-01,
+                                            -6.47683828e-01, -5.90232336e-01,  1.11220226e+00,
+                                            np.nan,  1.13275580e+00,  5.89479621e-03],
+                                        [ 3.16462868e+03,  2.84684766e+03,  2.27390539e-01,
+                                            -5.17576412e-01, -6.47683828e-01,  1.38486425e+00,
+                                            np.nan,  1.17758690e+00, -3.53258397e-01],
+                                        [ 2.95894007e+03,  3.16462868e+03,  2.84684766e+03,
+                                            2.27390539e-01, -5.17576412e-01,  6.20882352e-01,
+                                            np.nan,  1.04283370e+00,  8.42872836e-01],
+                                        [ 3.16462868e+03,  2.95894007e+03,  3.16462868e+03,
+                                            2.84684766e+03,  2.27390539e-01, -6.04449469e-01,
+                                            np.nan,  1.00599776e+00, -6.23146331e-01]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  'sin_day_of_week', 'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   ),
+        'id_1004': pd.DataFrame(
+                       data = np.array([[ 1.22899343e+00,  1.65819658e+00,  2.43189260e+00,
+                                            2.56743042e+00,  2.38367241e+00,  8.21644127e-03,
+                                            1.42962482e+00,  1.11141113e+00, -8.79435260e-01],
+                                        [ 3.42642783e+03,  1.22899343e+00,  1.65819658e+00,
+                                            2.43189260e+00,  2.56743042e+00,  1.11220226e+00,
+                                            8.96343746e-01,  1.13275580e+00,  5.89479621e-03],
+                                        [ 3.16462868e+03,  3.42642783e+03,  1.22899343e+00,
+                                            1.65819658e+00,  2.43189260e+00,  1.38486425e+00,
+                                            -3.01927953e-01,  1.17758690e+00, -3.53258397e-01],
+                                        [ 3.16462868e+03,  3.16462868e+03,  3.42642783e+03,
+                                            1.22899343e+00,  1.65819658e+00,  6.20882352e-01,
+                                            -1.26286725e+00,  1.04283370e+00,  8.42872836e-01],
+                                        [ 3.16462868e+03,  3.16462868e+03,  3.16462868e+03,
+                                            3.42642783e+03,  1.22899343e+00, -6.04449469e-01,
+                                            -1.26286725e+00,  1.00599776e+00, -6.23146331e-01]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  'sin_day_of_week', 'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   ),
+        'id_1005': pd.DataFrame(
+                       data = np.array([[ 1.22899343e+00,  1.65819658e+00,  2.43189260e+00,
+                                            2.56743042e+00,  2.38367241e+00,  8.21644127e-03,
+                                            1.42962482e+00,  1.11141113e+00, -8.79435260e-01],
+                                        [ 3.42642783e+03,  1.22899343e+00,  1.65819658e+00,
+                                            2.43189260e+00,  2.56743042e+00,  1.11220226e+00,
+                                            8.96343746e-01,  1.13275580e+00,  5.89479621e-03],
+                                        [ 3.16462868e+03,  3.42642783e+03,  1.22899343e+00,
+                                            1.65819658e+00,  2.43189260e+00,  1.38486425e+00,
+                                            -3.01927953e-01,  1.17758690e+00, -3.53258397e-01],
+                                        [ 3.16462868e+03,  3.16462868e+03,  3.42642783e+03,
+                                            1.22899343e+00,  1.65819658e+00,  6.20882352e-01,
+                                            -1.26286725e+00,  1.04283370e+00,  8.42872836e-01],
+                                        [ 3.16462868e+03,  3.16462868e+03,  3.16462868e+03,
+                                            3.42642783e+03,  1.22899343e+00, -6.04449469e-01,
+                                            -1.26286725e+00,  1.00599776e+00, -6.23146331e-01]]),
+                       columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                                  'sin_day_of_week', 'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                       index = pd.date_range(start='2016-08-01', periods=5, freq='D')
+                   )
     }
 
     for k in expected.keys():
