@@ -35,18 +35,18 @@ def _backtesting_sarimax(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    fixed_train_size: bool=True,
-    gap: int=0,
-    allow_incomplete_fold: bool=True,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Union[bool, int]=False,
-    alpha: Optional[float]=None,
-    interval: Optional[list]=None,
-    n_jobs: Union[int, str]='auto',
-    suppress_warnings_fit: bool=False,
-    verbose: bool=False,
-    show_progress: bool=True,
-) -> Tuple[Union[float, list], pd.DataFrame]:
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    allow_incomplete_fold: bool = True,
+    exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    refit: Union[bool, int] = False,
+    alpha: Optional[float] = None,
+    interval: Optional[list] = None,
+    n_jobs: Union[int, str] = 'auto',
+    suppress_warnings_fit: bool = False,
+    verbose: bool = False,
+    show_progress: bool = True,
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting of ForecasterSarimax.
 
@@ -120,7 +120,7 @@ def _backtesting_sarimax(
 
     Returns
     -------
-    metrics_value : float, list
+    metric_values : pandas DataFrame
         Value(s) of the metric(s).
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -158,10 +158,18 @@ def _backtesting_sarimax(
             n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
     if not isinstance(metric, list):
-        metrics = [_get_metric(metric=metric) if isinstance(metric, str) else metric]
+        metrics = [
+            _get_metric(metric=metric)
+            if isinstance(metric, str)
+            else add_y_train_argument(metric)
+        ]
     else:
-        metrics = [_get_metric(metric=m) if isinstance(m, str) else m 
-                   for m in metric]
+        metrics = [
+            _get_metric(metric=m)
+            if isinstance(m, str)
+            else add_y_train_argument(m) 
+            for m in metric
+        ]
 
     # initial_train_size cannot be None because of append method in Sarimax
     # First model training, this is done to allow parallelization when `refit` 
@@ -190,7 +198,7 @@ def _backtesting_sarimax(
             )
     
     if refit:
-        n_of_fits = int(len(folds)/refit)
+        n_of_fits = int(len(folds) / refit)
         if n_of_fits > 50:
             warnings.warn(
                 (f"The forecaster will be fit {n_of_fits} times. This can take substantial "
@@ -216,10 +224,10 @@ def _backtesting_sarimax(
         test_idx_end    = fold[2][1]
 
         if refit:
-            last_window_start = fold[0][1] # Same as train_idx_end
+            last_window_start = fold[0][1]  # Same as train_idx_end
             last_window_end   = fold[1][1]
         else:
-            last_window_end   = fold[2][0] # test_idx_start
+            last_window_end   = fold[2][0]  # test_idx_start
             last_window_start = last_window_end - steps
 
         if fold[4] is False:
@@ -287,16 +295,21 @@ def _backtesting_sarimax(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    metrics_values = [m(
-                        y_true = y.loc[backtest_predictions.index],
-                        y_pred = backtest_predictions['pred']
-                      ) for m in metrics
-                     ]
-    
-    if not isinstance(metric, list):
-        metrics_values = metrics_values[0]
+    # TODO: CHeck this with model_selection
+    # ==========================================================================
+    metric_values = [m(
+                       y_true = y.loc[backtest_predictions.index],
+                       y_pred = backtest_predictions['pred']
+                     ) for m in metrics
+                    ]
 
-    return metrics_values, backtest_predictions
+    metric_values = pd.DataFrame(
+        data    = [metric_values],
+        columns = [m.__name__ for m in metrics]
+    )
+    # ==========================================================================
+
+    return metric_values, backtest_predictions
 
 
 def backtesting_sarimax(
@@ -305,18 +318,18 @@ def backtesting_sarimax(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    fixed_train_size: bool=True,
-    gap: int=0,
-    allow_incomplete_fold: bool=True,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Union[bool, int]=False,
-    alpha: Optional[float]=None,
-    interval: Optional[list]=None,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=False,
-    suppress_warnings_fit: bool=False,
-    show_progress: bool=True
-) -> Tuple[Union[float, list], pd.DataFrame]:
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    allow_incomplete_fold: bool = True,
+    exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    refit: Union[bool, int] = False,
+    alpha: Optional[float] = None,
+    interval: Optional[list] = None,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = False,
+    suppress_warnings_fit: bool = False,
+    show_progress: bool = True
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting of ForecasterSarimax.
 
@@ -390,7 +403,7 @@ def backtesting_sarimax(
 
     Returns
     -------
-    metrics_value : float, list
+    metric_values : pandas DataFrame
         Value(s) of the metric(s).
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -425,7 +438,7 @@ def backtesting_sarimax(
         show_progress         = show_progress
     )
     
-    metrics_values, backtest_predictions = _backtesting_sarimax(
+    metric_values, backtest_predictions = _backtesting_sarimax(
         forecaster            = forecaster,
         y                     = y,
         steps                 = steps,
@@ -444,7 +457,7 @@ def backtesting_sarimax(
         show_progress         = show_progress
     )
 
-    return metrics_values, backtest_predictions
+    return metric_values, backtest_predictions
 
 
 def grid_search_sarimax(
@@ -454,17 +467,17 @@ def grid_search_sarimax(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    fixed_train_size: bool=True,
-    gap: int=0,
-    allow_incomplete_fold: bool=True,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Union[bool, int]=False,
-    return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=True,
-    suppress_warnings_fit: bool=False,
-    show_progress: bool=True,
-    output_file: Optional[str]=None
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    allow_incomplete_fold: bool = True,
+    exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    refit: Union[bool, int] = False,
+    return_best: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = True,
+    suppress_warnings_fit: bool = False,
+    show_progress: bool = True,
+    output_file: Optional[str] = None
 ) -> pd.DataFrame:
     """
     Exhaustive search over specified parameter values for a ForecasterSarimax object.
@@ -571,19 +584,19 @@ def random_search_sarimax(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    fixed_train_size: bool=True,
-    gap: int=0,
-    allow_incomplete_fold: bool=True,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Union[bool, int]=False,
-    n_iter: int=10,
-    random_state: int=123,
-    return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=True,
-    suppress_warnings_fit: bool=False,
-    show_progress: bool=True,
-    output_file: Optional[str]=None
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    allow_incomplete_fold: bool = True,
+    exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    refit: Union[bool, int] = False,
+    n_iter: int = 10,
+    random_state: int = 123,
+    return_best: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = True,
+    suppress_warnings_fit: bool = False,
+    show_progress: bool = True,
+    output_file: Optional[str] = None
 ) -> pd.DataFrame:
     """
     Random search over specified parameter values or distributions for a Forecaster 
@@ -695,17 +708,17 @@ def _evaluate_grid_hyperparameters_sarimax(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
-    fixed_train_size: bool=True,
-    gap: int=0,
-    allow_incomplete_fold: bool=True,
-    exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-    refit: Union[bool, int]=False,
-    return_best: bool=True,
-    n_jobs: Union[int, str]='auto',
-    verbose: bool=True,
-    suppress_warnings_fit: bool=False,
-    show_progress: bool=True,
-    output_file: Optional[str]=None
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    allow_incomplete_fold: bool = True,
+    exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    refit: Union[bool, int] = False,
+    return_best: bool = True,
+    n_jobs: Union[int, str] = 'auto',
+    verbose: bool = True,
+    suppress_warnings_fit: bool = False,
+    show_progress: bool = True,
+    output_file: Optional[str] = None
 ) -> pd.DataFrame:
     """
     Evaluate parameter values for a Forecaster object using time series backtesting.
@@ -786,7 +799,8 @@ def _evaluate_grid_hyperparameters_sarimax(
 
     if not isinstance(metric, list):
         metric = [metric] 
-    metric_dict = {(m if isinstance(m, str) else m.__name__): [] for m in metric}
+    metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
+                   for m in metric}
     
     if len(metric_dict) != len(metric):
         raise ValueError(
@@ -805,35 +819,36 @@ def _evaluate_grid_hyperparameters_sarimax(
     for params in param_grid:
 
         forecaster.set_params(params)
-        metrics_values = backtesting_sarimax(
-                            forecaster            = forecaster,
-                            y                     = y,
-                            steps                 = steps,
-                            metric                = metric,
-                            initial_train_size    = initial_train_size,
-                            fixed_train_size      = fixed_train_size,
-                            gap                   = gap,
-                            allow_incomplete_fold = allow_incomplete_fold,
-                            exog                  = exog,
-                            refit                 = refit,
-                            alpha                 = None,
-                            interval              = None,
-                            n_jobs                = n_jobs,
-                            verbose               = verbose,
-                            suppress_warnings_fit = suppress_warnings_fit,
-                            show_progress         = False
-                         )[0]
+        metric_values = backtesting_sarimax(
+                           forecaster            = forecaster,
+                           y                     = y,
+                           steps                 = steps,
+                           metric                = metric,
+                           initial_train_size    = initial_train_size,
+                           fixed_train_size      = fixed_train_size,
+                           gap                   = gap,
+                           allow_incomplete_fold = allow_incomplete_fold,
+                           exog                  = exog,
+                           refit                 = refit,
+                           alpha                 = None,
+                           interval              = None,
+                           n_jobs                = n_jobs,
+                           verbose               = verbose,
+                           suppress_warnings_fit = suppress_warnings_fit,
+                           show_progress         = False
+                        )[0]
+        metric_values = metric_values.iloc[0, :].to_list()
         warnings.filterwarnings('ignore', category=RuntimeWarning, 
                                 message= "The forecaster will be fit.*")
         
         params_list.append(params)
-        for m, m_value in zip(metric, metrics_values):
+        for m, m_value in zip(metric, metric_values):
             m_name = m if isinstance(m, str) else m.__name__
             metric_dict[m_name].append(m_value)
         
         if output_file is not None:
             header = ['params', *metric_dict.keys(), *params.keys()]
-            row = [params, *metrics_values, *params.values()]
+            row = [params, *metric_values, *params.values()]
             if not os.path.isfile(output_file):
                 with open(output_file, 'w', newline='') as f:
                     f.write('\t'.join(header) + '\n')

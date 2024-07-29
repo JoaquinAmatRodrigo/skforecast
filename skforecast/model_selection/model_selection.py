@@ -384,7 +384,7 @@ def _backtesting_forecaster(
 
     Returns
     -------
-    metrics_value : pandas DataFrame
+    metric_values : pandas DataFrame
         Value(s) of the metric(s).
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -573,10 +573,11 @@ def _backtesting_forecaster(
             train_iloc_start = fold[0][0]
             train_iloc_end = fold[0][1]
             train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
+    
     train_indexes = np.unique(np.concatenate(train_indexes))
     y_train = y.iloc[train_indexes]
 
-    metrics_values = [
+    metric_values = [
         m(
             y_true = y.loc[backtest_predictions.index],
             y_pred = backtest_predictions['pred'],
@@ -585,12 +586,12 @@ def _backtesting_forecaster(
         for m in metrics
     ]
 
-    metrics_values = pd.DataFrame(
-        data    = [metrics_values],
+    metric_values = pd.DataFrame(
+        data    = [metric_values],
         columns = [m.__name__ for m in metrics]
     )
     
-    return metrics_values, backtest_predictions
+    return metric_values, backtest_predictions
 
 
 def backtesting_forecaster(
@@ -708,7 +709,7 @@ def backtesting_forecaster(
 
     Returns
     -------
-    metrics_value : pandas DataFrame
+    metric_values : pandas DataFrame
         Value(s) of the metric(s).
     backtest_predictions : pandas DataFrame
         Value of predictions and their estimated interval if `interval` is not `None`.
@@ -761,7 +762,7 @@ def backtesting_forecaster(
              f"declared when the forecaster is initialized ({forecaster.steps}).")
         )
     
-    metrics_values, backtest_predictions = _backtesting_forecaster(
+    metric_values, backtest_predictions = _backtesting_forecaster(
         forecaster            = forecaster,
         y                     = y,
         steps                 = steps,
@@ -783,7 +784,7 @@ def backtesting_forecaster(
         show_progress         = show_progress
     )
 
-    return metrics_values, backtest_predictions
+    return metric_values, backtest_predictions
 
 
 def grid_search_forecaster(
@@ -1193,31 +1194,31 @@ def _evaluate_grid_hyperparameters(
         for params in param_grid:
 
             forecaster.set_params(params)
-            metrics_values = backtesting_forecaster(
-                                 forecaster            = forecaster,
-                                 y                     = y,
-                                 steps                 = steps,
-                                 metric                = metric,
-                                 initial_train_size    = initial_train_size,
-                                 fixed_train_size      = fixed_train_size,
-                                 gap                   = gap,
-                                 skip_folds            = skip_folds,
-                                 allow_incomplete_fold = allow_incomplete_fold,
-                                 exog                  = exog,
-                                 refit                 = refit,
-                                 interval              = None,
-                                 n_jobs                = n_jobs,
-                                 verbose               = verbose,
-                                 show_progress         = False
-                             )[0]
-            metrics_values = metrics_values.iloc[0, :].to_list()
+            metric_values = backtesting_forecaster(
+                                forecaster            = forecaster,
+                                y                     = y,
+                                steps                 = steps,
+                                metric                = metric,
+                                initial_train_size    = initial_train_size,
+                                fixed_train_size      = fixed_train_size,
+                                gap                   = gap,
+                                skip_folds            = skip_folds,
+                                allow_incomplete_fold = allow_incomplete_fold,
+                                exog                  = exog,
+                                refit                 = refit,
+                                interval              = None,
+                                n_jobs                = n_jobs,
+                                verbose               = verbose,
+                                show_progress         = False
+                            )[0]
+            metric_values = metric_values.iloc[0, :].to_list()
             warnings.filterwarnings('ignore', category=RuntimeWarning, 
                                     message= "The forecaster will be fit.*")
             
             lags_list.append(lags_v)
             lags_label_list.append(lags_k)
             params_list.append(params)
-            for m, m_value in zip(metric, metrics_values):
+            for m, m_value in zip(metric, metric_values):
                 m_name = m if isinstance(m, str) else m.__name__
                 metric_dict[m_name].append(m_value)
         
@@ -1225,7 +1226,7 @@ def _evaluate_grid_hyperparameters(
                 header = ['lags', 'lags_label', 'params', 
                           *metric_dict.keys(), *params.keys()]
                 row = [lags_v, lags_k, params, 
-                       *metrics_values, *params.values()]
+                       *metric_values, *params.values()]
                 if not os.path.isfile(output_file):
                     with open(output_file, 'w', newline='') as f:
                         f.write('\t'.join(header) + '\n')
