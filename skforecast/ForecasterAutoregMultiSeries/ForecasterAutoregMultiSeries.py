@@ -1215,28 +1215,24 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         in_sample_residuals = {}
         if store_in_sample_residuals:
 
-            residuals = y_train - self.regressor.predict(X_train_regressor)
-            in_sample_residuals['_unknown_level'] = residuals.to_numpy()
+            residuals = (y_train - self.regressor.predict(X_train)).to_numpy()
+            rng = np.random.default_rng(seed=123)
 
-            if self.encoding is not None:
-                for col in series_X_train:
-                    if self.encoding == 'onehot':
-                        in_sample_residuals[col] = residuals.loc[X_train[col] == 1.].to_numpy()
-                    else:
-                        encoded_value = self.encoding_mapping[col]
-                        in_sample_residuals[col] = (
-                            residuals.loc[X_train['_level_skforecast'] == encoded_value].to_numpy()
-                        )
-            
-            for k in in_sample_residuals.keys():
-                if len(in_sample_residuals[k]) > 1000:
-                    # Only up to 1000 residuals are stored
-                    rng = np.random.default_rng(seed=123)
-                    in_sample_residuals[k] = rng.choice(
-                                                a       = in_sample_residuals[k], 
-                                                size    = 1000, 
-                                                replace = False
-                                             )
+            for col in series_X_train:
+                if self.encoding == 'onehot':
+                    mask = X_train[col].to_numpy() == 1.
+                else:
+                    encoded_value = self.encoding_mapping[col]
+                    mask = X_train['_level_skforecast'].to_numpy() == encoded_value
+                
+                residuals_col = residuals[mask]
+                if len(residuals_col) > 1000:
+                    residuals_col = rng.choice(
+                                            a       = residuals_col,
+                                            size    = 1000,
+                                            replace = False
+                                      )
+                in_sample_residuals[col] = residuals_col
         else:
             if self.encoding is not None:
                 for col in series_X_train:
