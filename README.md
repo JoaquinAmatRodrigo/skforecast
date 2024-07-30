@@ -86,11 +86,12 @@ If you want to learn more about the installation process, dependencies and optio
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
 - [x] Support for `python 3.12`, `python 3.8` is no longer supported.
-- [x] Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code> are able to predict series not seen during training. This is useful when the user wants to predict a new series that was not included in the training data.
+- [x] Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code> are able to [predict series not seen during training](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html#forecasting-unknown-series). This is useful when the user wants to predict a new series that was not included in the training data.
+- [x] `encoding` can be set to `None` in Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. This option does [not add the encoded series ids](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting#series-encoding-in-multi-series) to the regressor training matrix.
 - [x] New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
-- [x] New module <code>[metrics]</code> with functions to calculate metrics for time series forecasting such as <code>[mean_absolute_scaled_error]</code> and <code>[root_mean_squared_scaled_error]</code>.
+- [x] New module <code>[metrics]</code> with functions to calculate metrics for time series forecasting such as <code>[mean_absolute_scaled_error]</code> and <code>[root_mean_squared_scaled_error]</code>. Visit [Time Series Forecasting Metrics](https://skforecast.org/latest/user_guides/metrics.html) for more information.
 - [x] New argument `add_aggregated_metric` in <code>[backtesting_forecaster_multiseries]</code> to include, in addition to the metrics for each level, the aggregated metric of all levels  using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).
-- [x] New argument `skip_folds` in <code>[model_selection]</code> and <code>[model_selection_multiseries]</code> functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
+- [x] New argument `skip_folds` in <code>[model_selection]</code> and <code>[model_selection_multiseries]</code> functions. It allows the user to [skip some folds during backtesting](https://skforecast.org/latest/user_guides/backtesting#backtesting-with-skip-folds), which can be useful to speed up the backtesting process and thus the hyperparameter search.
 - [x] Bug fixes and performance improvements.
 
 
@@ -259,13 +260,13 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 <!-- [ForecasterAutoreg]: https://skforecast.org/latest/api/forecasterautoreg
 [ForecasterAutoregCustom]: https://skforecast.org/latest/api/forecasterautoregcustom
 [ForecasterAutoregDirect]: https://skforecast.org/latest/api/forecasterautoregdirect
-[ForecasterAutoregMultiSeries]: https://skforecast.org/latest/api/forecastermultiseries
-[ForecasterAutoregMultiSeriesCustom]: https://skforecast.org/latest/api/forecastermultiseriescustom
-[ForecasterAutoregMultiVariate]: https://skforecast.org/latest/api/forecastermultivariate
 [ForecasterRNN]: https://skforecast.org/latest/api/forecasterrnn
 [ForecasterSarimax]: https://skforecast.org/latest/api/forecastersarimax
 [Sarimax]: https://skforecast.org/latest/api/sarimax
 [ForecasterEquivalentDate]: https://skforecast.org/latest/api/forecasterbaseline#skforecast.ForecasterBaseline.ForecasterEquivalentDate -->
+[ForecasterAutoregMultiSeries]: https://skforecast.org/latest/api/forecastermultiseries
+[ForecasterAutoregMultiSeriesCustom]: https://skforecast.org/latest/api/forecastermultiseriescustom
+[ForecasterAutoregMultiVariate]: https://skforecast.org/latest/api/forecastermultivariate
 
 <!-- metrics -->
 [metrics]: https://skforecast.org/latest/api/metrics

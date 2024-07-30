@@ -25,3 +25,9 @@ A detailed overview on how to contribute can be found in the [contributing guide
 + Mwainwright, [syndct](https://github.com/syndct)
 
 + Kishan Manani, [KishManani](https://github.com/KishManani)
+
++ Sergio Quijano, [Sergio-Quijano-Stratesys](https://github.com/Sergio-Quijano-Stratesys)
+
++ Fernando da Silva, [schoulten](https://github.com/schoulten)
+
++ Lillian Jensen, MPH, [tyg3rr](https://github.com/tyg3rr)
