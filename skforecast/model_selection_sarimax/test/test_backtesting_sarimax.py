@@ -519,7 +519,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_list_of_
                                         y                  = y_datetime,
                                         exog               = exog_datetime,
                                         steps              = 3,
-                                        metric             = [my_metric, 'mean_absolute_error'],
+                                        metric             = [my_metric, 'mean_absolute_scaled_error'],
                                         initial_train_size = len(y_datetime) - 12,
                                         fixed_train_size   = True,
                                         refit              = True,
@@ -529,7 +529,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_list_of_
                                    )
     
     expected_metric = pd.DataFrame({"my_metric": [0.007877420102652216], 
-                                    "mean_absolute_error": [0.31329767191681507]})
+                                    "mean_absolute_scaled_error": [3.899618814139531]})
     expected_preds = pd.DataFrame(
         data    = np.array([ 0.59409098,  0.78323365,  0.99609033,  0.88202026,  1.03241114,
                              1.16808941,  0.86535534,  0.87277596,  0.69357041,  0.16628876,

@@ -7,6 +7,7 @@
 
 import os
 from typing import Union, Tuple, Optional, Callable
+import numpy as np
 import pandas as pd
 import warnings
 import logging
@@ -295,19 +296,30 @@ def _backtesting_sarimax(
     if isinstance(backtest_predictions, pd.Series):
         backtest_predictions = pd.DataFrame(backtest_predictions)
 
-    # TODO: CHeck this with model_selection
-    # ==========================================================================
-    metric_values = [m(
-                       y_true = y.loc[backtest_predictions.index],
-                       y_pred = backtest_predictions['pred']
-                     ) for m in metrics
-                    ]
+    train_indexes = []
+    for i, fold in enumerate(folds):
+        fit_fold = fold[-1]
+        if i == 0 or fit_fold:
+            train_iloc_start = fold[0][0]
+            train_iloc_end = fold[0][1]
+            train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
+    
+    train_indexes = np.unique(np.concatenate(train_indexes))
+    y_train = y.iloc[train_indexes]
+
+    metric_values = [
+        m(
+            y_true = y.loc[backtest_predictions.index],
+            y_pred = backtest_predictions['pred'],
+            y_train = y_train
+        ) 
+        for m in metrics
+    ]
 
     metric_values = pd.DataFrame(
         data    = [metric_values],
         columns = [m.__name__ for m in metrics]
     )
-    # ==========================================================================
 
     return metric_values, backtest_predictions
 
