@@ -30,10 +30,11 @@ def test_check_create_lags_exception_when_n_splits_less_than_0():
     """
     series = pd.DataFrame(np.arange(10), columns=["l1"])
     y_array = np.arange(10)
+    lags_20 = 20
 
     model = create_and_compile_model(
         series=series,
-        lags=20,
+        lags=lags_20,
         steps=steps,
         levels=levels,
         recurrent_units=recurrent_units,
@@ -42,7 +43,7 @@ def test_check_create_lags_exception_when_n_splits_less_than_0():
         optimizer=optimizer,
         loss=loss,
     )
-    forecaster = ForecasterRnn(model, levels)
+    forecaster = ForecasterRnn(model, levels, lags=lags_20)
 
     err_msg = re.escape(
         f"The maximum lag ({forecaster.max_lag}) must be less than the length "

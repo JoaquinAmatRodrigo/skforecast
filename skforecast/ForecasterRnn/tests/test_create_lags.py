@@ -1,13 +1,14 @@
 # Unit test _create_lags ForecasterRnn
 # ==============================================================================
 import re
-import pytest
+
+import keras
 import numpy as np
 import pandas as pd
+import pytest
+
 from skforecast.ForecasterRnn import ForecasterRnn
 from skforecast.ForecasterRnn.utils import create_and_compile_model
-import keras
-
 
 lags = 6
 steps = 3
@@ -25,10 +26,10 @@ def test_check_create_lags_exception_when_n_splits_less_than_0():
     """
     series = pd.DataFrame(np.arange(10), columns=["l1"])
     y_array = np.arange(10)
-
+    lags_20 = 20
     model = create_and_compile_model(
         series=series,
-        lags=20,
+        lags=lags_20,
         steps=steps,
         levels=levels,
         recurrent_units=recurrent_units,
@@ -37,7 +38,7 @@ def test_check_create_lags_exception_when_n_splits_less_than_0():
         optimizer=optimizer,
         loss=loss,
     )
-    forecaster = ForecasterRnn(model, levels, lags=lags)
+    forecaster = ForecasterRnn(model, levels, lags=lags_20)
 
     err_msg = re.escape(
         f"The maximum lag ({forecaster.max_lag}) must be less than the length "

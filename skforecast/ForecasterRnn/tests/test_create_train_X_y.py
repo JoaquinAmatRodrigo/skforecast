@@ -157,9 +157,10 @@ def test_create_train_X_y_output_when_series_10_and_transformer_series_is_Standa
             "l2": pd.Series(np.arange(10, dtype=float)),
         }
     )
+    lags_5 = 5
     model = create_and_compile_model(
         series=series,
-        lags=5,
+        lags=lags_5,
         steps=2,
         levels=levels,
         recurrent_units=recurrent_units,
@@ -169,7 +170,7 @@ def test_create_train_X_y_output_when_series_10_and_transformer_series_is_Standa
         loss=loss,
     )
     forecaster = ForecasterRnn(
-        model, levels=levels, transformer_series=StandardScaler(), lags=lags
+        model, levels=levels, transformer_series=StandardScaler(), lags=lags_5
     )
 
     results = forecaster.create_train_X_y(series=series)
