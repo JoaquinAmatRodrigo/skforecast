@@ -656,13 +656,14 @@ def test_output_backtesting_forecaster_interval_out_sample_residuals_no_exog_no_
 # * Callable metric                                                            *
 # ******************************************************************************
 
-def my_metric(y_true, y_pred): # pragma: no cover
+def my_metric(y_true, y_pred):  # pragma: no cover
     """
     Callable metric
     """
-    metric = ((y_true - y_pred)/len(y_true)).mean()
+    metric = ((y_true - y_pred) / len(y_true)).mean()
     
     return metric
+
 
 def test_callable_metric_backtesting_forecaster_no_exog_no_remainder_with_mocked():
     """
