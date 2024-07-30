@@ -656,13 +656,14 @@ def test_output_backtesting_forecaster_interval_out_sample_residuals_no_exog_no_
 # * Callable metric                                                            *
 # ******************************************************************************
 
-def my_metric(y_true, y_pred): # pragma: no cover
+def my_metric(y_true, y_pred):  # pragma: no cover
     """
     Callable metric
     """
-    metric = ((y_true - y_pred)/len(y_true)).mean()
+    metric = ((y_true - y_pred) / len(y_true)).mean()
     
     return metric
+
 
 def test_callable_metric_backtesting_forecaster_no_exog_no_remainder_with_mocked():
     """
@@ -1135,7 +1136,10 @@ def test_output_backtesting_forecaster_refit_int_interval_yes_exog_yes_remainder
     20 observations to backtest, steps=5 and gap=0, metric='mean_squared_error',
     'in_sample_residuals = True'. Refit int.
     """
-    expected_metric = pd.DataFrame({'mean_squared_error': [0.06099110404144631]})
+    expected_metric = pd.DataFrame(
+        {'mean_squared_error': [0.06099110404144631], 
+         'mean_absolute_scaled_error': [0.7864146730810823]}
+    )
     expected_predictions = pd.DataFrame(
         data = np.array([[0.55616986, 0.15288789, 0.89198752],
                          [0.48751797, 0.05863911, 0.83169303],
@@ -1180,7 +1184,7 @@ def test_output_backtesting_forecaster_refit_int_interval_yes_exog_yes_remainder
                                        gap                   = 0,
                                        allow_incomplete_fold = True,
                                        steps                 = 2,
-                                       metric                = 'mean_squared_error',
+                                       metric                = ['mean_squared_error', 'mean_absolute_scaled_error'],
                                        interval              = [5, 95],
                                        n_boot                = 500,
                                        random_state          = 123,

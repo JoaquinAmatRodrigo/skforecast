@@ -1,12 +1,16 @@
 # Unit test predict method
 # ==============================================================================
-import keras
+import os
+
 import numpy as np
 import pandas as pd
 import pytest
 
 from skforecast.ForecasterRnn import ForecasterRnn
 from skforecast.ForecasterRnn.utils import create_and_compile_model
+
+os.environ["KERAS_BACKEND"] = "torch"
+import keras
 
 series = pd.DataFrame(
     {

@@ -1,16 +1,19 @@
 # Unit test create_train_X_y ForecasterRnn
 # ==============================================================================
+import os
 import re
 
-import keras
 import numpy as np
 import pandas as pd
 import pytest
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 from skforecast.ForecasterRnn import ForecasterRnn
 from skforecast.ForecasterRnn.utils import create_and_compile_model
+
+os.environ["KERAS_BACKEND"] = "torch"
+import keras
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
 series = pd.DataFrame(np.random.randn(100, 3))
 lags = 3

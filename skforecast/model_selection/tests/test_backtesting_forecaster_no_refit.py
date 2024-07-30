@@ -3,7 +3,6 @@
 import pytest
 import numpy as np
 import pandas as pd
-from pytest import approx
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
@@ -60,7 +59,7 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoreg_wi
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 3 lags of a time series.
     """
