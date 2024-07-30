@@ -74,6 +74,7 @@ def test_create_train_X_y_output_when_series_and_exog_and_encoding_None():
                      regressor          = LinearRegression(),
                      fun_predictors     = create_predictors_3,
                      window_size        = 3,
+                     name_predictors    = ['lag_1', 'lag_2', 'lag_3'],
                      encoding           = None,
                      transformer_series = StandardScaler(),
                  )    
