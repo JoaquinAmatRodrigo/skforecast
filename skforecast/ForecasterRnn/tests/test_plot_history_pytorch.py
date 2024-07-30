@@ -1,12 +1,17 @@
 # Unit test plot history method
 # ==============================================================================
-import keras
-import matplotlib.pyplot as plt
+import os
+
 import numpy as np
 import pandas as pd
 import pytest
 
 from skforecast.ForecasterRnn import ForecasterRnn
+
+os.environ["KERAS_BACKEND"] = "torch"
+import keras
+import matplotlib.pyplot as plt
+
 from skforecast.ForecasterRnn.utils import create_and_compile_model
 
 series = pd.DataFrame(

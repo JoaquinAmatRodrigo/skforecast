@@ -1,11 +1,16 @@
 # Unit test fit method
 # ==============================================================================
-import keras
+import os
+
 import numpy as np
 import pandas as pd
 import pytest
 
 from skforecast.ForecasterRnn import ForecasterRnn
+
+os.environ["KERAS_BACKEND"] = "torch"
+import keras
+
 from skforecast.ForecasterRnn.utils import create_and_compile_model
 
 series = pd.DataFrame(np.random.randn(100, 3))
