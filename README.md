@@ -259,13 +259,13 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 <!-- [ForecasterAutoreg]: https://skforecast.org/latest/api/forecasterautoreg
 [ForecasterAutoregCustom]: https://skforecast.org/latest/api/forecasterautoregcustom
 [ForecasterAutoregDirect]: https://skforecast.org/latest/api/forecasterautoregdirect
-[ForecasterAutoregMultiSeries]: https://skforecast.org/latest/api/forecastermultiseries
-[ForecasterAutoregMultiSeriesCustom]: https://skforecast.org/latest/api/forecastermultiseriescustom
-[ForecasterAutoregMultiVariate]: https://skforecast.org/latest/api/forecastermultivariate
 [ForecasterRNN]: https://skforecast.org/latest/api/forecasterrnn
 [ForecasterSarimax]: https://skforecast.org/latest/api/forecastersarimax
 [Sarimax]: https://skforecast.org/latest/api/sarimax
 [ForecasterEquivalentDate]: https://skforecast.org/latest/api/forecasterbaseline#skforecast.ForecasterBaseline.ForecasterEquivalentDate -->
+[ForecasterAutoregMultiSeries]: https://skforecast.org/latest/api/forecastermultiseries
+[ForecasterAutoregMultiSeriesCustom]: https://skforecast.org/latest/api/forecastermultiseriescustom
+[ForecasterAutoregMultiVariate]: https://skforecast.org/latest/api/forecastermultivariate
 
 <!-- metrics -->
 [metrics]: https://skforecast.org/latest/api/metrics
