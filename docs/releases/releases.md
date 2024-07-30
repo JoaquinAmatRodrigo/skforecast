@@ -34,6 +34,8 @@ The main changes in this release are:
 
 + Support for `python 3.12`.
 
++ `keras` has been added as an optional dependency, tag deeplearning, to use the <code>[ForecasterRnn]</code>.
+
 + New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
 
 + New `_create_predict_inputs` method in all Forecasters to unify the inputs of the predict methods.
