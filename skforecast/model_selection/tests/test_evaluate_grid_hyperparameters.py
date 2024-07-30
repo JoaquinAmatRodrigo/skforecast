@@ -14,12 +14,12 @@ from skforecast.model_selection.model_selection import _evaluate_grid_hyperparam
 
 from tqdm import tqdm
 from functools import partialmethod
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 # Fixtures
 from .fixtures_model_selection import y
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 4 lags of a time series, used in ForecasterAutoregCustom.
     """
@@ -41,9 +41,9 @@ def test_ValueError_evaluate_grid_hyperparameters_when_return_best_and_len_y_exo
     exog = y[:30]
 
     err_msg = re.escape(
-            (f"`exog` must have same number of samples as `y`. "
-             f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
-        )
+        (f"`exog` must have same number of samples as `y`. "
+         f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
+    )
     with pytest.raises(ValueError, match = err_msg):
         _evaluate_grid_hyperparameters(
             forecaster         = forecaster,
@@ -103,7 +103,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_mocked():
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
-    idx = len(lags_grid)*len(param_grid)
+    idx = len(lags_grid) * len(param_grid)
 
     results = _evaluate_grid_hyperparameters(
                   forecaster         = forecaster,

@@ -29,7 +29,7 @@
 
 # About The Project
 
-**Skforecast** is a Python library that eases using scikit-learn regressors as single and multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (LightGBM, XGBoost, CatBoost, ...).
+**Skforecast** is a Python library for time series forecasting using machine learning models. It works with any regressor compatible with the scikit-learn API, including popular options like LightGBM, XGBoost, CatBoost, Keras, and many others.
 
 **Why use skforecast?**
 
@@ -85,9 +85,12 @@ If you want to learn more about the installation process, dependencies and optio
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [ ] New features.
+- [x] Support for `python 3.12`.
+- [x] Deprecated `python 3.8` support.
+- [x] New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
+- [x] New module `metrics` with functions to calculate metrics for time series forecasting such as `mean_absolute_scaled_error` and `root_mean_squared_scaled_error`.
+- [x] New argument `add_aggregated_metric` in `backtesting_forecaster_multiseries` to include, in addition to the metrics for each level, the aggregated metric of all levels  using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).
 - [ ] Bug fixes and performance improvements.
-
 
 # Forecasters
 
@@ -107,10 +110,10 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 |[ForecasterSarimax]|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
 
 [ForecasterAutoreg]: https://skforecast.org/latest/user_guides/autoregresive-forecaster.html
-[ForecasterAutoregCustom]: https://skforecast.org/latest/user_guides/custom-predictors.html
+[ForecasterAutoregCustom]: https://skforecast.org/latest/user_guides/window-features-and-custom-features.html
 [ForecasterAutoregDirect]: https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html
 [ForecasterMultiSeries]: https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html
-[ForecasterMultiSeriesCustom]: https://skforecast.org/latest/user_guides/custom-predictors.html
+[ForecasterMultiSeriesCustom]: https://skforecast.org/latest/user_guides/window-features-and-custom-features.html#forecasterautoregmultiseriescustom
 [ForecasterMultiVariate]: https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html
 [ForecasterRNN]: https://skforecast.org/latest/user_guides/forecasting-with-deep-learning-rnn-lstm
 [ForecasterSarimax]: https://skforecast.org/latest/user_guides/forecasting-sarimax-arima.html
@@ -125,6 +128,8 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 + [**ARIMA and SARIMAX models**](https://www.cienciadedatos.net/documentos/py51-arima-sarimax-models-python.html)
 
 + [**Forecasting with gradient boosting: XGBoost, LightGBM and CatBoost**](https://www.cienciadedatos.net/documentos/py39-forecasting-time-series-with-skforecast-xgboost-lightgbm-catboost.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1Imy8ZM3DqPXg7UllRDH9gqWb_XSrqzzh)
+
++ [**Forecasting with XGBoost**](https://www.cienciadedatos.net/documentos/https://cienciadedatos.net/documentos/py56-forecasting-time-series-with-xgboost)
 
 + [**Global Forecasting Models: Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
 
@@ -147,6 +152,8 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 + [**Global Forecasting Models: Comparative Analysis of Single and Multi-Series Forecasting Modeling**](https://www.cienciadedatos.net/documentos/py53-global-forecasting-models.html)
 
 + [**Forecasting web traffic with machine learning and Python**](https://www.cienciadedatos.net/documentos/py37-forecasting-web-traffic-machine-learning.html) [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1QhLkJAAEfvgYoVkQXy58-T_sloNFCV1o)
+
++ [**Interpretable forecasting models**](https://www.cienciadedatos.net/documentos/py57-interpretable-forecasting-models.html)
 
 + [**Bitcoin price prediction with Python**](https://www.cienciadedatos.net/documentos/py41-forecasting-cryptocurrency-bitcoin-machine-learning-python.html)
 

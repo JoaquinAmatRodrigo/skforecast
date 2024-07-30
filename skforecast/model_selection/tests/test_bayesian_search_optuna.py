@@ -614,17 +614,17 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
                      )
 
         metric, _ = backtesting_forecaster(
-                        forecaster = forecaster,
-                        y          = y,
-                        steps      = steps,
-                        metric     = metric,
+                        forecaster         = forecaster,
+                        y                  = y,
+                        steps              = steps,
+                        metric             = metric,
                         initial_train_size = initial_train_size,
                         fixed_train_size   = fixed_train_size,
-                        refit      = refit,
-                        verbose    = verbose       
+                        refit              = refit,
+                        verbose            = verbose       
                     )
-
-        return abs(metric)
+        metric = metric.iat[0, 0]
+        return metric
   
     study = optuna.create_study(direction="minimize", 
                                 sampler=TPESampler(seed=random_state))

@@ -190,7 +190,7 @@ def test_create_train_X_y_ValueError_when_exog_columns_same_as_series_col_names(
 
 
 @pytest.mark.parametrize("exog", 
-                         [pd.Series(np.arange(15)), 
+                         [pd.Series(np.arange(15), name='exog'), 
                           pd.DataFrame(np.arange(50).reshape(25, 2))])
 def test_create_train_X_y_ValueError_when_series_and_exog_have_different_length(exog):
     """

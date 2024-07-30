@@ -3,7 +3,7 @@ extra_css:
   - stylesheets/extra.css
 repo_url: https://github.com/JoaquinAmatRodrigo/skforecast
 site_url: https://joaquinamatrodrigo.github.io/skforecast/
-site_description: Python library that eases using scikit-learn regressors as multi-step forecasters. It also works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).
+site_description: Python library that eases using machine learning models as single and multi-step forecasters. It works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).
 site_author: Joaquin Amat Rodrigo and Javier Escobar Ortiz
 use_directory_urls: false
 copyright: Copyright &copy; 2021 - 2024 Joaquín Amat Rodrigo, Javier Escobar Ortiz
@@ -40,9 +40,10 @@ nav:
     - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
     - Foreasting baseline: user_guides/forecasting-baseline.ipynb
     - Exogenous variables: user_guides/exogenous-variables.ipynb
-    - Custom predictors: user_guides/custom-predictors.ipynb
+    - Window and custom features: user_guides/window-features-and-custom-features.ipynb
     - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
     - Backtesting forecaster: user_guides/backtesting.ipynb
+    - Metrics: user_guides/metrics.ipynb
     - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
     - Scikit-learn Transformers and Pipelines: user_guides/sklearn-transformers-and-pipeline.ipynb
     - Probabilistic forecasting: user_guides/probabilistic-forecasting.ipynb
@@ -75,6 +76,7 @@ nav:
     - model_selection_multiseries: api/model_selection_multiseries.md
     - model_selection_sarimax: api/model_selection_sarimax.md
     - preprocessing: api/preprocessing.md
+    - metrics: api/metrics.md
     - plot: api/plot.md
     - utils: api/utils.md
     - datasets: api/datasets.md
@@ -135,7 +137,7 @@ theme:
     text: Open Sans
     code: Ubuntu Mono
   highlightjs: true
-  logo: img/logo-skforecast-orange-no-backgound.png
+  logo: img/logo-skforecast.png
   palette:
     # # Palette toggle for automatic mode
     # - media: "(prefers-color-scheme)"
@@ -160,10 +162,23 @@ theme:
         name: Switch to light mode
 
 markdown_extensions:
+  # Python Markdown
+  - abbr
   - admonition
   - attr_list
   - codehilite
   - footnotes
+  - pymdownx.details
+  - md_in_html
+  - toc:
+      permalink: true
+
+  # Python Markdown Extensions
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
   - pymdownx.details
   - pymdownx.emoji:
       emoji_index: !!python/name:material.extensions.emoji.twemoji
@@ -172,12 +187,17 @@ markdown_extensions:
       use_pygments: true
       linenums: true
   - pymdownx.inlinehilite
-  - pymdownx.magiclink
+  - pymdownx.keys
+  - pymdownx.mark
+  - pymdownx.smartsymbols
   - pymdownx.superfences
-  - pymdownx.tabbed
-  - toc:
-      permalink: true
-
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+  - pymdownx.magiclink
+  
 extra:
   version:
     provider: mike

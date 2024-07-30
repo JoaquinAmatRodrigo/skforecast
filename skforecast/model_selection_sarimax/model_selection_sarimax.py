@@ -18,7 +18,7 @@ from sklearn.model_selection import ParameterSampler
 
 from ..exceptions import LongTrainingWarning
 from ..exceptions import IgnoredArgumentWarning
-from ..model_selection.model_selection import _get_metric
+from ..metrics import add_y_train_argument, _get_metric
 from ..model_selection.model_selection import _create_backtesting_folds
 from ..utils import check_backtesting_input
 from ..utils import select_n_jobs_backtesting
@@ -72,9 +72,10 @@ def _backtesting_sarimax(
         Metric used to quantify the goodness of fit of the model.
         
         - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error'}
-        - If `Callable`: Function with arguments y_true, y_pred that returns 
-        a float.
+        'mean_absolute_percentage_error', 'mean_squared_log_error',
+        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
+        (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -341,9 +342,10 @@ def backtesting_sarimax(
         Metric used to quantify the goodness of fit of the model.
         
         - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error'}
-        - If `Callable`: Function with arguments y_true, y_pred that returns 
-        a float.
+        'mean_absolute_percentage_error', 'mean_squared_log_error',
+        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
+        (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int
         Number of samples in the initial train split. The backtest forecaster is
@@ -483,9 +485,10 @@ def grid_search_sarimax(
         Metric used to quantify the goodness of fit of the model.
         
         - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error'}
-        - If `Callable`: Function with arguments y_true, y_pred that returns 
-        a float.
+        'mean_absolute_percentage_error', 'mean_squared_log_error',
+        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
+        (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
@@ -601,9 +604,10 @@ def random_search_sarimax(
         Metric used to quantify the goodness of fit of the model.
         
         - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error'}
-        - If `Callable`: Function with arguments y_true, y_pred that returns 
-        a float.
+        'mean_absolute_percentage_error', 'mean_squared_log_error',
+        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
+        (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is
@@ -721,9 +725,10 @@ def _evaluate_grid_hyperparameters_sarimax(
         Metric used to quantify the goodness of fit of the model.
         
         - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error'}
-        - If `Callable`: Function with arguments y_true, y_pred that returns 
-        a float.
+        'mean_absolute_percentage_error', 'mean_squared_log_error',
+        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
+        (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split. The backtest forecaster is

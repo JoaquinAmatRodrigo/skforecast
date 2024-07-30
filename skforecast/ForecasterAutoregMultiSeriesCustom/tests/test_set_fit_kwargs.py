@@ -1,9 +1,9 @@
 # Unit test set_fit_kwargs ForecasterAutoregMultiSeriesCustom
 # ==============================================================================
-from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from lightgbm import LGBMRegressor
+from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 5 lags of a time series.
     """

@@ -30,9 +30,9 @@ exog_dict_train = {k: v.loc[:end_train,] for k, v in exog_dict.items()}
 series_dict_test = {k: v.loc[end_train:,] for k, v in series_dict.items()}
 exog_dict_test = {k: v.loc[end_train:,] for k, v in exog_dict.items()}
 series_with_nans = series.copy()
-series_with_nans['l2'].iloc[:10] = np.nan
+series_with_nans.iloc[:10, series_with_nans.columns.get_loc('l2')] = np.nan
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 2 lags of a time series.
     """
@@ -40,11 +40,22 @@ def create_predictors(y): # pragma: no cover
 
     return lags
 
-def create_predictors_14(y): # pragma: no cover
+def create_predictors_14(y):  # pragma: no cover
     """
     Create first 14 lags of a time series.
     """
     lags = y[-1:-15:-1]
+
+    return lags
+
+def create_predictors_1_7_14(y):  # pragma: no cover
+    """
+    Create lags 1 and 5 of a time series.
+    """
+    lag_1 = y[-1]
+    lag_7 = y[-7]
+    lag_14 = y[-14]
+    lags = np.hstack([lag_1, lag_7, lag_14])
 
     return lags
 
@@ -74,6 +85,7 @@ def test_backtesting_forecaster_multiseries_TypeError_when_forecaster_not_a_fore
             steps               = 4,
             levels              = 'l1',
             metric              = 'mean_absolute_error',
+            add_aggregated_metric = False,
             initial_train_size  = 12,
             refit               = False,
             fixed_train_size    = False,
@@ -126,6 +138,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps               = steps,
                                                levels              = 'l1',
                                                metric              = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = False,
                                                fixed_train_size    = False,
@@ -179,6 +192,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps               = steps,
                                                levels              = 'l1',
                                                metric              = mean_absolute_error,
+                                               add_aggregated_metric = False,
                                                initial_train_size  = initial_train_size,
                                                refit               = False,
                                                fixed_train_size    = False,
@@ -256,6 +270,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps               = steps,
                                                levels              = ['l1'],
                                                metric              = custom_metric,
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = True,
                                                fixed_train_size    = True, 
@@ -321,6 +336,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps               = steps,
                                                levels              = 'l1',
                                                metric              = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = True,
                                                fixed_train_size    = False,
@@ -372,6 +388,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps               = steps,
                                                levels              = 'l1',
                                                metric              = ['mean_absolute_error', mean_absolute_error],
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = True,
                                                fixed_train_size    = False,
@@ -424,6 +441,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps               = steps,
                                                levels              = None,
                                                metric              = ['mean_absolute_error', mean_absolute_error],
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = False,
                                                fixed_train_size    = False,
@@ -479,6 +497,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps               = steps,
                                                levels              = None,
                                                metric              = ['mean_absolute_error', mean_absolute_error],
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = True,
                                                fixed_train_size    = False,
@@ -534,6 +553,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps               = steps,
                                                levels              = ['l1'],
                                                metric              = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = False,
                                                fixed_train_size    = False,
@@ -593,6 +613,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps               = steps,
                                                levels              = 'l1',
                                                metric              = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = True,
                                                fixed_train_size    = True,
@@ -652,6 +673,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps                 = steps,
                                                levels                = 'l1',
                                                metric                = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size    = len(series) - n_validation,
                                                gap                   = gap,
                                                allow_incomplete_fold = True,
@@ -718,6 +740,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps                 = steps,
                                                levels                = 'l1',
                                                metric                = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size    = len(series) - n_validation,
                                                gap                   = gap,
                                                allow_incomplete_fold = False,
@@ -785,6 +808,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps                 = steps,
                                                levels                = 'l1',
                                                metric                = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size    = len(series_datetime) - n_validation,
                                                gap                   = gap,
                                                allow_incomplete_fold = False,
@@ -850,6 +874,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps                 = steps,
                                                levels                = 'l1',
                                                metric                = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size    = len(series_with_nans) - n_validation,
                                                gap                   = gap,
                                                allow_incomplete_fold = True,
@@ -916,6 +941,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps                 = steps,
                                                levels                = 'l1',
                                                metric                = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size    = len(series_with_nans) - n_validation,
                                                gap                   = gap,
                                                allow_incomplete_fold = False,
@@ -983,6 +1009,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps                 = steps,
                                                levels                = 'l1',
                                                metric                = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size    = len(series_with_nans_datetime) - n_validation,
                                                gap                   = gap,
                                                allow_incomplete_fold = False,
@@ -1047,6 +1074,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps                 = steps,
                                                levels                = None,
                                                metric                = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size    = len(series) - n_validation,
                                                gap                   = 0,
                                                allow_incomplete_fold = False,
@@ -1144,6 +1172,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
                                                steps                 = steps,
                                                levels                = ['l2'],
                                                metric                = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size    = len(series_with_index) - n_validation,
                                                gap                   = gap,
                                                allow_incomplete_fold = False,
@@ -1222,14 +1251,15 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
         exog                  = exog_dict,
         steps                 = 24,
         metric                = 'mean_absolute_error',
+        add_aggregated_metric = False,
         initial_train_size    = len(series_dict_train['id_1000']),
         fixed_train_size      = True,
         gap                   = 0,
         allow_incomplete_fold = True,
         refit                 = False,
         n_jobs                = 'auto',
-        verbose               = True,
-        show_progress         = True,
+        verbose               = False,
+        show_progress         = False,
         suppress_warnings     = True
     )
 
@@ -1253,6 +1283,360 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
         [1403.93625654, 2000.42985714,        np.nan, 7285.52781428],
         [1403.93625654, 2013.4379576 ,        np.nan, 7285.52781428],
         [1403.93625654, 2013.4379576 ,        np.nan, 7285.52781428]]),
+        index=pd.date_range('2016-08-01', periods=10, freq='D'),
+        columns=['id_1000', 'id_1001', 'id_1003', 'id_1004']
+    )
+
+    pd.testing.assert_frame_equal(metrics, expected_metrics)
+    pd.testing.assert_frame_equal(predictions.head(10), expected_predictions)
+
+
+@pytest.mark.parametrize("forecaster", 
+                         [ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), 
+                                                       lags=2, transformer_series=None,
+                                                       encoding='onehot'), 
+                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(random_state=123), 
+                                                             fun_predictors=create_predictors, 
+                                                             window_size=2, transformer_series=None,
+                                                             encoding='onehot')], 
+                         ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_aggregate_metrics_true(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom with no refit, remainder, multiple 
+    levels and add_aggregated_metric.
+    """
+    steps = 5
+    n_validation = 12
+
+    metrics, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster          = forecaster,
+                                               series              = series,
+                                               steps               = steps,
+                                               levels              = None,
+                                               metric              = ['mean_absolute_error', 'mean_absolute_scaled_error'],
+                                               add_aggregated_metric = True,
+                                               initial_train_size  = len(series) - n_validation,
+                                               refit               = False,
+                                               fixed_train_size    = False,
+                                               exog                = None,
+                                               interval            = None,
+                                               n_boot              = 500,
+                                               random_state        = 123,
+                                               in_sample_residuals = True,
+                                               verbose             = False
+                                           )
+    
+    expected_metrics = pd.DataFrame({
+                                "levels": ["l1", "l2", "average", "weighted_average", "pooling"],
+                                "mean_absolute_error": [
+                                    0.2114399595399619,
+                                    0.21941741445502347,
+                                    0.21542868699749268,
+                                    0.2154286869974927,
+                                    0.21542868699749265,
+                                ],
+                                "mean_absolute_scaled_error": [
+                                    0.9250668656254581,
+                                    0.7114558583005026,
+                                    0.8182613619629804,
+                                    0.8182613619629805,
+                                    0.8023811627024722,
+                                ],
+                            }
+                        )
+    expected_predictions = pd.DataFrame(
+                            {
+                                "l1": [
+                                    0.4978839,
+                                    0.46288427,
+                                    0.48433446,
+                                    0.48677605,
+                                    0.48562473,
+                                    0.50259242,
+                                    0.49536197,
+                                    0.48478881,
+                                    0.48496106,
+                                    0.48555902,
+                                    0.49673897,
+                                    0.4576795,
+                                ],
+                                "l2": [
+                                    0.50266337,
+                                    0.53045945,
+                                    0.50527774,
+                                    0.50315834,
+                                    0.50452649,
+                                    0.47372756,
+                                    0.51226827,
+                                    0.50650107,
+                                    0.50420766,
+                                    0.50448097,
+                                    0.52211914,
+                                    0.51092531,
+                                ],
+                            },
+                            index=pd.RangeIndex(start=38, stop=50, step=1),
+                            )
+                                   
+    pd.testing.assert_frame_equal(expected_metrics, metrics)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+@pytest.mark.parametrize("forecaster", 
+    [ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags=14,
+        encoding='ordinal',
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    ), 
+    ForecasterAutoregMultiSeriesCustom(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        fun_predictors=create_predictors_14, 
+        window_size=14,
+        encoding='ordinal',
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    )], 
+    ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_series_and_exog_dict_with_mocked_multiple_aggregated_metrics(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom when series and exog are
+    dictionaries and multiple aggregated metrics are calculated.
+    (mocked done in Skforecast v0.12.0).
+    """
+    
+    metrics, predictions = backtesting_forecaster_multiseries(
+        forecaster            = forecaster,
+        series                = series_dict,
+        exog                  = exog_dict,
+        steps                 = 24,
+        metric                = ['mean_absolute_error', 'mean_squared_error'],
+        add_aggregated_metric = True,
+        initial_train_size    = len(series_dict_train['id_1000']),
+        fixed_train_size      = True,
+        gap                   = 0,
+        allow_incomplete_fold = True,
+        refit                 = False,
+        n_jobs                = 'auto',
+        verbose               = False,
+        show_progress         = False,
+        suppress_warnings     = True
+    )
+
+    expected_metrics = pd.DataFrame({
+                        'levels': {0: 'id_1000',
+                        1: 'id_1001',
+                        2: 'id_1002',
+                        3: 'id_1003',
+                        4: 'id_1004',
+                        5: 'average',
+                        6: 'weighted_average',
+                        7: 'pooling'},
+                        'mean_absolute_error': {0: 286.6227398656757,
+                        1: 1364.7345740769094,
+                        2: np.nan,
+                        3: 237.4894217124842,
+                        4: 1267.85941538558,
+                        5: 789.1765377601623,
+                        6: 745.7085483145497,
+                        7: 745.7085483145497},
+                        'mean_squared_error': {0: 105816.86051259708,
+                        1: 2175934.9583102698,
+                        2: np.nan,
+                        3: 95856.72602398091,
+                        4: 2269796.338792736,
+                        5: 1161851.2209098958,
+                        6: 1024317.153152019,
+                        7: 1024317.1531520189}
+                })
+    
+    expected_predictions = pd.DataFrame(
+    data=np.array([[1438.14154717, 2090.79352613, 2166.9832933, 7285.52781428],
+                   [1438.14154717, 2089.11038884, 2074.55994929, 7488.18398744],
+                   [1438.14154717, 2089.11038884, 2035.99448247, 7488.18398744],
+                   [1403.93625654, 2089.11038884, 2035.99448247, 7488.18398744],
+                   [1403.93625654, 2089.11038884, 2035.99448247, 7488.18398744],
+                   [1403.93625654, 2076.10228838, 2035.99448247, 7250.69119259],
+                   [1403.93625654, 2076.10228838, np.nan, 7085.32315355],
+                   [1403.93625654, 2000.42985714, np.nan, 7285.52781428],
+                   [1403.93625654, 2013.4379576, np.nan, 7285.52781428],
+                   [1403.93625654, 2013.4379576, np.nan, 7285.52781428]]),
+    columns=['id_1000', 'id_1001', 'id_1003', 'id_1004'],
+    index=pd.date_range('2016-08-01', periods=10, freq='D')
+)
+
+    pd.testing.assert_frame_equal(metrics, expected_metrics)
+    pd.testing.assert_frame_equal(predictions.head(10), expected_predictions)
+
+
+@pytest.mark.parametrize("forecaster", 
+    [ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        lags=14,
+        encoding='ordinal',
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    ), 
+    ForecasterAutoregMultiSeriesCustom(
+        regressor=LGBMRegressor(
+            n_estimators=2, random_state=123, verbose=-1, max_depth=2
+        ),
+        fun_predictors=create_predictors_14, 
+        window_size=14,
+        encoding='ordinal',
+        dropna_from_series=False,
+        transformer_series=StandardScaler(),
+        transformer_exog=StandardScaler(),
+    )], 
+    ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_series_and_exog_dict_with_mocked_skip_folds_2(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom when series and exog are
+    dictionaries (mocked done in Skforecast v0.12.0).
+    """
+    
+    metrics, predictions = backtesting_forecaster_multiseries(
+        forecaster            = forecaster,
+        series                = series_dict,
+        exog                  = exog_dict,
+        steps                 = 5,
+        metric                = 'mean_absolute_error',
+        initial_train_size    = len(series_dict_train['id_1000']),
+        fixed_train_size      = True,
+        gap                   = 0,
+        skip_folds            = 2,
+        allow_incomplete_fold = True,
+        refit                 = False,
+        n_jobs                = 'auto',
+        verbose               = True,
+        show_progress         = True,
+        suppress_warnings     = True
+    )
+
+    expected_metrics = pd.DataFrame(
+        data={
+        'levels': ['id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004',
+                   'average', 'weighted_average', 'pooling'],
+        'mean_absolute_error': [258.53959034, 1396.68222457, np.nan, 253.72012285,
+                                1367.69574404, 819.1594204522052, 753.0251104677614,
+                                753.0251104677616]
+        },
+        columns=['levels', 'mean_absolute_error']
+    )
+    expected_predictions = pd.DataFrame(
+        data=np.array([
+            [1438.14154717, 2090.79352613, 2166.9832933 , 7285.52781428],
+            [1438.14154717, 2089.11038884, 2074.55994929, 7488.18398744],
+            [1438.14154717, 2089.11038884, 2035.99448247, 7488.18398744],
+            [1403.93625654, 2089.11038884, 2035.99448247, 7488.18398744],
+            [1403.93625654, 2089.11038884, 2035.99448247, 7488.18398744],
+            [1432.18965392, 2013.4379576 ,        np.nan, 7488.18398744],
+            [1403.93625654, 2013.4379576 ,        np.nan, 7488.18398744],
+            [1403.93625654, 2136.7144822 ,        np.nan, 7250.69119259],
+            [1403.93625654, 2136.7144822 ,        np.nan, 7085.32315355],
+            [1438.14154717, 2013.4379576 ,        np.nan, 7285.52781428]]),
+        index=pd.DatetimeIndex([
+                '2016-08-01', '2016-08-02', '2016-08-03', '2016-08-04',
+                '2016-08-05', '2016-08-11', '2016-08-12', '2016-08-13',
+                '2016-08-14', '2016-08-15'],
+                dtype='datetime64[ns]', freq=None),
+        columns=['id_1000', 'id_1001', 'id_1003', 'id_1004']
+    )
+
+    pd.testing.assert_frame_equal(metrics, expected_metrics)
+    pd.testing.assert_frame_equal(predictions.head(10), expected_predictions)
+
+
+@pytest.mark.parametrize("forecaster", 
+    [ForecasterAutoregMultiSeries(
+        regressor=LGBMRegressor(
+            n_estimators=30, random_state=123, verbose=-1, max_depth=4
+        ),
+        lags=[1, 7, 14],
+        encoding=None,
+        differentiation=1,
+        dropna_from_series=False,
+        transformer_series=None,
+        transformer_exog=StandardScaler(),
+    ), 
+    ForecasterAutoregMultiSeriesCustom(
+        regressor=LGBMRegressor(
+            n_estimators=30, random_state=123, verbose=-1, max_depth=4
+        ),
+        fun_predictors=create_predictors_1_7_14, 
+        window_size=14,
+        encoding=None,
+        differentiation=1,
+        dropna_from_series=False,
+        transformer_series=None,
+        transformer_exog=StandardScaler(),
+    )], 
+    ids=lambda forecaster: f'forecaster: {type(forecaster).__name__}')
+def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_series_and_exog_dict_encoding_None_differentiation(forecaster):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterAutoregMultiSeries 
+    and ForecasterAutoregMultiSeriesCustom when series and exog are
+    dictionaries, encoding=None, and differentiation=1 (mocked done in Skforecast v0.13.0).
+    """
+    
+    metrics, predictions = backtesting_forecaster_multiseries(
+        forecaster            = forecaster,
+        series                = series_dict,
+        exog                  = exog_dict,
+        steps                 = 24,
+        metric                = ['mean_absolute_error', 'mean_absolute_scaled_error'],
+        initial_train_size    = len(series_dict_train['id_1000']),
+        fixed_train_size      = True,
+        gap                   = 0,
+        allow_incomplete_fold = True,
+        refit                 = False,
+        n_jobs                = 'auto',
+        verbose               = True,
+        show_progress         = True,
+        suppress_warnings     = True
+    )
+
+    expected_metrics = pd.DataFrame(
+        data={
+            'levels': [
+                'id_1000', 'id_1001', 'id_1002', 'id_1003', 'id_1004',
+                'average', 'weighted_average', 'pooling'
+            ],
+            'mean_absolute_error': [
+                234.51032919, 1145.83513569, np.nan, 1342.06986733,
+                1025.76779699, 937.0457823, 818.85514869, 818.85514869
+            ],
+            'mean_absolute_scaled_error': [
+                1.06505383, 3.25617103, np.nan, 5.62127465,
+                0.85811137, 2.70015272, 2.6047229, 1.9453509
+            ]
+        }
+    )
+    expected_predictions = pd.DataFrame(
+        data=np.array([
+            [1351.44874045, 3267.13419659, 3843.06135374, 7220.15909652],
+            [1411.73786344, 3537.21728977, 3823.777024  , 7541.54119992],
+            [1367.56233886, 3595.37617537, 3861.96220571, 7599.93110962],
+            [1349.98221742, 3730.36025071, 3900.14738742, 7997.86353537],
+            [1330.33321825, 3752.7395927 , 3850.39111741, 7923.44398373],
+            [1045.2013386 , 2652.15007539, 4227.38385608, 6651.39787084],
+            [ 801.6084919 , 2059.57604816,        np.nan, 5625.61804572],
+            [1473.95692547, 3159.99921219,        np.nan, 6740.53028097],
+            [1596.51499989, 3449.40467366,        np.nan, 7172.21235605],
+            [1572.31317919, 3507.56355926,        np.nan, 7506.35124681]]),
         index=pd.date_range('2016-08-01', periods=10, freq='D'),
         columns=['id_1000', 'id_1001', 'id_1003', 'id_1004']
     )
@@ -1288,6 +1672,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                steps               = steps,
                                                levels              = 'l1',
                                                metric              = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = False,
                                                fixed_train_size    = False,
@@ -1339,6 +1724,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                steps               = steps,
                                                levels              = ['l1'],
                                                metric              = mean_absolute_error,
+                                               add_aggregated_metric = False,
                                                initial_train_size  = initial_train_size,
                                                refit               = False,
                                                fixed_train_size    = False,
@@ -1402,6 +1788,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                steps               = steps,
                                                levels              = None,
                                                metric              = custom_metric,
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = True,
                                                fixed_train_size    = True, 
@@ -1453,6 +1840,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                steps               = steps,
                                                levels              = 'l1',
                                                metric              = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = True,
                                                fixed_train_size    = False,
@@ -1503,6 +1891,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                steps               = steps,
                                                levels              = 'l1',
                                                metric              = ['mean_absolute_error', mean_absolute_error],
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = True,
                                                fixed_train_size    = False,
@@ -1554,6 +1943,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                steps               = steps,
                                                levels              = ['l1'],
                                                metric              = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = False,
                                                fixed_train_size    = False,
@@ -1612,6 +2002,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                steps               = steps,
                                                levels              = 'l1',
                                                metric              = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size  = len(series) - n_validation,
                                                refit               = True,
                                                fixed_train_size    = True,
@@ -1670,6 +2061,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                steps                 = steps,
                                                levels                = 'l1',
                                                metric                = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size    = len(series) - n_validation,
                                                gap                   = gap,
                                                allow_incomplete_fold = True,
@@ -1735,6 +2127,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                steps                 = steps,
                                                levels                = 'l1',
                                                metric                = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size    = len(series) - n_validation,
                                                gap                   = gap,
                                                allow_incomplete_fold = False,
@@ -1801,6 +2194,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                steps                 = steps,
                                                levels                = 'l1',
                                                metric                = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size    = len(series_datetime) - n_validation,
                                                gap                   = gap,
                                                allow_incomplete_fold = False,
@@ -1871,6 +2265,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                    steps                 = steps,
                                                    levels                = 'l1',
                                                    metric                = 'mean_absolute_error',
+                                                   add_aggregated_metric = False,
                                                    initial_train_size    = len(series) - n_validation,
                                                    gap                   = 0,
                                                    allow_incomplete_fold = False,
@@ -1948,6 +2343,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                steps                 = steps,
                                                levels                = ['l1'],
                                                metric                = 'mean_absolute_error',
+                                               add_aggregated_metric = False,
                                                initial_train_size    = len(series_with_index) - n_validation,
                                                gap                   = gap,
                                                allow_incomplete_fold = False,

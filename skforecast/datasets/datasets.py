@@ -366,7 +366,7 @@ def fetch_dataset(
             'url': 'https://drive.google.com/file/d/1fMsYjfhrFLmeFjKG3jenXjDa5s984ThC/view?usp=sharing',
             'sep': None,
             'index_col': 'timestamp',
-            'date_format': '%Y-%m-%d %H:%M:%S',
+            'date_format': '%Y-%m-%d',
             'freq': 'D',
             'description': (
                 "Daily energy consumption data from the ASHRAE competition with "
@@ -378,11 +378,47 @@ def fetch_dataset(
                 "Predictor III. Kaggle. https://www.kaggle.com/c/ashrae-energy-prediction/overview"
             )
         },
+        'bdg2_daily': {
+            'url': 'https://drive.google.com/file/d/1KHYopzclKvS1F6Gt6GoJWKnxiuZ2aqen/view?usp=sharing',
+            'sep': None,
+            'index_col': 'timestamp',
+            'date_format': '%Y-%m-%d',
+            'freq': 'D',
+            'description': (
+                "Daily energy consumption data from the The Building Data Genome Project 2 "
+                "with building metadata and weather data. "
+                "https://github.com/buds-lab/building-data-genome-project-2"
+            ),
+            'source': (
+                "Miller, C., Kathirgamanathan, A., Picchetti, B. et al. The Building Data "
+                "Genome Project 2, energy meter data from the ASHRAE Great Energy "
+                "Predictor III competition. Sci Data 7, 368 (2020). "
+                "https://doi.org/10.1038/s41597-020-00712-x"
+            )
+        },
+        'bdg2_hourly': {
+            'url': 'https://drive.google.com/file/d/1I2i5mZJ82Cl_SHPTaWJmLoaXnntdCgh7/view?usp=sharing',
+            'sep': None,
+            'index_col': 'timestamp',
+            'date_format': '%Y-%m-%d %H:%M:%S',
+            'freq': 'D',
+            'description': (
+                "Hourly energy consumption data from the The Building Data Genome Project 2 "
+                "with building metadata and weather data. "
+                "https://github.com/buds-lab/building-data-genome-project-2"
+            ),
+            'source': (
+                "Miller, C., Kathirgamanathan, A., Picchetti, B. et al. The Building Data "
+                "Genome Project 2, energy meter data from the ASHRAE Great Energy "
+                "Predictor III competition. Sci Data 7, 368 (2020). "
+                "https://doi.org/10.1038/s41597-020-00712-x"
+            )
+        }
     }
     
     if name not in datasets.keys():
         raise ValueError(
-            f"Dataset {name} not found. Available datasets are: {list(datasets.keys())}"
+            f"Dataset '{name}' not found. Available datasets are: {list(datasets.keys())}"
         )
     
     url = datasets[name]['url']
@@ -393,7 +429,7 @@ def fetch_dataset(
             df = pd.read_csv(url, sep=sep, **kwargs_read_csv)
         except:
             raise ValueError(
-                f"Error reading dataset {name} from {url}. Try to version = 'latest'"
+                f"Error reading dataset '{name}' from {url}. Try to version = 'latest'"
             )
 
     if url.endswith('.parquet'):
@@ -401,7 +437,7 @@ def fetch_dataset(
             df = pd.read_parquet(url)
         except:
             raise ValueError(
-                f"Error reading dataset {name} from {url}. Try to version = 'latest'"
+                f"Error reading dataset '{name}' from {url}. Try to version = 'latest'"
             )
         
     if url.startswith('https://drive.google.com'):
