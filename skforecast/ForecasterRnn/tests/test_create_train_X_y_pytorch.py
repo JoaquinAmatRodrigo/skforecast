@@ -46,7 +46,7 @@ def test_create_train_X_y_TypeError_when_series_not_dataframe():
             optimizer=optimizer,
             loss=loss,
         )
-        forecaster = ForecasterRnn(model)
+        forecaster = ForecasterRnn(model, lags=lags)
 
 
 def test_create_train_X_y_UserWarning_when_levels_of_transformer_series_not_equal_to_series_col_names():
@@ -69,7 +69,7 @@ def test_create_train_X_y_UserWarning_when_levels_of_transformer_series_not_equa
         loss=loss,
     )
     forecaster = ForecasterRnn(
-        model, levels=levels, transformer_series=dict_transformers
+        model, levels=levels, transformer_series=dict_transformers, lags=lags
     )
 
     series_not_in_transformer_series = set(series.columns) - set(
@@ -106,7 +106,7 @@ def test_create_train_X_y_ValueError_when_all_series_values_are_missing():
             optimizer=optimizer,
             loss=loss,
         )
-        forecaster = ForecasterRnn(model, levels=levels)
+        forecaster = ForecasterRnn(model, levels=levels, lags=lags)
         forecaster.create_train_X_y(series=series)
 
 
@@ -141,7 +141,7 @@ def test_create_train_X_y_ValueError_when_series_values_are_missing(values):
         optimizer=optimizer,
         loss=loss,
     )
-    forecaster = ForecasterRnn(model, levels=levels)
+    forecaster = ForecasterRnn(model, levels=levels, lags=lags)
 
     err_msg = re.escape(("`y` has missing values."))
     with pytest.raises(ValueError, match=err_msg):
@@ -172,7 +172,7 @@ def test_create_train_X_y_output_when_series_10_and_transformer_series_is_Standa
         loss=loss,
     )
     forecaster = ForecasterRnn(
-        model, levels=levels, transformer_series=StandardScaler()
+        model, levels=levels, transformer_series=StandardScaler(), lags=lags
     )
 
     results = forecaster.create_train_X_y(series=series)

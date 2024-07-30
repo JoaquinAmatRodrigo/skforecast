@@ -45,7 +45,7 @@ def test_fit_without_validation_data():
     """
     # Call the function to create and compile the model
 
-    forecaster = ForecasterRnn(model, levels)
+    forecaster = ForecasterRnn(model, levels, lags=lags)
 
     # Assert that the forecaster is fitted
     assert forecaster.fitted == False
@@ -85,6 +85,7 @@ def test_fit_with_validation_data():
             "batch_size": 32,  # Batch size to train the model.
             "series_val": series_val,  # Validation data for model training.
         },
+        lags=lags
     )
 
     # Assert that the forecaster is not fitted

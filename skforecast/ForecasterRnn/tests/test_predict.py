@@ -1,11 +1,12 @@
 # Unit test predict method
 # ==============================================================================
-import pandas as pd
+import keras
 import numpy as np
+import pandas as pd
 import pytest
+
 from skforecast.ForecasterRnn import ForecasterRnn
 from skforecast.ForecasterRnn.utils import create_and_compile_model
-import keras
 
 series = pd.DataFrame(
     {
@@ -43,7 +44,7 @@ def test_predict_3_steps_ahead():
     Test case for predicting 3 steps ahead
     """
     # Create a ForecasterRnn object
-    forecaster = ForecasterRnn(model, levels)
+    forecaster = ForecasterRnn(model, levels, lags=lags)
     forecaster.fit(series)
 
     # Call the predict method
@@ -59,7 +60,7 @@ def test_predict_2_steps_ahead_specific_levels():
     Test case for predicting 2 steps ahead with specific levels
     """
     # Create a ForecasterRnn object
-    forecaster = ForecasterRnn(model, levels)
+    forecaster = ForecasterRnn(model, levels, lags=lags)
     forecaster.fit(series)
 
     # Call the predict method

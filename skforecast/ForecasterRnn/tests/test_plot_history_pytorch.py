@@ -42,7 +42,7 @@ model = create_and_compile_model(
     optimizer=optimizer,
     loss=loss,
 )
-forecaster = ForecasterRnn(model, levels)
+forecaster = ForecasterRnn(model, levels, lags=lags)
 forecaster.fit(series)
 
 

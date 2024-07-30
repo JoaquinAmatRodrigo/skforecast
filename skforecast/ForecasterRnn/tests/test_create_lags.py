@@ -37,7 +37,7 @@ def test_check_create_lags_exception_when_n_splits_less_than_0():
         optimizer=optimizer,
         loss=loss,
     )
-    forecaster = ForecasterRnn(model, levels)
+    forecaster = ForecasterRnn(model, levels, lags=lags)
 
     err_msg = re.escape(
         f"The maximum lag ({forecaster.max_lag}) must be less than the length "

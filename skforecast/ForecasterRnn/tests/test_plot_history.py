@@ -1,12 +1,13 @@
 # Unit test plot history method
 # ==============================================================================
-import pandas as pd
-import numpy as np
-import pytest
-from skforecast.ForecasterRnn import ForecasterRnn
 import keras
-from skforecast.ForecasterRnn.utils import create_and_compile_model
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import pytest
+
+from skforecast.ForecasterRnn import ForecasterRnn
+from skforecast.ForecasterRnn.utils import create_and_compile_model
 
 series = pd.DataFrame(
     {
@@ -36,7 +37,7 @@ model = create_and_compile_model(
     optimizer=optimizer,
     loss=loss,
 )
-forecaster = ForecasterRnn(model, levels)
+forecaster = ForecasterRnn(model, levels, lags=lags)
 forecaster.fit(series)
 
 
