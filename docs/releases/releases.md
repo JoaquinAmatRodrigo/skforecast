@@ -10,21 +10,21 @@ All significant changes to this project are documented in this release file.
 | <span class="badge text-bg-danger">Fix</span>              | Bug fix                               |
 
 
-## 0.13.0 <small>In development</small> { id="0.13.0" }
+## 0.13.0 <small>Jul 31, 2024</small> { id="0.13.0" }
 
 The main changes in this release are:
 
-+ <span class="badge text-bg-feature">Feature</span> Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code> are able to predict series not seen during training. This is useful when the user wants to predict a new series that was not included in the training data.
++ <span class="badge text-bg-feature">Feature</span> Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code> are able to [predict series not seen during training](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html#forecasting-unknown-series). This is useful when the user wants to predict a new series that was not included in the training data.
 
-+ <span class="badge text-bg-feature">Feature</span> `encoding` can be set to `None` in Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. This option does not add an encoding column(s) to the regressor training matrix.
++ <span class="badge text-bg-feature">Feature</span> `encoding` can be set to `None` in Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. This option does [not add the encoded series ids](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting#series-encoding-in-multi-series) to the regressor training matrix.
 
 + <span class="badge text-bg-feature">Feature</span> New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
 
-+ <span class="badge text-bg-feature">Feature</span> New argument `skip_folds` in <code>[model_selection]</code> and <code>[model_selection_multiseries]</code> functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.
++ <span class="badge text-bg-feature">Feature</span> New module <code>[metrics]</code> with functions to calculate metrics for time series forecasting such as <code>[mean_absolute_scaled_error]</code> and <code>[root_mean_squared_scaled_error]</code>. Visit [Time Series Forecasting Metrics](https://skforecast.org/latest/user_guides/metrics.html) for more information.
 
 + <span class="badge text-bg-feature">Feature</span> New argument `add_aggregated_metric` in <code>[backtesting_forecaster_multiseries]</code> to include, in addition to the metrics for each level, the aggregated metric of all levels using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).
 
-+ <span class="badge text-bg-feature">Feature</span> New module <code>[metrics]</code> with functions to calculate metrics for time series forecasting such as <code>[mean_absolute_scaled_error]</code> and <code>[root_mean_squared_scaled_error]</code>.
++ <span class="badge text-bg-feature">Feature</span> New argument `skip_folds` in <code>[model_selection]</code> and <code>[model_selection_multiseries]</code> functions. It allows the user to [skip some folds during backtesting](https://skforecast.org/latest/user_guides/backtesting#backtesting-with-skip-folds), which can be useful to speed up the backtesting process and thus the hyperparameter search.
 
 + <span class="badge text-bg-api-change">API Change</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.
 
@@ -33,6 +33,8 @@ The main changes in this release are:
 **Added**
 
 + Support for `python 3.12`.
+
++ `keras` has been added as an optional dependency, tag deeplearning, to use the <code>[ForecasterRnn]</code>.
 
 + New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
 
@@ -48,7 +50,7 @@ The main changes in this release are:
 
 + Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code> are able to predict series not seen during training. This is useful when the user wants to predict a new series that was not included in the training data.
 
-+ `encoding` can be set to `None` in Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. This option does not add an encoding column(s) to the regressor training matrix.
++ `encoding` can be set to `None` in Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. This option does not add the encoded series ids to the regressor training matrix.
 
 + New argument `add_aggregated_metric` in <code>[backtesting_forecaster_multiseries]</code> to include, in addition to the metrics for each level, the aggregated metric of all levels using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).
 
@@ -59,6 +61,8 @@ The main changes in this release are:
 **Changed**
 
 + Deprecated `python 3.8` compatibility.
+
++ Update [project dependencies](https://skforecast.org/latest/quick-start/how-to-install).
 
 + Change default value of `n_bins` when initializing <code>[ForecasterAutoreg]</code> from 15 to 10.
 
@@ -72,7 +76,7 @@ The main changes in this release are:
 
 + `select_n_jobs_backtesting` and `select_n_jobs_fit` in <code>[utils]</code> return `n_jobs = 1` if regressor is `LGBMRegressor`. This is because `lightgbm` is highly optimized for gradient boosting and parallelizes operations at a very fine-grained level, making additional parallelization unnecessary and potentially harmful due to resource contention.
 
-+ `metrics` returned by <code>[backtesting_forecaster]</code> is a `pandas DataFrame` with one column per metric instead of a `list`.
++ `metric_values` returned by <code>[backtesting_forecaster]</code> and <code>[backtesting_sarimax]</code> is a `pandas DataFrame` with one column per metric instead of a `list`.
 
 **Fixed**
 

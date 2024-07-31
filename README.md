@@ -85,12 +85,15 @@ If you want to learn more about the installation process, dependencies and optio
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [x] Support for `python 3.12`.
-- [x] Deprecated `python 3.8` support.
+- [x] Support for `python 3.12`, `python 3.8` is no longer supported.
+- [x] Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code> are able to [predict series not seen during training](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html#forecasting-unknown-series). This is useful when the user wants to predict a new series that was not included in the training data.
+- [x] `encoding` can be set to `None` in Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. This option does [not add the encoded series ids](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting#series-encoding-in-multi-series) to the regressor training matrix.
 - [x] New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
-- [x] New module `metrics` with functions to calculate metrics for time series forecasting such as `mean_absolute_scaled_error` and `root_mean_squared_scaled_error`.
-- [x] New argument `add_aggregated_metric` in `backtesting_forecaster_multiseries` to include, in addition to the metrics for each level, the aggregated metric of all levels  using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).
-- [ ] Bug fixes and performance improvements.
+- [x] New module <code>[metrics]</code> with functions to calculate metrics for time series forecasting such as <code>[mean_absolute_scaled_error]</code> and <code>[root_mean_squared_scaled_error]</code>. Visit [Time Series Forecasting Metrics](https://skforecast.org/latest/user_guides/metrics.html) for more information.
+- [x] New argument `add_aggregated_metric` in <code>[backtesting_forecaster_multiseries]</code> to include, in addition to the metrics for each level, the aggregated metric of all levels  using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).
+- [x] New argument `skip_folds` in <code>[model_selection]</code> and <code>[model_selection_multiseries]</code> functions. It allows the user to [skip some folds during backtesting](https://skforecast.org/latest/user_guides/backtesting#backtesting-with-skip-folds), which can be useful to speed up the backtesting process and thus the hyperparameter search.
+- [x] Bug fixes and performance improvements.
+
 
 # Forecasters
 
@@ -210,12 +213,12 @@ If you use skforecast for a scientific publication, we would appreciate citation
 **Zenodo**
 
 ```
-Amat Rodrigo, Joaquin, & Escobar Ortiz, Javier. (2024). skforecast (v0.12.1). Zenodo. https://doi.org/10.5281/zenodo.8382788
+Amat Rodrigo, Joaquin, & Escobar Ortiz, Javier. (2024). skforecast (v0.13.0). Zenodo. https://doi.org/10.5281/zenodo.8382788
 ```
 
 **APA**:
 ```
-Amat Rodrigo, J., & Escobar Ortiz, J. (2024). skforecast (Version 0.12.1) [Computer software]. https://doi.org/10.5281/zenodo.8382788
+Amat Rodrigo, J., & Escobar Ortiz, J. (2024). skforecast (Version 0.13.0) [Computer software]. https://doi.org/10.5281/zenodo.8382788
 ```
 
 **BibTeX**:
@@ -223,8 +226,8 @@ Amat Rodrigo, J., & Escobar Ortiz, J. (2024). skforecast (Version 0.12.1) [Compu
 @software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 title = {skforecast},
-version = {0.12.1},
-month = {5},
+version = {0.13.0},
+month = {7},
 year = {2024},
 license = {BSD-3-Clause},
 url = {https://skforecast.org/},
@@ -249,3 +252,70 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 # License
 
 [BSD-3-Clause License](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/LICENSE)
+
+
+
+<!-- Links to API Reference -->
+<!-- Forecasters -->
+<!-- [ForecasterAutoreg]: https://skforecast.org/latest/api/forecasterautoreg
+[ForecasterAutoregCustom]: https://skforecast.org/latest/api/forecasterautoregcustom
+[ForecasterAutoregDirect]: https://skforecast.org/latest/api/forecasterautoregdirect
+[ForecasterRNN]: https://skforecast.org/latest/api/forecasterrnn
+[ForecasterSarimax]: https://skforecast.org/latest/api/forecastersarimax
+[Sarimax]: https://skforecast.org/latest/api/sarimax
+[ForecasterEquivalentDate]: https://skforecast.org/latest/api/forecasterbaseline#skforecast.ForecasterBaseline.ForecasterEquivalentDate -->
+[ForecasterAutoregMultiSeries]: https://skforecast.org/latest/api/forecastermultiseries
+[ForecasterAutoregMultiSeriesCustom]: https://skforecast.org/latest/api/forecastermultiseriescustom
+[ForecasterAutoregMultiVariate]: https://skforecast.org/latest/api/forecastermultivariate
+
+<!-- metrics -->
+[metrics]: https://skforecast.org/latest/api/metrics
+[add_y_train_argument]: https://skforecast.org/latest/api/metrics#skforecast.metrics.metrics.add_y_train_argument
+[mean_absolute_scaled_error]: https://skforecast.org/latest/api/metrics#skforecast.metrics.metrics.mean_absolute_scaled_error
+[root_mean_squared_scaled_error]: https://skforecast.org/latest/api/metrics#skforecast.metrics.metrics.root_mean_squared_scaled_error
+
+<!-- model_selection -->
+[model_selection]: https://skforecast.org/latest/api/model_selection
+[backtesting_forecaster]: https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.backtesting_forecaster
+[grid_search_forecaster]: https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.grid_search_forecaster
+[random_search_forecaster]: https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.random_search_forecaster
+[bayesian_search_forecaster]: https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.bayesian_search_forecaster
+[select_features]: https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.select_features
+
+<!-- model_selection_multiseries -->
+[model_selection_multiseries]: https://skforecast.org/latest/api/model_selection_multiseries
+[backtesting_forecaster_multiseries]: https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.backtesting_forecaster_multiseries
+[grid_search_forecaster_multiseries]: https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.grid_search_forecaster_multiseries
+[random_search_forecaster_multiseries]: https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.random_search_forecaster_multiseries
+[bayesian_search_forecaster_multiseries]: https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.bayesian_search_forecaster_multiseries
+[select_features_multiseries]: https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.select_features_multiseries
+
+<!-- model_selection_sarimax -->
+[model_selection_sarimax]: https://skforecast.org/latest/api/model_selection_sarimax
+[backtesting_sarimax]: https://skforecast.org/latest/api/model_selection_sarimax#skforecast.model_selection_sarimax.model_selection_sarimax.backtesting_sarimax
+[grid_search_sarimax]: https://skforecast.org/latest/api/model_selection_sarimax#skforecast.model_selection_sarimax.model_selection_sarimax.grid_search_sarimax
+[random_search_sarimax]: https://skforecast.org/latest/api/model_selection_sarimax#skforecast.model_selection_sarimax.model_selection_sarimax.random_search_sarimax
+
+<!-- preprocessing -->
+[preprocessing]: https://skforecast.org/latest/api/preprocessing
+[TimeSeriesDifferentiator]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.TimeSeriesDifferentiator
+[series_long_to_dict]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.series_long_to_dict
+[exog_long_to_dict]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.exog_long_to_dict
+[DateTimeFeatureTransformer]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.DateTimeFeatureTransformer
+[create_datetime_features]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.create_datetime_features
+
+<!-- plot -->
+[plot]: https://skforecast.org/latest/api/plot
+[set_dark_theme]: https://skforecast.org/latest/api/plot#skforecast.plot.plot.set_dark_theme
+[plot_residuals]: https://skforecast.org/latest/api/plot#skforecast.plot.plot.plot_residuals
+[plot_multivariate_time_series_corr]: https://skforecast.org/latest/api/plot#skforecast.plot.plot.plot_multivariate_time_series_corr
+[plot_prediction_distribution]: https://skforecast.org/latest/api/plot#skforecast.plot.plot.plot_prediction_distribution
+[plot_prediction_intervals]: https://skforecast.org/latest/api/plot#skforecast.plot.plot.plot_prediction_intervals
+
+<!-- datasets -->
+[datasets]: https://skforecast.org/latest/api/datasets
+[fetch_dataset]: https://skforecast.org/latest/api/datasets#skforecast.datasets.fetch_dataset
+[load_demo_dataset]: https://skforecast.org/latest/api/datasets#skforecast.datasets.load_demo_dataset
+
+<!-- utils -->
+[utils]: https://skforecast.org/latest/api/utils
