@@ -29,7 +29,7 @@ def test_check_output_series_long_to_dict_dropna_False():
                 'exog_2': 'b',
                 'exog_3': np.nan
             },
-            index=pd.date_range("2020-01-01", periods=n_exog_A, freq="D")
+            index=pd.date_range("2020-01-01", periods=n_exog_B, freq="D")
         ),
         'C': pd.DataFrame(
             {
@@ -37,7 +37,7 @@ def test_check_output_series_long_to_dict_dropna_False():
                 'exog_2': np.nan,
                 'exog_3': 1.0
             },
-            index=pd.date_range("2020-01-01", periods=n_exog_A, freq="D")
+            index=pd.date_range("2020-01-01", periods=n_exog_C, freq="D")
         )
     }
 
