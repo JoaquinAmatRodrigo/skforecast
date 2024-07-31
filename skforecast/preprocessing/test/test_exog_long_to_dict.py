@@ -55,7 +55,7 @@ def test_check_output_series_long_to_dict_dropna_False():
     )
 
     for k in expected.keys():
-        pd.testing.assert_frame_equal(results[k], expected[k])
+        results[k].equals(expected[k])
 
 
 def test_check_output_series_long_to_dict_dropna_True():
