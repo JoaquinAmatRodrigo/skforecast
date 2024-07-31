@@ -14,7 +14,7 @@ y = np.array([1, 4, 8, 10, 13, 22, 40, 46], dtype=float)
 
 @pytest.mark.parametrize("order",
                          [1, 2, 3],
-                         ids = lambda values : f'order: {values}')
+                         ids = lambda values: f'order: {values}')
 def test_TimeSeriesDifferentiator_inverse_transform(order):
     """
     Test TimeSeriesDifferentiator.inverse_transform method.

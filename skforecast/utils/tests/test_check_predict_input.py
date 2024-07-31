@@ -1376,7 +1376,7 @@ def test_check_predict_input_TypeError_when_ForecasterSarimax_last_window_exog_i
     """
     """
     
-    last_window_exog = pd.Series(np.arange(10), index=pd.date_range(start='2018', periods=10, freq='Y'))
+    last_window_exog = pd.Series(np.arange(10), index=pd.date_range(start='2018', periods=10, freq='YE'))
     index_freq = freq
     _, last_window_exog_index = preprocess_last_window(
                                 last_window = last_window_exog.iloc[:0]

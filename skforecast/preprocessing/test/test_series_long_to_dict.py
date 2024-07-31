@@ -1,31 +1,14 @@
 # Unit test series_long_to_dict
 # ==============================================================================
-import pandas as pd
-import numpy as np
 import pytest
+import numpy as np
+import pandas as pd
 from ..preprocessing import series_long_to_dict
 
 # Fixtures
-n_A = 10
-n_B = 5
-n_C = 15
-series_id = np.repeat(["A", "B", "C"], [n_A, n_B, n_C])
-index_A = pd.date_range("2020-01-01", periods=n_A, freq="D")
-index_B = pd.date_range("2020-01-01", periods=n_B, freq="D")
-index_C = pd.date_range("2020-01-01", periods=n_C, freq="D")
-index = index_A.append(index_B).append(index_C)
-values_A = np.arange(n_A)
-values_B = np.arange(n_B)
-values_C = np.arange(n_C)
-values = np.concatenate([values_A, values_B, values_C])
-
-series_long = pd.DataFrame(
-    {
-        "series_id": series_id,
-        "datetime": index,
-        "values": values,
-    }
-)
+from .fixtures_preprocessing import values_A, values_B, values_C
+from .fixtures_preprocessing import index_A, index_B, index_C
+from .fixtures_preprocessing import series_long
 
 
 def test_check_output_series_long_to_dict():

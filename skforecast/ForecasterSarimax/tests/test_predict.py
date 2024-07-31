@@ -322,7 +322,7 @@ def test_predict_output_ForecasterSarimax_with_last_window(kwargs, data):
     predictions = forecaster.predict(steps=5, last_window=y_lw_datetime)
     expected = pd.Series(
                    data  = data[system],
-                   index = pd.date_range(start='2100', periods=5, freq='A'),
+                   index = pd.date_range(start='2100', periods=5, freq='YE'),
                    name  = 'pred'
                )
     
@@ -353,7 +353,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog(kwargs, data
 
     expected = pd.Series(
                    data  = data,
-                   index = pd.date_range(start='2100', periods=5, freq='A'),
+                   index = pd.date_range(start='2100', periods=5, freq='YE'),
                    name  = 'pred'
                )
     
@@ -392,7 +392,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog_and_transfor
 
     expected = pd.Series(
                    data  = data,
-                   index = pd.date_range(start='2100', periods=5, freq='A'),
+                   index = pd.date_range(start='2100', periods=5, freq='YE'),
                    name  = 'pred'
                )
     
@@ -405,7 +405,7 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog_and_transfor
                          ids = lambda reg : f'regressor: {type(reg)}')
 @pytest.mark.parametrize("y          , idx", 
                          [(y         , pd.RangeIndex(start=0, stop=50)), 
-                          (y_datetime, pd.date_range(start='2000', periods=50, freq='A'))], 
+                          (y_datetime, pd.date_range(start='2000', periods=50, freq='YE'))], 
                          ids = lambda values : f'y, index: {type(values)}')
 def test_predict_ForecasterSarimax_updates_extended_index_twice(regressor, y, idx):
     """

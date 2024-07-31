@@ -197,7 +197,8 @@ def _create_backtesting_folds(
     if skip_folds is not None:
         if isinstance(skip_folds, int) and skip_folds > 0:
             index_to_keep = np.arange(0, len(folds), skip_folds)
-            index_to_skip = list(np.setdiff1d(np.arange(0, len(folds)), index_to_keep))
+            index_to_skip = np.setdiff1d(np.arange(0, len(folds)), index_to_keep, assume_unique=True)
+            index_to_skip = [int(i) for i in index_to_skip]
         if isinstance(skip_folds, list):
             index_to_skip = [i for i in skip_folds if i < len(folds)]        
     

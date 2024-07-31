@@ -13,7 +13,7 @@ from skforecast.model_selection.model_selection import _create_backtesting_folds
                           (False, [[[0, 70], [67, 70], [70, 80], [70, 80], False],
                                    [[0, 70], [77, 80], [80, 90], [80, 90], False],
                                    [[0, 70], [87, 90], [90, 100], [90, 100], False]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_no_refit_no_gap_no_remainder(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is False, gap=0 and not 
@@ -72,7 +72,7 @@ def test_create_backtesting_folds_no_refit_no_gap_no_remainder(capfd, return_all
                           (False, [[[0, 65], [61, 65], [65, 75], [65, 75], False],
                                    [[0, 65], [71, 75], [75, 85], [75, 85], False],
                                    [[0, 65], [81, 85], [85, 95], [85, 95], False]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_no_refit_no_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is 0 (False), gap=0, 
@@ -135,7 +135,7 @@ def test_create_backtesting_folds_no_refit_no_gap_allow_incomplete_fold_False(ca
                                    [[0, 70], [72, 77], [77, 89], [82, 89], False],
                                    [[0, 70], [79, 84], [84, 96], [89, 96], False],
                                    [[0, 70], [86, 91], [91, 100], [96, 100], False]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_no_refit_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is False, gap=5, 
@@ -210,14 +210,14 @@ def test_create_backtesting_folds_no_refit_gap_allow_incomplete_fold_True(capfd,
                                    [[0, 15], [50, 65], [65, 80], [70, 80], False],
                                    [[0, 15], [60, 75], [75, 90], [80, 90], False],
                                    [[0, 15], [70, 85], [85, 100], [90, 100], False]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_no_refit_no_initial_train_size_gap(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is False, gap=5, 
     already trained, no remainder, allow_incomplete_fold=True.
     """
     y = pd.Series(np.arange(100))
-    initial_train_size = 15 # window_size
+    initial_train_size = 15  # window_size
     window_size = 15
     gap = 5
     test_size = 10
@@ -285,7 +285,7 @@ def test_create_backtesting_folds_no_refit_no_initial_train_size_gap(capfd, retu
                           (False, [[[0, 70], [68, 70], [70, 80], [70, 80], False],
                                    [[0, 80], [78, 80], [80, 90], [80, 90], True],
                                    [[0, 90], [88, 90], [90, 100], [90, 100], True]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is True, fixed_train_size is 
@@ -345,7 +345,7 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder(capfd, retu
                           (False, [[[0, 70], [64, 70], [70, 80], [70, 80], False],
                                    [[10, 80], [74, 80], [80, 90], [80, 90], True],
                                    [[20, 90], [84, 90], [90, 100], [90, 100], True]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_fixed_train_size_no_gap_no_remainder(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is 1 (True), fixed_train_size 
@@ -407,7 +407,7 @@ def test_create_backtesting_folds_refit_fixed_train_size_no_gap_no_remainder(cap
                                    [[0, 77], [74, 77], [77, 89], [82, 89], True],
                                    [[0, 84], [81, 84], [84, 96], [89, 96], True],
                                    [[0, 91], [88, 91], [91, 100], [96, 100], True]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is True, fixed_train_size is 
@@ -475,7 +475,7 @@ def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_True(
                                    [[7, 77], [72, 77], [77, 89], [82, 89], True],
                                    [[14, 84], [79, 84], [84, 96], [89, 96], True],
                                    [[21, 91], [86, 91], [91, 100], [96, 100], True]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is True, fixed_train_size is 
@@ -540,7 +540,7 @@ def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fo
                           (False, [[[0, 70], [67, 70], [70, 82], [75, 82], False],
                                    [[0, 77], [74, 77], [77, 89], [82, 89], True],
                                    [[0, 84], [81, 84], [84, 96], [89, 96], True]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is True, fixed_train_size is 
@@ -603,7 +603,7 @@ def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_False
                           (False, [[[0, 70], [66, 70], [70, 82], [75, 82], False],
                                    [[7, 77], [73, 77], [77, 89], [82, 89], True],
                                    [[14, 84], [80, 84], [84, 96], [89, 96], True]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is True, fixed_train_size is 
@@ -667,7 +667,7 @@ def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fo
                                    [[0, 60], [66, 70], [70, 80], [70, 80], False],
                                    [[0, 80], [76, 80], [80, 90], [80, 90], True],
                                    [[0, 80], [86, 90], [90, 100], [90, 100], False]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_int_no_fixed_no_gap_no_remainder(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is 2, fixed_train_size is 
@@ -732,7 +732,7 @@ def test_create_backtesting_folds_refit_int_no_fixed_no_gap_no_remainder(capfd, 
                                    [[0, 60], [68, 70], [70, 80], [70, 80], False],
                                    [[0, 60], [78, 80], [80, 90], [80, 90], False],
                                    [[30, 90], [88, 90], [90, 100], [90, 100], True]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_int_fixed_train_size_no_gap_no_remainder(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is 3, fixed_train_size is 
@@ -797,7 +797,7 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_no_gap_no_remainder
                                    [[0, 70], [67, 77], [77, 89], [82, 89], False],
                                    [[0, 84], [74, 84], [84, 96], [89, 96], True],
                                    [[0, 84], [81, 91], [91, 100], [96, 100], False]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is 2, fixed_train_size is 
@@ -865,7 +865,7 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_T
                                    [[0, 70], [62, 77], [77, 89], [82, 89], False],
                                    [[0, 70], [69, 84], [84, 96], [89, 96], False],
                                    [[21, 91], [76, 91], [91, 100], [96, 100], True]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is 3, fixed_train_size is 
@@ -930,7 +930,7 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
                           (False, [[[0, 70], [50, 70], [70, 82], [75, 82], False],
                                    [[0, 70], [57, 77], [77, 89], [82, 89], False],
                                    [[0, 70], [64, 84], [84, 96], [89, 96], False]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is 3, fixed_train_size is 
@@ -993,7 +993,7 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_F
                           (False, [[[0, 70], [60, 70], [70, 82], [75, 82], False],
                                    [[0, 70], [67, 77], [77, 89], [82, 89], False],
                                    [[14, 84], [74, 84], [84, 96], [89, 96], True]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is True, fixed_train_size is 
@@ -1055,7 +1055,7 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
                           (False, [[[0, 70], [67, 70], [70, 80], [70, 80], False],
                                    [[0, 80], [77, 80], [80, 90], [80, 90], True],
                                    [[0, 90], [87, 90], [90, 100], [90, 100], True]])], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder_differentiation(capfd, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is True, fixed_train_size is 
@@ -1113,7 +1113,7 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder_differentia
 
 @pytest.mark.parametrize("skip_folds",
                          [3, [1, 2, 4, 5, 7]],
-                         ids = lambda skip_folds : f'{skip_folds}' )
+                         ids = lambda skip_folds: f'{skip_folds}')
 @pytest.mark.parametrize("return_all_indexes, expected",
                          [(True, [[range(0, 70), range(68, 70), range(70, 80), range(70, 80), False],
                                   [range(30, 100), range(98, 100), range(100, 110), range(100, 110), True],
@@ -1121,7 +1121,7 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder_differentia
                           (False, [[[0, 70], [68, 70], [70, 80], [70, 80], False],
                                    [[30, 100], [98, 100], [100, 110], [100, 110], True],
                                    [[60, 130], [128, 130], [130, 140], [130, 140], True]])],
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_create_backtesting_folds_refit_fixed_no_gap_no_remainder_skip_folds_3(capfd, skip_folds, return_all_indexes, expected):
     """
     Test _create_backtesting_folds output when refit is True, fixed_train_size is 

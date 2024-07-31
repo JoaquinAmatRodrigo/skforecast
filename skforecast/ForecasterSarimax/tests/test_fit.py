@@ -85,7 +85,7 @@ def test_fit_last_window_stored(store_last_window):
                          ids = lambda reg : f'regressor: {type(reg)}')
 @pytest.mark.parametrize("y          , idx", 
                          [(y         , pd.RangeIndex(start=0, stop=50)), 
-                          (y_datetime, pd.date_range(start='2000', periods=50, freq='A'))], 
+                          (y_datetime, pd.date_range(start='2000', periods=50, freq='YE'))], 
                          ids = lambda values : f'y, index: {type(values)}')
 def test_fit_extended_index_stored(regressor, y, idx):
     """

@@ -38,6 +38,7 @@ logging.basicConfig(
     level=logging.INFO,
 )
 
+
 # TODO. Test Interval
 # TODO. Test Grid search
 class ForecasterRnn(ForecasterBase):
