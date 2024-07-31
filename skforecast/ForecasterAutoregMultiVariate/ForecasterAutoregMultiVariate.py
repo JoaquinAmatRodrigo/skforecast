@@ -51,6 +51,7 @@ logging.basicConfig(
     level  = logging.INFO,
 )
 
+
 class ForecasterAutoregMultiVariate(ForecasterBase):
     """
     This class turns any regressor compatible with the scikit-learn API into a
@@ -223,12 +224,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         level: str,
         steps: int,
         lags: Union[int, np.ndarray, list, dict],
-        transformer_series: Optional[Union[object, dict]]=StandardScaler(),
-        transformer_exog: Optional[object]=None,
-        weight_func: Optional[Callable]=None,
-        fit_kwargs: Optional[dict]=None,
-        n_jobs: Union[int, str]='auto',
-        forecaster_id: Optional[Union[str, int]]=None
+        transformer_series: Optional[Union[object, dict]] = StandardScaler(),
+        transformer_exog: Optional[object] = None,
+        weight_func: Optional[Callable] = None,
+        fit_kwargs: Optional[dict] = None,
+        n_jobs: Union[int, str] = 'auto',
+        forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
         
         self.regressor               = regressor
@@ -342,7 +343,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         if isinstance(self.regressor, Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
-            params = {key : value for key, value in self.regressor.get_params().items() \
+            params = {key: value for key, value in self.regressor.get_params().items()
                       if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params()
@@ -412,11 +413,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
         """
           
-        n_splits = len(y) - self.max_lag - (self.steps - 1) # rows of y_data
+        n_splits = len(y) - self.max_lag - (self.steps - 1)  # rows of y_data
         if n_splits <= 0:
             raise ValueError(
                 (f"The maximum lag ({self.max_lag}) must be less than the length "
-                 f"of the series minus the number of steps ({len(y)-(self.steps-1)}).")
+                 f"of the series minus the number of steps ({len(y) - (self.steps - 1)}).")
             )
         
         if return_data == 'y':
@@ -439,7 +440,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     def _create_train_X_y(
         self,
         series: pd.DataFrame,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> Tuple[pd.DataFrame, dict, list, list, list]:
         """
         Create training matrices from multiple time series and exogenous
@@ -604,11 +605,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             if col == self.level:
                 y_train = y_train_values
 
-
         X_train = pd.DataFrame(
                       data    = np.hstack(X_train_list),
                       columns = X_train_col_names,
-                      index   = y_index[self.max_lag + (self.steps -1): ]
+                      index   = y_index[self.max_lag + (self.steps - 1):]
                   )
 
         if exog is not None:
@@ -627,8 +627,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         y_train = {
             step: pd.Series(
-                      data  = y_train[step-1], 
-                      index = y_index[self.max_lag + step-1:][:len(y_train[0])],
+                      data  = y_train[step - 1], 
+                      index = y_index[self.max_lag + step - 1:][:len(y_train[0])],
                       name  = f"{self.level}_step_{step}"
                   )
             for step in range(1, self.steps + 1)
@@ -640,7 +640,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     def create_train_X_y(
         self,
         series: pd.DataFrame,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> Tuple[pd.DataFrame, dict, list, list, list]:
         """
         Create training matrices from multiple time series and exogenous
@@ -685,7 +685,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         step: int,
         X_train: pd.DataFrame,
         y_train: dict,
-        remove_suffix: bool=False
+        remove_suffix: bool = False
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Select the columns needed to train a forecaster for a specific step.  
@@ -733,7 +733,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             idx_columns_lags = np.arange(len_columns_lags)
             n_exog = (len(self.X_train_col_names) - len_columns_lags) / self.steps
             idx_columns_exog = (
-                np.arange((step-1)*n_exog, (step)*n_exog) + idx_columns_lags[-1] + 1 
+                np.arange((step - 1) * n_exog, (step) * n_exog) + idx_columns_lags[-1] + 1 
             )
             idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
             X_train_step = X_train.iloc[:, idx_columns]
@@ -751,7 +751,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     def create_sample_weights(
         self,
         X_train: pd.DataFrame
-    )-> np.ndarray:
+    ) -> np.ndarray:
         """
         Crate weights for each observation according to the forecaster's attribute
         `weight_func`. 
@@ -795,10 +795,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     def fit(
         self,
         series: pd.DataFrame,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        store_last_window: bool=True,
-        store_in_sample_residuals: bool=True,
-        suppress_warnings: bool=False
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        store_last_window: bool = True,
+        store_in_sample_residuals: bool = True,
+        suppress_warnings: bool = False
     ) -> None:
         """
         Training Forecaster.
@@ -904,12 +904,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
                 if len(residuals) > 1000:
                     # Only up to 1000 residuals are stored
-                        rng = np.random.default_rng(seed=123)
-                        residuals = rng.choice(
-                                        a       = residuals, 
-                                        size    = 1000, 
-                                        replace = False
-                                    )
+                    rng = np.random.default_rng(seed=123)
+                    residuals = rng.choice(
+                                    a       = residuals, 
+                                    size    = 1000, 
+                                    replace = False
+                                )
             else:
                 residuals = None
 
@@ -964,9 +964,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
     def _create_predict_inputs(
         self,
-        steps: Optional[Union[int, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        steps: Optional[Union[int, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> Tuple[list, list, pd.Index, list]:
         """
         Create the inputs needed for the prediction process.
@@ -1075,7 +1075,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             n_exog = exog.shape[1]
             Xs = [
                 np.hstack(
-                    [X_lags, exog_values[(step-1)*n_exog : step*n_exog].reshape(1, -1)]
+                    [X_lags, exog_values[(step - 1) * n_exog : step * n_exog].reshape(1, -1)]
                 )
                 for step in steps
             ]
@@ -1086,10 +1086,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
     def create_predict_X(
         self,
-        steps: Optional[Union[int, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        suppress_warnings: bool=False
+        steps: Optional[Union[int, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        suppress_warnings: bool = False
     ) -> pd.DataFrame:
         """
         Create the predictors needed to predict `steps` ahead.
@@ -1146,11 +1146,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
     def predict(
         self,
-        steps: Optional[Union[int, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        suppress_warnings: bool=False,
-        levels: Any=None
+        steps: Optional[Union[int, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        suppress_warnings: bool = False,
+        levels: Any = None
     ) -> pd.DataFrame:
         """
         Predict n steps ahead
@@ -1225,14 +1225,14 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
     def predict_bootstrapping(
         self,
-        steps: Optional[Union[int, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        n_boot: int=500,
-        random_state: int=123,
-        in_sample_residuals: bool=True,
-        suppress_warnings: bool=False,
-        levels: Any=None
+        steps: Optional[Union[int, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        n_boot: int = 500,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        suppress_warnings: bool = False,
+        levels: Any = None
     ) -> pd.DataFrame:
         """
         Generate multiple forecasting predictions using a bootstrapping process. 
@@ -1356,7 +1356,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                           inverse_transform = False
                       )
         boot_predictions = pd.concat([predictions] * n_boot, axis=1)
-        boot_predictions.columns= [f"pred_boot_{i}" for i in range(n_boot)]
+        boot_predictions.columns = [f"pred_boot_{i}" for i in range(n_boot)]
 
         for i, step in enumerate(steps):
             rng = np.random.default_rng(seed=random_state)
@@ -1383,15 +1383,15 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
     def predict_interval(
         self,
-        steps: Optional[Union[int, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        interval: list=[5, 95],
-        n_boot: int=500,
-        random_state: int=123,
-        in_sample_residuals: bool=True,
-        suppress_warnings: bool=False,
-        levels: Any=None
+        steps: Optional[Union[int, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        interval: list = [5, 95],
+        n_boot: int = 500,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        suppress_warnings: bool = False,
+        levels: Any = None
     ) -> pd.DataFrame:
         """
         Bootstrapping based predicted intervals.
@@ -1475,7 +1475,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                in_sample_residuals = in_sample_residuals
                            )
 
-        interval = np.array(interval)/100
+        interval = np.array(interval) / 100
         predictions_interval = boot_predictions.quantile(q=interval, axis=1).transpose()
         predictions_interval.columns = [f'{self.level}_lower_bound', f'{self.level}_upper_bound']
         predictions = pd.concat((predictions, predictions_interval), axis=1)
@@ -1487,15 +1487,15 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     
     def predict_quantiles(
         self,
-        steps: Optional[Union[int, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        quantiles: list=[0.05, 0.5, 0.95],
-        n_boot: int=500,
-        random_state: int=123,
-        in_sample_residuals: bool=True,
-        suppress_warnings: bool=False,
-        levels: Any=None
+        steps: Optional[Union[int, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        quantiles: list = [0.05, 0.5, 0.95],
+        n_boot: int = 500,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        suppress_warnings: bool = False,
+        levels: Any = None
     ) -> pd.DataFrame:
         """
         Bootstrapping based predicted quantiles.
@@ -1579,14 +1579,14 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     def predict_dist(
         self,
         distribution: object,
-        steps: Optional[Union[int, list]]=None,
-        last_window: Optional[pd.DataFrame]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        n_boot: int=500,
-        random_state: int=123,
-        in_sample_residuals: bool=True,
-        suppress_warnings: bool=False,
-        levels: Any=None
+        steps: Optional[Union[int, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        n_boot: int = 500,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        suppress_warnings: bool = False,
+        levels: Any = None
     ) -> pd.DataFrame:
         """
         Fit a given probability distribution for each step. After generating 
@@ -1651,7 +1651,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                        )       
 
         param_names = [p for p in inspect.signature(distribution._pdf).parameters 
-                       if not p=='x'] + ["loc","scale"]
+                       if not p == 'x'] + ["loc", "scale"]
         param_values = np.apply_along_axis(
                            lambda x: distribution.fit(x),
                            axis = 1,
@@ -1772,10 +1772,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     def set_out_sample_residuals(
         self, 
         residuals: dict, 
-        append: bool=True,
-        transform: bool=True,
-        random_state: int=123
-    )-> None:
+        append: bool = True,
+        transform: bool = True,
+        random_state: int = 123
+    ) -> None:
         """
         Set new values to the attribute `out_sample_residuals`. Out of sample
         residuals are meant to be calculated using observations that did not
@@ -1877,7 +1877,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     def get_feature_importances(
         self,
         step: int,
-        sort_importance: bool=True
+        sort_importance: bool = True
     ) -> pd.DataFrame:
         """
         Return feature importance of the model stored in the forecaster for a

@@ -117,30 +117,30 @@ class ForecasterSarimax():
     def __init__(
         self,
         regressor: ARIMA,
-        transformer_y: Optional[object]=None,
-        transformer_exog: Optional[object]=None,
-        fit_kwargs: Optional[dict]=None,
-        forecaster_id: Optional[Union[str, int]]=None
+        transformer_y: Optional[object] = None,
+        transformer_exog: Optional[object] = None,
+        fit_kwargs: Optional[dict] = None,
+        forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
         
-        self.regressor         = regressor
-        self.transformer_y     = transformer_y
-        self.transformer_exog  = transformer_exog
-        self.window_size       = 1
-        self.last_window       = None
-        self.extended_index    = None
-        self.fitted            = False
-        self.index_type        = None
-        self.index_freq        = None
-        self.training_range    = None
-        self.included_exog     = False
-        self.exog_type         = None
-        self.exog_col_names    = None
-        self.creation_date     = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.fit_date          = None
-        self.skforecast_version= skforecast.__version__
-        self.python_version    = sys.version.split(" ")[0]
-        self.forecaster_id     = forecaster_id
+        self.regressor          = regressor
+        self.transformer_y      = transformer_y
+        self.transformer_exog   = transformer_exog
+        self.window_size        = 1
+        self.last_window        = None
+        self.extended_index     = None
+        self.fitted             = False
+        self.index_type         = None
+        self.index_freq         = None
+        self.training_range     = None
+        self.included_exog      = False
+        self.exog_type          = None
+        self.exog_col_names     = None
+        self.creation_date      = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fit_date           = None
+        self.skforecast_version = skforecast.__version__
+        self.python_version     = sys.version.split(" ")[0]
+        self.forecaster_id      = forecaster_id
         
         if isinstance(self.regressor, pmdarima.arima.ARIMA):
             self.engine = 'pmdarima'
@@ -206,9 +206,9 @@ class ForecasterSarimax():
     def fit(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        store_last_window: bool=True,
-        suppress_warnings: bool=False
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        store_last_window: bool = True,
+        suppress_warnings: bool = False
     ) -> None:
         """
         Training Forecaster.
@@ -316,9 +316,9 @@ class ForecasterSarimax():
     def _create_predict_inputs(
         self,
         steps: int,
-        last_window: Optional[pd.Series]=None,
-        last_window_exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        last_window: Optional[pd.Series] = None,
+        last_window_exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> Tuple[
             pd.Series,
             Optional[pd.DataFrame],
@@ -476,9 +476,9 @@ class ForecasterSarimax():
     def predict(
         self,
         steps: int,
-        last_window: Optional[pd.Series]=None,
-        last_window_exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        last_window: Optional[pd.Series] = None,
+        last_window_exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> pd.Series:
         """
         Forecast future values.
@@ -570,11 +570,11 @@ class ForecasterSarimax():
     def predict_interval(
         self,
         steps: int,
-        last_window: Optional[pd.Series]=None,
-        last_window_exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        alpha: float=0.05,
-        interval: list=None,
+        last_window: Optional[pd.Series] = None,
+        last_window_exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        alpha: float = 0.05,
+        interval: list = None,
     ) -> pd.DataFrame:
         """
         Forecast future values and their confidence intervals.
@@ -634,7 +634,7 @@ class ForecasterSarimax():
                      f"For example, interval of 95% should be as `interval = [2.5, 97.5]`. "
                      f"Got {interval}.")
                 )
-            alpha = 2*(100 - interval[1])/100
+            alpha = 2 * (100 - interval[1]) / 100
 
         last_window, last_window_exog, exog = self._create_predict_inputs(
                                                   steps            = steps,
@@ -678,7 +678,6 @@ class ForecasterSarimax():
                               return_conf_int = True,
                               alpha = alpha
                           )
-
 
         # Reverse the transformation if needed
         if self.transformer_y:
@@ -748,7 +747,7 @@ class ForecasterSarimax():
 
     def get_feature_importances(
         self,
-        sort_importance: bool=True
+        sort_importance: bool = True
     ) -> pd.DataFrame:
         """
         Return feature importances of the regressor stored in the forecaster.
@@ -784,8 +783,8 @@ class ForecasterSarimax():
 
     def get_info_criteria(
         self, 
-        criteria: str='aic', 
-        method: str='standard'
+        criteria: str = 'aic', 
+        method: str = 'standard'
     ) -> float:
         """
         Get the selected information criteria.
@@ -812,14 +811,14 @@ class ForecasterSarimax():
 
         if criteria not in ['aic', 'bic', 'hqic']:
             raise ValueError(
-                (f"Invalid value for `criteria`. Valid options are 'aic', 'bic', "
-                 f"and 'hqic'.")
+                ("Invalid value for `criteria`. Valid options are 'aic', 'bic', "
+                 "and 'hqic'.")
             )
         
         if method not in ['standard', 'lutkepohl']:
             raise ValueError(
-                (f"Invalid value for `method`. Valid options are 'standard' and "
-                 f"'lutkepohl'.")
+                ("Invalid value for `method`. Valid options are 'standard' and "
+                 "'lutkepohl'.")
             )
         
         if self.engine == 'pmdarima':

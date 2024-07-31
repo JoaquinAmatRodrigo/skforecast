@@ -11,7 +11,7 @@ import textwrap
 
 
 def fetch_dataset(
-    name : str,
+    name: str,
     version: str = 'latest',
     raw: bool = False,
     kwargs_read_csv: dict = {},
@@ -88,7 +88,7 @@ def fetch_dataset(
             )
         },
         'fuel_consumption': {
-            'url' : (
+            'url': (
                 f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
                 f'skforecast-datasets/{version}/data/consumos-combustibles-mensual.csv'
             ),
@@ -138,7 +138,7 @@ def fetch_dataset(
             )
         },
         'website_visits': {
-            'url' : (
+            'url': (
                 f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
                 f'skforecast-datasets/{version}/data/visitas_por_dia_web_cienciadedatos.csv'
             ),
@@ -156,7 +156,7 @@ def fetch_dataset(
             )
         },
         'bike_sharing': {
-            'url' : (
+            'url': (
                 f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
                 f'skforecast-datasets/{version}/data/bike_sharing_dataset_clean.csv'
             ),
@@ -175,7 +175,7 @@ def fetch_dataset(
             )
         },
         'bike_sharing_extended_features': {
-            'url' : (
+            'url': (
                 f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
                 f'skforecast-datasets/{version}/data/bike_sharing_extended_features.csv'
             ),
@@ -199,7 +199,7 @@ def fetch_dataset(
             )
         },
         'australia_tourism': {
-            'url' : (
+            'url': (
                 f'https://raw.githubusercontent.com/JoaquinAmatRodrigo/'
                 f'skforecast-datasets/{version}/data/australia_tourism.csv'
             ),
@@ -461,7 +461,7 @@ def fetch_dataset(
     
     if verbose:
         print(name)
-        print('-'*len(name))
+        print('-' * len(name))
         description = textwrap.fill(datasets[name]['description'], width=80)
         source = textwrap.fill(datasets[name]['source'], width=80)
         print(description)

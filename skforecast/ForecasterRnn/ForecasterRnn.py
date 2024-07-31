@@ -543,7 +543,7 @@ class ForecasterRnn(ForecasterBase):
         series: pd.DataFrame,
         store_in_sample_residuals: bool = True,
         exog: Any = None,
-        suppress_warnings: bool=False,
+        suppress_warnings: bool = False,
         store_last_window: str = "Ignored",
     ) -> None:
         """
@@ -626,7 +626,7 @@ class ForecasterRnn(ForecasterBase):
         levels: Optional[Union[str, list]] = None,
         last_window: Optional[pd.DataFrame] = None,
         exog: Any = None,
-        suppress_warnings: bool=False
+        suppress_warnings: bool = False
     ) -> pd.DataFrame:
         """
         Predict n steps ahead
@@ -1217,9 +1217,9 @@ class ForecasterRnn(ForecasterBase):
     # def set_out_sample_residuals(
     #     self,
     #     residuals: np.ndarray,
-    #     append: bool=True,
-    #     transform: bool=True,
-    #     random_state: int=123,
+    #     append: bool = True,
+    #     transform: bool = True,
+    #     random_state: int = 123,
     # ) -> None:
     #     """
     #     Set new values to the attribute `out_sample_residuals`. Out of sample
