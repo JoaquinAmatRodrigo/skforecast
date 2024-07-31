@@ -329,7 +329,7 @@ def test_Sarimax_predict_with_pandas(y, exog, exog_predict):
     # if isinstance(y.index, pd.RangeIndex):
     #     idx = pd.RangeIndex(start=50, stop=60, step=1)
     # else:
-    #     idx = pd.date_range(start='2050', periods=10, freq='A')
+    #     idx = pd.date_range(start='2050', periods=10, freq='YE')
     #
     # expected = pd.DataFrame(
     #     data    = np.array([0.54251563, 0.57444558, 0.60419802, 0.63585684, 0.67238625,
@@ -452,7 +452,7 @@ def test_Sarimax_predict_interval_with_pandas(y, exog, exog_predict):
     # if isinstance(y.index, pd.RangeIndex):
     #     idx = pd.RangeIndex(start=50, stop=60, step=1)
     # else:
-    #     idx = pd.date_range(start='2050', periods=10, freq='A')
+    #     idx = pd.date_range(start='2050', periods=10, freq='YE')
     
     # expected = pd.DataFrame(
     #     data    = np.array([[ 0.54251563, -1.19541248,  2.28044374],

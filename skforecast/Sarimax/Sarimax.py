@@ -11,10 +11,9 @@ import logging
 import inspect
 import numpy as np
 import pandas as pd
-from sklearn.base import clone, BaseEstimator, RegressorMixin
+from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.exceptions import NotFittedError
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-import skforecast
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -392,7 +391,7 @@ class Sarimax(BaseEstimator, RegressorMixin):
     def _create_sarimax(
         self,
         endog: Union[np.ndarray, pd.Series, pd.DataFrame],
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None
     ) -> None:
         """
         A helper method to create a new statsmodel SARIMAX model.
@@ -420,7 +419,7 @@ class Sarimax(BaseEstimator, RegressorMixin):
     def fit(
         self,
         y: Union[np.ndarray, pd.Series, pd.DataFrame],
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None
     ) -> None:
         """
         Fit the model to the data.
@@ -464,9 +463,9 @@ class Sarimax(BaseEstimator, RegressorMixin):
     def predict(
         self,
         steps: int,
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None, 
-        return_conf_int: bool=False,
-        alpha: float=0.05
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None, 
+        return_conf_int: bool = False,
+        alpha: float = 0.05
     ) -> Union[np.ndarray, pd.DataFrame]:
         """
         Forecast future values and, if desired, their confidence intervals.
@@ -544,9 +543,9 @@ class Sarimax(BaseEstimator, RegressorMixin):
     def append(
         self,
         y: Union[np.ndarray, pd.Series, pd.DataFrame],
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None,
-        refit: bool=False,
-        copy_initialization: bool=False,
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None,
+        refit: bool = False,
+        copy_initialization: bool = False,
         **kwargs
     ) -> None:
         """
@@ -611,9 +610,9 @@ class Sarimax(BaseEstimator, RegressorMixin):
     def apply(
         self,
         y: Union[np.ndarray, pd.Series, pd.DataFrame],
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None,
-        refit: bool=False,
-        copy_initialization: bool=False,
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None,
+        refit: bool = False,
+        copy_initialization: bool = False,
         **kwargs
     ) -> None:
         """
@@ -671,7 +670,7 @@ class Sarimax(BaseEstimator, RegressorMixin):
     def extend(
         self,
         y: Union[np.ndarray, pd.Series, pd.DataFrame],
-        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]]=None,
+        exog: Optional[Union[np.ndarray, pd.Series, pd.DataFrame]] = None,
         **kwargs
     ) -> None:
         """
@@ -738,7 +737,7 @@ class Sarimax(BaseEstimator, RegressorMixin):
 
         """
         
-        params = {k:v for k,v in params.items() if k in self._sarimax_params}
+        params = {k: v for k, v in params.items() if k in self._sarimax_params}
         for key, value in params.items():
             setattr(self, key, value)
 
@@ -828,14 +827,14 @@ class Sarimax(BaseEstimator, RegressorMixin):
 
         if criteria not in ['aic', 'bic', 'hqic']:
             raise ValueError(
-                (f"Invalid value for `criteria`. Valid options are 'aic', 'bic', "
-                 f"and 'hqic'.")
+                ("Invalid value for `criteria`. Valid options are 'aic', 'bic', "
+                 "and 'hqic'.")
             )
         
         if method not in ['standard', 'lutkepohl']:
             raise ValueError(
-                (f"Invalid value for `method`. Valid options are 'standard' and "
-                 f"'lutkepohl'.")
+                ("Invalid value for `method`. Valid options are 'standard' and "
+                 "'lutkepohl'.")
             )
         
         metric = self.sarimax_res.info_criteria(criteria=criteria, method=method)

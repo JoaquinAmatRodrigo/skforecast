@@ -21,10 +21,10 @@ except Exception as e:
 
 
 def plot_residuals(
-    residuals: Union[np.ndarray, pd.Series]=None,
-    y_true: Union[np.ndarray, pd.Series]=None,
-    y_pred: Union[np.ndarray, pd.Series]=None,
-    fig: matplotlib.figure.Figure=None,
+    residuals: Union[np.ndarray, pd.Series] = None,
+    y_true: Union[np.ndarray, pd.Series] = None,
+    y_pred: Union[np.ndarray, pd.Series] = None,
+    fig: matplotlib.figure.Figure = None,
     **fig_kw
 ) -> matplotlib.figure.Figure:
     """
@@ -79,7 +79,7 @@ def plot_residuals(
 
 def plot_multivariate_time_series_corr(
     corr: pd.DataFrame,
-    ax: matplotlib.axes.Axes=None,
+    ax: matplotlib.axes.Axes = None,
     **fig_kw
 ) -> matplotlib.figure.Figure:
     """
@@ -120,7 +120,7 @@ def plot_multivariate_time_series_corr(
 
 def plot_prediction_distribution(
     bootstrapping_predictions: pd.DataFrame,
-    bw_method: Optional[Any]=None,
+    bw_method: Optional[Any] = None,
     **fig_kw
 ) -> matplotlib.figure.Figure:
     """
@@ -183,7 +183,7 @@ def plot_prediction_distribution(
 
 
 def set_dark_theme(
-    custom_style: Optional[dict]=None
+    custom_style: Optional[dict] = None
 ) -> None:
     """
     Set aspects of the visual theme for all matplotlib plots.
@@ -209,7 +209,7 @@ def set_dark_theme(
     dark_style = {
         'figure.facecolor': '#212946',
         'axes.facecolor': '#212946',
-        'savefig.facecolor':'#212946',
+        'savefig.facecolor': '#212946',
         'axes.grid': True,
         'axes.grid.which': 'both',
         'axes.spines.left': False,
@@ -236,11 +236,11 @@ def plot_prediction_intervals(
     predictions: pd.DataFrame,
     y_true: pd.DataFrame,
     target_variable: str,
-    initial_x_zoom: list=None,
-    title: str=None,
-    xaxis_title: str=None,
-    yaxis_title: str=None,
-    ax: plt.Axes=None
+    initial_x_zoom: list = None,
+    title: str = None,
+    xaxis_title: str = None,
+    yaxis_title: str = None,
+    ax: plt.Axes = None
 ):
     """
     Plot predicted intervals vs real values using matplotlib.

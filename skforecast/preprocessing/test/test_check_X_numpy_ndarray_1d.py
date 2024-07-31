@@ -15,7 +15,7 @@ def test_TypeError_decorator_check_X_numpy_ndarray_1d_when_X_not_numpy_ndarray()
     differentiator = TimeSeriesDifferentiator(order=1)    
 
     err_msg = re.escape(
-        (f"'X' must be a numpy ndarray. Found <class 'list'>.")
+        ("'X' must be a numpy ndarray. Found <class 'list'>.")
     )
     with pytest.raises(TypeError, match = err_msg): 
         differentiator.fit(y)

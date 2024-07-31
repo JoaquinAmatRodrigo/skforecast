@@ -16,7 +16,7 @@ y_diff_3 = np.array([np.nan, np.nan, np.nan, -3., 3., 5., 3., -21.])
                          [(1, y_diff_1),
                           (2, y_diff_2),
                           (3, y_diff_3)],
-                         ids = lambda values : f'order: {values}')
+                         ids = lambda values: f'order: {values}')
 def test_TimeSeriesDifferentiator_transform(order, expected):
     """
     Test TimeSeriesDifferentiator transform method.
@@ -32,7 +32,7 @@ def test_TimeSeriesDifferentiator_transform(order, expected):
                          [(1, y_diff_1),
                           (2, y_diff_2),
                           (3, y_diff_3)],
-                         ids = lambda values : f'order: {values}')
+                         ids = lambda values: f'order: {values}')
 def test_TimeSeriesDifferentiator_fit_transform(order, expected):
     """
     Test TimeSeriesDifferentiator fit_transform method.

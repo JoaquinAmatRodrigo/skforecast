@@ -7,29 +7,12 @@ import numpy as np
 from skforecast.preprocessing import create_datetime_features
 
 # Fixtures
-year_cols_onehot = [f"year_{i}" for i in [2021, 2022, 2023]]
-month_cols_onehot = [f"month_{i}" for i in range(1, 13)]
-week_cols_onehot = [f"week_{i}" for i in range(1, 54)]
-day_of_week_cols_onehot = [f"day_of_week_{i}" for i in range(0, 7)]
-day_of_month_cols_onehot = [f"day_of_month_{i}" for i in range(1, 32)]
-day_of_year_cols_onehot = [f"day_of_year_{i}" for i in range(1, 366)]
-weekend_cols_onehot = ["weekend_0", "weekend_1"]
-hour_cols_onehot = [f"hour_{i}" for i in range(0, 24)]
-minute_cols_onehot = [f"minute_{i}" for i in range(0, 60)]
-second_cols_onehot = [f"second_{i}" for i in range(0, 60)]
+from .fixtures_preprocessing import features_all_onehot
 
-features_all_onehot = (
-    year_cols_onehot
-    + month_cols_onehot
-    + week_cols_onehot
-    + day_of_week_cols_onehot
-    + day_of_month_cols_onehot
-    + day_of_year_cols_onehot
-    + weekend_cols_onehot
-    + hour_cols_onehot
-    + minute_cols_onehot
-    + second_cols_onehot
-)
+if pd.__version__ < '2.2.0':
+    freq_h = "H"
+else:
+    freq_h = "h"
 
 
 def test_create_datetime_features_invalid_input_type():
@@ -127,7 +110,7 @@ def test_create_datetime_features_output_columns_when_onehot_encoding():
     """
     Test that create_datetime_features returns the expected columns when encoding is 'onehot'.
     """
-    index = pd.date_range(start="2021-01-01", end="2023-01-01", freq="H")
+    index = pd.date_range(start="2021-01-01", end="2023-01-01", freq=freq_h)
     df = pd.DataFrame(
             np.random.rand(len(index), 3),
             columns=["col_1", "col_2", "col_3"],
@@ -144,7 +127,7 @@ def test_create_datetime_features_output_columns_when_None_encoding():
     """
     Test that create_datetime_features returns the expected columns when encoding is 'None'.
     """
-    index = pd.date_range(start="2021-01-01", end="2023-01-01", freq="H")
+    index = pd.date_range(start="2021-01-01", end="2023-01-01", freq=freq_h)
     df = pd.DataFrame(
         np.random.rand(len(index), 3),
         columns=["col_1", "col_2", "col_3"],

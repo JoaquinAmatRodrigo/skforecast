@@ -5,7 +5,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Tuple, Optional, Callable, Any
+from typing import Union, Optional, Callable, Any
 import warnings
 import logging
 import sys
@@ -131,9 +131,9 @@ class ForecasterEquivalentDate():
     def __init__(
         self,
         offset: Union[int, pd.tseries.offsets.DateOffset],
-        n_offsets: int=1,
-        agg_func: Callable=np.mean,
-        forecaster_id: Optional[Union[str, int]]=None
+        n_offsets: int = 1,
+        agg_func: Callable = np.mean,
+        forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
         
         self.offset             = offset
@@ -194,8 +194,8 @@ class ForecasterEquivalentDate():
     def fit(
         self,
         y: pd.Series,
-        exog: Any=None,
-        store_in_sample_residuals: Any=None
+        exog: Any = None,
+        store_in_sample_residuals: Any = None
     ) -> None:
         """
         Training Forecaster.
@@ -286,8 +286,8 @@ class ForecasterEquivalentDate():
     def predict(
         self,
         steps: int,
-        last_window: Optional[pd.Series]=None,
-        exog: Any=None,
+        last_window: Optional[pd.Series] = None,
+        exog: Any = None,
     ) -> pd.Series:
         """
         Predict n steps ahead.
@@ -344,7 +344,7 @@ class ForecasterEquivalentDate():
 
             equivalent_indexes = np.tile(
                                      np.arange(-self.offset, 0),
-                                     int(np.ceil(steps/self.offset))
+                                     int(np.ceil(steps / self.offset))
                                  )
             equivalent_indexes = equivalent_indexes[:steps]
 

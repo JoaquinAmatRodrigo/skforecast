@@ -70,7 +70,7 @@ def test_binning_in_sample_residuals_stores_maximum_200_residuals_per_bin():
 
     y = pd.Series(
             data = np.random.normal(loc=10, scale=1, size=1000),
-            index = pd.date_range(start='01-01-2000', periods=1000, freq='H')
+            index = pd.date_range(start='01-01-2000', periods=1000, freq='h')
 
         )
     forecaster = ForecasterAutoreg(

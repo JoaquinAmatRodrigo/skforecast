@@ -99,6 +99,11 @@ exog_lw_predict = pd.Series(
 
 
 # Datetime Series
+if pd.__version__ < '2.2.0':
+    freq = "H"
+else:
+    freq = "h"
+
 y_datetime = pd.Series(data=y.to_numpy())
 y_datetime.index = pd.date_range(start='2000', periods=50, freq='YE')
 y_datetime.name = 'y'
