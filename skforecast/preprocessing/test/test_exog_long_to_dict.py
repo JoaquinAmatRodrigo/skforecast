@@ -1,76 +1,51 @@
 # Unit test exog_long_to_dict
 # ==============================================================================
-import pandas as pd
-import numpy as np
 import pytest
+import numpy as np
+import pandas as pd
 from ..preprocessing import exog_long_to_dict
 
 # Fixtures
-n_exog_A = 10
-n_exog_B = 5
-n_exog_C = 15
-index_exog_A = pd.date_range("2020-01-01", periods=n_exog_A, freq="D")
-index_exog_B = pd.date_range("2020-01-01", periods=n_exog_B, freq="D")
-index_exog_C = pd.date_range("2020-01-01", periods=n_exog_C, freq="D")
-exog_A = pd.DataFrame(
-    {
-        "series_id": "A",
-        "datetime": index_exog_A,
-        "exog_1": np.arange(n_exog_A),
-    }
-)
-exog_B = pd.DataFrame(
-    {
-        "series_id": "B",
-        "datetime": index_exog_B,
-        "exog_1": np.arange(n_exog_B),
-        "exog_2": "b",
-    }
-)
-exog_C = pd.DataFrame(
-    {
-        "series_id": "C",
-        "datetime": index_exog_C,
-        "exog_1": np.arange(n_exog_C),
-        "exog_3": 1,
-    }
-)
-exog_long = pd.concat([exog_A, exog_B, exog_C], axis=0)
+from .fixtures_preprocessing import exog_A, exog_B, exog_C, n_exog_A, n_exog_B, n_exog_C
+from .fixtures_preprocessing import exog_long
 
 
 def test_check_output_series_long_to_dict_dropna_False():
     """
     Check output of exog_long_to_dict with dropna=False.
     """
-    exog_columns = pd.DataFrame(
-        columns=["exog_1", "exog_2", "exog_3"],
-    )
-    exog_columns = pd.DataFrame(
-        columns=["exog_1", "exog_2", "exog_3"],
-    ).astype({"exog_1": int, "exog_2": str, "exog_3": float})
     expected = {
-        "A": pd.concat(
-            [
-                exog_A.set_index("datetime").asfreq("D").drop(columns="series_id"),
-                exog_columns,
-            ],
-            axis=0,
-        )[["exog_1", "exog_2", "exog_3"]],
-        "B": pd.concat(
-            [
-                exog_B.set_index("datetime").asfreq("D").drop(columns="series_id"),
-                exog_columns,
-            ],
-            axis=0,
-        )[["exog_1", "exog_2", "exog_3"]],
-        "C": pd.concat(
-            [
-                exog_C.set_index("datetime").asfreq("D").drop(columns="series_id"),
-                exog_columns,
-            ],
-            axis=0,
-        )[["exog_1", "exog_2", "exog_3"]],
+        'A': pd.DataFrame(
+            {
+                'exog_1': np.arange(n_exog_A),
+                'exog_2': np.nan,
+                'exog_3': np.nan
+            },
+            index=pd.date_range("2020-01-01", periods=n_exog_A, freq="D")
+        ),
+        'B': pd.DataFrame(
+            {
+                'exog_1': np.arange(n_exog_B),
+                'exog_2': 'b',
+                'exog_3': np.nan
+            },
+            index=pd.date_range("2020-01-01", periods=n_exog_B, freq="D")
+        ),
+        'C': pd.DataFrame(
+            {
+                'exog_1': np.arange(n_exog_C),
+                'exog_2': np.nan,
+                'exog_3': 1.0
+            },
+            index=pd.date_range("2020-01-01", periods=n_exog_C, freq="D")
+        )
     }
+
+    for k in expected.keys():
+        expected[k]['exog_1'] = expected[k]['exog_1'].astype(int)
+        expected[k]['exog_2'] = expected[k]['exog_2'].astype(str)
+        expected[k]['exog_3'] = expected[k]['exog_3'].astype(float)
+
     results = exog_long_to_dict(
         data=exog_long,
         series_id="series_id",
@@ -80,7 +55,7 @@ def test_check_output_series_long_to_dict_dropna_False():
     )
 
     for k in expected.keys():
-        pd.testing.assert_frame_equal(results[k], expected[k])
+        results[k].equals(expected[k])
 
 
 def test_check_output_series_long_to_dict_dropna_True():

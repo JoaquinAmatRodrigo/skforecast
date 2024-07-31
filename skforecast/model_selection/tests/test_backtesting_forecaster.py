@@ -33,9 +33,10 @@ def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
     ]
 
     err_msg = re.escape(
-        f"`forecaster` must be of type {forecaters_allowed}, for all other types of "
-        f" forecasters use the functions available in the other `model_selection` "
-        f"modules.")
+        (f"`forecaster` must be of type {forecaters_allowed}, for all other types of "
+         f" forecasters use the functions available in the other `model_selection` "
+         f"modules.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         backtesting_forecaster(
             forecaster            = forecaster,
@@ -72,10 +73,10 @@ def test_backtesting_forecaster_ValueError_when_ForecasterAutoregDirect_not_enou
     steps = 1
     
     err_msg = re.escape(
-            ("When using a ForecasterAutoregDirect, the combination of steps "
-             f"+ gap ({steps+gap}) cannot be greater than the `steps` parameter "
-             f"declared when the forecaster is initialized ({forecaster.steps}).")
-        )
+        (f"When using a ForecasterAutoregDirect, the combination of steps "
+         f"+ gap ({steps + gap}) cannot be greater than the `steps` parameter "
+         f"declared when the forecaster is initialized ({forecaster.steps}).")
+    )
     with pytest.raises(ValueError, match = err_msg):
         backtesting_forecaster(
             forecaster            = forecaster,

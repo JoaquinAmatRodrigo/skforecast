@@ -81,7 +81,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_no_remainder_with_mocked(n_
                             0.91918321, 0.84363512, 0.8804787 , 0.91651026, 0.42747836,
                             0.39041178, 0.23407875]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -117,7 +117,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_remainder_with_mocked():
                             0.89343704, 0.95023804, 1.00278782, 1.07322123, 1.13932909,
                             0.5673885 , 0.43713008]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -156,7 +156,7 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked(n
                             0.9244119 , 0.84173367, 0.8793909 , 0.91329115, 0.42336972,
                             0.38434305, 0.2093133 ]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -195,7 +195,7 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_remainder_with_mocked(n_jo
                             0.89513678, 0.94913026, 1.00437767, 1.07534674, 1.14049886,
                             0.56289528, 0.40343592]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -231,7 +231,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_no_remain
                             0.92421562, 0.85060945, 0.88539784, 0.92172861, 0.41776604,
                             0.37024487, 0.1878739 ]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -267,7 +267,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_remainder
                             0.8959923 , 0.95147449, 1.00612185, 1.07723486, 1.14356597,
                             0.56321268, 0.40920121]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -304,7 +304,7 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_with_mocked():
                              1.16176993,  0.85860472,  0.86636317,  0.68987477,  0.17788782,
                             -0.13577   , -0.50570715]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -341,7 +341,7 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
                              1.15283534,  0.8597644 ,  0.87093769,  0.71221024,  0.16839089,
                             -0.16421948, -0.55386343]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -378,7 +378,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_with_moc
                             0.89448353, 0.99712901, 1.05090061, 0.92362208, 0.76795064,
                             0.45382855, 0.26823527]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -424,7 +424,7 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_callable_metric_with_mocke
                              1.16176993,  0.85860472,  0.86636317,  0.68987477,  0.17788782,
                             -0.13577   , -0.50570715]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -461,7 +461,7 @@ def test_output_backtesting_sarimax_no_refit_no_exog_list_of_metrics_with_mocked
                             0.91918321, 0.84363512, 0.8804787 , 0.91651026, 0.42747836,
                             0.39041178, 0.23407875]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -497,7 +497,7 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_callable_metric_with_mocke
                             0.9244119 , 0.84173367, 0.8793909 , 0.91329115, 0.42336972,
                             0.38434305, 0.2093133 ]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -535,7 +535,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_list_of_
                              1.16808941,  0.86535534,  0.87277596,  0.69357041,  0.16628876,
                             -0.17189178, -0.56342057]),
         columns = ['pred'],
-        index   = pd.date_range(start='2038', periods=12, freq='A')
+        index   = pd.date_range(start='2038', periods=12, freq='YE')
     )
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -545,7 +545,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_list_of_
 @pytest.mark.parametrize("alpha, interval", 
                          [(0.05, [1, 99]), 
                           (None, [2.5, 97.5])], 
-                         ids = lambda values : f'alpha, interval: {values}')
+                         ids = lambda values: f'alpha, interval: {values}')
 def test_output_backtesting_sarimax_no_refit_yes_exog_interval_with_mocked(alpha, interval):
     """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, yes exog, 
@@ -587,7 +587,7 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_interval_with_mocked(alpha
     expected_backtest_predictions = pd.DataFrame(
                                         data    = expected_values,
                                         columns = ['pred', 'lower_bound', 'upper_bound'],
-                                        index   = pd.date_range(start='2038', periods=12, freq='A')
+                                        index   = pd.date_range(start='2038', periods=12, freq='YE')
                                     )                                                     
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -639,7 +639,7 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_interval_with_mocked(alph
     expected_backtest_predictions = pd.DataFrame(
                                         data    = expected_values,
                                         columns = ['pred', 'lower_bound', 'upper_bound'],
-                                        index   = pd.date_range(start='2038', periods=12, freq='A')
+                                        index   = pd.date_range(start='2038', periods=12, freq='YE')
                                     )                                                     
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)
@@ -691,7 +691,7 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_interval
     expected_backtest_predictions = pd.DataFrame(
                                         data    = expected_values,
                                         columns = ['pred', 'lower_bound', 'upper_bound'],
-                                        index   = pd.date_range(start='2038', periods=12, freq='A')
+                                        index   = pd.date_range(start='2038', periods=12, freq='YE')
                                     )                                                     
 
     pd.testing.assert_frame_equal(expected_metric, metric, atol=0.0001)

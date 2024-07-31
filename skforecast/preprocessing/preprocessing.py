@@ -5,7 +5,7 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Any, Union, List, Dict, Optional
+from typing import Any, Union, Optional
 from typing_extensions import Self
 import numpy as np
 import pandas as pd
@@ -77,7 +77,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
 
     def __init__(
         self, 
-        order: int=1
+        order: int = 1
     ) -> None:
 
         if not isinstance(order, int):
@@ -94,7 +94,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
     def fit(
         self, 
         X: np.ndarray, 
-        y: Any=None
+        y: Any = None
     ) -> Self:
         """
         Fits the transformer. This method only removes the values stored in
@@ -133,7 +133,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
     def transform(
         self, 
         X: np.ndarray, 
-        y: Any=None
+        y: Any = None
     ) -> np.ndarray:
         """
         Transforms a time series into a differentiated time series of order n and
@@ -164,7 +164,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
     def inverse_transform(
         self, 
         X: np.ndarray, 
-        y: Any=None
+        y: Any = None
     ) -> np.ndarray:
         """
         Reverts the differentiation. To do so, the input array is assumed to be
@@ -192,7 +192,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
                 X_undiff = np.insert(X, 0, self.initial_values[-1])
                 X_undiff = np.cumsum(X_undiff, dtype=float)
             else:
-                X_undiff = np.insert(X_undiff, 0, self.initial_values[-(i+1)])
+                X_undiff = np.insert(X_undiff, 0, self.initial_values[-(i + 1)])
                 X_undiff = np.cumsum(X_undiff, dtype=float)
 
         return X_undiff
@@ -202,7 +202,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
     def inverse_transform_next_window(
         self,
         X: np.ndarray,
-        y: Any=None
+        y: Any = None
     ) -> np.ndarray:
         """
         Reverts the differentiation. The input array `x` is assumed to be a 
@@ -231,7 +231,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
             if i == 0:
                 X_undiff = np.cumsum(X, dtype=float) + self.last_values[-1]
             else:
-                X_undiff = np.cumsum(X_undiff, dtype=float) + self.last_values[-(i+1)]
+                X_undiff = np.cumsum(X_undiff, dtype=float) + self.last_values[-(i + 1)]
 
         return X_undiff
 
@@ -286,7 +286,7 @@ def exog_long_to_dict(
     series_id: str,
     index: str,
     freq: str,
-    dropna: bool=False,
+    dropna: bool = False,
 ) -> dict:
     """
     Convert long format exogenous variables to dictionary.
@@ -507,9 +507,9 @@ class DateTimeFeatureTransformer(BaseEstimator, TransformerMixin):
 
     def __init__(
         self,
-        features: Optional[list]=None,
-        encoding: Optional[str]="cyclical",
-        max_values: Optional[dict]=None
+        features: Optional[list] = None,
+        encoding: Optional[str] = "cyclical",
+        max_values: Optional[dict] = None
     ) -> None:
 
         if encoding not in ["cyclical", "onehot", None]:

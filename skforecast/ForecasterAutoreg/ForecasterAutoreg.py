@@ -212,13 +212,13 @@ class ForecasterAutoreg(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
-        transformer_y: Optional[object]=None,
-        transformer_exog: Optional[object]=None,
-        weight_func: Optional[Callable]=None,
-        differentiation: Optional[int]=None,
-        fit_kwargs: Optional[dict]=None,
-        binner_kwargs: Optional[dict]=None,
-        forecaster_id: Optional[Union[str, int]]=None
+        transformer_y: Optional[object] = None,
+        transformer_exog: Optional[object] = None,
+        weight_func: Optional[Callable] = None,
+        differentiation: Optional[int] = None,
+        fit_kwargs: Optional[dict] = None,
+        binner_kwargs: Optional[dict] = None,
+        forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
 
         self.regressor                   = regressor
@@ -297,7 +297,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         if isinstance(self.regressor, Pipeline):
             name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
-            params = {key : value for key, value in self.regressor.get_params().items() \
+            params = {key: value for key, value in self.regressor.get_params().items()
                       if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params(deep=True)
@@ -379,7 +379,7 @@ class ForecasterAutoreg(ForecasterBase):
     def create_train_X_y(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Create training matrices from univariate time series and exogenous
@@ -453,7 +453,7 @@ class ForecasterAutoreg(ForecasterBase):
         X_train = pd.DataFrame(
                       data    = X_train,
                       columns = X_train_col_names,
-                      index   = y_index[self.max_lag: ]
+                      index   = y_index[self.max_lag:]
                   )
 
         if exog is not None:
@@ -470,13 +470,13 @@ class ForecasterAutoreg(ForecasterBase):
         # TODO: DataFrame or Series?
         y_train = pd.Series(
                       data  = y_train,
-                      index = y_index[self.max_lag: ],
+                      index = y_index[self.max_lag:],
                       name  = 'y'
                   )
 
         if self.differentiation is not None:
-            X_train = X_train.iloc[self.differentiation: ]
-            y_train = y_train.iloc[self.differentiation: ]
+            X_train = X_train.iloc[self.differentiation:]
+            y_train = y_train.iloc[self.differentiation:]
 
         return X_train, y_train
 
@@ -484,7 +484,7 @@ class ForecasterAutoreg(ForecasterBase):
     def create_sample_weights(
         self,
         X_train: pd.DataFrame,
-    )-> np.ndarray:
+    ) -> np.ndarray:
         """
         Crate weights for each observation according to the forecaster's attribute
         `weight_func`.
@@ -527,9 +527,9 @@ class ForecasterAutoreg(ForecasterBase):
     def fit(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        store_last_window: bool=True,
-        store_in_sample_residuals: bool=True
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        store_last_window: bool = True,
+        store_in_sample_residuals: bool = True
     ) -> None:
         """
         Training Forecaster.
@@ -624,7 +624,7 @@ class ForecasterAutoreg(ForecasterBase):
         self,
         y_true: pd.Series,
         y_pred: pd.Series,
-        random_state: int=95123
+        random_state: int = 95123
     ) -> None:
         """
         Binning residuals according to the predicted value each residual is
@@ -693,8 +693,8 @@ class ForecasterAutoreg(ForecasterBase):
     def _create_predict_inputs(
         self,
         steps: int,
-        last_window: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        last_window: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> Tuple[np.ndarray, np.ndarray, pd.Index]:
         """
         Create inputs needed for the first iteration of the prediction process. 
@@ -784,7 +784,7 @@ class ForecasterAutoreg(ForecasterBase):
         self,
         steps: int,
         last_window: np.ndarray,
-        exog: Optional[np.ndarray]=None
+        exog: Optional[np.ndarray] = None
     ) -> np.ndarray:
         """
         Predict n steps ahead. It is an iterative process in which, each prediction,
@@ -833,8 +833,8 @@ class ForecasterAutoreg(ForecasterBase):
     def create_predict_X(
         self,
         steps: int,
-        last_window: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        last_window: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> pd.DataFrame:
         """
         Create the predictors needed to predict `steps` ahead. As it is a recursive
@@ -890,8 +890,8 @@ class ForecasterAutoreg(ForecasterBase):
     def predict(
         self,
         steps: int,
-        last_window: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        last_window: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> pd.Series:
         """
         Predict n steps ahead. It is an recursive process in which, each prediction,
@@ -952,12 +952,12 @@ class ForecasterAutoreg(ForecasterBase):
     def predict_bootstrapping(
         self,
         steps: int,
-        last_window: Optional[pd.Series]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        n_boot: int=250,
-        random_state: int=123,
-        in_sample_residuals: bool=True,
-        binned_residuals: bool=False,
+        last_window: Optional[pd.Series] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        n_boot: int = 250,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        binned_residuals: bool = False,
     ) -> pd.DataFrame:
         """
         Generate multiple forecasting predictions using a bootstrapping process. 
@@ -1110,13 +1110,13 @@ class ForecasterAutoreg(ForecasterBase):
     def predict_interval(
         self,
         steps: int,
-        last_window: Optional[pd.Series]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        interval: list=[5, 95],
-        n_boot: int=250,
-        random_state: int=123,
-        in_sample_residuals: bool=True,
-        binned_residuals: bool=False
+        last_window: Optional[pd.Series] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        interval: list = [5, 95],
+        n_boot: int = 250,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        binned_residuals: bool = False
     ) -> pd.DataFrame:
         """
         Iterative process in which each prediction is used as a predictor
@@ -1194,7 +1194,7 @@ class ForecasterAutoreg(ForecasterBase):
                                binned_residuals    = binned_residuals
                            )
 
-        interval = np.array(interval)/100
+        interval = np.array(interval) / 100
         predictions_interval = boot_predictions.quantile(q=interval, axis=1).transpose()
         predictions_interval.columns = ['lower_bound', 'upper_bound']
         predictions = pd.concat((predictions, predictions_interval), axis=1)
@@ -1205,13 +1205,13 @@ class ForecasterAutoreg(ForecasterBase):
     def predict_quantiles(
         self,
         steps: int,
-        last_window: Optional[pd.Series]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        quantiles: list=[0.05, 0.5, 0.95],
-        n_boot: int=250,
-        random_state: int=123,
-        in_sample_residuals: bool=True,
-        binned_residuals: bool=False
+        last_window: Optional[pd.Series] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        quantiles: list = [0.05, 0.5, 0.95],
+        n_boot: int = 250,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        binned_residuals: bool = False
     ) -> pd.DataFrame:
         """
         Calculate the specified quantiles for each step. After generating 
@@ -1289,12 +1289,12 @@ class ForecasterAutoreg(ForecasterBase):
         self,
         steps: int,
         distribution: object,
-        last_window: Optional[pd.Series]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None,
-        n_boot: int=250,
-        random_state: int=123,
-        in_sample_residuals: bool=True,
-        binned_residuals: bool=False
+        last_window: Optional[pd.Series] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        n_boot: int = 250,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        binned_residuals: bool = False
     ) -> pd.DataFrame:
         """
         Fit a given probability distribution for each step. After generating 
@@ -1352,7 +1352,7 @@ class ForecasterAutoreg(ForecasterBase):
                        )       
 
         param_names = [p for p in inspect.signature(distribution._pdf).parameters
-                       if not p=='x'] + ["loc","scale"]
+                       if not p == 'x'] + ["loc", "scale"]
         param_values = np.apply_along_axis(
                            lambda x: distribution.fit(x),
                            axis = 1,
@@ -1446,11 +1446,11 @@ class ForecasterAutoreg(ForecasterBase):
     def set_out_sample_residuals(
         self, 
         residuals: Union[pd.Series, np.ndarray],
-        y_pred: Optional[Union[pd.Series, np.ndarray]]=None,
-        append: bool=True,
-        transform: bool=True,
-        random_state: int=123
-    )-> None:
+        y_pred: Optional[Union[pd.Series, np.ndarray]] = None,
+        append: bool = True,
+        transform: bool = True,
+        random_state: int = 123
+    ) -> None:
         """
         Set new values to the attribute `out_sample_residuals`. Out of sample
         residuals are meant to be calculated using observations that did not
@@ -1642,7 +1642,7 @@ class ForecasterAutoreg(ForecasterBase):
 
     def get_feature_importances(
         self,
-        sort_importance: bool=True
+        sort_importance: bool = True
     ) -> pd.DataFrame:
         """
         Return feature importances of the regressor stored in the forecaster.

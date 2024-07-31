@@ -77,7 +77,8 @@ class LongTrainingWarning(UserWarning):
             "warnings.simplefilter('ignore', category=LongTrainingWarning)"
         )
         return self.message + " " + extra_message
-    
+
+
 class UnknownLevelWarning(UserWarning):
     """
     Warning used to notify that a level being predicted was not part of the

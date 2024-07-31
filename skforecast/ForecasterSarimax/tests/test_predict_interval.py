@@ -359,7 +359,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window(alpha, inter
                                      [1.15605055, 0.27574629, 2.03635481],
                                      [1.22975713, 0.08768469, 2.37182957]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index   = pd.date_range(start='2100', periods=5, freq='A')
+                   index   = pd.date_range(start='2100', periods=5, freq='YE')
                )
     
     pd.testing.assert_frame_equal(predictions, expected, atol=0.0001)
@@ -393,7 +393,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog(alp
                                        [ 1.02336286, -2.2399583 ,  4.28668401],
                                        [ 1.05334974, -2.56051157,  4.66721105]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index   = pd.date_range(start='2100', periods=5, freq='A')
+                   index   = pd.date_range(start='2100', periods=5, freq='YE')
                )
     
     pd.testing.assert_frame_equal(predictions, expected, atol=0.0001)
@@ -436,7 +436,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog_and
                                        [0.94985823, 0.58885008, 1.31086638],
                                        [0.89218798, 0.5184476 , 1.26592836]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index   = pd.date_range(start='2100', periods=5, freq='A')
+                   index   = pd.date_range(start='2100', periods=5, freq='YE')
                )
     
     pd.testing.assert_frame_equal(predictions, expected, atol=0.0001)
@@ -448,7 +448,7 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog_and
                          ids = lambda reg : f'regressor: {type(reg)}')
 @pytest.mark.parametrize("y          , idx", 
                          [(y         , pd.RangeIndex(start=0, stop=50)), 
-                          (y_datetime, pd.date_range(start='2000', periods=50, freq='A'))], 
+                          (y_datetime, pd.date_range(start='2000', periods=50, freq='YE'))], 
                          ids = lambda values : f'y, index: {type(values)}')
 def test_predict_interval_ForecasterSarimax_updates_extended_index_twice(regressor, y, idx):
     """

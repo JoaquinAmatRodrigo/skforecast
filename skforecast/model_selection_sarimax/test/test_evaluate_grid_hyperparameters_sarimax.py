@@ -3,18 +3,16 @@
 import os
 import re
 import pytest
-import platform
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error
-from pmdarima.arima import ARIMA
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.model_selection_sarimax.model_selection_sarimax import _evaluate_grid_hyperparameters_sarimax
 
 from tqdm import tqdm
 from functools import partialmethod
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 # Fixtures
 from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import y_datetime
@@ -40,10 +38,10 @@ def test_ValueError_evaluate_grid_hyperparameters_sarimax_when_return_best_and_l
             forecaster         = forecaster,
             y                  = y_datetime,
             exog               = exog_test,
-            param_grid         = [{'order': (1,1,1)}, {'order': (1,2,2)}, {'order': (1,2,3)}],
+            param_grid         = [{'order': (1, 1, 1)}, {'order': (1, 2, 2)}, {'order': (1, 2, 3)}],
             steps              = 3,
             metric             = 'mean_absolute_error',
-            initial_train_size = len(y_datetime)-12,
+            initial_train_size = len(y_datetime) - 12,
             fixed_train_size   = False,
             refit              = False,
             return_best        = True,
@@ -66,10 +64,10 @@ def test_exception_evaluate_grid_hyperparameters_sarimax_metric_list_duplicate_n
             forecaster         = forecaster,
             y                  = y_datetime,
             exog               = exog_datetime,
-            param_grid         = [{'order': (1,1,1)}, {'order': (1,2,2)}, {'order': (1,2,3)}],
+            param_grid         = [{'order': (1, 1, 1)}, {'order': (1, 2, 2)}, {'order': (1, 2, 3)}],
             steps              = 3,
             metric             = ['mean_absolute_error', mean_absolute_error],
-            initial_train_size = len(y_datetime)-12,
+            initial_train_size = len(y_datetime) - 12,
             fixed_train_size   = False,
             refit              = False,
             return_best        = True,
@@ -86,7 +84,7 @@ def test_output_evaluate_grid_hyperparameters_sarimax_with_mocked():
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
-    param_grid = [{'order': (3, 2 ,0), 'trend': None}, 
+    param_grid = [{'order': (3, 2, 0), 'trend': None}, 
                   {'order': (3, 2, 0), 'trend': 'c'}]
 
     results = _evaluate_grid_hyperparameters_sarimax(
@@ -96,14 +94,14 @@ def test_output_evaluate_grid_hyperparameters_sarimax_with_mocked():
                   steps              = 3,
                   refit              = False,
                   metric             = 'mean_squared_error',
-                  initial_train_size = len(y_datetime)-12,
+                  initial_train_size = len(y_datetime) - 12,
                   fixed_train_size   = False,
                   return_best        = False,
                   verbose            = False
               )
     
     expected_results = pd.DataFrame(
-        data  = {'params'            : [{'order': (3, 2 ,0), 'trend': None}, 
+        data  = {'params'            : [{'order': (3, 2, 0), 'trend': None}, 
                                         {'order': (3, 2, 0), 'trend': 'c'}],
                  'mean_squared_error': np.array([0.03683793, 0.03740798]),
                  'order'             : [(3, 2, 0), (3, 2, 0)],
@@ -134,14 +132,14 @@ def test_output_evaluate_grid_hyperparameters_sarimax_exog_with_mocked():
                   steps              = 3,
                   refit              = False,
                   metric             = 'mean_squared_error',
-                  initial_train_size = len(y_datetime)-12,
+                  initial_train_size = len(y_datetime) - 12,
                   fixed_train_size   = False,
                   return_best        = False,
                   verbose            = False
               )
     
     expected_results = pd.DataFrame(
-        data  = {'params'            : [{'order': (3, 2 ,0), 'trend': None}, 
+        data  = {'params'            : [{'order': (3, 2, 0), 'trend': None}, 
                                         {'order': (3, 2, 0), 'trend': 'c'}],
                  'mean_squared_error': np.array([0.18551857, 0.19151678]),
                  'order'             : [(3, 2, 0), (3, 2, 0)],
@@ -171,14 +169,14 @@ def test_output_evaluate_grid_hyperparameters_sarimax_metric_list_with_mocked():
                   steps              = 3,
                   refit              = True,
                   metric             = [mean_absolute_error, 'mean_squared_error'],
-                  initial_train_size = len(y_datetime)-12,
+                  initial_train_size = len(y_datetime) - 12,
                   fixed_train_size   = False,
                   return_best        = False,
                   verbose            = False
               )
     
     expected_results = pd.DataFrame(
-        data  = {'params'             : [{'order': (3, 2 ,0), 'trend': None}, 
+        data  = {'params'             : [{'order': (3, 2, 0), 'trend': None}, 
                                          {'order': (3, 2, 0), 'trend': 'c'}],
                  'mean_absolute_error': np.array([0.15724498, 0.16638452]),
                  'mean_squared_error' : np.array([0.0387042 , 0.04325543]),
@@ -209,7 +207,7 @@ def test_evaluate_grid_hyperparameters_sarimax_when_return_best():
         steps                 = 3,
         refit                 = True,
         metric                = mean_absolute_error,
-        initial_train_size    = len(y_datetime)-12,
+        initial_train_size    = len(y_datetime) - 12,
         fixed_train_size      = True,
         return_best           = True,
         suppress_warnings_fit = False,
@@ -255,7 +253,7 @@ def test_evaluate_grid_hyperparameters_sarimax_output_file_when_single_metric():
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
-    param_grid = [{'order': (3, 2 ,0), 'trend': None}, 
+    param_grid = [{'order': (3, 2, 0), 'trend': None}, 
                   {'order': (1, 1, 0), 'trend': 'c'}]
     output_file = 'test_evaluate_grid_hyperparameters_sarimax_output_file.txt'
 
@@ -266,7 +264,7 @@ def test_evaluate_grid_hyperparameters_sarimax_output_file_when_single_metric():
                   steps              = 3,
                   refit              = False,
                   metric             = 'mean_squared_error',
-                  initial_train_size = len(y_datetime)-12,
+                  initial_train_size = len(y_datetime) - 12,
                   fixed_train_size   = False,
                   return_best        = False,
                   verbose            = False,
@@ -274,8 +272,13 @@ def test_evaluate_grid_hyperparameters_sarimax_output_file_when_single_metric():
               )
     results  = results.astype({'params': str, 'order': str})
 
+    def convert_none(val):  # pragma: no cover
+        if val == 'None':
+            return None
+        return val
+
     assert os.path.isfile(output_file)
-    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False, converters={'trend': convert_none})
     output_file_content = output_file_content.sort_values(by='mean_squared_error')
     output_file_content = output_file_content.astype({'params': str, 'order': str})
     pd.testing.assert_frame_equal(results, output_file_content)
@@ -302,7 +305,7 @@ def test_evaluate_grid_hyperparameters_sarimax_output_file_when_metric_list():
                   steps              = 3,
                   refit              = True,
                   metric             = [mean_absolute_error, 'mean_squared_error'],
-                  initial_train_size = len(y_datetime)-12,
+                  initial_train_size = len(y_datetime) - 12,
                   fixed_train_size   = False,
                   return_best        = False,
                   verbose            = False,
@@ -310,8 +313,13 @@ def test_evaluate_grid_hyperparameters_sarimax_output_file_when_metric_list():
               )
     results  = results.astype({'params': str, 'order': str})
 
+    def convert_none(val):  # pragma: no cover
+        if val == 'None': 
+            return None
+        return val
+
     assert os.path.isfile(output_file)
-    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
+    output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False, converters={'trend': convert_none})
     output_file_content = output_file_content.sort_values(by='mean_squared_error')
     output_file_content = output_file_content.astype({'params': str, 'order': str})
     pd.testing.assert_frame_equal(results, output_file_content)

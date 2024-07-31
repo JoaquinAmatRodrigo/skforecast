@@ -6,7 +6,7 @@
 # coding=utf-8
 
 from abc import ABC, abstractmethod
-from typing import Union, Dict, List, Tuple, Any, Optional
+from typing import Union, Tuple, Optional
 import logging
 import pandas as pd
 
@@ -26,7 +26,7 @@ class ForecasterBase(ABC):
     def create_train_X_y(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Create training matrices from univariate time series and exogenous
@@ -58,7 +58,7 @@ class ForecasterBase(ABC):
     def fit(
         self,
         y: pd.Series,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> None:
         """
         Training Forecaster.
@@ -85,8 +85,8 @@ class ForecasterBase(ABC):
     def predict(
         self,
         steps: int,
-        last_window: Optional[pd.Series]=None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]]=None
+        last_window: Optional[pd.Series] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> pd.Series:
         """
         Predict n steps ahead.
