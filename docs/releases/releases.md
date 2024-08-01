@@ -10,7 +10,7 @@ All significant changes to this project are documented in this release file.
 | <span class="badge text-bg-danger">Fix</span>              | Bug fix                               |
 
 
-## 0.13.0 <small>Jul 31, 2024</small> { id="0.13.0" }
+## 0.13.0 <small>Aug 01, 2024</small> { id="0.13.0" }
 
 The main changes in this release are:
 
@@ -35,6 +35,8 @@ The main changes in this release are:
 + Support for `python 3.12`.
 
 + `keras` has been added as an optional dependency, tag deeplearning, to use the <code>[ForecasterRnn]</code>.
+
++ `PyTorch` backend for the <code>[ForecasterRnn]</code>.
 
 + New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
 
