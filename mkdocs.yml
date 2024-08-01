@@ -18,10 +18,11 @@ nav:
     - API Reference: api/ForecasterAutoreg.md
     - FAQ and Tips: faq/faq.md
     - Releases: releases/releases.md
-
+    - Authors: authors/authors.md
+  
   - Introduction to forecasting: 
     - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
-
+  
   - Quick start:
     - Quick start: quick-start/quick-start-skforecast.ipynb
     - Forecaster Parameters: quick-start/forecaster-parameters.md
@@ -94,9 +95,11 @@ nav:
     - Parallelization in skforecast: faq/parallelization-skforecast.ipynb
     - Profiling skforecast: faq/profiling-skforecast.ipynb
 
-  - Releases: releases/releases.md
+  - Releases: 
+      - Releases: releases/releases.md
 
-  - Authors: authors/authors.md
+  - Authors: 
+      - Authors: authors/authors.md
 
 plugins:
   - mkdocstrings:
