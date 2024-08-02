@@ -4,7 +4,7 @@
     margin-bottom: 30px;
     margin-top: 0px;">
 
-<img src="img/banner-landing-page-dark-mode-skforecast.png#only-dark" align="left" style="
+<img src="img/banner-landing-page-dark-mode-skforecast-no-background.png#only-dark" align="left" style="
     margin-bottom: 30px;
     margin-top: 0px;">
 
