@@ -84,11 +84,12 @@ full = [
 
 docs = [
     "mkdocs-material==9.5.30",
+    "mkdocs==1.5.3",
     "mkdocs-jupyter==0.24.8",
     "mkdocstrings==0.25.2",
     "mkdocstrings-python==1.10.7",
     "jupyter-contrib-nbextensions==0.7.0",
-    "mike==1.1.2",          #2.1.2 not working when publishing online
+    "mike==1.1.2",              # 2.1.2 not working when publishing online
     "notebook==6.4.12"
 ]
 

@@ -1,20 +1,19 @@
 ################################################################################
-#                             skforecast.utils                                 #
+#                      skforecast.ForecasterRnn.utils                          #
 #                                                                              #
 # This work by skforecast team is licensed under the BSD 3-Clause License      #
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Any, Optional, Tuple, Callable
-import pandas as pd
-import re
-import os
+import warnings
+from typing import Union, Any, Optional
+import pandas as pd 
 from ..utils import check_optional_dependency
 
 try:
     import keras
     from keras.models import Model
-    from keras.layers import Dense, Input, Reshape, LSTM, SimpleRNN
+    from keras.layers import Dense, Input, LSTM, SimpleRNN
     from keras.optimizers import Adam
     from keras.losses import MeanSquaredError
 except Exception as e:
@@ -33,7 +32,7 @@ def create_and_compile_model(
     activation: str="relu",
     optimizer: object=Adam(learning_rate=0.01),
     loss: object=MeanSquaredError(),
-    compile_kwars: dict={},
+    compile_kwargs: dict={},
 ) -> keras.models.Model:
     """
     Creates a neural network model for time series prediction with flexible recurrent layers.
@@ -179,15 +178,17 @@ def create_and_compile_model(
     model = Model(inputs=input_layer, outputs=output_layer)
 
     # Compile the model if optimizer, loss or compile_kwargs are passed
-    if optimizer is not None or loss is not None or compile_kwars:
-        # give more priority to the parameters passed in the function check if the parameters passes in compile_kwars include optimizer and loss if so, delete them from compile_kwargs and raise a warning
-        if "optimizer" in compile_kwars.keys():
-            compile_kwars.pop("optimizer")
-            print("Warning: optimizer passed in compile_kwars. Ignoring it.")
-        if "loss" in compile_kwars.keys():
-            compile_kwars.pop("loss")
-            print("Warning: loss passed in compile_kwars. Ignoring it.")
+    if optimizer is not None or loss is not None or compile_kwargs:
+        # give more priority to the parameters passed in the function check if the 
+        # parameters passes in compile_kwargs include optimizer and loss if so, 
+        # delete them from compile_kwargs and raise a warning
+        if "optimizer" in compile_kwargs.keys():
+            compile_kwargs.pop("optimizer")
+            warnings.warn("`optimizer` passed in `compile_kwargs`. Ignoring it.")
+        if "loss" in compile_kwargs.keys():
+            compile_kwargs.pop("loss")
+            warnings.warn("`loss` passed in `compile_kwargs`. Ignoring it.")
 
-        model.compile(optimizer=optimizer, loss=loss, **compile_kwars)
+        model.compile(optimizer=optimizer, loss=loss, **compile_kwargs)
 
     return model

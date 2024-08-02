@@ -336,9 +336,9 @@ def exog_long_to_dict(
 
 def create_datetime_features(
     X: Union[pd.Series, pd.DataFrame],
-    features: list = None,
+    features: Optional[list] = None,
     encoding: str = "cyclical",
-    max_values: dict = None,
+    max_values: Optional[dict] = None,
 ) -> pd.DataFrame:
     """
     Extract datetime features from the DateTime index of a pandas DataFrame or Series.
@@ -347,33 +347,18 @@ def create_datetime_features(
     ----------
     X : pandas Series, pandas DataFrame
         Input DataFrame or Series with a datetime index.
-    features : list, default `[
-        'year',
-        'month',
-        'week',
-        'day_of_week',
-        'day_of_month',
-        'day_of_year',
-        'weekend',
-        'hour',
-        'minute',
-        'second'
-    ]`
-        List of calendar features (strings) to extract from the index.
+    features : list, default `None`
+        List of calendar features (strings) to extract from the index. When `None`,
+        the following features are extracted: 'year', 'month', 'week', 'day_of_week',
+        'day_of_month', 'day_of_year', 'weekend', 'hour', 'minute', 'second'.
     encoding : str, default `'cyclical'`
         Encoding method for the extracted features. Options are None, 'cyclical' or
         'onehot'.
-    max_values : dict, default {
-        'month': 12,
-        'week': 52,
-        'day_of_week': 7,
-        'day_of_month': 31,
-        'day_of_year': 365,
-        'hour': 24,
-        'minute': 60,
-        'second': 60
-    }
+    max_values : dict, default `None`
         Dictionary of maximum values for the cyclical encoding of calendar features.
+        When `None`, the following values are used: {'month': 12, 'week': 52, 
+        'day_of_week': 7, 'day_of_month': 31, 'day_of_year': 365, 'hour': 24, 
+        'minute': 60, 'second': 60}.
 
     Returns
     -------
@@ -466,33 +451,18 @@ class DateTimeFeatureTransformer(BaseEstimator, TransformerMixin):
 
     Parameters
     ----------
-    features : list, default `[
-        'year',
-        'month',
-        'week',
-        'day_of_week',
-        'day_of_month',
-        'day_of_year',
-        'weekend',
-        'hour',
-        'minute',
-        'second'
-    ]`
-        List of calendar features (strings) to extract from the index.
+    features : list, default `None`
+        List of calendar features (strings) to extract from the index. When `None`,
+        the following features are extracted: 'year', 'month', 'week', 'day_of_week',
+        'day_of_month', 'day_of_year', 'weekend', 'hour', 'minute', 'second'.
     encoding : str, default `'cyclical'`
         Encoding method for the extracted features. Options are None, 'cyclical' or
         'onehot'.
-    max_values : dict, default {
-        'month': 12,
-        'week': 52,
-        'day_of_week': 7,
-        'day_of_month': 31,
-        'day_of_year': 365,
-        'hour': 24,
-        'minute': 60,
-        'second': 60
-    }
+    max_values : dict, default `None`
         Dictionary of maximum values for the cyclical encoding of calendar features.
+        When `None`, the following values are used: {'month': 12, 'week': 52, 
+        'day_of_week': 7, 'day_of_month': 31, 'day_of_year': 365, 'hour': 24, 
+        'minute': 60, 'second': 60}.
     
     Attributes
     ----------
@@ -508,7 +478,7 @@ class DateTimeFeatureTransformer(BaseEstimator, TransformerMixin):
     def __init__(
         self,
         features: Optional[list] = None,
-        encoding: Optional[str] = "cyclical",
+        encoding: str = "cyclical",
         max_values: Optional[dict] = None
     ) -> None:
 
