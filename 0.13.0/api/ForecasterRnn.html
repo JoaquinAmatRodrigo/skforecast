@@ -5415,7 +5415,7 @@ method of the regressor.</p>
 
 
 <h2 id="skforecast.ForecasterRnn.utils.create_and_compile_model" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">create_and_compile_model</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">lags</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">recurrent_layer</span><span class="o">=</span><span class="s1">&#39;LSTM&#39;</span><span class="p">,</span> <span class="n">recurrent_units</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">dense_units</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">Adam</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">),</span> <span class="n">loss</span><span class="o">=</span><span class="n">MeanSquaredError</span><span class="p">(),</span> <span class="n">compile_kwars</span><span class="o">=</span><span class="p">{})</span></code>
+            <code class="highlight language-python"><span class="n">create_and_compile_model</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">lags</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">recurrent_layer</span><span class="o">=</span><span class="s1">&#39;LSTM&#39;</span><span class="p">,</span> <span class="n">recurrent_units</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">dense_units</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">Adam</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">),</span> <span class="n">loss</span><span class="o">=</span><span class="n">MeanSquaredError</span><span class="p">(),</span> <span class="n">compile_kwargs</span><span class="o">=</span><span class="p">{})</span></code>
 
 <a href="#skforecast.ForecasterRnn.utils.create_and_compile_model" class="headerlink" title="Permanent link">&para;</a></h2>
 
@@ -5622,7 +5622,8 @@ list of integers for multiple layers.</p>
 
             <details class="quote">
               <summary>Source code in <code>skforecast/ForecasterRnn/utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 25</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 24</span>
+<span class="normal"> 25</span>
 <span class="normal"> 26</span>
 <span class="normal"> 27</span>
 <span class="normal"> 28</span>
@@ -5790,7 +5791,8 @@ list of integers for multiple layers.</p>
 <span class="normal">190</span>
 <span class="normal">191</span>
 <span class="normal">192</span>
-<span class="normal">193</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_and_compile_model</span><span class="p">(</span>
+<span class="normal">193</span>
+<span class="normal">194</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_and_compile_model</span><span class="p">(</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
     <span class="n">lags</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
     <span class="n">steps</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
@@ -5801,7 +5803,7 @@ list of integers for multiple layers.</p>
     <span class="n">activation</span><span class="p">:</span> <span class="nb">str</span><span class="o">=</span><span class="s2">&quot;relu&quot;</span><span class="p">,</span>
     <span class="n">optimizer</span><span class="p">:</span> <span class="nb">object</span><span class="o">=</span><span class="n">Adam</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">),</span>
     <span class="n">loss</span><span class="p">:</span> <span class="nb">object</span><span class="o">=</span><span class="n">MeanSquaredError</span><span class="p">(),</span>
-    <span class="n">compile_kwars</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">compile_kwargs</span><span class="p">:</span> <span class="nb">dict</span><span class="o">=</span><span class="p">{},</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">keras</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Creates a neural network model for time series prediction with flexible recurrent layers.</span>
@@ -5947,16 +5949,18 @@ list of integers for multiple layers.</p>
     <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">inputs</span><span class="o">=</span><span class="n">input_layer</span><span class="p">,</span> <span class="n">outputs</span><span class="o">=</span><span class="n">output_layer</span><span class="p">)</span>
 
     <span class="c1"># Compile the model if optimizer, loss or compile_kwargs are passed</span>
-    <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">loss</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">compile_kwars</span><span class="p">:</span>
-        <span class="c1"># give more priority to the parameters passed in the function check if the parameters passes in compile_kwars include optimizer and loss if so, delete them from compile_kwargs and raise a warning</span>
-        <span class="k">if</span> <span class="s2">&quot;optimizer&quot;</span> <span class="ow">in</span> <span class="n">compile_kwars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">compile_kwars</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;optimizer&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: optimizer passed in compile_kwars. Ignoring it.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s2">&quot;loss&quot;</span> <span class="ow">in</span> <span class="n">compile_kwars</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">compile_kwars</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;loss&quot;</span><span class="p">)</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Warning: loss passed in compile_kwars. Ignoring it.&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">loss</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">compile_kwargs</span><span class="p">:</span>
+        <span class="c1"># give more priority to the parameters passed in the function check if the </span>
+        <span class="c1"># parameters passes in compile_kwargs include optimizer and loss if so, </span>
+        <span class="c1"># delete them from compile_kwargs and raise a warning</span>
+        <span class="k">if</span> <span class="s2">&quot;optimizer&quot;</span> <span class="ow">in</span> <span class="n">compile_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">compile_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;optimizer&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;`optimizer` passed in `compile_kwargs`. Ignoring it.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;loss&quot;</span> <span class="ow">in</span> <span class="n">compile_kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">compile_kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;loss&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;`loss` passed in `compile_kwargs`. Ignoring it.&quot;</span><span class="p">)</span>
 
-        <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">compile_kwars</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">optimizer</span><span class="o">=</span><span class="n">optimizer</span><span class="p">,</span> <span class="n">loss</span><span class="o">=</span><span class="n">loss</span><span class="p">,</span> <span class="o">**</span><span class="n">compile_kwargs</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">model</span>
 </code></pre></div></td></tr></table></div>

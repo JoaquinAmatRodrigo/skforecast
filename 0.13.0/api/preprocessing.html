@@ -4018,20 +4018,13 @@ pandas DataFrame or Series. It can also apply encoding to the extracted features
             </td>
             <td>
               <div class="doc-md-description">
-                <p>'year',
-'month',
-'week',
-'day_of_week',
-'day_of_month',
-'day_of_year',
-'weekend',
-'hour',
-'minute',
-'second'</p>
+                <p>List of calendar features (strings) to extract from the index. When <code>None</code>,
+the following features are extracted: 'year', 'month', 'week', 'day_of_week',
+'day_of_month', 'day_of_year', 'weekend', 'hour', 'minute', 'second'.</p>
               </div>
             </td>
             <td>
-                  <code>`[</code>
+                  <code>`None`</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -4056,18 +4049,14 @@ pandas DataFrame or Series. It can also apply encoding to the extracted features
             </td>
             <td>
               <div class="doc-md-description">
-                <p>'month': 12,
-'week': 52,
-'day_of_week': 7,
-'day_of_month': 31,
-'day_of_year': 365,
-'hour': 24,
-'minute': 60,
-'second': 60</p>
+                <p>Dictionary of maximum values for the cyclical encoding of calendar features.
+When <code>None</code>, the following values are used: {'month': 12, 'week': 52, 
+'day_of_week': 7, 'day_of_month': 31, 'day_of_year': 365, 'hour': 24, 
+'minute': 60, 'second': 60}.</p>
               </div>
             </td>
             <td>
-                  <code>{</code>
+                  <code>`None`</code>
             </td>
           </tr>
       </tbody>
@@ -4122,7 +4111,37 @@ pandas DataFrame or Series. It can also apply encoding to the extracted features
 
                   <details class="quote">
                     <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">508</span>
+                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">478</span>
+<span class="normal">479</span>
+<span class="normal">480</span>
+<span class="normal">481</span>
+<span class="normal">482</span>
+<span class="normal">483</span>
+<span class="normal">484</span>
+<span class="normal">485</span>
+<span class="normal">486</span>
+<span class="normal">487</span>
+<span class="normal">488</span>
+<span class="normal">489</span>
+<span class="normal">490</span>
+<span class="normal">491</span>
+<span class="normal">492</span>
+<span class="normal">493</span>
+<span class="normal">494</span>
+<span class="normal">495</span>
+<span class="normal">496</span>
+<span class="normal">497</span>
+<span class="normal">498</span>
+<span class="normal">499</span>
+<span class="normal">500</span>
+<span class="normal">501</span>
+<span class="normal">502</span>
+<span class="normal">503</span>
+<span class="normal">504</span>
+<span class="normal">505</span>
+<span class="normal">506</span>
+<span class="normal">507</span>
+<span class="normal">508</span>
 <span class="normal">509</span>
 <span class="normal">510</span>
 <span class="normal">511</span>
@@ -4132,40 +4151,10 @@ pandas DataFrame or Series. It can also apply encoding to the extracted features
 <span class="normal">515</span>
 <span class="normal">516</span>
 <span class="normal">517</span>
-<span class="normal">518</span>
-<span class="normal">519</span>
-<span class="normal">520</span>
-<span class="normal">521</span>
-<span class="normal">522</span>
-<span class="normal">523</span>
-<span class="normal">524</span>
-<span class="normal">525</span>
-<span class="normal">526</span>
-<span class="normal">527</span>
-<span class="normal">528</span>
-<span class="normal">529</span>
-<span class="normal">530</span>
-<span class="normal">531</span>
-<span class="normal">532</span>
-<span class="normal">533</span>
-<span class="normal">534</span>
-<span class="normal">535</span>
-<span class="normal">536</span>
-<span class="normal">537</span>
-<span class="normal">538</span>
-<span class="normal">539</span>
-<span class="normal">540</span>
-<span class="normal">541</span>
-<span class="normal">542</span>
-<span class="normal">543</span>
-<span class="normal">544</span>
-<span class="normal">545</span>
-<span class="normal">546</span>
-<span class="normal">547</span>
-<span class="normal">548</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<span class="normal">518</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">features</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">encoding</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;cyclical&quot;</span><span class="p">,</span>
+    <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cyclical&quot;</span><span class="p">,</span>
     <span class="n">max_values</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
@@ -4233,11 +4222,11 @@ pandas DataFrame or Series. It can also apply encoding to the extracted features
 
             <details class="quote">
               <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">550</span>
-<span class="normal">551</span>
-<span class="normal">552</span>
-<span class="normal">553</span>
-<span class="normal">554</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">520</span>
+<span class="normal">521</span>
+<span class="normal">522</span>
+<span class="normal">523</span>
+<span class="normal">524</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A no-op method to satisfy the scikit-learn API.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -4315,33 +4304,33 @@ pandas DataFrame or Series. It can also apply encoding to the extracted features
 
             <details class="quote">
               <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">556</span>
-<span class="normal">557</span>
-<span class="normal">558</span>
-<span class="normal">559</span>
-<span class="normal">560</span>
-<span class="normal">561</span>
-<span class="normal">562</span>
-<span class="normal">563</span>
-<span class="normal">564</span>
-<span class="normal">565</span>
-<span class="normal">566</span>
-<span class="normal">567</span>
-<span class="normal">568</span>
-<span class="normal">569</span>
-<span class="normal">570</span>
-<span class="normal">571</span>
-<span class="normal">572</span>
-<span class="normal">573</span>
-<span class="normal">574</span>
-<span class="normal">575</span>
-<span class="normal">576</span>
-<span class="normal">577</span>
-<span class="normal">578</span>
-<span class="normal">579</span>
-<span class="normal">580</span>
-<span class="normal">581</span>
-<span class="normal">582</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">transform</span><span class="p">(</span>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">526</span>
+<span class="normal">527</span>
+<span class="normal">528</span>
+<span class="normal">529</span>
+<span class="normal">530</span>
+<span class="normal">531</span>
+<span class="normal">532</span>
+<span class="normal">533</span>
+<span class="normal">534</span>
+<span class="normal">535</span>
+<span class="normal">536</span>
+<span class="normal">537</span>
+<span class="normal">538</span>
+<span class="normal">539</span>
+<span class="normal">540</span>
+<span class="normal">541</span>
+<span class="normal">542</span>
+<span class="normal">543</span>
+<span class="normal">544</span>
+<span class="normal">545</span>
+<span class="normal">546</span>
+<span class="normal">547</span>
+<span class="normal">548</span>
+<span class="normal">549</span>
+<span class="normal">550</span>
+<span class="normal">551</span>
+<span class="normal">552</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">transform</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -4428,20 +4417,13 @@ pandas DataFrame or Series. It can also apply encoding to the extracted features
             </td>
             <td>
               <div class="doc-md-description">
-                <p>'year',
-'month',
-'week',
-'day_of_week',
-'day_of_month',
-'day_of_year',
-'weekend',
-'hour',
-'minute',
-'second'</p>
+                <p>List of calendar features (strings) to extract from the index. When <code>None</code>,
+the following features are extracted: 'year', 'month', 'week', 'day_of_week',
+'day_of_month', 'day_of_year', 'weekend', 'hour', 'minute', 'second'.</p>
               </div>
             </td>
             <td>
-                  <code>`[</code>
+                  <code>`None`</code>
             </td>
           </tr>
           <tr class="doc-section-item">
@@ -4466,18 +4448,14 @@ pandas DataFrame or Series. It can also apply encoding to the extracted features
             </td>
             <td>
               <div class="doc-md-description">
-                <p>'month': 12,
-'week': 52,
-'day_of_week': 7,
-'day_of_month': 31,
-'day_of_year': 365,
-'hour': 24,
-'minute': 60,
-'second': 60</p>
+                <p>Dictionary of maximum values for the cyclical encoding of calendar features.
+When <code>None</code>, the following values are used: {'month': 12, 'week': 52, 
+'day_of_week': 7, 'day_of_month': 31, 'day_of_year': 365, 'hour': 24, 
+'minute': 60, 'second': 60}.</p>
               </div>
             </td>
             <td>
-                  <code>{</code>
+                  <code>`None`</code>
             </td>
           </tr>
       </tbody>
@@ -4615,26 +4593,11 @@ pandas DataFrame or Series. It can also apply encoding to the extracted features
 <span class="normal">441</span>
 <span class="normal">442</span>
 <span class="normal">443</span>
-<span class="normal">444</span>
-<span class="normal">445</span>
-<span class="normal">446</span>
-<span class="normal">447</span>
-<span class="normal">448</span>
-<span class="normal">449</span>
-<span class="normal">450</span>
-<span class="normal">451</span>
-<span class="normal">452</span>
-<span class="normal">453</span>
-<span class="normal">454</span>
-<span class="normal">455</span>
-<span class="normal">456</span>
-<span class="normal">457</span>
-<span class="normal">458</span>
-<span class="normal">459</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_datetime_features</span><span class="p">(</span>
+<span class="normal">444</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">create_datetime_features</span><span class="p">(</span>
     <span class="n">X</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
-    <span class="n">features</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">features</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">encoding</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;cyclical&quot;</span><span class="p">,</span>
-    <span class="n">max_values</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_values</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Extract datetime features from the DateTime index of a pandas DataFrame or Series.</span>
@@ -4643,33 +4606,18 @@ pandas DataFrame or Series. It can also apply encoding to the extracted features
 <span class="sd">    ----------</span>
 <span class="sd">    X : pandas Series, pandas DataFrame</span>
 <span class="sd">        Input DataFrame or Series with a datetime index.</span>
-<span class="sd">    features : list, default `[</span>
-<span class="sd">        &#39;year&#39;,</span>
-<span class="sd">        &#39;month&#39;,</span>
-<span class="sd">        &#39;week&#39;,</span>
-<span class="sd">        &#39;day_of_week&#39;,</span>
-<span class="sd">        &#39;day_of_month&#39;,</span>
-<span class="sd">        &#39;day_of_year&#39;,</span>
-<span class="sd">        &#39;weekend&#39;,</span>
-<span class="sd">        &#39;hour&#39;,</span>
-<span class="sd">        &#39;minute&#39;,</span>
-<span class="sd">        &#39;second&#39;</span>
-<span class="sd">    ]`</span>
-<span class="sd">        List of calendar features (strings) to extract from the index.</span>
+<span class="sd">    features : list, default `None`</span>
+<span class="sd">        List of calendar features (strings) to extract from the index. When `None`,</span>
+<span class="sd">        the following features are extracted: &#39;year&#39;, &#39;month&#39;, &#39;week&#39;, &#39;day_of_week&#39;,</span>
+<span class="sd">        &#39;day_of_month&#39;, &#39;day_of_year&#39;, &#39;weekend&#39;, &#39;hour&#39;, &#39;minute&#39;, &#39;second&#39;.</span>
 <span class="sd">    encoding : str, default `&#39;cyclical&#39;`</span>
 <span class="sd">        Encoding method for the extracted features. Options are None, &#39;cyclical&#39; or</span>
 <span class="sd">        &#39;onehot&#39;.</span>
-<span class="sd">    max_values : dict, default {</span>
-<span class="sd">        &#39;month&#39;: 12,</span>
-<span class="sd">        &#39;week&#39;: 52,</span>
-<span class="sd">        &#39;day_of_week&#39;: 7,</span>
-<span class="sd">        &#39;day_of_month&#39;: 31,</span>
-<span class="sd">        &#39;day_of_year&#39;: 365,</span>
-<span class="sd">        &#39;hour&#39;: 24,</span>
-<span class="sd">        &#39;minute&#39;: 60,</span>
-<span class="sd">        &#39;second&#39;: 60</span>
-<span class="sd">    }</span>
+<span class="sd">    max_values : dict, default `None`</span>
 <span class="sd">        Dictionary of maximum values for the cyclical encoding of calendar features.</span>
+<span class="sd">        When `None`, the following values are used: {&#39;month&#39;: 12, &#39;week&#39;: 52, </span>
+<span class="sd">        &#39;day_of_week&#39;: 7, &#39;day_of_month&#39;: 31, &#39;day_of_year&#39;: 365, &#39;hour&#39;: 24, </span>
+<span class="sd">        &#39;minute&#39;: 60, &#39;second&#39;: 60}.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
