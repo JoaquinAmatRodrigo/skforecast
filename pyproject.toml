@@ -88,8 +88,9 @@ docs = [
     "mkdocstrings==0.25.2",
     "mkdocstrings-python==1.10.7",
     "jupyter-contrib-nbextensions==0.7.0",
-    "mike==1.1.2",          #2.1.2 not working when publishing online
-    "notebook==6.4.12"
+    "mike==1.1.2",              # 2.1.2 not working when publishing online
+    "notebook==6.4.12",
+    "mkdocs==1.5.3"
 ]
 
 test = [

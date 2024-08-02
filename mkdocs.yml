@@ -122,6 +122,7 @@ plugins:
       allow_errors: False
       include_requirejs: True
   - search
+  - mike
 
 theme:
   name: material
