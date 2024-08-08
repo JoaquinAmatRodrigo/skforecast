@@ -132,7 +132,7 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 + [**Forecasting with gradient boosting: XGBoost, LightGBM and CatBoost**](https://www.cienciadedatos.net/documentos/py39-forecasting-time-series-with-skforecast-xgboost-lightgbm-catboost.html)
 
-+ [**Forecasting with XGBoost**](https://www.cienciadedatos.net/documentos/https://cienciadedatos.net/documentos/py56-forecasting-time-series-with-xgboost)
++ [**Forecasting with XGBoost**](https://www.cienciadedatos.net/documentos/py56-forecasting-time-series-with-xgboost.html)
 
 + [**Global Forecasting Models: Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
 

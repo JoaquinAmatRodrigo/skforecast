@@ -59,8 +59,7 @@ nav:
     - Plotting: user_guides/plotting.ipynb
     - Datasets: user_guides/datasets.ipynb
 
-  - Examples and tutorials:
-    - Examples and tutorials: examples/examples.md
+  - Examples and tutorials: examples/examples.md
 
   - API Reference:
     - ForecasterAutoreg: api/ForecasterAutoreg.md
@@ -95,11 +94,9 @@ nav:
     - Parallelization in skforecast: faq/parallelization-skforecast.ipynb
     - Profiling skforecast: faq/profiling-skforecast.ipynb
 
-  - Releases: 
-      - Releases: releases/releases.md
+  - Releases: releases/releases.md
 
-  - Authors: 
-      - Authors: authors/authors.md
+  - Authors: authors/authors.md
 
 plugins:
   - mkdocstrings:
