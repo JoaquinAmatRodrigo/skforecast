@@ -6447,6 +6447,31 @@ predictions.head(3)</div>
 </div>
 </div>
 </div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell" id="cell-id=9132d395">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px; padding-right: 10px">
+<p class="title">
+<i style="font-size: 18px; color:#ff9100; border-color: #ff1744;"></i>
+<b style="color: #ff9100;"> <span style="color: #ff9100;">⚠</span> Warning</b>
+</p>
+<p>When using <code>'ordinal_category'</code> a new categorical column is created (<code>_level_skforecast</code>). Therefore, the regressor must be able to handle categorical variables, otherwise use <code>'ordinal'</code> or <code>'onehot'</code> encoding.</p>
+<p><b> HistGradientBoostingRegressor </b></p>
+<div class="highlight"><pre><span></span><span class="n">HistGradientBoostingRegressor</span><span class="p">(</span><span class="n">categorical_features</span><span class="o">=</span><span class="s2">"from_dtype"</span><span class="p">)</span>
+</pre></div>
+<p><b> LightGBM </b></p>
+<p>LGBMRegressor automatically handles categorical variables.</p>
+<p><b> XGBoost</b></p>
+<div class="highlight"><pre><span></span><span class="n">XGBRegressor</span><span class="p">(</span><span class="n">enable_categorical</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=a76479c2">
 <div class="jp-Cell-inputWrapper" tabindex="0">
