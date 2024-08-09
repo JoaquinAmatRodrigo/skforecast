@@ -2872,7 +2872,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Libraries</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 <span class="kn">from</span> <span class="nn">xgboost</span> <span class="kn">import</span> <span class="n">XGBRegressor</span>
 <span class="kn">from</span> <span class="nn">lightgbm</span> <span class="kn">import</span> <span class="n">LGBMRegressor</span>
 <span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
@@ -2881,7 +2880,6 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <div class="clipboard-copy-txt" id="cell-1"># Libraries
 # ==============================================================================
 import pandas as pd
-import matplotlib.pyplot as plt
 from xgboost import XGBRegressor
 from lightgbm import LGBMRegressor
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
@@ -3070,10 +3068,10 @@ Training index type: DatetimeIndex
 Training index frequency: MS 
 Regressor parameters: {'boosting_type': 'gbdt', 'class_weight': None, 'colsample_bytree': 1.0, 'importance_type': 'split', 'learning_rate': 0.1, 'max_depth': -1, 'min_child_samples': 20, 'min_child_weight': 0.001, 'min_split_gain': 0.0, 'n_estimators': 100, 'n_jobs': None, 'num_leaves': 31, 'objective': None, 'random_state': 123, 'reg_alpha': 0.0, 'reg_lambda': 0.0, 'subsample': 1.0, 'subsample_for_bin': 200000, 'subsample_freq': 0, 'verbose': -1} 
 fit_kwargs: {} 
-Creation date: 2024-07-29 17:42:40 
-Last fit date: 2024-07-29 17:42:40 
+Creation date: 2024-08-09 11:11:32 
+Last fit date: 2024-08-09 11:11:32 
 Skforecast version: 0.13.0 
-Python version: 3.11.5 
+Python version: 3.12.4 
 Forecaster id: None </pre>
 </div>
 </div>
@@ -3284,7 +3282,7 @@ forecaster.get_feature_importances()</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and fit forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
-                 <span class="n">regressor</span>       <span class="o">=</span> <span class="n">XGBRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
+                 <span class="n">regressor</span>       <span class="o">=</span> <span class="n">XGBRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">enable_categorical</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
                  <span class="n">lags</span>            <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
                  <span class="n">differentiation</span> <span class="o">=</span> <span class="kc">None</span>
              <span class="p">)</span>
@@ -3295,7 +3293,7 @@ forecaster.get_feature_importances()</div>
 <div class="clipboard-copy-txt" id="cell-7"># Create and fit forecaster
 # ==============================================================================
 forecaster = ForecasterAutoreg(
-                 regressor       = XGBRegressor(random_state=123),
+                 regressor       = XGBRegressor(random_state=123, enable_categorical=True),
                  lags            = 8,
                  differentiation = None
              )
@@ -3319,7 +3317,7 @@ ForecasterAutoreg
 Regressor: XGBRegressor(base_score=None, booster=None, callbacks=None,
              colsample_bylevel=None, colsample_bynode=None,
              colsample_bytree=None, device=None, early_stopping_rounds=None,
-             enable_categorical=False, eval_metric=None, feature_types=None,
+             enable_categorical=True, eval_metric=None, feature_types=None,
              gamma=None, grow_policy=None, importance_type=None,
              interaction_constraints=None, learning_rate=None, max_bin=None,
              max_cat_threshold=None, max_cat_to_onehot=None,
@@ -3338,12 +3336,12 @@ Exogenous variables names: ['exog_1', 'exog_2']
 Training range: [Timestamp('1992-04-01 00:00:00'), Timestamp('2005-06-01 00:00:00')] 
 Training index type: DatetimeIndex 
 Training index frequency: MS 
-Regressor parameters: {'objective': 'reg:squarederror', 'base_score': None, 'booster': None, 'callbacks': None, 'colsample_bylevel': None, 'colsample_bynode': None, 'colsample_bytree': None, 'device': None, 'early_stopping_rounds': None, 'enable_categorical': False, 'eval_metric': None, 'feature_types': None, 'gamma': None, 'grow_policy': None, 'importance_type': None, 'interaction_constraints': None, 'learning_rate': None, 'max_bin': None, 'max_cat_threshold': None, 'max_cat_to_onehot': None, 'max_delta_step': None, 'max_depth': None, 'max_leaves': None, 'min_child_weight': None, 'missing': nan, 'monotone_constraints': None, 'multi_strategy': None, 'n_estimators': None, 'n_jobs': None, 'num_parallel_tree': None, 'random_state': 123, 'reg_alpha': None, 'reg_lambda': None, 'sampling_method': None, 'scale_pos_weight': None, 'subsample': None, 'tree_method': None, 'validate_parameters': None, 'verbosity': None} 
+Regressor parameters: {'objective': 'reg:squarederror', 'base_score': None, 'booster': None, 'callbacks': None, 'colsample_bylevel': None, 'colsample_bynode': None, 'colsample_bytree': None, 'device': None, 'early_stopping_rounds': None, 'enable_categorical': True, 'eval_metric': None, 'feature_types': None, 'gamma': None, 'grow_policy': None, 'importance_type': None, 'interaction_constraints': None, 'learning_rate': None, 'max_bin': None, 'max_cat_threshold': None, 'max_cat_to_onehot': None, 'max_delta_step': None, 'max_depth': None, 'max_leaves': None, 'min_child_weight': None, 'missing': nan, 'monotone_constraints': None, 'multi_strategy': None, 'n_estimators': None, 'n_jobs': None, 'num_parallel_tree': None, 'random_state': 123, 'reg_alpha': None, 'reg_lambda': None, 'sampling_method': None, 'scale_pos_weight': None, 'subsample': None, 'tree_method': None, 'validate_parameters': None, 'verbosity': None} 
 fit_kwargs: {} 
-Creation date: 2024-07-29 17:42:40 
-Last fit date: 2024-07-29 17:42:41 
+Creation date: 2024-08-09 11:11:32 
+Last fit date: 2024-08-09 11:11:32 
 Skforecast version: 0.13.0 
-Python version: 3.11.5 
+Python version: 3.12.4 
 Forecaster id: None </pre>
 </div>
 </div>
@@ -3517,6 +3515,37 @@ forecaster.get_feature_importances()</div>
 </table>
 </div>
 </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<div class="admonition note" name="html-admonition" style="background: rgba(255,145,0,.1); padding-top: 0px; padding-bottom: 6px; border-radius: 8px; border-left: 8px solid #ff9100; border-color: #ff9100; padding-left: 10px; padding-right: 10px">
+<p class="title">
+<i style="font-size: 18px; color:#ff9100; border-color: #ff1744;"></i>
+<b style="color: #ff9100;"> <span style="color: #ff9100;">⚠</span> Warning</b>
+</p>
+<p>Starting with version <code>0.13.0</code>, the <code>ForecasterAutoregMultiSeries</code> class defaults to using <code>encoding='ordinal_category'</code> for encoding time series identifiers. This approach creates a new column (<i>_level_skforecast</i>) of type pandas <code>category</code>. Consequently, the regressors must be able to handle categorical variables. If the regressors do not support categorical variables, the user should set the encoding to <code>'ordinal'</code> or <code>'onehot'</code> for compatibility.</p>
+<p>Some examples of regressors that support categorical variables and how to enable them are:</p>
+<ul>
+<li>
+<strong>HistGradientBoostingRegressor:</strong> <code>HistGradientBoostingRegressor(categorical_features="from_dtype")</code><br/><br/>
+</li>
+<li>
+<strong>LightGBM:</strong>
+<code>LGBMRegressor</code> does not allow configuration of categorical features during initialization, but rather in its <code>fit</code> method. Therefore, use <code>fit_kwargs = {'categorical_feature':'auto'}</code>. This is the default behavior of <code>LGBMRegressor</code> if no indication is given.
+        <br/><br/>
+</li>
+<li>
+<strong>XGBoost:</strong> <code>XGBRegressor(enable_categorical=True)</code>
+</li>
+</ul>
 </div>
 </div>
 </div>
