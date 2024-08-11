@@ -169,7 +169,11 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 + [**Forecasting con gradient boosting: XGBoost, LightGBM y CatBoost**](https://www.cienciadedatos.net/documentos/py39-forecasting-series-temporales-con-skforecast-xgboost-lightgbm-catboost.html)
 
++ [**Forecasting con XGBoost**](https://www.cienciadedatos.net/documentos/py56-forecasting-series-temporales-con-xgboost.html)
+
 + [**Global Forecasting Models: Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)
+
++ [**Modelos de forecasting globales: Análisis comparativo de modelos de una y múltiples series**](https://www.cienciadedatos.net/documentos/py53-modelos-forecasting-globales.html)
 
 + [**Forecasting Probabilístico**](https://www.cienciadedatos.net/documentos/py42-intervalos-prediccion-modelos-forecasting-machine-learning.html)
 
@@ -184,6 +188,8 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 + [**Forecasting de la demanda eléctrica**](https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html)
 
 + [**Forecasting de las visitas a una página web**](https://www.cienciadedatos.net/documentos/py37-forecasting-visitas-web-machine-learning.html)
+
++ [**Interpretabilidad en modelos de forecasting**](https://www.cienciadedatos.net/documentos/py57-modelos-forecasting-interpretables.html)
 
 + [**Predicción del precio de Bitcoin con Python**](https://www.cienciadedatos.net/documentos/py41-forecasting-criptomoneda-bitcoin-machine-learning-python.html)
 

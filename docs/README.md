@@ -143,7 +143,11 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 <i class="fa-solid fa-sitemap fa" style="font-size: 25px; color:#00cc99;"></i> [**Forecasting con gradient boosting: XGBoost, LightGBM y CatBoost**](https://www.cienciadedatos.net/documentos/py39-forecasting-series-temporales-con-skforecast-xgboost-lightgbm-catboost.html)
 
+<i class="fa-solid fa-diagram-project fa-rotate-90" style="font-size: 25px; color:#74C0FC;"></i> [**Forecasting con XGBoost**](https://www.cienciadedatos.net/documentos/py56-forecasting-series-temporales-con-xgboost.html)
+
 <i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Global Forecasting Models: Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast-español.html)
+
+<i class="fa-solid fa-globe" style="font-size: 25px; color:#6b8e23;"></i> [**Modelos de forecasting globales: Análisis comparativo de modelos de una y múltiples series**](https://www.cienciadedatos.net/documentos/py53-modelos-forecasting-globales.html)
 
 <i class="fa-light fa-chart-line fa" style="font-size: 25px; color:#f26e1d;"></i>  [**Forecasting probabilístico**](https://www.cienciadedatos.net/documentos/py42-intervalos-prediccion-modelos-forecasting-machine-learning.html)
 
@@ -152,6 +156,8 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 <i class="fa-solid fa-wave-square" style="color: #fbbb09;"></i> [**Predicción demanda intermitente**](https://www.cienciadedatos.net/documentos/py48-forecasting-demanda-intermitente.html)
 
 <i class="fa-solid fa-arrow-trend-up" style="color: #fbbb09;"></i> [**Modelar series temporales con tendencia utilizando modelos de árboles**](https://cienciadedatos.net/documentos/py49-modelar-tendencia-en-series-temporales-modelos-de-arboles.html)
+
+<i class="fa-solid fa-chart-gantt" style="color: #ff004f;"></i> [**Interpretabilidad en modelos de forecasting**](https://www.cienciadedatos.net/documentos/py57-modelos-forecasting-interpretables.html)
 
 <i class="fa-duotone fa-lightbulb fa" style="font-size: 25px; color:#fcea2b;"></i> [**Forecasting de la demanda eléctrica**](https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html)
 
