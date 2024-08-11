@@ -153,6 +153,8 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 <i class="fa-solid fa-layer-group" style="color: #001633;"></i> [**Forecasting con Deep Learning**](https://cienciadedatos.net/documentos/py54-forecasting-con-deep-learning)
 
+<i class="fa-solid fa-magnifying-glass" style="font-size: 25px; color:purple;"></i> [**Forecasting de series incompletas con valores faltantes**](https://www.cienciadedatos.net/documentos/py46-forecasting-series-temporales-incompletas.html)
+
 <i class="fa-solid fa-wave-square" style="color: #fbbb09;"></i> [**Predicción demanda intermitente**](https://www.cienciadedatos.net/documentos/py48-forecasting-demanda-intermitente.html)
 
 <i class="fa-solid fa-arrow-trend-up" style="color: #fbbb09;"></i> [**Modelar series temporales con tendencia utilizando modelos de árboles**](https://cienciadedatos.net/documentos/py49-modelar-tendencia-en-series-temporales-modelos-de-arboles.html)
