@@ -64,6 +64,8 @@ Practical examples and tutorials to help you understand and apply skforecast.
 
 <i class="fa-solid fa-chart-gantt" style="color: #ff004f;"></i> [**Interpretabilidad en modelos de forecasting**](https://www.cienciadedatos.net/documentos/py57-modelos-forecasting-interpretables.html)
 
+<i class="fa-solid fa-magnifying-glass" style="font-size: 25px; color:purple;"></i> [**Forecasting de series incompletas con valores faltantes**](https://www.cienciadedatos.net/documentos/py46-forecasting-series-temporales-incompletas.html)
+
 <i class="fa-solid fa-wave-square" style="color: #fbbb09;"></i> [**Predicción demanda intermitente**](https://www.cienciadedatos.net/documentos/py48-forecasting-demanda-intermitente.html)
 
 <i class="fa-duotone fa-lightbulb fa" style="font-size: 25px; color:#fcea2b;"></i> [**Forecasting de la demanda eléctrica**](https://www.cienciadedatos.net/documentos/py29-forecasting-demanda-energia-electrica-python.html)
