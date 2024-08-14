@@ -1300,6 +1300,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 steps = list(np.arange(self.steps) + 1)
             elif isinstance(steps, list):
                 steps = list(np.array(steps))
+            
+            # Required since numpy 2.0
+            steps = [int(step) for step in steps]
 
             if in_sample_residuals:
                 if not set(steps).issubset(set(self.in_sample_residuals.keys())):

@@ -151,7 +151,7 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
         [np.array([1, 2, 3, 4]), {'alpha': 0.2345829390285611},
             0.21647289061896782, 0.2345829390285611]], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([6, 4, 0, 7, 3, 8, 5, 9, 1, 2], dtype='int64'),
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float, 
         'alpha': float
@@ -224,7 +224,7 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
         {'alpha': 0.2345829390285611}, 0.21647289061896782,
         0.2345829390285611]], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([6, 4, 0, 7, 3, 8, 5, 9, 1, 2], dtype='int64')
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float, 
         'alpha': float

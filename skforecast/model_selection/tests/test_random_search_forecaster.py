@@ -58,7 +58,7 @@ def test_output_random_search_forecaster_ForecasterAutoreg_with_mocked():
         'alpha': np.array([1.00000000e-05, 3.59381366e-02, 1.00000000e-05, 
                            3.59381366e-02, 1.66810054e+01, 1.66810054e+01])
         },
-        index = pd.Index([1, 0, 4, 3, 5, 2], dtype='int64')
+        index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
