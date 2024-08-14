@@ -874,14 +874,17 @@ def _evaluate_grid_hyperparameters_sarimax(
                   **metric_dict
               })
     
-    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
+    results = (
+        results
+        .sort_values(by=list(metric_dict.keys())[0], ascending=True)
+        .reset_index(drop=True)
+    )
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
-        best_params = results['params'].iloc[0]
-        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
-        
+        best_params = results.loc[0, 'params']
+        best_metric = results.loc[0, list(metric_dict.keys())[0]]
         forecaster.set_params(best_params)
         forecaster.fit(y=y, exog=exog, suppress_warnings=suppress_warnings_fit)
         
