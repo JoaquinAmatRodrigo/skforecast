@@ -11,10 +11,12 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
+import inspect
+import textwrap
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
-import inspect
+from copy import copy
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
@@ -271,6 +273,17 @@ class ForecasterAutoregCustom(ForecasterBase):
                       if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params()
+        params = "\n    " + textwrap.fill(str(params), width=80, subsequent_indent="    ")
+
+        exog_col_names = copy(self.exog_col_names)
+        if exog_col_names is not None:
+            if len(exog_col_names) > 50:
+                exog_col_names = exog_col_names[:50] + ["..."]
+            exog_col_names = ", ".join(exog_col_names)
+            if len(exog_col_names) > 58:
+                exog_col_names = "\n    " + textwrap.fill(
+                    exog_col_names, width=80, subsequent_indent="    "
+                )
 
         info = (
             f"{'=' * len(type(self).__name__)} \n"
@@ -278,14 +291,13 @@ class ForecasterAutoregCustom(ForecasterBase):
             f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
             f"Predictors created with function: {self.fun_predictors.__name__} \n"
+            f"Window size: {self.window_size} \n"
+            f"Exogenous included: {self.included_exog} \n"
+            f"Exogenous names: {exog_col_names} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
-            f"Window size: {self.window_size} \n"
             f"Weight function included: {True if self.weight_func is not None else False} \n"
             f"Differentiation order: {self.differentiation} \n"
-            f"Exogenous included: {self.included_exog} \n"
-            f"Type of exogenous variable: {self.exog_type} \n"
-            f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"

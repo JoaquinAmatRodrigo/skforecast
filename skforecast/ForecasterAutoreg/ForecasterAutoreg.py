@@ -11,11 +11,13 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
+import inspect
+import textwrap
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.base import clone
-import inspect
+from copy import copy
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
@@ -301,6 +303,17 @@ class ForecasterAutoreg(ForecasterBase):
                       if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params(deep=True)
+        params = "\n    " + textwrap.fill(str(params), width=80, subsequent_indent="    ")
+
+        exog_col_names = copy(self.exog_col_names)
+        if exog_col_names is not None:
+            if len(exog_col_names) > 50:
+                exog_col_names = exog_col_names[:50] + ["..."]
+            exog_col_names = ", ".join(exog_col_names)
+            if len(exog_col_names) > 58:
+                exog_col_names = "\n    " + textwrap.fill(
+                    exog_col_names, width=80, subsequent_indent="    "
+                )
 
         info = (
             f"{'=' * len(type(self).__name__)} \n"
@@ -308,13 +321,13 @@ class ForecasterAutoreg(ForecasterBase):
             f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
+            f"Window size: {self.window_size} \n"
+            f"Exogenous included: {self.included_exog} \n"
+            f"Exogenous names: {exog_col_names} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
-            f"Window size: {self.window_size} \n"
             f"Weight function included: {True if self.weight_func is not None else False} \n"
             f"Differentiation order: {self.differentiation} \n"
-            f"Exogenous included: {self.included_exog} \n"
-            f"Exogenous variables names: {self.exog_col_names} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
@@ -341,7 +354,7 @@ class ForecasterAutoreg(ForecasterBase):
                     if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params(deep=True)
-
+        params = str(params)
         style = """
         <style>
             .container {
@@ -378,6 +391,7 @@ class ForecasterAutoreg(ForecasterBase):
             background-color: #e0e0e0;
             }
             .container ul {
+                font-family: 'Courier New', monospace;
                 list-style-type: none;
                 padding-left: 20px;
                 margin: 10px 0;
@@ -405,18 +419,28 @@ class ForecasterAutoreg(ForecasterBase):
                 <ul>
                     <li><strong>Regressor:</strong> {self.regressor}</li>
                     <li><strong>Lags:</strong> {self.lags}</li>
-                    <li><strong>Transformer for y:</strong> {self.transformer_y}</li>
-                    <li><strong>Transformer for exog:</strong> {self.transformer_exog}</li>
                     <li><strong>Window size:</strong> {self.window_size}</li>
+                    <li><strong>Exogenous included:</strong> {self.included_exog}</li>
                     <li><strong>Weight function included:</strong> {self.weight_func is not None}</li>
                     <li><strong>Differentiation order:</strong> {self.differentiation}</li>
-                    <li><strong>Exogenous included:</strong> {self.included_exog}</li>
+                    <li><strong>Creation date:</strong> {self.creation_date}</li>
+                    <li><strong>Last fit date:</strong> {self.fit_date}</li>
+                    <li><strong>Skforecast version:</strong> {self.skforecast_version}</li>
+                    <li><strong>Python version:</strong> {self.python_version}</li>
+                    <li><strong>Forecaster id:</strong> {self.forecaster_id}</li>
                 </ul>
             </details>
             <details>
                 <summary>Exogenous Variables</summary>
                 <ul>
                  {self.exog_col_names}
+                </ul>
+            </details>
+            <details>
+                <summary>Data Transformations</summary>
+                <ul>
+                 <li><strong>Transformer for y:</strong> {self.transformer_y}</li>
+                 <li><strong>Transformer for exog:</strong> {self.transformer_exog}</li>
                 </ul>
             </details>
             <details>
@@ -437,16 +461,6 @@ class ForecasterAutoreg(ForecasterBase):
                 <summary>Fit Kwargs</summary>
                 <ul>
                     {self.fit_kwargs}
-                </ul>
-            </details>
-            <details>
-                <summary>Metadata</summary>
-                <ul>
-                    <li><strong>Creation date:</strong> {self.creation_date}</li>
-                    <li><strong>Last fit date:</strong> {self.fit_date}</li>
-                    <li><strong>Skforecast version:</strong> {self.skforecast_version}</li>
-                    <li><strong>Python version:</strong> {self.python_version}</li>
-                    <li><strong>Forecaster id:</strong> {self.forecaster_id}</li>
                 </ul>
             </details>
         </div>
