@@ -11,10 +11,11 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
+import inspect
+from copy import copy
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
-import inspect
 from copy import copy
 from joblib import Parallel, delayed, cpu_count
 
@@ -198,7 +199,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         forecaster_id: Optional[Union[str, int]] = None,
     ) -> None:
         
-        self.regressor               = regressor
+        self.regressor               = copy(regressor)
         self.steps                   = steps
         self.transformer_y           = transformer_y
         self.transformer_exog        = transformer_exog

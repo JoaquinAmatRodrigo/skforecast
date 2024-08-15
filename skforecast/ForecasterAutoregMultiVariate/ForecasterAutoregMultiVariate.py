@@ -11,12 +11,12 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
+import inspect
+from copy import copy
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 from sklearn.preprocessing import StandardScaler
-import inspect
-from copy import copy
 from itertools import chain
 from joblib import Parallel, delayed, cpu_count
 
@@ -232,7 +232,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
         
-        self.regressor               = regressor
+        self.regressor               = copy(regressor)
         self.level                   = level
         self.steps                   = steps
         self.transformer_series      = transformer_series

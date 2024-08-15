@@ -12,6 +12,7 @@ import sys
 import numpy as np
 import pandas as pd
 import pmdarima
+from copy import copy
 from pmdarima.arima import ARIMA
 from sklearn.base import clone
 from sklearn.exceptions import NotFittedError
@@ -123,7 +124,7 @@ class ForecasterSarimax():
         forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
         
-        self.regressor          = regressor
+        self.regressor          = copy(regressor)
         self.transformer_y      = transformer_y
         self.transformer_exog   = transformer_exog
         self.window_size        = 1
@@ -182,18 +183,18 @@ class ForecasterSarimax():
             f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
             f"Regressor parameters: {self.params} \n"
-            f"fit_kwargs: {self.fit_kwargs} \n"
             f"Window size: {self.window_size} \n"
-            f"Transformer for y: {self.transformer_y} \n"
-            f"Transformer for exog: {self.transformer_exog} \n"
             f"Exogenous included: {self.included_exog} \n"
             f"Type of exogenous variable: {self.exog_type} \n"
             f"Exogenous variables names: {self.exog_col_names} \n"
+            f"Transformer for y: {self.transformer_y} \n"
+            f"Transformer for exog: {self.transformer_exog} \n"
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
+            f"fit_kwargs: {self.fit_kwargs} \n"
             f"Index seen by the forecaster: {self.extended_index} \n"
             f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"

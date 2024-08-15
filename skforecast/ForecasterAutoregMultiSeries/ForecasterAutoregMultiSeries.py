@@ -12,13 +12,13 @@ import sys
 import numpy as np
 import pandas as pd
 import sklearn
+import inspect
+from copy import copy
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import OrdinalEncoder
-from copy import copy
-import inspect
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
@@ -300,7 +300,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
 
-        self.regressor               = regressor
+        self.regressor               = copy(regressor)
         self.encoding                = encoding
         self.encoder                 = None
         self.encoding_mapping        = {}
