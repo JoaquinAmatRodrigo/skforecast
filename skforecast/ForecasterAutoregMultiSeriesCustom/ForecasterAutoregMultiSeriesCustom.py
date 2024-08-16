@@ -71,7 +71,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         Name of the predictors returned by `fun_predictors`. If `None`, predictors are
         named using the prefix 'custom_predictor_<i>' where `i` is the index of the 
         position the predictor has in the returned array of `fun_predictors`.
-    encoding : str, default `'ordinal_category'`
+    encoding : str, default `'ordinal'`
         Encoding used to identify the different series. 
         
         - If `'ordinal'`, a single column is created with integer values from 0 
@@ -83,7 +83,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         - If None, no column is created to identify the series. Internally, the
         series are identified as an integer from 0 to n_series - 1, but no column
         is created in the training matrices.
-        **New in version 0.12.0**
+        **Changed to 'ordinal' in version 0.14.0**
     transformer_series : transformer (preprocessor), dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -161,7 +161,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         - If None, no column is created to identify the series. Internally, the
         series are identified as an integer from 0 to n_series - 1, but no column
         is created in the training matrices.
-        **New in version 0.12.0**
+        **Changed to 'ordinal' in version 0.14.0**
     encoder : sklearn.preprocessing
         Scikit-learn preprocessing encoder used to encode the series.
         **New in version 0.12.0**
@@ -301,7 +301,7 @@ class ForecasterAutoregMultiSeriesCustom(ForecasterBase):
         fun_predictors: Callable, 
         window_size: int,
         name_predictors: Optional[list] = None,
-        encoding: Optional[str] = 'ordinal_category',
+        encoding: Optional[str] = 'ordinal',
         transformer_series: Optional[Union[object, dict]] = None,
         transformer_exog: Optional[object] = None,
         weight_func: Optional[Union[Callable, dict]] = None,
