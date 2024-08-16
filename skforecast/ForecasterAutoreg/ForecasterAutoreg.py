@@ -410,7 +410,7 @@ class ForecasterAutoreg(ForecasterBase):
             }
         </style>
         """
-
+        
         content = f"""
         <div class="container">
             <h2>{type(self).__name__}</h2>
@@ -463,6 +463,7 @@ class ForecasterAutoreg(ForecasterBase):
                     {self.fit_kwargs}
                 </ul>
             </details>
+        <p><a href="https://skforecast.org/{skforecast.__version__}/api/forecasterautoreg#forecasterautoreg">&#128712 API Reference</a></p>
         </div>
         """
 
