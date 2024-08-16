@@ -1864,11 +1864,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         last_window_values_new = pd.DataFrame(last_window_values_dict).to_numpy()
         # Exog is expected to be a dict where each key is the step. The value is
         # NumPy array where each column an exog and each row a series
-        exog_values = np.concat(list(exog_values_dict.values()))
-        exog_values_dict_new = {}
-        for i in range(steps):
-            exog_values_dict_new[i+1] = exog_values[i::steps, :]
-
+        if exog is not None:
+            exog_values = np.concat(list(exog_values_dict.values()))
+            exog_values_dict_new = {}
+            for i in range(steps):
+                exog_values_dict_new[i+1] = exog_values[i::steps, :]
+        else:
+            exog_values_dict_new = None
   
         predictions = self._recursive_predict_new(
                           steps       = steps,
