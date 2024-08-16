@@ -11,11 +11,12 @@ import logging
 import sys
 import numpy as np
 import pandas as pd
+import inspect
+from copy import copy
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.base import clone
-import inspect
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
@@ -221,7 +222,7 @@ class ForecasterAutoreg(ForecasterBase):
         forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
 
-        self.regressor                   = regressor
+        self.regressor                   = copy(regressor)
         self.transformer_y               = transformer_y
         self.transformer_exog            = transformer_exog
         self.weight_func                 = weight_func
