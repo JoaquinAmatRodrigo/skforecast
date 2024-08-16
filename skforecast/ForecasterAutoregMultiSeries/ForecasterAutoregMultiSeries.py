@@ -1514,7 +1514,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         return predictions
 
 
-    def _recursive_predict_all_levels(
+    def _recursive_predict_new(
         self,
         steps: int,
         levels: list,
@@ -1561,30 +1561,50 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels_encoded_shape = levels_encoded.shape[1]
         else:
             levels_encoded_shape = 0
+        # print(f"levels_encoded_shape: {levels_encoded_shape}")
+        # print(f"levels_encoded: {levels_encoded}")
 
         lags_shape = len(self.lags)
-        exog_shape = exog.shape[1] if exog is not None else 0
+        # print(f"lags_shape: {lags_shape}")
+        exog_shape = len(self.exog_col_names) if exog is not None else 0
+        # print(f"exog_shape: {exog_shape}")
+        # print(exog)
 
         features_shape = lags_shape + levels_encoded_shape + exog_shape
+        # print(f"features_shape: {features_shape}")
         features = np.full(shape=(n_levels, features_shape), fill_value=np.nan, dtype=float)
+        # print("features:")
+        # print(features)
         if self.encoding is not None:
-            features[lags_shape : lags_shape + levels_encoded_shape] = levels_encoded
-
+            features[:, lags_shape : lags_shape + levels_encoded_shape] = levels_encoded
+        # print("features:")
+        # print(features)
         predictions = np.full(shape=(steps, n_levels), fill_value=np.nan, dtype=float)
         last_window = np.concatenate((last_window, predictions), axis=0)
+        # print(f"predictions: {predictions}")
+        # print(f"last_window: {last_window}")
 
+        # print(f"steps: {steps}")
         for i in range(steps):
-
-            features[:, :lags_shape] = last_window[-self.lags - (steps - i), :]
+            step = i + 1
+            features[:, :lags_shape] = last_window[-self.lags - (steps - i), :].transpose()
+            # print("features:")
+            # print(features)
             if exog is not None:
-                features[:, -exog_shape:] = exog[i,].transpose()
-
+                # print(f"Exog step: {step}")
+                # print(exog[step])
+                features[:, -exog_shape:] = exog[step]
+            # print("features:")
+            # print(features)
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore", category=UserWarning)
-                pred = self.regressor.predict(features.reshape(1, -1)).ravel()[0]
-                predictions[1, :] = pred
+                pred = self.regressor.predict(features)
+                predictions[i, :] = pred
+            # print(f"predictions step {step}")
+            # print(pred)
+            # print(predictions)
 
             # Update `last_window` values. The first position is discarded and
             # the new prediction is added at the end.
@@ -1751,15 +1771,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         predictions = []
         for level in levels:
             
-            # Sacar esto fuera del bucle
-            # -----------------------------------
             preds_level = self._recursive_predict(
                               steps       = steps,
                               level       = level,
                               last_window = last_window_values_dict[level],
                               exog        = exog_values_dict[level]
                           )
-            # -----------------------------------
         
             if self.differentiation is not None:
                 preds_level = self.differentiator_[level].inverse_transform_next_window(preds_level)
@@ -1784,6 +1801,113 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         set_skforecast_warnings(suppress_warnings, action='default')
 
         return predictions
+    
+    def predict_new(
+        self,
+        steps: int,
+        levels: Optional[Union[str, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+        suppress_warnings: bool = False
+    ) -> pd.DataFrame:
+        """
+        Predict n steps ahead. It is an recursive process in which, each prediction,
+        is used as a predictor for the next step. Only levels whose last window
+        ends at the same datetime index can be predicted together.
+
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        levels : str, list, default `None`
+            Time series to be predicted. If `None` all levels whose last window
+            ends at the same datetime index will be predicted together.
+        last_window : pandas DataFrame, default `None`
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
+            If `last_window = None`, the values stored in `self.last_window` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+        exog : pandas Series, pandas DataFrame, dict, default `None`
+            Exogenous variable/s included as predictor/s.
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
+
+        Returns
+        -------
+        predictions : pandas DataFrame
+            Predicted values, one column for each level.
+
+        """
+
+        set_skforecast_warnings(suppress_warnings, action='ignore')
+
+        (
+            last_window_values_dict,
+            exog_values_dict,
+            levels,
+            prediction_index,
+            _
+        ) = self._create_predict_inputs(
+            steps       = steps,
+            levels      = levels,
+            last_window = last_window,
+            exog        = exog
+        )
+
+
+        # TODO: modificar _create_predict_inputs para que devuelva los siguiente:
+        # Last window is expected to by a numpy array where each column is a series
+        # and each row is a time step.
+        last_window_values_new = pd.DataFrame(last_window_values_dict).to_numpy()
+        # Exog is expected to be a dict where each key is the step. The value is
+        # NumPy array where each column an exog and each row a series
+        exog_values = np.concat(list(exog_values_dict.values()))
+        exog_values_dict_new = {}
+        for i in range(steps):
+            exog_values_dict_new[i+1] = exog_values[i::steps, :]
+
+  
+        predictions = self._recursive_predict_new(
+                          steps       = steps,
+                          levels      = levels,
+                          last_window = last_window_values_new,
+                          exog        = exog_values_dict_new
+                      )
+        
+        # print(f"predictions")
+        # print(predictions)
+        
+        predictions_tranformed = []
+        for i, level in enumerate(levels):
+            # print(level, i)
+            preds_level = predictions[:, i]
+            if self.differentiation is not None:
+                preds_level = self.differentiator_[level].inverse_transform_next_window(preds_level)
+
+            preds_level = pd.Series(
+                              data  = preds_level,
+                              index = prediction_index,
+                              name  = level
+                          )
+
+            preds_level = transform_series(
+                series            = preds_level,
+                transformer       = self.transformer_series_.get(level, self.transformer_series_['_unknown_level']),
+                fit               = False,
+                inverse_transform = True
+            )
+
+            predictions_tranformed.append(preds_level)
+
+        predictions_df = pd.concat(predictions_tranformed, axis=1)
+        
+        set_skforecast_warnings(suppress_warnings, action='default')
+
+        return predictions_df
+    
 
 
     def predict_bootstrapping(
