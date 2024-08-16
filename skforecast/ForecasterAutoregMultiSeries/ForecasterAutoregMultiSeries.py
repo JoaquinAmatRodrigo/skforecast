@@ -67,7 +67,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - `int`: include lags from 1 to `lags` (included).
         - `list`, `1d numpy ndarray` or `range`: include only lags present in 
         `lags`, all elements must be int.
-    encoding : str, None, default `'ordinal_category'`
+    encoding : str, None, default `'ordinal'`
         Encoding used to identify the different series. 
         
         - If `'ordinal'`, a single column is created with integer values from 0 
@@ -79,7 +79,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - If None, no column is created to identify the series. Internally, the
         series are identified as an integer from 0 to n_series - 1, but no column
         is created in the training matrices.
-        **New in version 0.12.0**
+        **Changed to 'ordinal' in version 0.14.0**
     transformer_series : transformer (preprocessor), dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -149,7 +149,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - If None, no column is created to identify the series. Internally, the
         series are identified as an integer from 0 to n_series - 1, but no column
         is created in the training matrices.
-        **New in version 0.12.0**
+        **Changed to 'ordinal' in version 0.14.0**
     encoder : sklearn.preprocessing
         Scikit-learn preprocessing encoder used to encode the series.
         **New in version 0.12.0**
@@ -289,7 +289,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self,
         regressor: object,
         lags: Union[int, np.ndarray, list],
-        encoding: Optional[str] = 'ordinal_category',
+        encoding: Optional[str] = 'ordinal',
         transformer_series: Optional[Union[object, dict]] = None,
         transformer_exog: Optional[object] = None,
         weight_func: Optional[Union[Callable, dict]] = None,
