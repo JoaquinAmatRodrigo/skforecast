@@ -1514,6 +1514,85 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         return predictions
 
 
+    def _recursive_predict_all_levels(
+        self,
+        steps: int,
+        levels: list,
+        last_window: np.ndarray,
+        exog: Optional[np.ndarray] = None,
+    ) -> np.ndarray:
+        """
+        Predict n steps for one or multiple levels. It is an iterative process
+        in which, each prediction, is used as a predictor for the next step.
+
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        levels : list
+            Time series to be predicted.
+        last_window : numpy ndarray
+            Series values used to create the features (lags) needed in the
+            first iteration of the prediction (t + 1).
+        exog : numpy ndarray, default `None`
+            Exogenous variable/s included as predictor/s.
+
+        Returns
+        -------
+        predictions : numpy ndarray
+            Predicted values.
+
+        """
+        n_levels = len(levels)
+
+        if self.encoding is not None:
+            if self.encoding == "onehot":
+                levels_encoded = np.zeros(
+                    (n_levels, len(self.series_col_names)), dtype=float
+                )
+                for idx, level in enumerate(levels):
+                    if level in self.series_col_names:
+                        levels_encoded[idx, self.series_col_names.index(level)] = 1.0
+            else:
+                levels_encoded = np.array(
+                    [self.encoding_mapping.get(level, None) for level in levels],
+                    dtype="float64",
+                ).reshape(-1, 1)
+            levels_encoded_shape = levels_encoded.shape[1]
+        else:
+            levels_encoded_shape = 0
+
+        lags_shape = len(self.lags)
+        exog_shape = exog.shape[1] if exog is not None else 0
+
+        features_shape = lags_shape + levels_encoded_shape + exog_shape
+        features = np.full(shape=(n_levels, features_shape), fill_value=np.nan, dtype=float)
+        if self.encoding is not None:
+            features[lags_shape : lags_shape + levels_encoded_shape] = levels_encoded
+
+        predictions = np.full(shape=(steps, n_levels), fill_value=np.nan, dtype=float)
+        last_window = np.concatenate((last_window, predictions), axis=0)
+
+        for i in range(steps):
+
+            features[:, :lags_shape] = last_window[-self.lags - (steps - i), :]
+            if exog is not None:
+                features[:, -exog_shape:] = exog[i,].transpose()
+
+            with warnings.catch_warnings():
+                # Suppress scikit-learn warning: "X does not have valid feature names,
+                # but NoOpTransformer was fitted with feature names".
+                warnings.simplefilter("ignore", category=UserWarning)
+                pred = self.regressor.predict(features.reshape(1, -1)).ravel()[0]
+                predictions[1, :] = pred
+
+            # Update `last_window` values. The first position is discarded and
+            # the new prediction is added at the end.
+            last_window[-(steps - i), :] = pred
+
+        return predictions
+    
+
     def create_predict_X(
         self,
         steps: int,
@@ -1671,13 +1750,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         predictions = []
         for level in levels:
-
+            
+            # Sacar esto fuera del bucle
+            # -----------------------------------
             preds_level = self._recursive_predict(
                               steps       = steps,
                               level       = level,
                               last_window = last_window_values_dict[level],
                               exog        = exog_values_dict[level]
                           )
+            # -----------------------------------
         
             if self.differentiation is not None:
                 preds_level = self.differentiator_[level].inverse_transform_next_window(preds_level)
