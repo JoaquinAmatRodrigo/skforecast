@@ -1615,15 +1615,18 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 else:
                     exog_values = empty_exog.to_numpy(copy=True)
             
-            exog_values_all_levels = exog_values
-            exog_values_all_levels = pd.concat(exog_values_all_levels)
+            exog_values_all_levels.append(exog_values)
 
-            # Exog is expected to be a dict where each key is a step and the value
-            # is a numPy array where each column is an exog and each row a series
-            if exog is not None:
-                exog_values_dict = {}
-                for i in range(steps):
-                    exog_values_dict[i+1] = exog_values_all_levels[i::steps, :]
+        
+        # Exog is expected to be a dict where each key is a step and the value
+        # is a numPy array where each column is an exog and each row a series
+        if exog is not None:
+            exog_values_all_levels = np.concatenate(exog_values_all_levels)
+            exog_values_dict = {}
+            for i in range(steps):
+                exog_values_dict[i+1] = exog_values_all_levels[i::steps, :]
+        else:
+            exog_values_dict = None
 
         return last_window, exog_values_dict, levels, prediction_index, residuals
 
@@ -2032,12 +2035,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         set_skforecast_warnings(suppress_warnings, action='ignore')
 
         (
-            last_window_values_dict,
+            last_window,
             exog_values_dict,
             levels,
             prediction_index,
             _
-        ) = self._create_predict_inputs(
+        ) = self._create_predict_inputs_new(
             steps       = steps,
             levels      = levels,
             last_window = last_window,
@@ -2048,22 +2051,22 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         # TODO: modificar _create_predict_inputs para que devuelva los siguiente:
         # Last window is expected to by a numpy array where each column is a series
         # and each row is a time step.
-        last_window_values_new = pd.DataFrame(last_window_values_dict).to_numpy()
+        #last_window_values_new = pd.DataFrame(last_window_values_dict).to_numpy()
         # Exog is expected to be a dict where each key is the step. The value is
         # NumPy array where each column an exog and each row a series
-        if exog is not None:
-            exog_values = np.concat(list(exog_values_dict.values()))
-            exog_values_dict_new = {}
-            for i in range(steps):
-                exog_values_dict_new[i+1] = exog_values[i::steps, :]
-        else:
-            exog_values_dict_new = None
+        # if exog is not None:
+        #     exog_values = np.concat(list(exog_values_dict.values()))
+        #     exog_values_dict_new = {}
+        #     for i in range(steps):
+        #         exog_values_dict_new[i+1] = exog_values[i::steps, :]
+        # else:
+        #     exog_values_dict_new = None
   
         predictions = self._recursive_predict_new(
                           steps       = steps,
                           levels      = levels,
-                          last_window = last_window_values_new,
-                          exog        = exog_values_dict_new
+                          last_window = last_window,
+                          exog        = exog_values_dict
                       )
         
         # print(f"predictions")
