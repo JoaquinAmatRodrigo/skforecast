@@ -198,7 +198,7 @@ def _create_backtesting_folds(
         if isinstance(skip_folds, int) and skip_folds > 0:
             index_to_keep = np.arange(0, len(folds), skip_folds)
             index_to_skip = np.setdiff1d(np.arange(0, len(folds)), index_to_keep, assume_unique=True)
-            index_to_skip = list(index_to_skip.astype(int))
+            index_to_skip = [int(x) for x in index_to_skip] # Required since numpy 2.0
         if isinstance(skip_folds, list):
             index_to_skip = [i for i in skip_folds if i < len(folds)]        
     
@@ -1243,14 +1243,18 @@ def _evaluate_grid_hyperparameters(
                   **metric_dict
               })
     
-    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
+    results = (
+        results
+        .sort_values(by=list(metric_dict.keys())[0], ascending=True)
+        .reset_index(drop=True)
+    )
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
-        best_lags = results['lags'].iloc[0]
-        best_params = results['params'].iloc[0]
-        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
+        best_lags = results.loc[0, 'lags']
+        best_params = results.loc[0, 'params']
+        best_metric = results.loc[0, list(metric_dict.keys())[0]]
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)
@@ -1676,13 +1680,17 @@ def _bayesian_search_optuna(
                   **metric_dict
               })
     
-    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
+    results = (
+        results
+        .sort_values(by=list(metric_dict.keys())[0], ascending=True)
+        .reset_index(drop=True)
+    )
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
-        best_lags = results['lags'].iloc[0]
-        best_params = results['params'].iloc[0]
-        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
+        best_lags = results.loc[0, 'lags']
+        best_params = results.loc[0, 'params']
+        best_metric = results.loc[0, list(metric_dict.keys())[0]]
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)

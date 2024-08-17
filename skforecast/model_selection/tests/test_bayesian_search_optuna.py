@@ -195,7 +195,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg():
                 0.22764885273610677, 14, 0.1147302385573586, 'sqrt']],
             dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'n_estimators', 'min_samples_leaf', 'max_features'],
-        index=pd.Index([1, 3, 8, 6, 9, 4, 0, 5, 7, 2], dtype='int64')
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     )
 
     pd.testing.assert_frame_equal(results, expected_results, check_dtype=False)
@@ -264,7 +264,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_kwargs_cre
         [np.array([1, 2, 3, 4]), {'alpha': 0.5558016213920624},
             0.21600778429729228, 0.5558016213920624]], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([9, 3, 4, 6, 8, 2, 7, 5, 0, 1], dtype='int64')
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float,
         'alpha': float
@@ -398,7 +398,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_when_lags_not_i
         [np.array([1, 2, 3, 4]), {'alpha': 0.2345829390285611},
             0.21647289061896782, 0.2345829390285611]], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([6, 4, 0, 7, 3, 8, 5, 9, 1, 2], dtype='int64')
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float,
         'alpha': float
@@ -473,7 +473,7 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregCustom():
             {'alpha': 0.2345829390285611}, 0.21647289061896782,
             0.2345829390285611]], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([6, 4, 0, 7, 3, 8, 5, 9, 1, 2], dtype='int64')
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float,
         'alpha': float
@@ -730,8 +730,8 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregDirect():
         [np.array([1, 2]),
             {'n_estimators': 17, 'min_samples_leaf': 0.19325882509735576, 'max_features': 'sqrt'},
             0.2279790315504743, 17, 0.19325882509735576, 'sqrt']], dtype=object),
-        columns=['lags', 'params', 'mean_absolute_error', 'n_estimators','min_samples_leaf', 'max_features'],
-        index=pd.Index([4, 7, 1, 3, 8, 6, 5, 9, 2, 0], dtype='int64')
+        columns=['lags', 'params', 'mean_absolute_error', 'n_estimators', 'min_samples_leaf', 'max_features'],
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float, 
         'n_estimators': int, 

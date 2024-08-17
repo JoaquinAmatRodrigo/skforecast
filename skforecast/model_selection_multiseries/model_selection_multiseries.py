@@ -1590,9 +1590,12 @@ def _evaluate_grid_hyperparameters_multiseries(
     results.insert(1, 'lags', lags_list)
     results.insert(2, 'lags_label', lags_label_list)
     results.insert(3, 'params', params_list)
-    results = results.sort_values(by=metric_names[0], ascending=True)
+    results = (
+        results
+        .sort_values(by=metric_names[0], ascending=True)
+        .reset_index(drop=True)
+    )
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
-    results = results.reset_index(drop=True)
     
     if return_best:
         
@@ -2121,9 +2124,12 @@ def _bayesian_search_optuna_multiseries(
     results.insert(0, 'levels', [levels] * len(results))
     results.insert(1, 'lags', lags_list)
     results.insert(2, 'params', params_list)
-    results = results.sort_values(by=metric_names[0], ascending=True)
+    results = (
+        results
+        .sort_values(by=metric_names[0], ascending=True)
+        .reset_index(drop=True)
+    )
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
-    results = results.reset_index(drop=True)
     
     if return_best:
         
