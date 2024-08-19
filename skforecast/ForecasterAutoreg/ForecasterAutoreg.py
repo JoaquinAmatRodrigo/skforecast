@@ -264,7 +264,7 @@ class ForecasterAutoreg(ForecasterBase):
             self.binner_kwargs = binner_kwargs
             self.binner_kwargs['encode'] = 'ordinal'
             self.binner_kwargs['dtype'] = np.float64
-        self.binner = KBinsDiscretizer(**self.binner_kwargs)
+        self.binner = KBinsDiscretizer(**self.binner_kwargs).set_output(transform="default")
         self.binner_intervals = None
 
         if self.differentiation is not None:
