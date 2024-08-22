@@ -1441,6 +1441,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         return last_window_values_dict, exog_values_dict, levels, prediction_index, residuals
 
 
+    # TODO: main changes: last_window returned is a data frame, and exog is a dict
+    # where each key is a step and each value is a numpy array where each column is
+    # an exog and each row a series.
     def _create_predict_inputs_new(
         self,
         steps: int,
@@ -1449,7 +1452,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
         predict_boot: bool = False,
         in_sample_residuals: bool = True
-    ) -> Tuple[dict, dict, list, pd.Index, Optional[dict]]:
+    ) -> Tuple[pd.DataFrame, dict, list, pd.Index, Optional[dict]]:
         """
         Create inputs needed for the first iteration of the prediction process. 
         Since it is a recursive process, last window is updated at each 
@@ -1481,11 +1484,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         Returns
         -------
-        last_window_values_dict : dict
-            Predictors for each series in the form `{series: last_window}`.
+        last_window : pandas DataFrame
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
         exog_values_dict : dict
             Exogenous variable/s included as predictor/s for each series in 
-            the form `{series: exog}`.
+            each step. The keys are the steps and the values are numpy arrays
+            where each column is an exog and each row a series.
         levels : list
             Names of the series (levels) to be predicted.
         prediction_index : pandas Index
@@ -1617,10 +1622,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
             exog_values_all_levels.append(exog_values)
 
-        
-        # Exog is expected to be a dict where each key is a step and the value
-        # is a numPy array where each column is an exog and each row a series
         if exog is not None:
+            # Exog is transformed into a dict where each key is a step and each value
+            # is a numpy array where each column is an exog and each row a series
             exog_values_all_levels = np.concatenate(exog_values_all_levels)
             exog_values_dict = {}
             for i in range(steps):
@@ -1703,7 +1707,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         return predictions
 
-
+    # TODO: main changes: predictions are thon at once for all levels in each step
     def _recursive_predict_new(
         self,
         steps: int,
@@ -2046,21 +2050,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             last_window = last_window,
             exog        = exog
         )
-
-
-        # TODO: modificar _create_predict_inputs para que devuelva los siguiente:
-        # Last window is expected to by a numpy array where each column is a series
-        # and each row is a time step.
-        #last_window_values_new = pd.DataFrame(last_window_values_dict).to_numpy()
-        # Exog is expected to be a dict where each key is the step. The value is
-        # NumPy array where each column an exog and each row a series
-        # if exog is not None:
-        #     exog_values = np.concat(list(exog_values_dict.values()))
-        #     exog_values_dict_new = {}
-        #     for i in range(steps):
-        #         exog_values_dict_new[i+1] = exog_values[i::steps, :]
-        # else:
-        #     exog_values_dict_new = None
   
         predictions = self._recursive_predict_new(
                           steps       = steps,
@@ -2069,12 +2058,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                           exog        = exog_values_dict
                       )
         
-        # print(f"predictions")
-        # print(predictions)
-        
         predictions_tranformed = []
         for i, level in enumerate(levels):
-            # print(level, i)
             preds_level = predictions[:, i]
             if self.differentiation is not None:
                 preds_level = self.differentiator_[level].inverse_transform_next_window(preds_level)
@@ -2100,7 +2085,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         return predictions_df
     
-
 
     def predict_bootstrapping(
         self,
