@@ -1383,11 +1383,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     exog = exog.to_frame()
                 
                 exog = transform_dataframe(
-                            df                = exog,
-                            transformer       = self.transformer_exog,
-                            fit               = False,
-                            inverse_transform = False
-                        )
+                           df                = exog,
+                           transformer       = self.transformer_exog,
+                           fit               = False,
+                           inverse_transform = False
+                       )
                 check_exog_dtypes(exog=exog)
                 exog_values = exog.to_numpy()[:steps]
         else:
@@ -1422,11 +1422,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
                     exog_values = empty_exog.fillna(exog_values)
                     exog_values = transform_dataframe(
-                                    df                = exog_values,
-                                    transformer       = self.transformer_exog,
-                                    fit               = False,
-                                    inverse_transform = False
-                                )
+                                      df                = exog_values,
+                                      transformer       = self.transformer_exog,
+                                      fit               = False,
+                                      inverse_transform = False
+                                  )
                     
                     check_exog_dtypes(
                         exog      = exog_values,
@@ -1560,9 +1560,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if isinstance(exog, dict):
                 # Empty dataframe to be filled with the exog values of each level
                 empty_exog = pd.DataFrame(
-                                 data    = {col: pd.Series(dtype=dtype)
-                                            for col, dtype in self.exog_dtypes.items()},
-                                 index   = prediction_index
+                                 data  = {col: pd.Series(dtype=dtype)
+                                          for col, dtype in self.exog_dtypes.items()},
+                                 index = prediction_index
                              )
             else:
                 if isinstance(exog, pd.Series):
@@ -1589,12 +1589,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 inverse_transform = False
             )
 
+            last_window_values = last_window_level.to_numpy()
             if self.differentiation is not None:
                 if level not in self.differentiator_.keys():
                     self.differentiator_[level] = clone(self.differentiator)
-                last_window_level = self.differentiator_[level].fit_transform(last_window_level)
+                last_window_values = self.differentiator_[level].fit_transform(last_window_values)
             
-            last_window[level] = last_window_level
+            last_window[level] = last_window_values
 
             if isinstance(exog, dict):
                 # Fill the empty dataframe with the exog values of each level
@@ -1606,11 +1607,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
                     exog_values = empty_exog.fillna(exog_values)
                     exog_values = transform_dataframe(
-                                    df                = exog_values,
-                                    transformer       = self.transformer_exog,
-                                    fit               = False,
-                                    inverse_transform = False
-                                )
+                                      df                = exog_values,
+                                      transformer       = self.transformer_exog,
+                                      fit               = False,
+                                      inverse_transform = False
+                                  )
                     
                     check_exog_dtypes(
                         exog      = exog_values,
@@ -1628,7 +1629,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_values_all_levels = np.concatenate(exog_values_all_levels)
             exog_values_dict = {}
             for i in range(steps):
-                exog_values_dict[i+1] = exog_values_all_levels[i::steps, :]
+                exog_values_dict[i + 1] = exog_values_all_levels[i::steps, :]
         else:
             exog_values_dict = None
 
@@ -1707,7 +1708,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         return predictions
 
-    # TODO: main changes: predictions are thon at once for all levels in each step
+
+    # TODO: main changes: predictions are done at once for all levels in each step
     def _recursive_predict_new(
         self,
         steps: int,
@@ -1737,6 +1739,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Predicted values.
 
         """
+
+        # TODO: check last_window is a DataFrame, we use it as a numpy array
+
         n_levels = len(levels)
 
         if self.encoding is not None:
@@ -1746,11 +1751,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
                 for idx, level in enumerate(levels):
                     if level in self.series_col_names:
-                        levels_encoded[idx, self.series_col_names.index(level)] = 1.0
+                        levels_encoded[idx, self.series_col_names.index(level)] = 1.
             else:
                 levels_encoded = np.array(
                     [self.encoding_mapping.get(level, None) for level in levels],
-                    dtype="float64",
+                    dtype="float64"
                 ).reshape(-1, 1)
             levels_encoded_shape = levels_encoded.shape[1]
         else:
@@ -1760,6 +1765,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         lags_shape = len(self.lags)
         # print(f"lags_shape: {lags_shape}")
+        # TODO: potential bug here, exog is transformed before being passed to the method
+        # can have more columns than exog_col_names
         exog_shape = len(self.exog_col_names) if exog is not None else 0
         # print(f"exog_shape: {exog_shape}")
         # print(exog)
@@ -1996,6 +2003,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         return predictions
     
+
     def predict_new(
         self,
         steps: int,
@@ -2064,6 +2072,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if self.differentiation is not None:
                 preds_level = self.differentiator_[level].inverse_transform_next_window(preds_level)
 
+            # TODO: if create transform_numpy, predictions_transformed can be a empty DataFrame
+            # to fill with the numpy arrays. We avoid the need to create a Series and concatenate
             preds_level = pd.Series(
                               data  = preds_level,
                               index = prediction_index,
