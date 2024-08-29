@@ -1715,7 +1715,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         steps: int,
         levels: list,
         last_window: np.ndarray,
-        exog: Optional[np.ndarray] = None,
+        exog: Optional[dict] = None,
     ) -> np.ndarray:
         """
         Predict n steps for one or multiple levels. It is an iterative process
@@ -1730,7 +1730,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         last_window : numpy ndarray
             Series values used to create the features (lags) needed in the
             first iteration of the prediction (t + 1).
-        exog : numpy ndarray, default `None`
+        exog : dict, default `None`
             Exogenous variable/s included as predictor/s.
 
         Returns
@@ -1740,18 +1740,30 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         """
 
-        # TODO: check last_window is a DataFrame, we use it as a numpy array
+        # TODO: Input last_window is a DataFrame, we use it as a numpy array when
+        # np.concatenate is called.
+
+        # TODO: rename `exog` argument to `exog_values_dict` (or similar)?
 
         n_levels = len(levels)
+        lags_shape = len(self.lags)
+        exog_shape = len(self.exog_col_names) if exog is not None else 0
+
+        # TODO: potential bug here, exog is transformed before being passed to the method
+        # can have more columns than exog_col_names. Posible solution, store an attribute
+        # with the exog columns names transformed.
+        print(f"lags_shape: {lags_shape}")
+        print(f"exog_shape: {exog_shape}")
+        print(exog)
 
         if self.encoding is not None:
             if self.encoding == "onehot":
                 levels_encoded = np.zeros(
                     (n_levels, len(self.series_col_names)), dtype=float
                 )
-                for idx, level in enumerate(levels):
+                for i, level in enumerate(levels):
                     if level in self.series_col_names:
-                        levels_encoded[idx, self.series_col_names.index(level)] = 1.
+                        levels_encoded[i, self.series_col_names.index(level)] = 1.
             else:
                 levels_encoded = np.array(
                     [self.encoding_mapping.get(level, None) for level in levels],
@@ -1760,59 +1772,54 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels_encoded_shape = levels_encoded.shape[1]
         else:
             levels_encoded_shape = 0
-        # print(f"levels_encoded_shape: {levels_encoded_shape}")
-        # print(f"levels_encoded: {levels_encoded}")
 
-        lags_shape = len(self.lags)
-        # print(f"lags_shape: {lags_shape}")
-        # TODO: potential bug here, exog is transformed before being passed to the method
-        # can have more columns than exog_col_names
-        exog_shape = len(self.exog_col_names) if exog is not None else 0
-        # print(f"exog_shape: {exog_shape}")
-        # print(exog)
+        print(f"levels_encoded_shape: {levels_encoded_shape}")
+        print(f"levels_encoded: {levels_encoded}")
 
         features_shape = lags_shape + levels_encoded_shape + exog_shape
-        # print(f"features_shape: {features_shape}")
         features = np.full(shape=(n_levels, features_shape), fill_value=np.nan, dtype=float)
-        # print("features:")
-        # print(features)
+        print(f"features_shape: {features_shape}")
+        print("features:")
+        print(features)
         if self.encoding is not None:
             features[:, lags_shape : lags_shape + levels_encoded_shape] = levels_encoded
-        # print("features:")
-        # print(features)
+        print("features:")
+        print(features)
+
         predictions = np.full(shape=(steps, n_levels), fill_value=np.nan, dtype=float)
         last_window = np.concatenate((last_window, predictions), axis=0)
-        # print(f"predictions: {predictions}")
-        # print(f"last_window: {last_window}")
+        print(f"predictions: {predictions}")
+        print(f"last_window: {last_window}")
 
-        # print(f"steps: {steps}")
+        print(f"steps: {steps}")
         for i in range(steps):
+
             step = i + 1
             features[:, :lags_shape] = last_window[-self.lags - (steps - i), :].transpose()
-            # print("features:")
-            # print(features)
             if exog is not None:
-                # print(f"Exog step: {step}")
-                # print(exog[step])
+                print(f"Exog step: {step}")
+                print(exog[step])
                 features[:, -exog_shape:] = exog[step]
-            # print("features:")
-            # print(features)
+            print("features:")
+            print(features)
+
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
                 warnings.simplefilter("ignore", category=UserWarning)
                 pred = self.regressor.predict(features)
-                predictions[i, :] = pred
-            # print(f"predictions step {step}")
-            # print(pred)
-            # print(predictions)
+            
+            predictions[i, :] = pred
+            print(f"predictions step {step}")
+            print(pred)
+            print(predictions)
 
             # Update `last_window` values. The first position is discarded and
             # the new prediction is added at the end.
             last_window[-(steps - i), :] = pred
 
         return predictions
-    
+
 
     def create_predict_X(
         self,
