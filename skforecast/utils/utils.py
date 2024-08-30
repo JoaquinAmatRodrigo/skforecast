@@ -1493,30 +1493,99 @@ def expand_index(
     return new_index
 
 
+def transform_numpy(
+    array: np.ndarray,
+    transformer,
+    fit: bool = False,
+    inverse_transform: bool = False
+) -> np.ndarray:
+    """
+    Transform raw values of a numpy ndarray with a scikit-learn alike 
+    transformer, preprocessor or ColumnTransformer. The transformer used must 
+    have the following methods: fit, transform, fit_transform and 
+    inverse_transform. ColumnTransformers are not allowed since they do not 
+    have inverse_transform method.
+
+    Parameters
+    ----------
+    array : numpy ndarray
+        Array to be transformed.
+    transformer : scikit-learn alike transformer, preprocessor, or ColumnTransformer.
+        Scikit-learn alike transformer (preprocessor) with methods: fit, transform,
+        fit_transform and inverse_transform.
+    fit : bool, default `False`
+        Train the transformer before applying it.
+    inverse_transform : bool, default `False`
+        Transform back the data to the original representation. This is not available
+        when using transformers of class scikit-learn ColumnTransformers.
+
+    Returns
+    -------
+    array_transformed : numpy ndarray
+        Transformed array.
+
+    """
+    
+    if not isinstance(array, np.ndarray):
+        raise TypeError(
+            f"`array` argument must be a numpy ndarray. Got {type(array)}"
+        )
+
+    if transformer is None:
+        return array
+    
+    array_ndim = array.ndim
+    if array_ndim == 1:
+        array = array.reshape(-1, 1)
+
+    if inverse_transform and isinstance(transformer, ColumnTransformer):
+        raise ValueError(
+            "`inverse_transform` is not available when using ColumnTransformers."
+        )
+
+    if not inverse_transform:
+        if fit:
+            array_transformed = transformer.fit_transform(array)
+        else:
+            array_transformed = transformer.transform(array)
+    else:
+        array_transformed = transformer.inverse_transform(array)
+
+    if hasattr(array_transformed, 'toarray'):
+        # If the returned values are in sparse matrix format, it is converted to dense
+        array_transformed = array_transformed.toarray()
+
+    if array_ndim == 1:
+        array_transformed = array_transformed.flatten()
+
+    return array_transformed
+
+
 def transform_series(
     series: pd.Series,
     transformer,
     fit: bool = False,
     inverse_transform: bool = False
 ) -> Union[pd.Series, pd.DataFrame]:
-    """      
-    Transform raw values of pandas Series with a scikit-learn alike transformer
-    (preprocessor). The transformer used must have the following methods: fit, 
-    transform, fit_transform and inverse_transform. ColumnTransformers are not 
-    allowed since they do not have inverse_transform method.
+    """
+    Transform raw values of pandas Series with a scikit-learn alike 
+    transformer, preprocessor or ColumnTransformer. The transformer used must 
+    have the following methods: fit, transform, fit_transform and 
+    inverse_transform. ColumnTransformers are not allowed since they do not 
+    have inverse_transform method.
 
     Parameters
     ----------
     series : pandas Series
         Series to be transformed.
-    transformer : scikit-learn alike transformer (preprocessor).
-        scikit-learn alike transformer (preprocessor) with methods: fit, transform,
-        fit_transform and inverse_transform. ColumnTransformers are not allowed 
-        since they do not have inverse_transform method.
+    transformer : scikit-learn alike transformer, preprocessor, or ColumnTransformer.
+        Scikit-learn alike transformer (preprocessor) with methods: fit, transform,
+        fit_transform and inverse_transform.
     fit : bool, default `False`
         Train the transformer before applying it.
     inverse_transform : bool, default `False`
-        Transform back the data to the original representation.
+        Transform back the data to the original representation. This is not available
+        when using transformers of class scikit-learn ColumnTransformers.
 
     Returns
     -------
@@ -1583,17 +1652,20 @@ def transform_dataframe(
     fit: bool = False,
     inverse_transform: bool = False
 ) -> pd.DataFrame:
-    """      
-    Transform raw values of pandas DataFrame with a scikit-learn alike
-    transformer, preprocessor or ColumnTransformer. `inverse_transform` is not 
-    available when using ColumnTransformers.
+    """
+    Transform raw values of pandas DataFrame with a scikit-learn alike 
+    transformer, preprocessor or ColumnTransformer. The transformer used must 
+    have the following methods: fit, transform, fit_transform and 
+    inverse_transform. ColumnTransformers are not allowed since they do not 
+    have inverse_transform method.
 
     Parameters
     ----------
     df : pandas DataFrame
         DataFrame to be transformed.
-    transformer : scikit-learn alike transformer, preprocessor or ColumnTransformer.
-        scikit-learn alike transformer, preprocessor or ColumnTransformer.
+    transformer : scikit-learn alike transformer, preprocessor, or ColumnTransformer.
+        Scikit-learn alike transformer (preprocessor) with methods: fit, transform,
+        fit_transform and inverse_transform.
     fit : bool, default `False`
         Train the transformer before applying it.
     inverse_transform : bool, default `False`
@@ -1616,7 +1688,7 @@ def transform_dataframe(
         return df
 
     if inverse_transform and isinstance(transformer, ColumnTransformer):
-        raise Exception(
+        raise ValueError(
             "`inverse_transform` is not available when using ColumnTransformers."
         )
  
