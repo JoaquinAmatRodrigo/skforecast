@@ -10,6 +10,39 @@ All significant changes to this project are documented in this release file.
 | <span class="badge text-bg-danger">Fix</span>              | Bug fix                               |
 
 
+## 0.14.0 <small>In development</small> { id="0.14.0" }
+
+The main changes in this release are:
+
++ ...
+
+**Added**
+
++ ...
+
+**Changed**
+
++ Change the default value of `encoding` to `ordinal` in <code>[ForecasterAutoregMultiSeries]</code>. This will avoid conflicts if the regressor does not support categorical variables by default.
+
++ `series_col_names` has been renamed to `series_names_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `series_X_train` has been renamed to `X_train_series_names_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `exog_col_names` has been renamed to `exog_names_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `X_train_col_names` has been renamed to `X_train_features_names_out_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `series_col_names` has been renamed to `series_names_in_` in the `check_predict_input`, `check_preprocess_exog_multiseries` and `initialize_transformer_series` functions in the <code>[utils]</code> module.
+
++ `series_X_train` has been renamed to `X_train_series_names_in_` in the `prepare_levels_multiseries` function in the <code>[utils]</code> module.
+
++ `exog_col_names` has been renamed to `exog_names_in_` in the `check_predict_input` and `check_preprocess_exog_multiseries` functions in the <code>[utils]</code> module.
+
+**Fixed**
+
++ ...
+
+
 ## 0.13.0 <small>Aug 01, 2024</small> { id="0.13.0" }
 
 The main changes in this release are:
@@ -29,7 +62,7 @@ The main changes in this release are:
 + <span class="badge text-bg-api-change">API Change</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.
 
 + <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
-  
+
 **Added**
 
 + Support for `python 3.12`.

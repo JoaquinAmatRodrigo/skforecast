@@ -183,7 +183,7 @@ def initialize_weights(
 
 def initialize_transformer_series(
     forecaster_name: str,
-    series_col_names: list,
+    series_names_in_: list,
     encoding: Optional[str] = None,
     transformer_series: Optional[Union[object, dict]] = None
 ) -> dict:
@@ -192,16 +192,16 @@ def initialize_transformer_series(
 
     - If `transformer_series` is `None`, no transformation is applied.
     - If `transformer_series` is a scikit-learn transformer (object), the same 
-    transformer is applied to all series (`series_col_names`).
+    transformer is applied to all series (`series_names_in_`).
     - If `transformer_series` is a `dict`, a different transformer can be
     applied to each series. The keys of the dictionary must be the same as the
-    names of the series in `series_col_names`.
+    names of the series in `series_names_in_`.
 
     Parameters
     ----------
     forecaster_name : str
         Forecaster name.
-    series_col_names : list
+    series_names_in_ : list
         Names of the series (levels) used during training.
     encoding : str, default `None`
         Encoding used to identify the different series (`ForecasterAutoregMultiSeries`, 
@@ -226,30 +226,25 @@ def initialize_transformer_series(
 
     if forecaster_name in multiseries_forecasters:
         if encoding is None:
-            series_col_names = ['_unknown_level']
+            series_names_in_ = ['_unknown_level']
         else:
-            series_col_names = series_col_names + ['_unknown_level']
+            series_names_in_ = series_names_in_ + ['_unknown_level']
 
     if transformer_series is None:
-        transformer_series_ = {serie: None for serie in series_col_names}
+        transformer_series_ = {serie: None for serie in series_names_in_}
     elif not isinstance(transformer_series, dict):
         transformer_series_ = {serie: clone(transformer_series) 
-                               for serie in series_col_names}
+                               for serie in series_names_in_}
     else:
-        transformer_series_ = {serie: None for serie in series_col_names}
+        transformer_series_ = {serie: None for serie in series_names_in_}
         # Only elements already present in transformer_series_ are updated
         transformer_series_.update(
             (k, v) for k, v in deepcopy(transformer_series).items() 
             if k in transformer_series_
         )
 
-        # series_not_in_transformer_series = (
-        #     set(series_col_names) - set(transformer_series.keys())
-        # )
-        # unknown_not_in_transformer_series = '_unknown_level' in series_not_in_transformer_series 
-        # series_not_in_transformer_series = series_not_in_transformer_series - {'_unknown_level'}
         series_not_in_transformer_series = (
-            set(series_col_names) - set(transformer_series.keys())
+            set(series_names_in_) - set(transformer_series.keys())
         ) - {'_unknown_level'}
         if series_not_in_transformer_series:
             warnings.warn(
@@ -257,14 +252,6 @@ def initialize_transformer_series(
                 f" No transformation is applied to these series."),
                 IgnoredArgumentWarning
             )
-        # if unknown_not_in_transformer_series:
-        #     warnings.warn(
-        #         ("If `transformer_series` is a `dict`, a transformer must be "
-        #          "provided to transform series that do not exist during training. "
-        #          "Add the key '_unknown_level' to `transformer_series`. "
-        #          "For example: {'_unknown_level': your_transformer}."),
-        #          UnknownLevelWarning
-        #     )
 
     return transformer_series_
 
@@ -646,13 +633,13 @@ def check_predict_input(
     last_window_exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
     exog_type: Optional[type] = None,
-    exog_col_names: Optional[list] = None,
+    exog_names_in_: Optional[list] = None,
     interval: Optional[list] = None,
     alpha: Optional[float] = None,
     max_steps: Optional[int] = None,
     levels: Optional[Union[str, list]] = None,
     levels_forecaster: Optional[Union[str, list]] = None,
-    series_col_names: Optional[list] = None,
+    series_names_in_: Optional[list] = None,
     encoding: Optional[str] = None
 ) -> None:
     """
@@ -687,7 +674,7 @@ def check_predict_input(
         Exogenous variable/s included as predictor/s.
     exog_type : type, default `None`
         Type of exogenous variable/s used in training.
-    exog_col_names : list, default `None`
+    exog_names_in_ : list, default `None`
         Names of the exogenous variables used during training.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
@@ -704,7 +691,7 @@ def check_predict_input(
     levels_forecaster : str, list, default `None`
         Time series used as output data of a multiseries problem in a RNN problem
         (`ForecasterRnn`).
-    series_col_names : list, default `None`
+    series_names_in_ : list, default `None`
         Names of the columns used during fit (`ForecasterAutoregMultiSeries`, 
         `ForecasterAutoregMultiSeriesCustom`, `ForecasterAutoregMultiVariate`
         and `ForecasterRnn`).
@@ -757,7 +744,7 @@ def check_predict_input(
 
         levels_to_check = (
             levels_forecaster if forecaster_name == 'ForecasterRnn'
-            else series_col_names
+            else series_names_in_
         )
         unknown_levels = set(levels) - set(levels_to_check)
         if forecaster_name == 'ForecasterRnn':
@@ -829,12 +816,12 @@ def check_predict_input(
             )
 
         if forecaster_name == 'ForecasterAutoregMultiVariate':
-            if len(set(series_col_names) - set(last_window_cols)) > 0:
+            if len(set(series_names_in_) - set(last_window_cols)) > 0:
                 raise ValueError(
                     (f"`last_window` columns must be the same as the `series` "
                      f"column names used to create the X_train matrix.\n"
                      f"    `last_window` columns    : {last_window_cols}\n"
-                     f"    `series` columns X train : {series_col_names}")
+                     f"    `series` columns X train : {series_names_in_}")
                 )
     else:
         if not isinstance(last_window, (pd.Series, pd.DataFrame)):
@@ -940,9 +927,9 @@ def check_predict_input(
                          f"steps predicted, {last_step}.")
                     )
 
-            # Check name/columns are in exog_col_names
+            # Check name/columns are in exog_names_in_
             if isinstance(exog_to_check, pd.DataFrame):
-                col_missing = set(exog_col_names).difference(set(exog_to_check.columns))
+                col_missing = set(exog_names_in_).difference(set(exog_to_check.columns))
                 if col_missing:
                     if forecaster_name in ['ForecasterAutoregMultiSeries', 
                                            'ForecasterAutoregMultiSeriesCustom']:
@@ -953,7 +940,7 @@ def check_predict_input(
                         ) 
                     else:
                         raise ValueError(
-                            (f"Missing columns in {exog_name}. Expected {exog_col_names}. "
+                            (f"Missing columns in {exog_name}. Expected {exog_names_in_}. "
                              f"Got {exog_to_check.columns.to_list()}.")
                         )
             else:
@@ -962,19 +949,19 @@ def check_predict_input(
                         (f"When {exog_name} is a pandas Series, it must have a name. Got None.")
                     )
 
-                if exog_to_check.name not in exog_col_names:
+                if exog_to_check.name not in exog_names_in_:
                     if forecaster_name in ['ForecasterAutoregMultiSeries', 
                                            'ForecasterAutoregMultiSeriesCustom']:
                         warnings.warn(
                             (f"'{exog_to_check.name}' was not observed during training. "
                              f"{exog_name} is ignored. Exogenous variables must be one "
-                             f"of: {exog_col_names}."),
+                             f"of: {exog_names_in_}."),
                              IgnoredArgumentWarning
                         )
                     else:
                         raise ValueError(
                             (f"'{exog_to_check.name}' was not observed during training. "
-                             f"Exogenous variables must be: {exog_col_names}.")
+                             f"Exogenous variables must be: {exog_names_in_}.")
                         )
 
             # Check index dtype and freq
@@ -1063,10 +1050,10 @@ def check_predict_input(
 
             # Check all columns are in the pd.DataFrame, last_window_exog
             if isinstance(last_window_exog, pd.DataFrame):
-                col_missing = set(exog_col_names).difference(set(last_window_exog.columns))
+                col_missing = set(exog_names_in_).difference(set(last_window_exog.columns))
                 if col_missing:
                     raise ValueError(
-                        (f"Missing columns in `last_window_exog`. Expected {exog_col_names}. "
+                        (f"Missing columns in `last_window_exog`. Expected {exog_names_in_}. "
                          f"Got {last_window_exog.columns.to_list()}.") 
                     )
             else:
@@ -1076,10 +1063,10 @@ def check_predict_input(
                          "name. Got None.")
                     )
 
-                if last_window_exog.name not in exog_col_names:
+                if last_window_exog.name not in exog_names_in_:
                     raise ValueError(
                         (f"'{last_window_exog.name}' was not observed during training. "
-                         f"Exogenous variables must be: {exog_col_names}.")
+                         f"Exogenous variables must be: {exog_names_in_}.")
                     )
 
     return
@@ -2493,7 +2480,7 @@ def check_preprocess_series(
 def check_preprocess_exog_multiseries(
     input_series_is_dict: bool,
     series_indexes: dict,
-    series_col_names: list,
+    series_names_in_: list,
     exog: Union[pd.Series, pd.DataFrame, dict],
     exog_dict: dict,
 ) -> Tuple[dict, list]:
@@ -2515,7 +2502,7 @@ def check_preprocess_exog_multiseries(
         Indicates if input series argument is a dict.
     series_indexes : dict
         Dictionary with the index of each series.
-    series_col_names : list
+    series_names_in_ : list
         Names of the series (levels) used during training.
     exog : pandas Series, pandas DataFrame, dict
         Exogenous variable/s used during training.
@@ -2526,7 +2513,7 @@ def check_preprocess_exog_multiseries(
     -------
     exog_dict : dict
         Dictionary with the exogenous variable/s used during training.
-    exog_col_names : list
+    exog_names_in_ : list
         Names of the exogenous variables used during training.
     
     """
@@ -2540,7 +2527,7 @@ def check_preprocess_exog_multiseries(
     if not input_series_is_dict:
         # If input series is a pandas DataFrame, all index are the same.
         # Select the first index to check exog
-        series_index = series_indexes[series_col_names[0]]
+        series_index = series_indexes[series_names_in_[0]]
 
     if isinstance(exog, (pd.Series, pd.DataFrame)): 
 
@@ -2566,7 +2553,7 @@ def check_preprocess_exog_multiseries(
                  "to ensure the correct alignment of values.")
             )
 
-        exog_dict = {serie: exog for serie in series_col_names}
+        exog_dict = {serie: exog for serie in series_names_in_}
 
     else:
 
@@ -2588,7 +2575,7 @@ def check_preprocess_exog_multiseries(
             if k in exog_dict and v is not None
         )
 
-        series_not_in_exog = set(series_col_names) - set(exog.keys())
+        series_not_in_exog = set(series_names_in_) - set(exog.keys())
         if series_not_in_exog:
             warnings.warn(
                 (f"{series_not_in_exog} not present in `exog`. All values "
@@ -2641,7 +2628,7 @@ def check_preprocess_exog_multiseries(
             non_unique_dtyeps_exogs = exog_dtypes_nunique[exog_dtypes_nunique != 1].index.to_list()
             raise TypeError(f"Exog/s: {non_unique_dtyeps_exogs} have different dtypes in different series.")
 
-    exog_col_names = list(
+    exog_names_in_ = list(
         set(
             column
             for df in exog_dict.values()
@@ -2650,15 +2637,14 @@ def check_preprocess_exog_multiseries(
         )
     )
 
-    if len(set(exog_col_names) - set(series_col_names)) != len(exog_col_names):
+    if len(set(exog_names_in_) - set(series_names_in_)) != len(exog_names_in_):
         raise ValueError(
-            (f"`exog` cannot contain a column named the same as one of the "
-             f"series (column names of series).\n"
-             f"    `series` columns : {series_col_names}.\n"
-             f"    `exog`   columns : {exog_col_names}.")
+            (f"`exog` cannot contain a column named the same as one of the series.\n"
+             f"    `series` columns : {series_names_in_}.\n"
+             f"    `exog`   columns : {exog_names_in_}.")
         )
 
-    return exog_dict, exog_col_names
+    return exog_dict, exog_names_in_
 
 
 def align_series_and_exog_multiseries(
@@ -2733,7 +2719,7 @@ def align_series_and_exog_multiseries(
 
 
 def prepare_levels_multiseries(
-    series_X_train: list,
+    X_train_series_names_in_: list,
     levels: Optional[Union[str, list]] = None
 ) -> Tuple[list, bool]:
     """
@@ -2741,7 +2727,7 @@ def prepare_levels_multiseries(
 
     Parameters
     ----------
-    series_X_train : list
+    X_train_series_names_in_ : list
         Names of the series (levels) included in the matrix `X_train`.
     levels : str, list, default `None`
         Names of the series (levels) to be predicted.
@@ -2755,7 +2741,7 @@ def prepare_levels_multiseries(
 
     input_levels_is_list = False
     if levels is None:
-        levels = series_X_train
+        levels = X_train_series_names_in_
     elif isinstance(levels, str):
         levels = [levels]
     else:
