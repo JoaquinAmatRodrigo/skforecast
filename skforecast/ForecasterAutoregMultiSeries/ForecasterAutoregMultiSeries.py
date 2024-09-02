@@ -12,6 +12,7 @@ import sys
 import numpy as np
 import pandas as pd
 from copy import copy
+import textwrap
 import inspect
 import sklearn
 from sklearn.exceptions import NotFittedError
@@ -428,44 +429,63 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                       if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params()
-        
-        params = [f"{k}: {v}" for k, v in params.items()]
-        if len(params) > 5:
-            params = ", ".join(params[:5] + ['...'])
+        params = "\n    " + textwrap.fill(str(params), width=80, subsequent_indent="    ")
 
         training_range = (
             [f"'{k}': {v.astype(str).to_list()}" for k, v in self.training_range.items()]
             if self.fitted
             else None
         )
-        if training_range is not None and len(training_range) > 3:
-            training_range = ", ".join(training_range[:3] + ['...'])
 
-        series_names_in_ = self.series_names_in_
-        if series_names_in_ is not None and len(series_names_in_) > 5:
-            series_names_in_ = ", ".join(series_names_in_[:5] + ['...'])
+        if training_range is not None:
+            if len(training_range) > 10:
+                training_range = training_range[:10] + ['...']
+            training_range = "\n    " + "\n    ".join(training_range)
 
-        exog_names_in_ = self.exog_names_in_
-        if exog_names_in_ is not None and len(exog_names_in_) > 5:
-            exog_names_in_ = ", ".join(exog_names_in_[:5] + ['...'])
+        if self.series_names_in_ is not None:
+            series_names_in_ = copy(self.series_names_in_)
+            if len(series_names_in_) > 50:
+                series_names_in_ = series_names_in_[:50] + ["..."]
+            series_names_in_ = ", ".join(series_names_in_)
+            if len(series_names_in_) > 58:
+                series_names_in_ = "\n    " + textwrap.fill(
+                    str(series_names_in_), width=80, subsequent_indent="    "
+                )
 
+        if self.exog_names_in_ is not None:
+            exog_names_in_ = copy(self.exog_names_in_)
+            if len(exog_names_in_) > 50:
+                exog_names_in_ = exog_names_in_[:50] + ["..."]
+            exog_names_in_ = ", ".join(exog_names_in_)
+            if len(exog_names_in_) > 58:
+                exog_names_in_ = "\n    " + textwrap.fill(
+                    str(exog_names_in_), width=80, subsequent_indent="    "
+                )
+        if isinstance(self.transformer_series, dict):
+            transformer_series = (
+                [f"'{k}': {v}" for k, v in self.transformer_series.items()]
+            )
+            if transformer_series is not None:
+                transformer_series = "\n    " + "\n    ".join(transformer_series)
+        else:
+            transformer_series = self.transformer_series
+                
         info = (
             f"{'=' * len(type(self).__name__)} \n"
             f"{type(self).__name__} \n"
             f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
-            f"Transformer for series: {self.transformer_series} \n"
-            f"Transformer for exog: {self.transformer_exog} \n"
-            f"Series encoding: {self.encoding} \n"
             f"Window size: {self.window_size} \n"
             f"Series levels (names): {series_names_in_} \n"
+            f"Series encoding: {self.encoding} \n"
             f"Series weights: {self.series_weights} \n"
+            f"Exogenous included: {self.included_exog} \n"
+            f"Exogenous names: {exog_names_in_} \n"
+            f"Transformer for series: {transformer_series} \n"
+            f"Transformer for exog: {self.transformer_exog} \n"
             f"Weight function included: {True if self.weight_func is not None else False} \n"
             f"Differentiation order: {self.differentiation} \n"
-            f"Exogenous included: {self.included_exog} \n"
-            f"Type of exogenous variable: {self.exog_type} \n"
-            f"Exogenous variables names: {exog_names_in_} \n"
             f"Training range: {training_range} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"

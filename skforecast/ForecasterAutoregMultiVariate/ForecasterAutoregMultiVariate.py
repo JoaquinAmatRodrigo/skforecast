@@ -19,6 +19,7 @@ import inspect
 from copy import copy
 from itertools import chain
 from joblib import Parallel, delayed, cpu_count
+import textwrap
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
@@ -347,6 +348,27 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                       if key.startswith(name_pipe_steps)}
         else:
             params = self.regressor.get_params()
+        params = "\n    " + textwrap.fill(str(params), width=80, subsequent_indent="    ")
+
+        series_col_names = copy(self.series_col_names)
+        if series_col_names is not None:
+            if len(series_col_names) > 50:
+                series_col_names = series_col_names[:50] + ["..."]
+            series_col_names = ", ".join(series_col_names)
+            if len(series_col_names) > 58:
+                series_col_names = "\n    " + textwrap.fill(
+                    str(series_col_names), width=80, subsequent_indent="  "
+                )
+                
+        exog_col_names = copy(self.exog_col_names)
+        if exog_col_names is not None:
+            if len(exog_col_names) > 50:
+                exog_col_names = exog_col_names[:50] + ["..."]
+            exog_col_names = ", ".join(exog_col_names)
+            if len(exog_col_names) > 58:
+                exog_col_names = "\n    " + textwrap.fill(
+                    str(exog_col_names), width=80, subsequent_indent="    "
+                )
 
         info = (
             f"{'=' * len(type(self).__name__)} \n"
@@ -354,15 +376,15 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
+            f"Window size: {self.window_size} \n"
+            f"Target series (level): {self.level} \n"
+            f"Multivariate series (levels): {self.series_col_names} \n"
+            f"Maximum steps to predict: {self.steps} \n"
+            f"Exogenous included: {self.included_exog} \n"
+            f"Exogenous names: {self.exog_col_names} \n"
             f"Transformer for series: {self.transformer_series} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
-            f"Weight function included: {True if self.weight_func is not None else False} \n"
-            f"Window size: {self.window_size} \n"
-            f"Target series, level: {self.level} \n"
-            f"Multivariate series (names): {self.series_col_names} \n"
-            f"Maximum steps predicted: {self.steps} \n"
-            f"Exogenous included: {self.included_exog} \n"
-            f"Exogenous variables names: {self.exog_col_names} \n"
+            f"Weight function included: {True if self.weight_func is not None else False} \n"        
             f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
             f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
             f"Training index frequency: {self.index_freq if self.fitted else None} \n"
