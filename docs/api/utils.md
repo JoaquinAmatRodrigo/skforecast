@@ -20,6 +20,7 @@
 ::: skforecast.utils.utils.exog_to_direct
 ::: skforecast.utils.utils.exog_to_direct_numpy
 ::: skforecast.utils.utils.expand_index
+::: skforecast.utils.utils.transform_numpy
 ::: skforecast.utils.utils.transform_series
 ::: skforecast.utils.utils.transform_dataframe
 ::: skforecast.utils.utils.check_optional_dependency
