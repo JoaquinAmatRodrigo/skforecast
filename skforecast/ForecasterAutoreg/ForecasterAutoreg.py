@@ -305,8 +305,8 @@ class ForecasterAutoreg(ForecasterBase):
             params = self.regressor.get_params(deep=True)
         params = "\n    " + textwrap.fill(str(params), width=80, subsequent_indent="    ")
 
-        exog_col_names = copy(self.exog_col_names)
-        if exog_col_names is not None:
+        if self.exog_col_names is not None:
+            exog_col_names = copy(self.exog_col_names)
             if len(exog_col_names) > 50:
                 exog_col_names = exog_col_names[:50] + ["..."]
             exog_col_names = ", ".join(exog_col_names)
@@ -355,6 +355,7 @@ class ForecasterAutoreg(ForecasterBase):
         else:
             params = self.regressor.get_params(deep=True)
         params = str(params)
+
         style = """
         <style>
             .container {
@@ -433,14 +434,14 @@ class ForecasterAutoreg(ForecasterBase):
             <details>
                 <summary>Exogenous Variables</summary>
                 <ul>
-                 {self.exog_col_names}
+                     {self.exog_col_names}
                 </ul>
             </details>
             <details>
                 <summary>Data Transformations</summary>
                 <ul>
-                 <li><strong>Transformer for y:</strong> {self.transformer_y}</li>
-                 <li><strong>Transformer for exog:</strong> {self.transformer_exog}</li>
+                    <li><strong>Transformer for y:</strong> {self.transformer_y}</li>
+                    <li><strong>Transformer for exog:</strong> {self.transformer_exog}</li>
                 </ul>
             </details>
             <details>
@@ -463,7 +464,11 @@ class ForecasterAutoreg(ForecasterBase):
                     {self.fit_kwargs}
                 </ul>
             </details>
-        <p><a href="https://skforecast.org/{skforecast.__version__}/api/forecasterautoreg#forecasterautoreg">&#128712 API Reference</a></p>
+            <p>
+                <a href="https://skforecast.org/{skforecast.__version__}/api/forecasterautoreg#forecasterautoreg.html">&#128712 <strong>API Reference</strong></a>
+                &nbsp;&nbsp;
+                <a href="https://skforecast.org/{skforecast.__version__}/user_guides/autoregresive-forecaster.html">&#128462 <strong>User Guide</strong></a>
+            </p>
         </div>
         """
 

@@ -461,6 +461,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 exog_names_in_ = "\n    " + textwrap.fill(
                     str(exog_names_in_), width=80, subsequent_indent="    "
                 )
+        
         if isinstance(self.transformer_series, dict):
             transformer_series = (
                 [f"'{k}': {v}" for k, v in self.transformer_series.items()]
@@ -477,7 +478,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
             f"Window size: {self.window_size} \n"
-            f"Series levels (names): {series_names_in_} \n"
+            f"Series names (levels): {series_names_in_} \n"
             f"Series encoding: {self.encoding} \n"
             f"Series weights: {self.series_weights} \n"
             f"Exogenous included: {self.included_exog} \n"
