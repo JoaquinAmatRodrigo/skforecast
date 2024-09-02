@@ -795,6 +795,7 @@ def grid_search_forecaster(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
+    method: str = 'backtesting',
     fixed_train_size: bool = True,
     gap: int = 0,
     skip_folds: Optional[Union[int, list]] = None,
@@ -802,7 +803,6 @@ def grid_search_forecaster(
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
     lags_grid: Optional[Union[list, dict]] = None,
     refit: Union[bool, int] = False,
-    one_step_ahead_only: bool = False, # Experimental
     return_best: bool = True,
     n_jobs: Union[int, str] = 'auto',
     verbose: bool = True,
@@ -833,6 +833,17 @@ def grid_search_forecaster(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+        **New in version 0.14.0**
     initial_train_size : int 
         Number of samples in the initial train split.
     fixed_train_size : bool, default `True`
@@ -890,25 +901,14 @@ def grid_search_forecaster(
         - additional n columns with param = value.
     
     """
+    if method not in ['backtesting', 'one_step_ahead']:
+        raise ValueError(
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
+        )
 
     param_grid = list(ParameterGrid(param_grid))
 
-    if one_step_ahead_only:
-        results = _evaluate_grid_hyperparameters_one_step_ahead(
-            forecaster            = forecaster,
-            y                     = y,
-            param_grid            = param_grid,
-            metric                = metric,
-            initial_train_size    = initial_train_size,
-            exog                  = exog,
-            lags_grid             = lags_grid,
-            return_best           = return_best,
-            verbose               = verbose,
-            show_progress         = show_progress,
-            output_file           = output_file
-        )
-
-    else:
+    if method == 'backtesting':
         results = _evaluate_grid_hyperparameters(
             forecaster            = forecaster,
             y                     = y,
@@ -929,6 +929,20 @@ def grid_search_forecaster(
             show_progress         = show_progress,
             output_file           = output_file
         )
+    else:
+        results = _evaluate_grid_hyperparameters_one_step_ahead(
+            forecaster            = forecaster,
+            y                     = y,
+            param_grid            = param_grid,
+            metric                = metric,
+            initial_train_size    = initial_train_size,
+            exog                  = exog,
+            lags_grid             = lags_grid,
+            return_best           = return_best,
+            verbose               = verbose,
+            show_progress         = show_progress,
+            output_file           = output_file
+        )
 
     return results
 
@@ -940,6 +954,7 @@ def random_search_forecaster(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
+    method: str = 'backtesting',
     fixed_train_size: bool = True,
     gap: int = 0,
     skip_folds: Optional[Union[int, list]] = None,
@@ -948,7 +963,6 @@ def random_search_forecaster(
     lags_grid: Optional[Union[list, dict]] = None,
     refit: Union[bool, int] = False,
     n_iter: int = 10,
-    one_step_ahead_only: bool = False, # Experimental
     random_state: int = 123,
     return_best: bool = True,
     n_jobs: Union[int, str] = 'auto',
@@ -982,6 +996,17 @@ def random_search_forecaster(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+    **New in version 0.14.0**
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -1042,27 +1067,14 @@ def random_search_forecaster(
         - additional n columns with param = value.
     
     """
+    if method not in ['backtesting', 'one_step_ahead']:
+        raise ValueError(
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
+        )
 
     param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, random_state=random_state))
 
-    if one_step_ahead_only:
-
-        results = _evaluate_grid_hyperparameters_one_step_ahead(
-            forecaster            = forecaster,
-            y                     = y,
-            param_grid            = param_grid,
-            metric                = metric,
-            initial_train_size    = initial_train_size,
-            exog                  = exog,
-            lags_grid             = lags_grid,
-            return_best           = return_best,
-            verbose               = verbose,
-            show_progress         = show_progress,
-            output_file           = output_file
-        )
-
-    else:
-
+    if method == 'backtesting':
         results = _evaluate_grid_hyperparameters(
             forecaster            = forecaster,
             y                     = y,
@@ -1079,6 +1091,20 @@ def random_search_forecaster(
             refit                 = refit,
             return_best           = return_best,
             n_jobs                = n_jobs,
+            verbose               = verbose,
+            show_progress         = show_progress,
+            output_file           = output_file
+        )
+    else:
+        results = _evaluate_grid_hyperparameters_one_step_ahead(
+            forecaster            = forecaster,
+            y                     = y,
+            param_grid            = param_grid,
+            metric                = metric,
+            initial_train_size    = initial_train_size,
+            exog                  = exog,
+            lags_grid             = lags_grid,
+            return_best           = return_best,
             verbose               = verbose,
             show_progress         = show_progress,
             output_file           = output_file
@@ -1406,16 +1432,17 @@ def _evaluate_grid_hyperparameters_one_step_ahead(
         raise ValueError(
             "When `metric` is a `list`, each metric name must be unique."
         )
+    
+    warnings.warn(
+        "Models are evaluated using one-step-ahead predictions. This is faster "
+        "than backtesting the model to predict multiple steps ahead and is useful "
+        "for quickly comparing different models and hyperparameters, but the results "
+        "may not reflect the actual performance of the model when predicting multiple "
+        "steps ahead."
+    )
 
     if verbose:
         print(f"Number of models compared: {len(param_grid) * len(lags_grid)}.")
-        print(
-            "Models are evaluated using one-step-ahead predictions. This is faster "
-            "than backtesting the model to predict multiple steps ahead and is useful "
-            "for quickly comparing different models and hyperparameters, but the results "
-            "may not reflect the actual performance of the model when predicting multiple "
-            "steps ahead."
-        )
 
     if show_progress:
         lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0)  # ncols=90
@@ -1523,13 +1550,13 @@ def bayesian_search_forecaster(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
+    method: str = 'backtesting',
     fixed_train_size: bool = True,
     gap: int = 0,
     skip_folds: Optional[Union[int, list]] = None,
     allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
     refit: Union[bool, int] = False,
-    one_step_ahead_only: bool = False, # Experimental
     n_trials: int = 10,
     random_state: int = 123,
     return_best: bool = True,
@@ -1568,6 +1595,17 @@ def bayesian_search_forecaster(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+    **New in version 0.14.0**
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -1645,27 +1683,13 @@ def bayesian_search_forecaster(
             f"`engine` only allows 'optuna', got {engine}."
         )
     
-    if one_step_ahead_only:
-
-            results, best_trial = _bayesian_search_optuna_one_step_ahead(
-                                        forecaster            = forecaster,
-                                        y                     = y,
-                                        exog                  = exog,
-                                        search_space          = search_space,
-                                        metric                = metric,
-                                        initial_train_size    = initial_train_size,
-                                        n_trials              = n_trials,
-                                        random_state          = random_state,
-                                        return_best           = return_best,
-                                        verbose               = verbose,
-                                        show_progress         = show_progress,
-                                        output_file           = output_file,
-                                        kwargs_create_study   = kwargs_create_study,
-                                        kwargs_study_optimize = kwargs_study_optimize
-                                    )
-
-    else:
-
+    if method not in ['backtesting', 'one_step_ahead']:
+        raise ValueError(
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
+        )
+    
+    if method == 'backtesting':
+            
         results, best_trial = _bayesian_search_optuna(
                                     forecaster            = forecaster,
                                     y                     = y,
@@ -1689,6 +1713,24 @@ def bayesian_search_forecaster(
                                     kwargs_create_study   = kwargs_create_study,
                                     kwargs_study_optimize = kwargs_study_optimize
                                 )
+    else:
+
+            results, best_trial = _bayesian_search_optuna_one_step_ahead(
+                                        forecaster            = forecaster,
+                                        y                     = y,
+                                        exog                  = exog,
+                                        search_space          = search_space,
+                                        metric                = metric,
+                                        initial_train_size    = initial_train_size,
+                                        n_trials              = n_trials,
+                                        random_state          = random_state,
+                                        return_best           = return_best,
+                                        verbose               = verbose,
+                                        show_progress         = show_progress,
+                                        output_file           = output_file,
+                                        kwargs_create_study   = kwargs_create_study,
+                                        kwargs_study_optimize = kwargs_study_optimize
+                                    )
 
     return results, best_trial
 
@@ -2098,14 +2140,13 @@ def _bayesian_search_optuna_one_step_ahead(
             "When `metric` is a `list`, each metric name must be unique."
         )
     
-    if verbose:
-        print(
-            "Models are evaluated using one-step-ahead predictions. This is faster "
-            "than backtesting the model to predict multiple steps ahead and is useful "
-            "for quickly comparing different models and hyperparameters, but the results "
-            "may not reflect the actual performance of the model when predicting multiple "
-            "steps ahead."
-        )
+    warnings.warn(
+        "Models are evaluated using one-step-ahead predictions. This is faster "
+        "than backtesting the model to predict multiple steps ahead and is useful "
+        "for quickly comparing different models and hyperparameters, but the results "
+        "may not reflect the actual performance of the model when predicting multiple "
+        "steps ahead."
+    )
         
     # Objective function using backtesting_forecaster
     def _objective(
