@@ -13,7 +13,6 @@ import numpy as np
 import pandas as pd
 from copy import copy
 import inspect
-# TODO: importamos todo sklearn
 import sklearn
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
@@ -260,10 +259,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         up to 1000 values in the form `{level: residuals}`. If `transformer_series` 
         is not `None`, residuals are assumed to be in the transformed scale. Use 
         `set_out_sample_residuals()` method to set values.
-    fitted : bool
-        Tag to identify if the regressor has been fitted (trained).
     creation_date : str
         Date of creation.
+    fitted : bool
+        Tag to identify if the regressor has been fitted (trained).
     fit_date : str
         Date of last fit.
     skforecast_version : str
@@ -309,7 +308,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.regressor                   = copy(regressor)
         self.encoding                    = encoding
         self.encoder                     = None
-        self.encoding_mapping            = {}
+        self.encoding_mapping           = {} # TODO: encoding_mapping_
         self.transformer_series          = transformer_series
         self.transformer_series_         = None
         self.transformer_exog            = transformer_exog
@@ -322,22 +321,22 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.differentiator              = None
         self.differentiator_             = None
         self.dropna_from_series          = dropna_from_series
-        self.last_window                 = None
-        self.index_type                  = None
-        self.index_freq                  = None
-        self.training_range              = None
+        self.last_window                = None # TODO: last_window_
+        self.index_type                 = None # TODO: index_type_
+        self.index_freq                 = None # TODO: index_freq_
+        self.training_range             = None # TODO: training_range_
         self.series_names_in_            = None
+        self.included_exog            = False # TODO: exog_in_
         self.exog_names_in_              = None
+        self.exog_type                = None # TODO: exog_type_in_
+        self.exog_dtypes              = None # TODO: exog_dtypes_in_
         self.X_train_series_names_in_    = None
         self.X_train_exog_names_out_     = None
         self.X_train_features_names_out_ = None
-        self.included_exog               = False
-        self.exog_type                   = None
-        self.exog_dtypes                 = None
-        self.in_sample_residuals         = None
-        self.out_sample_residuals        = None
-        self.fitted                      = False
+        self.in_sample_residuals        = None # TODO: in_sample_residuals_
+        self.out_sample_residuals       = None # TODO: out_sample_residuals_
         self.creation_date               = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.fitted                   = False # TODO: is_fitted
         self.fit_date                    = None
         self.skforecast_version          = skforecast.__version__
         self.python_version              = sys.version.split(" ")[0]
@@ -1278,7 +1277,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         set_skforecast_warnings(suppress_warnings, action='default')
 
 
-    def _create_predict_inputs(
+    def _create_predict_inputs_old(
         self,
         steps: int,
         levels: Optional[Union[str, list]] = None,
@@ -1461,7 +1460,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     # TODO: main changes: last_window returned is a data frame, and exog is a dict
     # where each key is a step and each value is a numpy array where each column is
     # an exog and each row a series.
-    def _create_predict_inputs_new(
+    def _create_predict_inputs(
         self,
         steps: int,
         levels: Optional[Union[str, list]] = None,
@@ -1507,7 +1506,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog_values_dict : dict
             Exogenous variable/s included as predictor/s for each series in 
             each step. The keys are the steps and the values are numpy arrays
-            where each column is an exog and each row a series.
+            where each column is an exog and each row a series (level).
         levels : list
             Names of the series (levels) to be predicted.
         prediction_index : pandas Index
@@ -1562,9 +1561,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             encoding         = self.encoding
         )
 
-        # TODO: review with Ximo, as now last_window is a dataframe
-        # we need to select only the columns of the levels
-        # to be predicted
         last_window = last_window.iloc[
             -self.window_size_diff :, last_window.columns.get_indexer(levels)
         ].copy()
@@ -1959,7 +1955,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels,
             prediction_index,
             _
-        ) = self._create_predict_inputs(
+        ) = self._create_predict_inputs_old(
             steps       = steps,
             levels      = levels,
             last_window = last_window,
@@ -2049,7 +2045,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             levels,
             prediction_index,
             _
-        ) = self._create_predict_inputs_new(
+        ) = self._create_predict_inputs(
             steps       = steps,
             levels      = levels,
             last_window = last_window,
@@ -2063,39 +2059,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                           exog_values_dict = exog_values_dict
                       )
         
-        # predictions_tranformed = []
         for i, level in enumerate(levels):
-            preds_level = predictions[:, i]
             if self.differentiation is not None:
-                preds_level = self.differentiator_[level].inverse_transform_next_window(preds_level)
+                predictions[:, i] = (
+                    self
+                    .differentiator_[level]
+                    .inverse_transform_next_window(predictions[:, i])
+                )
 
-            # TODO: if create transform_numpy, predictions_transformed can be a empty DataFrame
-            # to fill with the numpy arrays. We avoid the need to create a Series and concatenate
-            # preds_level = pd.Series(
-            #                   data  = preds_level,
-            #                   index = prediction_index,
-            #                   name  = level
-            #               )
-
-            # preds_level = transform_series(
-            #     series            = preds_level,
-            #     transformer       = self.transformer_series_.get(level, self.transformer_series_['_unknown_level']),
-            #     fit               = False,
-            #     inverse_transform = True
-            # )
-
-            # predictions_tranformed.append(preds_level)
-
-            preds_level = transform_numpy(
-                array             = preds_level,
+            predictions[:, i] = transform_numpy(
+                array             = predictions[:, i],
                 transformer       = self.transformer_series_.get(level, self.transformer_series_['_unknown_level']),
                 fit               = False,
                 inverse_transform = True
             )
-
-            predictions[:, i] = preds_level
-
-        # predictions_df = pd.concat(predictions_tranformed, axis=1)
 
         predictions = pd.DataFrame(
                           data    = predictions,

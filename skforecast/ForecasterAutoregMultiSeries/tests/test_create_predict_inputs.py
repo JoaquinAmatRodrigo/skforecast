@@ -26,6 +26,12 @@ from .fixtures_ForecasterAutoregMultiSeries import exog_predict
 THIS_DIR = Path(__file__).parent
 series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
 exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
+
+for k in series_dict.keys():
+    series_dict[k].index.name = None
+for k in exog_dict.keys():
+    exog_dict[k].index.name = None
+
 end_train = "2016-07-31 23:59:00"
 series_dict_train = {k: v.loc[:end_train,] for k, v in series_dict.items()}
 exog_dict_train = {k: v.loc[:end_train,] for k, v in exog_dict.items()}
@@ -60,19 +66,19 @@ def test_output_create_predict_inputs_when_regressor_is_LinearRegression():
     results = forecaster._create_predict_inputs(steps=5)
 
     expected = (
-        {'1': np.array([45., 46., 47., 48., 49.]),
-         '2': np.array([95., 96., 97., 98., 99.])
-        },
-        {'1': None, '2': None},
+        pd.DataFrame(
+            {'1': np.array([45., 46., 47., 48., 49.]),
+             '2': np.array([95., 96., 97., 98., 99.])},
+            index = pd.RangeIndex(start=45, stop=50, step=1)
+        ),
+        None,
         ['1', '2'],
         pd.RangeIndex(start=50, stop=55, step=1),
         None
     )
 
-    for k in expected[0].keys():
-        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
-    for k in expected[1].keys():
-        assert results[1] == expected[1]
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert results[1] == expected[1]
     assert results[2] == expected[2]
     pd.testing.assert_index_equal(results[3], expected[3])
     assert results[4] == expected[4]
@@ -92,19 +98,20 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
     results = forecaster._create_predict_inputs(steps=5, levels='1')
     
     expected = (
-        {'1': np.array([-1.0814183452563133, -0.08097053361357116, 2.0806640273868244, 
-                         0.07582436346198025, 0.4776288428854555])
-        },
-        {'1': None},
+        pd.DataFrame(
+            {'1': np.array([
+                      -1.0814183452563133, -0.08097053361357116, 2.0806640273868244, 
+                       0.07582436346198025, 0.4776288428854555])},
+            index = pd.RangeIndex(start=45, stop=50, step=1)
+        ),
+        None,
         ['1'],
         pd.RangeIndex(start=50, stop=55, step=1),
         None
     )
 
-    for k in expected[0].keys():
-        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
-    for k in expected[1].keys():
-        assert results[1] == expected[1]
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert results[1] == expected[1]
     assert results[2] == expected[2]
     pd.testing.assert_index_equal(results[3], expected[3])
     assert results[4] == expected[4]
@@ -135,23 +142,25 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
     results = forecaster._create_predict_inputs(steps=5, levels='1', exog=exog_predict)
     
     expected = (
-        {'1': np.array([-1.0814183452563133, -0.08097053361357116, 2.0806640273868244, 
-                         0.07582436346198025, 0.4776288428854555])
-        },
-        {'1': np.array([[-0.09362908,  1., 0.],
-                        [ 0.45144522,  1., 0.],
-                        [-1.53968887,  1., 0.],
-                        [-1.45096055,  1., 0.],
-                        [-0.77240468,  1., 0.]])
+        pd.DataFrame(
+            {'1': np.array([
+                      -1.0814183452563133, -0.08097053361357116, 2.0806640273868244, 
+                       0.07582436346198025, 0.4776288428854555])},
+            index = pd.RangeIndex(start=45, stop=50, step=1)
+        ),
+        {1: np.array([[-0.09362908,  1., 0.]]),
+         2: np.array([[0.45144522,  1., 0.]]),
+         3: np.array([[-1.53968887,  1., 0.]]),
+         4: np.array([[-1.45096055,  1., 0.]]),
+         5: np.array([[-0.77240468,  1., 0.]])
         },
         ['1'],
         pd.RangeIndex(start=50, stop=55, step=1),
         None
     )
 
-    for k in expected[0].keys():
-        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
-    for k in expected[1].keys():
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    for k in results[1].keys():
         np.testing.assert_array_almost_equal(results[1][k], expected[1][k])
     assert results[2] == expected[2]
     pd.testing.assert_index_equal(results[3], expected[3])
@@ -187,23 +196,29 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_tr
     results = forecaster._create_predict_inputs(steps=5, exog=exog_predict)
     
     expected = (
-        {'1': np.array([-1.08141835, -0.08097053, 2.08066403, 0.07582436, 0.47762884]),
-         '2': np.array([0.73973379, -1.29936753, -0.36483376, -0.96090271, -0.57388468])
-        },
-        {'1': np.array([[-0.09575486,  1., 0.],
-                        [ 0.44024531,  1., 0.],
-                        [-1.51774136,  1., 0.],
-                        [-1.43049014,  1., 0.],
-                        [-0.76323054,  1., 0.]])
+        pd.DataFrame(
+            {'1': np.array([-1.08141835, -0.08097053, 2.08066403, 0.07582436, 0.47762884]),
+             '2': np.array([0.73973379, -1.29936753, -0.36483376, -0.96090271, -0.57388468])},
+            index = pd.RangeIndex(start=45, stop=50, step=1)
+        ),
+        {1: np.array([[-0.09575486,  1., 0.],
+                      [-0.09575486,  1., 0.]]),
+         2: np.array([[0.44024531,  1., 0.],
+                      [0.44024531,  1., 0.]]),
+         3: np.array([[-1.51774136,  1., 0.],
+                      [-1.51774136,  1., 0.]]),
+         4: np.array([[-1.43049014,  1., 0.],
+                      [-1.43049014,  1., 0.]]),
+         5: np.array([[-0.76323054,  1., 0.],
+                      [-0.76323054,  1., 0.]])
         },
         ['1', '2'],
         pd.RangeIndex(start=50, stop=55, step=1),
         None
     )
 
-    for k in expected[0].keys():
-        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
-    for k in expected[1].keys():
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    for k in results[1].keys():
         np.testing.assert_array_almost_equal(results[1][k], expected[1][k])
     assert results[2] == expected[2]
     pd.testing.assert_index_equal(results[3], expected[3])
@@ -251,38 +266,40 @@ def test_create_predict_inputs_output_when_categorical_features_native_implement
     results = forecaster._create_predict_inputs(steps=10, exog=exog_predict)
     
     expected = (
-        {'1': np.array([0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]),
-         '2': np.array([0.6917018 , 0.15112745, 0.39887629, 0.2408559 , 0.34345601])
-        },
-        {'1': np.array([[0, 0, 0.51312815],
-                        [1, 1, 0.66662455],
-                        [2, 2, 0.10590849],
-                        [3, 3, 0.13089495],
-                        [4, 4, 0.32198061],
-                        [0, 0, 0.66156434],
-                        [1, 1, 0.84650623],
-                        [2, 2, 0.55325734],
-                        [3, 3, 0.85445249],
-                        [4, 4, 0.38483781]]),
-         '2': np.array([[0, 0, 0.51312815],
-                        [1, 1, 0.66662455],
-                        [2, 2, 0.10590849],
-                        [3, 3, 0.13089495],
-                        [4, 4, 0.32198061],
-                        [0, 0, 0.66156434],
-                        [1, 1, 0.84650623],
-                        [2, 2, 0.55325734],
-                        [3, 3, 0.85445249],
-                        [4, 4, 0.38483781]])
+        pd.DataFrame(
+            {'1': np.array([0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]),
+             '2': np.array([0.6917018 , 0.15112745, 0.39887629, 0.2408559 , 0.34345601])},
+            index = pd.RangeIndex(start=45, stop=50, step=1)
+        ),
+        {1: np.array([[0, 0, 0.51312815],
+                      [0, 0, 0.51312815]]),
+         2: np.array([[1, 1, 0.66662455],
+                      [1, 1, 0.66662455]]),
+         3: np.array([[2, 2, 0.10590849],
+                      [2, 2, 0.10590849]]),
+         4: np.array([[3, 3, 0.13089495],
+                      [3, 3, 0.13089495]]),
+         5: np.array([[4, 4, 0.32198061],
+                      [4, 4, 0.32198061]]),
+         6: np.array([[0, 0, 0.66156434],
+                      [0, 0, 0.66156434]]),
+         7: np.array([[1, 1, 0.84650623],
+                      [1, 1, 0.84650623]]),
+         8: np.array([[2, 2, 0.55325734],
+                      [2, 2, 0.55325734]]),
+         9: np.array([[3, 3, 0.85445249],
+                      [3, 3, 0.85445249]]),
+         10: np.array([[4, 4, 0.38483781],
+                       [4, 4, 0.38483781]])
+
         },
         ['1', '2'],
         pd.RangeIndex(start=50, stop=60, step=1),
         None
     )
 
-    for k in expected[0].keys():
-        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
-    for k in expected[1].keys():
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    for k in results[1].keys():
         np.testing.assert_array_almost_equal(results[1][k], expected[1][k])
     assert results[2] == expected[2]
     pd.testing.assert_index_equal(results[3], expected[3])
@@ -310,44 +327,41 @@ def test_create_predict_inputs_output_when_series_and_exog_dict():
     results = forecaster._create_predict_inputs(steps=5, exog=exog_dict_test)
     
     expected = (
-        {'id_1000': np.array([-0.3525861, -0.457091, -0.49618465, -1.07810218, -1.77580056]),
-         'id_1001': np.array([0.21800529, 0.36936645, 0.67896814, 1.16332175, 1.1523137]),
-         'id_1003': np.array([-0.62651976, -0.74685959, -1.03823091, -0.37837738, 3.39980134]),
-         'id_1004': np.array([0.61495753, 0.8322971, 0.6719899, -0.24309812, -0.75073762])
-        },
-        {'id_1000': np.array([
-                        [0.00821644, 1.42962482, np.nan, np.nan],
-                        [1.11220226, 0.89634375, np.nan, np.nan],
-                        [1.38486425, -0.30192795, np.nan, np.nan],
-                        [0.62088235, -1.26286725, np.nan, np.nan],
-                        [-0.60444947, -1.26286725, np.nan, np.nan]]),
-         'id_1001': np.array([
-                        [0.00821644, 1.42962482, 1.11141113, -0.87943526],
-                        [1.11220226, 0.89634375, 1.1327558 , 0.0058948 ],
-                        [1.38486425, -0.30192795, 1.1775869 , -0.3532584 ],
-                        [0.62088235, -1.26286725, 1.0428337 , 0.84287284],
-                        [-0.60444947, -1.26286725, 1.00599776, -0.62314633]]),
-         'id_1003': np.array([
-                        [0.00821644, np.nan, 1.11141113, -0.87943526],
-                        [1.11220226, np.nan, 1.1327558 , 0.0058948 ],
-                        [1.38486425, np.nan, 1.1775869 , -0.3532584 ],
-                        [0.62088235, np.nan, 1.0428337 , 0.84287284],
-                        [-0.60444947, np.nan, 1.00599776, -0.62314633]]),
-         'id_1004': np.array([
-                        [0.00821644, 1.42962482, 1.11141113, -0.87943526],
-                        [1.11220226, 0.89634375, 1.1327558 , 0.0058948 ],
-                        [1.38486425, -0.30192795, 1.1775869 , -0.3532584 ],
-                        [0.62088235, -1.26286725, 1.0428337 , 0.84287284],
-                        [-0.60444947, -1.26286725, 1.00599776, -0.62314633]])
+        pd.DataFrame(
+            {'id_1000': np.array([-0.3525861, -0.457091, -0.49618465, -1.07810218, -1.77580056]),
+             'id_1001': np.array([0.21800529, 0.36936645, 0.67896814, 1.16332175, 1.1523137]),
+             'id_1003': np.array([-0.62651976, -0.74685959, -1.03823091, -0.37837738, 3.39980134]),
+             'id_1004': np.array([0.61495753, 0.8322971, 0.6719899, -0.24309812, -0.75073762])},
+            index = pd.date_range(start='2016-07-27', periods=5, freq='D')
+        ),
+        {1: np.array([[0.00821644, 1.42962482, np.nan, np.nan],
+                      [0.00821644, 1.42962482, 1.11141113, -0.87943526],
+                      [0.00821644, np.nan, 1.11141113, -0.87943526],
+                      [0.00821644, 1.42962482, 1.11141113, -0.87943526]]),
+         2: np.array([[1.11220226, 0.89634375, np.nan, np.nan],
+                      [1.11220226, 0.89634375, 1.1327558 , 0.0058948 ],
+                      [1.11220226, np.nan, 1.1327558 , 0.0058948 ],
+                      [1.11220226, 0.89634375, 1.1327558 , 0.0058948 ]]),
+         3: np.array([[1.38486425, -0.30192795, np.nan, np.nan],
+                      [1.38486425, -0.30192795, 1.1775869 , -0.3532584 ],
+                      [1.38486425, np.nan, 1.1775869 , -0.3532584 ],
+                      [1.38486425, -0.30192795, 1.1775869 , -0.3532584 ]]),
+         4: np.array([[0.62088235, -1.26286725, np.nan, np.nan],
+                      [0.62088235, -1.26286725, 1.0428337 , 0.84287284],
+                      [0.62088235, np.nan, 1.0428337 , 0.84287284],
+                      [0.62088235, -1.26286725, 1.0428337 , 0.84287284]]),
+         5: np.array([[-0.60444947, -1.26286725, np.nan, np.nan],
+                      [-0.60444947, -1.26286725, 1.00599776, -0.62314633],
+                      [-0.60444947, np.nan, 1.00599776, -0.62314633],
+                      [-0.60444947, -1.26286725, 1.00599776, -0.62314633]])
         },
         ['id_1000', 'id_1001', 'id_1003', 'id_1004'],
         pd.date_range(start='2016-08-01', periods=5, freq='D'),
         None
     )
 
-    for k in expected[0].keys():
-        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
-    for k in expected[1].keys():
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    for k in results[1].keys():
         np.testing.assert_array_almost_equal(results[1][k], expected[1][k])
     assert results[2] == expected[2]
     pd.testing.assert_index_equal(results[3], expected[3])
@@ -393,35 +407,66 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_ex
                      differentiation    = 1
                  )
     forecaster.fit(series=series_dict_datetime, exog=exog_dict_datetime)
-    results = forecaster._create_predict_inputs(steps=steps, exog=exog_pred,
-                                               predict_boot=True)
+    results = forecaster._create_predict_inputs(
+        steps=steps, exog=exog_pred, predict_boot=True
+    )
     
     expected = (
-        {'1': np.array([
-                    np.nan, 1.53099926e+00, -2.50175863e+00, -3.17051107e-02,
-                    1.60372524e+00, 1.24398054e-03, 4.61947999e-01, 9.68409847e-01,
-                    -5.62842287e-01, -5.10849917e-01, 5.01788973e-01, -1.79911269e+00,
-                    1.74873121e-01, -6.01343264e-01, 2.94763400e-01, 1.51888875e+00]
-              ),
-         '2': np.array([
-                    np.nan, -2.93045496, 2.6268138, -2.00736345, -0.19086106,
-                    1.46005589, -1.8403251, 3.04806289, -0.99623011, 0.3712246,
-                    -2.73026424, 2.23235938, -0.14532345, -1.53568303, -0.02273313,
-                    2.09399597]
-              )
-        },
-        {'1': np.array([
-                [-0.78916779], [0.07769117], [0.27283009], [0.35075195], [0.31597336],
-                [0.14091339], [1.28618144], [0.09164865], [-0.50744682], [0.01522573],
-                [0.82813767], [0.15290495], [0.61532804], [-0.06287136], [-1.1896156],
-                [0.28674823], [-0.64581528], [0.20879998], [1.80029302], [0.14269745]
-              ]),
-          '2': np.array([
-                [-0.78916779], [0.07769117], [0.27283009], [0.35075195], [0.31597336],
-                [0.14091339], [1.28618144], [0.09164865], [-0.50744682], [0.01522573],
-                [0.82813767], [0.15290495], [0.61532804], [-0.06287136], [-1.1896156],
-                [0.28674823], [-0.64581528], [0.20879998], [1.80029302], [0.14269745]
-              ])
+        pd.DataFrame(
+            {'1': np.array([
+                      np.nan, 1.53099926e+00, -2.50175863e+00, -3.17051107e-02,
+                      1.60372524e+00, 1.24398054e-03, 4.61947999e-01, 9.68409847e-01,
+                      -5.62842287e-01, -5.10849917e-01, 5.01788973e-01, -1.79911269e+00,
+                      1.74873121e-01, -6.01343264e-01, 2.94763400e-01, 1.51888875e+00]
+                  ),
+             '2': np.array([
+                      np.nan, -2.93045496, 2.6268138, -2.00736345, -0.19086106,
+                      1.46005589, -1.8403251, 3.04806289, -0.99623011, 0.3712246,
+                      -2.73026424, 2.23235938, -0.14532345, -1.53568303, -0.02273313,
+                      2.09399597]
+                  )},
+            index = pd.date_range(start='2003-01-15', periods=16, freq='D')
+        ),
+        {1: np.array([[-0.78916779],
+                      [-0.78916779]]),
+         2: np.array([[0.07769117],
+                      [0.07769117]]),
+         3: np.array([[0.27283009],
+                      [0.27283009]]),
+         4: np.array([[0.35075195],
+                      [0.35075195]]),
+         5: np.array([[0.31597336],
+                      [0.31597336]]),
+         6: np.array([[0.14091339],
+                      [0.14091339]]),
+         7: np.array([[1.28618144],
+                      [1.28618144]]),
+         8: np.array([[0.09164865],
+                      [0.09164865]]),
+         9: np.array([[-0.50744682],
+                      [-0.50744682]]),
+         10: np.array([[0.01522573],
+                       [0.01522573]]),
+         11: np.array([[0.82813767],
+                       [0.82813767]]),
+         12: np.array([[0.15290495],
+                       [0.15290495]]),
+         13: np.array([[0.61532804],
+                       [0.61532804]]),
+         14: np.array([[-0.06287136],
+                       [-0.06287136]]),
+         15: np.array([[-1.1896156],
+                       [-1.1896156]]),
+         16: np.array([[0.28674823],
+                       [0.28674823]]),
+         17: np.array([[-0.64581528],
+                       [-0.64581528]]),
+         18: np.array([[0.20879998],
+                       [0.20879998]]),
+         19: np.array([[1.80029302],
+                       [1.80029302]]),
+         20: np.array([[0.14269745],
+                       [0.14269745]])
         },
         ['1', '2'],
         pd.date_range(start='2003-01-31', periods=steps, freq='D'),
@@ -433,9 +478,8 @@ def test_create_predict_inputs_output_when_regressor_is_LinearRegression_with_ex
                         0.83327134,  0.37868888, -0.69352672,  0.66181368])}
     )
 
-    for k in expected[0].keys():
-        np.testing.assert_array_almost_equal(results[0][k], expected[0][k])
-    for k in expected[1].keys():
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    for k in results[1].keys():
         np.testing.assert_array_almost_equal(results[1][k], expected[1][k])
     assert results[2] == expected[2]
     pd.testing.assert_index_equal(results[3], expected[3])

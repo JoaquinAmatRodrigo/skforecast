@@ -24,13 +24,35 @@ The main changes in this release are:
 
 + Change the default value of `encoding` to `ordinal` in <code>[ForecasterAutoregMultiSeries]</code>. This will avoid conflicts if the regressor does not support categorical variables by default.
 
++ `encoding_mapping` has been renamed to `encoding_mapping_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `last_window` has been renamed to `last_window_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `index_type` has been renamed to `index_type_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `index_freq` has been renamed to `index_freq_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `training_range` has been renamed to `training_range_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
 + `series_col_names` has been renamed to `series_names_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
 
-+ `series_X_train` has been renamed to `X_train_series_names_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
++ `included_exog` has been renamed to `exog_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `exog_type` has been renamed to `exog_type_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `exog_dtypes` has been renamed to `exog_dtypes_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
 
 + `exog_col_names` has been renamed to `exog_names_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
 
++ `series_X_train` has been renamed to `X_train_series_names_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
 + `X_train_col_names` has been renamed to `X_train_features_names_out_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `in_sample_residuals` has been renamed to `in_sample_residuals_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `out_sample_residuals` has been renamed to `out_sample_residuals_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
++ `fitted` has been renamed to `is_fitted` in <code>[ForecasterAutoregMultiSeries]</code>.
 
 + `series_col_names` has been renamed to `series_names_in_` in the `check_predict_input`, `check_preprocess_exog_multiseries` and `initialize_transformer_series` functions in the <code>[utils]</code> module.
 
