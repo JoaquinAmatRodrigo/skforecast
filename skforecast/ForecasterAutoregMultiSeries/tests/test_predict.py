@@ -787,7 +787,7 @@ def test_predict_output_when_series_and_exog_dict_encoding_None_unknown_level():
 
     levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
     last_window = pd.DataFrame(
-        {k: v for k, v in forecaster.last_window.items() if k in levels}
+        {k: v for k, v in forecaster.last_window_.items() if k in levels}
     )
     last_window['id_1005'] = last_window['id_1004'] * 0.9
     predictions = forecaster.predict(
@@ -830,7 +830,7 @@ def test_predict_output_when_series_and_exog_dict_encoding_None_transformer_seri
 
     levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
     last_window = pd.DataFrame(
-        {k: v for k, v in forecaster.last_window.items() if k in levels}
+        {k: v for k, v in forecaster.last_window_.items() if k in levels}
     )
     last_window['id_1005'] = last_window['id_1004'] * 0.9
     exog_dict_test_2 = exog_dict_test.copy()
@@ -874,7 +874,7 @@ def test_predict_output_when_series_and_exog_dict_unknown_level():
 
     levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
     last_window = pd.DataFrame(
-        {k: v for k, v in forecaster.last_window.items() if k in levels}
+        {k: v for k, v in forecaster.last_window_.items() if k in levels}
     )
     last_window['id_1005'] = last_window['id_1004'] * 0.9
     exog_dict_test_2 = exog_dict_test.copy()

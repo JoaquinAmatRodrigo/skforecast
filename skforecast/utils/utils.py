@@ -624,15 +624,15 @@ def check_interval(
 def check_predict_input(
     forecaster_name: str,
     steps: Union[int, list],
-    fitted: bool,
-    included_exog: bool,
-    index_type: type,
-    index_freq: str,
+    is_fitted: bool,
+    exog_in_: bool,
+    index_type_: type,
+    index_freq_: str,
     window_size: int,
     last_window: Union[pd.Series, pd.DataFrame, None],
     last_window_exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    exog_type: Optional[type] = None,
+    exog_type_in_: Optional[type] = None,
     exog_names_in_: Optional[list] = None,
     interval: Optional[list] = None,
     alpha: Optional[float] = None,
@@ -653,13 +653,13 @@ def check_predict_input(
         Forecaster name.
     steps : int, list
         Number of future steps predicted.
-    fitted: bool
+    is_fitted: bool
         Tag to identify if the regressor has been fitted (trained).
-    included_exog : bool
+    exog_in_ : bool
         If the forecaster has been trained using exogenous variable/s.
-    index_type : type
+    index_type_ : type
         Type of index of the input used in training.
-    index_freq : str
+    index_freq_ : str
         Frequency of Index of the input used in training.
     window_size: int
         Size of the window needed to create the predictors. It is equal to 
@@ -672,7 +672,7 @@ def check_predict_input(
         ForecasterSarimax predictions.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s.
-    exog_type : type, default `None`
+    exog_type_in_ : type, default `None`
         Type of exogenous variable/s used in training.
     exog_names_in_ : list, default `None`
         Names of the exogenous variables used during training.
@@ -705,7 +705,7 @@ def check_predict_input(
 
     """
 
-    if not fitted:
+    if not is_fitted:
         raise NotFittedError(
             ("This Forecaster instance is not fitted yet. Call `fit` with "
              "appropriate arguments before using predict.")
@@ -769,13 +769,13 @@ def check_predict_input(
                          UnknownLevelWarning
                     )
 
-    if exog is None and included_exog:
+    if exog is None and exog_in_:
         raise ValueError(
             ("Forecaster trained with exogenous variable/s. "
              "Same variable/s must be provided when predicting.")
         )
 
-    if exog is not None and not included_exog:
+    if exog is not None and not exog_in_:
         raise ValueError(
             ("Forecaster trained without exogenous variable/s. "
              "`exog` must be `None` when predicting.")
@@ -846,15 +846,15 @@ def check_predict_input(
                                last_window   = last_window.iloc[:0],
                                return_values = False
                            ) 
-    if not isinstance(last_window_index, index_type):
+    if not isinstance(last_window_index, index_type_):
         raise TypeError(
-            (f"Expected index of type {index_type} for `last_window`. "
+            (f"Expected index of type {index_type_} for `last_window`. "
              f"Got {type(last_window_index)}.")
         )
     if isinstance(last_window_index, pd.DatetimeIndex):
-        if not last_window_index.freqstr == index_freq:
+        if not last_window_index.freqstr == index_freq_:
             raise TypeError(
-                (f"Expected frequency of type {index_freq} for `last_window`. "
+                (f"Expected frequency of type {index_freq_} for `last_window`. "
                  f"Got {last_window_index.freqstr}.")
             )
 
@@ -868,9 +868,9 @@ def check_predict_input(
                 raise TypeError(
                     f"`exog` must be a pandas Series, DataFrame or dict. Got {type(exog)}."
                 )
-            if exog_type == dict and not isinstance(exog, dict):
+            if exog_type_in_ == dict and not isinstance(exog, dict):
                 raise TypeError(
-                    f"Expected type for `exog`: {exog_type}. Got {type(exog)}."
+                    f"Expected type for `exog`: {exog_type_in_}. Got {type(exog)}."
                 )
         else:
             if not isinstance(exog, (pd.Series, pd.DataFrame)):
@@ -969,17 +969,17 @@ def check_predict_input(
                                 exog          = exog_to_check.iloc[:0, ],
                                 return_values = False
                             )
-            if not isinstance(exog_index, index_type):
+            if not isinstance(exog_index, index_type_):
                 raise TypeError(
-                    (f"Expected index of type {index_type} for {exog_name}. "
+                    (f"Expected index of type {index_type_} for {exog_name}. "
                      f"Got {type(exog_index)}.")
                 )
             if forecaster_name not in ['ForecasterAutoregMultiSeries', 
                                        'ForecasterAutoregMultiSeriesCustom']:
                 if isinstance(exog_index, pd.DatetimeIndex):
-                    if not exog_index.freqstr == index_freq:
+                    if not exog_index.freqstr == index_freq_:
                         raise TypeError(
-                            (f"Expected frequency of type {index_freq} for {exog_name}. "
+                            (f"Expected frequency of type {index_freq_} for {exog_name}. "
                              f"Got {exog_index.freqstr}.")
                         )
 
@@ -1010,7 +1010,7 @@ def check_predict_input(
     if forecaster_name == 'ForecasterSarimax':
         # Check last_window_exog type, len, nulls and index (type and freq)
         if last_window_exog is not None:
-            if not included_exog:
+            if not exog_in_:
                 raise ValueError(
                     ("Forecaster trained without exogenous variable/s. "
                      "`last_window_exog` must be `None` when predicting.")
@@ -1036,15 +1036,15 @@ def check_predict_input(
                                             last_window   = last_window_exog.iloc[:0],
                                             return_values = False
                                         ) 
-            if not isinstance(last_window_exog_index, index_type):
+            if not isinstance(last_window_exog_index, index_type_):
                 raise TypeError(
-                    (f"Expected index of type {index_type} for `last_window_exog`. "
+                    (f"Expected index of type {index_type_} for `last_window_exog`. "
                      f"Got {type(last_window_exog_index)}.")
                 )
             if isinstance(last_window_exog_index, pd.DatetimeIndex):
-                if not last_window_exog_index.freqstr == index_freq:
+                if not last_window_exog_index.freqstr == index_freq_:
                     raise TypeError(
-                        (f"Expected frequency of type {index_freq} for "
+                        (f"Expected frequency of type {index_freq_} for "
                          f"`last_window_exog`. Got {last_window_exog_index.freqstr}.")
                     )
 
@@ -2193,7 +2193,7 @@ def check_backtesting_input(
                  f"length of `{data_name}` ({data_length}).")
             )
         else:
-            if not forecaster.fitted:
+            if not forecaster.is_fitted:
                 raise NotFittedError(
                     ("`forecaster` must be already trained if no `initial_train_size` "
                      "is provided.")
@@ -2753,12 +2753,12 @@ def prepare_levels_multiseries(
 def preprocess_levels_self_last_window_multiseries(
     levels: list,
     input_levels_is_list: bool,
-    last_window: dict
+    last_window_: dict
 ) -> Tuple[list, pd.DataFrame]:
     """
-    Preprocess `levels` and `last_window` arguments in multiseries Forecasters. 
-    Only levels whose last window ends at the same datetime index will 
-    be predicted together.
+    Preprocess `levels` and `last_window` (when using self.last_window_) arguments 
+    in multiseries Forecasters when predicting. Only levels whose last window 
+    ends at the same datetime index will be predicted together.
 
     Parameters
     ----------
@@ -2766,8 +2766,8 @@ def preprocess_levels_self_last_window_multiseries(
         Names of the series (levels) to be predicted.
     input_levels_is_list : bool
         Indicates if input levels argument is a list.
-    last_window : dict
-        Dictionary with the last window of each series (self.last_window).
+    last_window_ : dict
+        Dictionary with the last window of each series (self.last_window_).
 
     Returns
     -------
@@ -2779,7 +2779,7 @@ def preprocess_levels_self_last_window_multiseries(
 
     """
 
-    available_last_windows = set() if last_window is None else set(last_window.keys())
+    available_last_windows = set() if last_window_ is None else set(last_window_.keys())
     not_available_last_window = set(levels) - available_last_windows
     if not_available_last_window:
         levels = [level for level in levels 
@@ -2787,13 +2787,13 @@ def preprocess_levels_self_last_window_multiseries(
         if not levels:
             raise ValueError(
                 (f"No series to predict. None of the series {not_available_last_window} "
-                 f"are present in `last_window` attribute. Provide `last_window` "
+                 f"are present in `last_window_` attribute. Provide `last_window` "
                  f"as argument in predict method.")
             )
         else:
             warnings.warn(
                 (f"Levels {not_available_last_window} are excluded from "
-                 f"prediction since they were not stored in `last_window` "
+                 f"prediction since they were not stored in `last_window_` "
                  f"attribute during training. If you don't want to retrain "
                  f"the Forecaster, provide `last_window` as argument."),
                  IgnoredArgumentWarning
@@ -2801,14 +2801,14 @@ def preprocess_levels_self_last_window_multiseries(
 
     last_index_levels = [
         v.index[-1] 
-        for k, v in last_window.items()
+        for k, v in last_window_.items()
         if k in levels
     ]
     if len(set(last_index_levels)) > 1:
         max_index_levels = max(last_index_levels)
         selected_levels = [
             k
-            for k, v in last_window.items()
+            for k, v in last_window_.items()
             if k in levels and v.index[-1] == max_index_levels
         ]
 
@@ -2826,7 +2826,7 @@ def preprocess_levels_self_last_window_multiseries(
 
     last_window = pd.DataFrame(
         {k: v 
-         for k, v in last_window.items() 
+         for k, v in last_window_.items() 
          if k in levels}
     )
 
@@ -2837,8 +2837,8 @@ def prepare_residuals_multiseries(
     levels: list,
     use_in_sample: bool,
     encoding: Optional[str] = None,
-    in_sample_residuals: Optional[dict] = None,
-    out_sample_residuals: Optional[dict] = None
+    in_sample_residuals_: Optional[dict] = None,
+    out_sample_residuals_: Optional[dict] = None
 ) -> Tuple[list, bool]:
     """
     Prepare residuals for bootstrapping prediction in multiseries Forecasters.
@@ -2848,16 +2848,16 @@ def prepare_residuals_multiseries(
     levels : list
         Names of the series (levels) to be predicted.
     use_in_sample : bool
-        Indicates if in_sample_residuals are used. Same as `in_sample_residuals`
+        Indicates if in_sample_residuals_ are used. Same as `in_sample_residuals`
         argument in predict method.
     encoding : str, default `None`
         Encoding used to identify the different series (`ForecasterAutoregMultiSeries`, 
         `ForecasterAutoregMultiSeriesCustom`).
-    in_sample_residuals : dict, default `None`
+    in_sample_residuals_ : dict, default `None`
         Residuals of the model when predicting training data. Only stored up to
         1000 values in the form `{level: residuals}`. If `transformer_series` 
         is not `None`, residuals are stored in the transformed scale.
-    out_sample_residuals : dict, default `None`
+    out_sample_residuals_ : dict, default `None`
         Residuals of the model when predicting non-training data. Only stored
         up to 1000 values in the form `{level: residuals}`. If `transformer_series` 
         is not `None`, residuals are assumed to be in the transformed scale. Use 
@@ -2873,39 +2873,39 @@ def prepare_residuals_multiseries(
     """
 
     if use_in_sample:
-        unknown_levels = set(levels) - set(in_sample_residuals.keys())
+        unknown_levels = set(levels) - set(in_sample_residuals_.keys())
         if unknown_levels and encoding is not None:
             warnings.warn(
-                (f"`levels` {unknown_levels} are not present in `forecaster.in_sample_residuals`, "
+                (f"`levels` {unknown_levels} are not present in `forecaster.in_sample_residuals_`, "
                  f"most likely because they were not present in the training data. "
                  f"A random sample of the residuals from other levels will be used. "
                  f"This can lead to inaccurate intervals for the unknown levels."),
                  UnknownLevelWarning
             )
-        residuals = in_sample_residuals.copy()
+        residuals = in_sample_residuals_.copy()
     else:
-        if out_sample_residuals is None:
+        if out_sample_residuals_ is None:
             raise ValueError(
-                ("`forecaster.out_sample_residuals` is `None`. Use "
+                ("`forecaster.out_sample_residuals_` is `None`. Use "
                  "`in_sample_residuals=True` or the  `set_out_sample_residuals()` "
                  "method before predicting.")
             )
         else:
-            unknown_levels = set(levels) - set(out_sample_residuals.keys())
+            unknown_levels = set(levels) - set(out_sample_residuals_.keys())
             if unknown_levels and encoding is not None:
                 warnings.warn(
-                    (f"`levels` {unknown_levels} are not present in `forecaster.out_sample_residuals`. "
+                    (f"`levels` {unknown_levels} are not present in `forecaster.out_sample_residuals_`. "
                      f"A random sample of the residuals from other levels will be used. "
                      f"This can lead to inaccurate intervals for the unknown levels. "
                      f"Otherwise, Use the `set_out_sample_residuals()` method before "
                      f"predicting to set the residuals for these levels."),
                      UnknownLevelWarning
                 )
-            residuals = out_sample_residuals.copy()
+            residuals = out_sample_residuals_.copy()
 
     check_residuals = (
-        "forecaster.in_sample_residuals" if use_in_sample
-        else "forecaster.out_sample_residuals"
+        "forecaster.in_sample_residuals_" if use_in_sample
+        else "forecaster.out_sample_residuals_"
     )
     for level in levels:
         if level in unknown_levels:

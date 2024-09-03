@@ -38,7 +38,7 @@ def test_create_train_X_y_ValueError_when_Forecaster_fitted_and_different_column
     of the series are different from the columns names used to fit the forecaster.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fitted = True
+    forecaster.is_fitted = True
     forecaster.series_names_in_ = ['l1', 'l2']
 
     new_series = pd.DataFrame({
@@ -62,7 +62,7 @@ def test_create_train_X_y_ValueError_when_Forecaster_fitted_without_exog_and_exo
     exog is not None.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fitted = True
+    forecaster.is_fitted = True
     forecaster.series_names_in_ = ['l1', 'l2']
     forecaster.exog_names_in_ = None
 
@@ -86,7 +86,7 @@ def test_create_train_X_y_ValueError_when_Forecaster_fitted_and_different_exog_c
     of exog are different from the columns names used to fit the forecaster.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fitted = True
+    forecaster.is_fitted = True
     forecaster.series_names_in_ = ['l1', 'l2']
     forecaster.exog_names_in_ = ['exog']
 
@@ -2265,13 +2265,13 @@ def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
-@pytest.mark.parametrize("encoding, encoding_mapping", 
+@pytest.mark.parametrize("encoding, encoding_mapping_", 
                          [('ordinal'         , {'1': 0, '2': 1}), 
                           ('ordinal_category', {'1': 0, '2': 1}),
                           ('onehot'          , {'1': 0, '2': 1}),
                           (None              , {'1': 0, '2': 1})], 
                          ids = lambda dt : f'encoding, mapping: {dt}')
-def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping):
+def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping_):
     """
     Test the encoding mapping of _create_train_X_y.
     """
@@ -2284,12 +2284,12 @@ def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping):
     )
     _ = forecaster._create_train_X_y(series=series)
     
-    assert forecaster.encoding_mapping == encoding_mapping
+    assert forecaster.encoding_mapping_ == encoding_mapping_
 
 
 @pytest.mark.parametrize("fit_forecaster", 
                          [True, False], 
-                         ids = lambda fitted: f'fit_forecaster: {fitted}')
+                         ids = lambda is_fitted: f'fit_forecaster: {is_fitted}')
 def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and_already_trained(fit_forecaster):
     """
     Test the output of _create_train_X_y when differentiation=1 and already 
@@ -2393,7 +2393,7 @@ def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and
 
 @pytest.mark.parametrize("fit_forecaster", 
                          [True, False], 
-                         ids = lambda fitted: f'fit_forecaster: {fitted}')
+                         ids = lambda is_fitted: f'fit_forecaster: {is_fitted}')
 def test_create_train_X_y_output_when_series_and_exog_and_already_trained_encoding_None(fit_forecaster):
     """
     Test the output of _create_train_X_y when encoding None and already 
@@ -2501,7 +2501,7 @@ def test_create_train_X_y_output_when_series_and_exog_and_already_trained_encodi
 
 @pytest.mark.parametrize("fit_forecaster", 
                          [True, False], 
-                         ids = lambda fitted: f'fit_forecaster: {fitted}')
+                         ids = lambda is_fitted: f'fit_forecaster: {is_fitted}')
 def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and_already_trained_encoding_None(fit_forecaster):
     """
     Test the output of _create_train_X_y when differentiation=1,

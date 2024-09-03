@@ -60,6 +60,25 @@ The main changes in this release are:
 
 + `exog_col_names` has been renamed to `exog_names_in_` in the `check_predict_input` and `check_preprocess_exog_multiseries` functions in the <code>[utils]</code> module.
 
++ `index_type` has been renamed to `index_type_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
++ `index_freq` has been renamed to `index_freq_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
++ `included_exog` has been renamed to `exog_in_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
++ `exog_type` has been renamed to `exog_type_in_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
++ `exog_dtypes` has been renamed to `exog_dtypes_in_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
++ `fitted` has been renamed to `is_fitted` in the `check_predict_input` function in the <code>[utils]</code> module.
+
++ `in_sample_residuals` has been renamed to `in_sample_residuals_` in the `prepare_residuals_multiseries` function in the <code>[utils]</code> module.
+
++ `out_sample_residuals` has been renamed to `out_sample_residuals_` in the `prepare_residuals_multiseries` function in the <code>[utils]</code> module.
+
++ `last_window` has been renamed to `last_window_` in the `preprocess_levels_self_last_window_multiseries` function in the <code>[utils]</code> module.
+
+
 **Fixed**
 
 + ...
