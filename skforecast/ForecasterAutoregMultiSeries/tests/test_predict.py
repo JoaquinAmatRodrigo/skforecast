@@ -66,7 +66,7 @@ def test_predict_IgnoredArgumentWarning_when_not_available_self_last_window_for_
 
     warn_msg = re.escape(
         ("Levels {'2'} are excluded from prediction "
-         "since they were not stored in `last_window` attribute "
+         "since they were not stored in `last_window_` attribute "
          "during training. If you don't want to retrain the "
          "Forecaster, provide `last_window` as argument.")
     )
@@ -95,7 +95,7 @@ def test_predict_ValueError_when_not_available_self_last_window_for_levels(store
 
     err_msg = re.escape(
         ("No series to predict. None of the series {'2'} are present in "
-         "`last_window` attribute. Provide `last_window` as argument "
+         "`last_window_` attribute. Provide `last_window` as argument "
          "in predict method.")
     )
     with pytest.raises(ValueError, match = err_msg):

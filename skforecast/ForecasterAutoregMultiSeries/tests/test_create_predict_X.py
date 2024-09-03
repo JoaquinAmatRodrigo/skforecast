@@ -245,8 +245,8 @@ def test_create_predict_X_output_when_categorical_features_native_implementation
     """
     df_exog = pd.DataFrame(
         {'exog_1': exog['exog_1'],
-         'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-         'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)}
+         'exog_2': ['a', 'b', 'c', 'd', 'e'] * 10,
+         'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J'] * 10)}
     )
     
     exog_predict = df_exog.copy()
