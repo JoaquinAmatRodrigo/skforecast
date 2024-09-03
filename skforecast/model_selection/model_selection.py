@@ -9,7 +9,7 @@ import re
 import os
 from copy import deepcopy
 import logging
-from typing import Union, Tuple, Optional, Callable, Any
+from typing import Union, Tuple, Optional, Callable
 import warnings
 import numpy as np
 import pandas as pd
@@ -1275,8 +1275,11 @@ def _evaluate_grid_hyperparameters(
                                 show_progress         = False
                             )[0]
             metric_values = metric_values.iloc[0, :].to_list()
-            warnings.filterwarnings('ignore', category=RuntimeWarning, 
-                                    message= "The forecaster will be fit.*")
+            warnings.filterwarnings(
+                'ignore',
+                category = RuntimeWarning, 
+                message  = "The forecaster will be fit.*"
+            )
             
             lags_list.append(lags_v)
             lags_label_list.append(lags_k)
@@ -1349,11 +1352,11 @@ def _evaluate_grid_hyperparameters_one_step_ahead(
     output_file: Optional[str] = None
 ) -> pd.DataFrame:
     """
-    Evaluate parameter values for a Forecaster object using its error when predicting
-    one step ahead. This is faster than backtesting the model to predict multiple steps
-    ahead and is useful for quickly comparing different models and hyperparameters, but
-    the results may not reflect the actual performance of the model when predicting multiple
-    steps ahead.
+    Evaluate parameter values for a Forecaster object by assessing its error in
+    one-step-ahead predictions. This method is faster than backtesting, which involves
+    multi-step predictions, and allows for quick comparisons between different models
+    and hyperparameters. However, while it is efficient for initial evaluations, the
+    results may not fully reflect the model's performance in multi-step predictions.
     
     Parameters
     ----------
@@ -1434,11 +1437,9 @@ def _evaluate_grid_hyperparameters_one_step_ahead(
         )
     
     warnings.warn(
-        "Models are evaluated using one-step-ahead predictions. This is faster "
-        "than backtesting the model to predict multiple steps ahead and is useful "
-        "for quickly comparing different models and hyperparameters, but the results "
-        "may not reflect the actual performance of the model when predicting multiple "
-        "steps ahead."
+        "One-step-ahead predictions are used for faster model comparison, but they may "
+        "not fully represent multi-step prediction performance. It is recommended to "
+        "backtest the final model for a more accurate multi-step performance estimate."
     )
 
     if verbose:
@@ -1465,27 +1466,66 @@ def _evaluate_grid_hyperparameters_one_step_ahead(
             if lags_label == 'values':
                 lags_k = lags_v
 
-        # Crear matrices X_train, y_train, X_test, y_test
+        train_size = initial_train_size - forecaster.window_size
         X_all, y_all = forecaster.create_train_X_y(y=y, exog=exog)
-        X_train = X_all.iloc[:initial_train_size, :]
-        y_train = y_all.iloc[:initial_train_size]
-        X_test = X_all.iloc[initial_train_size:, :]
-        y_test = y_all.iloc[initial_train_size:]
-        
+        X_train = X_all.iloc[:train_size, :]
+        X_test  = X_all.iloc[train_size:, :]
+
+        if type(forecaster).__name__ == 'ForecasterAutoreg': 
+            y_train = y_all.iloc[:train_size]
+            y_test  = y_all.iloc[train_size:]
+
+        if type(forecaster).__name__ == 'ForecasterAutoregDirect':
+            y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
+            y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
+
         for params in param_grid:
 
             forecaster.set_params(params)
-            forecaster.regressor.fit(X_train, y_train)
-            pred = forecaster.regressor.predict(X_test)
 
-            metric_values = []
-            for m in metric:
-                metric_values.append(
-                    m(y_true=y_test, y_pred=pred, y_train=y_train)
-                )
+            if type(forecaster).__name__ == 'ForecasterAutoreg':
+                forecaster.regressor.fit(X_train, y_train)
+                pred = forecaster.regressor.predict(X_test)
 
-            warnings.filterwarnings('ignore', category=RuntimeWarning, 
-                                    message= "The forecaster will be fit.*")
+                metric_values = []
+                for m in metric:
+                    metric_values.append(
+                        m(y_true=y_test, y_pred=pred, y_train=y_train)
+                    )
+
+            if type(forecaster).__name__ == 'ForecasterAutoregDirect':
+                pred_per_step = {}
+                steps = range(1, forecaster.steps + 1)
+                for step in steps:
+                    X_train_step, y_train_step = forecaster.filter_train_X_y_for_step(
+                                                    step    = step,
+                                                    X_train = X_train,
+                                                    y_train = y_train
+                                                  )
+                    X_test_step, y_test_step = forecaster.filter_train_X_y_for_step(
+                                                    step    = step,  
+                                                    X_train = X_test,
+                                                    y_train = y_test
+                                                )
+                    forecaster.regressors_[step].fit(X_train_step, y_train_step)
+                    pred = forecaster.regressors_[step].predict(X_test_step)
+                    pred_per_step[step] = pred
+
+                metric_values = []
+                for m in metric:
+                    metric_values_per_step = []
+                    for step in steps:
+                        metric_values_per_step.append(
+                            m(y_true=y_test_step, y_pred=pred_per_step[step], y_train=y_train[step])
+                        )
+                    metric_values.append(np.mean(metric_values_per_step))
+
+
+            warnings.filterwarnings(
+                'ignore',
+                category = RuntimeWarning, 
+                message  = "The forecaster will be fit.*"
+            )
             
             lags_list.append(lags_v)
             lags_label_list.append(lags_k)
@@ -1678,6 +1718,7 @@ def bayesian_search_forecaster(
              f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
         )
 
+    # TODO: remove argument engine?
     if engine not in ['optuna']:
         raise ValueError(
             f"`engine` only allows 'optuna', got {engine}."
@@ -1715,22 +1756,22 @@ def bayesian_search_forecaster(
                                 )
     else:
 
-            results, best_trial = _bayesian_search_optuna_one_step_ahead(
-                                        forecaster            = forecaster,
-                                        y                     = y,
-                                        exog                  = exog,
-                                        search_space          = search_space,
-                                        metric                = metric,
-                                        initial_train_size    = initial_train_size,
-                                        n_trials              = n_trials,
-                                        random_state          = random_state,
-                                        return_best           = return_best,
-                                        verbose               = verbose,
-                                        show_progress         = show_progress,
-                                        output_file           = output_file,
-                                        kwargs_create_study   = kwargs_create_study,
-                                        kwargs_study_optimize = kwargs_study_optimize
-                                    )
+        results, best_trial = _bayesian_search_optuna_one_step_ahead(
+                                    forecaster            = forecaster,
+                                    y                     = y,
+                                    exog                  = exog,
+                                    search_space          = search_space,
+                                    metric                = metric,
+                                    initial_train_size    = initial_train_size,
+                                    n_trials              = n_trials,
+                                    random_state          = random_state,
+                                    return_best           = return_best,
+                                    verbose               = verbose,
+                                    show_progress         = show_progress,
+                                    output_file           = output_file,
+                                    kwargs_create_study   = kwargs_create_study,
+                                    kwargs_study_optimize = kwargs_study_optimize
+                                )
 
     return results, best_trial
 
@@ -1932,8 +1973,8 @@ def _bayesian_search_optuna(
 
     warnings.filterwarnings(
         "ignore",
-        category=UserWarning,
-        message="Choices for a categorical distribution should be*"
+        category = UserWarning,
+        message  = "Choices for a categorical distribution should be*"
     )
 
     study = optuna.create_study(**kwargs_create_study)
@@ -2033,11 +2074,11 @@ def _bayesian_search_optuna_one_step_ahead(
     kwargs_study_optimize: dict = {}
 ) -> Tuple[pd.DataFrame, object]:
     """
-    Bayesian optimization for a Forecaster object using time series backtesting 
-    and optuna library. This is faster than backtesting the model to predict multiple
-    steps ahead and is useful for quickly comparing different models and hyperparameters,
-    but the results may not reflect the actual performance of the model when predicting
-    multiple steps ahead.
+    Bayesian optimization for a Forecaster object by assessing its error in 
+    one-step-ahead predictions. This method is faster than backtesting, which involves
+    multi-step predictions, and allows for quick comparisons between different models
+    and hyperparameters. However, while it is efficient for initial evaluations, the
+    results may not fully reflect the model's performance in multi-step predictions.
     
     Parameters
     ----------
@@ -2141,11 +2182,9 @@ def _bayesian_search_optuna_one_step_ahead(
         )
     
     warnings.warn(
-        "Models are evaluated using one-step-ahead predictions. This is faster "
-        "than backtesting the model to predict multiple steps ahead and is useful "
-        "for quickly comparing different models and hyperparameters, but the results "
-        "may not reflect the actual performance of the model when predicting multiple "
-        "steps ahead."
+        "One-step-ahead predictions are used for faster model comparison, but they may "
+        "not fully represent multi-step prediction performance. It is recommended to "
+        "backtest the final model for a more accurate multi-step performance estimate."
     )
         
     # Objective function using backtesting_forecaster
@@ -2166,22 +2205,53 @@ def _bayesian_search_optuna_one_step_ahead(
             if "lags" in sample:
                 forecaster.set_lags(sample['lags'])
 
-        # Crear matrices X_train, y_train, X_test, y_test
+        train_size = initial_train_size - forecaster.window_size
         X_all, y_all = forecaster.create_train_X_y(y=y, exog=exog)
-        X_train = X_all.iloc[:initial_train_size, :]
-        y_train = y_all.iloc[:initial_train_size]
-        X_test = X_all.iloc[initial_train_size:, :]
-        y_test = y_all.iloc[initial_train_size:]
+        X_train = X_all.iloc[:train_size, :]
+        X_test  = X_all.iloc[train_size:, :]
+        if type(forecaster).__name__ == 'ForecasterAutoreg': 
+            y_train = y_all.iloc[:train_size]
+            y_test  = y_all.iloc[train_size:]
 
-        forecaster.regressor.fit(X_train, y_train)
-        pred = forecaster.regressor.predict(X_test)
-        
-        metrics = []
-        for m in metric:
-            metrics.append(
-                m(y_true=y_test, y_pred=pred, y_train=y_train)
-            )
-        
+            forecaster.regressor.fit(X_train, y_train)
+            pred = forecaster.regressor.predict(X_test)
+            
+            metrics = []
+            for m in metric:
+                metrics.append(
+                    m(y_true=y_test, y_pred=pred, y_train=y_train)
+                )
+
+        if type(forecaster).__name__ == 'ForecasterAutoregDirect':
+            y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
+            y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
+
+            pred_per_step = {}
+            steps = range(1, forecaster.steps + 1)
+            for step in steps:
+                X_train_step, y_train_step = forecaster.filter_train_X_y_for_step(
+                                                    step    = step,
+                                                    X_train = X_train,
+                                                    y_train = y_train
+                                                  )
+                X_test_step, y_test_step = forecaster.filter_train_X_y_for_step(
+                                                step    = step,  
+                                                X_train = X_test,
+                                                y_train = y_test
+                                            )
+                forecaster.regressors_[step].fit(X_train_step, y_train_step)
+                pred = forecaster.regressors_[step].predict(X_test_step)
+                pred_per_step[step] = pred
+
+            metrics = []
+            for m in metric:
+                metric_values_per_step = []
+                for step in steps:
+                    metric_values_per_step.append(
+                        m(y_true=y_test_step, y_pred=pred_per_step[step], y_train=y_train[step])
+                    )
+                metrics.append(np.mean(metric_values_per_step))
+
         # Store all metrics in the variable `metric_values` defined outside _objective.
         nonlocal metric_values
         metric_values.append(metrics)
@@ -2212,8 +2282,8 @@ def _bayesian_search_optuna_one_step_ahead(
 
     warnings.filterwarnings(
         "ignore",
-        category=UserWarning,
-        message="Choices for a categorical distribution should be*"
+        category = UserWarning,
+        message  = "Choices for a categorical distribution should be*"
     )
 
     study = optuna.create_study(**kwargs_create_study)
