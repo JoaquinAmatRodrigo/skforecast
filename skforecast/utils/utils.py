@@ -1530,6 +1530,7 @@ def transform_numpy(
             "`inverse_transform` is not available when using ColumnTransformers."
         )
 
+    # TODO: Review warning X does not have valid feature names
     if not inverse_transform:
         if fit:
             array_transformed = transformer.fit_transform(array)

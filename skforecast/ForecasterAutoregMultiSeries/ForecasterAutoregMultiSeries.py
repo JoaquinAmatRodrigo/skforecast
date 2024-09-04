@@ -2563,12 +2563,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                      f"({transformer_level}). Ensure that the new "
                      f"residuals are on the same scale as the original time series.")
                 )
-                residuals_level = transform_series(
-                    series            = pd.Series(residuals_level, name='residuals'),
+                # TODO: review warning X does not have valid feature names
+                # See function transform_numpy in utils.py
+                # residuals_level = transform_series(
+                #     series            = pd.Series(residuals_level, name='residuals'),
+                #     transformer       = transformer_level,
+                #     fit               = False,
+                #     inverse_transform = False
+                # ).to_numpy()
+                residuals_level = transform_numpy(
+                    array             = residuals_level,
                     transformer       = transformer_level,
                     fit               = False,
                     inverse_transform = False
-                ).to_numpy()
+                )
 
             if len(residuals_level) > 1000:
                 rng = np.random.default_rng(seed=random_state)
