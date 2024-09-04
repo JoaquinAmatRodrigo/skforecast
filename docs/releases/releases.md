@@ -18,7 +18,7 @@ The main changes in this release are:
 
 **Added**
 
-+ ...
++ Create `transform_numpy` function in the <code>[utils]</code> module to carry out the transformation of the modeled time series and exogenous variables as numpy arrays.
 
 **Changed**
 
