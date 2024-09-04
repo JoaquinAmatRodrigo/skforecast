@@ -160,6 +160,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         return X_diff
 
 
+    # TODO: review method docstring, seems to be the same as inverse_transform_next_window
     @_check_X_numpy_ndarray_1d
     def inverse_transform(
         self, 
@@ -198,7 +199,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         return X_undiff
 
 
-    @_check_X_numpy_ndarray_1d
+    # @_check_X_numpy_ndarray_1d
     def inverse_transform_next_window(
         self,
         X: np.ndarray,
@@ -225,13 +226,31 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         """
 
         # Remove initial nan values if present
-        X = X[np.argmax(~np.isnan(X)):]
+        # X = X[np.argmax(~np.isnan(X)):]
+
+        # for i in range(self.order):
+        #     if i == 0:
+        #         X_undiff = np.cumsum(X, dtype=float) + self.last_values[-1]
+        #     else:
+        #         X_undiff = np.cumsum(X_undiff, dtype=float) + self.last_values[-(i + 1)]
+
+
+        # Code adapted for 2d arrays
+        array_ndim = X.ndim
+        if array_ndim == 1:
+            X = X.reshape(-1, 1)
+
+        # Remove initial rows with nan values if present
+        X = X[~np.isnan(X).any(axis=1)]
 
         for i in range(self.order):
             if i == 0:
-                X_undiff = np.cumsum(X, dtype=float) + self.last_values[-1]
+                X_undiff = np.cumsum(X, axis=0, dtype=float) + self.last_values[-1]
             else:
-                X_undiff = np.cumsum(X_undiff, dtype=float) + self.last_values[-(i + 1)]
+                X_undiff = np.cumsum(X_undiff, axis=0, dtype=float) + self.last_values[-(i + 1)]
+
+        if array_ndim == 1:
+            X_undiff = X_undiff.flatten()
 
         return X_undiff
 

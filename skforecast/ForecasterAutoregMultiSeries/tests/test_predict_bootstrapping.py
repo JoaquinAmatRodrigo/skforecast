@@ -53,7 +53,7 @@ def test_predict_bootstrapping_IgnoredArgumentWarning_when_not_available_self_la
 
     warn_msg = re.escape(
         ("Levels {'2'} are excluded from prediction "
-         "since they were not stored in `last_window` attribute "
+         "since they were not stored in `last_window_` attribute "
          "during training. If you don't want to retrain the "
          "Forecaster, provide `last_window` as argument.")
     )
@@ -90,7 +90,7 @@ def test_predict_bootstrapping_ValueError_when_not_available_self_last_window_fo
 
     err_msg = re.escape(
         ("No series to predict. None of the series {'2'} are present in "
-         "`last_window` attribute. Provide `last_window` as argument "
+         "`last_window_` attribute. Provide `last_window` as argument "
          "in predict method.")
     )
     with pytest.raises(ValueError, match = err_msg):
@@ -159,13 +159,13 @@ def test_predict_bootstrapping_UnknownLevelWarning_when_not_in_sample_residuals_
         LGBMRegressor(verbose=-1), lags=3, encoding='ordinal'
     )
     forecaster.fit(series=series)
-    last_window = pd.DataFrame(forecaster.last_window)
+    last_window = pd.DataFrame(forecaster.last_window_)
     last_window['3'] = last_window['1']
 
     warn_msg = re.escape(
         ("`levels` {'3'} were not included in training. "
          "Unknown levels are encoded as NaN, which may cause the "
-        "prediction to fail if the regressor does not accept NaN values.")
+         "prediction to fail if the regressor does not accept NaN values.")
     )
     with pytest.warns(UnknownLevelWarning, match = warn_msg):
         results = forecaster.predict_bootstrapping(
@@ -177,7 +177,7 @@ def test_predict_bootstrapping_UnknownLevelWarning_when_not_in_sample_residuals_
                   )
 
     warn_msg = re.escape(
-        ("`levels` {'3'} are not present in `forecaster.in_sample_residuals`, "
+        ("`levels` {'3'} are not present in `forecaster.in_sample_residuals_`, "
          "most likely because they were not present in the training data. "
          "A random sample of the residuals from other levels will be used. "
          "This can lead to inaccurate intervals for the unknown levels.")
@@ -222,7 +222,7 @@ def test_predict_bootstrapping_encoding_None_unknown_level():
         LGBMRegressor(verbose=-1), lags=3, encoding=None
     )
     forecaster.fit(series=series)
-    last_window = pd.DataFrame(forecaster.last_window)
+    last_window = pd.DataFrame(forecaster.last_window_)
     last_window['3'] = last_window['1']
 
     results = forecaster.predict_bootstrapping(
@@ -264,7 +264,7 @@ def test_predict_bootstrapping_encoding_None_unknown_level_differentiation():
         LGBMRegressor(verbose=-1), lags=3, encoding=None, differentiation=1
     )
     forecaster.fit(series=series)
-    last_window = pd.DataFrame(forecaster.last_window)
+    last_window = pd.DataFrame(forecaster.last_window_)
     last_window['3'] = last_window['1'] * 0.9
 
     results = forecaster.predict_bootstrapping(
@@ -300,13 +300,13 @@ def test_predict_bootstrapping_encoding_None_unknown_level_differentiation():
 def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     """
     Test ValueError is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals is None.
+    forecaster.out_sample_residuals_ is None.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
 
     err_msg = re.escape(
-        ("`forecaster.out_sample_residuals` is `None`. Use "
+        ("`forecaster.out_sample_residuals_` is `None`. Use "
          "`in_sample_residuals=True` or the  `set_out_sample_residuals()` "
          "method before predicting.")
     )
@@ -334,7 +334,7 @@ def test_predict_bootstrapping_UnknownLevelWarning_out_sample_residuals_with_enc
     with pytest.warns(UnknownLevelWarning, match = warn_msg):
         forecaster.set_out_sample_residuals(new_residuals)
     
-    last_window = pd.DataFrame(forecaster.last_window)
+    last_window = pd.DataFrame(forecaster.last_window_)
     last_window['3'] = last_window['1']
     results = forecaster.predict_bootstrapping(
                   steps               = 1,
@@ -372,7 +372,7 @@ def test_predict_bootstrapping_UnknownLevelWarning_out_sample_residuals_with_enc
 def test_predict_bootstrapping_ValueError_when_not_level_in_out_sample_residuals(transformer_series):
     """
     Test ValueError is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals is missing a level.
+    forecaster.out_sample_residuals_ is missing a level.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               transformer_series=transformer_series)
@@ -382,7 +382,7 @@ def test_predict_bootstrapping_ValueError_when_not_level_in_out_sample_residuals
 
     err_msg = re.escape(
         ("Not available residuals for level '2'. "
-         "Check `forecaster.out_sample_residuals`.")
+         "Check `forecaster.out_sample_residuals_`.")
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
@@ -394,7 +394,7 @@ def test_predict_bootstrapping_ValueError_when_not_level_in_out_sample_residuals
 def test_predict_bootstrapping_ValueError_when_level_out_sample_residuals_value_contains_None_or_NaNs(transformer_series):
     """
     Test ValueError is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals has a level with a None or NaN value.
+    forecaster.out_sample_residuals_ has a level with a None or NaN value.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               transformer_series=transformer_series)
@@ -405,7 +405,7 @@ def test_predict_bootstrapping_ValueError_when_level_out_sample_residuals_value_
 
     err_msg = re.escape(
         ("forecaster residuals for level '2' contains `None` "
-         "or `NaNs` values. Check `forecaster.out_sample_residuals`.")
+         "or `NaNs` values. Check `forecaster.out_sample_residuals_`.")
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
@@ -485,7 +485,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               transformer_series=None)
     forecaster.fit(series=series, exog=exog['exog_1'])
-    forecaster.out_sample_residuals = forecaster.in_sample_residuals
+    forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_bootstrapping(
                   steps               = 1, 
                   n_boot              = 4, 
@@ -519,7 +519,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               transformer_series=None)
     forecaster.fit(series=series, exog=exog['exog_1'])
-    forecaster.out_sample_residuals = forecaster.in_sample_residuals
+    forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_bootstrapping(
                   steps               = 2, 
                   n_boot              = 4, 
@@ -560,8 +560,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                  )
     forecaster.fit(series=series, exog=exog)
 
-    forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=0)
-    forecaster.in_sample_residuals['2'] = np.full_like(forecaster.in_sample_residuals['2'], fill_value=0)
+    forecaster.in_sample_residuals_['1'] = np.full_like(forecaster.in_sample_residuals_['1'], fill_value=0)
+    forecaster.in_sample_residuals_['2'] = np.full_like(forecaster.in_sample_residuals_['2'], fill_value=0)
     results = forecaster.predict_bootstrapping(
                   steps               = 2, 
                   n_boot              = 4, 

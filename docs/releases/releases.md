@@ -22,6 +22,8 @@ The main changes in this release are:
 
 **Changed**
 
++ Refactor `recursive_predict` in <code>[ForecasterAutoregMultiSeries]</code> to predict all series at once. This improves performance when predicting multiple series.
+
 + Change the default value of `encoding` to `ordinal` in <code>[ForecasterAutoregMultiSeries]</code>. This will avoid conflicts if the regressor does not support categorical variables by default.
 
 + `encoding_mapping` has been renamed to `encoding_mapping_` in <code>[ForecasterAutoregMultiSeries]</code>.
