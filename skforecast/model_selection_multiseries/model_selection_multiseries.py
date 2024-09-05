@@ -1788,31 +1788,28 @@ def _evaluate_grid_hyperparameters_multiseries_one_step_ahead(
             if lags_label == 'values':
                 lags_k = lags_v
 
-        # TODO:
-        # train_size = initial_train_size - forecaster.window_size
-        # X_all, y_all = forecaster.create_train_X_y(y=y, exog=exog)
-        # X_train = X_all.iloc[:train_size, :]
-        # X_test  = X_all.iloc[train_size:, :]
+        train_size = initial_train_size - forecaster.window_size
+        X_all, y_all = forecaster.create_train_X_y(y=y, exog=exog)
+        X_train = X_all.iloc[:train_size, :]
+        X_test  = X_all.iloc[train_size:, :]
 
-        # if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries': 
-        #     y_train = y_all.iloc[:train_size]
-        #     y_test  = y_all.iloc[train_size:]
+        if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries': 
+            y_train = y_all.iloc[:train_size]
+            y_test  = y_all.iloc[train_size:]
 
-        # if type(forecaster).__name__ == 'ForecasterAutoregMultiSeriesDirect':
-        #     y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
-        #     y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
+        if type(forecaster).__name__ == 'ForecasterAutoregMultiSeriesDirect':
+            y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
+            y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
 
         for params in param_grid:
 
             forecaster.set_params(params)
             
-            # TODO:
-                # predecir y calcular la metrica a nivel de level
-                if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries':
-                    forecaster.regressor.fit(X_train, y_train)
-                    pred = forecaster.regressor.predict(X_test)
+            if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries':
+                forecaster.regressor.fit(X_train, y_train)
+                pred = forecaster.regressor.predict(X_test)
 
-                    #calcular las metricas por nivel
+                #calcular las metricas por nivel
 
 
             if add_aggregated_metric:
