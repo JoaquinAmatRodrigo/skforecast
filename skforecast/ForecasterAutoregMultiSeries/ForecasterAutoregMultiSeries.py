@@ -1131,6 +1131,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
 
 # TODO: change to store_last_window_ and store_in_sample_residuals_ ?
+# el "_" debería ser para los artributos pero no para los argumentos
     def fit(
         self,
         series: Union[pd.DataFrame, dict],
@@ -1300,6 +1301,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
 
     # TODO: change to in_sample_residuals_ ?
+    # I would rather keep it as it is now
     def _create_predict_inputs(
         self,
         steps: int,
@@ -1641,6 +1643,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         )
         
         # TODO: Parallelize this loop ?
+        # I think this method is not a bottle neck in terms of speed. I would not
+        # add the extra complexity of paralilization.
         X_predict_dict = {}
         idx_lags = np.arange(-steps, 0)[:, None] - self.lags
         len_X_train_series_names_in_ = len(self.X_train_series_names_in_)
