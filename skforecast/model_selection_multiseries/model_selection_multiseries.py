@@ -557,7 +557,6 @@ def _backtesting_forecaster_multiseries(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -938,7 +937,6 @@ def backtesting_forecaster_multiseries(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -1121,7 +1119,6 @@ def grid_search_forecaster_multiseries(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
@@ -1279,7 +1276,6 @@ def random_search_forecaster_multiseries(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
@@ -1426,6 +1422,10 @@ def _evaluate_grid_hyperparameters_multiseries(
         integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
+    n_jobs : int, 'auto', default `'auto'`
+        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
+        set to the number of cores. If 'auto', `n_jobs` is set using the function
+        skforecast.utils.select_n_jobs_backtesting. 
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
@@ -1548,6 +1548,272 @@ def _evaluate_grid_hyperparameters_multiseries(
                 show_progress         = False,
                 suppress_warnings     = suppress_warnings
             )
+
+            if add_aggregated_metric:
+                metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
+            else:
+                metrics = metrics.loc[metrics['levels'] == levels[0], :]
+            metrics = pd.DataFrame(
+                          data    = [metrics.iloc[:, 1:].transpose().stack().to_numpy()],
+                          columns = metric_names
+                      )
+
+            for warn_category in warn_skforecast_categories:
+                warnings.filterwarnings('ignore', category=warn_category)
+
+            lags_list.append(lags_v)
+            lags_label_list.append(lags_k)
+            params_list.append(params)
+            metrics_list.append(metrics)
+
+            if output_file is not None:
+                header = ['levels', 'lags', 'lags_label', 'params', 
+                          *metric_names, *params.keys()]
+                row = [
+                    levels,
+                    lags_v,
+                    lags_k,
+                    params,
+                    *metrics.loc[0, :].to_list(),
+                    *params.values()
+                ]
+                if not os.path.isfile(output_file):
+                    with open(output_file, 'w', newline='') as f:
+                        f.write('\t'.join(header) + '\n')
+                        f.write('\t'.join([str(r) for r in row]) + '\n')
+                else:
+                    with open(output_file, 'a', newline='') as f:
+                        f.write('\t'.join([str(r) for r in row]) + '\n')
+
+    results = pd.concat(metrics_list, axis=0)
+    results.insert(0, 'levels', [levels] * len(results))
+    results.insert(1, 'lags', lags_list)
+    results.insert(2, 'lags_label', lags_label_list)
+    results.insert(3, 'params', params_list)
+    results = (
+        results
+        .sort_values(by=metric_names[0], ascending=True)
+        .reset_index(drop=True)
+    )
+    results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
+    
+    if return_best:
+        
+        best_lags = results.loc[0, 'lags']
+        best_params = results.loc[0, 'params']
+        best_metric = results.loc[0, metric_names[0]]
+        
+        if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
+            forecaster.set_lags(best_lags)
+        forecaster.set_params(best_params)
+
+        forecaster.fit(series=series, exog=exog, store_in_sample_residuals=True)
+        
+        print(
+            f"`Forecaster` refitted using the best-found lags and parameters, "
+            f"and the whole data set: \n"
+            f"  Lags: {best_lags} \n"
+            f"  Parameters: {best_params}\n"
+            f"  Backtesting metric: {best_metric}\n"
+            f"  Levels: {levels}\n"
+        )
+
+    set_skforecast_warnings(suppress_warnings, action='default')
+    
+    return results
+
+
+def _evaluate_grid_hyperparameters_multiseries_one_step_ahead(
+    forecaster: object,
+    series: Union[pd.DataFrame, dict],
+    param_grid: dict,
+    metric: Union[str, Callable, list],
+    initial_train_size: int,
+    aggregate_metric: Union[str, list] = ['weighted_average', 'average', 'pooling'],
+    levels: Optional[Union[str, list]] = None,
+    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+    lags_grid: Optional[Union[list, dict]] = None,
+    return_best: bool = True,
+    verbose: bool = True,
+    show_progress: bool = True,
+    suppress_warnings: bool = False,
+    output_file: Optional[str] = None
+) -> pd.DataFrame:
+    """
+    Evaluate parameter values for a Forecaster object by assessing its error in
+    one-step-ahead predictions. This method is faster than backtesting, which involves
+    multi-step predictions, and allows for quick comparisons between different models
+    and hyperparameters. However, while it is efficient for initial evaluations, the
+    results may not fully reflect the model's performance in multi-step predictions.
+        
+    Parameters
+    ----------
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+        Forecaster model.
+    series : pandas DataFrame, dict
+        Training time series.
+    param_grid : dict
+        Dictionary with parameters names (`str`) as keys and lists of parameter
+        settings to try as values.
+    metric : str, Callable, list
+        Metric used to quantify the goodness of fit of the model.
+        
+        - If `string`: {'mean_squared_error', 'mean_absolute_error',
+        'mean_absolute_percentage_error', 'mean_squared_log_error',
+        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
+        (Optional) that returns a float.
+        - If `list`: List containing multiple strings and/or Callables.
+    initial_train_size : int 
+        Number of samples in the initial train split.
+    aggregate_metric : str, list, default `['weighted_average', 'average', 'pooling']`
+        Aggregation method/s used to combine the metric/s of all levels (series)
+        when multiple levels are predicted. If list, the first aggregation method
+        is used to select the best parameters.
+
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
+        predicted values of each level.
+        - 'pooling': the values of all levels are pooled and then the metric is
+        calculated.
+    levels : str, list, default `None`
+        level (`str`) or levels (`list`) at which the forecaster is optimized. 
+        If `None`, all levels are taken into account.
+    exog : pandas Series, pandas DataFrame, dict, default `None`
+        Exogenous variables.
+    lags_grid : list, dict, default `None`
+        Lists of lags to try, containing int, lists, numpy ndarray, or range 
+        objects. If `dict`, the keys are used as labels in the `results` 
+        DataFrame, and the values are used as the lists of lags to try. Ignored 
+        if the forecaster is an instance of `ForecasterAutoregCustom` or 
+        `ForecasterAutoregMultiSeriesCustom`.
+    return_best : bool, default `True`
+        Refit the `forecaster` using the best found parameters on the whole data.
+    verbose : bool, default `True`
+        Print number of folds used for cv or backtesting.
+    show_progress : bool, default `True`
+        Whether to show a progress bar.
+    suppress_warnings: bool, default `False`
+        If `True`, skforecast warnings will be suppressed during the hyperparameter 
+        search. See skforecast.exceptions.warn_skforecast_categories for more
+        information.
+    output_file : str, default `None`
+        Specifies the filename or full path where the results should be saved. 
+        The results will be saved in a tab-separated values (TSV) format. If 
+        `None`, the results will not be saved to a file.
+        **New in version 0.12.0**
+
+    Returns
+    -------
+    results : pandas DataFrame
+        Results for each combination of parameters.
+
+        - column levels: levels configuration for each iteration.
+        - column lags: lags configuration for each iteration.
+        - column lags_label: descriptive label or alias for the lags.
+        - column params: parameters configuration for each iteration.
+        - n columns with metrics: metric/s value/s estimated for each iteration.
+        There is one column for each metric and aggregation method. The name of
+        the column flollows the pattern `metric__aggregation`.
+        - additional n columns with param = value.
+    
+    """
+
+    set_skforecast_warnings(suppress_warnings, action='ignore')
+
+    if return_best and exog is not None and (len(exog) != len(series)):
+        raise ValueError(
+            (f"`exog` must have same number of samples as `series`. "
+             f"length `exog`: ({len(exog)}), length `series`: ({len(series)})")
+        )
+    
+    if isinstance(aggregate_metric, str):
+        aggregate_metric = [aggregate_metric]
+    allowed_aggregate_metrics = ['average', 'weighted_average', 'pooling']
+    if not set(aggregate_metric).issubset(allowed_aggregate_metrics):
+        raise ValueError(
+            (f"Allowed `aggregate_metric` are: {allowed_aggregate_metrics}. "
+             f"Got: {aggregate_metric}.")
+        )
+    
+    levels = _initialize_levels_model_selection_multiseries(
+                 forecaster = forecaster,
+                 series     = series,
+                 levels     = levels
+             )
+
+    add_aggregated_metric = True if len(levels) > 1 else False
+
+    lags_grid, lags_label = initialize_lags_grid(forecaster, lags_grid)
+   
+    if not isinstance(metric, list):
+        metric = [metric]
+    metric_names = [(m if isinstance(m, str) else m.__name__) for m in metric]
+
+    if len(metric_names) != len(set(metric_names)):
+        raise ValueError(
+            "When `metric` is a `list`, each metric name must be unique."
+        )
+
+    if add_aggregated_metric:
+        metric_names = [
+            f"{metric_name}__{aggregation}"
+            for metric_name in metric_names
+            for aggregation in aggregate_metric
+        ]
+
+    print(
+        f"{len(param_grid) * len(lags_grid)} models compared for {len(levels)} level(s). "
+        f"Number of iterations: {len(param_grid) * len(lags_grid)}."
+    )
+
+    if show_progress:
+        lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0)  # ncols=90
+        param_grid = tqdm(param_grid, desc='params grid', position=1, leave=False)
+    else:
+        lags_grid_tqdm = lags_grid.items()
+    
+    if output_file is not None and os.path.isfile(output_file):
+        os.remove(output_file)
+
+    lags_list = []
+    lags_label_list = []
+    params_list = []
+    metrics_list = []
+    for lags_k, lags_v in lags_grid_tqdm:
+
+        if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
+            forecaster.set_lags(lags_v)
+            lags_v = forecaster.lags.copy()
+            if lags_label == 'values':
+                lags_k = lags_v
+
+        # TODO:
+        # train_size = initial_train_size - forecaster.window_size
+        # X_all, y_all = forecaster.create_train_X_y(y=y, exog=exog)
+        # X_train = X_all.iloc[:train_size, :]
+        # X_test  = X_all.iloc[train_size:, :]
+
+        # if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries': 
+        #     y_train = y_all.iloc[:train_size]
+        #     y_test  = y_all.iloc[train_size:]
+
+        # if type(forecaster).__name__ == 'ForecasterAutoregMultiSeriesDirect':
+        #     y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
+        #     y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
+
+        for params in param_grid:
+
+            forecaster.set_params(params)
+            
+            # TODO:
+                # predecir y calcular la metrica a nivel de level
+                if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries':
+                    forecaster.regressor.fit(X_train, y_train)
+                    pred = forecaster.regressor.predict(X_test)
+
+                    #calcular las metricas por nivel
+
 
             if add_aggregated_metric:
                 metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
@@ -2461,7 +2727,6 @@ def backtesting_forecaster_multivariate(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0** 
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -2608,7 +2873,6 @@ def grid_search_forecaster_multivariate(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
@@ -2767,7 +3031,6 @@ def random_search_forecaster_multivariate(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
@@ -2925,7 +3188,6 @@ def bayesian_search_forecaster_multivariate(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
