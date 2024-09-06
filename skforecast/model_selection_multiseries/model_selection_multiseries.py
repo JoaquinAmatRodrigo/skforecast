@@ -1808,20 +1808,14 @@ def _evaluate_grid_hyperparameters_multiseries_one_step_ahead(
             if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries':
                 forecaster.regressor.fit(X_train, y_train)
                 pred = forecaster.regressor.predict(X_test)
-                pred = pd.DataFrame({
-                            'pred': pred,
-                            'y_true': y_test,
-                            '_level_skforecast': X_test['_level_skforecast'],
-                                
-                        })
 
-
-                #calcular las metricas por nivel
-                pred_by_level = {
-                    key: group
-                    for key, group
-                    in pred.groupby('_level_skforecast')
-                }
+            metrics = _calculate_metrics_multiseries_one_step_ahead(
+                            y_true = y_test,
+                            y_pred = pred,
+                            metric = metric,
+                            levels = levels
+                        )
+                
 
 
             if add_aggregated_metric:
