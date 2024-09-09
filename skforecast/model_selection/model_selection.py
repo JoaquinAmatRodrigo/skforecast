@@ -1227,7 +1227,8 @@ def _evaluate_grid_hyperparameters(
             "When `metric` is a `list`, each metric name must be unique."
         )
 
-    print(f"Number of models compared: {len(param_grid) * len(lags_grid)}.")
+    if verbose:
+        print(f"Number of models compared: {len(param_grid) * len(lags_grid)}.")
 
     if show_progress:
         lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0)  # ncols=90

@@ -258,6 +258,7 @@ def _calculate_metrics_multiseries(
     predictions: pd.DataFrame,
     folds: Union[list, tqdm],
     span_index: Union[pd.DatetimeIndex, pd.RangeIndex],
+    window_size: int,
     metrics: list,
     levels: list,
     add_aggregated_metric: bool = True
@@ -282,6 +283,10 @@ def _calculate_metrics_multiseries(
         Folds created during the backtesting process.
     span_index : pandas DatetimeIndex, pandas RangeIndex
         Full index from the minimum to the maximum index among all series.
+    window_size : int
+        Size of the window used by the forecaster to create the predictors.
+        This is used remove the first `window_size` values from y_train since
+        they are not part of the training matrix.
     metrics : list
         List of metrics to calculate.
     levels : list
@@ -343,7 +348,7 @@ def _calculate_metrics_multiseries(
             for i, fold in enumerate(folds):
                 fit_fold = fold[-1]
                 if i == 0 or fit_fold:
-                    train_iloc_start = fold[0][0]
+                    train_iloc_start = fold[0][0] + window_size
                     train_iloc_end = fold[0][1]
                     train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
             train_indexes = np.unique(np.concatenate(train_indexes))
@@ -446,15 +451,15 @@ def _calculate_metrics_multiseries(
 
     return metrics_levels
 
-
+# TODO: unify metric or metrics as argument name. Better to use scoring?
 def _calculate_metrics_multiseries_one_step_ahead(
     y_true: np.ndarray,
     y_true_index: pd.DatetimeIndex,
     y_pred: np.ndarray,
-    y_pred_level: np.ndarray,
+    y_pred_encoding: np.ndarray,
     y_train: np.ndarray,
     y_train_index: pd.DatetimeIndex,
-    y_train_level: np.ndarray,
+    y_train_encoding: np.ndarray,
     levels: list,
     metrics: list,
     add_aggregated_metric: bool = True
@@ -477,14 +482,14 @@ def _calculate_metrics_multiseries_one_step_ahead(
         Index of the true values.
     y_pred : pandas DataFrame
         Predictions generated during the backtesting process.
-    y_pred_level : numpy array
-        Series level for which each prediction belongs to.
+    y_pred_encoding : numpy array
+        Series level code for which each prediction belongs to.
     y_train : numpy array
         True values of the training set.
     y_train_index : pandas DatetimeIndex
         Index of the training set.
-    y_train_level : numpy array
-        Series level for which each training value belongs to.
+    y_train_encoding : numpy array
+        Series level code for which each training value belongs to.
     metrics : list
         List of metrics to calculate.
     levels : list
@@ -531,7 +536,7 @@ def _calculate_metrics_multiseries_one_step_ahead(
         {
             'y_true': y_true,
             'y_pred': y_pred,
-            '_level_skforecast': y_pred_level,
+            '_level_skforecast': y_pred_encoding,
         },
         index=y_true_index,
     )
@@ -541,14 +546,14 @@ def _calculate_metrics_multiseries_one_step_ahead(
 
     y_train = pd.DataFrame({
         'y_train': y_train,
-        '_level_skforecast': y_train_level
+        '_level_skforecast': y_train_encoding
         },
         index=y_train_index,
     )
     y_train_per_level = {
         key: group for key, group in y_train.groupby('_level_skforecast')
     }
-          
+
     metrics_levels = []
     for level in levels:
         if level in predictions_per_level:
@@ -602,11 +607,7 @@ def _calculate_metrics_multiseries_one_step_ahead(
         weighted_average['levels'] = 'weighted_average'
 
         # aggregation: pooling
-        list_y_train_by_level = [
-            group.to_numpy()
-            for _, group
-            in y_train.groupby("_level_skforecast")["y_train"]
-        ]
+        list_y_train_by_level = [v['y_train'].to_numpy() for v in y_train_per_level.values()]
         pooled = []
         for m, m_name in zip(metrics, metric_names):
             if m_name in ['mean_absolute_scaled_error', 'root_mean_squared_scaled_error']:
@@ -1005,6 +1006,7 @@ def _backtesting_forecaster_multiseries(
         predictions           = backtest_predictions,
         folds                 = folds,
         span_index            = span_index,
+        window_size           = forecaster.window_size_diff,
         metrics               = metrics,
         levels                = levels,
         add_aggregated_metric = add_aggregated_metric
@@ -1224,6 +1226,7 @@ def grid_search_forecaster_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
+    method: str = 'backtesting',
     aggregate_metric: Union[str, list] = ['weighted_average', 'average', 'pooling'],
     fixed_train_size: bool = True,
     gap: int = 0,
@@ -1266,6 +1269,17 @@ def grid_search_forecaster_multiseries(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+        **New in version 0.14.0**
     aggregate_metric : str, list, default `['weighted_average', 'average', 'pooling']`
         Aggregation method/s used to combine the metric/s of all levels (series)
         when multiple levels are predicted. If list, the first aggregation method
@@ -1338,31 +1352,51 @@ def grid_search_forecaster_multiseries(
     
     """
 
+    if method not in ['backtesting', 'one_step_ahead']:
+        raise ValueError(
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
+        )
+
     param_grid = list(ParameterGrid(param_grid))
 
-    results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster            = forecaster,
-                  series                = series,
-                  param_grid            = param_grid,
-                  steps                 = steps,
-                  metric                = metric,
-                  aggregate_metric      = aggregate_metric,
-                  initial_train_size    = initial_train_size,
-                  fixed_train_size      = fixed_train_size,
-                  gap                   = gap,
-                  skip_folds            = skip_folds,
-                  allow_incomplete_fold = allow_incomplete_fold,
-                  levels                = levels,
-                  exog                  = exog,
-                  lags_grid             = lags_grid,
-                  refit                 = refit,
-                  n_jobs                = n_jobs,
-                  return_best           = return_best,
-                  verbose               = verbose,
-                  show_progress         = show_progress,
-                  suppress_warnings     = suppress_warnings,
-                  output_file           = output_file
-              )
+    if method == 'backtesting':
+        results = _evaluate_grid_hyperparameters_multiseries(
+                    forecaster            = forecaster,
+                    series                = series,
+                    param_grid            = param_grid,
+                    steps                 = steps,
+                    metric                = metric,
+                    aggregate_metric      = aggregate_metric,
+                    initial_train_size    = initial_train_size,
+                    fixed_train_size      = fixed_train_size,
+                    gap                   = gap,
+                    skip_folds            = skip_folds,
+                    allow_incomplete_fold = allow_incomplete_fold,
+                    levels                = levels,
+                    exog                  = exog,
+                    lags_grid             = lags_grid,
+                    refit                 = refit,
+                    n_jobs                = n_jobs,
+                    return_best           = return_best,
+                    verbose               = verbose,
+                    show_progress         = show_progress,
+                    suppress_warnings     = suppress_warnings,
+                    output_file           = output_file
+                )
+    else:
+        results = _evaluate_grid_hyperparameters_multiseries_one_step_ahead(
+            forecaster            = forecaster,
+            series                = series,
+            param_grid            = param_grid,
+            metric                = metric,
+            initial_train_size    = initial_train_size,
+            exog                  = exog,
+            lags_grid             = lags_grid,
+            return_best           = return_best,
+            verbose               = verbose,
+            show_progress         = show_progress,
+            output_file           = output_file
+        )
 
     return results
 
@@ -1374,6 +1408,7 @@ def random_search_forecaster_multiseries(
     steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
+    method: str = 'backtesting',
     aggregate_metric: Union[str, list] = ['weighted_average', 'average', 'pooling'],
     fixed_train_size: bool = True,
     gap: int = 0,
@@ -1418,6 +1453,17 @@ def random_search_forecaster_multiseries(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+    **New in version 0.14.0**
     aggregate_metric : str, list, default `['weighted_average', 'average', 'pooling']`
         Aggregation method/s used to combine the metric/s of all levels (series)
         when multiple levels are predicted. If list, the first aggregation method
@@ -1495,32 +1541,52 @@ def random_search_forecaster_multiseries(
     
     """
 
+    if method not in ['backtesting', 'one_step_ahead']:
+        raise ValueError(
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
+        )
+    
     param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, 
                                        random_state=random_state))
 
-    results = _evaluate_grid_hyperparameters_multiseries(
-                  forecaster            = forecaster,
-                  series                = series,
-                  param_grid            = param_grid,
-                  steps                 = steps,
-                  metric                = metric,
-                  aggregate_metric      = aggregate_metric,
-                  initial_train_size    = initial_train_size,
-                  fixed_train_size      = fixed_train_size,
-                  gap                   = gap,
-                  skip_folds            = skip_folds,
-                  allow_incomplete_fold = allow_incomplete_fold,
-                  levels                = levels,
-                  exog                  = exog,
-                  lags_grid             = lags_grid,
-                  refit                 = refit,
-                  return_best           = return_best,
-                  n_jobs                = n_jobs,
-                  verbose               = verbose,
-                  show_progress         = show_progress,
-                  suppress_warnings     = suppress_warnings,
-                 output_file            = output_file
-              )
+    if method == 'backtesting':
+        results = _evaluate_grid_hyperparameters_multiseries(
+                    forecaster            = forecaster,
+                    series                = series,
+                    param_grid            = param_grid,
+                    steps                 = steps,
+                    metric                = metric,
+                    aggregate_metric      = aggregate_metric,
+                    initial_train_size    = initial_train_size,
+                    fixed_train_size      = fixed_train_size,
+                    gap                   = gap,
+                    skip_folds            = skip_folds,
+                    allow_incomplete_fold = allow_incomplete_fold,
+                    levels                = levels,
+                    exog                  = exog,
+                    lags_grid             = lags_grid,
+                    refit                 = refit,
+                    return_best           = return_best,
+                    n_jobs                = n_jobs,
+                    verbose               = verbose,
+                    show_progress         = show_progress,
+                    suppress_warnings     = suppress_warnings,
+                    output_file            = output_file
+                )
+    else:
+        results = _evaluate_grid_hyperparameters_multiseries_one_step_ahead(
+            forecaster            = forecaster,
+            series                = series,
+            param_grid            = param_grid,
+            metric                = metric,
+            initial_train_size    = initial_train_size,
+            exog                  = exog,
+            lags_grid             = lags_grid,
+            return_best           = return_best,
+            verbose               = verbose,
+            show_progress         = show_progress,
+            output_file           = output_file
+        )
 
     return results
 
@@ -1689,10 +1755,11 @@ def _evaluate_grid_hyperparameters_multiseries(
             for aggregation in aggregate_metric
         ]
 
-    print(
-        f"{len(param_grid) * len(lags_grid)} models compared for {len(levels)} level(s). "
-        f"Number of iterations: {len(param_grid) * len(lags_grid)}."
-    )
+    if verbose:
+        print(
+            f"{len(param_grid) * len(lags_grid)} models compared for {len(levels)} "
+            f"level(s). Number of iterations: {len(param_grid) * len(lags_grid)}."
+        )
 
     if show_progress:
         lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0)  # ncols=90
@@ -1944,6 +2011,13 @@ def _evaluate_grid_hyperparameters_multiseries_one_step_ahead(
         raise ValueError(
             "When `metric` is a `list`, each metric name must be unique."
         )
+    
+    metric = [
+            _get_metric(metric=m)
+            if isinstance(m, str)
+            else add_y_train_argument(m) 
+            for m in metric
+        ]
 
     if add_aggregated_metric:
         metric_names = [
@@ -1952,10 +2026,17 @@ def _evaluate_grid_hyperparameters_multiseries_one_step_ahead(
             for aggregation in aggregate_metric
         ]
 
-    print(
-        f"{len(param_grid) * len(lags_grid)} models compared for {len(levels)} level(s). "
-        f"Number of iterations: {len(param_grid) * len(lags_grid)}."
+    warnings.warn(
+        "One-step-ahead predictions are used for faster model comparison, but they may "
+        "not fully represent multi-step prediction performance. It is recommended to "
+        "backtest the final model for a more accurate multi-step performance estimate."
     )
+
+    if verbose:
+        print(
+            f"{len(param_grid) * len(lags_grid)} models compared for {len(levels)} "
+            f"level(s). Number of iterations: {len(param_grid) * len(lags_grid)}."
+        )
 
     if show_progress:
         lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0)  # ncols=90
@@ -1979,17 +2060,31 @@ def _evaluate_grid_hyperparameters_multiseries_one_step_ahead(
                 lags_k = lags_v
 
         train_size = initial_train_size - forecaster.window_size
-        X_all, y_all = forecaster.create_train_X_y(y=series, exog=exog)
-        X_train = X_all.iloc[:train_size, :]
-        X_test  = X_all.iloc[train_size:, :]
+        X_all, y_all = forecaster.create_train_X_y(series=series, exog=exog)
+        # X_train contain repetaded dates (one per level) so slicing is not possible
+        end_train = X_all.index.unique()[train_size]
+        X_train = X_all.loc[X_all.index < end_train, :]
+        X_test  = X_all.loc[X_all.index >= end_train, :]
 
-        if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries': 
-            y_train = y_all.iloc[:train_size]
-            y_test  = y_all.iloc[train_size:]
+        if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries':
+            
+            if forecaster.encoding in ['ordinal', 'ordinal_category']:
+                X_train_encoding = forecaster.encoder.inverse_transform(X_train[['_level_skforecast']]).ravel()
+                X_test_encoding = forecaster.encoder.inverse_transform(X_test[['_level_skforecast']]).ravel()
+            elif forecaster.encoding == 'onehot':
+                X_train_encoding = forecaster.encoder.inverse_transform(
+                                    X_train.loc[:, forecaster.encoding_mapping.keys()]
+                                ).ravel()
+                X_test_encoding = forecaster.encoder.inverse_transform(
+                                        X_test.loc[:, forecaster.encoding_mapping.keys()]
+                                    ).ravel()
+                
+            y_train = y_all.loc[y_all.index < end_train]
+            y_test  = y_all.loc[y_all.index >= end_train]
 
-        if type(forecaster).__name__ == 'ForecasterAutoregMultiSeriesDirect':
-            y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
-            y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
+        if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
+            y_train = {k: v.loc[v.index <= end_train] for k, v in y_all.items()}
+            y_test  = {k: v.loc[v.index > end_train] for k, v in y_all.items()}
 
         for params in param_grid:
 
@@ -1999,12 +2094,54 @@ def _evaluate_grid_hyperparameters_multiseries_one_step_ahead(
                 forecaster.regressor.fit(X_train, y_train)
                 pred = forecaster.regressor.predict(X_test)
 
-            metrics = _calculate_metrics_multiseries_one_step_ahead(
-                            y_true = y_test,
-                            y_pred = pred,
-                            metric = metric,
-                            levels = levels
-                        )
+                metrics = _calculate_metrics_multiseries_one_step_ahead(
+                                y_true                = y_test.to_numpy(),
+                                y_true_index          = y_test.index,
+                                y_pred                = pred,
+                                y_pred_encoding       = X_test_encoding,
+                                y_train               = y_train.to_numpy(),
+                                y_train_index         = y_train.index,
+                                y_train_encoding      = X_train_encoding,
+                                levels                = levels,
+                                metrics               = metric,
+                                add_aggregated_metric = add_aggregated_metric
+                            )
+            if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
+                pred_per_step = {}
+                steps = range(1, forecaster.steps + 1)
+
+                for step in steps:
+                    X_train_step, y_train_step = forecaster.filter_train_X_y_for_step(
+                                                    step    = step,
+                                                    X_train = X_train,
+                                                    y_train = y_train
+                                                  )
+                    X_test_step, y_test_step = forecaster.filter_train_X_y_for_step(
+                                                    step    = step,  
+                                                    X_train = X_test,
+                                                    y_train = y_test
+                                                )
+                    forecaster.regressors_[step].fit(X_train_step, y_train_step)
+                    pred = forecaster.regressors_[step].predict(X_test_step)
+                    pred_per_step[step] = pred
+
+                    metric_values = []
+                    for step in steps:
+                        metrics = _calculate_metrics_multiseries_one_step_ahead(
+                                y_true                = y_test_step[step].to_numpy(),
+                                y_true_index          = y_test_step[step].index,
+                                y_pred                = pred_per_step[step],
+                                y_pred_encoding       = X_test_encoding,
+                                y_train               = y_train_step[step].to_numpy(),
+                                y_train_index         = y_train_step[step].index,
+                                y_train_encoding      = X_train_encoding,
+                                levels                = levels,
+                                metrics               = metric,
+                                add_aggregated_metric = add_aggregated_metric
+                            )
+                        metric_values.append(metrics)
+                    metric_values = pd.concat(metric_values, axis=1)
+                    metric_values = metric_values.mean(axis=1)
 
             if add_aggregated_metric:
                 metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
