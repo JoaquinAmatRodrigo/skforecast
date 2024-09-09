@@ -1979,7 +1979,7 @@ def _evaluate_grid_hyperparameters_multiseries_one_step_ahead(
                 lags_k = lags_v
 
         train_size = initial_train_size - forecaster.window_size
-        X_all, y_all = forecaster.create_train_X_y(y=y, exog=exog)
+        X_all, y_all = forecaster.create_train_X_y(y=series, exog=exog)
         X_train = X_all.iloc[:train_size, :]
         X_test  = X_all.iloc[train_size:, :]
 
