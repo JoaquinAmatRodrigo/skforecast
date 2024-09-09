@@ -447,6 +447,196 @@ def _calculate_metrics_multiseries(
     return metrics_levels
 
 
+def _calculate_metrics_multiseries_one_step_ahead(
+    y_true: np.ndarray,
+    y_true_index: pd.DatetimeIndex,
+    y_pred: np.ndarray,
+    y_pred_level: np.ndarray,
+    y_train: np.ndarray,
+    y_train_index: pd.DatetimeIndex,
+    y_train_level: np.ndarray,
+    levels: list,
+    metrics: list,
+    add_aggregated_metric: bool = True
+) -> pd.DataFrame:
+    """   
+    Calculate metrics for each level and also for all levels aggregated using
+    average, weighted average or pooling when predictions are one-step-ahead.
+
+    - 'average': the average (arithmetic mean) of all levels.
+    - 'weighted_average': the average of the metrics weighted by the number of
+    predicted values of each level.
+    - 'pooling': the values of all levels are pooled and then the metric is
+    calculated.
+
+    Parameters
+    ----------
+    y_true : numpy array
+        True values.
+    y_true_index : pandas DatetimeIndex
+        Index of the true values.
+    y_pred : pandas DataFrame
+        Predictions generated during the backtesting process.
+    y_pred_level : numpy array
+        Series level for which each prediction belongs to.
+    y_train : numpy array
+        True values of the training set.
+    y_train_index : pandas DatetimeIndex
+        Index of the training set.
+    y_train_level : numpy array
+        Series level for which each training value belongs to.
+    metrics : list
+        List of metrics to calculate.
+    levels : list
+        Levels to calculate the metrics.
+    add_aggregated_metric : bool, default `True`
+        If `True`, and multiple series (`levels`) are predicted, the aggregated
+        metrics (average, weighted average and pooled) are also returned.
+
+        - 'average': the average (arithmetic mean) of all levels.
+        - 'weighted_average': the average of the metrics weighted by the number of
+        predicted values of each level.
+        - 'pooling': the values of all levels are pooled and then the metric is
+        calculated.
+
+    Returns
+    -------
+    metrics_levels : pandas DataFrame
+        Value(s) of the metric(s).
+    
+    """
+
+    if not isinstance(y_true, np.ndarray):
+        raise TypeError(
+            (f"`y_true` must be a numpy array. Got: {type(y_true)}")
+        )
+    if not isinstance(y_true_index, pd.Index):
+        raise TypeError(
+            (f"`y_true_index` must be a pandas Index. Got: {type(y_true_index)}")
+        )
+    if not isinstance(y_pred, np.ndarray):
+        raise TypeError(
+            (f"`y_pred` must be a numpy array. Got: {type(y_pred)}")
+        )
+    if not isinstance(metrics, list):
+        raise TypeError("`metrics` must be a list.")
+    if not isinstance(levels, list):
+        raise TypeError("`levels` must be a list.")
+    if not isinstance(add_aggregated_metric, bool):
+        raise TypeError("`add_aggregated_metric` must be a boolean.")
+    
+    metric_names = [(m if isinstance(m, str) else m.__name__) for m in metrics]
+
+    predictions = pd.DataFrame(
+        {
+            'y_true': y_true,
+            'y_pred': y_pred,
+            '_level_skforecast': y_pred_level,
+        },
+        index=y_true_index,
+    )
+    predictions_per_level = {
+        key: group for key, group in predictions.groupby('_level_skforecast')
+    }
+
+    y_train = pd.DataFrame({
+        'y_train': y_train,
+        '_level_skforecast': y_train_level
+        },
+        index=y_train_index,
+    )
+    y_train_per_level = {
+        key: group for key, group in y_train.groupby('_level_skforecast')
+    }
+          
+    metrics_levels = []
+    for level in levels:
+        if level in predictions_per_level:
+            metrics_level = [
+                m(
+                    y_true = predictions_per_level[level].loc[:, 'y_true'],
+                    y_pred = predictions_per_level[level].loc[:, 'y_pred'],
+                    y_train = y_train_per_level[level].loc[:, 'y_train']
+                )
+                for m in metrics
+            ]
+            metrics_levels.append(metrics_level)
+        else:
+            metrics_levels.append([None for _ in metrics])
+
+    metrics_levels = pd.DataFrame(
+                         data    = metrics_levels,
+                         columns = [m if isinstance(m, str) else m.__name__
+                                    for m in metrics]
+                     )
+    metrics_levels.insert(0, 'levels', levels)
+
+    if len(levels) < 2:
+        add_aggregated_metric = False
+
+    if add_aggregated_metric:
+
+        # aggragation: average
+        average = metrics_levels.drop(columns='levels').mean(skipna=True)
+        average = average.to_frame().transpose()
+        average['levels'] = 'average'
+
+        # aggregation: weighted_average
+        weighted_averages = {}
+        n_predictions_levels = (
+            predictions
+            .groupby("_level_skforecast")["y_pred"]
+            .apply(lambda x: x.notna().sum())
+            .to_frame(name="n_predictions")
+            .reset_index(names="levels")
+        )
+        metrics_levels_no_missing = (
+            metrics_levels.merge(n_predictions_levels, on='levels', how='inner')
+        )
+        for col in metric_names:
+            weighted_averages[col] = np.average(
+                metrics_levels_no_missing[col],
+                weights=metrics_levels_no_missing['n_predictions']
+            )
+        weighted_average = pd.DataFrame(weighted_averages, index=[0])
+        weighted_average['levels'] = 'weighted_average'
+
+        # aggregation: pooling
+        list_y_train_by_level = [
+            group.to_numpy()
+            for _, group
+            in y_train.groupby("_level_skforecast")["y_train"]
+        ]
+        pooled = []
+        for m, m_name in zip(metrics, metric_names):
+            if m_name in ['mean_absolute_scaled_error', 'root_mean_squared_scaled_error']:
+                pooled.append(
+                    m(
+                        y_true = predictions.loc[:, 'y_true'],
+                        y_pred = predictions.loc[:, 'y_pred'],
+                        y_train = list_y_train_by_level
+                    )
+                )
+            else:
+                pooled.append(
+                    m(
+                        y_true = predictions.loc[:, 'y_true'],
+                        y_pred = predictions.loc[:, 'y_pred'],
+                        y_train = y_train.loc[:, 'y_train']
+                    )
+                )
+        pooled = pd.DataFrame([pooled], columns=metric_names)
+        pooled['levels'] = 'pooling'
+
+        metrics_levels = pd.concat(
+            [metrics_levels, average, weighted_average, pooled],
+            axis=0,
+            ignore_index=True
+        )
+
+    return metrics_levels
+
+
 def _backtesting_forecaster_multiseries(
     forecaster: object,
     series: Union[pd.DataFrame, dict],
@@ -1815,8 +2005,6 @@ def _evaluate_grid_hyperparameters_multiseries_one_step_ahead(
                             metric = metric,
                             levels = levels
                         )
-                
-
 
             if add_aggregated_metric:
                 metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
