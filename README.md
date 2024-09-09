@@ -181,7 +181,7 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 + [**Modelar series temporales con tendencia utilizando modelos de árboles**](https://cienciadedatos.net/documentos/py49-modelar-tendencia-en-series-temporales-modelos-de-arboles.html)
 
-+ **Forecasting de series incompletas con valores faltantes**(https://www.cienciadedatos.net/documentos/py46-forecasting-series-temporales-incompletas.html)
++ [**Forecasting de series incompletas con valores faltantes**](https://www.cienciadedatos.net/documentos/py46-forecasting-series-temporales-incompletas.html)
 
 + [**Predicción de demanda intermitente**](https://www.cienciadedatos.net/documentos/py48-forecasting-demanda-intermitente.html)
 
