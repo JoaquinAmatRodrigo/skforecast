@@ -1001,8 +1001,8 @@ def random_search_forecaster(
         - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
         This is faster than backtesting but the results may not reflect the actual
         performance of the model when predicting multiple steps ahead. Arguments `steps`,
-        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
-        ignored when `method` is 'one_step_ahead'.
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold`, `n_jobs` and
+        `refit` are ignored when `method` is 'one_step_ahead'.
     **New in version 0.14.0**
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
@@ -1462,7 +1462,7 @@ def _evaluate_grid_hyperparameters_one_step_ahead(
             if lags_label == 'values':
                 lags_k = lags_v
 
-        train_size = initial_train_size - forecaster.window_size
+        train_size = initial_train_size - forecaster.window_size_diff
         X_all, y_all = forecaster.create_train_X_y(y=y, exog=exog)
         X_train = X_all.iloc[:train_size, :]
         X_test  = X_all.iloc[train_size:, :]
@@ -1600,7 +1600,6 @@ def bayesian_search_forecaster(
     verbose: bool = True,
     show_progress: bool = True,
     output_file: Optional[str] = None,
-    engine: str = 'optuna',
     kwargs_create_study: dict = {},
     kwargs_study_optimize: dict = {}
 ) -> Tuple[pd.DataFrame, object]:
@@ -1683,15 +1682,12 @@ def bayesian_search_forecaster(
         The results will be saved in a tab-separated values (TSV) format. If 
         `None`, the results will not be saved to a file.
         **New in version 0.12.0**
-    engine : str, default `'optuna'`
-        Bayesian optimization runs through the optuna library.
     kwargs_create_study : dict, default `{}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study().
         If default, the direction is set to 'minimize' and a TPESampler(seed=123) 
         sampler is used during optimization.
     kwargs_study_optimize : dict, default `{}`
-        Only applies to engine='optuna'. Other keyword arguments (key, value mappings) 
-        to pass to study.optimize().
+        Other keyword arguments (key, value mappings) to pass to study.optimize().
 
     Returns
     -------
@@ -1711,12 +1707,6 @@ def bayesian_search_forecaster(
         raise ValueError(
             (f"`exog` must have same number of samples as `y`. "
              f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
-        )
-
-    # TODO: remove argument engine?
-    if engine not in ['optuna']:
-        raise ValueError(
-            f"`engine` only allows 'optuna', got {engine}."
         )
     
     if method not in ['backtesting', 'one_step_ahead']:
@@ -2097,26 +2087,10 @@ def _bayesian_search_optuna_one_step_ahead(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
-    gap : int, default `0`
-        Number of samples to be excluded after the end of each training set and 
-        before the test set.
-    skip_folds : int, list, default `None`
-        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
-        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
-        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
-        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
-    allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to have a smaller number of samples than the 
-        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -2125,10 +2099,6 @@ def _bayesian_search_optuna_one_step_ahead(
         sampler. For example `{'sampler': TPESampler(seed=145)}`.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
-    n_jobs : int, 'auto', default `'auto'`
-        The number of jobs to run in parallel. If `-1`, then the number of jobs is 
-        set to the number of cores. If 'auto', `n_jobs` is set using the function
-        skforecast.utils.select_n_jobs_backtesting.
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
