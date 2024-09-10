@@ -10,6 +10,87 @@ All significant changes to this project are documented in this release file.
 | <span class="badge text-bg-danger">Fix</span>              | Bug fix                               |
 
 
+## 0.14.0 <small>In development</small> { id="0.14.0" }
+
+The main changes in this release are:
+
++ ...
+
+**Added**
+
++ Create `transform_numpy` function in the <code>[utils]</code> module to carry out the transformation of the modeled time series and exogenous variables as numpy arrays.
+
++ New argument `method` in <code>[grid_search_forecaster]</code>, <code>[bayesian_search_forecaster]</code>, <code>[grid_search_forecaster_multiseries]</code> and <code>[bayesian_search_forecaster_multiseries]</code> that allows the user to select the method used to identify the best combination of hyperparameters and lags. The available methods are 'basktesting' (default) and 'on_step_ahead'.
+
+**Changed**
+
++ Refactor `recursive_predict` in <code>[ForecasterAutoregMultiSeries]</code> to predict all series at once. This improves performance when predicting multiple series.
+
++ Change the default value of `encoding` to `ordinal` in <code>[ForecasterAutoregMultiSeries]</code>. This will avoid conflicts if the regressor does not support categorical variables by default.
+
++ Renamed attributes:
+
+    + `encoding_mapping` has been renamed to `encoding_mapping_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `last_window` has been renamed to `last_window_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `index_type` has been renamed to `index_type_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `index_freq` has been renamed to `index_freq_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `training_range` has been renamed to `training_range_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `series_col_names` has been renamed to `series_names_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `included_exog` has been renamed to `exog_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `exog_type` has been renamed to `exog_type_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `exog_dtypes` has been renamed to `exog_dtypes_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `exog_col_names` has been renamed to `exog_names_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `series_X_train` has been renamed to `X_train_series_names_in_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `X_train_col_names` has been renamed to `X_train_features_names_out_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `in_sample_residuals` has been renamed to `in_sample_residuals_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `out_sample_residuals` has been renamed to `out_sample_residuals_` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `fitted` has been renamed to `is_fitted` in <code>[ForecasterAutoregMultiSeries]</code>.
+
+    + `series_col_names` has been renamed to `series_names_in_` in the `check_predict_input`, `check_preprocess_exog_multiseries` and `initialize_transformer_series` functions in the <code>[utils]</code> module.
+
+    + `series_X_train` has been renamed to `X_train_series_names_in_` in the `prepare_levels_multiseries` function in the <code>[utils]</code> module.
+
+    + `exog_col_names` has been renamed to `exog_names_in_` in the `check_predict_input` and `check_preprocess_exog_multiseries` functions in the <code>[utils]</code> module.
+
+    + `index_type` has been renamed to `index_type_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `index_freq` has been renamed to `index_freq_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `included_exog` has been renamed to `exog_in_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `exog_type` has been renamed to `exog_type_in_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `exog_dtypes` has been renamed to `exog_dtypes_in_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `fitted` has been renamed to `is_fitted` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `in_sample_residuals` has been renamed to `in_sample_residuals_` in the `prepare_residuals_multiseries` function in the <code>[utils]</code> module.
+
+    + `out_sample_residuals` has been renamed to `out_sample_residuals_` in the `prepare_residuals_multiseries` function in the <code>[utils]</code> module.
+
+    + `last_window` has been renamed to `last_window_` in the `preprocess_levels_self_last_window_multiseries` function in the <code>[utils]</code> module.
+
++ Removed argument `engine` fom <code>[bayesian_search_forecaster]</code> and <code>[bayesian_search_forecaster_multiseries]</code>.
+
+**Fixed**
+
++ ...
+
+
 ## 0.13.0 <small>Aug 01, 2024</small> { id="0.13.0" }
 
 The main changes in this release are:
