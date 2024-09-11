@@ -47,6 +47,3 @@ def test_ValueError_decorator_check_X_numpy_ndarray_1d_when_X_not_1D_numpy_ndarr
         differentiator.fit_transform(y)
     with pytest.raises(ValueError, match = err_msg): 
         differentiator.inverse_transform(y)
-    with pytest.raises(ValueError, match = err_msg): 
-        differentiator.inverse_transform_next_window(y)
-

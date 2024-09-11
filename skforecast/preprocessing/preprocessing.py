@@ -13,41 +13,44 @@ from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
 
 
-def _check_X_numpy_ndarray_1d(func):
+def _check_X_numpy_ndarray_1d(ensure_1d=True):
     """
     This decorator checks if the argument X is a numpy ndarray with 1 dimension.
 
     Parameters
     ----------
-    func : Callable
-        Function to wrap.
+    ensure_1d : bool, default=True
+        Whether to ensure if X is a 1D numpy array.
     
     Returns
     -------
-    wrapper : wrapper
-        Function wrapped.
+    decorator : Callable
+        A decorator function.
 
     """
 
-    def wrapper(self, *args, **kwargs):
+    def decorator(func):
+        def wrapper(self, *args, **kwargs):
 
-        if args:
-            X = args[0] 
-        elif 'X' in kwargs:
-            X = kwargs['X']
-        else:
-            raise ValueError("Methods must be called with 'X' as argument.")
+            if args:
+                X = args[0] 
+            elif 'X' in kwargs:
+                X = kwargs['X']
+            else:
+                raise ValueError("Methods must be called with 'X' as argument.")
 
-        if not isinstance(X, np.ndarray):
-            raise TypeError(f"'X' must be a numpy ndarray. Found {type(X)}.")
-        if not X.ndim == 1:
-            raise ValueError(f"'X' must be a 1D array. Found {X.ndim} dimensions.")
+            if not isinstance(X, np.ndarray):
+                raise TypeError(f"'X' must be a numpy ndarray. Found {type(X)}.")
+            if ensure_1d and not X.ndim == 1:
+                raise ValueError(f"'X' must be a 1D array. Found {X.ndim} dimensions.")
+            
+            result = func(self, *args, **kwargs)
+            
+            return result
         
-        result = func(self, *args, **kwargs)
-        
-        return result
+        return wrapper
     
-    return wrapper
+    return decorator
 
 
 class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
@@ -90,7 +93,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         self.last_values = []
 
 
-    @_check_X_numpy_ndarray_1d
+    @_check_X_numpy_ndarray_1d()
     def fit(
         self, 
         X: np.ndarray, 
@@ -129,7 +132,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         return self
 
 
-    @_check_X_numpy_ndarray_1d
+    @_check_X_numpy_ndarray_1d()
     def transform(
         self, 
         X: np.ndarray, 
@@ -160,7 +163,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         return X_diff
 
 
-    @_check_X_numpy_ndarray_1d
+    @_check_X_numpy_ndarray_1d()
     def inverse_transform(
         self, 
         X: np.ndarray, 
@@ -196,8 +199,8 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
 
         return X_undiff
 
-    # TODO: only check if numpy
-    # @_check_X_numpy_ndarray_1d
+
+    @_check_X_numpy_ndarray_1d(ensure_1d=False)
     def inverse_transform_next_window(
         self,
         X: np.ndarray,
