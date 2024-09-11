@@ -160,7 +160,6 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         return X_diff
 
 
-    # TODO: review method docstring, seems to be the same as inverse_transform_next_window
     @_check_X_numpy_ndarray_1d
     def inverse_transform(
         self, 
@@ -169,8 +168,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
     ) -> np.ndarray:
         """
         Reverts the differentiation. To do so, the input array is assumed to be
-        a differentiated time series of order n that starts right after the
-        the time series used to fit the transformer.
+        the same time series used to fit the transformer but differentiated.
 
         Parameters
         ----------
@@ -198,7 +196,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
 
         return X_undiff
 
-
+    # TODO: only check if numpy
     # @_check_X_numpy_ndarray_1d
     def inverse_transform_next_window(
         self,
@@ -206,7 +204,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         y: Any = None
     ) -> np.ndarray:
         """
-        Reverts the differentiation. The input array `x` is assumed to be a 
+        Reverts the differentiation. The input array `X` is assumed to be a 
         differentiated time series of order n that starts right after the
         the time series used to fit the transformer.
 
@@ -224,18 +222,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
             Reverted differentiated time series.
         
         """
-
-        # Remove initial nan values if present
-        # X = X[np.argmax(~np.isnan(X)):]
-
-        # for i in range(self.order):
-        #     if i == 0:
-        #         X_undiff = np.cumsum(X, dtype=float) + self.last_values[-1]
-        #     else:
-        #         X_undiff = np.cumsum(X_undiff, dtype=float) + self.last_values[-(i + 1)]
-
-
-        # Code adapted for 2d arrays
+        
         array_ndim = X.ndim
         if array_ndim == 1:
             X = X.reshape(-1, 1)

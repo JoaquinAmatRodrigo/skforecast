@@ -1535,9 +1535,13 @@ def transform_numpy(
         if fit:
             array_transformed = transformer.fit_transform(array)
         else:
-            array_transformed = transformer.transform(array)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore", category=UserWarning)
+                array_transformed = transformer.transform(array)
     else:
-        array_transformed = transformer.inverse_transform(array)
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", category=UserWarning)
+            array_transformed = transformer.inverse_transform(array)
 
     if hasattr(array_transformed, 'toarray'):
         # If the returned values are in sparse matrix format, it is converted to dense

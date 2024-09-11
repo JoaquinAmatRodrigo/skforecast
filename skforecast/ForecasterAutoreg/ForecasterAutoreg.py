@@ -305,6 +305,7 @@ class ForecasterAutoreg(ForecasterBase):
             params = self.regressor.get_params(deep=True)
         params = "\n    " + textwrap.fill(str(params), width=80, subsequent_indent="    ")
 
+        exog_col_names = None
         if self.exog_col_names is not None:
             exog_col_names = copy(self.exog_col_names)
             if len(exog_col_names) > 50:

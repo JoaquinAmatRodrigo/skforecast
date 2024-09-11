@@ -266,10 +266,10 @@ def test_create_sample_weights_output_using_series_weights(encoding, X_train):
         encoding=encoding,
         series_weights={"series_1": 1.0, "series_2": 2.0},
     )
-    forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
+    forecaster.encoding_mapping_ = {"series_1": 0, "series_2": 1}
 
     results = forecaster.create_sample_weights(
-        series_col_names=["series_1", "series_2"], X_train=X_train
+        series_names_in_=["series_1", "series_2"], X_train=X_train
     )
 
     expected = np.array(
@@ -299,9 +299,9 @@ def test_create_sample_weights_output_using_weight_func(encoding, X_train):
         encoding=encoding,
         weight_func=custom_weights,
     )
-    forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
+    forecaster.encoding_mapping_ = {"series_1": 0, "series_2": 1}
     results = forecaster.create_sample_weights(
-        series_col_names=["series_1", "series_2"],
+        series_names_in_=["series_1", "series_2"],
         X_train=X_train,
     )
     expected = np.array([1, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 1])
@@ -342,9 +342,9 @@ def test_create_sample_weights_output_using_weight_func_dict(weight_func, expect
                      transformer_series = StandardScaler(),
                      weight_func        = weight_func
                  )
-    forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
+    forecaster.encoding_mapping_ = {"series_1": 0, "series_2": 1}
     results = forecaster.create_sample_weights(
-        series_col_names=["series_1", "series_2"], X_train=X_train_ordinal
+        series_names_in_=["series_1", "series_2"], X_train=X_train_ordinal
     )
 
     assert np.array_equal(results, expected)
@@ -395,9 +395,9 @@ def test_create_sample_weights_output_using_weight_func_dict_different_series_le
                      transformer_series = StandardScaler(),
                      weight_func        = weight_func
                  )
-    forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
+    forecaster.encoding_mapping_ = {"series_1": 0, "series_2": 1}
     results = forecaster.create_sample_weights(
-        series_col_names=["series_1", "series_2"],
+        series_names_in_=["series_1", "series_2"],
         X_train=X_train_ordinal_diferent_length,
     )
 
@@ -428,9 +428,9 @@ def test_create_sample_weights_output_using_series_weights_and_weight_func(
                      series_weights     = {"series_1": 1.0, "series_2": 2.0},
                      weight_func        = custom_weights
                  )
-    forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
+    forecaster.encoding_mapping_ = {"series_1": 0, "series_2": 1}
     results = forecaster.create_sample_weights(
-        series_col_names=["series_1", "series_2"], X_train=X_train
+        series_names_in_=["series_1", "series_2"], X_train=X_train
     )
 
     expected = np.array([1, 0, 0, 0, 1, 1, 1, 2, 0, 0, 0, 2, 2, 2], dtype=float)
@@ -463,9 +463,9 @@ def test_create_sample_weights_output_using_series_weights_and_weight_func_diffe
                      series_weights     = {"series_1": 1.0, "series_2": 2.0},
                      weight_func        = custom_weights
                  )
-    forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
+    forecaster.encoding_mapping_ = {"series_1": 0, "series_2": 1}
     results = forecaster.create_sample_weights(
-        series_col_names=["series_1", "series_2"], X_train=X_train
+        series_names_in_=["series_1", "series_2"], X_train=X_train
     )
     
     expected = np.array([1, 0, 0, 0, 1, 1, 1, 0, 2, 2, 2], dtype=float)
@@ -494,12 +494,12 @@ def test_create_sample_weights_ValueError_when_weights_has_nan(encoding, X_train
                      transformer_series = StandardScaler(),
                      weight_func        = custom_weights_nan
                  )
-    forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
+    forecaster.encoding_mapping_ = {"series_1": 0, "series_2": 1}
 
     err_msg = re.escape("The resulting `weights` cannot have NaN values.")
     with pytest.raises(ValueError, match=err_msg):
         forecaster.create_sample_weights(
-            series_col_names=["series_1", "series_2"], X_train=X_train
+            series_names_in_=["series_1", "series_2"], X_train=X_train
         )
 
 
@@ -526,12 +526,12 @@ def test_create_sample_weights_ValueError_when_weights_has_negative_values(
                      transformer_series = StandardScaler(),
                      weight_func        = custom_weights_negative
                  )
-    forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
+    forecaster.encoding_mapping_ = {"series_1": 0, "series_2": 1}
 
     err_msg = re.escape("The resulting `weights` cannot have negative values.")
     with pytest.raises(ValueError, match=err_msg):
         forecaster.create_sample_weights(
-            series_col_names=["series_1", "series_2"], X_train=X_train
+            series_names_in_=["series_1", "series_2"], X_train=X_train
         )
 
 
@@ -556,7 +556,7 @@ def test_create_sample_weights_ValueError_when_weights_all_zeros(encoding, X_tra
                      transformer_series = StandardScaler(),
                      series_weights     = {"series_1": 0, "series_2": 0},
                  )
-    forecaster.encoding_mapping = {"series_1": 0, "series_2": 1}
+    forecaster.encoding_mapping_ = {"series_1": 0, "series_2": 1}
 
     err_msg = re.escape(
         ("The resulting `weights` cannot be normalized because "
@@ -564,5 +564,5 @@ def test_create_sample_weights_ValueError_when_weights_all_zeros(encoding, X_tra
     )
     with pytest.raises(ValueError, match=err_msg):
         forecaster.create_sample_weights(
-            series_col_names=["series_1", "series_2"], X_train=X_train
+            series_names_in_=["series_1", "series_2"], X_train=X_train
         )
