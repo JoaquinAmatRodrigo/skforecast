@@ -1107,7 +1107,8 @@ def _calculate_metrics_one_step_ahead(
     if type(forecaster).__name__ == 'ForecasterAutoregDirect':
 
         pred_per_step = {}
-        steps = range(1, forecaster.steps + 1)
+        # steps = range(1, forecaster.steps + 1)
+        steps = [1] # Currently only model for step 1 is optimized.
 
         for step in steps:
             X_train_step, y_train_step = forecaster.filter_train_X_y_for_step(

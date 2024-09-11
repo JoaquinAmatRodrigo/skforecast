@@ -2458,9 +2458,10 @@ def _bayesian_search_optuna_multiseries(
                             )
                 
             if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
-                steps = range(1, forecaster.steps + 1)
+                # steps = range(1, forecaster.steps + 1)
+                steps = [1] # Currently only model for step 1 is optimized.
                 metric_values = []
-                for step in steps:
+                for step in steps:  
                     X_train_step, y_train_step = forecaster.filter_train_X_y_for_step(
                                                     step    = step,
                                                     X_train = X_train,
