@@ -335,7 +335,7 @@ def _calculate_metrics_multiseries(
         y_true_pred_level = None
         y_train = None
         if level in predictions.columns:
-            # TODO: avoid merges inside the loop, instead merge upside and then filter
+            # TODO: avoid merges inside the loop, instead merge outside and then filter
             y_true_pred_level = pd.merge(
                 series[level],
                 predictions[level],
@@ -453,7 +453,6 @@ def _calculate_metrics_multiseries(
     return metrics_levels
 
 
-# TODO: unify metric or metrics as argument name. Better to use scoring?
 def _calculate_metrics_multiseries_one_step_ahead(
     y_true: np.ndarray,
     y_true_index: pd.DatetimeIndex,
@@ -1788,49 +1787,18 @@ def _evaluate_grid_hyperparameters_multiseries(
 
         if method == 'one_step_ahead':
 
-            train_size = initial_train_size - forecaster.window_size_diff
-            X_all, y_all, *_ = forecaster._create_train_X_y(series=series, exog=exog)
-            
-            if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries':
-                # X_train contain repetaded dates (one per level) so slicing is not possible
-                end_train = X_all.index.unique()[train_size]
-                X_train = X_all.loc[X_all.index < end_train, :]
-                X_test  = X_all.loc[X_all.index >= end_train, :]
-                
-                if forecaster.encoding in ["ordinal", "ordinal_category"]:
-                    X_train_encoding = forecaster.encoder.inverse_transform(
-                        X_train[["_level_skforecast"]]
-                    ).ravel()
-                    X_test_encoding = forecaster.encoder.inverse_transform(
-                        X_test[["_level_skforecast"]]
-                    ).ravel()
-                elif forecaster.encoding == 'onehot':
-                    X_train_encoding = forecaster.encoder.inverse_transform(
-                                            X_train.loc[:, forecaster.encoding_mapping.keys()]
-                                        ).ravel()
-                    X_test_encoding = forecaster.encoder.inverse_transform(
-                                            X_test.loc[:, forecaster.encoding_mapping.keys()]
-                                        ).ravel()
-                else:
-                    X_train_encoding = forecaster.encoder.inverse_transform(
-                        X_train[["_level_skforecast"]]
-                    ).ravel()
-                    X_test_encoding = forecaster.encoder.inverse_transform(
-                        X_test[["_level_skforecast"]]
-                    ).ravel()
-                    X_train = X_train.drop(columns="_level_skforecast")
-                    X_test = X_test.drop(columns="_level_skforecast")
-                    
-                y_train = y_all.loc[y_all.index < end_train]
-                y_test  = y_all.loc[y_all.index >= end_train]
-
-            if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
-                X_train = X_all.iloc[:train_size, :]
-                X_test  = X_all.iloc[train_size:, :]
-                y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
-                y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
-                X_train_encoding = np.repeat(forecaster.level, len(X_train))
-                X_test_encoding = np.repeat(forecaster.level, len(X_test))
+            (
+                X_train,
+                y_train,
+                X_test,
+                y_test,
+                X_train_encoding,
+                X_test_encoding
+            ) = forecaster._create_train_X_y_one_step_ahead(
+                    series             = series,
+                    exog               = exog,
+                    initial_train_size = initial_train_size,
+                )
         
         for params in param_grid:
 
@@ -1876,7 +1844,7 @@ def _evaluate_grid_hyperparameters_multiseries(
                                     levels                = levels,
                                     metrics               = metric,
                                     add_aggregated_metric = add_aggregated_metric
-                                )
+                               )
                 if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
                     steps = range(1, forecaster.steps + 1)
                     metric_values = []
@@ -2458,41 +2426,20 @@ def _bayesian_search_optuna_multiseries(
                 if "lags" in sample:
                     forecaster.set_lags(sample['lags'])
             
-            train_size = initial_train_size - forecaster.window_size_diff
-            X_all, y_all, *_ = forecaster._create_train_X_y(series=series, exog=exog)
+            (
+                X_train,
+                y_train,
+                X_test,
+                y_test,
+                X_train_encoding,
+                X_test_encoding
+            ) = forecaster._create_train_X_y_one_step_ahead(
+                    series             = series,
+                    exog               = exog,
+                    initial_train_size = initial_train_size,
+                )
             
-            if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries':
-                # X_train contain repetaded dates (one per level) so slicing is not possible
-                end_train = X_all.index.unique()[train_size]
-                X_train = X_all.loc[X_all.index < end_train, :]
-                X_test  = X_all.loc[X_all.index >= end_train, :]
-                
-                if forecaster.encoding in ["ordinal", "ordinal_category"]:
-                    X_train_encoding = forecaster.encoder.inverse_transform(
-                        X_train[["_level_skforecast"]]
-                    ).ravel()
-                    X_test_encoding = forecaster.encoder.inverse_transform(
-                        X_test[["_level_skforecast"]]
-                    ).ravel()
-                elif forecaster.encoding == 'onehot':
-                    X_train_encoding = forecaster.encoder.inverse_transform(
-                                            X_train.loc[:, forecaster.encoding_mapping.keys()]
-                                        ).ravel()
-                    X_test_encoding = forecaster.encoder.inverse_transform(
-                                            X_test.loc[:, forecaster.encoding_mapping.keys()]
-                                        ).ravel()
-                else:
-                    X_train_encoding = forecaster.encoder.inverse_transform(
-                        X_train[["_level_skforecast"]]
-                    ).ravel()
-                    X_test_encoding = forecaster.encoder.inverse_transform(
-                        X_test[["_level_skforecast"]]
-                    ).ravel()
-                    X_train = X_train.drop(columns="_level_skforecast")
-                    X_test = X_test.drop(columns="_level_skforecast")
-                    
-                y_train = y_all.loc[y_all.index < end_train]
-                y_test  = y_all.loc[y_all.index >= end_train]
+            if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries':              
 
                 forecaster.regressor.fit(X_train, y_train)
                 pred = forecaster.regressor.predict(X_test)

@@ -637,6 +637,57 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         return X_train, y_train, series_col_names, series_X_train, exog_col_names
 
 
+    def _create_train_X_y_one_step_ahead(
+        self,
+        series: Union[pd.Series, pd.DataFrame, dict],
+        initial_train_size: int,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None
+    ) -> Tuple[pd.DataFrame, dict, pd.DataFrame, dict, np.ndarray, np.ndarray]:
+        """
+        Create matrices needed to train and test the forecaster for one-step-ahead
+        predictions.
+        
+        Parameters
+        ----------
+        series : pandas Series, pandas DataFrame, dict
+            Training time series.
+        initial_train_size : int
+            Initial size of the training set. It is the number of observations used
+            to train the forecaster before making the first prediction.
+        exog : pandas Series, pandas DataFrame, dict, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same number
+            of observations as `series` and their indexes must be aligned.
+        
+        Returns
+        -------
+        X_train : pandas DataFrame
+            Training values (predictors)
+        y_train : dict
+            Values (target) of the time series related to each row of `X_train` 
+            for each step.
+        X_test : pandas DataFrame
+            Test values (predictors)
+        y_test : dict
+            Values (target) of the time series related to each row of `X_test` 
+            for each step.
+        X_train_encoding : numpy ndarray
+            Series identifiers for each row of `X_train`.
+        X_test_encoding : numpy ndarray
+            Series identifiers for each row of `X_test`.
+        """
+
+        train_size = initial_train_size - self.window_size_diff
+        X_all, y_all, *_ = self._create_train_X_y(series=series, exog=exog)
+        X_train = X_all.iloc[:train_size, :]
+        X_test  = X_all.iloc[train_size:, :]
+        y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
+        y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
+        X_train_encoding = np.repeat(self.level, len(X_train))
+        X_test_encoding = np.repeat(self.level, len(X_test))
+
+        return X_train, y_train, X_test, y_test, X_train_encoding, X_test_encoding
+
+
     def create_train_X_y(
         self,
         series: pd.DataFrame,

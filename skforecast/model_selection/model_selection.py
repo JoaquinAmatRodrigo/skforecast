@@ -1081,6 +1081,61 @@ def random_search_forecaster(
     return results
 
 
+def _calculate_metrics_one_step_ahead(
+    forecaster: object,
+    metrics: list,
+    X_train: pd.DataFrame,
+    y_train: Union[pd.Series, dict],
+    X_test: pd.DataFrame,
+    y_test: Union[pd.Series, dict]
+):
+    """
+    Calculate metrics when predictions are one-step-ahead.
+    """
+
+    if type(forecaster).__name__ == 'ForecasterAutoreg':
+
+        forecaster.regressor.fit(X_train, y_train)
+        pred = forecaster.regressor.predict(X_test)
+
+        metric_values = []
+        for m in metrics:
+            metric_values.append(
+                m(y_true=y_test, y_pred=pred, y_train=y_train)
+            )
+
+    if type(forecaster).__name__ == 'ForecasterAutoregDirect':
+
+        pred_per_step = {}
+        steps = range(1, forecaster.steps + 1)
+
+        for step in steps:
+            X_train_step, y_train_step = forecaster.filter_train_X_y_for_step(
+                                            step    = step,
+                                            X_train = X_train,
+                                            y_train = y_train
+                                        )
+            X_test_step, y_test_step = forecaster.filter_train_X_y_for_step(
+                                            step    = step,  
+                                            X_train = X_test,
+                                            y_train = y_test
+                                        )
+            forecaster.regressors_[step].fit(X_train_step, y_train_step)
+            pred = forecaster.regressors_[step].predict(X_test_step)
+            pred_per_step[step] = pred
+
+        metric_values = []
+        for m in metrics:
+            metric_values_per_step = []
+            for step in steps:
+                metric_values_per_step.append(
+                    m(y_true=y_test_step, y_pred=pred_per_step[step], y_train=y_train[step])
+                )
+            metric_values.append(np.mean(metric_values_per_step))
+
+    return metric_values
+
+
 def _evaluate_grid_hyperparameters(
     forecaster: object,
     y: pd.Series,
@@ -1255,18 +1310,16 @@ def _evaluate_grid_hyperparameters(
 
         if method == 'one_step_ahead':
 
-            train_size = initial_train_size - forecaster.window_size_diff
-            X_all, y_all = forecaster.create_train_X_y(y=y, exog=exog)
-            X_train = X_all.iloc[:train_size, :]
-            X_test  = X_all.iloc[train_size:, :]
-
-            if type(forecaster).__name__ == 'ForecasterAutoreg': 
-                y_train = y_all.iloc[:train_size]
-                y_test  = y_all.iloc[train_size:]
-
-            if type(forecaster).__name__ == 'ForecasterAutoregDirect':
-                y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
-                y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
+            (
+                X_train,
+                y_train,
+                X_test,
+                y_test
+            ) = forecaster._create_train_X_y_one_step_ahead(
+                    y                   = y,
+                    initial_train_size  = initial_train_size,
+                    exog                = exog
+            )
 
         for params in param_grid:
 
@@ -1295,45 +1348,14 @@ def _evaluate_grid_hyperparameters(
 
             else:
 
-                if type(forecaster).__name__ == 'ForecasterAutoreg':
-
-                    forecaster.regressor.fit(X_train, y_train)
-                    pred = forecaster.regressor.predict(X_test)
-
-                    metric_values = []
-                    for m in metric:
-                        metric_values.append(
-                            m(y_true=y_test, y_pred=pred, y_train=y_train)
-                        )
-
-                if type(forecaster).__name__ == 'ForecasterAutoregDirect':
-
-                    pred_per_step = {}
-                    steps = range(1, forecaster.steps + 1)
-
-                    for step in steps:
-                        X_train_step, y_train_step = forecaster.filter_train_X_y_for_step(
-                                                        step    = step,
-                                                        X_train = X_train,
-                                                        y_train = y_train
-                                                    )
-                        X_test_step, y_test_step = forecaster.filter_train_X_y_for_step(
-                                                        step    = step,  
-                                                        X_train = X_test,
-                                                        y_train = y_test
-                                                    )
-                        forecaster.regressors_[step].fit(X_train_step, y_train_step)
-                        pred = forecaster.regressors_[step].predict(X_test_step)
-                        pred_per_step[step] = pred
-
-                    metric_values = []
-                    for m in metric:
-                        metric_values_per_step = []
-                        for step in steps:
-                            metric_values_per_step.append(
-                                m(y_true=y_test_step, y_pred=pred_per_step[step], y_train=y_train[step])
-                            )
-                        metric_values.append(np.mean(metric_values_per_step))
+                metric_values = _calculate_metrics_one_step_ahead(
+                                    forecaster = forecaster,
+                                    metrics    = metric,
+                                    X_train    = X_train,
+                                    y_train    = y_train,
+                                    X_test     = X_test,
+                                    y_test     = y_test
+                                )
 
             warnings.filterwarnings(
                 'ignore',
@@ -1785,54 +1807,27 @@ def _bayesian_search_optuna(
                 if "lags" in sample:
                     forecaster.set_lags(sample['lags'])
 
-            train_size = initial_train_size - forecaster.window_size
-            X_all, y_all = forecaster.create_train_X_y(y=y, exog=exog)
-            X_train = X_all.iloc[:train_size, :]
-            X_test  = X_all.iloc[train_size:, :]
-            if type(forecaster).__name__ == 'ForecasterAutoreg': 
-                y_train = y_all.iloc[:train_size]
-                y_test  = y_all.iloc[train_size:]
+            (
+                X_train,
+                y_train,
+                X_test,
+                y_test
+            ) = forecaster._create_train_X_y_one_step_ahead(
+                    y                   = y,
+                    initial_train_size  = initial_train_size,
+                    exog                = exog
+            )
 
-                forecaster.regressor.fit(X_train, y_train)
-                pred = forecaster.regressor.predict(X_test)
-                
-                metrics = []
-                for m in metric:
-                    metrics.append(
-                        m(y_true=y_test, y_pred=pred, y_train=y_train)
+            metrics = _calculate_metrics_one_step_ahead(
+                            forecaster = forecaster,
+                            metrics    = metric,
+                            X_train    = X_train,
+                            y_train    = y_train,
+                            X_test     = X_test,
+                            y_test     = y_test
                     )
 
-            if type(forecaster).__name__ == 'ForecasterAutoregDirect':
-                y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
-                y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
-
-                pred_per_step = {}
-                steps = range(1, forecaster.steps + 1)
-                for step in steps:
-                    X_train_step, y_train_step = forecaster.filter_train_X_y_for_step(
-                                                        step    = step,
-                                                        X_train = X_train,
-                                                        y_train = y_train
-                                                    )
-                    X_test_step, y_test_step = forecaster.filter_train_X_y_for_step(
-                                                    step    = step,  
-                                                    X_train = X_test,
-                                                    y_train = y_test
-                                                )
-                    forecaster.regressors_[step].fit(X_train_step, y_train_step)
-                    pred = forecaster.regressors_[step].predict(X_test_step)
-                    pred_per_step[step] = pred
-
-                metrics = []
-                for m in metric:
-                    metric_values_per_step = []
-                    for step in steps:
-                        metric_values_per_step.append(
-                            m(y_true=y_test_step, y_pred=pred_per_step[step], y_train=y_train[step])
-                        )
-                    metrics.append(np.mean(metric_values_per_step))
-
-                # Store all metrics in the variable `metric_values` defined outside _objective.
+            # Store all metrics in the variable `metric_values` defined outside _objective.
             nonlocal metric_values
             metric_values.append(metrics)
 

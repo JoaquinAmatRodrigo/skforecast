@@ -20,7 +20,11 @@ The main changes in this release are:
 
 + Create `transform_numpy` function in the <code>[utils]</code> module to carry out the transformation of the modeled time series and exogenous variables as numpy arrays.
 
-+ New argument `method` in <code>[grid_search_forecaster]</code>, <code>[bayesian_search_forecaster]</code>, <code>[grid_search_forecaster_multiseries]</code> and <code>[bayesian_search_forecaster_multiseries]</code> that allows the user to select the method used to identify the best combination of hyperparameters and lags. The available methods are 'basktesting' (default) and 'on_step_ahead'.
++ New argument `method` in <code>[grid_search_forecaster]</code>, <code>`random_search_forecaster`</code>, <code>[bayesian_search_forecaster]</code>, <code>[grid_search_forecaster_multiseries]</code>, <code>`random_search_forecaster_multiseries`</code> and <code>[bayesian_search_forecaster_multiseries]</code> that allows the user to select the method used to identify the best combination of hyperparameters and lags. The available methods are 'basktesting' (default) and 'on_step_ahead'.
+
++ New private method `_create_train_X_y_one_step_ahead` in all forecasters.
+
++ New private function `_calculate_metrics_one_step_ahead` to `model_selection` module to calculate the metrics when predicting one step ahead.
 
 **Changed**
 
