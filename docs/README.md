@@ -98,7 +98,7 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 ### English
 
-<i class="fa-duotone fa-chart-line fa" style="font-size: 25px; color:#1DA1F2;"></i>  [**Skforecast: time series forecasting with Machine Learning**](https://www.cienciadedatos.net/documentos/py27-time-series-forecasting-python-scikitlearn.html)
+<i class="fa-duotone fa-chart-line fa" style="font-size: 25px; color:#1DA1F2;"></i>  [**Skforecast: time series forecasting with machine learning**](https://www.cienciadedatos.net/documentos/py27-time-series-forecasting-python-scikitlearn.html)
 
 <i class="fa-solid fa-arrow-trend-up" style="color: #E60023;"></i> [**ARIMA and SARIMAX models**](https://www.cienciadedatos.net/documentos/py51-arima-sarimax-models-python.html)
 
@@ -108,20 +108,19 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 
 <i class="fa-duotone fa-water fa" style="font-size: 25px; color:teal;"></i> [**Global Forecasting Models: Multi-series forecasting**](https://www.cienciadedatos.net/documentos/py44-multi-series-forecasting-skforecast.html)
 
-<i class="fa-light fa-chart-line fa" style="font-size: 25px; color:#f26e1d;"></i>  [**Probabilistic forecasting models**](https://www.cienciadedatos.net/documentos/py42-probabilistic-forecasting.html)
+<i class="fa-light fa-chart-line fa" style="font-size: 25px; color:#f26e1d;"></i>  [**Probabilistic forecasting**](https://www.cienciadedatos.net/documentos/py42-probabilistic-forecasting.html)
 
 <i class="fa-solid fa-layer-group" style="color: #001633;"></i> [**Forecasting with Deep Learning**](https://cienciadedatos.net/documentos/py54-forecasting-with-deep-learning)
 
-<i class="fa-solid fa-arrow-trend-up" style="color: #fbbb09;"></i> [**Modelling time series trend with tree based models**](https://www.cienciadedatos.net/documentos/py49-modelling-time-series-trend-with-tree-based-models.html)
+<i class="fa-solid fa-cubes-stacked fa-rotate-180" style="color: #c15d0b;"></i> [**Stacking ensemble of machine learning models to improve forecasting**](https://cienciadedatos.net/documentos/py52-stacking-ensemble-models-forecasting.html)
 
+<i class="fa-solid fa-arrow-trend-up" style="color: #fbbb09;"></i> [**Modelling time series trend with tree based models**](https://www.cienciadedatos.net/documentos/py49-modelling-time-series-trend-with-tree-based-models.html)
 
 <i class="fa-solid fa-chart-gantt" style="color: #ff004f;"></i> [**Interpretable forecasting models**](https://www.cienciadedatos.net/documentos/py57-interpretable-forecasting-models.html)
 
-<i class="fa-solid fa-wave-square" style="color: #fbbb09;"></i> [**Intermittent demand forecasting**](https://www.cienciadedatos.net/documentos/py48-intermittent-demand-forecasting.html)
-
 <i class="fa-solid fa-magnifying-glass" style="font-size: 25px; color:purple;"></i> [**Forecasting time series with missing values**](https://www.cienciadedatos.net/documentos/py46-forecasting-time-series-missing-values.html)
 
-<i class="fa-solid fa-cubes-stacked fa-rotate-180" style="color: #c15d0b;"></i> [**Stacking ensemble of machine learning models to improve forecasting**](https://cienciadedatos.net/documentos/py52-stacking-ensemble-models-forecasting.html)
+<i class="fa-solid fa-wave-square" style="color: #fbbb09;"></i> [**Intermittent demand forecasting**](https://www.cienciadedatos.net/documentos/py48-intermittent-demand-forecasting.html)
 
 <i class="fa-duotone fa-lightbulb fa" style="font-size: 25px; color:#fcea2b;"></i> [**Forecasting energy demand with machine learning**](https://www.cienciadedatos.net/documentos/py29-forecasting-electricity-power-demand-python.html)
 
@@ -132,8 +131,6 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 <i class="fa-duotone fa-rss fa" style="font-size: 25px; color:#666666;"></i> [**Forecasting web traffic with machine learning and Python**](https://www.cienciadedatos.net/documentos/py37-forecasting-web-traffic-machine-learning.html)
 
 <i class="fa-brands fa-bitcoin fa" style="font-size: 25px; color:#f7931a;"></i> [**Bitcoin price prediction with Python**](https://www.cienciadedatos.net/documentos/py41-forecasting-cryptocurrency-bitcoin-machine-learning-python.html)
-
-
 
 ### Español
 
