@@ -1564,10 +1564,16 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if exog_values_dict is not None:
                 features[:, -exog_shape:] = exog_values_dict[step]
 
+            # TODO: Catch specific warnings
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
                 # but NoOpTransformer was fitted with feature names".
-                warnings.simplefilter("ignore", category=UserWarning)
+                # warnings.simplefilter("ignore", category=UserWarning)
+                warnings.filterwarnings(
+                    "ignore", 
+                    message="X does not have valid feature names", 
+                    category=UserWarning
+                )
                 pred = self.regressor.predict(features)
             
             predictions[i, :] = pred
@@ -2023,17 +2029,20 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         n_levels = len(levels)
         rng = np.random.default_rng(seed=random_state)
-        seeds = rng.integers(low=0, high=10000, size=n_levels)
 
+        # TODO: Refactoring
         # Hacer un array de 3d (steps, n_levels, n_boot) una capa por n_boot
+        # No se si es posible porque pueden llegar residuos de diferentes longitudes
+
+        # Alternativa, coger todos los residuos de una, cada columna es una iteración
+        # de bootstrapping, y luego se coge la fila correspondiente a cada step
         sample_residuals = {}
         for level in levels:
             sample_residuals[level] = rng.choice(
                                           a       = residuals[level],
-                                          size    = (n_boot, steps),
+                                          size    = (steps, n_boot),
                                           replace = True
                                       )
-            # Hay que acceder a la fila para que sea flatten
 
         # (steps, n_boot, n_levels)
         boot_predictions_full = np.full(
@@ -2043,20 +2052,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                 )
         for i in range(n_boot):
             
-            # TODO: puedes hacerlo fuera, y luego ir cogiendo steps residuals
-            # en cada iteración de bootstraping.
-            sample_residuals = {}
-            rng = np.random.default_rng(seed=seeds[i])
-            for level in levels:
-                sample_residuals[level] = rng.choice(
-                                              a       = residuals[level],
-                                              size    = steps,
-                                              replace = True
-                                          )
-            
             # In each bootstraping iteration the initial last_window and exog
             # need to be restored.
             last_window_boot = last_window.to_numpy()
+
+            residuals_n_boot = (
+                np.array([sample_residuals[level][:, i] for level in levels])
+                .transpose()
+            )
             for j in range(steps):
                 
                 # TODO: move residuals inside _recursive_predict
@@ -2066,11 +2069,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                                  last_window      = last_window_boot,
                                  exog_values_dict = exog_values_dict
                              )
-
-                residuals_step = (
-                    np.array([sample_residuals[level][i, j] for level in levels])
-                    .reshape(1, -1)
-                )
+                residuals_step = residuals_n_boot[j]
                 prediction_with_residual = prediction + residuals_step
                 start_cols = i * n_levels
                 boot_predictions_full[j, start_cols:start_cols + n_levels] = prediction_with_residual
@@ -3194,6 +3193,249 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     )
 
             boot_predictions[level] = boot_predictions_level
+        
+        set_skforecast_warnings(suppress_warnings, action='default')
+
+        return boot_predictions
+    
+
+    def _recursive_predict_residuals(
+        self,
+        steps: int,
+        levels: list,
+        last_window: pd.DataFrame,
+        exog_values_dict: Optional[dict] = None,
+        residuals: Optional[np.ndarray] = None
+    ) -> np.ndarray:
+        """
+        Predict n steps for one or multiple levels. It is an iterative process
+        in which, each prediction, is used as a predictor for the next step.
+
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        levels : list
+            Time series to be predicted.
+        last_window : pandas DataFrame
+            Series values used to create the features (lags) needed in the
+            first iteration of the prediction (t + 1).
+        exog_values_dict : dict, default `None`
+            Exogenous variable/s included as predictor/s.
+        residuals : numpy ndarray, default `None`
+            Residuals used to generate bootstrapping predictions in the form
+            (steps, levels).
+
+        Returns
+        -------
+        predictions : numpy ndarray
+            Predicted values.
+
+        """
+
+        n_levels = len(levels)
+        lags_shape = len(self.lags)
+        exog_shape = len(self.X_train_exog_names_out_) if exog_values_dict is not None else 0
+
+        if self.encoding is not None:
+            if self.encoding == "onehot":
+                levels_encoded = np.zeros(
+                    (n_levels, len(self.X_train_series_names_in_)), dtype=float
+                )
+                for i, level in enumerate(levels):
+                    if level in self.X_train_series_names_in_:
+                        levels_encoded[i, self.X_train_series_names_in_.index(level)] = 1.
+            else:
+                levels_encoded = np.array(
+                    [self.encoding_mapping_.get(level, None) for level in levels],
+                    dtype="float64"
+                ).reshape(-1, 1)
+            levels_encoded_shape = levels_encoded.shape[1]
+        else:
+            levels_encoded_shape = 0
+
+        features_shape = lags_shape + levels_encoded_shape + exog_shape
+        features = np.full(shape=(n_levels, features_shape), fill_value=np.nan, dtype=float)
+        if self.encoding is not None:
+            features[:, lags_shape : lags_shape + levels_encoded_shape] = levels_encoded
+
+        predictions = np.full(shape=(steps, n_levels), fill_value=np.nan, dtype=float)
+        last_window = np.concatenate((last_window, predictions), axis=0)
+
+        for i in range(steps):
+
+            step = i + 1
+            features[:, :lags_shape] = last_window[-self.lags - (steps - i), :].transpose()
+            if exog_values_dict is not None:
+                features[:, -exog_shape:] = exog_values_dict[step]
+
+            # TODO: Catch specific warnings
+            with warnings.catch_warnings():
+                # Suppress scikit-learn warning: "X does not have valid feature names,
+                # but NoOpTransformer was fitted with feature names".
+                warnings.filterwarnings(
+                    "ignore", 
+                    message="X does not have valid feature names", 
+                    category=UserWarning
+                )
+                # warnings.simplefilter("ignore", category=UserWarning)
+                pred = self.regressor.predict(features)
+            
+            if residuals is not None:
+                pred += residuals[i]
+            
+            predictions[i, :] = pred 
+
+            # Update `last_window` values. The first position is discarded and
+            # the new prediction is added at the end.
+            last_window[-(steps - i), :] = pred
+
+        return predictions    
+
+
+    def predict_bootstrapping_residuals(
+        self,
+        steps: int,
+        levels: Optional[Union[str, list]] = None,
+        last_window: Optional[pd.DataFrame] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
+        n_boot: int = 500,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        suppress_warnings: bool = False
+    ) -> dict:
+        """
+        Generate multiple forecasting predictions using a bootstrapping process. 
+        By sampling from a collection of past observed errors (the residuals),
+        each iteration of bootstrapping generates a different set of predictions. 
+        Only levels whose last window ends at the same datetime index can be 
+        predicted together. See the Notes section for more information. 
+        
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        levels : str, list, default `None`
+            Time series to be predicted. If `None` all levels whose last window
+            ends at the same datetime index will be predicted together.
+        last_window : pandas DataFrame, default `None`
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
+            If `last_window = None`, the values stored in `self.last_window_` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+        exog : pandas Series, pandas DataFrame, dict, default `None`
+            Exogenous variable/s included as predictor/s.
+        n_boot : int, default `500`
+            Number of bootstrapping iterations used to estimate predictions.
+        random_state : int, default `123`
+            Sets a seed to the random generator, so that boot predictions are always 
+            deterministic.
+        in_sample_residuals : bool, default `True`
+            If `True`, residuals from the training data are used as proxy of
+            prediction error to create predictions. If `False`, out of sample 
+            residuals are used. In the latter case, the user should have
+            calculated and stored the residuals within the forecaster (see
+            `set_out_sample_residuals()`).
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the prediction 
+            process. See skforecast.exceptions.warn_skforecast_categories for more
+            information.
+
+        Returns
+        -------
+        boot_predictions : dict
+            Predictions generated by bootstrapping for each level.
+            {level: pandas DataFrame, shape (steps, n_boot)}
+
+        Notes
+        -----
+        More information about prediction intervals in forecasting:
+        https://otexts.com/fpp3/prediction-intervals.html#prediction-intervals-from-bootstrapped-residuals
+        Forecasting: Principles and Practice (3nd ed) Rob J Hyndman and George Athanasopoulos.
+
+        """
+
+        set_skforecast_warnings(suppress_warnings, action='ignore')
+
+        (
+            last_window,
+            exog_values_dict,
+            levels,
+            prediction_index,
+            residuals
+        ) = self._create_predict_inputs(
+            steps               = steps,
+            levels              = levels,
+            last_window         = last_window,
+            exog                = exog,
+            predict_boot        = True,
+            in_sample_residuals = in_sample_residuals
+        )
+
+        n_levels = len(levels)
+        rng = np.random.default_rng(seed=random_state)
+        sample_residuals = np.full(
+                               shape      = (steps, n_boot, n_levels),
+                               fill_value = np.nan,
+                               dtype      = float
+                           )
+        for i, level in enumerate(levels):
+            sample_residuals[:, :, i] = rng.choice(
+                                            a       = residuals[level],
+                                            size    = (steps, n_boot),
+                                            replace = True
+                                        )
+        
+        boot_columns = []
+        boot_predictions_full = np.full(
+                                    shape      = (steps, n_levels, n_boot),
+                                    fill_value = np.nan,
+                                    dtype      = float
+                                )
+        for i in range(n_boot):
+
+            boot_columns.append(f"pred_boot_{i}")
+            boot_predictions_full[:, :, i] = self._recursive_predict_residuals(
+                steps            = steps,
+                levels           = levels,
+                last_window      = last_window,
+                exog_values_dict = exog_values_dict,
+                residuals        = sample_residuals[:, i, :]
+            )
+
+        boot_predictions = {}
+        # boot_columns = [f"pred_boot_{i}" for i in range(n_boot)]
+        for i, level in enumerate(levels):
+
+            if self.differentiation is not None:
+                boot_predictions_full[:, i, :] = (
+                    self.differentiator_[level].inverse_transform_next_window(boot_predictions_full[:, i, :])
+                )
+            
+            transformer_level = self.transformer_series_.get(level, self.transformer_series_['_unknown_level'])
+            if transformer_level is not None:
+                # for j in range(n_boot):
+                #     boot_predictions_full[:, i, j] = transform_numpy(
+                #         array             = boot_predictions_full[:, i, j],
+                #         transformer       = transformer_level,
+                #         fit               = False,
+                #         inverse_transform = True
+                #     )
+                boot_predictions_full[:, i, :] = np.apply_along_axis(
+                    func1d            = transform_numpy,
+                    axis              = 0,
+                    arr               = boot_predictions_full[:, i, :],
+                    transformer       = transformer_level,
+                    fit               = False,
+                    inverse_transform = True
+                )
+    
+            boot_predictions[level] = pd.DataFrame(
+                                          data    = boot_predictions_full[:, i, :],
+                                          index   = prediction_index,
+                                          columns = boot_columns
+                                      )
         
         set_skforecast_warnings(suppress_warnings, action='default')
 
