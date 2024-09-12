@@ -59,7 +59,9 @@ nav:
     - Plotting: user_guides/plotting.ipynb
     - Datasets: user_guides/datasets.ipynb
 
-  - Examples and tutorials: examples/examples.md
+  - Examples and tutorials:
+    - English: examples/examples_english.md
+    - Spanish: examples/examples_spanish.md
 
   - API Reference:
     - ForecasterAutoreg: api/ForecasterAutoreg.md
