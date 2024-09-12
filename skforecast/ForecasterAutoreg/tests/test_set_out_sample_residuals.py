@@ -119,7 +119,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.set_out_sample_residuals(residuals=np.arange(2000))
 
-    assert len(forecaster.out_sample_residuals) == 1000
+    assert len(forecaster.out_sample_residuals_) == 1000
 
 
 def test_same_out_sample_residuals_stored_when_residuals_length_is_greater_than_1000():
@@ -129,10 +129,10 @@ def test_same_out_sample_residuals_stored_when_residuals_length_is_greater_than_
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.set_out_sample_residuals(residuals=np.arange(2000))
-    out_sample_residuals_1 = forecaster.out_sample_residuals
+    out_sample_residuals_1 = forecaster.out_sample_residuals_
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.set_out_sample_residuals(residuals=np.arange(2000))
-    out_sample_residuals_2 = forecaster.out_sample_residuals
+    out_sample_residuals_2 = forecaster.out_sample_residuals_
 
     np.testing.assert_almost_equal(out_sample_residuals_1, out_sample_residuals_2)
 
@@ -145,7 +145,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no
     forecaster.set_out_sample_residuals(residuals=np.arange(20))
     forecaster.set_out_sample_residuals(residuals=np.arange(10), append=False)
     expected = np.arange(10)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     np.testing.assert_almost_equal(results, expected)
 
@@ -158,7 +158,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_ap
     forecaster.set_out_sample_residuals(residuals=np.arange(10))
     forecaster.set_out_sample_residuals(residuals=np.arange(10), append=True)
     expected = np.hstack([np.arange(10), np.arange(10)])
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     np.testing.assert_almost_equal(results, expected)
 
@@ -171,7 +171,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_ap
     forecaster.set_out_sample_residuals(residuals=np.arange(10))
     forecaster.set_out_sample_residuals(residuals=np.arange(1000), append=True)
     expected = np.hstack([np.arange(10), np.arange(1200)])[:1000]
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     np.testing.assert_almost_equal(results, expected)
 
@@ -193,7 +193,7 @@ def test_set_out_sample_residuals_when_transform_is_True():
     new_residuals_transformed = new_residuals_transformed.flatten()
     forecaster.set_out_sample_residuals(residuals=new_residuals, transform=True)
 
-    np.testing.assert_array_equal(new_residuals_transformed, forecaster.out_sample_residuals)
+    np.testing.assert_array_equal(new_residuals_transformed, forecaster.out_sample_residuals_)
 
 
 def test_same_out_sample_residuals_by_bin_stored_when_y_pred_is_provided():
@@ -219,10 +219,10 @@ def test_same_out_sample_residuals_by_bin_stored_when_y_pred_is_provided():
         y_pred=predictions
     )
 
-    for k in forecaster.out_sample_residuals_by_bin.keys():
+    for k in forecaster.out_sample_residuals_by_bin_.keys():
         np.testing.assert_almost_equal(
-            forecaster.in_sample_residuals_by_bin[k],
-            forecaster.out_sample_residuals_by_bin[k]
+            forecaster.in_sample_residuals_by_bin_[k],
+            forecaster.out_sample_residuals_by_bin_[k]
         )
 
 def test_set_out_sample_residuals_stores_maximum_200_residuals_per_bin():
@@ -241,12 +241,12 @@ def test_set_out_sample_residuals_stores_maximum_200_residuals_per_bin():
     forecaster.fit(y)
     forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
 
-    for v in forecaster.out_sample_residuals_by_bin.values():
+    for v in forecaster.out_sample_residuals_by_bin_.values():
         assert len(v) == 200
 
     np.testing.assert_array_almost_equal(
-        forecaster.out_sample_residuals,
-        np.concatenate(list(forecaster.out_sample_residuals_by_bin.values())),
+        forecaster.out_sample_residuals_,
+        np.concatenate(list(forecaster.out_sample_residuals_by_bin_.values())),
     )
 
 
@@ -268,18 +268,18 @@ def test_set_out_sample_residuals_append_new_residuals_per_bin():
     )
     forecaster.fit(y)   
     forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred, append=True)
-    for v in forecaster.out_sample_residuals_by_bin.values():
+    for v in forecaster.out_sample_residuals_by_bin_.values():
         assert len(v) == 50
 
     forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred, append=True)
-    for v in forecaster.out_sample_residuals_by_bin.values():
+    for v in forecaster.out_sample_residuals_by_bin_.values():
         assert len(v) == 100
 
     forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred, append=True)
     forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred, append=True)
     forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred, append=True)
     forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred, append=True)
-    for v in forecaster.out_sample_residuals_by_bin.values():
+    for v in forecaster.out_sample_residuals_by_bin_.values():
         assert len(v) == 200
 
 
@@ -314,4 +314,4 @@ def test_set_out_sample_residuals_when_there_are_no_residuals_for_some_bins():
             residuals=residuals, y_pred=y_pred, append=True
         )
 
-    assert len(forecaster.out_sample_residuals_by_bin[0]) == 200
+    assert len(forecaster.out_sample_residuals_by_bin_[0]) == 200

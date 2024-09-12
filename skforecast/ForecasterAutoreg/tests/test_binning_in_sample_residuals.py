@@ -14,7 +14,7 @@ def test_binning_in_sample_residuals_output():
     forecaster = ForecasterAutoreg(
         regressor=object(),
         lags = 5,
-        binner_kwargs={'n_bins':3}
+        binner_kwargs={'n_bins': 3}
     )
 
     rng = np.random.default_rng(12345)
@@ -55,10 +55,10 @@ def test_binning_in_sample_residuals_output():
         2: (109.36821559391004, 135.2111448156828)
     }
 
-    np.testing.assert_almost_equal(forecaster.in_sample_residuals, expected_1)
+    np.testing.assert_almost_equal(forecaster.in_sample_residuals_, expected_1)
 
     for k in expected_2.keys():
-        np.testing.assert_almost_equal(forecaster.in_sample_residuals_by_bin[k], expected_2[k])
+        np.testing.assert_almost_equal(forecaster.in_sample_residuals_by_bin_[k], expected_2[k])
 
     assert forecaster.binner_intervals == expected_3
 
@@ -76,15 +76,15 @@ def test_binning_in_sample_residuals_stores_maximum_200_residuals_per_bin():
     forecaster = ForecasterAutoreg(
                     regressor=LinearRegression(),
                     lags = 5,
-                    binner_kwargs={'n_bins':2}
+                    binner_kwargs={'n_bins': 2}
                 )
     forecaster.fit(y)
 
-    for v in forecaster.in_sample_residuals_by_bin.values():
+    for v in forecaster.in_sample_residuals_by_bin_.values():
         assert len(v) == 200
         assert len(v) > 0
 
     np.testing.assert_array_almost_equal(
-        forecaster.in_sample_residuals,
-        np.concatenate(list(forecaster.in_sample_residuals_by_bin.values()))
+        forecaster.in_sample_residuals_,
+        np.concatenate(list(forecaster.in_sample_residuals_by_bin_.values()))
     )

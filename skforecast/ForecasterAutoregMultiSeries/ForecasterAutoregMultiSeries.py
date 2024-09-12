@@ -229,8 +229,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         series.
     series_names_in_ : list
         Names of the series (levels) provided by the user during training.
+    exog_in_ : bool
+        If the forecaster has been trained using exogenous variable/s.
     exog_names_in_ : list
         Names of the exogenous variables used during training.
+    exog_type_in_ : type
+        Type of exogenous variable/s used in training.
+    exog_dtypes_in_ : dict
+        Type of each exogenous variable/s used in training. If `transformer_exog` 
+        is used, the dtypes are calculated before the transformation.
     X_train_series_names_in_ : list
         Names of the series (levels) included in the matrix `X_train` created
         internally for training. It can be different from `series_names_in_` if
@@ -242,13 +249,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         some exogenous variables are transformed during the training process.
     X_train_features_names_out_ : list
         Names of columns of the matrix created internally for training.
-    exog_in_ : bool
-        If the forecaster has been trained using exogenous variable/s.
-    exog_type_in_ : type
-        Type of exogenous variable/s used in training.
-    exog_dtypes_in_ : dict
-        Type of each exogenous variable/s used in training. If `transformer_exog` 
-        is used, the dtypes are calculated before the transformation.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
     in_sample_residuals_ : dict
@@ -1194,13 +1194,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.index_freq_                 = None
         self.training_range_             = None
         self.series_names_in_            = None
+        self.exog_in_                    = False
         self.exog_names_in_              = None
+        self.exog_type_in_               = None
+        self.exog_dtypes_in_             = None
         self.X_train_series_names_in_    = None
         self.X_train_exog_names_out_     = None
         self.X_train_features_names_out_ = None
-        self.exog_in_                    = False
-        self.exog_type_in_               = None
-        self.exog_dtypes_in_             = None
         self.in_sample_residuals_        = None
         self.is_fitted                   = False
         self.fit_date                    = None
@@ -1238,6 +1238,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.series_names_in_ = series_names_in_
         self.X_train_series_names_in_ = X_train_series_names_in_
         self.X_train_features_names_out_ = X_train_regressor.columns.to_list()
+
         self.is_fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
         self.training_range_ = {k: v[[0, -1]] for k, v in series_indexes.items()}
@@ -1443,9 +1444,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         exog_values_all_levels = []
         for level in levels:
-            last_window_level = last_window[level]
-            last_window_level = transform_series(
-                series            = last_window_level,
+            last_window_level = last_window[level].to_numpy()
+            last_window_level = transform_numpy(
+                array             = last_window_level,
                 transformer       = self.transformer_series_.get(level, self.transformer_series_['_unknown_level']),
                 fit               = False,
                 inverse_transform = False
@@ -1454,7 +1455,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if self.differentiation is not None:
                 if level not in self.differentiator_.keys():
                     self.differentiator_[level] = clone(self.differentiator)
-                last_window_level = self.differentiator_[level].fit_transform(last_window_level.to_numpy())
+                last_window_level = self.differentiator_[level].fit_transform(last_window_level)
             
             last_window[level] = last_window_level
 

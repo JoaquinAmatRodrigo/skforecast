@@ -16,7 +16,7 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression():
     forecaster.fit(y=pd.Series(np.arange(50)))
     predictions = forecaster._recursive_predict(
                       steps       = 5,
-                      last_window = forecaster.last_window.to_numpy().ravel(),
+                      last_window = forecaster.last_window_.to_numpy().ravel(),
                       exog        = None
                   )
     
@@ -38,7 +38,7 @@ def test_recursive_predict_output_when_regressor_is_Ridge_StandardScaler():
     forecaster.fit(y=pd.Series(np.arange(50), name='y'))
     predictions = forecaster._recursive_predict(
                       steps       = 5,
-                      last_window = forecaster.last_window.to_numpy().ravel(),
+                      last_window = forecaster.last_window_.to_numpy().ravel(),
                       exog        = None
                   )
     

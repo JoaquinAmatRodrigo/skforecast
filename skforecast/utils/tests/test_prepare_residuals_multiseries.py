@@ -62,7 +62,7 @@ def test_prepare_residuals_multiseries_ValueError_when_out_sample_residuals_is_N
 
     err_msg = re.escape(
         ("`forecaster.out_sample_residuals` is `None`. Use "
-         "`in_sample_residuals=True` or the  `set_out_sample_residuals()` "
+         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
          "method before predicting.")
     )
     with pytest.raises(ValueError, match = err_msg):

@@ -2893,7 +2893,7 @@ def prepare_residuals_multiseries(
         if out_sample_residuals_ is None:
             raise ValueError(
                 ("`forecaster.out_sample_residuals_` is `None`. Use "
-                 "`in_sample_residuals=True` or the  `set_out_sample_residuals()` "
+                 "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
                  "method before predicting.")
             )
         else:
