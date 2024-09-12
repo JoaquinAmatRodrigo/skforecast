@@ -1090,49 +1090,35 @@ def _calculate_metrics_one_step_ahead(
     y_test: Union[pd.Series, dict]
 ):
     """
-    Calculate metrics when predictions are one-step-ahead.
+    Calculate metrics when predictions are one-step-ahead. When forecaster is
+    of type ForecasterAutoregDirect only the regressor for step 1 is used.
     """
-
-    if type(forecaster).__name__ == 'ForecasterAutoreg':
-
-        forecaster.regressor.fit(X_train, y_train)
-        pred = forecaster.regressor.predict(X_test)
-
-        metric_values = []
-        for m in metrics:
-            metric_values.append(
-                m(y_true=y_test, y_pred=pred, y_train=y_train)
-            )
 
     if type(forecaster).__name__ == 'ForecasterAutoregDirect':
 
-        pred_per_step = {}
-        # steps = range(1, forecaster.steps + 1)
-        steps = [1] # Currently only model for step 1 is optimized.
+        step = 1  # Only model for step 1 is optimized.
+        X_train, y_train = forecaster.filter_train_X_y_for_step(
+                                step    = step,
+                                X_train = X_train,
+                                y_train = y_train
+                           )
+        X_test, y_test = forecaster.filter_train_X_y_for_step(
+                            step    = step,  
+                            X_train = X_test,
+                            y_train = y_test
+                         )
+        forecaster.regressors_[step].fit(X_train, y_train)
+        pred = forecaster.regressors_[step].predict(X_test)
 
-        for step in steps:
-            X_train_step, y_train_step = forecaster.filter_train_X_y_for_step(
-                                            step    = step,
-                                            X_train = X_train,
-                                            y_train = y_train
-                                        )
-            X_test_step, y_test_step = forecaster.filter_train_X_y_for_step(
-                                            step    = step,  
-                                            X_train = X_test,
-                                            y_train = y_test
-                                        )
-            forecaster.regressors_[step].fit(X_train_step, y_train_step)
-            pred = forecaster.regressors_[step].predict(X_test_step)
-            pred_per_step[step] = pred
+    else:
+        forecaster.regressor.fit(X_train, y_train)
+        pred = forecaster.regressor.predict(X_test)
 
-        metric_values = []
-        for m in metrics:
-            metric_values_per_step = []
-            for step in steps:
-                metric_values_per_step.append(
-                    m(y_true=y_test_step, y_pred=pred_per_step[step], y_train=y_train[step])
-                )
-            metric_values.append(np.mean(metric_values_per_step))
+    metric_values = []
+    for m in metrics:
+        metric_values.append(
+            m(y_true=y_test, y_pred=pred, y_train=y_train)
+        )
 
     return metric_values
 
@@ -1316,7 +1302,7 @@ def _evaluate_grid_hyperparameters(
                 y_train,
                 X_test,
                 y_test
-            ) = forecaster._create_train_X_y_one_step_ahead(
+            ) = forecaster._train_test_split_one_step_ahead(
                     y                   = y,
                     initial_train_size  = initial_train_size,
                     exog                = exog
@@ -1813,7 +1799,7 @@ def _bayesian_search_optuna(
                 y_train,
                 X_test,
                 y_test
-            ) = forecaster._create_train_X_y_one_step_ahead(
+            ) = forecaster._train_test_split_one_step_ahead(
                     y                   = y,
                     initial_train_size  = initial_train_size,
                     exog                = exog

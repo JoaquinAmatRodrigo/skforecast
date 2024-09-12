@@ -454,13 +454,11 @@ def _calculate_metrics_multiseries(
 
 
 def _calculate_metrics_multiseries_one_step_ahead(
-    y_true: np.ndarray,
-    y_true_index: pd.DatetimeIndex,
+    y_true: pd.Series,
     y_pred: np.ndarray,
-    y_pred_encoding: np.ndarray,
-    y_train: np.ndarray,
-    y_train_index: pd.DatetimeIndex,
-    y_train_encoding: np.ndarray,
+    y_pred_encoding: pd.Series,
+    y_train: pd.Series,
+    y_train_encoding: pd.Series,
     levels: list,
     metrics: list,
     add_aggregated_metric: bool = True
@@ -477,19 +475,15 @@ def _calculate_metrics_multiseries_one_step_ahead(
 
     Parameters
     ----------
-    y_true : numpy array
+    y_true : pandas Series
         True values.
-    y_true_index : pandas DatetimeIndex
-        Index of the true values.
-    y_pred : pandas DataFrame
-        Predictions generated during the backtesting process.
-    y_pred_encoding : numpy array
+    y_pred : numpy array
+        One-step-ahead predictions
+    y_pred_encoding : pandas Series
         Series level code for which each prediction belongs to.
-    y_train : numpy array
+    y_train : pandas Series
         True values of the training set.
-    y_train_index : pandas DatetimeIndex
-        Index of the training set.
-    y_train_encoding : numpy array
+    y_train_encoding : pandas Series
         Series level code for which each training value belongs to.
     metrics : list
         List of metrics to calculate.
@@ -512,17 +506,25 @@ def _calculate_metrics_multiseries_one_step_ahead(
     
     """
 
-    if not isinstance(y_true, np.ndarray):
+    if not isinstance(y_true, pd.Series):
         raise TypeError(
-            (f"`y_true` must be a numpy array. Got: {type(y_true)}")
-        )
-    if not isinstance(y_true_index, pd.Index):
-        raise TypeError(
-            (f"`y_true_index` must be a pandas Index. Got: {type(y_true_index)}")
+            (f"`y_true` must be a pandas Series. Got: {type(y_true)}")
         )
     if not isinstance(y_pred, np.ndarray):
         raise TypeError(
             (f"`y_pred` must be a numpy array. Got: {type(y_pred)}")
+        )
+    if not isinstance(y_pred_encoding, pd.Series):
+        raise TypeError(
+            (f"`y_pred_encoding` must be a pandas Series. Got: {type(y_pred_encoding)}")
+        )
+    if not isinstance(y_train, pd.Series):
+        raise TypeError(
+            (f"`y_train` must be a pandas Series. Got: {type(y_train)}")
+        )
+    if not isinstance(y_train_encoding, pd.Series):
+        raise TypeError(
+            (f"`y_train_encoding` must be a pandas Series. Got: {type(y_train_encoding)}")
         )
     if not isinstance(metrics, list):
         raise TypeError("`metrics` must be a list.")
@@ -539,7 +541,7 @@ def _calculate_metrics_multiseries_one_step_ahead(
             'y_pred': y_pred,
             '_level_skforecast': y_pred_encoding,
         },
-        index=y_true_index,
+        index=y_true.index,
     )
     predictions_per_level = {
         key: group for key, group in predictions.groupby('_level_skforecast')
@@ -549,7 +551,7 @@ def _calculate_metrics_multiseries_one_step_ahead(
         'y_train': y_train,
         '_level_skforecast': y_train_encoding
         },
-        index=y_train_index,
+        index=y_train.index,
     )
     y_train_per_level = {
         key: group for key, group in y_train.groupby('_level_skforecast')
@@ -1788,13 +1790,13 @@ def _evaluate_grid_hyperparameters_multiseries(
         if method == 'one_step_ahead':
 
             (
-                X_train,
-                y_train,
-                X_test,
-                y_test,
-                X_train_encoding,
-                X_test_encoding
-            ) = forecaster._create_train_X_y_one_step_ahead(
+                X_train_all,
+                y_train_all,
+                X_test_all,
+                y_test_all,
+                X_train_encoding_all,
+                X_test_encoding_all
+            ) = forecaster._train_test_split_one_step_ahead(
                     series             = series,
                     exog               = exog,
                     initial_train_size = initial_train_size,
@@ -1829,54 +1831,39 @@ def _evaluate_grid_hyperparameters_multiseries(
 
             else:
 
-                if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries':
+                if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
+                    step = 1
+                    X_train, y_train = forecaster.filter_train_X_y_for_step(
+                                            step    = step,
+                                            X_train = X_train_all,
+                                            y_train = y_train_all
+                                        )
+                    X_test, y_test = forecaster.filter_train_X_y_for_step(
+                                        step    = step,  
+                                        X_train = X_test_all,
+                                        y_train = y_test_all
+                                      )                 
+                    forecaster.regressors_[step].fit(X_train, y_train)
+                    pred = forecaster.regressors_[step].predict(X_test)
+
+                else:
+                    X_train = X_train_all
+                    y_train = y_train_all
+                    X_test = X_test_all
+                    y_test = y_test_all
                     forecaster.regressor.fit(X_train, y_train)
                     pred = forecaster.regressor.predict(X_test)
 
-                    metrics = _calculate_metrics_multiseries_one_step_ahead(
-                                    y_true                = y_test.to_numpy(),
-                                    y_true_index          = y_test.index,
-                                    y_pred                = pred,
-                                    y_pred_encoding       = X_test_encoding,
-                                    y_train               = y_train.to_numpy(),
-                                    y_train_index         = y_train.index,
-                                    y_train_encoding      = X_train_encoding,
-                                    levels                = levels,
-                                    metrics               = metric,
-                                    add_aggregated_metric = add_aggregated_metric
-                               )
-                if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
-                    steps = range(1, forecaster.steps + 1)
-                    metric_values = []
-                    for step in steps:
-                        X_train_step, y_train_step = forecaster.filter_train_X_y_for_step(
-                                                        step    = step,
-                                                        X_train = X_train,
-                                                        y_train = y_train
-                                                     )
-                        X_test_step, y_test_step = forecaster.filter_train_X_y_for_step(
-                                                        step    = step,  
-                                                        X_train = X_test,
-                                                        y_train = y_test
-                                                   )
-                        forecaster.regressors_[step].fit(X_train_step, y_train_step)
-                        pred = forecaster.regressors_[step].predict(X_test_step)
-                        
-                        metrics = _calculate_metrics_multiseries_one_step_ahead(
-                                        y_true                = y_test_step.to_numpy(),
-                                        y_true_index          = y_test_step.index,
-                                        y_pred                = pred,
-                                        y_pred_encoding       = X_test_encoding,
-                                        y_train               = y_train_step.to_numpy(),
-                                        y_train_index         = y_train_step.index,
-                                        y_train_encoding      = X_train_encoding,
-                                        levels                = levels,
-                                        metrics               = metric,
-                                        add_aggregated_metric = add_aggregated_metric
-                                    )
-                        metric_values.append(metrics)
-                    metric_values = pd.concat(metric_values, axis=0)
-                    metric_values = metric_values.drop(columns='levels').mean()
+                metrics = _calculate_metrics_multiseries_one_step_ahead(
+                                y_true                = y_test,
+                                y_pred                = pred,
+                                y_pred_encoding       = X_test_encoding_all,
+                                y_train               = y_train,
+                                y_train_encoding      = X_train_encoding_all,
+                                levels                = levels,
+                                metrics               = metric,
+                                add_aggregated_metric = add_aggregated_metric
+                          )
 
             if add_aggregated_metric:
                 metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
@@ -2427,69 +2414,51 @@ def _bayesian_search_optuna_multiseries(
                     forecaster.set_lags(sample['lags'])
             
             (
-                X_train,
-                y_train,
-                X_test,
-                y_test,
-                X_train_encoding,
-                X_test_encoding
-            ) = forecaster._create_train_X_y_one_step_ahead(
+                X_train_all,
+                y_train_all,
+                X_test_all,
+                y_test_all,
+                X_train_encoding_all,
+                X_test_encoding_all
+            ) = forecaster._train_test_split_one_step_ahead(
                     series             = series,
                     exog               = exog,
                     initial_train_size = initial_train_size,
                 )
-            
-            if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries':              
+                
+            if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
+                step = 1
+                X_train, y_train = forecaster.filter_train_X_y_for_step(
+                                        step    = step,
+                                        X_train = X_train_all,
+                                        y_train = y_train_all
+                                    )
+                X_test, y_test = forecaster.filter_train_X_y_for_step(
+                                    step    = step,  
+                                    X_train = X_test_all,
+                                    y_train = y_test_all
+                                    )                
+                forecaster.regressors_[step].fit(X_train, y_train)
+                pred = forecaster.regressors_[step].predict(X_test)
 
+            else:
+                X_train = X_train_all
+                y_train = y_train_all
+                X_test = X_test_all
+                y_test = y_test_all
                 forecaster.regressor.fit(X_train, y_train)
                 pred = forecaster.regressor.predict(X_test)
 
-                metrics = _calculate_metrics_multiseries_one_step_ahead(
-                                y_true                = y_test.to_numpy(),
-                                y_true_index          = y_test.index,
-                                y_pred                = pred,
-                                y_pred_encoding       = X_test_encoding,
-                                y_train               = y_train.to_numpy(),
-                                y_train_index         = y_train.index,
-                                y_train_encoding      = X_train_encoding,
-                                levels                = levels,
-                                metrics               = metric,
-                                add_aggregated_metric = add_aggregated_metric
-                            )
-                
-            if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
-                # steps = range(1, forecaster.steps + 1)
-                steps = [1] # Currently only model for step 1 is optimized.
-                metric_values = []
-                for step in steps:  
-                    X_train_step, y_train_step = forecaster.filter_train_X_y_for_step(
-                                                    step    = step,
-                                                    X_train = X_train,
-                                                    y_train = y_train
-                                                    )
-                    X_test_step, y_test_step = forecaster.filter_train_X_y_for_step(
-                                                    step    = step,  
-                                                    X_train = X_test,
-                                                    y_train = y_test
-                                                )
-                    forecaster.regressors_[step].fit(X_train_step, y_train_step)
-                    pred = forecaster.regressors_[step].predict(X_test_step)
-                    
-                    metrics = _calculate_metrics_multiseries_one_step_ahead(
-                            y_true                = y_test_step.to_numpy(),
-                            y_true_index          = y_test_step.index,
+            metrics = _calculate_metrics_multiseries_one_step_ahead(
+                            y_true                = y_test,
                             y_pred                = pred,
-                            y_pred_encoding       = X_test_encoding,
-                            y_train               = y_train_step.to_numpy(),
-                            y_train_index         = y_train_step.index,
-                            y_train_encoding      = X_train_encoding,
+                            y_pred_encoding       = X_test_encoding_all,
+                            y_train               = y_train,
+                            y_train_encoding      = X_train_encoding_all,
                             levels                = levels,
                             metrics               = metric,
                             add_aggregated_metric = add_aggregated_metric
                         )
-                    metric_values.append(metrics)
-                metric_values = pd.concat(metric_values, axis=0)
-                metric_values = metric_values.drop(columns='levels').mean()
 
             if add_aggregated_metric:
                 metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
@@ -2505,400 +2474,6 @@ def _bayesian_search_optuna_multiseries(
             metrics_list.append(metrics)
 
             return metrics.loc[0, metric_names[0]]
-
-    if show_progress:
-        kwargs_study_optimize['show_progress_bar'] = True
-    
-    if output_file is not None:
-        # Redirect optuna logging to file
-        optuna.logging.disable_default_handler()
-        logger = logging.getLogger('optuna')
-        logger.setLevel(logging.INFO)
-        for handler in logger.handlers.copy():
-            if isinstance(handler, logging.StreamHandler):
-                logger.removeHandler(handler)
-        handler = logging.FileHandler(output_file, mode="w")
-        logger.addHandler(handler)
-    else:
-        logging.getLogger("optuna").setLevel(logging.WARNING)
-        optuna.logging.disable_default_handler()
-
-    # `metrics_list` will be modified inside _objective function. 
-    # It is a trick to extract multiple values from _objective since
-    # only the optimized value can be returned.
-    metrics_list = []
-
-    warnings.filterwarnings(
-        "ignore",
-        category=UserWarning,
-        message="Choices for a categorical distribution should be*"
-    )
-
-    study = optuna.create_study(**kwargs_create_study)
-
-    if 'sampler' not in kwargs_create_study.keys():
-        study.sampler = TPESampler(seed=random_state)
-
-    study.optimize(_objective, n_trials=n_trials, **kwargs_study_optimize)
-    best_trial = study.best_trial
-
-    if output_file is not None:
-        handler.close()
-       
-    if search_space(best_trial).keys() != best_trial.params.keys():
-        raise ValueError(
-            (f"Some of the key values do not match the search_space key names.\n"
-             f"  Search Space keys  : {list(search_space(best_trial).keys())}\n"
-             f"  Trial objects keys : {list(best_trial.params.keys())}")
-        )
-    warnings.filterwarnings('default')
-    
-    lags_list = []
-    params_list = []
-    for trial in study.get_trials():
-        regressor_params = {k: v for k, v in trial.params.items() if k != 'lags'}
-        lags = trial.params.get(
-                   'lags',
-                   forecaster.lags if hasattr(forecaster, 'lags') else None
-               )
-        params_list.append(regressor_params)
-        lags_list.append(lags)
-    
-    if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeriesCustom',
-                                         'ForecasterAutoregMultiVariate']:
-        lags_list = [
-            initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)
-            for lag in lags_list
-        ]
-    elif type(forecaster).__name__ == 'ForecasterAutoregMultiSeriesCustom':
-        lags_list = [
-            f"custom function: {forecaster.fun_predictors.__name__}"
-            for _ in lags_list
-        ]
-    else:
-        lags_list_initialized = []
-        for lags in lags_list:
-            if isinstance(lags, dict):
-                for key in lags:
-                    if lags[key] is None:
-                        lags[key] = None
-                    else:
-                        lags[key] = initialize_lags(
-                                        forecaster_name = type(forecaster).__name__,
-                                        lags            = lags[key]
-                                    )
-            else:
-                lags = initialize_lags(
-                           forecaster_name = type(forecaster).__name__,
-                           lags            = lags
-                       )
-            lags_list_initialized.append(lags)
-        
-        lags_list = lags_list_initialized
-
-    results = pd.concat(metrics_list, axis=0)
-    results.insert(0, 'levels', [levels] * len(results))
-    results.insert(1, 'lags', lags_list)
-    results.insert(2, 'params', params_list)
-    results = (
-        results
-        .sort_values(by=metric_names[0], ascending=True)
-        .reset_index(drop=True)
-    )
-    results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
-    
-    if return_best:
-        
-        best_lags = results.loc[0, 'lags']
-        best_params = results.loc[0, 'params']
-        best_metric = results.loc[0, metric_names[0]]
-        
-        if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
-            forecaster.set_lags(best_lags)
-        forecaster.set_params(best_params)
-
-        forecaster.fit(series=series, exog=exog, store_in_sample_residuals=True)
-        
-        print(
-            f"`Forecaster` refitted using the best-found lags and parameters, "
-            f"and the whole data set: \n"
-            f"  Lags: {best_lags} \n"
-            f"  Parameters: {best_params}\n"
-            f"  Backtesting metric: {best_metric}\n"
-            f"  Levels: {levels}\n"
-        )
-
-    set_skforecast_warnings(suppress_warnings, action='default')
-            
-    return results, best_trial
-
-
-def _bayesian_search_optuna_multiseries_one_step_ahead(
-    forecaster: object,
-    series: Union[pd.DataFrame, dict],
-    search_space: Callable,
-    metric: Union[str, Callable, list],
-    initial_train_size: int,
-    aggregate_metric: Union[str, list] = ['weighted_average', 'average', 'pooling'],
-    levels: Optional[Union[str, list]] = None,
-    exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
-    n_trials: int = 10,
-    random_state: int = 123,
-    return_best: bool = True,
-    verbose: bool = True,
-    show_progress: bool = True,
-    suppress_warnings: bool = False,
-    output_file: Optional[str] = None,
-    kwargs_create_study: dict = {},
-    kwargs_study_optimize: dict = {}
-) -> Tuple[pd.DataFrame, object]:
-    """
-    Bayesian optimization for a Forecaster object using multi-series backtesting 
-    and optuna library.
-    
-    Parameters
-    ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
-        Forecaster model.
-    series : pandas DataFrame, dict
-        Training time series.
-    search_space : Callable
-        Function with argument `trial` which returns a dictionary with parameters names 
-        (`str`) as keys and Trial object from optuna (trial.suggest_float, 
-        trial.suggest_int, trial.suggest_categorical) as values.
-    metric : str, Callable, list
-        Metric used to quantify the goodness of fit of the model.
-        
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
-        - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
-        (Optional) that returns a float.
-        - If `list`: List containing multiple strings and/or Callables.
-    initial_train_size : int 
-        Number of samples in the initial train split.
-    aggregate_metric : str, list, default `['weighted_average', 'average', 'pooling']`
-        Aggregation method/s used to combine the metric/s of all levels (series)
-        when multiple levels are predicted. If list, the first aggregation method
-        is used to select the best parameters.
-
-        - 'average': the average (arithmetic mean) of all levels.
-        - 'weighted_average': the average of the metrics weighted by the number of
-        predicted values of each level.
-        - 'pooling': the values of all levels are pooled and then the metric is
-        calculated.
-    levels : str, list, default `None`
-        level (`str`) or levels (`list`) at which the forecaster is optimized. 
-        If `None`, all levels are taken into account.
-    exog : pandas Series, pandas DataFrame, dict, default `None`
-        Exogenous variables.
-    n_trials : int, default `10`
-        Number of parameter settings that are sampled in each lag configuration.
-    random_state : int, default `123`
-        Sets a seed to the sampling for reproducible output.
-    return_best : bool, default `True`
-        Refit the `forecaster` using the best found parameters on the whole data.
-    verbose : bool, default `True`
-        Print number of folds used for cv or backtesting.
-    show_progress : bool, default `True`
-        Whether to show a progress bar.
-    suppress_warnings: bool, default `False`
-        If `True`, skforecast warnings will be suppressed during the hyperparameter
-        search. See skforecast.exceptions.warn_skforecast_categories for more
-        information.
-    output_file : str, default `None`
-        Specifies the filename or full path where the results should be saved. 
-        The results will be saved in a tab-separated values (TSV) format. If 
-        `None`, the results will not be saved to a file.
-        **New in version 0.12.0**
-    kwargs_create_study : dict, default `{}`
-        Keyword arguments (key, value mappings) to pass to optuna.create_study().
-        If default, the direction is set to 'minimize' and a TPESampler(seed=123) 
-        sampler is used during optimization.
-    kwargs_study_optimize : dict, default `{}`
-        Other keyword arguments (key, value mappings) to pass to study.optimize().
-
-    Returns
-    -------
-    results : pandas DataFrame
-        Results for each combination of parameters.
-
-        - column levels: levels configuration for each iteration.
-        - column lags: lags configuration for each iteration.
-        - column lags_label: descriptive label or alias for the lags.
-        - column params: parameters configuration for each iteration.
-        - n columns with metrics: metric/s value/s estimated for each iteration.
-        There is one column for each metric and aggregation method. The name of
-        the column flollows the pattern `metric__aggregation`.
-        - additional n columns with param = value.
-    best_trial : optuna object
-        The best optimization result returned as an optuna FrozenTrial object.
-
-    """
-    
-    set_skforecast_warnings(suppress_warnings, action='ignore')
-    
-    if isinstance(aggregate_metric, str):
-        aggregate_metric = [aggregate_metric]
-    allowed_aggregate_metrics = ['average', 'weighted_average', 'pooling']
-    if not set(aggregate_metric).issubset(allowed_aggregate_metrics):
-        raise ValueError(
-            (f"Allowed `aggregate_metric` are: {allowed_aggregate_metrics}. "
-             f"Got: {aggregate_metric}.")
-        )
-    
-    levels = _initialize_levels_model_selection_multiseries(
-                 forecaster = forecaster,
-                 series     = series,
-                 levels     = levels
-             )
-    add_aggregated_metric = True if len(levels) > 1 else False
-
-    if not isinstance(metric, list):
-        metric = [metric]
-    metric = [
-            _get_metric(metric=m)
-            if isinstance(m, str)
-            else add_y_train_argument(m) 
-            for m in metric
-        ]
-    metric_names = [(m if isinstance(m, str) else m.__name__) for m in metric]
-    
-    if len(metric_names) != len(set(metric_names)):
-        raise ValueError(
-            "When `metric` is a `list`, each metric name must be unique."
-        )
-    
-    if add_aggregated_metric:
-        metric_names = [
-            f"{metric_name}__{aggregation}"
-            for metric_name in metric_names
-            for aggregation in aggregate_metric
-        ]
-
-    # Objective function using backtesting_forecaster_multiseries
-    def _objective(
-        trial,
-        search_space          = search_space,
-        forecaster            = forecaster,
-        series                = series,
-        exog                  = exog,
-        levels                = levels,
-        metric                = metric,
-        add_aggregated_metric = add_aggregated_metric,
-        aggregate_metric      = aggregate_metric,
-        metric_names          = metric_names,
-        initial_train_size    = initial_train_size,
-        verbose               = verbose,
-        suppress_warnings     = suppress_warnings
-    ) -> float:
-        
-        sample = search_space(trial)
-        sample_params = {k: v for k, v in sample.items() if k != 'lags'}
-        forecaster.set_params(sample_params)
-        if type(forecaster).__name__ != 'ForecasterAutoregMultiSeriesCustom':
-            if "lags" in sample:
-                forecaster.set_lags(sample['lags'])
-        
-        train_size = initial_train_size - forecaster.window_size_diff
-        X_all, y_all, *_ = forecaster._create_train_X_y(series=series, exog=exog)
-        
-        if type(forecaster).__name__ == 'ForecasterAutoregMultiSeries':
-            # X_train contain repetaded dates (one per level) so slicing is not possible
-            end_train = X_all.index.unique()[train_size]
-            X_train = X_all.loc[X_all.index < end_train, :]
-            X_test  = X_all.loc[X_all.index >= end_train, :]
-            
-            if forecaster.encoding in ["ordinal", "ordinal_category"]:
-                X_train_encoding = forecaster.encoder.inverse_transform(
-                    X_train[["_level_skforecast"]]
-                ).ravel()
-                X_test_encoding = forecaster.encoder.inverse_transform(
-                    X_test[["_level_skforecast"]]
-                ).ravel()
-            elif forecaster.encoding == 'onehot':
-                X_train_encoding = forecaster.encoder.inverse_transform(
-                                        X_train.loc[:, forecaster.encoding_mapping.keys()]
-                                    ).ravel()
-                X_test_encoding = forecaster.encoder.inverse_transform(
-                                        X_test.loc[:, forecaster.encoding_mapping.keys()]
-                                    ).ravel()
-            else:
-                X_train_encoding = forecaster.encoder.inverse_transform(
-                    X_train[["_level_skforecast"]]
-                ).ravel()
-                X_test_encoding = forecaster.encoder.inverse_transform(
-                    X_test[["_level_skforecast"]]
-                ).ravel()
-                X_train = X_train.drop(columns="_level_skforecast")
-                X_test = X_test.drop(columns="_level_skforecast")
-                
-            y_train = y_all.loc[y_all.index < end_train]
-            y_test  = y_all.loc[y_all.index >= end_train]
-
-            forecaster.regressor.fit(X_train, y_train)
-            pred = forecaster.regressor.predict(X_test)
-
-            metrics = _calculate_metrics_multiseries_one_step_ahead(
-                            y_true                = y_test.to_numpy(),
-                            y_true_index          = y_test.index,
-                            y_pred                = pred,
-                            y_pred_encoding       = X_test_encoding,
-                            y_train               = y_train.to_numpy(),
-                            y_train_index         = y_train.index,
-                            y_train_encoding      = X_train_encoding,
-                            levels                = levels,
-                            metrics               = metric,
-                            add_aggregated_metric = add_aggregated_metric
-                        )
-            
-        if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
-            steps = range(1, forecaster.steps + 1)
-            metric_values = []
-            for step in steps:
-                X_train_step, y_train_step = forecaster.filter_train_X_y_for_step(
-                                                step    = step,
-                                                X_train = X_train,
-                                                y_train = y_train
-                                                )
-                X_test_step, y_test_step = forecaster.filter_train_X_y_for_step(
-                                                step    = step,  
-                                                X_train = X_test,
-                                                y_train = y_test
-                                            )
-                forecaster.regressors_[step].fit(X_train_step, y_train_step)
-                pred = forecaster.regressors_[step].predict(X_test_step)
-                
-                metrics = _calculate_metrics_multiseries_one_step_ahead(
-                        y_true                = y_test_step.to_numpy(),
-                        y_true_index          = y_test_step.index,
-                        y_pred                = pred,
-                        y_pred_encoding       = X_test_encoding,
-                        y_train               = y_train_step.to_numpy(),
-                        y_train_index         = y_train_step.index,
-                        y_train_encoding      = X_train_encoding,
-                        levels                = levels,
-                        metrics               = metric,
-                        add_aggregated_metric = add_aggregated_metric
-                    )
-                metric_values.append(metrics)
-            metric_values = pd.concat(metric_values, axis=0)
-            metric_values = metric_values.drop(columns='levels').mean()
-
-        if add_aggregated_metric:
-            metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
-        else:
-            metrics = metrics.loc[metrics['levels'] == levels[0], :]
-        metrics = pd.DataFrame(
-                      data    = [metrics.iloc[:, 1:].transpose().stack().to_numpy()],
-                      columns = metric_names
-                  )
-        
-        # Store metrics in the variable `metrics_list` defined outside _objective.
-        nonlocal metrics_list
-        metrics_list.append(metrics)
-
-        return metrics.loc[0, metric_names[0]]
 
     if show_progress:
         kwargs_study_optimize['show_progress_bar'] = True

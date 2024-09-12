@@ -482,7 +482,7 @@ class ForecasterAutoreg(ForecasterBase):
         return X_train, y_train
     
 
-    def _create_train_X_y_one_step_ahead(
+    def _train_test_split_one_step_ahead(
         self,
         y: pd.Series,
         initial_train_size: int,

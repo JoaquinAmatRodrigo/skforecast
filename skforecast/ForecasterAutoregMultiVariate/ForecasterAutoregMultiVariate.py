@@ -637,12 +637,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         return X_train, y_train, series_col_names, series_X_train, exog_col_names
 
 
-    def _create_train_X_y_one_step_ahead(
+    def _train_test_split_one_step_ahead(
         self,
         series: Union[pd.Series, pd.DataFrame, dict],
         initial_train_size: int,
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None
-    ) -> Tuple[pd.DataFrame, dict, pd.DataFrame, dict, np.ndarray, np.ndarray]:
+    ) -> Tuple[pd.DataFrame, dict, pd.DataFrame, dict, pd.Series, pd.Series]:
         """
         Create matrices needed to train and test the forecaster for one-step-ahead
         predictions.
@@ -670,9 +670,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         y_test : dict
             Values (target) of the time series related to each row of `X_test` 
             for each step.
-        X_train_encoding : numpy ndarray
+        X_train_encoding : pandas Series
             Series identifiers for each row of `X_train`.
-        X_test_encoding : numpy ndarray
+        X_test_encoding : pandas Series
             Series identifiers for each row of `X_test`.
         """
 
@@ -682,8 +682,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         X_test  = X_all.iloc[train_size:, :]
         y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
         y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
-        X_train_encoding = np.repeat(self.level, len(X_train))
-        X_test_encoding = np.repeat(self.level, len(X_test))
+        X_train_encoding = pd.Series(self.level, index=X_train.index)
+        X_test_encoding = pd.Series(self.level, index=X_test.index)
 
         return X_train, y_train, X_test, y_test, X_train_encoding, X_test_encoding
 
