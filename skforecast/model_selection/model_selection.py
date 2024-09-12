@@ -570,7 +570,7 @@ def _backtesting_forecaster(
     for i, fold in enumerate(folds):
         fit_fold = fold[-1]
         if i == 0 or fit_fold:
-            train_iloc_start = fold[0][0]
+            train_iloc_start = fold[0][0] + window_size
             train_iloc_end = fold[0][1]
             train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
     
@@ -1113,6 +1113,9 @@ def _calculate_metrics_one_step_ahead(
     else:
         forecaster.regressor.fit(X_train, y_train)
         pred = forecaster.regressor.predict(X_test)
+
+    if forecaster.transformer_y is not None:
+        pred = forecaster.transformer_y.inverse_transform(pred.reshape(-1, 1)).flatten()
 
     metric_values = []
     for m in metrics:
