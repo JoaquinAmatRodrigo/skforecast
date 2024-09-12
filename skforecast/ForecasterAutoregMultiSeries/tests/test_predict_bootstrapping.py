@@ -67,7 +67,7 @@ def test_predict_bootstrapping_IgnoredArgumentWarning_when_not_available_self_la
                   )
 
     expected_1 = pd.DataFrame(
-                     data    = np.array([[0.16386591, 0.56398143, 0.38576231, 0.37782729]]),
+                     data    = np.array([[0.48128438, 0.20172898, 0.07381993, 0.38819631]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=51)
                  )
@@ -140,7 +140,7 @@ def test_predict_bootstrapping_IgnoredArgumentWarning_when_levels_is_list_and_di
 
     expected = {
         '1': pd.DataFrame(
-                 data    = np.array([[0.17482136, 0.59548022, 0.40159385, 0.37372285]]),
+                 data    = np.array([[0.47931483, 0.21880114, 0.10692630, 0.42510201]]),
                  columns = [f"pred_boot_{i}" for i in range(4)],
                  index   = pd.date_range(start='2020-02-20', periods=1)
              )
@@ -193,17 +193,17 @@ def test_predict_bootstrapping_UnknownLevelWarning_when_not_in_sample_residuals_
 
     expected = {
         '1': pd.DataFrame(
-                 data    = np.array([[0.2557472, 0.45547833, 0.40141629, 0.41792497]]),
+                 data    = np.array([[0.60487599, 0.22612695, 0.07322577, 0.45340699]]),
                  columns = [f"pred_boot_{i}" for i in range(4)],
                  index   = pd.RangeIndex(50, 51)
              ),
         '2': pd.DataFrame(
-                 data    = np.array([[0.35308571, 0.39818568, 0.67766497, 0.22103753]]),
+                 data    = np.array([[0.69343437, 0.67766497, 0.69444735, 0.64415095]]),
                  columns = [f"pred_boot_{i}" for i in range(4)],
                  index   = pd.RangeIndex(50, 51)
              ),
         '3': pd.DataFrame(
-                 data    = np.array([[0.51830135, 0.20914413, 0.92354139, 0.45547833]]),
+                 data    = np.array([[0.26291992, 0.45547833, 0.22612695, 0.51589959]]),
                  columns = [f"pred_boot_{i}" for i in range(4)],
                  index   = pd.RangeIndex(50, 51)
              )
@@ -235,17 +235,17 @@ def test_predict_bootstrapping_encoding_None_unknown_level():
 
     expected = {
         '1': pd.DataFrame(
-                 data    = np.array([[0.46049943, 0.27232912, 0.4773099, 0.51544113]]),
+                 data    = np.array([[0.62339220, 0.03921391, 0.58593655, 0.45059094]]),
                  columns = [f"pred_boot_{i}" for i in range(4)],
                  index   = pd.RangeIndex(50, 51)
              ),
         '2': pd.DataFrame(
-                 data    = np.array([[0.53328674, 0.58200333, 0.60314635, 0.41766002]]),
+                 data    = np.array([[0.94743870, 0.53474394, 0.38578090, 0.56857677]]),
                  columns = [f"pred_boot_{i}" for i in range(4)],
                  index   = pd.RangeIndex(50, 51)
              ),
         '3': pd.DataFrame(
-                 data    = np.array([[0.52831631, 0.19924718, 0.91194292, 0.42972248]]),
+                 data    = np.array([[0.23759071, 0.42972248, 0.19361364, 0.49593259]]),
                  columns = [f"pred_boot_{i}" for i in range(4)],
                  index   = pd.RangeIndex(50, 51)
              )
@@ -277,17 +277,17 @@ def test_predict_bootstrapping_encoding_None_unknown_level_differentiation():
 
     expected = {
         '1': pd.DataFrame(
-                 data    = np.array([[0.85193261, 0.65669636, 0.40904666, 0.48671657, 0.64058698]]),
+                 data    = np.array([[0.63878989, 0.33256144, 0.62392879, 0.37577094, 1.14849867]]),
                  columns = [f"pred_boot_{i}" for i in range(5)],
                  index   = pd.RangeIndex(50, 51)
              ),
         '2': pd.DataFrame(
-                 data    = np.array([[0.25888000,  0.35629127, -0.27895615,  0.16318238,  0.16318238]]),
+                 data    = np.array([[0.26274688, -0.00150092, 0.26392699, 0.18584762, 0.26392699]]),
                  columns = [f"pred_boot_{i}" for i in range(5)],
                  index   = pd.RangeIndex(50, 51)
              ),
         '3': pd.DataFrame(
-                 data    = np.array([[0.44749540, 0.46893592, 1.08720922, 0.74829265, 0.748292653]]),
+                 data    = np.array([[0.44105054, 0.54865001, 0.26752194, 0.36550593, 0.26752194]]),
                  columns = [f"pred_boot_{i}" for i in range(5)],
                  index   = pd.RangeIndex(50, 51)
              )
@@ -346,17 +346,17 @@ def test_predict_bootstrapping_UnknownLevelWarning_out_sample_residuals_with_enc
 
     expected = {
         '1': pd.DataFrame(
-              data    = np.array([[4.48307367, 4.48307367, 5.48307367, 2.48307367]]),
+              data    = np.array([[1.48307367, 2.48307367, 1.48307367, 1.48307367]]),
               columns = [f"pred_boot_{i}" for i in range(4)],
               index   = pd.RangeIndex(50, 51)
           ),
         '2': pd.DataFrame(
-              data    = np.array([[1.5061193, 3.5061193, 3.5061193, 1.5061193]]),
+              data    = np.array([[5.5061193, 3.5061193, 3.5061193, 2.5061193]]),
               columns = [f"pred_boot_{i}" for i in range(4)],
               index   = pd.RangeIndex(50, 51)
           ),
         '3': pd.DataFrame(
-              data    = np.array([[1.48307367, 2.48307367, 5.48307367, 2.48307367]]),
+              data    = np.array([[4.48307367, 2.48307367, 4.48307367, 4.48307367]]),
               columns = [f"pred_boot_{i}" for i in range(4)],
               index   = pd.RangeIndex(50, 51)
           )
@@ -427,12 +427,12 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
               )
 
     expected_1 = pd.DataFrame(
-                     data    = np.array([[0.16386591, 0.56398143, 0.38576231, 0.37782729]]),
+                     data    = np.array([[0.48128438, 0.20172898, 0.07381993, 0.38819631]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=51)
                  )
     expected_2 = pd.DataFrame(
-                     data    = np.array([[0.31806650, 0.40236263, 0.73878038, 0.12951421]]),
+                     data    = np.array([[0.72210743, 0.73878038, 0.80513315, 0.57237401]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=51)
                  )
@@ -459,14 +459,14 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
               )
 
     expected_1 = pd.DataFrame(
-                     data    = np.array([[0.16386591, 0.56398143, 0.38576231, 0.37782729],
-                                         [0.07792903, 0.47905617, 0.10365142, 0.25129988]]),
+                     data    = np.array([[0.48128438, 0.20172898, 0.07381993, 0.38819631],
+                                         [0.22472696, 0.06269684, 0.35120532, 0.66839553]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=52)
                  )
     expected_2 = pd.DataFrame(
-                     data    = np.array([[0.69663465, 1.03514738, 0.72210743, 0.57237401],
-                                         [0.47358417, 0.25757726, 0.76135164, 0.32060755]]),
+                     data    = np.array([[0.08624916, 0.57237401, 0.69862572, 0.92542401],
+                                         [0.06877403, 0.19830837, 0.10900956, 0.09861192]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=52)
                  )    
@@ -495,12 +495,12 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
               )
 
     expected_1 = pd.DataFrame(
-                     data    = np.array([[0.16386591, 0.56398143, 0.38576231, 0.37782729]]),
+                     data    = np.array([[0.48128438, 0.20172898, 0.07381993, 0.38819631]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=51)
                  )
     expected_2 = pd.DataFrame(
-                     data    = np.array([[0.31806650, 0.40236263, 0.73878038, 0.12951421]]),
+                     data    = np.array([[0.72210743, 0.73878038, 0.80513315, 0.57237401]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=51)
                  )
@@ -528,17 +528,17 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
               )
     
     expected_1 = pd.DataFrame(
-                     data    = np.array([[0.16386591, 0.56398143, 0.38576231, 0.37782729],
-                                         [0.07792903, 0.47905617, 0.10365142, 0.25129988]]),
+                     data    = np.array([[0.48128438, 0.20172898, 0.07381993, 0.38819631],
+                                         [0.22472696, 0.06269684, 0.35120532, 0.66839553]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=52)
                  )
     expected_2 = pd.DataFrame(
-                     data    = np.array([[0.69663465, 1.03514738, 0.72210743, 0.57237401],
-                                         [0.47358417, 0.25757726, 0.76135164, 0.32060755]]),
+                     data    = np.array([[0.08624916, 0.57237401, 0.69862572, 0.92542401],
+                                         [0.06877403, 0.19830837, 0.10900956, 0.09861192]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=52)
-                 )
+                 )    
 
     expected = {'1': expected_1, '2': expected_2}
 
@@ -551,7 +551,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     Test output of predict_bootstrapping when regressor is LinearRegression,
     2 steps are predicted, using in-sample residuals, exog is included, both
     inputs are transformed and in-sample residuals are fixed to 0.
-    """    
+    """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor          = LinearRegression(),
                      lags               = 3,
@@ -571,13 +571,13 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     
     expected_1 = pd.DataFrame(
                      data    = np.array([[0.50201669, 0.50201669, 0.50201669, 0.50201669],
-                                         [0.52505626, 0.52505626, 0.52505626, 0.52505626]]),
+                                         [0.49804821, 0.49804821, 0.49804821, 0.49804821]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=52)
                  )
     expected_2 = pd.DataFrame(
                      data    = np.array([[0.52531076, 0.52531076, 0.52531076, 0.52531076],
-                                         [0.54676784, 0.54676784, 0.54676784, 0.54676784]]),
+                                         [0.51683613, 0.51683613, 0.51683613, 0.51683613]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=52)
                  )
@@ -609,14 +609,14 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
               )
     
     expected_1 = pd.DataFrame(
-                     data    = np.array([[0.16958001, 0.55887507, 0.41716867, 0.38128471],
-                                         [0.10815767, 0.51571912, 0.10374366, 0.28260587]]),
+                     data    = np.array([[0.48598851, 0.24503818, 0.10778738, 0.38990777],
+                                         [0.25740769, 0.06499781, 0.35491959, 0.67049609]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=52)
                  )
     expected_2 = pd.DataFrame(
-                     data    = np.array([[0.73391792, 1.07905155, 0.76739951, 0.57081569],
-                                         [0.52099221, 0.30211351, 0.81041311, 0.35755142]]),
+                     data    = np.array([[0.08931035, 0.57081569, 0.70066373, 0.96406103],
+                                         [0.06876068, 0.23752454, 0.11044965, 0.10202009]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=52)
                  )
@@ -650,23 +650,23 @@ def test_predict_bootstrapping_output_when_differentiation():
     
     expected_1 = pd.DataFrame(
                      data    = np.array([
-                                   [0.47934326, 0.95168238, 0.4030405 , 0.34931421, 0.4030405 ,
-                                    0.49328573, 0.38902953, 0.45618806, 0.88232388, 0.612208  ],
-                                   [0.35408694, 0.61371682, 0.62401789, 0.55599343, 0.57505757,
-                                    0.73604114, 0.36091845, 0.59391637, 0.5984969 , 0.44011073],
-                                   [0.19794885, 0.81617238, 0.35911255, 0.75628619, 0.77605324,
-                                    0.56566898, 0.21739428, 0.71080749, 0.76868514, 0.26477136]]),
+                                   [0.86835554,  0.43568881,  0.72677672,  1.19824354,  0.44801019,
+                                    0.66116832,  0.98730031,  0.49328573,  0.83294094,  0.49328573],
+                                   [0.932948  , -0.04286105,  0.78881897,  0.94368941,  0.68990191,
+                                    0.39479453,  0.66796447, -0.02242345,  0.79317039,  1.09345254],
+                                   [0.80047137,  0.1669375 ,  0.49039454,  1.27844361,  1.00682521,
+                                   -0.02294521,  0.66800615,  0.0497091 ,  0.79972101,  1.18391928]]),
                      columns = [f"pred_boot_{i}" for i in range(10)],
                      index   = pd.RangeIndex(start=50, stop=53)
                  )
     expected_2 = pd.DataFrame(
                      data    = np.array([
-                                   [ 0.84930299, -0.11175337,  0.50405259,  0.14628148,  0.38288212,
-                                     0.32115554,  0.07709315,  0.43881105,  0.23392556, -0.21650711],
-                                   [ 0.41249056,  0.02020636, -0.11352055,  0.4148467 ,  0.29391619,
-                                     0.79821461,  0.57576831,  0.46159357, -0.31856089, -0.26444904],
-                                   [ 0.60723463,  0.45673017, -0.16179447,  0.08755587,  0.5958805 ,
-                                     0.85290729,  0.19710101,  0.66891429, -0.11672833, -0.17209489]]),
+                                   [0.30645781,  0.38475619, -0.21650711, -0.11175337,  0.13573138,
+                                    0.45197729,  0.07709315,  0.62428333,  0.42746891, -0.02426089],
+                                   [0.62617546,  0.48165268, -0.50937191,  0.02315903,  0.00976064,
+                                    0.37468356, -0.01104646,  0.34859438,  0.48364255,  0.07752748],
+                                   [0.2132809 ,  0.24251965, -0.01663732,  0.39527145,  0.5228262 ,
+                                   -0.15531628, -0.40091162,  0.07307154,  0.35477817,  0.31644122]]),
                      columns = [f"pred_boot_{i}" for i in range(10)],
                      index   = pd.RangeIndex(start=50, stop=53)
                  )

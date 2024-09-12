@@ -1560,7 +1560,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             features[:, lags_shape : lags_shape + levels_encoded_shape] = levels_encoded
 
         predictions = np.full(shape=(steps, n_levels), fill_value=np.nan, dtype=float)
-        last_window = np.concatenate((last_window, predictions), axis=0)
+        last_window = np.concatenate((last_window.to_numpy(), predictions), axis=0)
 
         for i in range(steps):
 
