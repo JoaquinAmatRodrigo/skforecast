@@ -7,7 +7,7 @@
 
 import re
 import os
-from copy import deepcopy
+from copy import deepcopy, copy
 import logging
 from typing import Union, Tuple, Optional, Callable
 import warnings
@@ -198,7 +198,7 @@ def _create_backtesting_folds(
         if isinstance(skip_folds, int) and skip_folds > 0:
             index_to_keep = np.arange(0, len(folds), skip_folds)
             index_to_skip = np.setdiff1d(np.arange(0, len(folds)), index_to_keep, assume_unique=True)
-            index_to_skip = [int(x) for x in index_to_skip] # Required since numpy 2.0
+            index_to_skip = [int(x) for x in index_to_skip]  # Required since numpy 2.0
         if isinstance(skip_folds, list):
             index_to_skip = [i for i in skip_folds if i < len(folds)]        
     
@@ -1083,6 +1083,7 @@ def random_search_forecaster(
 
 def _calculate_metrics_one_step_ahead(
     forecaster: object,
+    y: pd.Series,
     metrics: list,
     X_train: pd.DataFrame,
     y_train: Union[pd.Series, dict],
@@ -1092,6 +1093,24 @@ def _calculate_metrics_one_step_ahead(
     """
     Calculate metrics when predictions are one-step-ahead. When forecaster is
     of type ForecasterAutoregDirect only the regressor for step 1 is used.
+
+    Parameters
+    ----------
+    forecaster : object
+        Forecaster model.
+    y : pandas Series
+        Time series data used to train and test the model.
+    metrics : list
+        List of metrics.
+    X_train : pandas DataFrame
+        Predictor values used to train the model.
+    y_train : pandas Series
+        Target values related to each row of `X_train`.
+    X_test : pandas DataFrame
+        Predictor values used to test the model.
+    y_test : pandas Series
+        Target values related to each row of `X_test`.
+    
     """
 
     if type(forecaster).__name__ == 'ForecasterAutoregDirect':
@@ -1114,13 +1133,28 @@ def _calculate_metrics_one_step_ahead(
         forecaster.regressor.fit(X_train, y_train)
         pred = forecaster.regressor.predict(X_test)
 
+    pred = pred.ravel()
+    y_train = y_train.to_numpy()
+    y_test = y_test.to_numpy()
+
+    if hasattr(forecaster, 'differentiation') and forecaster.differentiation:
+        differentiator = copy(forecaster.differentiator)
+        differentiator.initial_values = (
+            [y.iloc[forecaster.window_size_diff - forecaster.differentiation]]
+        )
+        pred = differentiator.inverse_transform_next_window(pred)
+        y_test = differentiator.inverse_transform_next_window(y_test)
+        y_train = differentiator.inverse_transform(y_train)
+
     if forecaster.transformer_y is not None:
-        pred = forecaster.transformer_y.inverse_transform(pred.reshape(-1, 1)).flatten()
+        pred = forecaster.transformer_y.inverse_transform(pred.reshape(-1, 1))
+        y_test = forecaster.transformer_y.inverse_transform(y_test.reshape(-1, 1))
+        y_train = forecaster.transformer_y.inverse_transform(y_train.reshape(-1, 1))
 
     metric_values = []
     for m in metrics:
         metric_values.append(
-            m(y_true=y_test, y_pred=pred, y_train=y_train)
+            m(y_true=y_test.ravel(), y_pred=pred.ravel(), y_train=y_train.ravel())
         )
 
     return metric_values
@@ -1340,6 +1374,7 @@ def _evaluate_grid_hyperparameters(
 
                 metric_values = _calculate_metrics_one_step_ahead(
                                     forecaster = forecaster,
+                                    y          = y,
                                     metrics    = metric,
                                     X_train    = X_train,
                                     y_train    = y_train,
