@@ -541,33 +541,55 @@ def _calculate_metrics_multiseries_one_step_ahead(
     
     metric_names = [(m if isinstance(m, str) else m.__name__) for m in metrics]
 
-    predictions = pd.DataFrame(
+    predictions_per_level = pd.DataFrame(
         {
             'y_true': y_true,
             'y_pred': y_pred,
             '_level_skforecast': y_pred_encoding,
         },
         index=y_true.index,
-    )
-    predictions_per_level = {
-        key: group for key, group in predictions.groupby('_level_skforecast')
-    }
+    ).groupby('_level_skforecast')
+    predictions_per_level = {key: group for key, group in predictions_per_level}
 
-    y_train = pd.DataFrame({
+    y_train_per_level = pd.DataFrame({
         'y_train': y_train,
         '_level_skforecast': y_train_encoding
         },
         index=y_train.index,
-    )
-    y_train_per_level = {
-        key: group for key, group in y_train.groupby('_level_skforecast')
-    }
+    ).groupby('_level_skforecast')
+    y_train_per_level = {key: group for key, group in y_train_per_level}
 
+    # TODO: review with Javier
+    if hasattr(forecaster, "differentiation") and forecaster.differentiation:
+        differentiator = deepcopy(forecaster.differentiator)
+        for level in predictions_per_level:
+            differentiator[level].initial_values = [
+                series["level"].iloc[
+                    forecaster.window_size_diff - forecaster.differentiation
+                ]
+            ]
+            predictions_per_level[level]["y_pred"] = differentiator[level].inverse_transform_next_window(
+                predictions_per_level[level][["y_pred"]]
+            )
+            predictions_per_level[level]["y_true"] = differentiator[level].inverse_transform_next_window(
+                predictions_per_level[level][["y_true"]]
+            )
+            y_train_per_level[level]["y_true"] = differentiator[level].inverse_transform(
+                y_train_per_level[level][["y_train"]]
+            )
 
-    # TODO: desdiferencia y destransformar!!!!!!!!!!!!!!
-    if hasattr(forecaster, 'differentiation') and forecaster.differentiation:
-        pass
-
+    if forecaster.transformer_series is not None:
+        for level in predictions_per_level:
+            transformer = forecaster.transformer_series_[level]
+            predictions_per_level[level]["y_pred"] = transformer.inverse_transform(
+                predictions_per_level[level][["y_pred"]]
+            )
+            predictions_per_level[level]["y_true"] = transformer.inverse_transform(
+                predictions_per_level[level][["y_true"]]
+            )
+            y_train_per_level[level]["y_train"] = transformer.inverse_transform(
+                y_train_per_level[level][["y_train"]]
+            )
 
     metrics_levels = []
     for level in levels:
@@ -603,12 +625,13 @@ def _calculate_metrics_multiseries_one_step_ahead(
 
         # aggregation: weighted_average
         weighted_averages = {}
-        n_predictions_levels = (
-            predictions
-            .groupby("_level_skforecast")["y_pred"]
-            .apply(lambda x: x.notna().sum())
-            .to_frame(name="n_predictions")
-            .reset_index(names="levels")
+        n_predictions_levels = {
+            k: v['y_pred'].notna().sum()
+            for k, v in predictions_per_level.items()
+        }
+        n_predictions_levels = pd.DataFrame(
+            n_predictions_levels.items(),
+            columns=['levels', 'n_predictions']
         )
         metrics_levels_no_missing = (
             metrics_levels.merge(n_predictions_levels, on='levels', how='inner')
@@ -623,22 +646,24 @@ def _calculate_metrics_multiseries_one_step_ahead(
 
         # aggregation: pooling
         list_y_train_by_level = [v['y_train'].to_numpy() for v in y_train_per_level.values()]
+        predictions_pooled = pd.concat(predictions_per_level.values())
+        y_train_pooled = pd.concat(y_train_per_level.values())
         pooled = []
         for m, m_name in zip(metrics, metric_names):
             if m_name in ['mean_absolute_scaled_error', 'root_mean_squared_scaled_error']:
                 pooled.append(
                     m(
-                        y_true = predictions.loc[:, 'y_true'],
-                        y_pred = predictions.loc[:, 'y_pred'],
+                        y_true = predictions_pooled['y_true'],
+                        y_pred = predictions_pooled['y_pred'],
                         y_train = list_y_train_by_level
                     )
                 )
             else:
                 pooled.append(
                     m(
-                        y_true = predictions.loc[:, 'y_true'],
-                        y_pred = predictions.loc[:, 'y_pred'],
-                        y_train = y_train.loc[:, 'y_train']
+                        y_true = predictions_pooled['y_true'],
+                        y_pred = predictions_pooled['y_pred'],
+                        y_train = y_train_pooled['y_train']
                     )
                 )
         pooled = pd.DataFrame([pooled], columns=metric_names)
