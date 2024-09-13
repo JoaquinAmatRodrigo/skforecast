@@ -390,12 +390,19 @@ class ForecasterAutoregDirect(ForecasterBase):
             Values (target) of the time series related to each row of `X_test`.
         """
 
-        train_size = initial_train_size - self.window_size_diff
-        X_all, y_all = self.create_train_X_y(y=y, exog=exog)
-        X_train = X_all.iloc[:train_size, :]
-        X_test  = X_all.iloc[train_size:, :]
-        y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
-        y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
+        is_fitted = self.fitted
+        self.fitted = False
+        X_train, y_train = self.create_train_X_y(
+            y    = y.iloc[: initial_train_size],
+            exog = exog.iloc[: initial_train_size] if exog is not None else None
+        )
+        test_init = initial_train_size - self.window_size_diff
+        self.fitted = True
+        X_test, y_test = self.create_train_X_y(
+            y    = y.iloc[test_init:],
+            exog = exog.iloc[test_init:] if exog is not None else None
+        )
+        self.fitted = is_fitted
 
         return X_train, y_train, X_test, y_test
 
