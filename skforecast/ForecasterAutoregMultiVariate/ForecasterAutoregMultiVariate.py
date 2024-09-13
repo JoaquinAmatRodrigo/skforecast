@@ -676,12 +676,59 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Series identifiers for each row of `X_test`.
         """
 
-        train_size = initial_train_size - self.window_size_diff
-        X_all, y_all, *_ = self._create_train_X_y(series=series, exog=exog)
-        X_train = X_all.iloc[:train_size, :]
-        X_test  = X_all.iloc[train_size:, :]
-        y_train = {k: v.iloc[:train_size] for k, v in y_all.items()}
-        y_test  = {k: v.iloc[train_size:] for k, v in y_all.items()}
+        if isinstance(series, dict):
+            freqs = [s.index.freq for s in series.values() if s.index.freq is not None]
+            if not freqs:
+                raise ValueError("At least one series must have a frequency.")
+            if not all(f == freqs[0] for f in freqs):
+                raise ValueError(
+                    "Not all series with a frequency have the same frequency in their index."
+                )
+            min_index = min([v.index[0] for v in series.values()])
+            max_index = max([v.index[-1] for v in series.values()])
+            span_index = pd.date_range(start=min_index, end=max_index, freq=freqs[0])
+        else:
+            span_index = series.index
+
+        end_train_idx = initial_train_size
+        end_train_date = span_index[end_train_idx]
+        start_test_idx = initial_train_size - self.window_size_diff
+        start_test_date = span_index[start_test_idx]
+
+        if isinstance(series, pd.DataFrame):
+            series_train = series.iloc[:end_train_idx, :]
+            series_test = series.iloc[start_test_idx:, :]
+        elif isinstance(series, dict):
+            series_train = {k: v.loc[v.index < end_train_date] for k, v in series.items()}
+            series_test = {k: v.loc[v.index >= start_test_date] for k, v in series.items()}
+
+        if isinstance(exog, pd.DataFrame):
+            exog_train = exog.iloc[:end_train_idx, :]
+            exog_test = exog.iloc[start_test_idx:, :]
+        elif isinstance(exog, dict):
+            exog_train = {k: v.loc[v.index < end_train_date] for k, v in exog.items()}
+            exog_test = {k: v.loc[v.index >= start_test_date] for k, v in exog.items()}
+        else:
+            exog_train = None
+            exog_test = None
+
+        is_fitted = self.fitted
+        self.fitted = False
+        X_train, y_train, *_ = self._create_train_X_y(
+                                    series = series_train,
+                                    exog   = exog_train
+                              )
+        self.series_col_names = (
+            list(series_train.columns) if isinstance(series_train, pd.DataFrame)
+            else list(series_train.keys())
+        )
+        self.fitted = True
+        X_test, y_test, *_ = self._create_train_X_y(
+                                series = series_test,
+                                exog   = exog_test
+                             )
+        self.fitted = is_fitted
+
         X_train_encoding = pd.Series(self.level, index=X_train.index)
         X_test_encoding = pd.Series(self.level, index=X_test.index)
 
