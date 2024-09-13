@@ -4,9 +4,8 @@ import pandas as pd
 import numpy as np
 import pytest as pytest
 from skforecast.model_selection_multiseries.model_selection_multiseries import _calculate_metrics_multiseries_one_step_ahead
-from skforecast.model_selection_multiseries.model_selection_multiseries import _calculate_metrics_multiseries_one
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
-from sklearn.linear_model import LinearRegression
+from skforecast.model_selection_multiseries.model_selection_multiseries import _calculate_metrics_multiseries
+
 from skforecast.metrics import add_y_train_argument
 from sklearn.metrics import mean_absolute_error
 from skforecast.metrics import mean_absolute_scaled_error
