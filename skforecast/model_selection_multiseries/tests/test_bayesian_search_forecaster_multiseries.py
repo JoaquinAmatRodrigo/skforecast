@@ -14,7 +14,6 @@ from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import bayesian_search_forecaster_multiseries
-from skforecast.model_selection_multiseries import bayesian_search_forecaster_multivariate
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
@@ -666,7 +665,7 @@ def test_results_output_bayesian_search_forecaster_multivariate_optuna_engine_Fo
 
         return search_space
 
-    results = bayesian_search_forecaster_multivariate(
+    results = bayesian_search_forecaster_multiseries(
                   forecaster         = forecaster,
                   series             = series,
                   steps              = steps,

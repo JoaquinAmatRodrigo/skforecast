@@ -5,11 +5,16 @@ import os
 import pytest
 import numpy as np
 import pandas as pd
-from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.model_selection import ParameterGrid
+from sklearn.linear_model import Ridge
+from sklearn.preprocessing import StandardScaler
+from skforecast.metrics import mean_absolute_scaled_error
+from skforecast.metrics import root_mean_squared_scaled_error
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
+from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.model_selection.model_selection import _evaluate_grid_hyperparameters
 
 from tqdm import tqdm
@@ -18,6 +23,8 @@ tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 # Fixtures
 from .fixtures_model_selection import y
+from .fixtures_model_selection import y_feature_selection
+from .fixtures_model_selection import exog_feature_selection
 
 def create_predictors(y):  # pragma: no cover
     """
@@ -644,3 +651,75 @@ def test_evaluate_grid_hyperparameters_output_file_when_2_metrics_as_list():
     output_file_content = output_file_content.astype({'lags': str, 'lags_label': str, 'params': str})
     pd.testing.assert_frame_equal(results, output_file_content)
     os.remove(output_file)
+
+
+forecasters = [
+    ForecasterAutoreg(regressor=Ridge(random_state=678), lags=3),
+    ForecasterAutoregDirect(regressor=Ridge(random_state=678), lags=3, steps=1),
+    ForecasterAutoreg(
+        regressor=Ridge(random_state=678),
+        lags=3,
+        transformer_y=StandardScaler(),
+        transformer_exog=StandardScaler()
+    ),
+    ForecasterAutoregDirect(
+        regressor=Ridge(random_state=678),
+        lags=3,
+        steps=1,
+        transformer_y=StandardScaler(),
+        transformer_exog=StandardScaler()
+    )
+]
+
+
+@pytest.mark.parametrize("forecaster", forecasters)
+def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_one_step_ahead(
+    forecaster,
+):
+
+    metrics = [
+        "mean_absolute_error",
+        "mean_squared_error",
+        mean_absolute_percentage_error,
+        mean_absolute_scaled_error,
+        root_mean_squared_scaled_error,
+    ]
+    steps = 1
+    initial_train_size = 100
+    param_grid = {
+        "alpha": np.logspace(-3, 3, 2),
+    }
+    lags_grid = [3, 5, 7]
+    param_grid = list(ParameterGrid(param_grid))
+    results_backtesting = _evaluate_grid_hyperparameters(
+        forecaster         = forecaster,
+        y                  = y_feature_selection,
+        exog               = exog_feature_selection,
+        param_grid         = param_grid,
+        lags_grid          = lags_grid,
+        steps              = steps,
+        refit              = False,
+        metric             = metrics,
+        initial_train_size = initial_train_size,
+        method             = 'backtesting',
+        fixed_train_size   = False,
+        return_best        = False,
+        n_jobs             = 'auto',
+        verbose            = False,
+        show_progress      = False
+    )
+    results_one_step_ahead = _evaluate_grid_hyperparameters(
+        forecaster         = forecaster,
+        y                  = y_feature_selection,
+        exog               = exog_feature_selection,
+        param_grid         = param_grid,
+        lags_grid          = lags_grid,
+        metric             = metrics,
+        initial_train_size = initial_train_size,
+        method             = 'one_step_ahead',
+        return_best        = False,
+        verbose            = False,
+        show_progress      = False
+    )
+
+    pd.testing.assert_frame_equal(results_backtesting, results_one_step_ahead)
