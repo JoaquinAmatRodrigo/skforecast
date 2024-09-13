@@ -454,6 +454,8 @@ def _calculate_metrics_multiseries(
 
 
 def _calculate_metrics_multiseries_one_step_ahead(
+    forecaster: object,
+    series: Union[pd.DataFrame, dict],
     y_true: pd.Series,
     y_pred: np.ndarray,
     y_pred_encoding: pd.Series,
@@ -475,6 +477,10 @@ def _calculate_metrics_multiseries_one_step_ahead(
 
     Parameters
     ----------
+    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+        Forecaster model.
+    series : pandas DataFrame, dict
+        Series data used to train and test the forecaster.
     y_true : pandas Series
         True values.
     y_pred : numpy array
@@ -556,6 +562,12 @@ def _calculate_metrics_multiseries_one_step_ahead(
     y_train_per_level = {
         key: group for key, group in y_train.groupby('_level_skforecast')
     }
+
+
+    # TODO: desdiferencia y destransformar!!!!!!!!!!!!!!
+    if hasattr(forecaster, 'differentiation') and forecaster.differentiation:
+        pass
+
 
     metrics_levels = []
     for level in levels:
@@ -1855,6 +1867,8 @@ def _evaluate_grid_hyperparameters_multiseries(
                     pred = forecaster.regressor.predict(X_test)
 
                 metrics = _calculate_metrics_multiseries_one_step_ahead(
+                                forecaster            = forecaster,
+                                series                = series,
                                 y_true                = y_test,
                                 y_pred                = pred,
                                 y_pred_encoding       = X_test_encoding_all,

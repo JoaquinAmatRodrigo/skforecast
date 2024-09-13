@@ -952,13 +952,51 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Series identifiers for each row of `X_test`.
         """
 
-        train_size = initial_train_size - self.window_size_diff
-        X_all, y_all, *_ = self._create_train_X_y(series=series, exog=exog)
 
-        # X_train contain repetaded dates (one per level) so slicing is not possible
-        end_train = X_all.index.unique()[train_size]
-        X_train = X_all.loc[X_all.index < end_train, :]
-        X_test  = X_all.loc[X_all.index >= end_train, :]
+        is_fitted = self.fitted
+        self.fitted = False
+        test_init = initial_train_size - self.window_size_diff
+
+        if isinstance(series, pd.DataFrame):
+            series_train = series.iloc[: initial_train_size]
+            series_test = series.iloc[test_init:]
+        elif isinstance(series, dict):
+            series_train = {k: v.iloc[: initial_train_size] for k, v in series.items()}
+            series_test = {k: v.iloc[test_init:] for k, v in series.items()}
+        else:
+            series_train = None
+            series_test = None
+
+        if isinstance(exog, pd.DataFrame):
+            exog_train = exog.iloc[: initial_train_size]
+            exog_test = exog.iloc[test_init:]
+        elif isinstance(exog, dict):
+            exog_train = {k: v.iloc[: initial_train_size] for k, v in exog.items()}
+            exog_test = {k: v.iloc[test_init:] for k, v in exog.items()}
+        else:
+            exog_train = None
+            exog_test = None
+        
+        X_train, y_train = self.create_train_X_y(
+            series  = series_train,
+            exog = exog_train
+        )
+        test_init = initial_train_size - self.window_size_diff
+        self.fitted = True
+        X_test, y_test = self.create_train_X_y(
+            series = series_test,
+            exog = exog_test
+        )
+        self.fitted = is_fitted
+
+
+        # train_size = initial_train_size - self.window_size_diff
+        # X_all, y_all, *_ = self._create_train_X_y(series=series, exog=exog)
+
+        # # X_train contain repetaded dates (one per level) so slicing is not possible
+        # end_train = X_all.index.unique()[train_size]
+        # X_train = X_all.loc[X_all.index < end_train, :]
+        # X_test  = X_all.loc[X_all.index >= end_train, :]
 
         if self.encoding in ["ordinal", "ordinal_category"]:
             X_train_encoding = self.encoder.inverse_transform(
