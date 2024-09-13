@@ -14,7 +14,7 @@ nav:
     - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
     - Quick start: quick-start/quick-start-skforecast.ipynb
     - User Guides: user_guides/user-guides.md
-    - Examples and tutorials: examples/examples.md
+    - Examples and tutorials: examples/examples_english.md
     - API Reference: api/ForecasterAutoreg.md
     - FAQ and Tips: faq/faq.md
     - Releases: releases/releases.md
