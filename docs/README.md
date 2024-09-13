@@ -27,19 +27,21 @@
 
 **Why use skforecast?**
 
-The fields of statistics and machine learning have developed many excellent regression algorithms that can be useful for forecasting, but applying them effectively to time series analysis can still be a challenge. To address this issue, the skforecast library provides a comprehensive set of tools for training, validation and prediction in a variety of scenarios commonly encountered when working with time series. The library is built using the widely used scikit-learn API, making it easy to integrate into existing workflows. With skforecast, users have access to a wide range of functionalities such as feature engineering, model selection, hyperparameter tuning and many others. This allows users to focus on the essential aspects of their projects and leave the intricacies of time series analysis to skforecast. In addition, skforecast is developed according to the following priorities:
+Skforecast simplifies time series forecasting with machine learning by providing:
 
-+ Fast and robust prototyping. :zap:
-+ Validation and backtesting methods to have a realistic assessment of model performance. :mag:
-+ Models must be deployed in production. :hammer:
-+ Models must be interpretable. :crystal_ball:
+- <i class="fa-solid fa-puzzle-piece" style="font-size: 25px; color:#1DA1F2;"></i> **Seamless integration** with any scikit-learn compatible regressor (e.g., LightGBM, XGBoost, CatBoost, etc.).
+- <i class="fa-solid fa-diagram-project" style="font-size: 25px; color:#E60023;"></i> **Flexible workflows** that allow for both single and multi-series forecasting.
+- <i class="fa-solid fa-toolbox" style="font-size: 25px; color:#00cc99;"></i> **Comprehensive tools** for feature engineering, model selection, hyperparameter tuning, and more.
+- <i class="fa-solid fa-hammer" style="font-size: 25px; color:#f26e1d;"></i> **Production-ready models** with interpretability and validation methods for backtesting and realistic performance evaluation.
+
+Whether you're building quick prototypes or deploying models in production, skforecast ensures a fast, reliable, and scalable experience.
 
 **Get Involved**
 
-We value your contributions! Here are a few ways you can participate:
+We value your input! Here are a few ways you can participate:
 
 - **Report bugs** and suggest new features on our [GitHub Issues page](https://github.com/JoaquinAmatRodrigo/skforecast/issues).
-- **Contribute** to the project by [submitting code](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md), adding new features, or improving documentation.
+- **Contribute** to the project by [submitting code](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md), adding new features, or improving the documentation.
 - **Share your feedback** on LinkedIn to help spread the word about skforecast!
 
 Together, we can make time series forecasting accessible to everyone.

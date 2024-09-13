@@ -1,3 +1,5 @@
+<script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
+
 <h1 align="left">
     <img src="https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/images/banner-landing-page-skforecast.png?raw=true#only-light" style= margin-top: 0px;>
 </h1>
@@ -18,7 +20,7 @@
 - :information_source: [About The Project](#about-the-project)
 - :books: [Documentation](#documentation)
 - :computer: [Installation & Dependencies](#installation--dependencies)
-- :sparkles: [What is new in skforecast 0.13?](#what-is-new-in-skforecast-013)
+- :sparkles: [What is new in skforecast 0.14?](#what-is-new-in-skforecast-014)
 - :crystal_ball: [Forecasters](#forecasters)
 - :mortar_board: [Examples and tutorials](#examples-and-tutorials)
 - :handshake: [How to contribute](#how-to-contribute)
@@ -33,16 +35,24 @@
 
 **Why use skforecast?**
 
-The fields of statistics and machine learning have developed many excellent regression algorithms that can be useful for forecasting, but applying them effectively to time series analysis can still be a challenge. To address this issue, the skforecast library provides a comprehensive set of tools for training, validation and prediction in a variety of scenarios commonly encountered when working with time series. The library is built using the widely used scikit-learn API, making it easy to integrate into existing workflows. With skforecast, users have access to a wide range of functionalities such as feature engineering, model selection, hyperparameter tuning and many others. This allows users to focus on the essential aspects of their projects and leave the intricacies of time series analysis to skforecast. In addition, skforecast is developed according to the following priorities:
+Skforecast simplifies time series forecasting with machine learning by providing:
 
-+ Fast and robust prototyping. :zap:
-+ Validation and backtesting methods to have a realistic assessment of model performance. :mag:
-+ Models must be deployed in production. :hammer:
-+ Models must be interpretable. :crystal_ball:
+- <i class="fa-solid fa-puzzle-piece" style="font-size: 25px; color:#1DA1F2;"></i> **Seamless integration** with any scikit-learn compatible regressor (e.g., LightGBM, XGBoost, CatBoost, etc.).
+- <i class="fa-solid fa-diagram-project" style="font-size: 25px; color:#E60023;"></i> **Flexible workflows** that allow for both single and multi-series forecasting.
+- <i class="fa-solid fa-toolbox" style="font-size: 25px; color:#00cc99;"></i> **Comprehensive tools** for feature engineering, model selection, hyperparameter tuning, and more.
+- <i class="fa-solid fa-hammer" style="font-size: 25px; color:#f26e1d;"></i> **Production-ready models** with interpretability and validation methods for backtesting and realistic performance evaluation.
 
-**Share Your Thoughts with Us**
+Whether you're building quick prototypes or deploying models in production, skforecast ensures a fast, reliable, and scalable experience.
 
-Thank you for choosing skforecast! We value your suggestions, bug reports and recommendations as they help us identify areas for improvement and ensure that skforecast meets the needs of the community. Please consider sharing your experiences, reporting bugs, making suggestions or even contributing to the codebase on GitHub. Together, let's make time series forecasting more accessible and accurate for everyone.
+**Get Involved**
+
+We value your input! Here are a few ways you can participate:
+
+- **Report bugs** and suggest new features on our [GitHub Issues page](https://github.com/JoaquinAmatRodrigo/skforecast/issues).
+- **Contribute** to the project by [submitting code](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/CONTRIBUTING.md), adding new features, or improving the documentation.
+- **Share your feedback** on LinkedIn to help spread the word about skforecast!
+
+Together, we can make time series forecasting accessible to everyone.
 
 
 # Documentation
@@ -81,17 +91,11 @@ pip install skforecast
 For more installation options, including dependencies and additional features, check out our [Installation Guide](https://skforecast.org/latest/quick-start/how-to-install.html).
 
 
-# What is new in skforecast 0.13?
+# What is new in skforecast 0.14?
 
 Visit the [release notes](https://github.com/JoaquinAmatRodrigo/skforecast/blob/master/changelog.md) to view all notable changes.
 
-- [x] Support for `python 3.12`, `python 3.8` is no longer supported.
-- [x] Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code> are able to [predict series not seen during training](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html#forecasting-unknown-series). This is useful when the user wants to predict a new series that was not included in the training data.
-- [x] `encoding` can be set to `None` in Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. This option does [not add the encoded series ids](https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting#series-encoding-in-multi-series) to the regressor training matrix.
-- [x] New `create_predict_X` method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.
-- [x] New module <code>[metrics]</code> with functions to calculate metrics for time series forecasting such as <code>[mean_absolute_scaled_error]</code> and <code>[root_mean_squared_scaled_error]</code>. Visit [Time Series Forecasting Metrics](https://skforecast.org/latest/user_guides/metrics.html) for more information.
-- [x] New argument `add_aggregated_metric` in <code>[backtesting_forecaster_multiseries]</code> to include, in addition to the metrics for each level, the aggregated metric of all levels  using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).
-- [x] New argument `skip_folds` in <code>[model_selection]</code> and <code>[model_selection_multiseries]</code> functions. It allows the user to [skip some folds during backtesting](https://skforecast.org/latest/user_guides/backtesting#backtesting-with-skip-folds), which can be useful to speed up the backtesting process and thus the hyperparameter search.
+- [ ] ...
 - [x] Bug fixes and performance improvements.
 
 
