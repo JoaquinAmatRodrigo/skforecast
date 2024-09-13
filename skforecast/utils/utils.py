@@ -1549,7 +1549,7 @@ def transform_numpy(
         array_transformed = array_transformed.toarray()
 
     if array_ndim == 1:
-        array_transformed = array_transformed.flatten()
+        array_transformed = array_transformed.ravel()
 
     return array_transformed
 
@@ -1623,7 +1623,7 @@ def transform_series(
     
     if isinstance(values_transformed, np.ndarray) and values_transformed.shape[1] == 1:
         series_transformed = pd.Series(
-                                 data  = values_transformed.flatten(),
+                                 data  = values_transformed.ravel(),
                                  index = data.index,
                                  name  = data.columns[0]
                              )

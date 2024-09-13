@@ -107,7 +107,7 @@ def test_transform_numpy_when_transformer_is_StandardScaler_and_inverse_transfor
     transformer = StandardScaler()
     transformer.fit(input_1.reshape(-1, 1))
 
-    input_2 = transformer.transform(input_1.reshape(-1, 1)).flatten()
+    input_2 = transformer.transform(input_1.reshape(-1, 1)).ravel()
     results = transform_numpy(
                   array             = input_2,
                   transformer       = transformer,

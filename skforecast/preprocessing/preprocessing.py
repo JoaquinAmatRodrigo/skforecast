@@ -240,7 +240,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
                 X_undiff = np.cumsum(X_undiff, axis=0, dtype=float) + self.last_values[-(i + 1)]
 
         if array_ndim == 1:
-            X_undiff = X_undiff.flatten()
+            X_undiff = X_undiff.ravel()
 
         return X_undiff
 
