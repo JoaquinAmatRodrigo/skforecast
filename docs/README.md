@@ -25,18 +25,18 @@
 
 **Skforecast** is a Python library for time series forecasting using machine learning models. It works with any regressor compatible with the scikit-learn API, including popular options like LightGBM, XGBoost, CatBoost, Keras, and many others.
 
-**Why use skforecast?**
+### Why use skforecast?
 
 Skforecast simplifies time series forecasting with machine learning by providing:
 
-- <i class="fa-solid fa-puzzle-piece" style="font-size: 25px; color:#1DA1F2;"></i> **Seamless integration** with any scikit-learn compatible regressor (e.g., LightGBM, XGBoost, CatBoost, etc.).
-- <i class="fa-solid fa-diagram-project" style="font-size: 25px; color:#E60023;"></i> **Flexible workflows** that allow for both single and multi-series forecasting.
-- <i class="fa-solid fa-toolbox" style="font-size: 25px; color:#00cc99;"></i> **Comprehensive tools** for feature engineering, model selection, hyperparameter tuning, and more.
-- <i class="fa-solid fa-hammer" style="font-size: 25px; color:#f26e1d;"></i> **Production-ready models** with interpretability and validation methods for backtesting and realistic performance evaluation.
+- :jigsaw: **Seamless integration** with any scikit-learn compatible regressor (e.g., LightGBM, XGBoost, CatBoost, etc.).
+- :repeat: **Flexible workflows** that allow for both single and multi-series forecasting.
+- :hammer_and_wrench: **Comprehensive tools** for feature engineering, model selection, hyperparameter tuning, and more.
+- :building_construction: **Production-ready models** with interpretability and validation methods for backtesting and realistic performance evaluation.
 
 Whether you're building quick prototypes or deploying models in production, skforecast ensures a fast, reliable, and scalable experience.
 
-**Get Involved**
+### Get Involved
 
 We value your input! Here are a few ways you can participate:
 
