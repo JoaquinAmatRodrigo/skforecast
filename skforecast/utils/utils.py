@@ -1875,18 +1875,12 @@ def multivariate_time_series_corr(
 
 def check_backtesting_input(
     forecaster: object,
-    steps: int,
+    cv: object,
     metric: Union[str, Callable, list],
     add_aggregated_metric: bool = True,
     y: Optional[pd.Series] = None,
     series: Optional[Union[pd.DataFrame, dict]] = None,
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
-    initial_train_size: Optional[int] = None,
-    fixed_train_size: bool = True,
-    gap: int = 0,
-    skip_folds: Optional[Union[int, list]] = None,
-    allow_incomplete_fold: bool = True,
-    refit: Union[bool, int] = False,
     interval: Optional[list] = None,
     alpha: Optional[float] = None,
     n_boot: int = 500,
@@ -1908,6 +1902,8 @@ def check_backtesting_input(
         Forecaster model.
     steps : int, list
         Number of future steps predicted.
+    cv : TimeSeriesFold
+        TimeSeriesFold object with the information needed to split the data into folds.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
     add_aggregated_metric : bool, default `True`
@@ -1919,26 +1915,6 @@ def check_backtesting_input(
         Training time series for multi-series forecasters.
     exog : pandas Series, pandas DataFrame, dict, default `None`
         Exogenous variables.
-    initial_train_size : int, default `None`
-        Number of samples in the initial train split. If `None` and `forecaster` 
-        is already trained, no initial train is done and all data is used to 
-        evaluate the model.
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
-    gap : int, default `0`
-        Number of samples to be excluded after the end of each training set and 
-        before the test set.
-    skip_folds : int, list, default `None`
-        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
-        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
-        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
-        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
-    allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to have a smaller number of samples than the 
-        `test_size`. If `False`, the last fold is excluded.
-    refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an 
-        integer, the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive.
@@ -1974,6 +1950,14 @@ def check_backtesting_input(
     None
     
     """
+
+    steps = cv.steps
+    initial_train_size = cv.initial_train_size
+    fixed_train_size = cv.fixed_train_size
+    gap = cv.gap
+    skip_folds = cv.skip_folds
+    allow_incomplete_fold = cv.allow_incomplete_fold
+    refit = cv.refit
 
     forecasters_uni = [
         "ForecasterAutoreg",
@@ -2073,6 +2057,8 @@ def check_backtesting_input(
                     (f"`exog` must be a pandas Series, DataFrame or None. Got {type(exog)}.")
                 )
 
+    # TODO: all this checks are already done in TimeSeriesFold
+    # --------------------------------------------------------
     if not isinstance(steps, (int, np.integer)) or steps < 1:
         raise TypeError(
             f"`steps` must be an integer greater than or equal to 1. Got {steps}."
@@ -2096,6 +2082,17 @@ def check_backtesting_input(
             ("`skip_folds` cannot contain the value 0, the first fold is "
              "needed to train the forecaster.")
         )
+    # --------------------------------------------------------
+
+    if hasattr(forecaster, 'differentiaion'):
+        if forecaster.differentiation != cv.differentiation:
+            raise ValueError(
+                (f"The differentiation included in the forecaster "
+                 f"({forecaster.differentiation}) differs from the differentiation "
+                 f" included in the cv ({cv.differentiation}). Set the same value "
+                 f"for both.")
+            )
+
     if not isinstance(metric, (str, Callable, list)):
         raise TypeError(
             (f"`metric` must be a string, a callable function, or a list containing "
