@@ -682,7 +682,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 raise ValueError("At least one series must have a frequency.")
             if not all(f == freqs[0] for f in freqs):
                 raise ValueError(
-                    "Not all series with a frequency have the same frequency in their index."
+                    "All series with frequency must have the same frequency."
                 )
             min_index = min([v.index[0] for v in series.values()])
             max_index = max([v.index[-1] for v in series.values()])
