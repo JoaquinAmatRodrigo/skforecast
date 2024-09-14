@@ -1845,6 +1845,7 @@ def _bayesian_search_optuna(
 
             metrics = _calculate_metrics_one_step_ahead(
                             forecaster = forecaster,
+                            y          = y,
                             metrics    = metric,
                             X_train    = X_train,
                             y_train    = y_train,

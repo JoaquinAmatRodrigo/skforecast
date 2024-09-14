@@ -2489,6 +2489,8 @@ def _bayesian_search_optuna_multiseries(
                 pred = forecaster.regressor.predict(X_test)
 
             metrics = _calculate_metrics_multiseries_one_step_ahead(
+                            forecaster            = forecaster,
+                            series                = series,
                             y_true                = y_test,
                             y_pred                = pred,
                             y_pred_encoding       = X_test_encoding_all,

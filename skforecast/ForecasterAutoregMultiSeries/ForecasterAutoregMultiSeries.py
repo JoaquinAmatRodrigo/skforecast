@@ -998,6 +998,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             list(series_train.columns) if isinstance(series_train, pd.DataFrame)
             else list(series_train.keys())
         )
+        # TODO: ver con javier por qué esto es necesario
+        if exog is not None:
+            if isinstance(exog_train, pd.DataFrame):
+                self.exog_col_names = list(exog_train.columns)
+            elif isinstance(exog_train, dict):
+                self.exog_col_names = list(exog_train.keys())
+            elif isinstance(exog_train, pd.Series):
+                self.exog_col_names = [exog_train.name]
         self.fitted = True
         X_test, y_test = self.create_train_X_y(
                             series = series_test,

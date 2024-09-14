@@ -670,8 +670,6 @@ forecasters = [
         transformer_exog=StandardScaler()
     )
 ]
-
-
 @pytest.mark.parametrize("forecaster", forecasters)
 def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_one_step_ahead(
     forecaster,

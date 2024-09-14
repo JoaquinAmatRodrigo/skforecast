@@ -131,6 +131,13 @@ def test_calculate_metrics_multiseries_one_step_ahead_input_types():
     """
 
     # Mock inputs
+    series = pd.DataFrame(
+        {
+            'item_1': [1, 2, 3],
+            'item_2': [4, 5, 6],
+        },
+        index=pd.DatetimeIndex(["2020-01-01", "2020-01-02", "2020-01-03"])
+    )
     y_true = np.array([1, 2, 3])
     y_true_index = pd.DatetimeIndex(["2020-01-01", "2020-01-02", "2020-01-03"])
     y_pred = np.array([1, 2, 3])
