@@ -48,11 +48,14 @@ class TimeSeriesFold():
     steps : int
         Number of observations used to be predicted in each fold. This is also commonly
         referred to as the forecast horizon or test size.
-    window_size : int
-        Number of observations needed to generate the autoregressive predictors.
     initial_train_size : int, default=None
         Number of observations used for initial training. If `None` or 0, the initial
         forecaster is not trained in the first fold.
+     window_size : int
+        Number of observations needed to generate the autoregressive predictors.
+    differentiation : int, default=None
+        Number of observations to use for differentiation. This is used to extend the
+        `last_window` as many observations as the differentiation order.
     refit : bool or int, default=False
         Whether to refit the forecaster in each fold.
 
@@ -79,9 +82,6 @@ class TimeSeriesFold():
         If `False`, the last fold is excluded if it is incomplete.
     return_all_indexes : bool, default=False
         Whether to return all indexes or only the start and end indexes of each fold.
-    differentiation : int, default=None
-        Number of observations to use for differentiation. This is used to extend the
-        `last_window` as many observations as the differentiation order.
     verbose : bool, default=True
         Whether to print information about generated folds.
 
@@ -90,11 +90,14 @@ class TimeSeriesFold():
     steps : int
         Number of observations used to be predicted in each fold. This is also commonly
         referred to as the forecast horizon or test size.
-    window_size : int
-        Number of observations needed to generate the autoregressive predictors.
     initial_train_size : int, default=None
         Number of observations used for initial training. If `None` or 0, the initial
         forecaster is not trained in the first fold.
+    window_size : int
+        Number of observations needed to generate the autoregressive predictors.
+    differentiation : int, default=None
+        Number of observations to use for differentiation. This is used to extend the
+        `last_window` as many observations as the differentiation order.
     refit : bool or int, default=False
         Whether to refit the forecaster in each fold.
 
@@ -121,9 +124,6 @@ class TimeSeriesFold():
         If `False`, the last fold is excluded if it is incomplete.
     return_all_indexes : bool, default=False
         Whether to return all indexes or only the start and end indexes of each fold.
-    differentiation : int, default=None
-        Number of observations to use for differentiation. This is used to extend the
-        `last_window` as many observations as the differentiation order.
     verbose : bool, default=True
         Whether to print information about generated folds.
 
@@ -148,55 +148,55 @@ class TimeSeriesFold():
     def __init__(
             self,
             steps: int,
-            window_size: int,
             initial_train_size: Optional[int] = None,
+            window_size: Optional[int] = None,
+            differentiation: Optional[int] = None,
             refit: Union[bool, int] = False,
             fixed_train_size: bool = True,
             gap: int = 0,
             skip_folds: Optional[Union[int, list]] = None,
             allow_incomplete_fold: bool = True,
             return_all_indexes: bool = False,
-            differentiation: Optional[int] = None,
             verbose: bool = True
     ) -> None:
 
         self._validate_params(
-            window_size,
-            initial_train_size,
             steps,
+            initial_train_size,
+            window_size,
+            differentiation,
             refit, 
             fixed_train_size,
             gap,
             skip_folds,
             allow_incomplete_fold, 
             return_all_indexes,
-            differentiation
         )
 
-        self.window_size = window_size
         self.initial_train_size = initial_train_size
         self.steps = steps
+        self.window_size = window_size
+        self.differentiation = differentiation
         self.refit = refit
         self.fixed_train_size = fixed_train_size
         self.gap = gap
         self.skip_folds = skip_folds
         self.allow_incomplete_fold = allow_incomplete_fold
         self.return_all_indexes = return_all_indexes
-        self.differentiation = differentiation
         self.verbose = verbose
 
     def _validate_params(
         self,
-        window_size: int,
-        initial_train_size: Optional[int],
         steps: int,
+        initial_train_size: Optional[int],
+        window_size: Optional[int],
+        differentiation: Optional[int] = None,
         refit: Union[bool, int] = False,
         fixed_train_size: bool = True,
         gap: int = 0,
         skip_folds: Optional[Union[int, list]] = None,
         allow_incomplete_fold: bool = True,
         return_all_indexes: bool = False,
-        differentiation: Optional[int] = None,
         verbose: bool = True
     ) -> None:
                 
@@ -204,7 +204,11 @@ class TimeSeriesFold():
         Validate all input parameters to ensure correctness.
         """
 
-        if not isinstance(window_size, int) or window_size < 1:
+        if (
+            not isinstance(window_size, (int, type(None)))
+            or window_size is not None
+            and window_size < 1
+        ):
             raise ValueError(
                 f"`window_size` must be an integer greater than 0. Got {window_size}."
             )
@@ -261,6 +265,29 @@ class TimeSeriesFold():
                 f"`verbose` must be a boolean. Got {verbose}."
             )
 
+    def __repr__(
+        self
+    ) -> str:
+        """
+        Information displayed when a ForecasterAutoreg object is printed.
+        """
+            
+        return (
+            f"TimeSeriesFold(\n"
+            f"    steps={self.steps},\n"
+            f"    initial_train_size={self.initial_train_size},\n"
+            f"    window_size={self.window_size},\n"
+            f"    differentiation={self.differentiation},\n"
+            f"    refit={self.refit},\n"
+            f"    fixed_train_size={self.fixed_train_size},\n"
+            f"    gap={self.gap},\n"
+            f"    skip_folds={self.skip_folds},\n"
+            f"    allow_incomplete_fold={self.allow_incomplete_fold},\n"
+            f"    return_all_indexes={self.return_all_indexes},\n"
+            f"    verbose={self.verbose}\n"
+            f")"
+        )
+
 
     def split(
             self,
@@ -289,8 +316,9 @@ class TimeSeriesFold():
             - (last_window_start, last_window_end): tuple with the start and end positions
             of the last window seen by the forecaster during training. The last window
             is used to generate the lags use as predictors. If `diferentiation` is
-            included, the last window will is extended as many observations as the
-            differentiation order.
+            included, the interval is extended as many observations as the
+            differentiation order. If the arguemnt `window_size` is `None`, this tuple is
+            empty.
             - (test_start, test_end): tuple with the start and end positions of the test
             set. These are the observations used to evaluate the forecaster.
             - (test_start_with_gap, test_end_with_gap): tuple with the start and end
@@ -317,6 +345,11 @@ class TimeSeriesFold():
         i = 0
         last_fold_excluded = False
 
+        if self.window_size is not None and self.differentiation is not None:
+            window_size = self.window_size + self.differentiation
+        else:
+            window_size = self.window_size
+
         if len(index) < self.initial_train_size + self.steps:
             raise ValueError(
                 f"The time series must have at least `initial_train_size + steps` "
@@ -338,12 +371,13 @@ class TimeSeriesFold():
                 train_iloc_end = self.initial_train_size
                 test_iloc_start = self.initial_train_size + i * (self.steps)
             
-            last_window_iloc_start = test_iloc_start - self.window_size
+            if window_size is not None:
+                last_window_iloc_start = test_iloc_start - window_size
             test_iloc_end = test_iloc_start + self.gap + self.steps
         
             partitions = [
                 idx[train_iloc_start : train_iloc_end],
-                idx[last_window_iloc_start : test_iloc_start],
+                idx[last_window_iloc_start : test_iloc_start] if window_size is not None else [],
                 idx[test_iloc_start : test_iloc_end],
                 idx[test_iloc_start + self.gap : test_iloc_end]
             ]
@@ -377,13 +411,6 @@ class TimeSeriesFold():
             if fit_forecaster[i] is False:
                 folds[i][0] = folds[i - 1][0]
 
-
-        # TODO: esto mejor que se modifique dentro del loop de backtesting. Y así 
-        # el output de split() es más intuitivo.
-        # This is done to allow parallelization when `refit` is `False`. The initial 
-        # Forecaster fit is outside the auxiliary function.
-        folds[0][4] = False
-
         index_to_skip = []
         if self.skip_folds is not None:
             if isinstance(self.skip_folds, int) and self.skip_folds > 0:
@@ -407,7 +434,7 @@ class TimeSeriesFold():
             # +1 to prevent iloc pandas from deleting the last observation
             folds = [
                 [[fold[0][0], fold[0][-1] + 1], 
-                [fold[1][0], fold[1][-1] + 1], 
+                [fold[1][0], fold[1][-1] + 1] if window_size is not None else [],
                 [fold[2][0], fold[2][-1] + 1],
                 [fold[3][0], fold[3][-1] + 1],
                 fold[4]] 
@@ -452,6 +479,24 @@ class TimeSeriesFold():
             index = X
             
         return index
+    
+
+    def set_params(self, params: dict) -> None:
+        """
+        Set the parameters of the TimeSeriesFold object.
+
+        Parameters
+        ----------
+        params : dict
+            Dictionary with the parameters to set.
+        """
+
+        if not isinstance(params, dict):
+            raise ValueError(
+                f"`params` must be a dictionary. Got {type(params)}."
+            )
+        for key, value in params.items():
+            setattr(self, key, value)
     
 
     def _print_info(
@@ -499,7 +544,7 @@ class TimeSeriesFold():
         print(f"    Number of steps per fold: {self.steps}")
         print(
             f"    Number of steps to exclude from the end of each train set "
-            f"before test (gap): self.{self.gap}"
+            f"before test (gap): {self.gap}"
         )
         if last_fold_excluded:
             print("    Last fold has been excluded because it was incomplete.")
@@ -640,6 +685,7 @@ def _backtesting_forecaster(
     """
 
     forecaster = deepcopy(forecaster)
+    cv = deepcopy(cv)
 
     if n_jobs == 'auto':
         n_jobs = select_n_jobs_backtesting(
@@ -672,39 +718,36 @@ def _backtesting_forecaster(
 
     store_in_sample_residuals = False if interval is None else True
 
-    initial_train_size = cv.initial_train_size
-    if initial_train_size is not None:
+    if cv.initial_train_size is not None:
         # First model training, this is done to allow parallelization when `refit`
         # is `False`. The initial Forecaster fit is outside the auxiliary function.
-        exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
+        exog_train = exog.iloc[:cv.initial_train_size, ] if exog is not None else None
         forecaster.fit(
-            y                         = y.iloc[:initial_train_size, ],
+            y                         = y.iloc[:cv.initial_train_size, ],
             exog                      = exog_train,
             store_in_sample_residuals = store_in_sample_residuals
         )
-        window_size = forecaster.window_size_diff
         externally_fitted = False
     else:
         # Although not used for training, first observations are needed to create
         # the initial predictors
-        window_size = forecaster.window_size_diff
-        initial_train_size = window_size
+        cv.set_params({'initial_train_size': forecaster.window_size_diff})
         externally_fitted = True
 
-    # TODO: ya no es necesario esto, ya que se chequea en en check_backtesting_input
-    # para verificar que coincide entre el forecaster y el cv.
+    cv.set_params({
+        'window_size': forecaster.window_size,
+        'differentiation': forecaster.differentiation,
+        'return_all_indexes': False,
+        'verbose': verbose
+    })
 
-    # if type(forecaster).__name__ != 'ForecasterAutoregDirect':
-    #     differentiation = forecaster.differentiation
-    # else:
-    #     differentiation = None
-
-    cv.return_all_indexes = False
-    cv.verbose = verbose
     folds = cv.split(
-                X                     = y,
-                externally_fitted     = externally_fitted,
+                X                  = y,
+                externally_fitted  = externally_fitted,
             )
+    # This is done to allow parallelization when `refit` is `False`. The initial 
+    # Forecaster fit is outside the auxiliary function.
+    folds[0][4] = False
 
     if cv.refit:
         n_of_fits = int(len(folds) / cv.refit)
