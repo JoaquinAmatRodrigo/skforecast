@@ -46,6 +46,7 @@ from ..utils import transform_dataframe
 from ..utils import set_skforecast_warnings
 from ..preprocessing import TimeSeriesDifferentiator
 
+
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
     level  = logging.INFO,
@@ -966,6 +967,27 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         else:
             span_index = series.index
 
+
+        #TODO: ¿Por qué _extract_data_folds_multiseries no devuelve series_test?
+
+        # fold_initial_train = [
+        #     [0, initial_train_size],
+        #     [initial_train_size - self.window_size_diff, initial_train_size],
+        #     [0, 0],  # dummy values
+        #     [0, 0],  # dummy values
+        #     True
+        # ]
+        # data_fold = _extract_data_folds_multiseries(
+        #                 series             = series,
+        #                 folds              = [fold_initial_train],
+        #                 span_index         = span_index,
+        #                 window_size        = self.window_size_diff,
+        #                 exog               = exog,
+        #                 dropna_last_window = self.dropna_from_series,
+        #                 externally_fitted  = False
+        #             )
+        # series_train, _, _, exog_train, exog_test, _ = next(data_fold)
+        # ----------------------------------------------------------------------
         end_train_idx = initial_train_size
         end_train_date = span_index[end_train_idx]
         start_test_idx = initial_train_size - self.window_size_diff
@@ -978,40 +1000,42 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             series_train = {k: v.loc[v.index < end_train_date] for k, v in series.items()}
             series_test = {k: v.loc[v.index >= start_test_date] for k, v in series.items()}
 
-        if isinstance(exog, pd.DataFrame):
-            exog_train = exog.iloc[:end_train_idx, :]
-            exog_test = exog.iloc[start_test_idx:, :]
+        if isinstance(exog, (pd.DataFrame, pd.Series)):
+            exog_train = exog.iloc[:end_train_idx]
+            exog_test = exog.iloc[start_test_idx:]
         elif isinstance(exog, dict):
             exog_train = {k: v.loc[v.index < end_train_date] for k, v in exog.items()}
             exog_test = {k: v.loc[v.index >= start_test_date] for k, v in exog.items()}
         else:
             exog_train = None
             exog_test = None
+        # ----------------------------------------------------------------------
        
-        is_fitted = self.fitted
+        fitted_ = self.fitted
+        series_col_names_ = self.series_col_names
+        exog_col_names_ = self.exog_col_names
+
         self.fitted = False
-        X_train, y_train = self.create_train_X_y(
-                                series = series_train,
-                                exog   = exog_train
-                            )
-        self.series_col_names = (
-            list(series_train.columns) if isinstance(series_train, pd.DataFrame)
-            else list(series_train.keys())
+        X_train, y_train, _, series_col_names, _, exog_col_names, _, _ = (
+            self._create_train_X_y(
+                series            = series_train,
+                exog              = exog_train,
+                store_last_window = False
+            )
         )
-        # TODO: ver con javier por qué esto es necesario
+        self.series_col_names = series_col_names
         if exog is not None:
-            if isinstance(exog_train, pd.DataFrame):
-                self.exog_col_names = list(exog_train.columns)
-            elif isinstance(exog_train, dict):
-                self.exog_col_names = list(exog_train.keys())
-            elif isinstance(exog_train, pd.Series):
-                self.exog_col_names = [exog_train.name]
+            self.exog_col_names = exog_col_names
         self.fitted = True
-        X_test, y_test = self.create_train_X_y(
-                            series = series_test,
-                            exog   = exog_test
+
+        X_test, y_test, *_ = self._create_train_X_y(
+                            series            = series_test,
+                            exog              = exog_test,
+                            store_last_window = False
                         )
-        self.fitted = is_fitted
+        self.fitted = fitted_
+        self.series_col_names = series_col_names_
+        self.exog_col_names = exog_col_names_
 
         if self.encoding in ["ordinal", "ordinal_category"]:
             X_train_encoding = self.encoder.inverse_transform(

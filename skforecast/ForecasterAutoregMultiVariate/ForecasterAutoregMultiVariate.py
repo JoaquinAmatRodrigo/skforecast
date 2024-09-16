@@ -695,14 +695,14 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         start_test_idx = initial_train_size - self.window_size_diff
         start_test_date = span_index[start_test_idx]
 
-        if isinstance(series, pd.DataFrame):
-            series_train = series.iloc[:end_train_idx, :]
-            series_test = series.iloc[start_test_idx:, :]
+        if isinstance(exog, (pd.DataFrame, pd.Series)):
+            series_train = series.iloc[:end_train_idx]
+            series_test = series.iloc[start_test_idx]
         elif isinstance(series, dict):
             series_train = {k: v.loc[v.index < end_train_date] for k, v in series.items()}
             series_test = {k: v.loc[v.index >= start_test_date] for k, v in series.items()}
 
-        if isinstance(exog, pd.DataFrame):
+        if isinstance(exog, (pd.DataFrame, pd.Series)):
             exog_train = exog.iloc[:end_train_idx, :]
             exog_test = exog.iloc[start_test_idx:, :]
         elif isinstance(exog, dict):
@@ -712,30 +712,29 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             exog_train = None
             exog_test = None
 
-        is_fitted = self.fitted
+        fitted_ = self.fitted
+        series_col_names_ = self.series_col_names
+        exog_col_names_ = self.exog_col_names
+
         self.fitted = False
-        X_train, y_train, *_ = self._create_train_X_y(
-                                    series = series_train,
-                                    exog   = exog_train
-                              )
-        self.series_col_names = (
-            list(series_train.columns) if isinstance(series_train, pd.DataFrame)
-            else list(series_train.keys())
+        X_train, y_train, series_col_names, _, exog_col_names = (
+            self._create_train_X_y(
+                series            = series_train,
+                exog              = exog_train,
+            )
         )
-        # TODO: ver con javier por qué esto es necesario
+        self.series_col_names = series_col_names
         if exog is not None:
-            if isinstance(exog_train, pd.DataFrame):
-                self.exog_col_names = list(exog_train.columns)
-            elif isinstance(exog_train, dict):
-                self.exog_col_names = list(exog_train.keys())
-            elif isinstance(exog_train, pd.Series):
-                self.exog_col_names = [exog_train.name]
+            self.exog_col_names = exog_col_names
         self.fitted = True
+
         X_test, y_test, *_ = self._create_train_X_y(
-                                series = series_test,
-                                exog   = exog_test
-                             )
-        self.fitted = is_fitted
+                            series            = series_test,
+                            exog              = exog_test,
+                        )
+        self.fitted = fitted_
+        self.series_col_names = series_col_names_
+        self.exog_col_names = exog_col_names_
 
         X_train_encoding = pd.Series(self.level, index=X_train.index)
         X_test_encoding = pd.Series(self.level, index=X_test.index)
