@@ -35,11 +35,7 @@ logging.basicConfig(
 
 
 class TimeSeriesFold():
-    # TODO: actualmente, _create_backtesting_folds simpre pone en false en training the la primera iteración. Esto es porque no se puede paralelizar si se entrena el modelo en la primera iteración,
-    # ya que el modelo se entrena por primera vez fuera del loop de backtestig. Esto es poco
-    # intuitivo al ver el aoutput de split(). Propongo que se devuelva True y que sea dentro
-    # del backtesting donde se modifica a False. De esta forma, el output de split() es más
-    # intuitivo.
+    # incluir argumento as_data_frame en el split para devolver los folds como dataframe y se sean más interpretables
     """
     Class to split time series data into train and test folds.
 
@@ -385,8 +381,8 @@ class TimeSeriesFold():
             i += 1
 
         if not self.allow_incomplete_fold and len(folds[-1][3]) < self.steps:
-                folds = folds[:-1]
-                last_fold_excluded = True
+            folds = folds[:-1]
+            last_fold_excluded = True
 
         # Replace partitions inside folds with length 0 with `None`
         folds = [
