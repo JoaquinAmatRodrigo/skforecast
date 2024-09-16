@@ -453,21 +453,24 @@ def _calculate_metrics_multiseries(
     return metrics_levels
 
 
-def _calculate_metrics_multiseries_one_step_ahead(
+def _predict_and_calculate_metrics_multiseries_one_step_ahead(
     forecaster: object,
     series: Union[pd.DataFrame, dict],
-    y_true: pd.Series,
-    y_pred: np.ndarray,
-    y_pred_encoding: pd.Series,
-    y_train: pd.Series,
-    y_train_encoding: pd.Series,
+    X_train: pd.DataFrame,
+    y_train: Union[pd.Series, dict],
+    X_train_encoding: pd.Series,
+    X_test: pd.DataFrame,
+    y_test: Union[pd.Series, dict],
+    X_test_encoding: pd.Series,
     levels: list,
     metrics: list,
     add_aggregated_metric: bool = True
-) -> pd.DataFrame:
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """   
-    Calculate metrics for each level and also for all levels aggregated using
-    average, weighted average or pooling when predictions are one-step-ahead.
+    One-step-ahead predictions and metrics for each level and also for all levels
+    aggregated using average, weighted average or pooling.
+    Input matrices (X_train, y_train, X_test, y_test, X_train_encoding, y_test_encoding)
+    are should have been generated using the forecaster._train_test_split_one_step_ahead().
 
     - 'average': the average (arithmetic mean) of all levels.
     - 'weighted_average': the average of the metrics weighted by the number of
@@ -477,20 +480,22 @@ def _calculate_metrics_multiseries_one_step_ahead(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate
+    forecaster : object
         Forecaster model.
     series : pandas DataFrame, dict
         Series data used to train and test the forecaster.
-    y_true : pandas Series
-        True values.
-    y_pred : numpy array
-        One-step-ahead predictions
-    y_pred_encoding : pandas Series
-        Series level code for which each prediction belongs to.
-    y_train : pandas Series
-        True values of the training set.
-    y_train_encoding : pandas Series
-        Series level code for which each training value belongs to.
+    X_train : pandas DataFrame
+        Training matrix.
+    y_train : pandas Series, dict
+        Target values of the training set.
+    X_train_encoding : pandas Series
+            Series identifiers for each row of `X_train`.
+    X_test : pandas DataFrame
+        Test matrix.
+    y_test : pandas Series, dict
+        Target values of the test set.
+    X_test_encoding : pandas Series
+        Series identifiers for each row of `X_test`.
     metrics : list
         List of metrics to calculate.
     levels : list
@@ -509,28 +514,37 @@ def _calculate_metrics_multiseries_one_step_ahead(
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s).
+    backtest_predictions : pandas Dataframe
+        Value of predictions for each level.
     
     """
 
-    if not isinstance(y_true, pd.Series):
+    if not isinstance(series, (pd.DataFrame, dict)):
         raise TypeError(
-            (f"`y_true` must be a pandas Series. Got: {type(y_true)}")
+            ("`series` must be a pandas DataFrame or a dictionary of pandas "
+             "DataFrames.")
         )
-    if not isinstance(y_pred, np.ndarray):
+    if not isinstance(X_train, pd.DataFrame):
+        raise TypeError(f"`X_train` must be a pandas DataFrame. Got: {type(X_train)}")
+    if not isinstance(y_train, (pd.Series, dict)):
         raise TypeError(
-            (f"`y_pred` must be a numpy array. Got: {type(y_pred)}")
+            (f"`y_train` must be a pandas Series or a dictionary of pandas Series. "
+                f"Got: {type(y_train)}")
+        )        
+    if not isinstance(X_train_encoding, pd.Series):
+        raise TypeError(
+            (f"`X_train_encoding` must be a pandas Series. Got: {type(X_train_encoding)}")
         )
-    if not isinstance(y_pred_encoding, pd.Series):
+    if not isinstance(X_test, pd.DataFrame):
+        raise TypeError(f"`X_test` must be a pandas DataFrame. Got: {type(X_test)}")
+    if not isinstance(y_test, (pd.Series, dict)):
         raise TypeError(
-            (f"`y_pred_encoding` must be a pandas Series. Got: {type(y_pred_encoding)}")
+            (f"`y_test` must be a pandas Series or a dictionary of pandas Series. "
+                f"Got: {type(y_test)}")
         )
-    if not isinstance(y_train, pd.Series):
+    if not isinstance(X_test_encoding, pd.Series):
         raise TypeError(
-            (f"`y_train` must be a pandas Series. Got: {type(y_train)}")
-        )
-    if not isinstance(y_train_encoding, pd.Series):
-        raise TypeError(
-            (f"`y_train_encoding` must be a pandas Series. Got: {type(y_train_encoding)}")
+            (f"`y_test_encoding` must be a pandas Series. Got: {type(X_test_encoding)}")
         )
     if not isinstance(metrics, list):
         raise TypeError("`metrics` must be a list.")
@@ -541,42 +555,60 @@ def _calculate_metrics_multiseries_one_step_ahead(
     
     metric_names = [(m if isinstance(m, str) else m.__name__) for m in metrics]
 
+    if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
+        step = 1
+        X_train, y_train = forecaster.filter_train_X_y_for_step(
+                                step    = step,
+                                X_train = X_train,
+                                y_train = y_train
+                            )
+        X_test, y_test = forecaster.filter_train_X_y_for_step(
+                            step    = step,  
+                            X_train = X_test,
+                            y_train = y_test
+                            )                 
+        forecaster.regressors_[step].fit(X_train, y_train)
+        pred = forecaster.regressors_[step].predict(X_test)
+
+    else:
+        forecaster.regressor.fit(X_train, y_train)
+        pred = forecaster.regressor.predict(X_test)
+
     predictions_per_level = pd.DataFrame(
         {
-            'y_true': y_true,
-            'y_pred': y_pred,
-            '_level_skforecast': y_pred_encoding,
+            'y_true': y_test,
+            'y_pred': pred,
+            '_level_skforecast': X_test_encoding,
         },
-        index=y_true.index,
+        index=y_test.index,
     ).groupby('_level_skforecast')
     predictions_per_level = {key: group for key, group in predictions_per_level}
 
     y_train_per_level = pd.DataFrame({
         'y_train': y_train,
-        '_level_skforecast': y_train_encoding
+        '_level_skforecast': X_train_encoding
         },
         index=y_train.index,
     ).groupby('_level_skforecast')
     y_train_per_level = {key: group for key, group in y_train_per_level}
 
-    # TODO: review with Javier
     if hasattr(forecaster, "differentiation") and forecaster.differentiation:
-        differentiator = deepcopy(forecaster.differentiator)
         for level in predictions_per_level:
-            differentiator[level].initial_values = [
-                series["level"].iloc[
+            differentiator = deepcopy(forecaster.differentiator_[level])
+            differentiator.initial_values = [
+                series[level].iloc[
                     forecaster.window_size_diff - forecaster.differentiation
                 ]
             ]
-            predictions_per_level[level]["y_pred"] = differentiator[level].inverse_transform_next_window(
-                predictions_per_level[level][["y_pred"]]
+            predictions_per_level[level]["y_pred"] = differentiator.inverse_transform_next_window(
+                predictions_per_level[level]["y_pred"].to_numpy()
             )
-            predictions_per_level[level]["y_true"] = differentiator[level].inverse_transform_next_window(
-                predictions_per_level[level][["y_true"]]
+            predictions_per_level[level]["y_true"] = differentiator.inverse_transform_next_window(
+                predictions_per_level[level]["y_true"].to_numpy()
             )
-            y_train_per_level[level]["y_true"] = differentiator[level].inverse_transform(
-                y_train_per_level[level][["y_train"]]
-            )
+            y_train_per_level[level]["y_true"] = differentiator.inverse_transform(
+                y_train_per_level[level]["y_train"].to_numpy()
+            )[forecaster.differentiation:]
 
     if forecaster.transformer_series is not None:
         for level in predictions_per_level:
@@ -675,7 +707,15 @@ def _calculate_metrics_multiseries_one_step_ahead(
             ignore_index=True
         )
 
-    return metrics_levels
+    predictions = (
+        pd.concat(predictions_per_level.values())
+        .loc[:, ["y_pred", "_level_skforecast"]]
+        .pivot(columns="_level_skforecast", values="y_pred")
+        .rename_axis(columns=None, index=None)
+    )
+    predictions = predictions.asfreq(X_test.index.freq)
+
+    return metrics_levels, predictions
 
 
 def _backtesting_forecaster_multiseries(
@@ -1827,12 +1867,12 @@ def _evaluate_grid_hyperparameters_multiseries(
         if method == 'one_step_ahead':
 
             (
-                X_train_all,
-                y_train_all,
-                X_test_all,
-                y_test_all,
-                X_train_encoding_all,
-                X_test_encoding_all
+                X_train,
+                y_train,
+                X_test,
+                y_test,
+                X_train_encoding,
+                X_test_encoding
             ) = forecaster._train_test_split_one_step_ahead(
                     series             = series,
                     exog               = exog,
@@ -1868,37 +1908,39 @@ def _evaluate_grid_hyperparameters_multiseries(
 
             else:
 
-                if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
-                    step = 1
-                    X_train, y_train = forecaster.filter_train_X_y_for_step(
-                                            step    = step,
-                                            X_train = X_train_all,
-                                            y_train = y_train_all
-                                        )
-                    X_test, y_test = forecaster.filter_train_X_y_for_step(
-                                        step    = step,  
-                                        X_train = X_test_all,
-                                        y_train = y_test_all
-                                      )                 
-                    forecaster.regressors_[step].fit(X_train, y_train)
-                    pred = forecaster.regressors_[step].predict(X_test)
+                # TODO: mover a funcion _calculate_metrics_multiseries_one_step_ahead y hacer que tabiien devuelva las predicciones
+                # if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
+                #     step = 1
+                #     X_train, y_train = forecaster.filter_train_X_y_for_step(
+                #                             step    = step,
+                #                             X_train = X_train_all,
+                #                             y_train = y_train_all
+                #                         )
+                #     X_test, y_test = forecaster.filter_train_X_y_for_step(
+                #                         step    = step,  
+                #                         X_train = X_test_all,
+                #                         y_train = y_test_all
+                #                       )                 
+                #     forecaster.regressors_[step].fit(X_train, y_train)
+                #     pred = forecaster.regressors_[step].predict(X_test)
 
-                else:
-                    X_train = X_train_all
-                    y_train = y_train_all
-                    X_test = X_test_all
-                    y_test = y_test_all
-                    forecaster.regressor.fit(X_train, y_train)
-                    pred = forecaster.regressor.predict(X_test)
+                # else:
+                #     X_train = X_train_all
+                #     y_train = y_train_all
+                #     X_test = X_test_all
+                #     y_test = y_test_all
+                #     forecaster.regressor.fit(X_train, y_train)
+                #     pred = forecaster.regressor.predict(X_test)
 
-                metrics = _calculate_metrics_multiseries_one_step_ahead(
+                metrics, _ = _predict_and_calculate_metrics_multiseries_one_step_ahead(
                                 forecaster            = forecaster,
                                 series                = series,
-                                y_true                = y_test,
-                                y_pred                = pred,
-                                y_pred_encoding       = X_test_encoding_all,
+                                X_train               = X_train,
                                 y_train               = y_train,
-                                y_train_encoding      = X_train_encoding_all,
+                                X_train_encoding      = X_train_encoding,
+                                X_test                = X_test,
+                                y_test                = y_test,
+                                X_test_encoding       = X_test_encoding,
                                 levels                = levels,
                                 metrics               = metric,
                                 add_aggregated_metric = add_aggregated_metric
