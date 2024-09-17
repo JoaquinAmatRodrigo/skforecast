@@ -1041,7 +1041,8 @@ class ForecasterAutoreg(ForecasterBase):
                     message="X does not have valid feature names", 
                     category=UserWarning
                 )
-                pred = self.regressor.predict(X.reshape(1, -1))
+                # TODO: Check with RandomForestRegressor
+                pred = self.regressor.predict(X.reshape(1, -1)).ravel()
             
             if residuals is not None:
 
@@ -1185,6 +1186,8 @@ class ForecasterAutoreg(ForecasterBase):
         return predictions
 
 
+    # TODO: change in_sample_residuals to use_in_sample_residuals
+    # TODO: change binned_residuals to use_binned_residuals
     def predict_bootstrapping(
         self,
         steps: int,
