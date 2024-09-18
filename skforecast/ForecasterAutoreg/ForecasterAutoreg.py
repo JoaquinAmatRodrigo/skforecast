@@ -817,8 +817,8 @@ class ForecasterAutoreg(ForecasterBase):
                                         index = X_train.index
                                     )
             self._binning_in_sample_residuals(
-                y_true = y_train,
-                y_pred = in_sample_predictions
+                y_true = y_train.to_numpy(),
+                y_pred = self.regressor.predict(X_train).ravel()
             )
 
         # The last time window of training data is stored so that lags needed as
@@ -831,7 +831,7 @@ class ForecasterAutoreg(ForecasterBase):
                 .to_frame(name=y.name if y.name is not None else 'y')
             )
 
-
+    #TODO: change inputs to numpy arrays
     def _binning_in_sample_residuals(
         self,
         y_true: pd.Series,
@@ -862,18 +862,21 @@ class ForecasterAutoreg(ForecasterBase):
         
         """
 
-        y_pred = y_pred.rename('prediction')
-        residuals = (y_true - y_pred).rename('residual')
-        data = pd.merge(
-                   residuals,
-                   y_pred,
-                   left_index  = True,
-                   right_index = True
-               )
-        self.binner.fit(data[['prediction']].to_numpy())
-        data['bin'] = self.binner.transform(data[['prediction']].to_numpy()).astype(int)
+        # y_pred = y_pred.rename('prediction')
+        # residuals = (y_true - y_pred).rename('residual')
+        # data = pd.merge(
+        #            residuals,
+        #            y_pred,
+        #            left_index  = True,
+        #            right_index = True
+        #        )
+        # self.binner.fit(data[['prediction']].to_numpy())
+        # data['bin'] = self.binner.transform(data[['prediction']].to_numpy()).astype(int)
+
+        data = pd.DataFrame({'prediction': y_pred, 'residuals': (y_true - y_pred)})
+        data['bin'] = self.binner.fit_transform(y_pred.reshape(-1, 1)).astype(int)
         self.in_sample_residuals_by_bin_ = (
-            data.groupby('bin')['residual'].apply(np.array).to_dict()
+            data.groupby('bin')['residuals'].apply(np.array).to_dict()
         )
 
         # Only up to 200 residuals are stored per bin
@@ -1788,15 +1791,11 @@ class ForecasterAutoreg(ForecasterBase):
                  "arguments before using `set_out_sample_residuals()`.")
             )
 
-        if isinstance(residuals, np.ndarray):
-            residuals = pd.Series(residuals, name='residuals')
-        else:
-            residuals = residuals.rename('residuals').reset_index(drop=True)
+        if not isinstance(residuals, np.ndarray):
+            residuals = residuals.to_numpy()
 
-        if isinstance(y_pred, np.ndarray):
-            y_pred = pd.Series(y_pred, name='prediction')
-        elif isinstance(y_pred, pd.Series):
-            y_pred = y_pred.rename('prediction').reset_index(drop=True)
+        if y_pred is not None and not isinstance(y_pred, np.ndarray):
+            y_pred = y_pred.to_numpy()
 
         if not transform and self.transformer_y is not None:
             warnings.warn(
@@ -1827,25 +1826,20 @@ class ForecasterAutoreg(ForecasterBase):
             if append and self.out_sample_residuals_ is not None:
                 free_space = max(0, 1000 - len(self.out_sample_residuals_))
                 if len(residuals) < free_space:
-                    residuals = np.hstack((
+                    residuals = np.concatenate((
                                     self.out_sample_residuals_,
                                     residuals
                                 ))
                 else:
-                    residuals = np.hstack((
+                    residuals = np.concatenate((
                                     self.out_sample_residuals_,
                                     residuals[:free_space]
                                 ))
             self.out_sample_residuals_ = residuals
         else:
             # Residuals are binned according to the predicted values.
-            data = pd.merge(
-                       residuals,
-                       y_pred,
-                       left_index  = True,
-                       right_index = True
-                   )
-            data['bin'] = self.binner.transform(data[['prediction']].to_numpy()).astype(int)
+            data = pd.DataFrame({'prediction': y_pred, 'residuals': residuals})
+            data['bin'] = self.binner.transform(y_pred.reshape(-1, 1)).astype(int)
             residuals_by_bin = data.groupby('bin')['residuals'].apply(np.array).to_dict()
 
             if append and self.out_sample_residuals_by_bin_ is not None:
@@ -1853,12 +1847,12 @@ class ForecasterAutoreg(ForecasterBase):
                     if k in self.out_sample_residuals_by_bin_:
                         free_space = max(0, 200 - len(self.out_sample_residuals_by_bin_[k]))
                         if len(v) < free_space:
-                            self.out_sample_residuals_by_bin_[k] = np.hstack((
+                            self.out_sample_residuals_by_bin_[k] = np.concatenate((
                                 self.out_sample_residuals_by_bin_[k],
                                 v
                             ))
                         else:
-                            self.out_sample_residuals_by_bin_[k] = np.hstack((
+                            self.out_sample_residuals_by_bin_[k] = np.concatenate((
                                 self.out_sample_residuals_by_bin_[k],
                                 v[:free_space]
                             ))

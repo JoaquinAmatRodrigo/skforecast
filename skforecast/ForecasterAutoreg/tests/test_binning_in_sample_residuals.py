@@ -36,11 +36,11 @@ def test_binning_in_sample_residuals_output():
 
     expected_2 = {
         0: np.array([
-                34.58035615, 22.08911948, 15.6081091 ,  7.0808798 , 55.47454021,
+                34.58035615, 22.08911948, 15.6081091,  7.0808798, 55.47454021,
                 1.80092458, 12.2624188
             ]),
         1: np.array([
-            -12.32822882,  -0.451743  ,  11.83152763,  -7.11862253,
+            -12.32822882,  -0.45174300,  11.83152763,  -7.11862253,
             6.32581108, -20.92461257
             ]),
         2: np.array([
@@ -71,7 +71,6 @@ def test_binning_in_sample_residuals_stores_maximum_200_residuals_per_bin():
     y = pd.Series(
             data = np.random.normal(loc=10, scale=1, size=1000),
             index = pd.date_range(start='01-01-2000', periods=1000, freq='h')
-
         )
     forecaster = ForecasterAutoreg(
                     regressor=LinearRegression(),

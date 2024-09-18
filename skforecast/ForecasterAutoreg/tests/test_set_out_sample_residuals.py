@@ -25,8 +25,8 @@ def test_set_out_sample_residuals_TypeError_when_residuals_is_not_numpy_array_or
     residuals = [1, 2, 3]
 
     err_msg = re.escape(
-        f"`residuals` argument must be `numpy ndarray` or `pandas Series`, "
-        f"but found {type(residuals)}."
+        (f"`residuals` argument must be `numpy ndarray` or `pandas Series`, "
+         f"but found {type(residuals)}.")
     )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
@@ -46,6 +46,7 @@ def test_set_out_sample_residuals_TypeError_when_y_pred_is_not_numpy_array_or_pa
     )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
+
 
 def test_set_out_sample_residuals_ValueError_when_residuals_and_y_pred_have_different_lenght():
     """
@@ -184,7 +185,7 @@ def test_set_out_sample_residuals_when_transform_is_True():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, transformer_y=StandardScaler())
     y = pd.Series(
             np.array([
-                12.5, 10.3,  9.9, 10.4,  9.9,  8.5, 10.6, 11.4, 10. ,  9.5, 10.1,
+                12.5, 10.3,  9.9, 10.4,  9.9,  8.5, 10.6, 11.4, 10.,  9.5, 10.1,
                 11.5, 11.4, 11.3, 10.5,  9.6, 10.4, 11.7,  8.7, 10.6])
         )
     forecaster.fit(y=y)
@@ -204,10 +205,10 @@ def test_same_out_sample_residuals_by_bin_stored_when_y_pred_is_provided():
     # set_out_sample_residuals so out_sample_residuals_by_bin and
     # out_sample_residuals_by_bin must be equal
     forecaster = ForecasterAutoreg(
-                regressor=LinearRegression(),
-                lags = 5,
-                binner_kwargs={'n_bins':3}
-            )
+                     regressor = LinearRegression(),
+                     lags = 5,
+                     binner_kwargs = {'n_bins': 3}
+                 )
     forecaster.fit(y)
     X_train, y_train = forecaster.create_train_X_y(y)
     forecaster.regressor.fit(X_train, y_train)
@@ -224,6 +225,7 @@ def test_same_out_sample_residuals_by_bin_stored_when_y_pred_is_provided():
             forecaster.in_sample_residuals_by_bin_[k],
             forecaster.out_sample_residuals_by_bin_[k]
         )
+
 
 def test_set_out_sample_residuals_stores_maximum_200_residuals_per_bin():
     """
