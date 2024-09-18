@@ -730,7 +730,8 @@ class ForecasterAutoreg(ForecasterBase):
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
         store_last_window: bool = True,
-        store_in_sample_residuals: bool = True
+        store_in_sample_residuals: bool = True,
+        random_state: int = 123
     ) -> None:
         """
         Training Forecaster.
@@ -751,6 +752,9 @@ class ForecasterAutoreg(ForecasterBase):
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
             after fitting (`in_sample_residuals_` attribute).
+        random_state : int, default `123`
+            Set a seed for the random generator so that the stored sample 
+            residuals are always deterministic.
 
         Returns
         -------
@@ -812,13 +816,10 @@ class ForecasterAutoreg(ForecasterBase):
 
         # This is done to save time during fit in functions such as backtesting()
         if store_in_sample_residuals:
-            in_sample_predictions = pd.Series(
-                                        data  = self.regressor.predict(X_train),
-                                        index = X_train.index
-                                    )
             self._binning_in_sample_residuals(
-                y_true = y_train.to_numpy(),
-                y_pred = self.regressor.predict(X_train).ravel()
+                y_true       = y_train.to_numpy(),
+                y_pred       = self.regressor.predict(X_train).ravel(),
+                random_state = random_state
             )
 
         # The last time window of training data is stored so that lags needed as
@@ -831,11 +832,11 @@ class ForecasterAutoreg(ForecasterBase):
                 .to_frame(name=y.name if y.name is not None else 'y')
             )
 
-    #TODO: change inputs to numpy arrays
+
     def _binning_in_sample_residuals(
         self,
-        y_true: pd.Series,
-        y_pred: pd.Series,
+        y_true: np.ndarray,
+        y_pred: np.ndarray,
         random_state: int = 123
     ) -> None:
         """
@@ -848,10 +849,10 @@ class ForecasterAutoreg(ForecasterBase):
 
         Parameters
         ----------
-        y_true : pandas Series
+        y_true : numpy ndarray
             True values of the time series.
-        y_pred : pandas Series
-            Predicted values of the time series.  
+        y_pred : numpy ndarray
+            Predicted values of the time series.
         random_state : int, default `123`
             Set a seed for the random generator so that the stored sample 
             residuals are always deterministic.
@@ -862,17 +863,6 @@ class ForecasterAutoreg(ForecasterBase):
         
         """
 
-        # y_pred = y_pred.rename('prediction')
-        # residuals = (y_true - y_pred).rename('residual')
-        # data = pd.merge(
-        #            residuals,
-        #            y_pred,
-        #            left_index  = True,
-        #            right_index = True
-        #        )
-        # self.binner.fit(data[['prediction']].to_numpy())
-        # data['bin'] = self.binner.transform(data[['prediction']].to_numpy()).astype(int)
-
         data = pd.DataFrame({'prediction': y_pred, 'residuals': (y_true - y_pred)})
         data['bin'] = self.binner.fit_transform(y_pred.reshape(-1, 1)).astype(int)
         self.in_sample_residuals_by_bin_ = (
@@ -881,8 +871,6 @@ class ForecasterAutoreg(ForecasterBase):
 
         # Only up to 200 residuals are stored per bin
         for k, v in self.in_sample_residuals_by_bin_.items():
-            # TODO: Include `random_state` in fit method to allow the user
-            # change the residual sample stored.
             rng = np.random.default_rng(seed=random_state)
             if len(v) > 200:
                 sample = rng.choice(a=v, size=200, replace=False)

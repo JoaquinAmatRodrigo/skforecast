@@ -14,17 +14,22 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
++ <span class="badge text-bg-enhancement">Enhancement</span> Refactor the prediction process in <code>[ForecasterAutoregMultiSeries]</code> to improve performance when predicting multiple series.
+
 + <span class="badge text-bg-enhancement">Enhancement</span> The bootstrapping process in the `predict_bootstrapping` method of all forecasters has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
 
 **Added**
 
 + Create `transform_numpy` function in the <code>[utils]</code> module to carry out the transformation of the modeled time series and exogenous variables as numpy arrays.
 
++ `random_state` argument in the `fit` method of <code>[ForecasterAutoreg]</code> to set a seed for the random generator so that the stored sample residuals are always deterministic.
+
+
 **Changed**
 
 + Refactor `recursive_predict` in <code>[ForecasterAutoregMultiSeries]</code> to predict all series at once and include option of adding residuals. This improves performance when predicting multiple series.
 
-+ Refactor `predict_bootstrapping` in <code>[ForecasterAutoregMultiSeries]</code>. The bootstrapping process has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
++ Refactor `predict_bootstrapping` in <code>[ForecasterAutoreg]</code> and <code>[ForecasterAutoregMultiSeries]</code>. The bootstrapping process has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
 
 + Change the default value of `encoding` to `ordinal` in <code>[ForecasterAutoregMultiSeries]</code>. This will avoid conflicts if the regressor does not support categorical variables by default.
 
