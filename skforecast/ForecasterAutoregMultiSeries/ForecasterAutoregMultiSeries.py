@@ -993,44 +993,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             series_test = series_test.loc[:, levels_last_window]
             series_test = series_test.dropna(axis=1, how='all')
         elif isinstance(series, dict):
+            # TODO: añadir tambien que si es todo nan
             series_test = {
                 k: v.loc[v.index >= start_test_date]
                 for k, v in series.items()
                 if k in levels_last_window and not v.empty
             }
-
-
-        # if isinstance(exog, (pd.DataFrame, pd.Series)):
-        #     exog_test = exog.iloc[start_test_idx:]
-        # elif isinstance(exog, dict):
-        #     exog_test = {k: v.loc[v.index >= start_test_date] for k, v in exog.items()}
-        # else:
-        #     exog_train = None
-        #     exog_test = None
-
-        # ----------------------------------------------------------------------
-        # end_train_idx = initial_train_size
-        # end_train_date = span_index[end_train_idx]
-        # start_test_idx = initial_train_size - self.window_size_diff
-        # start_test_date = span_index[start_test_idx]
-
-        # if isinstance(series, pd.DataFrame):
-        #     series_train = series.iloc[:end_train_idx, :]
-        #     series_test = series.iloc[start_test_idx:, :]
-        # elif isinstance(series, dict):
-        #     series_train = {k: v.loc[v.index < end_train_date] for k, v in series.items()}
-        #     series_test = {k: v.loc[v.index >= start_test_date] for k, v in series.items()}
-
-        # if isinstance(exog, (pd.DataFrame, pd.Series)):
-        #     exog_train = exog.iloc[:end_train_idx]
-        #     exog_test = exog.iloc[start_test_idx:]
-        # elif isinstance(exog, dict):
-        #     exog_train = {k: v.loc[v.index < end_train_date] for k, v in exog.items()}
-        #     exog_test = {k: v.loc[v.index >= start_test_date] for k, v in exog.items()}
-        # else:
-        #     exog_train = None
-        #     exog_test = None
-        # ----------------------------------------------------------------------
        
         fitted_ = self.fitted
         series_col_names_ = self.series_col_names

@@ -349,7 +349,7 @@ def _calculate_metrics_multiseries(
             for i, fold in enumerate(folds):
                 fit_fold = fold[-1]
                 if i == 0 or fit_fold:
-                    train_iloc_start = fold[0][0] + window_size
+                    train_iloc_start = fold[0][0]
                     train_iloc_end = fold[0][1]
                     train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
             train_indexes = np.unique(np.concatenate(train_indexes))
@@ -366,7 +366,7 @@ def _calculate_metrics_multiseries(
                 m(
                     y_true = y_true_pred_levels[i].iloc[:, 0],
                     y_pred = y_true_pred_levels[i].iloc[:, 1],
-                    y_train = y_train_levels[i]
+                    y_train = y_train_levels[i].iloc[window_size:]  # Exclude observations used to create predictors
                 )
                 for m in metrics
             ]
@@ -426,8 +426,6 @@ def _calculate_metrics_multiseries(
         pooled = []
         for m, m_name in zip(metrics, metric_names):
             if m_name in ['mean_absolute_scaled_error', 'root_mean_squared_scaled_error']:
-                print(m_name, 'backtesting')
-                print([len(y_train) for y_train in y_train_levels])
                 pooled.append(
                     m(
                         y_true = y_true_pred_levels.loc[:, 'y_true'],
@@ -555,6 +553,12 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
     if not isinstance(add_aggregated_metric, bool):
         raise TypeError("`add_aggregated_metric` must be a boolean.")
     
+    metrics = [
+        _get_metric(metric=m)
+        if isinstance(m, str)
+        else add_y_train_argument(m) 
+        for m in metrics
+    ]
     metric_names = [(m if isinstance(m, str) else m.__name__) for m in metrics]
 
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
@@ -586,6 +590,7 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
     ).groupby('_level_skforecast')
     predictions_per_level = {key: group for key, group in predictions_per_level}
 
+    # 
     y_train_per_level = pd.DataFrame({
         'y_train': y_train,
         '_level_skforecast': X_train_encoding
@@ -593,6 +598,7 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
         index=y_train.index,
     ).groupby('_level_skforecast')
     y_train_per_level = {key: group for key, group in y_train_per_level}
+    # TODO: establecer la frecuencia para que se completen los huecos que y_train ya no tiene
 
     if hasattr(forecaster, "differentiation") and forecaster.differentiation:
         for level in predictions_per_level:
@@ -628,6 +634,17 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
     metrics_levels = []
     for level in levels:
         if level in predictions_per_level:
+            if level == "id_1003":
+                print(predictions_per_level[level].loc[:, 'y_true'].sum())
+                print(predictions_per_level[level].loc[:, 'y_pred'].sum())
+                print(y_train_per_level[level].loc[:, 'y_train'].sum())
+                print(predictions_per_level[level].loc[:, 'y_true'].diff().sum())
+                print(predictions_per_level[level].loc[:, 'y_pred'].diff().sum())
+                print(y_train_per_level[level].loc[:, 'y_train'].diff().sum())
+                print(predictions_per_level[level].loc[:, 'y_true'])
+                print(predictions_per_level[level].loc[:, 'y_pred'])
+                print(y_train_per_level[level].loc[:, 'y_train'])
+
             metrics_level = [
                 m(
                     y_true = predictions_per_level[level].loc[:, 'y_true'],
@@ -691,8 +708,6 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
         pooled = []
         for m, m_name in zip(metrics, metric_names):
             if m_name in ['mean_absolute_scaled_error', 'root_mean_squared_scaled_error']:
-                print(m_name, 'one-step-ahead')
-                print([len(y_train) for y_train in list_y_train_by_level])
                 pooled.append(
                     m(
                         y_true = predictions_pooled['y_true'],

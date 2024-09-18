@@ -570,7 +570,7 @@ def _backtesting_forecaster(
     for i, fold in enumerate(folds):
         fit_fold = fold[-1]
         if i == 0 or fit_fold:
-            train_iloc_start = fold[0][0] + window_size
+            train_iloc_start = fold[0][0] + window_size  # Exclude observations used to create predictors
             train_iloc_end = fold[0][1]
             train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
     

@@ -45,6 +45,7 @@ from ..utils import transform_series
 from ..utils import transform_dataframe
 from ..utils import select_n_jobs_fit_forecaster
 from ..utils import set_skforecast_warnings
+from ..model_selection_multiseries.model_selection_multiseries import _extract_data_folds_multiseries
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -690,29 +691,36 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         else:
             span_index = series.index
 
-        # ----------------------------------------------------------------------
-        end_train_idx = initial_train_size
-        end_train_date = span_index[end_train_idx]
+        fold = [
+            [0, initial_train_size],
+            [initial_train_size - self.window_size_diff, initial_train_size],
+            [initial_train_size - self.window_size_diff, len(span_index)],
+            [0, 0],  # Dummy value
+            True
+        ]
+        data_fold = _extract_data_folds_multiseries(
+                        series             = series,
+                        folds              = [fold],
+                        span_index         = span_index,
+                        window_size        = self.window_size_diff,
+                        exog               = exog,
+                        dropna_last_window = self.dropna_from_series,
+                        externally_fitted  = False
+                    )
+        series_train, _, levels_last_window, exog_train, exog_test, _ = next(data_fold)
+
         start_test_idx = initial_train_size - self.window_size_diff
         start_test_date = span_index[start_test_idx]
-
         if isinstance(series, pd.DataFrame):
-            series_train = series.iloc[:end_train_idx]
-            series_test = series.iloc[start_test_idx:]
+            series_test = series.iloc[start_test_idx:, :]
+            series_test = series_test.loc[:, levels_last_window]
+            series_test = series_test.dropna(axis=1, how='all')
         elif isinstance(series, dict):
-            series_train = {k: v.loc[v.index < end_train_date] for k, v in series.items()}
-            series_test = {k: v.loc[v.index >= start_test_date] for k, v in series.items()}
-
-        if isinstance(exog, (pd.DataFrame, pd.Series)):
-            exog_train = exog.iloc[:end_train_idx]
-            exog_test = exog.iloc[start_test_idx:]
-        elif isinstance(exog, dict):
-            exog_train = {k: v.loc[v.index < end_train_date] for k, v in exog.items()}
-            exog_test = {k: v.loc[v.index >= start_test_date] for k, v in exog.items()}
-        else:
-            exog_train = None
-            exog_test = None
-        # ----------------------------------------------------------------------
+            series_test = {
+                k: v.loc[v.index >= start_test_date]
+                for k, v in series.items()
+                if k in levels_last_window and not v.empty
+            }
         
         fitted_ = self.fitted
         series_col_names_ = self.series_col_names
