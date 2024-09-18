@@ -23,7 +23,7 @@ from skforecast.preprocessing import TimeSeriesDifferentiator
 # Fixtures
 from .fixtures_ForecasterAutoreg import y as y_categorical
 from .fixtures_ForecasterAutoreg import exog as exog_categorical
-from .fixtures_ForecasterAutoreg import data # to test results when using differentiation
+from .fixtures_ForecasterAutoreg import data  # to test results when using differentiation
 
 
 def test_predict_NotFittedError_when_fitted_is_False():

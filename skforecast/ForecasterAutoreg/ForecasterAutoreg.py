@@ -530,11 +530,127 @@ class ForecasterAutoreg(ForecasterBase):
         return X_data, y_data
 
 
+    def _create_train_X_y(
+        self,
+        y: pd.Series,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
+    ) -> Tuple[pd.DataFrame, pd.Series, list, list, dict]:
+        """
+        Create training matrices from univariate time series and exogenous
+        variables.
+        
+        Parameters
+        ----------
+        y : pandas Series
+            Training time series.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
+            number of observations as `y` and their indexes must be aligned.
+
+        Returns
+        -------
+        X_train : pandas DataFrame
+            Training values (predictors).
+            Shape: (len(y) - self.max_lag, len(self.lags))
+        y_train : pandas Series
+            Values (target) of the time series related to each row of `X_train`.
+            Shape: (len(y) - self.max_lag, )
+        exog_names_in_ : list
+            Names of the exogenous variables used during training.
+        X_train_exog_names_out_ : list
+            Names of the exogenous variables included in the matrix `X_train` created
+            internally for training. It can be different from `exog_names_in_` if
+            some exogenous variables are transformed during the training process.
+        exog_dtypes_in_ : dict
+            Type of each exogenous variable/s used in training. If `transformer_exog` 
+            is used, the dtypes are calculated before the transformation.
+        
+        """
+
+        check_y(y=y)
+        y = input_to_frame(data=y, input_name='y')
+
+        fit_transformer = False if self.is_fitted else True
+        y = transform_dataframe(
+                df                = y, 
+                transformer       = self.transformer_y,
+                fit               = fit_transformer,
+                inverse_transform = False,
+            )
+        y_values, y_index = preprocess_y(y=y)
+
+        if self.differentiation is not None:
+            if not self.is_fitted:
+                y_values = self.differentiator.fit_transform(y_values)
+            else:
+                differentiator = clone(self.differentiator)
+                y_values = differentiator.fit_transform(y_values)
+
+        exog_names_in_ = None
+        exog_dtypes_in_ = None
+        if exog is not None:
+            check_exog(exog=exog, allow_nan=True)
+            exog = input_to_frame(data=exog, input_name='exog')
+            if len(exog) != len(y):
+                raise ValueError(
+                    (f"`exog` must have same number of samples as `y`. "
+                     f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
+                )
+
+            exog_names_in_ = exog.columns.to_list()
+            exog_dtypes_in_ = get_exog_dtypes(exog=exog)
+
+            exog = transform_dataframe(
+                       df                = exog,
+                       transformer       = self.transformer_exog,
+                       fit               = fit_transformer,
+                       inverse_transform = False
+                   )
+
+            check_exog_dtypes(exog, call_check_exog=True)
+
+            _, exog_index = preprocess_exog(exog=exog, return_values=False)
+            if not (exog_index[:len(y_index)] == y_index).all():
+                raise ValueError(
+                    ("Different index for `y` and `exog`. They must be equal "
+                     "to ensure the correct alignment of values.")
+                )
+
+        X_train, y_train = self._create_lags(y=y_values)
+        X_train = pd.DataFrame(
+                      data    = X_train,
+                      columns = [f"lag_{i}" for i in self.lags],
+                      index   = y_index[self.max_lag:]
+                  )
+
+        X_train_exog_names_out_ = None
+        if exog is not None:
+            # The first `self.max_lag` positions have to be removed from exog
+            # since they are not in X_train.
+            exog_to_train = exog.iloc[self.max_lag:, ]
+            exog_to_train.index = exog_index[self.max_lag:]
+            X_train_exog_names_out_ = exog_to_train.columns.to_list()
+            X_train = pd.concat((X_train, exog_to_train), axis=1)
+
+        # TODO: DataFrame or Series?
+        y_train = pd.Series(
+                      data  = y_train,
+                      index = y_index[self.max_lag:],
+                      name  = 'y'
+                  )
+
+        if self.differentiation is not None:
+            X_train = X_train.iloc[self.differentiation:]
+            y_train = y_train.iloc[self.differentiation:]
+
+        return X_train, y_train, exog_names_in_, X_train_exog_names_out_, exog_dtypes_in_
+
+
     def create_train_X_y(
         self,
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None
-    ) -> Tuple[pd.DataFrame, pd.Series]:
+    ) -> Tuple[pd.DataFrame, pd.Series, list, list, dict]:
         """
         Create training matrices from univariate time series and exogenous
         variables.
@@ -558,82 +674,10 @@ class ForecasterAutoreg(ForecasterBase):
         
         """
 
-        check_y(y=y)
-        y = input_to_frame(data=y, input_name='y')
+        output = self._create_train_X_y(y=y, exog=exog)
 
-        fit_transformer = False if self.is_fitted else True
-        y = transform_dataframe(
-                df                = y, 
-                transformer       = self.transformer_y,
-                fit               = fit_transformer,
-                inverse_transform = False,
-            )
-        y_values, y_index = preprocess_y(y=y)
-
-        if self.differentiation is not None:
-            if not self.is_fitted:
-                y_values = self.differentiator.fit_transform(y_values)
-            else:
-                differentiator = clone(self.differentiator)
-                y_values = differentiator.fit_transform(y_values)
-
-        if exog is not None:
-            check_exog(exog=exog, allow_nan=True)
-            exog = input_to_frame(data=exog, input_name='exog')
-            if len(exog) != len(y):
-                raise ValueError(
-                    (f"`exog` must have same number of samples as `y`. "
-                     f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
-                )
-
-            exog = transform_dataframe(
-                       df                = exog,
-                       transformer       = self.transformer_exog,
-                       fit               = fit_transformer,
-                       inverse_transform = False
-                   )
-
-            check_exog_dtypes(exog, call_check_exog=True)
-
-            _, exog_index = preprocess_exog(exog=exog, return_values=False)
-            if not (exog_index[:len(y_index)] == y_index).all():
-                raise ValueError(
-                    ("Different index for `y` and `exog`. They must be equal "
-                     "to ensure the correct alignment of values.")
-                )
-
-        X_train, y_train = self._create_lags(y=y_values)
-        X_train_features_names_out_ = [f"lag_{i}" for i in self.lags]
-        X_train = pd.DataFrame(
-                      data    = X_train,
-                      columns = X_train_features_names_out_,
-                      index   = y_index[self.max_lag:]
-                  )
-
-        if exog is not None:
-            # The first `self.max_lag` positions have to be removed from exog
-            # since they are not in X_train.
-            exog_to_train = exog.iloc[self.max_lag:, ]
-            exog_to_train.index = exog_index[self.max_lag:]
-            X_train = pd.concat((X_train, exog_to_train), axis=1)
-            # TODO: move self to fit method and make X_train_features_names_out_ a return
-            if not self.is_fitted:
-                self.X_train_exog_names_out_ = exog_to_train.columns.to_list()
-
-        # TODO: move self to fit method and make X_train_features_names_out_ a return
-        if not self.is_fitted:
-            self.X_train_features_names_out_ = X_train.columns.to_list()
-
-        # TODO: DataFrame or Series?
-        y_train = pd.Series(
-                      data  = y_train,
-                      index = y_index[self.max_lag:],
-                      name  = 'y'
-                  )
-
-        if self.differentiation is not None:
-            X_train = X_train.iloc[self.differentiation:]
-            y_train = y_train.iloc[self.differentiation:]
+        X_train = output[0]
+        y_train = output[1]
 
         return X_train, y_train
 
@@ -729,7 +773,13 @@ class ForecasterAutoreg(ForecasterBase):
         self.is_fitted                   = False
         self.fit_date                    = None
 
-        X_train, y_train = self.create_train_X_y(y=y, exog=exog)
+        (
+            X_train,
+            y_train,
+            exog_names_in_,
+            X_train_exog_names_out_,
+            exog_dtypes_in_
+        ) = self._create_train_X_y(y=y, exog=exog)
         sample_weight = self.create_sample_weights(X_train=X_train)
 
         if sample_weight is not None:
@@ -741,6 +791,8 @@ class ForecasterAutoreg(ForecasterBase):
             )
         else:
             self.regressor.fit(X=X_train, y=y_train, **self.fit_kwargs)
+
+        self.X_train_features_names_out_ = X_train.columns.to_list()
 
         self.is_fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -754,12 +806,9 @@ class ForecasterAutoreg(ForecasterBase):
         if exog is not None:
             self.exog_in_ = True
             self.exog_type_in_ = type(exog)
-            self.exog_dtypes_in_ = get_exog_dtypes(exog=exog)
-            self.exog_names_in_ = (
-                exog.columns.to_list()
-                if isinstance(exog, pd.DataFrame)
-                else [exog.name]
-            )
+            self.exog_names_in_ = exog_names_in_
+            self.exog_dtypes_in_ = exog_dtypes_in_
+            self.X_train_exog_names_out_ = X_train_exog_names_out_
 
         # This is done to save time during fit in functions such as backtesting()
         if store_in_sample_residuals:
@@ -787,7 +836,7 @@ class ForecasterAutoreg(ForecasterBase):
         self,
         y_true: pd.Series,
         y_pred: pd.Series,
-        random_state: int = 95123
+        random_state: int = 123
     ) -> None:
         """
         Binning residuals according to the predicted value each residual is
@@ -803,7 +852,7 @@ class ForecasterAutoreg(ForecasterBase):
             True values of the time series.
         y_pred : pandas Series
             Predicted values of the time series.  
-        random_state : int, default `95123`
+        random_state : int, default `123`
             Set a seed for the random generator so that the stored sample 
             residuals are always deterministic.
 
@@ -985,8 +1034,8 @@ class ForecasterAutoreg(ForecasterBase):
     def _recursive_predict(
         self,
         steps: int,
-        last_window: np.ndarray,
-        exog: Optional[np.ndarray] = None,
+        last_window_values: np.ndarray,
+        exog_values: Optional[np.ndarray] = None,
         residuals: Optional[np.ndarray] = None,
         binned_residuals: bool = False,
         rng: Optional[np.random.Generator] = None
@@ -999,10 +1048,10 @@ class ForecasterAutoreg(ForecasterBase):
         ----------
         steps : int
             Number of future steps predicted.
-        last_window : numpy ndarray
+        last_window_values : numpy ndarray
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-        exog : numpy ndarray, default `None`
+        exog_values : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
         residuals : numpy ndarray, default `None`
             Residuals used to generate bootstrapping predictions.
@@ -1015,7 +1064,7 @@ class ForecasterAutoreg(ForecasterBase):
             **New in version 0.12.0**
         rng : numpy Generator, default `None`
             Random number generator used to select residuals in bootstrapping
-            predictions. 
+            predictions when using binned residuals. 
 
         Returns
         -------
@@ -1025,13 +1074,13 @@ class ForecasterAutoreg(ForecasterBase):
         """
 
         predictions = np.full(shape=steps, fill_value=np.nan)
-        last_window = np.concatenate((last_window, predictions))
+        last_window = np.concatenate((last_window_values, predictions))
 
         for i in range(steps):
 
             X = last_window[-self.lags - (steps - i)]
-            if exog is not None:
-                X = np.concatenate((X, exog[i, ]))
+            if exog_values is not None:
+                X = np.concatenate((X, exog_values[i, ]))
         
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
@@ -1041,11 +1090,9 @@ class ForecasterAutoreg(ForecasterBase):
                     message="X does not have valid feature names", 
                     category=UserWarning
                 )
-                # TODO: Check with RandomForestRegressor
                 pred = self.regressor.predict(X.reshape(1, -1)).ravel()
             
             if residuals is not None:
-
                 if binned_residuals:
                     predicted_bin = (
                         int(self.binner.transform(pred.reshape(1, -1))[0, 0])
@@ -1162,9 +1209,9 @@ class ForecasterAutoreg(ForecasterBase):
         )
         
         predictions = self._recursive_predict(
-                          steps       = steps,
-                          last_window = last_window_values,
-                          exog        = exog_values
+                          steps              = steps,
+                          last_window_values = last_window_values,
+                          exog_values        = exog_values
                       )
 
         if self.differentiation is not None:
@@ -1187,7 +1234,9 @@ class ForecasterAutoreg(ForecasterBase):
 
 
     # TODO: change in_sample_residuals to use_in_sample_residuals
+    # use_in_sample, apply_in_sample, use_train_data, apply_train_residuals, in_sample_mode
     # TODO: change binned_residuals to use_binned_residuals
+    # use_binned_residuals, apply_binned, binned_mode, use_bins, apply_conditioning
     def predict_bootstrapping(
         self,
         steps: int,
@@ -1287,12 +1336,12 @@ class ForecasterAutoreg(ForecasterBase):
 
             boot_columns.append(f"pred_boot_{i}")
             boot_predictions[:, i] = self._recursive_predict(
-                steps            = steps,
-                last_window      = last_window_values,
-                exog             = exog_values,
-                residuals        = residuals_by_bin if binned_residuals else sampled_residuals[:, i],
-                binned_residuals = binned_residuals,
-                rng              = rng
+                steps              = steps,
+                last_window_values = last_window_values,
+                exog_values        = exog_values,
+                residuals          = residuals_by_bin if binned_residuals else sampled_residuals[:, i],
+                binned_residuals   = binned_residuals,
+                rng                = rng
             )
 
         if self.differentiation is not None:

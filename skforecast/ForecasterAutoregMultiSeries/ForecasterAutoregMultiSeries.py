@@ -967,6 +967,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Training time series.
         exog : pandas Series, pandas DataFrame, dict, default `None`
             Exogenous variable/s included as predictor/s.
+        suppress_warnings : bool, default `False`
+            If `True`, skforecast warnings will be suppressed during the creation
+            of the training matrices. See skforecast.exceptions.warn_skforecast_categories 
+            for more information.
 
         Returns
         -------
@@ -974,10 +978,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Training values (predictors).
         y_train : pandas Series
             Values (target) of the time series related to each row of `X_train`.
-        suppress_warnings : bool, default `False`
-            If `True`, skforecast warnings will be suppressed during the creation
-            of the training matrices. See skforecast.exceptions.warn_skforecast_categories 
-            for more information.
 
         Notes
         -----
@@ -1252,8 +1252,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             self.exog_in_ = True
             self.exog_type_in_ = type(exog)
             self.exog_names_in_ = exog_names_in_
-            self.X_train_exog_names_out_ = X_train_exog_names_out_
             self.exog_dtypes_in_ = exog_dtypes_in_
+            self.X_train_exog_names_out_ = X_train_exog_names_out_
 
         in_sample_residuals_ = {}
         if store_in_sample_residuals:

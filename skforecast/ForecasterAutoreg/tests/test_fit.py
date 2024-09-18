@@ -9,9 +9,10 @@ from sklearn.linear_model import LinearRegression
 
 # Fixtures
 from .fixtures_ForecasterAutoreg import y
+from .fixtures_ForecasterAutoreg import exog
 
 
-def custom_weights(index): # pragma: no cover
+def custom_weights(index):  # pragma: no cover
     """
     Return 0 if index is one of '2022-01-05', '2022-01-06', 1 otherwise.
     """
@@ -22,6 +23,28 @@ def custom_weights(index): # pragma: no cover
               )
     
     return weights
+
+
+def test_forecaster_y_exog_features_stored():
+    """
+    Test forecaster stores y and exog features after fitting.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster.fit(y=y, exog=exog)
+
+    X_train_features_names_out_ = ['lag_1', 'lag_2', 'lag_3', 'exog']
+    exog_in_ = True
+    exog_type_in_ = type(exog)
+    exog_names_in_ = ['exog']
+    exog_dtypes_in_ = {'exog': exog.dtype}
+    X_train_exog_names_out_ = ['exog']
+
+    assert forecaster.X_train_features_names_out_ == X_train_features_names_out_
+    assert forecaster.exog_in_ == exog_in_
+    assert forecaster.exog_type_in_ == exog_type_in_
+    assert forecaster.exog_names_in_ == exog_names_in_
+    assert forecaster.exog_dtypes_in_ == exog_dtypes_in_
+    assert forecaster.X_train_exog_names_out_ == X_train_exog_names_out_
 
 
 def test_forecaster_DatetimeIndex_index_freq_stored():
@@ -160,7 +183,7 @@ def test_fit_last_window_stored(store_last_window):
     if store_last_window:
         pd.testing.assert_frame_equal(forecaster.last_window_, expected)
     else:
-        assert forecaster.last_window_ == None
+        assert forecaster.last_window_ is None
 
 
 def test_fit_model_coef_when_using_weight_func():

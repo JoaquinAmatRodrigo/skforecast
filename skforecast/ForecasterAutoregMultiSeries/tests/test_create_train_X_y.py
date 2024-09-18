@@ -324,7 +324,7 @@ def test_create_train_X_y_output_when_series_and_exog_no_pandas_index():
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -412,7 +412,7 @@ def test_create_train_X_y_output_when_series_and_exog_no_pandas_index_ordinal_en
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -482,7 +482,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_float_int(
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -557,7 +557,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     assert isinstance(results[8], type(None))
 
 
@@ -626,7 +626,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_bool_str(e
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     assert isinstance(results[8], type(None))
 
 
@@ -698,7 +698,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_bool_st
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     assert isinstance(results[8], type(None))
 
 
@@ -762,7 +762,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_category()
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     assert isinstance(results[8], type(None))
 
 
@@ -797,10 +797,10 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_categor
             index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
         ).assign(
-            l1     = [1.]*5 + [0.]*5, 
-            l2     = [0.]*5 + [1.]*5,
-            exog_1 = pd.Categorical([5, 6, 7, 8, 9]*2, categories=range(10)),
-            exog_2 = pd.Categorical([105, 106, 107, 108, 109]*2, categories=range(100, 110))
+            l1     = [1.] * 5 + [0.] * 5, 
+            l2     = [0.] * 5 + [1.] * 5,
+            exog_1 = pd.Categorical([5, 6, 7, 8, 9] * 2, categories=range(10)),
+            exog_2 = pd.Categorical([105, 106, 107, 108, 109] * 2, categories=range(100, 110))
         ).astype({'l1': int, 'l2': int}
         ),
         pd.Series(
@@ -828,7 +828,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_categor
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     assert isinstance(results[8], type(None))
 
 
@@ -898,7 +898,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     assert isinstance(results[8], type(None))
 
 
@@ -989,7 +989,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -1234,7 +1234,7 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog(tr
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -1326,7 +1326,7 @@ def test_create_train_X_y_output_when_series_different_length_and_exog_is_datafr
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -1431,7 +1431,7 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     assert isinstance(results[8], type(None))
 
 
@@ -1512,7 +1512,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_y_train():
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -1606,7 +1606,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_y_train_datetime()
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -1685,7 +1685,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_T
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -1777,7 +1777,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_T
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -1859,7 +1859,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_F
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -1954,7 +1954,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_F
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -2100,7 +2100,7 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
@@ -2260,7 +2260,7 @@ def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
     assert results[5] == expected[5]
     assert results[6] == expected[6]
     for k in results[7].keys():
-        assert results[7] == expected[7]
+        assert results[7][k] == expected[7][k]
     for k in results[8].keys():
         pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
