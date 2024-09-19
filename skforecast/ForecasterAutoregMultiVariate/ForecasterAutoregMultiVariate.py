@@ -1547,32 +1547,39 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                       )
 
         # Predictions must be in the transformed scale before adding residuals
-        predictions = transform_dataframe(
-                          df                = predictions,
-                          transformer       = self.transformer_series_[self.level],
-                          fit               = False,
-                          inverse_transform = False
-                      )
-        boot_predictions = pd.concat([predictions] * n_boot, axis=1)
-        boot_predictions.columns = [f"pred_boot_{i}" for i in range(n_boot)]
+        boot_predictions = transform_numpy(
+                               array             = predictions.to_numpy().ravel(),
+                               transformer       = self.transformer_series_[self.level],
+                               fit               = False,
+                               inverse_transform = False
+                           )
+        boot_predictions = np.tile(boot_predictions, (n_boot, 1)).T
+        boot_columns = [f"pred_boot_{i}" for i in range(n_boot)]
 
+        rng = np.random.default_rng(seed=random_state)
         for i, step in enumerate(steps):
-            rng = np.random.default_rng(seed=random_state)
             sample_residuals = rng.choice(
                                    a       = residuals[step],
                                    size    = n_boot,
                                    replace = True
                                )
-            boot_predictions.iloc[i, :] = boot_predictions.iloc[i, :] + sample_residuals
+            boot_predictions[i, :] = boot_predictions[i, :] + sample_residuals
 
         if self.transformer_series_[self.level]:
-            for col in boot_predictions.columns:
-                boot_predictions[col] = transform_series(
-                                            series            = boot_predictions[col],
-                                            transformer       = self.transformer_series_[self.level],
-                                            fit               = False,
-                                            inverse_transform = True
-                                        )
+            boot_predictions = np.apply_along_axis(
+                                   func1d            = transform_numpy,
+                                   axis              = 0,
+                                   arr               = boot_predictions,
+                                   transformer       = self.transformer_series_[self.level],
+                                   fit               = False,
+                                   inverse_transform = True
+                               )
+    
+        boot_predictions = pd.DataFrame(
+                               data    = boot_predictions,
+                               index   = predictions.index,
+                               columns = boot_columns
+                           )
 
         set_skforecast_warnings(suppress_warnings, action='default')
         

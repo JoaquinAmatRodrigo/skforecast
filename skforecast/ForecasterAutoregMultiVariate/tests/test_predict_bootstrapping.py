@@ -166,7 +166,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                                                n_boot=4, in_sample_residuals=True)
     expected = pd.DataFrame(
                     data = np.array([[0.68370403, 0.61428329, 0.38628787, 0.46804785],
-                                     [0.53932503, 0.13843292, 0.39752999, 0.86694953]]),
+                                     [0.23010355, 0.19812106, 0.62028743, 0.25357764]]),
                     columns = [f"pred_boot_{i}" for i in range(4)],
                     index   = pd.RangeIndex(start=50, stop=52)
                 )
@@ -194,7 +194,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                                                n_boot=4, in_sample_residuals=False)
     expected = pd.DataFrame(
                     data = np.array([[0.68370403, 0.61428329, 0.38628787, 0.46804785],
-                                     [0.53932503, 0.13843292, 0.39752999, 0.86694953]]),
+                                     [0.23010355, 0.19812106, 0.62028743, 0.25357764]]),
                     columns = [f"pred_boot_{i}" for i in range(4)],
                     index   = pd.RangeIndex(start=50, stop=52)
                 )

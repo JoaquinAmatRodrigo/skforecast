@@ -36,7 +36,7 @@ The main changes in this release are:
 
 + Refactor `recursive_predict` in <code>[ForecasterAutoregMultiSeries]</code> to predict all series at once and include option of adding residuals. This improves performance when predicting multiple series.
 
-+ Refactor `predict_bootstrapping` in <code>[ForecasterAutoreg]</code> and <code>[ForecasterAutoregMultiSeries]</code>. The bootstrapping process has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
++ Refactor `predict_bootstrapping` in all Forecasters. The bootstrapping process has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
 
 + Change the default value of `encoding` to `ordinal` in <code>[ForecasterAutoregMultiSeries]</code>. This will avoid conflicts if the regressor does not support categorical variables by default.
 

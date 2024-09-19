@@ -34,8 +34,8 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
                   in_sample_residuals = True
               )
     expected = pd.DataFrame(
-                   data    = np.array([[0.67523588, 0.25414219, 0.72561416],
-                                       [0.38024988, 0.27143513, 0.78431847]]),
+                   data    = np.array([[0.67523588, 0.2541421877507869, 0.7256141639758971],
+                                       [0.38024988, 0.16009135981052192, 0.48878124019421915]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -66,8 +66,8 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
                   in_sample_residuals = False
               )
     expected = pd.DataFrame(
-                   data    = np.array([[0.67523588, 0.25414219, 0.72561416],
-                                       [0.38024988, 0.27143513, 0.78431847]]),
+                   data    = np.array([[0.67523588, 0.2541421877507869, 0.7256141639758971],
+                                       [0.38024988, 0.16009135981052192, 0.48878124019421915]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )

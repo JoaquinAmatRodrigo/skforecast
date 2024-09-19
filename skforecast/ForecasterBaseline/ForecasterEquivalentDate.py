@@ -315,13 +315,14 @@ class ForecasterEquivalentDate():
             last_window = self.last_window_
 
         check_predict_input(
-            forecaster_name  = type(self).__name__,
-            steps            = steps,
-            is_fitted           = self.is_fitted,
-            index_type_       = self.index_type_,
-            index_freq_       = self.index_freq_,
-            window_size      = self.window_size,
-            last_window      = last_window
+            forecaster_name = type(self).__name__,
+            steps           = steps,
+            is_fitted       = self.is_fitted,
+            exog_in_        = False,
+            index_type_     = self.index_type_,
+            index_freq_     = self.index_freq_,
+            window_size     = self.window_size,
+            last_window     = last_window
         )
 
         last_window = last_window.copy()

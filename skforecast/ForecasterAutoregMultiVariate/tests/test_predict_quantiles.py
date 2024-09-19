@@ -47,7 +47,7 @@ def test_predict_quantiles_output_when_forecaster_is_LinearRegression_steps_is_2
     
     expected = pd.DataFrame(
                    data    = np.array([[0.39855187, 0.56310088, 0.67329092],
-                                       [0.17729748, 0.48969677, 0.81780586]]),
+                                       [0.20291844, 0.24536171, 0.56528096]]),
                    columns = ['l1_q_0.05', 'l1_q_0.55', 'l1_q_0.95'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -82,7 +82,7 @@ def test_predict_quantiles_output_when_forecaster_is_LinearRegression_steps_is_2
     
     expected = pd.DataFrame(
                    data    = np.array([[0.39855187, 0.56310088, 0.67329092],
-                                       [0.17729748, 0.48969677, 0.81780586]]),
+                                       [0.20291844, 0.24536171, 0.56528096]]),
                    columns = ['l1_q_0.05', 'l1_q_0.55', 'l1_q_0.95'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
