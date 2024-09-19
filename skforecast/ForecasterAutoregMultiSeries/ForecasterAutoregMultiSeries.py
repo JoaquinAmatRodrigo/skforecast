@@ -750,8 +750,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 np.concatenate(list(series_dict.values())).reshape(-1, 1)
             )
 
-        # TODO: parallelize
-        # ======================================================================
         ignore_exog = True if exog is None else False
         input_matrices = [
             [series_dict[k], exog_dict[k], ignore_exog]
@@ -774,7 +772,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             X_train_lags_buffer.append(X_train_lags)
             X_train_exog_buffer.append(X_train_exog)
             y_train_buffer.append(y_train)
-        # ======================================================================
 
         X_train = pd.concat(X_train_lags_buffer, axis=0)
         y_train = pd.concat(y_train_buffer, axis=0)
@@ -993,11 +990,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             series_test = series_test.loc[:, levels_last_window]
             series_test = series_test.dropna(axis=1, how='all')
         elif isinstance(series, dict):
-            # TODO: añadir tambien que si es todo nan
             series_test = {
                 k: v.loc[v.index >= start_test_date]
                 for k, v in series.items()
-                if k in levels_last_window and not v.empty
+                if k in levels_last_window and not v.empty and not v.isna().all()
             }
        
         fitted_ = self.fitted

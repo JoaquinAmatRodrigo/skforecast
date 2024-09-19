@@ -561,6 +561,8 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
     ]
     metric_names = [(m if isinstance(m, str) else m.__name__) for m in metrics]
 
+    freq = series.index.freq if isinstance(series, pd.DataFrame) else series[levels[0]].index.freq
+
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
         step = 1
         X_train, y_train = forecaster.filter_train_X_y_for_step(
@@ -590,7 +592,6 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
     ).groupby('_level_skforecast')
     predictions_per_level = {key: group for key, group in predictions_per_level}
 
-    # 
     y_train_per_level = pd.DataFrame({
         'y_train': y_train,
         '_level_skforecast': X_train_encoding
@@ -598,7 +599,8 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
         index=y_train.index,
     ).groupby('_level_skforecast')
     y_train_per_level = {key: group for key, group in y_train_per_level}
-    # TODO: establecer la frecuencia para que se completen los huecos que y_train ya no tiene
+    # Interleaved Nan values were excluded fom y_train. They are reestored
+    y_train_per_level = {key: group.asfreq(freq) for key, group in y_train_per_level}
 
     if hasattr(forecaster, "differentiation") and forecaster.differentiation:
         for level in predictions_per_level:

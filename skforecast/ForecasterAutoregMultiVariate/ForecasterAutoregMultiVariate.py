@@ -719,7 +719,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             series_test = {
                 k: v.loc[v.index >= start_test_date]
                 for k, v in series.items()
-                if k in levels_last_window and not v.empty
+                if k in levels_last_window and not v.empty and not v.isna().all()
             }
         
         fitted_ = self.fitted
@@ -1320,10 +1320,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             ]
 
         predictions_index = expand_index(index=last_window_index, steps=max(steps))
-        # TODO: acer esto solo cuando el np.array(steps) es completo np.arange(min(steps), max(steps) + 1)
         predictions_index = predictions_index[np.array(steps) - 1]
-        if isinstance(last_window_index, pd.DatetimeIndex):
+        if isinstance(last_window_index, pd.DatetimeIndex) and steps == np.arange(
+            min(steps), max(steps) + 1
+        ):
             predictions_index.freq = last_window_index.freq
+            
         predictions = pd.DataFrame(
                           data    = predictions,
                           columns = [self.level],
