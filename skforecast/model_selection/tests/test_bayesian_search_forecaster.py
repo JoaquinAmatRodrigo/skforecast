@@ -58,43 +58,6 @@ def test_ValueError_bayesian_search_forecaster_when_return_best_and_len_y_exog_d
             random_state       = 123,
             return_best        = True,
             verbose            = False,
-            engine             = 'optuna'
-        )
-
-
-def test_bayesian_search_forecaster_ValueError_when_engine_not_optuna():
-    """
-    Test ValueError in bayesian_search_forecaster is raised when engine 
-    is not 'optuna'.
-    """
-    forecaster = ForecasterAutoreg(
-                    regressor = Ridge(random_state=123),
-                    lags      = 2
-                 )
-
-    def search_space(trial): # pragma: no cover
-        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
-                        }
-        return search_space
-
-    engine = 'not_optuna'
-    
-    err_msg = re.escape(f"`engine` only allows 'optuna', got {engine}.")
-    with pytest.raises(ValueError, match = err_msg):
-        bayesian_search_forecaster(
-            forecaster         = forecaster,
-            y                  = y,
-            search_space       = search_space,
-            steps              = 3,
-            metric             = 'mean_absolute_error',
-            refit              = True,
-            initial_train_size = len(y[:-12]),
-            fixed_train_size   = True,
-            n_trials           = 10,
-            random_state       = 123,
-            return_best        = False,
-            verbose            = False,
-            engine             = engine
         )
 
 
@@ -126,7 +89,6 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
                   random_state       = 123,
                   return_best        = False,
                   verbose            = False,
-                  engine             = 'optuna'
               )[0]
     
     expected_results = pd.DataFrame(
@@ -151,7 +113,7 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
         [np.array([1, 2, 3, 4]), {'alpha': 0.2345829390285611},
             0.21647289061896782, 0.2345829390285611]], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([6, 4, 0, 7, 3, 8, 5, 9, 1, 2], dtype='int64'),
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float, 
         'alpha': float
@@ -189,7 +151,6 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
                   random_state       = 123,
                   return_best        = False,
                   verbose            = False,
-                  engine             = 'optuna'
               )[0]
     
     expected_results = pd.DataFrame(
@@ -224,7 +185,7 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
         {'alpha': 0.2345829390285611}, 0.21647289061896782,
         0.2345829390285611]], dtype=object),
         columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([6, 4, 0, 7, 3, 8, 5, 9, 1, 2], dtype='int64')
+        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
     ).astype({
         'mean_absolute_error': float, 
         'alpha': float

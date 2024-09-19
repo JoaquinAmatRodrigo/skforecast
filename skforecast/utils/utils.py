@@ -305,7 +305,8 @@ def initialize_lags_grid(
     if isinstance(lags_grid, list):
         lags_grid = {f'{lags}': lags for lags in lags_grid}
     elif lags_grid is None:
-        lags_grid = {f'{list(forecaster.lags)}': list(forecaster.lags)}
+        lags = [int(lag) for lag in forecaster.lags] # Required since numpy 2.0
+        lags_grid = {f'{lags}': lags}
     else:
         lags_label = 'keys'
 
@@ -2973,6 +2974,8 @@ def prepare_steps_direct(
                 (f"`steps` argument must be an int, a list of ints or `None`. "
                  f"Got {type(steps)}.")
             )
+    # Required since numpy 2.0
+    steps = [int(step) for step in steps if step is not None]
 
     return steps
 

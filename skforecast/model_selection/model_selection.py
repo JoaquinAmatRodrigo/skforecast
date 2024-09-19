@@ -7,9 +7,9 @@
 
 import re
 import os
-from copy import deepcopy
+from copy import deepcopy, copy
 import logging
-from typing import Union, Tuple, Optional, Callable, Any
+from typing import Union, Tuple, Optional, Callable
 import warnings
 import numpy as np
 import pandas as pd
@@ -198,7 +198,7 @@ def _create_backtesting_folds(
         if isinstance(skip_folds, int) and skip_folds > 0:
             index_to_keep = np.arange(0, len(folds), skip_folds)
             index_to_skip = np.setdiff1d(np.arange(0, len(folds)), index_to_keep, assume_unique=True)
-            index_to_skip = list(index_to_skip.astype(int))
+            index_to_skip = [int(x) for x in index_to_skip]  # Required since numpy 2.0
         if isinstance(skip_folds, list):
             index_to_skip = [i for i in skip_folds if i < len(folds)]        
     
@@ -376,7 +376,6 @@ def _backtesting_forecaster(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -571,7 +570,7 @@ def _backtesting_forecaster(
     for i, fold in enumerate(folds):
         fit_fold = fold[-1]
         if i == 0 or fit_fold:
-            train_iloc_start = fold[0][0]
+            train_iloc_start = fold[0][0] + window_size  # Exclude observations used to create predictors
             train_iloc_end = fold[0][1]
             train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
     
@@ -701,7 +700,6 @@ def backtesting_forecaster(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
@@ -792,9 +790,10 @@ def grid_search_forecaster(
     forecaster: object,
     y: pd.Series,
     param_grid: dict,
-    steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
+    steps: Optional[int] = None,
+    method: str = 'backtesting',
     fixed_train_size: bool = True,
     gap: int = 0,
     skip_folds: Optional[Union[int, list]] = None,
@@ -821,8 +820,6 @@ def grid_search_forecaster(
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
-    steps : int
-        Number of steps to predict.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -834,6 +831,19 @@ def grid_search_forecaster(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
+    steps : int, default `None`
+        Number of steps to predict. 
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+        **New in version 0.14.0**
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -866,7 +876,6 @@ def grid_search_forecaster(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
@@ -889,29 +898,34 @@ def grid_search_forecaster(
         - additional n columns with param = value.
     
     """
+    if method not in ['backtesting', 'one_step_ahead']:
+        raise ValueError(
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
+        )
 
     param_grid = list(ParameterGrid(param_grid))
 
     results = _evaluate_grid_hyperparameters(
-        forecaster            = forecaster,
-        y                     = y,
-        param_grid            = param_grid,
-        steps                 = steps,
-        metric                = metric,
-        initial_train_size    = initial_train_size,
-        fixed_train_size      = fixed_train_size,
-        gap                   = gap,
-        skip_folds            = skip_folds,
-        allow_incomplete_fold = allow_incomplete_fold,
-        exog                  = exog,
-        lags_grid             = lags_grid,
-        refit                 = refit,
-        return_best           = return_best,
-        n_jobs                = n_jobs,
-        verbose               = verbose,
-        show_progress         = show_progress,
-        output_file           = output_file
-    )
+                forecaster            = forecaster,
+                y                     = y,
+                param_grid            = param_grid,
+                metric                = metric,
+                initial_train_size    = initial_train_size,
+                steps                 = steps,
+                method                = method,
+                fixed_train_size      = fixed_train_size,
+                gap                   = gap,
+                skip_folds            = skip_folds,
+                allow_incomplete_fold = allow_incomplete_fold,
+                exog                  = exog,
+                lags_grid             = lags_grid,
+                refit                 = refit,
+                return_best           = return_best,
+                n_jobs                = n_jobs,
+                verbose               = verbose,
+                show_progress         = show_progress,
+                output_file           = output_file
+             )
 
     return results
 
@@ -920,9 +934,10 @@ def random_search_forecaster(
     forecaster: object,
     y: pd.Series,
     param_distributions: dict,
-    steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
+    steps: Optional[int] = None,
+    method: str = 'backtesting',
     fixed_train_size: bool = True,
     gap: int = 0,
     skip_folds: Optional[Union[int, list]] = None,
@@ -951,8 +966,6 @@ def random_search_forecaster(
     param_distributions : dict
         Dictionary with parameters names (`str`) as keys and 
         distributions or lists of parameters to try.
-    steps : int
-        Number of steps to predict.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -964,6 +977,19 @@ def random_search_forecaster(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
+    steps : int, default `None`
+        Number of steps to predict.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+        **New in version 0.14.0**
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -1001,7 +1027,6 @@ def random_search_forecaster(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
@@ -1024,40 +1049,125 @@ def random_search_forecaster(
         - additional n columns with param = value.
     
     """
+    if method not in ['backtesting', 'one_step_ahead']:
+        raise ValueError(
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
+        )
 
     param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, random_state=random_state))
 
     results = _evaluate_grid_hyperparameters(
-        forecaster            = forecaster,
-        y                     = y,
-        param_grid            = param_grid,
-        steps                 = steps,
-        metric                = metric,
-        initial_train_size    = initial_train_size,
-        fixed_train_size      = fixed_train_size,
-        gap                   = gap,
-        skip_folds            = skip_folds,
-        allow_incomplete_fold = allow_incomplete_fold,
-        exog                  = exog,
-        lags_grid             = lags_grid,
-        refit                 = refit,
-        return_best           = return_best,
-        n_jobs                = n_jobs,
-        verbose               = verbose,
-        show_progress         = show_progress,
-        output_file           = output_file
-    )
+                forecaster            = forecaster,
+                y                     = y,
+                param_grid            = param_grid,
+                metric                = metric,
+                initial_train_size    = initial_train_size,
+                steps                 = steps,
+                method                = method,
+                fixed_train_size      = fixed_train_size,
+                gap                   = gap,
+                skip_folds            = skip_folds,
+                allow_incomplete_fold = allow_incomplete_fold,
+                exog                  = exog,
+                lags_grid             = lags_grid,
+                refit                 = refit,
+                return_best           = return_best,
+                n_jobs                = n_jobs,
+                verbose               = verbose,
+                show_progress         = show_progress,
+                output_file           = output_file
+             )
 
     return results
+
+
+def _calculate_metrics_one_step_ahead(
+    forecaster: object,
+    y: pd.Series,
+    metrics: list,
+    X_train: pd.DataFrame,
+    y_train: Union[pd.Series, dict],
+    X_test: pd.DataFrame,
+    y_test: Union[pd.Series, dict]
+):
+    """
+    Calculate metrics when predictions are one-step-ahead. When forecaster is
+    of type ForecasterAutoregDirect only the regressor for step 1 is used.
+
+    Parameters
+    ----------
+    forecaster : object
+        Forecaster model.
+    y : pandas Series
+        Time series data used to train and test the model.
+    metrics : list
+        List of metrics.
+    X_train : pandas DataFrame
+        Predictor values used to train the model.
+    y_train : pandas Series
+        Target values related to each row of `X_train`.
+    X_test : pandas DataFrame
+        Predictor values used to test the model.
+    y_test : pandas Series
+        Target values related to each row of `X_test`.
+    
+    """
+
+    if type(forecaster).__name__ == 'ForecasterAutoregDirect':
+
+        step = 1  # Only model for step 1 is optimized.
+        X_train, y_train = forecaster.filter_train_X_y_for_step(
+                                step    = step,
+                                X_train = X_train,
+                                y_train = y_train
+                           )
+        X_test, y_test = forecaster.filter_train_X_y_for_step(
+                            step    = step,  
+                            X_train = X_test,
+                            y_train = y_test
+                         )
+        forecaster.regressors_[step].fit(X_train, y_train)
+        pred = forecaster.regressors_[step].predict(X_test)
+
+    else:
+        forecaster.regressor.fit(X_train, y_train)
+        pred = forecaster.regressor.predict(X_test)
+
+    pred = pred.ravel()
+    y_train = y_train.to_numpy()
+    y_test = y_test.to_numpy()
+
+    if hasattr(forecaster, 'differentiation') and forecaster.differentiation:
+        differentiator = copy(forecaster.differentiator)
+        differentiator.initial_values = (
+            [y.iloc[forecaster.window_size_diff - forecaster.differentiation]]
+        )
+        pred = differentiator.inverse_transform_next_window(pred)
+        y_test = differentiator.inverse_transform_next_window(y_test)
+        y_train = differentiator.inverse_transform(y_train)
+
+    if forecaster.transformer_y is not None:
+        pred = forecaster.transformer_y.inverse_transform(pred.reshape(-1, 1))
+        y_test = forecaster.transformer_y.inverse_transform(y_test.reshape(-1, 1))
+        y_train = forecaster.transformer_y.inverse_transform(y_train.reshape(-1, 1))
+
+    metric_values = []
+    for m in metrics:
+        metric_values.append(
+            m(y_true=y_test.ravel(), y_pred=pred.ravel(), y_train=y_train.ravel())
+        )
+
+    return metric_values
 
 
 def _evaluate_grid_hyperparameters(
     forecaster: object,
     y: pd.Series,
     param_grid: dict,
-    steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
+    steps: Optional[int] = None,
+    method: str = 'backtesting',
     fixed_train_size: bool = True,
     gap: int = 0,
     skip_folds: Optional[Union[int, list]] = None,
@@ -1083,8 +1193,6 @@ def _evaluate_grid_hyperparameters(
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
-    steps : int
-        Number of steps to predict.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -1096,6 +1204,19 @@ def _evaluate_grid_hyperparameters(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
+    steps : int
+        Number of steps to predict.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+        **New in version 0.14.0**
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -1128,7 +1249,6 @@ def _evaluate_grid_hyperparameters(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
@@ -1152,6 +1272,19 @@ def _evaluate_grid_hyperparameters(
 
     """
 
+    if method not in ['backtesting', 'one_step_ahead']:
+        raise ValueError(
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
+        )
+    
+    if method == 'one_step_ahead':
+        warnings.warn(
+            "One-step-ahead predictions are used for faster model comparison, but they "
+            "may not fully represent multi-step prediction performance. It is recommended "
+            "to backtest the final model for a more accurate multi-step performance "
+            "estimate."
+        )
+
     if return_best and exog is not None and (len(exog) != len(y)):
         raise ValueError(
             (f"`exog` must have same number of samples as `y`. "
@@ -1162,6 +1295,12 @@ def _evaluate_grid_hyperparameters(
    
     if not isinstance(metric, list):
         metric = [metric] 
+    metric = [
+            _get_metric(metric=m)
+            if isinstance(m, str)
+            else add_y_train_argument(m) 
+            for m in metric
+        ]
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
                    for m in metric}
     
@@ -1170,7 +1309,8 @@ def _evaluate_grid_hyperparameters(
             "When `metric` is a `list`, each metric name must be unique."
         )
 
-    print(f"Number of models compared: {len(param_grid) * len(lags_grid)}.")
+    if verbose:
+        print(f"Number of models compared: {len(param_grid) * len(lags_grid)}.")
 
     if show_progress:
         lags_grid_tqdm = tqdm(lags_grid.items(), desc='lags grid', position=0)  # ncols=90
@@ -1191,30 +1331,62 @@ def _evaluate_grid_hyperparameters(
             lags_v = forecaster.lags.copy()
             if lags_label == 'values':
                 lags_k = lags_v
-        
+
+        if method == 'one_step_ahead':
+
+            (
+                X_train,
+                y_train,
+                X_test,
+                y_test
+            ) = forecaster._train_test_split_one_step_ahead(
+                    y                   = y,
+                    initial_train_size  = initial_train_size,
+                    exog                = exog
+            )
+
         for params in param_grid:
 
             forecaster.set_params(params)
-            metric_values = backtesting_forecaster(
-                                forecaster            = forecaster,
-                                y                     = y,
-                                steps                 = steps,
-                                metric                = metric,
-                                initial_train_size    = initial_train_size,
-                                fixed_train_size      = fixed_train_size,
-                                gap                   = gap,
-                                skip_folds            = skip_folds,
-                                allow_incomplete_fold = allow_incomplete_fold,
-                                exog                  = exog,
-                                refit                 = refit,
-                                interval              = None,
-                                n_jobs                = n_jobs,
-                                verbose               = verbose,
-                                show_progress         = False
-                            )[0]
-            metric_values = metric_values.iloc[0, :].to_list()
-            warnings.filterwarnings('ignore', category=RuntimeWarning, 
-                                    message= "The forecaster will be fit.*")
+
+            if method == 'backtesting':
+
+                metric_values = backtesting_forecaster(
+                                    forecaster            = forecaster,
+                                    y                     = y,
+                                    steps                 = steps,
+                                    metric                = metric,
+                                    initial_train_size    = initial_train_size,
+                                    fixed_train_size      = fixed_train_size,
+                                    gap                   = gap,
+                                    skip_folds            = skip_folds,
+                                    allow_incomplete_fold = allow_incomplete_fold,
+                                    exog                  = exog,
+                                    refit                 = refit,
+                                    interval              = None,
+                                    n_jobs                = n_jobs,
+                                    verbose               = verbose,
+                                    show_progress         = False
+                                )[0]
+                metric_values = metric_values.iloc[0, :].to_list()
+
+            else:
+
+                metric_values = _calculate_metrics_one_step_ahead(
+                                    forecaster = forecaster,
+                                    y          = y,
+                                    metrics    = metric,
+                                    X_train    = X_train,
+                                    y_train    = y_train,
+                                    X_test     = X_test,
+                                    y_test     = y_test
+                                )
+
+            warnings.filterwarnings(
+                'ignore',
+                category = RuntimeWarning, 
+                message  = "The forecaster will be fit.*"
+            )
             
             lags_list.append(lags_v)
             lags_label_list.append(lags_k)
@@ -1243,14 +1415,18 @@ def _evaluate_grid_hyperparameters(
                   **metric_dict
               })
     
-    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
+    results = (
+        results
+        .sort_values(by=list(metric_dict.keys())[0], ascending=True)
+        .reset_index(drop=True)
+    )
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
         
-        best_lags = results['lags'].iloc[0]
-        best_params = results['params'].iloc[0]
-        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
+        best_lags = results.loc[0, 'lags']
+        best_params = results.loc[0, 'params']
+        best_metric = results.loc[0, list(metric_dict.keys())[0]]
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)
@@ -1273,9 +1449,10 @@ def bayesian_search_forecaster(
     forecaster: object,
     y: pd.Series,
     search_space: Callable,
-    steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
+    steps: Optional[int] = None,
+    method: str = 'backtesting',
     fixed_train_size: bool = True,
     gap: int = 0,
     skip_folds: Optional[Union[int, list]] = None,
@@ -1289,7 +1466,6 @@ def bayesian_search_forecaster(
     verbose: bool = True,
     show_progress: bool = True,
     output_file: Optional[str] = None,
-    engine: str = 'optuna',
     kwargs_create_study: dict = {},
     kwargs_study_optimize: dict = {}
 ) -> Tuple[pd.DataFrame, object]:
@@ -1307,8 +1483,6 @@ def bayesian_search_forecaster(
         Function with argument `trial` which returns a dictionary with parameters names 
         (`str`) as keys and Trial object from optuna (trial.suggest_float, 
         trial.suggest_int, trial.suggest_categorical) as values.
-    steps : int
-        Number of steps to predict.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -1320,6 +1494,19 @@ def bayesian_search_forecaster(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
+    steps : int, default `None`
+        Number of steps to predict.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+        **New in version 0.14.0**
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -1352,7 +1539,6 @@ def bayesian_search_forecaster(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
@@ -1362,15 +1548,12 @@ def bayesian_search_forecaster(
         The results will be saved in a tab-separated values (TSV) format. If 
         `None`, the results will not be saved to a file.
         **New in version 0.12.0**
-    engine : str, default `'optuna'`
-        Bayesian optimization runs through the optuna library.
     kwargs_create_study : dict, default `{}`
         Keyword arguments (key, value mappings) to pass to optuna.create_study().
         If default, the direction is set to 'minimize' and a TPESampler(seed=123) 
         sampler is used during optimization.
     kwargs_study_optimize : dict, default `{}`
-        Only applies to engine='optuna'. Other keyword arguments (key, value mappings) 
-        to pass to study.optimize().
+        Other keyword arguments (key, value mappings) to pass to study.optimize().
 
     Returns
     -------
@@ -1391,34 +1574,35 @@ def bayesian_search_forecaster(
             (f"`exog` must have same number of samples as `y`. "
              f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
         )
-
-    if engine not in ['optuna']:
+    
+    if method not in ['backtesting', 'one_step_ahead']:
         raise ValueError(
-            f"`engine` only allows 'optuna', got {engine}."
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
         )
-
+            
     results, best_trial = _bayesian_search_optuna(
-                              forecaster            = forecaster,
-                              y                     = y,
-                              exog                  = exog,
-                              search_space          = search_space,
-                              steps                 = steps,
-                              metric                = metric,
-                              refit                 = refit,
-                              initial_train_size    = initial_train_size,
-                              fixed_train_size      = fixed_train_size,
-                              gap                   = gap,
-                              skip_folds            = skip_folds,
-                              allow_incomplete_fold = allow_incomplete_fold,
-                              n_trials              = n_trials,
-                              random_state          = random_state,
-                              return_best           = return_best,
-                              n_jobs                = n_jobs,
-                              verbose               = verbose,
-                              show_progress         = show_progress,
-                              output_file           = output_file,
-                              kwargs_create_study   = kwargs_create_study,
-                              kwargs_study_optimize = kwargs_study_optimize
+                                forecaster            = forecaster,
+                                y                     = y,
+                                exog                  = exog,
+                                search_space          = search_space,
+                                steps                 = steps,
+                                metric                = metric,
+                                refit                 = refit,
+                                initial_train_size    = initial_train_size,
+                                method                = method,
+                                fixed_train_size      = fixed_train_size,
+                                gap                   = gap,
+                                skip_folds            = skip_folds,
+                                allow_incomplete_fold = allow_incomplete_fold,
+                                n_trials              = n_trials,
+                                random_state          = random_state,
+                                return_best           = return_best,
+                                n_jobs                = n_jobs,
+                                verbose               = verbose,
+                                show_progress         = show_progress,
+                                output_file           = output_file,
+                                kwargs_create_study   = kwargs_create_study,
+                                kwargs_study_optimize = kwargs_study_optimize
                           )
 
     return results, best_trial
@@ -1428,9 +1612,10 @@ def _bayesian_search_optuna(
     forecaster: object,
     y: pd.Series,
     search_space: Callable,
-    steps: int,
     metric: Union[str, Callable, list],
     initial_train_size: int,
+    steps: Optional[int] = None,
+    method: str = 'backtesting',
     fixed_train_size: bool = True,
     gap: int = 0,
     skip_folds: Optional[Union[int, list]] = None,
@@ -1461,8 +1646,6 @@ def _bayesian_search_optuna(
         Function with argument `trial` which returns a dictionary with parameters names 
         (`str`) as keys and Trial object from optuna (trial.suggest_float, 
         trial.suggest_int, trial.suggest_categorical) as values.
-    steps : int
-        Number of steps to predict.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -1474,6 +1657,19 @@ def _bayesian_search_optuna(
         - If `list`: List containing multiple strings and/or Callables.
     initial_train_size : int 
         Number of samples in the initial train split.
+    steps : int, default `None`
+        Number of steps to predict.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+        **New in version 0.14.0**
     fixed_train_size : bool, default `True`
         If True, train size doesn't increase but moves by `steps` in each iteration.
     gap : int, default `0`
@@ -1506,7 +1702,6 @@ def _bayesian_search_optuna(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     show_progress : bool, default `True`
@@ -1536,9 +1731,28 @@ def _bayesian_search_optuna(
         The best optimization result returned as an optuna FrozenTrial object.
 
     """
+
+    if method not in ['backtesting', 'one_step_ahead']:
+        raise ValueError(
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
+        )
+    
+    if method == 'one_step_ahead':
+        warnings.warn(
+            "One-step-ahead predictions are used for faster model comparison, but they "
+            "may not fully represent multi-step prediction performance. It is recommended "
+            "to backtest the final model for a more accurate multi-step performance "
+            "estimate."
+        )
     
     if not isinstance(metric, list):
-        metric = [metric] 
+        metric = [metric]
+    metric = [
+            _get_metric(metric=m)
+            if isinstance(m, str)
+            else add_y_train_argument(m) 
+            for m in metric
+        ]
     metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
                    for m in metric}
     
@@ -1548,55 +1762,103 @@ def _bayesian_search_optuna(
         )
         
     # Objective function using backtesting_forecaster
-    def _objective(
-        trial,
-        search_space          = search_space,
-        forecaster            = forecaster,
-        y                     = y,
-        exog                  = exog,
-        steps                 = steps,
-        metric                = metric,
-        initial_train_size    = initial_train_size,
-        fixed_train_size      = fixed_train_size,
-        gap                   = gap,
-        skip_folds            = skip_folds,
-        allow_incomplete_fold = allow_incomplete_fold,
-        refit                 = refit,
-        n_jobs                = n_jobs,
-        verbose               = verbose,
-    ) -> float:
-        
-        sample = search_space(trial)
-        sample_params = {k: v for k, v in sample.items() if k != 'lags'}
-        forecaster.set_params(sample_params)
-        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-            if "lags" in sample:
-                forecaster.set_lags(sample['lags'])
-        
-        metrics, _ = backtesting_forecaster(
-                         forecaster            = forecaster,
-                         y                     = y,
-                         exog                  = exog,
-                         steps                 = steps,
-                         metric                = metric,
-                         initial_train_size    = initial_train_size,
-                         fixed_train_size      = fixed_train_size,
-                         skip_folds            = skip_folds,
-                         gap                   = gap,
-                         allow_incomplete_fold = allow_incomplete_fold,
-                         refit                 = refit,
-                         n_jobs                = n_jobs,
-                         verbose               = verbose,
-                         show_progress         = False
-                     )
-        metrics = metrics.iloc[0, :].to_list()
-        
-        # Store metrics in the variable `metric_values` defined outside _objective.
-        nonlocal metric_values
-        metric_values.append(metrics)
+    if method == 'backtesting':
 
-        return metrics[0]
-       
+        def _objective(
+            trial,
+            search_space          = search_space,
+            forecaster            = forecaster,
+            y                     = y,
+            exog                  = exog,
+            steps                 = steps,
+            metric                = metric,
+            initial_train_size    = initial_train_size,
+            fixed_train_size      = fixed_train_size,
+            gap                   = gap,
+            skip_folds            = skip_folds,
+            allow_incomplete_fold = allow_incomplete_fold,
+            refit                 = refit,
+            n_jobs                = n_jobs,
+            verbose               = verbose,
+        ) -> float:
+            
+            sample = search_space(trial)
+            sample_params = {k: v for k, v in sample.items() if k != 'lags'}
+            forecaster.set_params(sample_params)
+            if type(forecaster).__name__ != 'ForecasterAutoregCustom':
+                if "lags" in sample:
+                    forecaster.set_lags(sample['lags'])
+            
+            metrics, _ = backtesting_forecaster(
+                            forecaster            = forecaster,
+                            y                     = y,
+                            exog                  = exog,
+                            steps                 = steps,
+                            metric                = metric,
+                            initial_train_size    = initial_train_size,
+                            fixed_train_size      = fixed_train_size,
+                            skip_folds            = skip_folds,
+                            gap                   = gap,
+                            allow_incomplete_fold = allow_incomplete_fold,
+                            refit                 = refit,
+                            n_jobs                = n_jobs,
+                            verbose               = verbose,
+                            show_progress         = False
+                        )
+            metrics = metrics.iloc[0, :].to_list()
+            
+            # Store metrics in the variable `metric_values` defined outside _objective.
+            nonlocal metric_values
+            metric_values.append(metrics)
+
+            return metrics[0]
+        
+    else:
+
+        def _objective(
+            trial,
+            search_space          = search_space,
+            forecaster            = forecaster,
+            y                     = y,
+            exog                  = exog,
+            metric                = metric,
+            initial_train_size    = initial_train_size,
+        ) -> float:
+            
+            sample = search_space(trial)
+            sample_params = {k: v for k, v in sample.items() if k != 'lags'}
+            forecaster.set_params(sample_params)
+            if type(forecaster).__name__ != 'ForecasterAutoregCustom':
+                if "lags" in sample:
+                    forecaster.set_lags(sample['lags'])
+
+            (
+                X_train,
+                y_train,
+                X_test,
+                y_test
+            ) = forecaster._train_test_split_one_step_ahead(
+                    y                   = y,
+                    initial_train_size  = initial_train_size,
+                    exog                = exog
+            )
+
+            metrics = _calculate_metrics_one_step_ahead(
+                            forecaster = forecaster,
+                            y          = y,
+                            metrics    = metric,
+                            X_train    = X_train,
+                            y_train    = y_train,
+                            X_test     = X_test,
+                            y_test     = y_test
+                    )
+
+            # Store all metrics in the variable `metric_values` defined outside _objective.
+            nonlocal metric_values
+            metric_values.append(metrics)
+
+            return metrics[0]
+
     if show_progress:
         kwargs_study_optimize['show_progress_bar'] = True
 
@@ -1621,8 +1883,8 @@ def _bayesian_search_optuna(
 
     warnings.filterwarnings(
         "ignore",
-        category=UserWarning,
-        message="Choices for a categorical distribution should be*"
+        category = UserWarning,
+        message  = "Choices for a categorical distribution should be*"
     )
 
     study = optuna.create_study(**kwargs_create_study)
@@ -1676,13 +1938,17 @@ def _bayesian_search_optuna(
                   **metric_dict
               })
     
-    results = results.sort_values(by=list(metric_dict.keys())[0], ascending=True)
+    results = (
+        results
+        .sort_values(by=list(metric_dict.keys())[0], ascending=True)
+        .reset_index(drop=True)
+    )
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
     
     if return_best:
-        best_lags = results['lags'].iloc[0]
-        best_params = results['params'].iloc[0]
-        best_metric = results[list(metric_dict.keys())[0]].iloc[0]
+        best_lags = results.loc[0, 'lags']
+        best_params = results.loc[0, 'params']
+        best_metric = results.loc[0, list(metric_dict.keys())[0]]
         
         if type(forecaster).__name__ != 'ForecasterAutoregCustom':
             forecaster.set_lags(best_lags)

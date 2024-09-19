@@ -30,7 +30,7 @@ Welcome to the skforecast user guides! This comprehensive collection of guides i
 - [Probabilistic forecasting](https://skforecast.org/latest/user_guides/probabilistic-forecasting)
 
 ## Advanced Topics
-- [Scikit-learn Transformers and Pipelines](https://skforecast.org/latest/user_guides/sklearn-transformers-and-pipeline)
+- [Data transformations](https://skforecast.org/latest/user_guides/sklearn-transformers-and-pipeline)
 - [Forecaster in production](https://skforecast.org/latest/user_guides/forecaster-in-production)
 - [Save and load forecaster](https://skforecast.org/latest/user_guides/save-load-forecaster)
 - [Explainability](https://skforecast.org/latest/user_guides/explainability)

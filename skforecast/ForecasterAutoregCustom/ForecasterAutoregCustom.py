@@ -12,11 +12,11 @@ import sys
 import numpy as np
 import pandas as pd
 import inspect
+from copy import copy
 import textwrap
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
-from copy import copy
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
@@ -195,7 +195,7 @@ class ForecasterAutoregCustom(ForecasterBase):
         forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
         
-        self.regressor                  = regressor
+        self.regressor                  = copy(regressor)
         self.fun_predictors             = fun_predictors
         self.source_code_fun_predictors = None
         self.window_size                = window_size

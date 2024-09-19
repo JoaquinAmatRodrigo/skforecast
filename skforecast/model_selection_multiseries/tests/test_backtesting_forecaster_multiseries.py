@@ -17,7 +17,6 @@ from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import backtesting_forecaster_multiseries
-from skforecast.model_selection_multiseries import backtesting_forecaster_multivariate
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
@@ -1666,7 +1665,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     steps = 3
     n_validation = 12
 
-    metrics_levels, backtest_predictions = backtesting_forecaster_multivariate(
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
                                                forecaster          = forecaster,
                                                series              = series,
                                                steps               = steps,

@@ -12,12 +12,12 @@ import sys
 import numpy as np
 import pandas as pd
 import inspect
+from copy import copy
 import textwrap
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import KBinsDiscretizer
 from sklearn.base import clone
-from copy import copy
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
@@ -271,7 +271,7 @@ class ForecasterAutoreg(ForecasterBase):
             self.binner_kwargs = binner_kwargs
             self.binner_kwargs['encode'] = 'ordinal'
             self.binner_kwargs['dtype'] = np.float64
-        self.binner = KBinsDiscretizer(**self.binner_kwargs)
+        self.binner = KBinsDiscretizer(**self.binner_kwargs).set_output(transform="default")
         self.binner_intervals = None
 
         if self.differentiation is not None:
@@ -680,6 +680,56 @@ class ForecasterAutoreg(ForecasterBase):
         y_train = output[1]
 
         return X_train, y_train
+    
+
+    def _train_test_split_one_step_ahead(
+        self,
+        y: pd.Series,
+        initial_train_size: int,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None
+    ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
+        """
+        Create matrices needed to train and test the forecaster for one-step-ahead
+        predictions.
+
+        Parameters
+        ----------
+        series : pandas Series, pandas DataFrame, dict
+            Training time series.
+        initial_train_size : int
+            Initial size of the training set. It is the number of observations used
+            to train the forecaster before making the first prediction.
+        exog : pandas Series, pandas DataFrame, dict, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same number
+            of observations as `series` and their indexes must be aligned.
+        
+        Returns
+        -------
+        X_train : pandas DataFrame
+            Predictor values used to train the model.
+        y_train : pandas Series
+            Target values related to each row of `X_train`.
+        X_test : pandas DataFrame
+            Predictor values used to test the model.
+        y_test : pandas Series
+            Target values related to each row of `X_test`.
+        """
+
+        is_fitted = self.fitted
+        self.fitted = False
+        X_train, y_train = self.create_train_X_y(
+            y    = y.iloc[: initial_train_size],
+            exog = exog.iloc[: initial_train_size] if exog is not None else None
+        )
+        test_init = initial_train_size - self.window_size_diff
+        self.fitted = True
+        X_test, y_test = self.create_train_X_y(
+            y    = y.iloc[test_init:],
+            exog = exog.iloc[test_init:] if exog is not None else None
+        )
+        self.fitted = is_fitted
+
+        return X_train, y_train, X_test, y_test
 
 
     def create_sample_weights(

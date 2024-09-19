@@ -12,11 +12,11 @@ import sys
 import numpy as np
 import pandas as pd
 import inspect
+from copy import copy
 import textwrap
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
-from copy import copy
 from joblib import Parallel, delayed, cpu_count
 
 import skforecast
@@ -199,7 +199,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         forecaster_id: Optional[Union[str, int]] = None,
     ) -> None:
         
-        self.regressor               = regressor
+        self.regressor               = copy(regressor)
         self.steps                   = steps
         self.transformer_y           = transformer_y
         self.transformer_exog        = transformer_exog
@@ -365,6 +365,57 @@ class ForecasterAutoregDirect(ForecasterBase):
             y_data[step, ] = y[self.max_lag + step : self.max_lag + step + n_splits]
             
         return X_data, y_data
+    
+
+    def _train_test_split_one_step_ahead(
+        self,
+        y: pd.Series,
+        initial_train_size: int,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None
+    ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
+        
+        """
+        Create matrices needed to train and test the forecaster for one-step-ahead
+        predictions.
+
+        Parameters
+        ----------
+        series : pandas Series, pandas DataFrame, dict
+            Training time series.
+        initial_train_size : int
+            Initial size of the training set. It is the number of observations used
+            to train the forecaster before making the first prediction.
+        exog : pandas Series, pandas DataFrame, dict, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same number
+            of observations as `series` and their indexes must be aligned.
+        
+        Returns
+        -------
+        X_train : pandas DataFrame
+            Training values (predictors).
+        y_train : pandas Series
+            Values (target) of the time series related to each row of `X_train`.
+        X_test : pandas DataFrame
+            Test values (predictors).
+        y_test : pandas Series
+            Values (target) of the time series related to each row of `X_test`.
+        """
+
+        is_fitted = self.fitted
+        self.fitted = False
+        X_train, y_train = self.create_train_X_y(
+            y    = y.iloc[: initial_train_size],
+            exog = exog.iloc[: initial_train_size] if exog is not None else None
+        )
+        test_init = initial_train_size - self.window_size_diff
+        self.fitted = True
+        X_test, y_test = self.create_train_X_y(
+            y    = y.iloc[test_init:],
+            exog = exog.iloc[test_init:] if exog is not None else None
+        )
+        self.fitted = is_fitted
+
+        return X_train, y_train, X_test, y_test
 
 
     def create_train_X_y(

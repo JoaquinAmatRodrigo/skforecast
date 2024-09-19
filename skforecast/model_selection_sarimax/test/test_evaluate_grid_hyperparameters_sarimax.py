@@ -279,7 +279,7 @@ def test_evaluate_grid_hyperparameters_sarimax_output_file_when_single_metric():
 
     assert os.path.isfile(output_file)
     output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False, converters={'trend': convert_none})
-    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.sort_values(by='mean_squared_error').reset_index(drop=True)
     output_file_content = output_file_content.astype({'params': str, 'order': str})
     pd.testing.assert_frame_equal(results, output_file_content)
     os.remove(output_file)
@@ -320,7 +320,7 @@ def test_evaluate_grid_hyperparameters_sarimax_output_file_when_metric_list():
 
     assert os.path.isfile(output_file)
     output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False, converters={'trend': convert_none})
-    output_file_content = output_file_content.sort_values(by='mean_squared_error')
+    output_file_content = output_file_content.sort_values(by='mean_squared_error').reset_index(drop=True)
     output_file_content = output_file_content.astype({'params': str, 'order': str})
     pd.testing.assert_frame_equal(results, output_file_content)
     os.remove(output_file)

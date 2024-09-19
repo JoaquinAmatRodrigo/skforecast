@@ -8,7 +8,6 @@ from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import random_search_forecaster_multiseries
-from skforecast.model_selection_multiseries import random_search_forecaster_multivariate
 
 from tqdm import tqdm
 from functools import partialmethod
@@ -148,7 +147,7 @@ def test_output_random_search_forecaster_multiseries_ForecasterAutoregMultiVaria
     param_distributions = {'alpha':np.logspace(-5, 3, 10)}
     n_iter = 3
 
-    results = random_search_forecaster_multivariate(
+    results = random_search_forecaster_multiseries(
                   forecaster          = forecaster,
                   series              = series,
                   param_distributions = param_distributions,

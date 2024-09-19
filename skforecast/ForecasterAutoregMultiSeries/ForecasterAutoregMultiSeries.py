@@ -15,6 +15,8 @@ from copy import copy
 import textwrap
 import inspect
 import sklearn
+import inspect
+from copy import copy
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
@@ -47,6 +49,8 @@ from ..utils import transform_series
 from ..utils import transform_dataframe
 from ..utils import set_skforecast_warnings
 from ..preprocessing import TimeSeriesDifferentiator
+from ..model_selection_multiseries.model_selection_multiseries import _extract_data_folds_multiseries
+
 
 logging.basicConfig(
     format = '%(name)-10s %(levelname)-5s %(message)s', 
@@ -151,7 +155,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         - If None, no column is created to identify the series. Internally, the
         series are identified as an integer from 0 to n_series - 1, but no column
         is created in the training matrices.
-        **New in version 0.12.0**
+        **Changed to 'ordinal' in version 0.14.0**
     encoder : sklearn.preprocessing
         Scikit-learn preprocessing encoder used to encode the series.
         **New in version 0.12.0**
@@ -720,7 +724,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         input_series_is_dict = isinstance(series, dict)
         series_names_in_ = list(series_dict.keys())
 
-        if self.is_fitted and not (series_names_in_ == self.series_names_in_):
+        if self.is_fitted and not set(series_col_names).issubset(set(self.series_names_in_)):
             raise ValueError(
                 (f"Once the Forecaster has been trained, `series` must contain "
                  f"the same series names as those used during training:\n"
@@ -781,8 +785,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 np.concatenate(list(series_dict.values())).reshape(-1, 1)
             )
 
-        # TODO: parallelize
-        # ======================================================================
         ignore_exog = True if exog is None else False
         input_matrices = [
             [series_dict[k], exog_dict[k], ignore_exog]
@@ -805,7 +807,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             X_train_lags_buffer.append(X_train_lags)
             X_train_exog_buffer.append(X_train_exog)
             y_train_buffer.append(y_train)
-        # ======================================================================
 
         X_train = pd.concat(X_train_lags_buffer, axis=0)
         y_train = pd.concat(y_train_buffer, axis=0)
@@ -948,6 +949,148 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog_dtypes_in_,
             last_window_,
         )
+
+
+    def _train_test_split_one_step_ahead(
+        self,
+        series: Union[pd.Series, pd.DataFrame, dict],
+        initial_train_size: int,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None
+    ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series, pd.Series, pd.Series]:
+        """
+        Create matrices needed to train and test the forecaster for one-step-ahead
+        predictions.
+
+        Parameters
+        ----------
+        series : pandas Series, pandas DataFrame, dict
+            Training time series.
+        initial_train_size : int
+            Initial size of the training set. It is the number of observations used
+            to train the forecaster before making the first prediction.
+        exog : pandas Series, pandas DataFrame, dict, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same number
+            of observations as `series` and their indexes must be aligned.
+        
+        Returns
+        -------
+        X_train : pandas DataFrame
+            Training values (predictors).
+        y_train : pandas Series
+            Values (target) of the time series related to each row of `X_train`.
+        X_test : pandas DataFrame
+            Test values (predictors).
+        y_test : pandas Series
+            Values (target) of the time series related to each row of `X_test`.
+        X_train_encoding : pandas Series
+            Series identifiers for each row of `X_train`.
+        X_test_encoding : pandas Series
+            Series identifiers for each row of `X_test`.
+        """
+
+        if isinstance(series, dict):
+            freqs = [s.index.freq for s in series.values() if s.index.freq is not None]
+            if not freqs:
+                raise ValueError("At least one series must have a frequency.")
+            if not all(f == freqs[0] for f in freqs):
+                raise ValueError(
+                    "All series with frequency must have the same frequency."
+                )
+            min_index = min([v.index[0] for v in series.values()])
+            max_index = max([v.index[-1] for v in series.values()])
+            span_index = pd.date_range(start=min_index, end=max_index, freq=freqs[0])
+        else:
+            span_index = series.index
+
+        fold = [
+            [0, initial_train_size],
+            [initial_train_size - self.window_size_diff, initial_train_size],
+            [initial_train_size - self.window_size_diff, len(span_index)],
+            [0, 0],  # Dummy value
+            True
+        ]
+        data_fold = _extract_data_folds_multiseries(
+                        series             = series,
+                        folds              = [fold],
+                        span_index         = span_index,
+                        window_size        = self.window_size_diff,
+                        exog               = exog,
+                        dropna_last_window = self.dropna_from_series,
+                        externally_fitted  = False
+                    )
+        series_train, _, levels_last_window, exog_train, exog_test, _ = next(data_fold)
+
+        start_test_idx = initial_train_size - self.window_size_diff
+        start_test_date = span_index[start_test_idx]
+        if isinstance(series, pd.DataFrame):
+            series_test = series.iloc[start_test_idx:, :]
+            series_test = series_test.loc[:, levels_last_window]
+            series_test = series_test.dropna(axis=1, how='all')
+        elif isinstance(series, dict):
+            series_test = {
+                k: v.loc[v.index >= start_test_date]
+                for k, v in series.items()
+                if k in levels_last_window and not v.empty and not v.isna().all()
+            }
+       
+        fitted_ = self.fitted
+        series_col_names_ = self.series_col_names
+        exog_col_names_ = self.exog_col_names
+
+        self.fitted = False
+        X_train, y_train, _, series_col_names, _, exog_col_names, _, _ = (
+            self._create_train_X_y(
+                series            = series_train,
+                exog              = exog_train,
+                store_last_window = False
+            )
+        )
+        self.series_col_names = series_col_names
+        if exog is not None:
+            self.exog_col_names = exog_col_names
+        self.fitted = True
+
+        X_test, y_test, *_ = self._create_train_X_y(
+                                series            = series_test,
+                                exog              = exog_test,
+                                store_last_window = False
+                             )
+        self.fitted = fitted_
+        self.series_col_names = series_col_names_
+        self.exog_col_names = exog_col_names_
+
+        if self.encoding in ["ordinal", "ordinal_category"]:
+            X_train_encoding = self.encoder.inverse_transform(
+                X_train[["_level_skforecast"]]
+            ).ravel()
+            X_test_encoding = self.encoder.inverse_transform(
+                X_test[["_level_skforecast"]]
+            ).ravel()
+        elif self.encoding == 'onehot':
+            X_train_encoding = self.encoder.inverse_transform(
+                                    X_train.loc[:, self.encoding_mapping.keys()]
+                                ).ravel()
+            X_test_encoding = self.encoder.inverse_transform(
+                                    X_test.loc[:, self.encoding_mapping.keys()]
+                                ).ravel()
+        else:
+            X_train_encoding = self.encoder.inverse_transform(
+                X_train[["_level_skforecast"]]
+            ).ravel()
+            X_test_encoding = self.encoder.inverse_transform(
+                X_test[["_level_skforecast"]]
+            ).ravel()
+            X_train = X_train.drop(columns="_level_skforecast")
+            X_test = X_test.drop(columns="_level_skforecast")
+        
+        X_train_encoding = pd.Series(data=X_train_encoding, index=X_train.index).fillna(
+            "_unknown_level"
+        )
+        X_test_encoding = pd.Series(data=X_test_encoding, index=X_test.index).fillna(
+            "_unknown_level"
+        )
+        
+        return X_train, y_train, X_test, y_test, X_train_encoding, X_test_encoding
 
 
     def create_train_X_y(
