@@ -140,8 +140,10 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     forecaster.fit(y=y, exog=exog)
     results = forecaster.predict_bootstrapping(steps=steps, exog=exog_predict, n_boot=4, in_sample_residuals=True)
     expected = pd.DataFrame(
-                   data = np.array([[0.73195423, 0.6896871 , 0.20248689, 0.54685553],
-                                    [0.58019048, 0.25711887, 0.35256064, 0.82034106]]),
+                   data = np.array([
+                              [0.7319542342426019, 0.6896870991312363, 0.2024868918354829, 0.5468555312708429],
+                              [0.13621073709672699, 0.29541488852202646, 0.5160668468937661, 0.33416280223011985]
+                          ]),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -166,8 +168,10 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=False)
     expected = pd.DataFrame(
-                   data = np.array([[0.73195423, 0.6896871 , 0.20248689, 0.54685553],
-                                    [0.58019048, 0.25711887, 0.35256064, 0.82034106]]),
+                   data = np.array([
+                              [0.7319542342426019, 0.6896870991312363, 0.2024868918354829, 0.5468555312708429],
+                              [0.13621073709672699, 0.29541488852202646, 0.5160668468937661, 0.33416280223011985]
+                          ]),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
