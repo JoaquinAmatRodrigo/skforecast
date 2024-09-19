@@ -22,9 +22,9 @@ def test_predict_NotFittedError_when_fitted_is_False():
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=5)
 
     err_msg = re.escape(
-                ('This Forecaster instance is not fitted yet. Call `fit` with '
-                 'appropriate arguments before using predict.')
-              )
+        ("This Forecaster instance is not fitted yet. Call `fit` with "
+         "appropriate arguments before using predict.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.predict_bootstrapping(steps=5)
 
@@ -36,12 +36,12 @@ def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_some_
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.in_sample_residuals = {2: np.array([1, 2, 3])}
+    forecaster.in_sample_residuals_ = {2: np.array([1, 2, 3])}
 
     err_msg = re.escape(
-                (f"Not `forecaster.in_sample_residuals` for steps: "
-                 f"{set([1, 2]) - set(forecaster.in_sample_residuals.keys())}.")
-              )
+        (f"Not `forecaster.in_sample_residuals_` for steps: "
+         f"{set([1, 2]) - set(forecaster.in_sample_residuals_.keys())}.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=None, in_sample_residuals=True)
 
@@ -49,17 +49,16 @@ def test_predict_bootstrapping_ValueError_when_not_in_sample_residuals_for_some_
 def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     """
     Test ValueError is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals is None.
+    forecaster.out_sample_residuals_ is None.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
     forecaster.fit(y=pd.Series(np.arange(10)))
 
     err_msg = re.escape(
-                ("`forecaster.out_sample_residuals` is `None`. Use "
-                 "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                 "before `predict_interval()`, `predict_bootstrapping()`, "
-                 "`predict_quantiles()` or `predict_dist()`.")
-              )
+        ("`forecaster.out_sample_residuals_` is `None`. Use "
+         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
+         "method before predicting.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False)
 
@@ -67,19 +66,19 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
 def test_predict_bootstrapping_ValueError_when_not_out_sample_residuals_for_all_steps_predicted():
     """
     Test ValueError is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals is not available for all steps predicted.
+    forecaster.out_sample_residuals_ is not available for all steps predicted.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)
     forecaster.fit(y=pd.Series(np.arange(15)))
     residuals = {2: np.array([1, 2, 3, 4, 5]), 
                  3: np.array([1, 2, 3, 4, 5])}
-    forecaster.out_sample_residuals = residuals
+    forecaster.out_sample_residuals_ = residuals
 
     err_msg = re.escape(
-                    (f"Not `forecaster.out_sample_residuals` for steps: "
-                     f"{set([1, 2]) - set(forecaster.out_sample_residuals.keys())}. "
-                     f"Use method `set_out_sample_residuals()`.")
-                )
+        (f"Not `forecaster.out_sample_residuals_` for steps: "
+         f"{set([1, 2]) - set(forecaster.out_sample_residuals_.keys())}. "
+         f"Use method `set_out_sample_residuals()`.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=[1, 2], in_sample_residuals=False)
 
@@ -87,7 +86,7 @@ def test_predict_bootstrapping_ValueError_when_not_out_sample_residuals_for_all_
 def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_is_None():
     """
     Test ValueError is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals has a step with a None.
+    forecaster.out_sample_residuals_ has a step with a None.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)
     forecaster.fit(y=pd.Series(np.arange(15)))
@@ -96,8 +95,9 @@ def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_i
     forecaster.set_out_sample_residuals(residuals = residuals)
 
     err_msg = re.escape(
-                ("forecaster residuals for step 3 are `None`. Check forecaster.out_sample_residuals.")
-            )
+        ("forecaster residuals for step 3 are `None`. "
+         "Check forecaster.out_sample_residuals_.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
 
@@ -105,7 +105,7 @@ def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_i
 def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_contains_None():
     """
     Test ValueError is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals has a step with a None value.
+    forecaster.out_sample_residuals_ has a step with a None value.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)
     forecaster.fit(y=pd.Series(np.arange(15)))
@@ -115,8 +115,9 @@ def test_predict_bootstrapping_ValueError_when_step_out_sample_residuals_value_c
     forecaster.set_out_sample_residuals(residuals = residuals)
 
     err_msg = re.escape(
-                    ("forecaster residuals for step 3 contains `None` values. Check forecaster.out_sample_residuals.")
-                )
+        ("forecaster residuals for step 3 contains `None` values. "
+         "Check forecaster.out_sample_residuals_.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
 
@@ -162,7 +163,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                      transformer_exog = StandardScaler(),
                  )
     forecaster.fit(y=y, exog=exog)
-    forecaster.out_sample_residuals = forecaster.in_sample_residuals
+    forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=False)
     expected = pd.DataFrame(
                    data = np.array([[0.73195423, 0.6896871 , 0.20248689, 0.54685553],
@@ -185,8 +186,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                      lags      = 3
                  )
     forecaster.fit(y=y, exog=exog)
-    forecaster.in_sample_residuals = {1: pd.Series([1, 1, 1, 1, 1, 1, 1]),
-                                      2: pd.Series([5, 5, 5, 5, 5, 5, 5])}
+    forecaster.in_sample_residuals_ = {1: pd.Series([1, 1, 1, 1, 1, 1, 1]),
+                                       2: pd.Series([5, 5, 5, 5, 5, 5, 5])}
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=True)
     expected = pd.DataFrame(
                    data = np.array([[1.67523588, 1.67523588, 1.67523588, 1.67523588],

@@ -446,12 +446,6 @@ def _backtesting_forecaster(
         initial_train_size = window_size
         externally_fitted = True
 
-    # TODO: remove when all forecaster include differentiation
-    if type(forecaster).__name__ != 'ForecasterAutoregDirect':
-        differentiation = forecaster.differentiation
-    else:
-        differentiation = None
-
     folds = _create_backtesting_folds(
                 data                  = y,
                 window_size           = window_size,
@@ -464,7 +458,7 @@ def _backtesting_forecaster(
                 skip_folds            = skip_folds,
                 allow_incomplete_fold = allow_incomplete_fold,
                 return_all_indexes    = False,
-                differentiation       = differentiation,
+                differentiation       = forecaster.differentiation,
                 verbose               = verbose
             )
 
@@ -1089,7 +1083,7 @@ def _calculate_metrics_one_step_ahead(
     y_train: Union[pd.Series, dict],
     X_test: pd.DataFrame,
     y_test: Union[pd.Series, dict]
-):
+) -> list:
     """
     Calculate metrics when predictions are one-step-ahead. When forecaster is
     of type ForecasterAutoregDirect only the regressor for step 1 is used.
@@ -1110,6 +1104,11 @@ def _calculate_metrics_one_step_ahead(
         Predictor values used to test the model.
     y_test : pandas Series
         Target values related to each row of `X_test`.
+
+    Returns
+    -------
+    metric_values : list
+        List with metric values.
     
     """
 
@@ -1117,14 +1116,14 @@ def _calculate_metrics_one_step_ahead(
 
         step = 1  # Only model for step 1 is optimized.
         X_train, y_train = forecaster.filter_train_X_y_for_step(
-                                step    = step,
-                                X_train = X_train,
-                                y_train = y_train
+                               step    = step,
+                               X_train = X_train,
+                               y_train = y_train
                            )
         X_test, y_test = forecaster.filter_train_X_y_for_step(
-                            step    = step,  
-                            X_train = X_test,
-                            y_train = y_test
+                             step    = step,  
+                             X_train = X_test,
+                             y_train = y_test
                          )
         forecaster.regressors_[step].fit(X_train, y_train)
         pred = forecaster.regressors_[step].predict(X_test)
@@ -1137,7 +1136,7 @@ def _calculate_metrics_one_step_ahead(
     y_train = y_train.to_numpy()
     y_test = y_test.to_numpy()
 
-    if hasattr(forecaster, 'differentiation') and forecaster.differentiation:
+    if forecaster.differentiation is not None:
         differentiator = copy(forecaster.differentiator)
         differentiator.initial_values = (
             [y.iloc[forecaster.window_size_diff - forecaster.differentiation]]
@@ -1279,10 +1278,10 @@ def _evaluate_grid_hyperparameters(
     
     if method == 'one_step_ahead':
         warnings.warn(
-            "One-step-ahead predictions are used for faster model comparison, but they "
-            "may not fully represent multi-step prediction performance. It is recommended "
-            "to backtest the final model for a more accurate multi-step performance "
-            "estimate."
+            ("One-step-ahead predictions are used for faster model comparison, but they "
+             "may not fully represent multi-step prediction performance. It is recommended "
+             "to backtest the final model for a more accurate multi-step performance "
+             "estimate.")
         )
 
     if return_best and exog is not None and (len(exog) != len(y)):
@@ -1340,9 +1339,7 @@ def _evaluate_grid_hyperparameters(
                 X_test,
                 y_test
             ) = forecaster._train_test_split_one_step_ahead(
-                    y                   = y,
-                    initial_train_size  = initial_train_size,
-                    exog                = exog
+                y=y, initial_train_size=initial_train_size, exog=exog
             )
 
         for params in param_grid:
@@ -1739,10 +1736,10 @@ def _bayesian_search_optuna(
     
     if method == 'one_step_ahead':
         warnings.warn(
-            "One-step-ahead predictions are used for faster model comparison, but they "
-            "may not fully represent multi-step prediction performance. It is recommended "
-            "to backtest the final model for a more accurate multi-step performance "
-            "estimate."
+            ("One-step-ahead predictions are used for faster model comparison, but they "
+             "may not fully represent multi-step prediction performance. It is recommended "
+             "to backtest the final model for a more accurate multi-step performance "
+             "estimate.")
         )
     
     if not isinstance(metric, list):
@@ -1838,9 +1835,7 @@ def _bayesian_search_optuna(
                 X_test,
                 y_test
             ) = forecaster._train_test_split_one_step_ahead(
-                    y                   = y,
-                    initial_train_size  = initial_train_size,
-                    exog                = exog
+                y=y, initial_train_size=initial_train_size, exog=exog
             )
 
             metrics = _calculate_metrics_one_step_ahead(

@@ -540,7 +540,7 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
     if not isinstance(y_test, (pd.Series, dict)):
         raise TypeError(
             (f"`y_test` must be a pandas Series or a dictionary of pandas Series. "
-                f"Got: {type(y_test)}")
+             f"Got: {type(y_test)}")
         )
     if not isinstance(X_test_encoding, pd.Series):
         raise TypeError(
@@ -569,18 +569,17 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
         step = 1
         X_train, y_train = forecaster.filter_train_X_y_for_step(
-                                step    = step,
-                                X_train = X_train,
-                                y_train = y_train
-                            )
+                               step    = step,
+                               X_train = X_train,
+                               y_train = y_train
+                           )
         X_test, y_test = forecaster.filter_train_X_y_for_step(
-                            step    = step,  
-                            X_train = X_test,
-                            y_train = y_test
-                            )                 
+                             step    = step,  
+                             X_train = X_test,
+                             y_train = y_test
+                         )                 
         forecaster.regressors_[step].fit(X_train, y_train)
         pred = forecaster.regressors_[step].predict(X_test)
-
     else:
         forecaster.regressor.fit(X_train, y_train)
         pred = forecaster.regressor.predict(X_test)
@@ -595,16 +594,14 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
     ).groupby('_level_skforecast')
     predictions_per_level = {key: group for key, group in predictions_per_level}
 
-    y_train_per_level = pd.DataFrame({
-        'y_train': y_train,
-        '_level_skforecast': X_train_encoding
-        },
+    y_train_per_level = pd.DataFrame(
+        {"y_train": y_train, "_level_skforecast": X_train_encoding},
         index=y_train.index,
-    ).groupby('_level_skforecast')
+    ).groupby("_level_skforecast")
     # Interleaved Nan values were excluded fom y_train. They are reestored
     y_train_per_level = {key: group.asfreq(freq) for key, group in y_train_per_level}
 
-    if hasattr(forecaster, "differentiation") and forecaster.differentiation:
+    if forecaster.differentiation is not None:
         for level in predictions_per_level:
             differentiator = deepcopy(forecaster.differentiator_[level])
             differentiator.initial_values = [
@@ -1803,10 +1800,10 @@ def _evaluate_grid_hyperparameters_multiseries(
     
     if method == 'one_step_ahead':
         warnings.warn(
-            "One-step-ahead predictions are used for faster model comparison, but they "
-            "may not fully represent multi-step prediction performance. It is recommended "
-            "to backtest the final model for a more accurate multi-step performance "
-            "estimate."
+            ("One-step-ahead predictions are used for faster model comparison, but they "
+             "may not fully represent multi-step prediction performance. It is recommended "
+             "to backtest the final model for a more accurate multi-step performance "
+             "estimate.")
         )
 
     if return_best and exog is not None and (len(exog) != len(series)):
@@ -1892,10 +1889,8 @@ def _evaluate_grid_hyperparameters_multiseries(
                 X_train_encoding,
                 X_test_encoding
             ) = forecaster._train_test_split_one_step_ahead(
-                    series             = series,
-                    exog               = exog,
-                    initial_train_size = initial_train_size,
-                )
+                series=series, exog=exog, initial_train_size=initial_train_size
+            )
         
         for params in param_grid:
 
@@ -1927,18 +1922,18 @@ def _evaluate_grid_hyperparameters_multiseries(
             else:
 
                 metrics, _ = _predict_and_calculate_metrics_multiseries_one_step_ahead(
-                                forecaster            = forecaster,
-                                series                = series,
-                                X_train               = X_train,
-                                y_train               = y_train,
-                                X_train_encoding      = X_train_encoding,
-                                X_test                = X_test,
-                                y_test                = y_test,
-                                X_test_encoding       = X_test_encoding,
-                                levels                = levels,
-                                metrics               = metric,
-                                add_aggregated_metric = add_aggregated_metric
-                          )
+                    forecaster            = forecaster,
+                    series                = series,
+                    X_train               = X_train,
+                    y_train               = y_train,
+                    X_train_encoding      = X_train_encoding,
+                    X_test                = X_test,
+                    y_test                = y_test,
+                    X_test_encoding       = X_test_encoding,
+                    levels                = levels,
+                    metrics               = metric,
+                    add_aggregated_metric = add_aggregated_metric
+                )
 
             if add_aggregated_metric:
                 metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
@@ -2352,10 +2347,10 @@ def _bayesian_search_optuna_multiseries(
     
     if method == 'one_step_ahead':
         warnings.warn(
-            "One-step-ahead predictions are used for faster model comparison, but they "
-            "may not fully represent multi-step prediction performance. It is recommended "
-            "to backtest the final model for a more accurate multi-step performance "
-            "estimate."
+            ("One-step-ahead predictions are used for faster model comparison, but they "
+             "may not fully represent multi-step prediction performance. It is recommended "
+             "to backtest the final model for a more accurate multi-step performance "
+             "estimate.")
         )
     
     if isinstance(aggregate_metric, str):
@@ -2429,24 +2424,24 @@ def _bayesian_search_optuna_multiseries(
                     forecaster.set_lags(sample['lags'])
             
             metrics, _ = backtesting_forecaster_multiseries(
-                            forecaster            = forecaster,
-                            series                = series,
-                            exog                  = exog,
-                            steps                 = steps,
-                            levels                = levels,
-                            metric                = metric,
-                            add_aggregated_metric = add_aggregated_metric,
-                            initial_train_size    = initial_train_size,
-                            fixed_train_size      = fixed_train_size,
-                            gap                   = gap,
-                            skip_folds            = skip_folds,
-                            allow_incomplete_fold = allow_incomplete_fold,
-                            refit                 = refit,
-                            n_jobs                = n_jobs,
-                            verbose               = verbose,
-                            show_progress         = False,
-                            suppress_warnings     = suppress_warnings
-                        )
+                             forecaster            = forecaster,
+                             series                = series,
+                             exog                  = exog,
+                             steps                 = steps,
+                             levels                = levels,
+                             metric                = metric,
+                             add_aggregated_metric = add_aggregated_metric,
+                             initial_train_size    = initial_train_size,
+                             fixed_train_size      = fixed_train_size,
+                             gap                   = gap,
+                             skip_folds            = skip_folds,
+                             allow_incomplete_fold = allow_incomplete_fold,
+                             refit                 = refit,
+                             n_jobs                = n_jobs,
+                             verbose               = verbose,
+                             show_progress         = False,
+                             suppress_warnings     = suppress_warnings
+                         )
 
             if add_aggregated_metric:
                 metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
@@ -2476,9 +2471,7 @@ def _bayesian_search_optuna_multiseries(
             add_aggregated_metric = add_aggregated_metric,
             aggregate_metric      = aggregate_metric,
             metric_names          = metric_names,
-            initial_train_size    = initial_train_size,
-            verbose               = verbose,
-            suppress_warnings     = suppress_warnings
+            initial_train_size    = initial_train_size
         ) -> float:
             
             sample = search_space(trial)
@@ -2496,33 +2489,31 @@ def _bayesian_search_optuna_multiseries(
                 X_train_encoding,
                 X_test_encoding
             ) = forecaster._train_test_split_one_step_ahead(
-                    series             = series,
-                    exog               = exog,
-                    initial_train_size = initial_train_size,
-                )
+                series=series, exog=exog, initial_train_size=initial_train_size,
+            )
 
             metrics, _ = _predict_and_calculate_metrics_multiseries_one_step_ahead(
-                                forecaster            = forecaster,
-                                series                = series,
-                                X_train               = X_train,
-                                y_train               = y_train,
-                                X_train_encoding      = X_train_encoding,
-                                X_test                = X_test,
-                                y_test                = y_test,
-                                X_test_encoding       = X_test_encoding,
-                                levels                = levels,
-                                metrics               = metric,
-                                add_aggregated_metric = add_aggregated_metric
-                          )
+                forecaster            = forecaster,
+                series                = series,
+                X_train               = X_train,
+                y_train               = y_train,
+                X_train_encoding      = X_train_encoding,
+                X_test                = X_test,
+                y_test                = y_test,
+                X_test_encoding       = X_test_encoding,
+                levels                = levels,
+                metrics               = metric,
+                add_aggregated_metric = add_aggregated_metric
+            )
 
             if add_aggregated_metric:
                 metrics = metrics.loc[metrics['levels'].isin(aggregate_metric), :]
             else:
                 metrics = metrics.loc[metrics['levels'] == levels[0], :]
             metrics = pd.DataFrame(
-                        data    = [metrics.iloc[:, 1:].transpose().stack().to_numpy()],
-                        columns = metric_names
-                    )
+                          data    = [metrics.iloc[:, 1:].transpose().stack().to_numpy()],
+                          columns = metric_names
+                      )
             
             # Store metrics in the variable `metrics_list` defined outside _objective.
             nonlocal metrics_list

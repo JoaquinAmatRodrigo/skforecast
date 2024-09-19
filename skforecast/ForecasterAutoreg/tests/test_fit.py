@@ -32,19 +32,19 @@ def test_forecaster_y_exog_features_stored():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=y, exog=exog)
 
-    X_train_features_names_out_ = ['lag_1', 'lag_2', 'lag_3', 'exog']
     exog_in_ = True
     exog_type_in_ = type(exog)
     exog_names_in_ = ['exog']
     exog_dtypes_in_ = {'exog': exog.dtype}
     X_train_exog_names_out_ = ['exog']
-
-    assert forecaster.X_train_features_names_out_ == X_train_features_names_out_
+    X_train_features_names_out_ = ['lag_1', 'lag_2', 'lag_3', 'exog']
+    
     assert forecaster.exog_in_ == exog_in_
     assert forecaster.exog_type_in_ == exog_type_in_
     assert forecaster.exog_names_in_ == exog_names_in_
     assert forecaster.exog_dtypes_in_ == exog_dtypes_in_
     assert forecaster.X_train_exog_names_out_ == X_train_exog_names_out_
+    assert forecaster.X_train_features_names_out_ == X_train_features_names_out_
 
 
 def test_forecaster_DatetimeIndex_index_freq_stored():

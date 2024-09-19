@@ -1,6 +1,5 @@
 # Unit test _train_test_split_one_step_ahead ForecasterAutoreg
 # ==============================================================================
-
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
@@ -9,8 +8,9 @@ from sklearn.linear_model import LinearRegression
 
 def test_train_test_split_one_step_ahead_when_y_is_series_15_and_exog_is_dataframe_of_float_int():
     """
-    Test the output of create_train_X_y when y=pd.Series(np.arange(10)) and
-    exog is a pandas dataframe with 2 columns of floats or ints.
+    Test the output of _train_test_split_one_step_ahead when 
+    y=pd.Series(np.arange(10)) and exog is a pandas dataframe with 
+    2 columns of floats or ints.
     """
     y = pd.Series(
         np.arange(15), index=pd.date_range("2020-01-01", periods=15), dtype=float
@@ -43,7 +43,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_15_and_exog_is_datafra
             ["2020-01-06", "2020-01-07", "2020-01-08", "2020-01-09", "2020-01-10"],
             freq='D'
         ),
-    )
+    ).astype({'exog_2': int})
     expected_y_train = pd.Series(
         [5.0, 6.0, 7.0, 8.0, 9.0],
         index=pd.DatetimeIndex(
@@ -52,6 +52,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_15_and_exog_is_datafra
         ),
         name = 'y'
     )
+
     expected_X_test = pd.DataFrame(
         {
             "lag_1": [9.0, 10.0, 11.0, 12.0, 13.0],
@@ -66,8 +67,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_15_and_exog_is_datafra
             ["2020-01-11", "2020-01-12", "2020-01-13", "2020-01-14", "2020-01-15"],
             freq='D'
         ),
-    )
-
+    ).astype({'exog_2': int})
     expected_y_test = pd.Series(
         [10.0, 11.0, 12.0, 13.0, 14.0],
         index=pd.DatetimeIndex(

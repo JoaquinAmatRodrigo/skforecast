@@ -271,6 +271,8 @@ def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None(level, exp
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
+        None,
+        None,
         None
     )
 
@@ -283,6 +285,8 @@ def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None(level, exp
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert isinstance(results[4], type(None))
+    assert isinstance(results[5], type(None))
+    assert isinstance(results[6], type(None))
 
 
 @pytest.mark.parametrize("level, expected_y_values", 
@@ -328,6 +332,8 @@ def test_create_train_X_y_output_when_interspersed_lags_steps_2_and_exog_is_None
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
+        None,
+        None,
         None
     )
 
@@ -340,6 +346,8 @@ def test_create_train_X_y_output_when_interspersed_lags_steps_2_and_exog_is_None
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert isinstance(results[4], type(None))
+    assert isinstance(results[5], type(None))
+    assert isinstance(results[6], type(None))
 
 
 @pytest.mark.parametrize("level, expected_y_values", 
@@ -384,6 +392,8 @@ def test_create_train_X_y_output_when_lags_dict_steps_2_and_exog_is_None(level, 
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
+        None,
+        None,
         None
     )
 
@@ -396,6 +406,8 @@ def test_create_train_X_y_output_when_lags_dict_steps_2_and_exog_is_None(level, 
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert isinstance(results[4], type(None))
+    assert isinstance(results[5], type(None))
+    assert isinstance(results[6], type(None))
 
 
 @pytest.mark.parametrize("level, expected_y_values", 
@@ -441,6 +453,8 @@ def test_create_train_X_y_output_when_lags_dict_with_None_steps_2_and_exog_is_No
         },
         ['l1'] if forecaster.level == 'l1' else ['l1', 'l2'],
         ['l1'],
+        None,
+        None,
         None
     )
 
@@ -453,6 +467,8 @@ def test_create_train_X_y_output_when_lags_dict_with_None_steps_2_and_exog_is_No
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert isinstance(results[4], type(None))
+    assert isinstance(results[5], type(None))
+    assert isinstance(results[6], type(None))
 
 
 def test_create_train_X_y_output_when_y_and_exog_no_pandas_index():
@@ -491,7 +507,9 @@ def test_create_train_X_y_output_when_y_and_exog_no_pandas_index():
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog']
+        ['exog'],
+        ['exog'],
+        {'exog': exog.dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -503,11 +521,14 @@ def test_create_train_X_y_output_when_y_and_exog_no_pandas_index():
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 @pytest.mark.parametrize("dtype", 
                          [float, int], 
-                         ids = lambda dt : f'dtype: {dt}')
+                         ids = lambda dt: f'dtype: {dt}')
 def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_float_int(dtype):
     """
     Test output of _create_train_X_y when regressor is LinearRegression, 
@@ -542,7 +563,9 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_float
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog']
+        ['exog'],
+        ['exog'],
+        {'exog': exog.dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -554,11 +577,14 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_float
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 @pytest.mark.parametrize("dtype", 
                          [float, int], 
-                         ids = lambda dt : f'dtype: {dt}')
+                         ids = lambda dt: f'dtype: {dt}')
 def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_float_int(dtype):
     """
     Test output of _create_train_X_y when regressor is LinearRegression, 
@@ -597,7 +623,9 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_float
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog']
+        ['exog'],
+        ['exog'],
+        {'exog': exog.dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -609,11 +637,14 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_float
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 @pytest.mark.parametrize("dtype", 
                          [float, int], 
-                         ids = lambda dt : f'dtype: {dt}')
+                         ids = lambda dt: f'dtype: {dt}')
 def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_float_int(dtype):
     """
     Test output of _create_train_X_y when regressor is LinearRegression, 
@@ -621,8 +652,8 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_fl
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(10), dtype=float), 
                            'l2': pd.Series(np.arange(50, 60), dtype=float)})
-    exog   = pd.DataFrame({'exog_1' : np.arange(100, 110, dtype=dtype),
-                           'exog_2' : np.arange(1000, 1010, dtype=dtype)})
+    exog   = pd.DataFrame({'exog_1': np.arange(100, 110, dtype=dtype),
+                           'exog_2': np.arange(1000, 1010, dtype=dtype)})
     
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
                                                lags=5, steps=1, transformer_series=None)
@@ -649,7 +680,9 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_fl
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog_1', 'exog_2']
+        ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['exog_1'].dtype, 'exog_2': exog['exog_2'].dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -661,11 +694,14 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_fl
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 @pytest.mark.parametrize("dtype", 
                          [float, int], 
-                         ids = lambda dt : f'dtype: {dt}')
+                         ids = lambda dt: f'dtype: {dt}')
 def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_float_int(dtype):
     """
     Test output of _create_train_X_y when regressor is LinearRegression, 
@@ -713,7 +749,9 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_fl
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog_1', 'exog_2']
+        ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['exog_1'].dtype, 'exog_2': exog['exog_2'].dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -725,12 +763,15 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_fl
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 @pytest.mark.parametrize("exog_values, dtype", 
                          [([True]    , bool), 
                           (['string'], str)], 
-                         ids = lambda dt : f'values, dtype: {dt}')
+                         ids = lambda dt: f'values, dtype: {dt}')
 def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_bool_str(exog_values, dtype):
     """
     Test output of _create_train_X_y when regressor is LinearRegression, 
@@ -738,7 +779,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_bool_
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(10), dtype=float), 
                            'l2': pd.Series(np.arange(50, 60), dtype=float)})
-    exog = pd.Series(exog_values*10, name='exog', dtype=dtype)
+    exog = pd.Series(exog_values * 10, name='exog', dtype=dtype)
 
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
                                                lags=5, steps=1, transformer_series=None)
@@ -755,7 +796,7 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_bool_
             index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
-        ).assign(exog_step_1=exog_values*5).astype({'exog_step_1': dtype}),
+        ).assign(exog_step_1=exog_values * 5).astype({'exog_step_1': dtype}),
         {1: pd.Series(
                 data  = np.array([5., 6., 7., 8., 9.], dtype=float), 
                 index = pd.RangeIndex(start=5, stop=10, step=1),
@@ -764,7 +805,9 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_bool_
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog']
+        ['exog'],
+        ['exog'],
+        {'exog': exog.dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -776,12 +819,15 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_bool_
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 @pytest.mark.parametrize("exog_values, dtype", 
                          [([True]    , bool), 
                           (['string'], str)], 
-                         ids = lambda dt : f'values, dtype: {dt}')
+                         ids = lambda dt: f'values, dtype: {dt}')
 def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_bool_str(exog_values, dtype):
     """
     Test output of _create_train_X_y when regressor is LinearRegression, 
@@ -789,7 +835,7 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_bool_
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(10), dtype=float), 
                            'l2': pd.Series(np.arange(50, 60), dtype=float)})
-    exog = pd.Series(exog_values*10, name='exog', dtype=dtype)
+    exog = pd.Series(exog_values * 10, name='exog', dtype=dtype)
 
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
                                                lags=5, steps=2, transformer_series=None)
@@ -805,8 +851,8 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_bool_
             index = pd.RangeIndex(start=6, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
-        ).assign(exog_step_1=exog_values*4,
-                 exog_step_2=exog_values*4).astype({'exog_step_1': dtype, 
+        ).assign(exog_step_1=exog_values * 4,
+                 exog_step_2=exog_values * 4).astype({'exog_step_1': dtype, 
                                                     'exog_step_2': dtype}),
         {1: pd.Series(
                 data  = np.array([5., 6., 7., 8.], dtype=float), 
@@ -821,7 +867,9 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_bool_
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog']
+        ['exog'],
+        ['exog'],
+        {'exog': exog.dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -833,12 +881,15 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_bool_
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 @pytest.mark.parametrize("v_exog_1   , v_exog_2  , dtype", 
                          [([True]    , [False]   , bool), 
                           (['string'], ['string'], str)], 
-                         ids = lambda dt : f'values, dtype: {dt}')
+                         ids = lambda dt: f'values, dtype: {dt}')
 def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_bool_str(v_exog_1, v_exog_2, dtype):
     """
     Test output of _create_train_X_y when regressor is LinearRegression, 
@@ -846,8 +897,8 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_bo
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(10), dtype=float), 
                            'l2': pd.Series(np.arange(50, 60), dtype=float)})
-    exog = pd.DataFrame({'exog_1': v_exog_1*10,
-                         'exog_2': v_exog_2*10})
+    exog = pd.DataFrame({'exog_1': v_exog_1 * 10,
+                         'exog_2': v_exog_2 * 10})
     
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
                                                lags=5, steps=1, transformer_series=None)
@@ -864,9 +915,9 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_bo
             index = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
-        ).assign(exog_1_step_1=v_exog_1*5,
-                 exog_2_step_1=v_exog_2*5).astype({'exog_1_step_1': dtype, 
-                                                   'exog_2_step_1': dtype}),
+        ).assign(exog_1_step_1=v_exog_1 * 5,
+                 exog_2_step_1=v_exog_2 * 5).astype({'exog_1_step_1': dtype, 
+                                                     'exog_2_step_1': dtype}),
         {1: pd.Series(
                 data  = np.array([55., 56., 57., 58., 59.], dtype=float), 
                 index = pd.RangeIndex(start=5, stop=10, step=1),
@@ -875,7 +926,9 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_bo
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog_1', 'exog_2']
+        ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['exog_1'].dtype, 'exog_2': exog['exog_2'].dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -887,12 +940,15 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_bo
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 @pytest.mark.parametrize("v_exog_1   , v_exog_2  , dtype", 
                          [([True]    , [False]   , bool), 
                           (['string'], ['string'], str)], 
-                         ids = lambda dt : f'values, dtype: {dt}')
+                         ids = lambda dt: f'values, dtype: {dt}')
 def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_bool_str(v_exog_1, v_exog_2, dtype):
     """
     Test output of _create_train_X_y when regressor is LinearRegression, 
@@ -900,8 +956,8 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_bo
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(10), dtype=float), 
                            'l2': pd.Series(np.arange(50, 60), dtype=float)})
-    exog = pd.DataFrame({'exog_1': v_exog_1*10,
-                         'exog_2': v_exog_2*10})
+    exog = pd.DataFrame({'exog_1': v_exog_1 * 10,
+                         'exog_2': v_exog_2 * 10})
     
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l2',
                                                lags=5, steps=3, transformer_series=None)
@@ -916,12 +972,12 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_bo
             index = pd.RangeIndex(start=7, stop=10, step=1),
             columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
                        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
-        ).assign(exog_1_step_1=v_exog_1*3,
-                 exog_2_step_1=v_exog_2*3,
-                 exog_1_step_2=v_exog_1*3,
-                 exog_2_step_2=v_exog_2*3,
-                 exog_1_step_3=v_exog_1*3,
-                 exog_2_step_3=v_exog_2*3
+        ).assign(exog_1_step_1=v_exog_1 * 3,
+                 exog_2_step_1=v_exog_2 * 3,
+                 exog_1_step_2=v_exog_1 * 3,
+                 exog_2_step_2=v_exog_2 * 3,
+                 exog_1_step_3=v_exog_1 * 3,
+                 exog_2_step_3=v_exog_2 * 3
         ).astype({'exog_1_step_1': dtype, 'exog_2_step_1': dtype, 
                   'exog_1_step_2': dtype, 'exog_2_step_2': dtype, 
                   'exog_1_step_3': dtype, 'exog_2_step_3': dtype}
@@ -944,7 +1000,9 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_bo
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog_1', 'exog_2']
+        ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['exog_1'].dtype, 'exog_2': exog['exog_2'].dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -956,6 +1014,9 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_bo
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_category():
@@ -991,7 +1052,9 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_categ
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog']
+        ['exog'],
+        ['exog'],
+        {'exog': exog.dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -1003,6 +1066,9 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_series_of_categ
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_category():
@@ -1043,7 +1109,9 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_categ
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog']
+        ['exog'],
+        ['exog'],
+        {'exog': exog.dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -1055,6 +1123,9 @@ def test_create_train_X_y_output_when_lags_5_steps_2_and_exog_is_series_of_categ
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_category():
@@ -1094,7 +1165,9 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_ca
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog_1', 'exog_2']
+        ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['exog_1'].dtype, 'exog_2': exog['exog_2'].dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -1106,6 +1179,9 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_exog_is_dataframe_of_ca
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_category():
@@ -1157,7 +1233,9 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_ca
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog_1', 'exog_2']
+        ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['exog_1'].dtype, 'exog_2': exog['exog_2'].dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -1169,6 +1247,9 @@ def test_create_train_X_y_output_when_lags_5_steps_3_and_exog_is_dataframe_of_ca
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_float_int_category_steps_1():
@@ -1208,7 +1289,9 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog_1', 'exog_2', 'exog_3']
+        ['exog_1', 'exog_2', 'exog_3'],
+        ['exog_1', 'exog_2', 'exog_3'],
+        {'exog_1': exog['exog_1'].dtype, 'exog_2': exog['exog_2'].dtype, 'exog_3': exog['exog_3'].dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -1220,6 +1303,9 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_float_int_category_steps_3():
@@ -1273,7 +1359,9 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['exog_1', 'exog_2', 'exog_3']
+        ['exog_1', 'exog_2', 'exog_3'],
+        ['exog_1', 'exog_2', 'exog_3'],
+        {'exog_1': exog['exog_1'].dtype, 'exog_2': exog['exog_2'].dtype, 'exog_3': exog['exog_3'].dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -1285,12 +1373,15 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 @pytest.mark.parametrize("transformer_series", 
                          [StandardScaler(),
                           {'l1': StandardScaler(), 'l2': StandardScaler()}], 
-                         ids = lambda tr : f'transformer_series: {tr}')
+                         ids = lambda tr: f'transformer_series: {tr}')
 def test_create_train_X_y_output_when_lags_5_steps_1_and_transformer_series_StandardScaler(transformer_series):
     """
     Test the output of _create_train_X_y when exog is None and transformer_series
@@ -1333,6 +1424,8 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_transformer_series_Stan
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
+        None,
+        None,
         None
     )
 
@@ -1345,6 +1438,8 @@ def test_create_train_X_y_output_when_lags_5_steps_1_and_transformer_series_Stan
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert isinstance(results[4], type(None))
+    assert isinstance(results[5], type(None))
+    assert isinstance(results[6], type(None))
 
 
 @pytest.mark.parametrize("level, expected_y_values", 
@@ -1385,6 +1480,8 @@ def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None_and_transf
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
+        None,
+        None,
         None
     )
 
@@ -1397,12 +1494,14 @@ def test_create_train_X_y_output_when_lags_3_steps_1_and_exog_is_None_and_transf
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert isinstance(results[4], type(None))
+    assert isinstance(results[5], type(None))
+    assert isinstance(results[6], type(None))
 
 
 @pytest.mark.parametrize("transformer_series", 
                          [StandardScaler(),
                           {'l1': StandardScaler(), 'l2': StandardScaler()}], 
-                         ids = lambda tr : f'transformer_series: {tr}')
+                         ids = lambda tr: f'transformer_series: {tr}')
 def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_steps_2(transformer_series):
     """
     Test the output of _create_train_X_y when using transformer_series and 
@@ -1470,7 +1569,9 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_st
         },
         ['l1', 'l2'],
         ['l1', 'l2'],
-        ['col_1', 'col_2']
+        ['col_1', 'col_2'],
+        ['col_1', 'col_2_a', 'col_2_b'],
+        {'col_1': exog['col_1'].dtype, 'col_2': exog['col_2'].dtype}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
@@ -1482,3 +1583,6 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_st
     assert results[2] == expected[2]
     assert results[3] == expected[3]
     assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]

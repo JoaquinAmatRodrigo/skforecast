@@ -38,6 +38,7 @@ from ..utils import input_to_frame
 from ..utils import exog_to_direct
 from ..utils import exog_to_direct_numpy
 from ..utils import expand_index
+from ..utils import transform_numpy
 from ..utils import transform_series
 from ..utils import transform_dataframe
 from ..utils import select_n_jobs_fit_forecaster
@@ -130,41 +131,48 @@ class ForecasterAutoregDirect(ForecasterBase):
     window_size_diff : int
         This attribute has the same value as window_size as this Forecaster 
         doesn't support differentiation.
-    last_window : pandas DataFrame
+    last_window_ : pandas DataFrame
         Last window the forecaster has seen during training. It stores the
         values needed to predict `steps` immediately after the training data.
-    index_type : type
+    index_type_ : type
         Type of index of the input used in training.
-    index_freq : str
+    index_freq_ : str
         Frequency of Index of the input used in training.
-    training_range : pandas Index
+    training_range_ : pandas Index
         First and last values of index of the data used during training.
-    included_exog : bool
+    exog_in_ : bool
         If the forecaster has been trained using exogenous variable/s.
-    exog_type : type
+    exog_names_in_ : list
+        Names of the exogenous variables used during training.
+    exog_type_in_ : type
         Type of exogenous variable/s used in training.
-    exog_dtypes : dict
+    exog_dtypes_in_ : dict
         Type of each exogenous variable/s used in training. If `transformer_exog` 
         is used, the dtypes are calculated after the transformation.
-    exog_col_names : list
-        Names of the exogenous variables used during training.
-    X_train_col_names : list
+    X_train_exog_names_out_ : list
+        Names of the exogenous variables included in the matrix `X_train` created
+        internally for training. It can be different from `exog_names_in_` if
+        some exogenous variables are transformed during the training process.
+    X_train_direct_exog_names_out_ : list
+        Same as `X_train_exog_names_out_` but using the direct format. The same 
+        exogenous variable is repeated for each step.
+    X_train_features_names_out_ : list
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
-    in_sample_residuals : dict
+    in_sample_residuals_ : dict
         Residuals of the models when predicting training data. Only stored up to
         1000 values per model in the form `{step: residuals}`. If `transformer_y` 
         is not `None`, residuals are stored in the transformed scale.
-    out_sample_residuals : dict
+    out_sample_residuals_ : dict
         Residuals of the models when predicting non training data. Only stored
         up to 1000 values per model in the form `{step: residuals}`. If `transformer_y` 
         is not `None`, residuals are assumed to be in the transformed scale. Use 
         `set_out_sample_residuals()` method to set values.
-    fitted : bool
-        Tag to identify if the regressor has been fitted (trained).
     creation_date : str
         Date of creation.
+    is_fitted : bool
+        Tag to identify if the regressor has been fitted (trained).
     fit_date : str
         Date of last fit.
     skforecast_version : str
@@ -175,9 +183,12 @@ class ForecasterAutoregDirect(ForecasterBase):
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_fit_forecaster.
-        **New in version 0.9.0**
     forecaster_id : str, int
         Name used as an identifier of the forecaster.
+    differentiation : Ignored
+        Not used, present here for API consistency by convention.
+    differentiator : Ignored
+        Not used, present here for API consistency by convention.
 
     Notes
     -----
@@ -199,27 +210,31 @@ class ForecasterAutoregDirect(ForecasterBase):
         forecaster_id: Optional[Union[str, int]] = None,
     ) -> None:
         
-        self.regressor               = copy(regressor)
-        self.steps                   = steps
-        self.transformer_y           = transformer_y
-        self.transformer_exog        = transformer_exog
-        self.weight_func             = weight_func
-        self.source_code_weight_func = None
-        self.last_window             = None
-        self.index_type              = None
-        self.index_freq              = None
-        self.training_range          = None
-        self.included_exog           = False
-        self.exog_type               = None
-        self.exog_dtypes             = None
-        self.exog_col_names          = None
-        self.X_train_col_names       = None
-        self.fitted                  = False
-        self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.fit_date                = None
-        self.skforecast_version      = skforecast.__version__
-        self.python_version          = sys.version.split(" ")[0]
-        self.forecaster_id           = forecaster_id
+        self.regressor                      = copy(regressor)
+        self.steps                          = steps
+        self.transformer_y                  = transformer_y
+        self.transformer_exog               = transformer_exog
+        self.weight_func                    = weight_func
+        self.source_code_weight_func        = None
+        self.last_window_                   = None
+        self.index_type_                    = None
+        self.index_freq_                    = None
+        self.training_range_                = None
+        self.exog_in_                       = False
+        self.exog_names_in_                 = None
+        self.exog_type_in_                  = None
+        self.exog_dtypes_in_                = None
+        self.X_train_exog_names_out_        = None
+        self.X_train_direct_exog_names_out_ = None
+        self.X_train_features_names_out_    = None
+        self.creation_date                  = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.is_fitted                      = False
+        self.fit_date                       = None
+        self.skforecast_version             = skforecast.__version__
+        self.python_version                 = sys.version.split(" ")[0]
+        self.forecaster_id                  = forecaster_id
+        self.differentiation                = None
+        self.differentiator                 = None
 
         if not isinstance(steps, int):
             raise TypeError(
@@ -255,8 +270,8 @@ class ForecasterAutoregDirect(ForecasterBase):
                               fit_kwargs = fit_kwargs
                           )
 
-        self.in_sample_residuals = {step: None for step in range(1, steps + 1)}
-        self.out_sample_residuals = None
+        self.in_sample_residuals_ = {step: None for step in range(1, steps + 1)}
+        self.out_sample_residuals_ = None
 
         if n_jobs == 'auto':
             self.n_jobs = select_n_jobs_fit_forecaster(
@@ -265,7 +280,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                           )
         else:
             self.n_jobs = n_jobs if n_jobs > 0 else cpu_count()
-    
+
 
     def __repr__(
         self
@@ -279,17 +294,18 @@ class ForecasterAutoregDirect(ForecasterBase):
             params = {key: value for key, value in self.regressor.get_params().items()
                       if key.startswith(name_pipe_steps)}
         else:
-            params = self.regressor.get_params()
+            params = self.regressor.get_params(deep=True)
         params = "\n    " + textwrap.fill(str(params), width=80, subsequent_indent="    ")
 
-        exog_col_names = copy(self.exog_col_names)
-        if exog_col_names is not None:
-            if len(exog_col_names) > 50:
-                exog_col_names = exog_col_names[:50] + ["..."]
-            exog_col_names = ", ".join(exog_col_names)
-            if len(exog_col_names) > 58:
-                exog_col_names = "\n    " + textwrap.fill(
-                    exog_col_names, width=80, subsequent_indent="    "
+        exog_names_in_ = None
+        if self.exog_names_in_ is not None:
+            exog_names_in_ = copy(self.exog_names_in_)
+            if len(exog_names_in_) > 50:
+                exog_names_in_ = exog_names_in_[:50] + ["..."]
+            exog_names_in_ = ", ".join(exog_names_in_)
+            if len(exog_names_in_) > 58:
+                exog_names_in_ = "\n    " + textwrap.fill(
+                    exog_names_in_, width=80, subsequent_indent="    "
                 )
 
         info = (
@@ -300,14 +316,14 @@ class ForecasterAutoregDirect(ForecasterBase):
             f"Lags: {self.lags} \n"
             f"Window size: {self.window_size} \n"
             f"Maximum steps to predict: {self.steps} \n"
-            f"Exogenous included: {self.included_exog} \n"
-            f"Exogenous names: {exog_col_names} \n"
+            f"Exogenous included: {self.exog_in_} \n"
+            f"Exogenous names: {exog_names_in_} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
             f"Weight function included: {True if self.weight_func is not None else False} \n"
-            f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
-            f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
-            f"Training index frequency: {self.index_freq if self.fitted else None} \n"
+            f"Training range: {self.training_range_.to_list() if self.is_fitted else None} \n"
+            f"Training index type: {str(self.index_type_).split('.')[-1][:-2] if self.is_fitted else None} \n"
+            f"Training index frequency: {self.index_freq_ if self.is_fitted else None} \n"
             f"Regressor parameters: {params} \n"
             f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
@@ -365,57 +381,6 @@ class ForecasterAutoregDirect(ForecasterBase):
             y_data[step, ] = y[self.max_lag + step : self.max_lag + step + n_splits]
             
         return X_data, y_data
-    
-
-    def _train_test_split_one_step_ahead(
-        self,
-        y: pd.Series,
-        initial_train_size: int,
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None
-    ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
-        
-        """
-        Create matrices needed to train and test the forecaster for one-step-ahead
-        predictions.
-
-        Parameters
-        ----------
-        series : pandas Series, pandas DataFrame, dict
-            Training time series.
-        initial_train_size : int
-            Initial size of the training set. It is the number of observations used
-            to train the forecaster before making the first prediction.
-        exog : pandas Series, pandas DataFrame, dict, default `None`
-            Exogenous variable/s included as predictor/s. Must have the same number
-            of observations as `series` and their indexes must be aligned.
-        
-        Returns
-        -------
-        X_train : pandas DataFrame
-            Training values (predictors).
-        y_train : pandas Series
-            Values (target) of the time series related to each row of `X_train`.
-        X_test : pandas DataFrame
-            Test values (predictors).
-        y_test : pandas Series
-            Values (target) of the time series related to each row of `X_test`.
-        """
-
-        is_fitted = self.fitted
-        self.fitted = False
-        X_train, y_train = self.create_train_X_y(
-            y    = y.iloc[: initial_train_size],
-            exog = exog.iloc[: initial_train_size] if exog is not None else None
-        )
-        test_init = initial_train_size - self.window_size_diff
-        self.fitted = True
-        X_test, y_test = self.create_train_X_y(
-            y    = y.iloc[test_init:],
-            exog = exog.iloc[test_init:] if exog is not None else None
-        )
-        self.fitted = is_fitted
-
-        return X_train, y_train, X_test, y_test
 
 
     def create_train_X_y(
@@ -461,7 +426,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         check_y(y=y)
         y = input_to_frame(data=y, input_name='y')
 
-        fit_transformer = False if self.fitted else True
+        fit_transformer = False if self.is_fitted else True
         y = transform_dataframe(
                 df                = y, 
                 transformer       = self.transformer_y,
@@ -479,7 +444,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                      f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
                 )
             # Need here for filter_train_X_y_for_step to work without fitting
-            self.included_exog = True
+            self.exog_in_ = True
 
             exog = transform_dataframe(
                        df                = exog,
@@ -498,10 +463,9 @@ class ForecasterAutoregDirect(ForecasterBase):
                 )
 
         X_train, y_train = self._create_lags(y=y_values)
-        X_train_col_names = [f"lag_{i}" for i in self.lags]
         X_train = pd.DataFrame(
                       data    = X_train,
-                      columns = X_train_col_names,
+                      columns = [f"lag_{i}" for i in self.lags],
                       index   = y_index[self.max_lag + (self.steps - 1):]
                   )
 
@@ -515,10 +479,11 @@ class ForecasterAutoregDirect(ForecasterBase):
                             ).iloc[-X_train.shape[0]:, :]
             exog_to_train.index = exog_index[-X_train.shape[0]:]
             X_train = pd.concat((X_train, exog_to_train), axis=1)
-
-        # TODO: move self to fit method and make X_train_col_names a return
-        if not self.fitted:
-            self.X_train_col_names = X_train.columns.to_list()
+            # TODO: move self to fit method and make X_train_exog_names_out_ a return
+            # Maybe Need X_train_direct_exog_names_out_ here for filter_train_X_y_for_step to work without fitting
+            if not self.is_fitted:
+                self.X_train_exog_names_out_ = exog.columns.to_list()
+                self.X_train_direct_exog_names_out_ = exog_to_train.columns.to_list()
 
         y_train = {step: pd.Series(
                              data  = y_train[step - 1], 
@@ -574,11 +539,11 @@ class ForecasterAutoregDirect(ForecasterBase):
         y_train_step = y_train[step]
 
         # Matrix X_train starts at index 0.
-        if not self.included_exog:
+        if not self.exog_in_:
             X_train_step = X_train
         else:
             idx_columns_lags = np.arange(len(self.lags))
-            n_exog = (len(self.X_train_col_names) - len(self.lags)) / self.steps
+            n_exog = len(self.X_train_direct_exog_names_out_) / self.steps
             idx_columns_exog = (
                 np.arange((step - 1) * n_exog, (step) * n_exog) + idx_columns_lags[-1] + 1
             )
@@ -593,6 +558,60 @@ class ForecasterAutoregDirect(ForecasterBase):
             y_train_step.name = y_train_step.name.replace(f"_step_{step}", "")
 
         return X_train_step, y_train_step
+    
+
+    def _train_test_split_one_step_ahead(
+        self,
+        y: pd.Series,
+        initial_train_size: int,
+        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None
+    ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
+        
+        """
+        Create matrices needed to train and test the forecaster for one-step-ahead
+        predictions.
+
+        Parameters
+        ----------
+        series : pandas Series, pandas DataFrame, dict
+            Training time series.
+        initial_train_size : int
+            Initial size of the training set. It is the number of observations used
+            to train the forecaster before making the first prediction.
+        exog : pandas Series, pandas DataFrame, dict, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same number
+            of observations as `series` and their indexes must be aligned.
+        
+        Returns
+        -------
+        X_train : pandas DataFrame
+            Training values (predictors).
+        y_train : pandas Series
+            Values (target) of the time series related to each row of `X_train`.
+        X_test : pandas DataFrame
+            Test values (predictors).
+        y_test : pandas Series
+            Values (target) of the time series related to each row of `X_test`.
+        
+        """
+
+        is_fitted = self.is_fitted
+        self.is_fitted = False
+        X_train, y_train = self.create_train_X_y(
+            y    = y.iloc[: initial_train_size],
+            exog = exog.iloc[: initial_train_size] if exog is not None else None
+        )
+
+        test_init = initial_train_size - self.window_size_diff
+        self.is_fitted = True
+        X_test, y_test = self.create_train_X_y(
+            y    = y.iloc[test_init:],
+            exog = exog.iloc[test_init:] if exog is not None else None
+        )
+
+        self.is_fitted = is_fitted
+
+        return X_train, y_train, X_test, y_test
 
 
     def create_sample_weights(
@@ -661,10 +680,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
         store_last_window : bool, default `True`
-            Whether or not to store the last window of training data.
+            Whether or not to store the last window (`last_window_`) of training data.
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
-            after fitting.
+            after fitting (`in_sample_residuals_` attribute).
 
         Returns
         -------
@@ -673,17 +692,20 @@ class ForecasterAutoregDirect(ForecasterBase):
         """
 
         # Reset values in case the forecaster has already been fitted.
-        self.index_type          = None
-        self.index_freq          = None
-        self.last_window         = None
-        self.included_exog       = False
-        self.exog_type           = None
-        self.exog_dtypes         = None
-        self.exog_col_names      = None
-        self.X_train_col_names   = None
-        self.in_sample_residuals = {step: None for step in range(1, self.steps + 1)}
-        self.fitted              = False
-        self.training_range      = None
+        self.last_window_                   = None
+        self.index_type_                    = None
+        self.index_freq_                    = None
+        self.training_range_                = None
+        self.exog_in_                       = False
+        self.exog_names_in_                 = None
+        self.exog_type_in_                  = None
+        self.exog_dtypes_in_                = None
+        self.X_train_exog_names_out_        = None
+        self.X_train_direct_exog_names_out_ = None
+        self.X_train_features_names_out_    = None
+        self.in_sample_residuals_           = {step: None for step in range(1, self.steps + 1)}
+        self.is_fitted                      = False
+        self.fit_date                       = None
 
         X_train, y_train = self.create_train_X_y(y=y, exog=exog)
 
@@ -703,7 +725,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 Step of the forecaster to be fitted.
             store_in_sample_residuals : bool
                 If `True`, in-sample residuals will be stored in the forecaster object
-                after fitting.
+                after fitting (`in_sample_residuals_` attribute).
             
             Returns
             -------
@@ -768,30 +790,32 @@ class ForecasterAutoregDirect(ForecasterBase):
                             for step, regressor, _ in results_fit}
 
         if store_in_sample_residuals:
-            self.in_sample_residuals = {step: residuals 
-                                        for step, _, residuals in results_fit}
+            self.in_sample_residuals_ = {step: residuals 
+                                         for step, _, residuals in results_fit}
+            
+        self.X_train_features_names_out_ = X_train.columns.to_list()
 
-        self.fitted = True
+        self.is_fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.training_range = preprocess_y(y=y, return_values=False)[1][[0, -1]]
-        self.index_type = type(X_train.index)
+        self.training_range_ = preprocess_y(y=y, return_values=False)[1][[0, -1]]
+        self.index_type_ = type(X_train.index)
         if isinstance(X_train.index, pd.DatetimeIndex):
-            self.index_freq = X_train.index.freqstr
+            self.index_freq_ = X_train.index.freqstr
         else: 
-            self.index_freq = X_train.index.step
+            self.index_freq_ = X_train.index.step
 
         if exog is not None:
-            self.included_exog = True
-            self.exog_type = type(exog)
-            self.exog_dtypes = get_exog_dtypes(exog=exog)
-            self.exog_col_names = (
+            self.exog_in_ = True
+            self.exog_type_in_ = type(exog)
+            self.exog_dtypes_in_ = get_exog_dtypes(exog=exog)
+            self.exog_names_in_ = (
                 exog.columns.to_list()
                 if isinstance(exog, pd.DataFrame)
                 else [exog.name]
             )
 
         if store_last_window:
-            self.last_window = (
+            self.last_window_ = (
                 y.iloc[-self.window_size_diff:]
                 .copy()
                 .to_frame(name=y.name if y.name is not None else 'y')
@@ -802,8 +826,9 @@ class ForecasterAutoregDirect(ForecasterBase):
         self,
         steps: Optional[Union[int, list]] = None,
         last_window: Optional[Union[pd.Series, pd.DataFrame]] = None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
-    ) -> Tuple[list, list, pd.Index, list]:
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        check_inputs: bool = True
+    ) -> Tuple[list, list, list, pd.Index]:
         """
         Create the inputs needed for the prediction process.
         
@@ -821,22 +846,26 @@ class ForecasterAutoregDirect(ForecasterBase):
         last_window : pandas Series, pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed to 
             predict `steps`.
-            If `last_window = None`, the values stored in `self.last_window` are
+            If `last_window = None`, the values stored in `self.last_window_` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
+        check_inputs : bool, default `True`
+            If `True`, the input is checked for possible warnings and errors 
+            with the `check_predict_input` function. This argument is created 
+            for internal use and is not recommended to be changed.
 
         Returns
         -------
         Xs : list
             List of numpy arrays with the predictors for each step.
-        steps : list
-            Steps to predict.
-        last_window_index : pandas Index
-            Last window Index.
         Xs_col_names : list
             Names of the columns of the matrix created internally for prediction.
+        steps : list
+            Steps to predict.
+        prediction_index : pandas Index
+            Index of the predictions.
         
         """
         
@@ -846,34 +875,43 @@ class ForecasterAutoregDirect(ForecasterBase):
                 )
 
         if last_window is None:
-            last_window = self.last_window
+            last_window = self.last_window_
 
-        check_predict_input(
-            forecaster_name  = type(self).__name__,
-            steps            = steps,
-            fitted           = self.fitted,
-            included_exog    = self.included_exog,
-            index_type       = self.index_type,
-            index_freq       = self.index_freq,
-            window_size      = self.window_size_diff,
-            last_window      = last_window,
-            last_window_exog = None,
-            exog             = exog,
-            exog_type        = self.exog_type,
-            exog_col_names   = self.exog_col_names,
-            interval         = None,
-            alpha            = None,
-            max_steps        = None,
-            levels           = None,
-            series_col_names = None
-        )
+        if check_inputs:
+            check_predict_input(
+                forecaster_name  = type(self).__name__,
+                steps            = steps,
+                is_fitted        = self.is_fitted,
+                exog_in_         = self.exog_in_,
+                index_type_      = self.index_type_,
+                index_freq_      = self.index_freq_,
+                window_size      = self.window_size_diff,
+                last_window      = last_window,
+                exog             = exog,
+                exog_type_in_    = self.exog_type_in_,
+                exog_names_in_   = self.exog_names_in_,
+                interval         = None,
+                max_steps        = None
+            )
 
         last_window = last_window.iloc[-self.window_size_diff:].copy()
-        last_window = input_to_frame(data=last_window, input_name='last_window')
+        last_window_values, last_window_index = preprocess_last_window(
+                                                    last_window = last_window
+                                                )
+
+        last_window_values = transform_numpy(
+                                 array             = last_window_values,
+                                 transformer       = self.transformer_y,
+                                 fit               = False,
+                                 inverse_transform = False
+                             )
+        
+        X_lags = last_window_values[-self.lags].reshape(1, -1)
+        Xs_col_names = [f"lag_{i}" for i in self.lags]
 
         if exog is not None:
             exog = input_to_frame(data=exog, input_name='exog')
-            exog = exog.loc[:, self.exog_col_names]
+            exog = exog.loc[:, self.exog_names_in_]
             exog = transform_dataframe(
                        df                = exog,
                        transformer       = self.transformer_exog,
@@ -885,34 +923,29 @@ class ForecasterAutoregDirect(ForecasterBase):
                               exog  = exog.to_numpy()[:max(steps)],
                               steps = max(steps)
                           )[0]
-        else:
-            exog_values = None
-
-        last_window = transform_dataframe(
-                          df                = last_window,
-                          transformer       = self.transformer_y,
-                          fit               = False,
-                          inverse_transform = False
-                      )
-        last_window_values, last_window_index = preprocess_last_window(
-                                                    last_window = last_window
-                                                )
-        
-        X_lags = last_window_values[-self.lags].reshape(1, -1)
-        Xs_col_names = [f"lag_{i}" for i in self.lags]
-        if exog is None:
-            Xs = [X_lags] * len(steps)
-        else:
+            
             n_exog = exog.shape[1]
             Xs = [
                 np.hstack(
-                    [X_lags, exog_values[(step - 1) * n_exog : step * n_exog].reshape(1, -1)]
+                    [X_lags, 
+                     exog_values[(step - 1) * n_exog : step * n_exog].reshape(1, -1)]
                 )
                 for step in steps
             ]
-            Xs_col_names = Xs_col_names + exog.columns.to_list()
+            Xs_col_names = Xs_col_names + self.X_train_exog_names_out_
+        else:
+            Xs = [X_lags] * len(steps)
 
-        return Xs, steps, last_window_index, Xs_col_names
+        prediction_index = expand_index(
+                               index = last_window_index,
+                               steps = max(steps)
+                           )[np.array(steps) - 1]
+        if isinstance(last_window_index, pd.DatetimeIndex) and np.array_equal(
+            steps, np.arange(min(steps), max(steps) + 1)
+        ):
+            prediction_index.freq = last_window_index.freq
+
+        return Xs, Xs_col_names, steps, prediction_index
 
 
     def create_predict_X(
@@ -938,7 +971,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         last_window : pandas Series, pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed to 
             predict `steps`.
-            If `last_window = None`, the values stored in `self.last_window` are
+            If `last_window = None`, the values stored in `self.last_window_` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
@@ -952,15 +985,14 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         """
 
-        Xs, steps, last_window_index, Xs_col_names = self._create_predict_inputs(
+        Xs, Xs_col_names, steps, prediction_index = self._create_predict_inputs(
             steps=steps, last_window=last_window, exog=exog
         )
 
-        idx = expand_index(index=last_window_index, steps=max(steps))
         X_predict = pd.DataFrame(
                         data    = np.concatenate(Xs, axis=0), 
                         columns = Xs_col_names, 
-                        index   = idx[np.array(steps) - 1]
+                        index   = prediction_index
                     )
 
         return X_predict
@@ -970,7 +1002,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         self,
         steps: Optional[Union[int, list]] = None,
         last_window: Optional[Union[pd.Series, pd.DataFrame]] = None,
-        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        check_inputs: bool = True
     ) -> pd.Series:
         """
         Predict n steps ahead.
@@ -989,11 +1022,15 @@ class ForecasterAutoregDirect(ForecasterBase):
         last_window : pandas Series, pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed to 
             predict `steps`.
-            If `last_window = None`, the values stored in` self.last_window` are
+            If `last_window = None`, the values stored in` self.last_window_` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
+        check_inputs : bool, default `True`
+            If `True`, the input is checked for possible warnings and errors 
+            with the `check_predict_input` function. This argument is created 
+            for internal use and is not recommended to be changed.
 
         Returns
         -------
@@ -1002,31 +1039,35 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         """
 
-        Xs, steps, last_window_index, _ = self._create_predict_inputs(
-            steps=steps, last_window=last_window, exog=exog
+        Xs, _, steps, prediction_index = self._create_predict_inputs(
+            steps=steps, last_window=last_window, exog=exog, check_inputs=check_inputs
         )
 
         regressors = [self.regressors_[step] for step in steps]
         with warnings.catch_warnings():
             # Suppress scikit-learn warning: "X does not have valid feature names,
             # but NoOpTransformer was fitted with feature names".
-            warnings.simplefilter("ignore", category=UserWarning)
-            predictions = [
-                regressor.predict(X)[0] for regressor, X in zip(regressors, Xs)
-            ]
+            warnings.filterwarnings(
+                "ignore", 
+                message="X does not have valid feature names", 
+                category=UserWarning
+            )
+            predictions = np.array([
+                regressor.predict(X).ravel()[0] 
+                for regressor, X in zip(regressors, Xs)
+            ])
 
-        idx = expand_index(index=last_window_index, steps=max(steps))
-        predictions = pd.Series(
-                          data  = predictions,
-                          index = idx[np.array(steps) - 1],
-                          name  = 'pred'
-                      )
-
-        predictions = transform_series(
-                          series            = predictions,
+        predictions = transform_numpy(
+                          array             = predictions,
                           transformer       = self.transformer_y,
                           fit               = False,
                           inverse_transform = True
+                      )
+
+        predictions = pd.Series(
+                          data  = predictions,
+                          index = prediction_index,
+                          name  = 'pred'
                       )
 
         return predictions
@@ -1062,7 +1103,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed to 
             predict `steps`.
-            If `last_window = None`, the values stored in` self.last_window` are
+            If `last_window = None`, the values stored in` self.last_window_` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
@@ -1095,7 +1136,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         """
 
-        if self.fitted:
+        if self.is_fitted:
             
             steps = prepare_steps_direct(
                         steps    = steps,
@@ -1103,32 +1144,31 @@ class ForecasterAutoregDirect(ForecasterBase):
                     )
             
             if in_sample_residuals:
-                if not set(steps).issubset(set(self.in_sample_residuals.keys())):
+                if not set(steps).issubset(set(self.in_sample_residuals_.keys())):
                     raise ValueError(
-                        (f"Not `forecaster.in_sample_residuals` for steps: "
-                         f"{set(steps) - set(self.in_sample_residuals.keys())}.")
+                        (f"Not `forecaster.in_sample_residuals_` for steps: "
+                         f"{set(steps) - set(self.in_sample_residuals_.keys())}.")
                     )
-                residuals = self.in_sample_residuals
+                residuals = self.in_sample_residuals_
             else:
-                if self.out_sample_residuals is None:
+                if self.out_sample_residuals_ is None:
                     raise ValueError(
-                        ("`forecaster.out_sample_residuals` is `None`. Use "
-                         "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-                         "before `predict_interval()`, `predict_bootstrapping()`, "
-                         "`predict_quantiles()` or `predict_dist()`.")
+                        ("`forecaster.out_sample_residuals_` is `None`. Use "
+                         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
+                         "method before predicting.")
                     )
                 else:
-                    if not set(steps).issubset(set(self.out_sample_residuals.keys())):
+                    if not set(steps).issubset(set(self.out_sample_residuals_.keys())):
                         raise ValueError(
-                            (f"Not `forecaster.out_sample_residuals` for steps: "
-                             f"{set(steps) - set(self.out_sample_residuals.keys())}. "
+                            (f"Not `forecaster.out_sample_residuals_` for steps: "
+                             f"{set(steps) - set(self.out_sample_residuals_.keys())}. "
                              f"Use method `set_out_sample_residuals()`.")
                         )
-                residuals = self.out_sample_residuals
+                residuals = self.out_sample_residuals_
             
             check_residuals = (
-                "forecaster.in_sample_residuals" if in_sample_residuals
-                else "forecaster.out_sample_residuals"
+                "forecaster.in_sample_residuals_" if in_sample_residuals
+                else "forecaster.out_sample_residuals_"
             )
             for step in steps:
                 if residuals[step] is None:
@@ -1149,32 +1189,39 @@ class ForecasterAutoregDirect(ForecasterBase):
                       )
 
         # Predictions must be in the transformed scale before adding residuals
-        predictions = transform_series(
-                          series            = predictions,
-                          transformer       = self.transformer_y,
-                          fit               = False,
-                          inverse_transform = False
-                      )
-        boot_predictions = pd.concat([predictions] * n_boot, axis=1)
-        boot_predictions.columns = [f"pred_boot_{i}" for i in range(n_boot)]
-        
+        boot_predictions = transform_numpy(
+                               array             = predictions.to_numpy(),
+                               transformer       = self.transformer_y,
+                               fit               = False,
+                               inverse_transform = False
+                           )
+        boot_predictions = np.tile(boot_predictions, (n_boot, 1)).T
+        boot_columns = [f"pred_boot_{i}" for i in range(n_boot)]
+
+        rng = np.random.default_rng(seed=random_state)
         for i, step in enumerate(steps):
-            rng = np.random.default_rng(seed=random_state)
             sample_residuals = rng.choice(
                                    a       = residuals[step],
                                    size    = n_boot,
                                    replace = True
                                )
-            boot_predictions.iloc[i, :] = boot_predictions.iloc[i, :] + sample_residuals
+            boot_predictions[i, :] = boot_predictions[i, :] + sample_residuals
 
         if self.transformer_y:
-            for col in boot_predictions.columns:
-                boot_predictions[col] = transform_series(
-                                            series            = boot_predictions[col],
-                                            transformer       = self.transformer_y,
-                                            fit               = False,
-                                            inverse_transform = True
-                                        )
+            boot_predictions = np.apply_along_axis(
+                                func1d            = transform_numpy,
+                                axis              = 0,
+                                arr               = boot_predictions,
+                                transformer       = self.transformer_y,
+                                fit               = False,
+                                inverse_transform = True
+                            )
+    
+        boot_predictions = pd.DataFrame(
+                               data    = boot_predictions,
+                               index   = predictions.index,
+                               columns = boot_columns
+                           )
         
         return boot_predictions
 
@@ -1208,7 +1255,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed to 
             predict `steps`.
-            If `last_window = None`, the values stored in` self.last_window` are
+            If `last_window = None`, the values stored in` self.last_window_` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
@@ -1251,12 +1298,6 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         check_interval(interval=interval)
 
-        predictions = self.predict(
-                          steps       = steps,
-                          last_window = last_window,
-                          exog        = exog
-                      )
-
         boot_predictions = self.predict_bootstrapping(
                                steps               = steps,
                                last_window         = last_window,
@@ -1265,6 +1306,13 @@ class ForecasterAutoregDirect(ForecasterBase):
                                random_state        = random_state,
                                in_sample_residuals = in_sample_residuals
                            )
+
+        predictions = self.predict(
+                          steps        = steps,
+                          last_window  = last_window,
+                          exog         = exog,
+                          check_inputs = False
+                      )
 
         interval = np.array(interval) / 100
         predictions_interval = boot_predictions.quantile(q=interval, axis=1).transpose()
@@ -1302,7 +1350,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed to 
             predict `steps`.
-            If `last_window = None`, the values stored in` self.last_window` are
+            If `last_window = None`, the values stored in` self.last_window_` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
@@ -1388,7 +1436,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed to 
             predict `steps`.
-            If `last_window = None`, the values stored in` self.last_window` are
+            If `last_window = None`, the values stored in` self.last_window_` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
@@ -1524,7 +1572,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         random_state: int = 123
     ) -> None:
         """
-        Set new values to the attribute `out_sample_residuals`. Out of sample
+        Set new values to the attribute `out_sample_residuals_`. Out of sample
         residuals are meant to be calculated using observations that did not
         participate in the training process.
         
@@ -1536,8 +1584,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             sample of 1000 values are stored.
         append : bool, default `True`
             If `True`, new residuals are added to the once already stored in the
-            attribute `out_sample_residuals`. Once the limit of 1000 values is
-            reached, no more values are appended. If False, `out_sample_residuals`
+            attribute `out_sample_residuals_`. Once the limit of 1000 values is
+            reached, no more values are appended. If False, `out_sample_residuals_`
             is overwritten with the new residuals.
         transform : bool, default `True`
             If `True`, new residuals are transformed using self.transformer_y.
@@ -1557,28 +1605,26 @@ class ForecasterAutoregDirect(ForecasterBase):
                  f"Got {type(residuals)}.")
             )
 
-        if not self.fitted:
+        if not self.is_fitted:
             raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `set_out_sample_residuals()`.")
             )
         
-        if self.out_sample_residuals is None:
-            self.out_sample_residuals = {step: None 
-                                         for step in range(1, self.steps + 1)}
+        if self.out_sample_residuals_ is None:
+            self.out_sample_residuals_ = {step: None 
+                                          for step in range(1, self.steps + 1)}
         
-        if not set(self.out_sample_residuals.keys()).issubset(set(residuals.keys())):
+        if not set(self.out_sample_residuals_.keys()).issubset(set(residuals.keys())):
             warnings.warn(
-                f"""
-                Only residuals of models (steps) 
-                {set(self.out_sample_residuals.keys()).intersection(set(residuals.keys()))} 
-                are updated.
-                """
+                (f"Only residuals of models (steps) "
+                 f"{set(self.out_sample_residuals_.keys()).intersection(set(residuals.keys()))} "
+                 f"are updated.")
             )
 
         residuals = {key: value 
                      for key, value in residuals.items() 
-                     if key in self.out_sample_residuals.keys()}
+                     if key in self.out_sample_residuals_.keys()}
 
         if not transform and self.transformer_y is not None:
             warnings.warn(
@@ -1594,32 +1640,32 @@ class ForecasterAutoregDirect(ForecasterBase):
                  f"new residuals are on the same scale as the original time series.")
             )
             for key, value in residuals.items():
-                residuals[key] = transform_series(
-                                     series            = pd.Series(value, name='residuals'),
+                residuals[key] = transform_numpy(
+                                     array             = value,
                                      transformer       = self.transformer_y,
                                      fit               = False,
                                      inverse_transform = False
-                                 ).to_numpy()
+                                 )
     
         for key, value in residuals.items():
             if len(value) > 1000:
                 rng = np.random.default_rng(seed=random_state)
                 value = rng.choice(a=value, size=1000, replace=False)
 
-            if append and self.out_sample_residuals[key] is not None:
-                free_space = max(0, 1000 - len(self.out_sample_residuals[key]))
+            if append and self.out_sample_residuals_[key] is not None:
+                free_space = max(0, 1000 - len(self.out_sample_residuals_[key]))
                 if len(value) < free_space:
-                    value = np.hstack((
-                                self.out_sample_residuals[key],
+                    value = np.concatenate((
+                                self.out_sample_residuals_[key],
                                 value
                             ))
                 else:
-                    value = np.hstack((
-                                self.out_sample_residuals[key],
+                    value = np.concatenate((
+                                self.out_sample_residuals_[key],
                                 value[:free_space]
                             ))
             
-            self.out_sample_residuals[key] = value
+            self.out_sample_residuals_[key] = value
 
  
     def get_feature_importances(
@@ -1655,7 +1701,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 f"`step` must be an integer. Got {type(step)}."
             )
         
-        if not self.fitted:
+        if not self.is_fitted:
             raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `get_feature_importances()`.")
@@ -1673,16 +1719,16 @@ class ForecasterAutoregDirect(ForecasterBase):
             estimator = self.regressors_[step]
 
         idx_columns_lags = np.arange(len(self.lags))
-        if self.included_exog:
+        if self.exog_in_:
             idx_columns_exog = np.flatnonzero(
                                    [name.endswith(f"step_{step}") 
-                                    for name in self.X_train_col_names]
+                                    for name in self.X_train_features_names_out_]
                                )
         else:
             idx_columns_exog = np.array([], dtype=int)
 
         idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
-        feature_names = [self.X_train_col_names[i].replace(f"_step_{step}", "") 
+        feature_names = [self.X_train_features_names_out_[i].replace(f"_step_{step}", "") 
                          for i in idx_columns]
 
         if hasattr(estimator, 'feature_importances_'):
@@ -1709,3 +1755,149 @@ class ForecasterAutoregDirect(ForecasterBase):
                                       )
 
         return feature_importances
+
+
+    def predict_bootstrapping_013(
+        self,
+        steps: Optional[Union[int, list]] = None,
+        last_window: Optional[pd.Series] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        n_boot: int = 500,
+        random_state: int = 123,
+        in_sample_residuals: bool = True,
+        binned_residuals: Any = None
+    ) -> pd.DataFrame:
+        """
+        Generate multiple forecasting predictions using a bootstrapping process. 
+        By sampling from a collection of past observed errors (the residuals),
+        each iteration of bootstrapping generates a different set of predictions. 
+        See the Notes section for more information. 
+        
+        Parameters
+        ----------
+        steps : int, list, None, default `None`
+            Predict n steps. The value of `steps` must be less than or equal to the 
+            value of steps defined when initializing the forecaster. Starts at 1.
+        
+            - If `int`: Only steps within the range of 1 to int are predicted.
+            - If `list`: List of ints. Only the steps contained in the list 
+            are predicted.
+            - If `None`: As many steps are predicted as were defined at 
+            initialization.
+        last_window : pandas Series, default `None`
+            Series values used to create the predictors (lags) needed to 
+            predict `steps`.
+            If `last_window = None`, the values stored in` self.last_window_` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
+        n_boot : int, default `500`
+            Number of bootstrapping iterations used to estimate predictions.
+        random_state : int, default `123`
+            Sets a seed to the random generator, so that boot predictions are always 
+            deterministic.
+        in_sample_residuals : bool, default `True`
+            If `True`, residuals from the training data are used as proxy of
+            prediction error to create predictions. If `False`, out of sample 
+            residuals are used. In the latter case, the user should have
+            calculated and stored the residuals within the forecaster (see
+            `set_out_sample_residuals()`).
+        binned_residuals : Ignored
+            Not used, present here for API consistency by convention.
+
+        Returns
+        -------
+        boot_predictions : pandas DataFrame
+            Predictions generated by bootstrapping.
+            Shape: (steps, n_boot)
+
+        Notes
+        -----
+        More information about prediction intervals in forecasting:
+        https://otexts.com/fpp3/prediction-intervals.html#prediction-intervals-from-bootstrapped-residuals
+        Forecasting: Principles and Practice (3nd ed) Rob J Hyndman and George Athanasopoulos.
+
+        """
+
+        if self.is_fitted:
+            
+            steps = prepare_steps_direct(
+                        steps    = steps,
+                        max_step = self.steps
+                    )
+            
+            if in_sample_residuals:
+                if not set(steps).issubset(set(self.in_sample_residuals_.keys())):
+                    raise ValueError(
+                        (f"Not `forecaster.in_sample_residuals_` for steps: "
+                         f"{set(steps) - set(self.in_sample_residuals_.keys())}.")
+                    )
+                residuals = self.in_sample_residuals_
+            else:
+                if self.out_sample_residuals_ is None:
+                    raise ValueError(
+                        ("`forecaster.out_sample_residuals_` is `None`. Use "
+                         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
+                         "method before predicting.")
+                    )
+                else:
+                    if not set(steps).issubset(set(self.out_sample_residuals_.keys())):
+                        raise ValueError(
+                            (f"Not `forecaster.out_sample_residuals_` for steps: "
+                             f"{set(steps) - set(self.out_sample_residuals_.keys())}. "
+                             f"Use method `set_out_sample_residuals()`.")
+                        )
+                residuals = self.out_sample_residuals_
+            
+            check_residuals = (
+                "forecaster.in_sample_residuals_" if in_sample_residuals
+                else "forecaster.out_sample_residuals_"
+            )
+            for step in steps:
+                if residuals[step] is None:
+                    raise ValueError(
+                        (f"forecaster residuals for step {step} are `None`. "
+                         f"Check {check_residuals}.")
+                    )
+                elif (residuals[step] == None).any():
+                    raise ValueError(
+                        (f"forecaster residuals for step {step} contains `None` values. "
+                         f"Check {check_residuals}.")
+                    )
+
+        predictions = self.predict(
+                          steps       = steps,
+                          last_window = last_window,
+                          exog        = exog 
+                      )
+
+        # Predictions must be in the transformed scale before adding residuals
+        predictions = transform_series(
+                          series            = predictions,
+                          transformer       = self.transformer_y,
+                          fit               = False,
+                          inverse_transform = False
+                      )
+        boot_predictions = pd.concat([predictions] * n_boot, axis=1)
+        boot_predictions.columns = [f"pred_boot_{i}" for i in range(n_boot)]
+        
+        for i, step in enumerate(steps):
+            rng = np.random.default_rng(seed=random_state)
+            sample_residuals = rng.choice(
+                                   a       = residuals[step],
+                                   size    = n_boot,
+                                   replace = True
+                               )
+            boot_predictions.iloc[i, :] = boot_predictions.iloc[i, :] + sample_residuals
+
+        if self.transformer_y:
+            for col in boot_predictions.columns:
+                boot_predictions[col] = transform_series(
+                                            series            = boot_predictions[col],
+                                            transformer       = self.transformer_y,
+                                            fit               = False,
+                                            inverse_transform = True
+                                        )
+        
+        return boot_predictions

@@ -58,7 +58,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
                      transformer_exog = StandardScaler(),
                  )
     forecaster.fit(y=y, exog=exog)
-    forecaster.out_sample_residuals = forecaster.in_sample_residuals
+    forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_interval(
                   steps               = 2,
                   exog                = exog_predict,

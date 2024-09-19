@@ -402,14 +402,14 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog_and_transfor
 @pytest.mark.parametrize("regressor", 
                          [ARIMA(order=(1, 0, 0)), 
                           Sarimax(order=(1, 0, 0))], 
-                         ids = lambda reg : f'regressor: {type(reg)}')
+                         ids = lambda reg: f'regressor: {type(reg)}')
 @pytest.mark.parametrize("y          , idx", 
                          [(y         , pd.RangeIndex(start=0, stop=50)), 
                           (y_datetime, pd.date_range(start='2000', periods=50, freq='YE'))], 
-                         ids = lambda values : f'y, index: {type(values)}')
+                         ids = lambda values: f'y, index: {type(values)}')
 def test_predict_ForecasterSarimax_updates_extended_index_twice(regressor, y, idx):
     """
-    Test forecaster.extended_index is updated when using predict twice.
+    Test forecaster.extended_index_ is updated when using predict twice.
     """
     y_fit = y.iloc[:30].copy()
 
@@ -418,11 +418,11 @@ def test_predict_ForecasterSarimax_updates_extended_index_twice(regressor, y, id
 
     lw_1 = y.iloc[30:40].copy()
     forecaster.predict(steps=5, last_window=lw_1)
-    result_1 = forecaster.extended_index.copy()
+    result_1 = forecaster.extended_index_.copy()
     expected_1 = idx[:40]
 
     lw_2 = y.iloc[40:].copy()
     forecaster.predict(steps=5, last_window=lw_2)
 
     pd.testing.assert_index_equal(result_1, expected_1)
-    pd.testing.assert_index_equal(forecaster.extended_index, idx)
+    pd.testing.assert_index_equal(forecaster.extended_index_, idx)

@@ -307,7 +307,7 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
 
     err_msg = re.escape(
         ("`forecaster.out_sample_residuals_` is `None`. Use "
-         "`in_sample_residuals=True` or the  `set_out_sample_residuals()` "
+         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
          "method before predicting.")
     )
     with pytest.raises(ValueError, match = err_msg):

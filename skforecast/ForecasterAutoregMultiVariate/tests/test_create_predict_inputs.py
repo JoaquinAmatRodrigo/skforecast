@@ -67,9 +67,11 @@ def test_create_predict_inputs_output(steps):
     """
     Test _create_predict_inputs output.
     """
+    series_datetime = series.copy()
+    series_datetime.index = pd.date_range(start='2020-01-01', periods=50, freq='D')
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
                                                lags=3, steps=3, transformer_series=None)
-    forecaster.fit(series=series)
+    forecaster.fit(series=series_datetime)
     results = forecaster._create_predict_inputs(steps=steps)
 
     expected = (
@@ -79,17 +81,17 @@ def test_create_predict_inputs_output(steps):
                     0.34345601, 0.2408559, 0.39887629]]),
          np.array([[0.61289453, 0.51948512, 0.98555979, 
                     0.34345601, 0.2408559, 0.39887629]])],
-        [1, 2, 3],
-        pd.RangeIndex(start=47, stop=50, step=1),
         ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
-         'l2_lag_1', 'l2_lag_2', 'l2_lag_3']
+         'l2_lag_1', 'l2_lag_2', 'l2_lag_3'],
+        [1, 2, 3],
+        pd.date_range(start='2020-02-20', periods=3, freq='D')
     )
     
     for step in range(len(expected[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
-    pd.testing.assert_index_equal(results[2], expected[2])
-    assert results[3] == expected[3]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
 
 
 def test_create_predict_inputs_output_when_list_interspersed():
@@ -107,17 +109,17 @@ def test_create_predict_inputs_output_when_list_interspersed():
                     0.34345601, 0.2408559, 0.39887629]]),
          np.array([[0.61289453, 0.51948512, 0.98555979, 
                     0.34345601, 0.2408559, 0.39887629]])],
-        [1, 4],
-        pd.RangeIndex(start=47, stop=50, step=1),
         ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
-         'l2_lag_1', 'l2_lag_2', 'l2_lag_3']
+         'l2_lag_1', 'l2_lag_2', 'l2_lag_3'],
+        [1, 4],
+        pd.RangeIndex(start=50, stop=54, step=1)[[0, 3]]
     )
     
     for step in range(len(expected[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
-    pd.testing.assert_index_equal(results[2], expected[2])
-    assert results[3] == expected[3]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
 
 
 def test_create_predict_inputs_output_when_different_lags():
@@ -138,17 +140,17 @@ def test_create_predict_inputs_output_when_different_lags():
                     0.34345601, 0.76254781]]),
          np.array([[0.61289453, 0.51948512, 0.98555979, 0.48303426, 0.25045537,
                     0.34345601, 0.76254781]])],
-        [1, 2, 3],
-        pd.RangeIndex(start=43, stop=50, step=1),
         ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
-         'l2_lag_1', 'l2_lag_7']
+         'l2_lag_1', 'l2_lag_7'],
+        [1, 2, 3],
+        pd.RangeIndex(start=50, stop=53, step=1)
     )
     
     for step in range(len(expected[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
-    pd.testing.assert_index_equal(results[2], expected[2])
-    assert results[3] == expected[3]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
 
 
 def test_create_predict_inputs_output_when_lags_dict_with_None_in_level_lags():
@@ -166,16 +168,16 @@ def test_create_predict_inputs_output_when_lags_dict_with_None_in_level_lags():
         [np.array([[0.61289453, 0.51948512, 0.98555979, 0.48303426, 0.25045537]]),
          np.array([[0.61289453, 0.51948512, 0.98555979, 0.48303426, 0.25045537]]),
          np.array([[0.61289453, 0.51948512, 0.98555979, 0.48303426, 0.25045537]])],
+        ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5'],
         [1, 2, 3],
-        pd.RangeIndex(start=45, stop=50, step=1),
-        ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5']
+        pd.RangeIndex(start=50, stop=53, step=1)
     )
     
     for step in range(len(expected[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
-    pd.testing.assert_index_equal(results[2], expected[2])
-    assert results[3] == expected[3]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
 
 
 def test_create_predict_inputs_output_when_lags_dict_with_None_but_no_in_level():
@@ -193,16 +195,16 @@ def test_create_predict_inputs_output_when_lags_dict_with_None_but_no_in_level()
         [np.array([[0.61289453, 0.51948512, 0.98555979, 0.48303426, 0.25045537]]),
          np.array([[0.61289453, 0.51948512, 0.98555979, 0.48303426, 0.25045537]]),
          np.array([[0.61289453, 0.51948512, 0.98555979, 0.48303426, 0.25045537]])],
+        ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5'],
         [1, 2, 3],
-        pd.RangeIndex(start=45, stop=50, step=1),
-        ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5']
+        pd.RangeIndex(start=50, stop=53, step=1)
     )
     
     for step in range(len(expected[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
-    pd.testing.assert_index_equal(results[2], expected[2])
-    assert results[3] == expected[3]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
 
 
 def test_create_predict_inputs_output_when_last_window():
@@ -227,17 +229,17 @@ def test_create_predict_inputs_output_when_last_window():
                     0.34345601, 0.2408559, 0.39887629]]),
          np.array([[0.61289453, 0.51948512, 0.98555979, 
                     0.34345601, 0.2408559, 0.39887629]])],
-        [1, 2],
-        pd.RangeIndex(start=47, stop=50, step=1),
         ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
-         'l2_lag_1', 'l2_lag_2', 'l2_lag_3']
+         'l2_lag_1', 'l2_lag_2', 'l2_lag_3'],
+        [1, 2],
+        pd.RangeIndex(start=50, stop=52, step=1)
     )
     
     for step in range(len(expected[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
-    pd.testing.assert_index_equal(results[2], expected[2])
-    assert results[3] == expected[3]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
 
 
 def test_create_predict_inputs_output_when_exog():
@@ -257,17 +259,17 @@ def test_create_predict_inputs_output_when_exog():
                     0.39818568, 0.30476807, 0.04359146, 0.29686078]]),
          np.array([[0.50183668, 0.94416002, 0.89338916, 
                     0.39818568, 0.30476807, 0.04359146, 0.92758424]])],
-        [1, 2, 3],
-        pd.RangeIndex(start=37, stop=40, step=1),
         ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
-         'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'exog_1']
+         'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'exog_1'],
+        [1, 2, 3],
+        pd.RangeIndex(start=40, stop=43, step=1)
     )
     
     for step in range(len(expected[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
-    pd.testing.assert_index_equal(results[2], expected[2])
-    assert results[3] == expected[3]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
 
 
 def test_create_predict_inputs_output_with_transform_series():
@@ -295,17 +297,17 @@ def test_create_predict_inputs_output_with_transform_series():
                     -0.61148712, -1.00971677, -0.39638015, -1.35798666,  0.74018589]]),
          np.array([[0.47762884,  0.07582436,  2.08066403, -0.08097053, -1.08141835, 
                     -0.61148712, -1.00971677, -0.39638015, -1.35798666,  0.74018589]])],
-        [1, 2, 3, 4, 5],
-        pd.RangeIndex(start=45, stop=50, step=1),
         ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5',
-         'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
+         'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5'],
+        [1, 2, 3, 4, 5],
+        pd.RangeIndex(start=50, stop=55, step=1)
     )
     
     for step in range(len(expected[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
-    pd.testing.assert_index_equal(results[2], expected[2])
-    assert results[3] == expected[3]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
 
 
 def test_create_predict_inputs_output_with_transform_series_as_dict():
@@ -334,17 +336,17 @@ def test_create_predict_inputs_output_with_transform_series_as_dict():
                     0.33426983,  0.22949344,  0.39086564,  0.13786173,  0.68990237]]),
          np.array([[0.47762884,  0.07582436,  2.08066403, -0.08097053, -1.08141835, 
                     0.33426983,  0.22949344,  0.39086564,  0.13786173,  0.68990237]])],
-        [1, 2, 3, 4, 5],
-        pd.RangeIndex(start=45, stop=50, step=1),
         ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5',
-         'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5']
+         'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5'],
+        [1, 2, 3, 4, 5],
+        pd.RangeIndex(start=50, stop=55, step=1)
     )
     
     for step in range(len(expected[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
-    pd.testing.assert_index_equal(results[2], expected[2])
-    assert results[3] == expected[3]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
 
 
 @pytest.mark.parametrize("n_jobs", [1, -1, 'auto'], 
@@ -382,18 +384,18 @@ def test_create_predict_inputs_output_with_transform_series_and_transform_exog(n
          np.array([[0.47762884,  0.07582436,  2.08066403, -0.08097053, -1.08141835, 
                     -0.61148712, -1.00971677, -0.39638015, -1.35798666,  0.74018589,
                     -0.70392558,  1.,  0.]])],
-        [1, 2, 3, 4, 5],
-        pd.RangeIndex(start=45, stop=50, step=1),
         ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5',
          'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
-         'exog_1', 'exog_2_a', 'exog_2_b']
+         'exog_1', 'exog_2_a', 'exog_2_b'],
+        [1, 2, 3, 4, 5],
+        pd.RangeIndex(start=50, stop=55, step=1)
     )
     
     for step in range(len(expected[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
-    pd.testing.assert_index_equal(results[2], expected[2])
-    assert results[3] == expected[3]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
 
 
 def test_create_predict_inputs_output_when_categorical_features_native_implementation_HistGradientBoostingRegressor():
@@ -403,8 +405,8 @@ def test_create_predict_inputs_output_when_categorical_features_native_implement
     """
     df_exog = pd.DataFrame({
         'exog_1': exog['exog_1'],
-        'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-        'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)}
+        'exog_2': ['a', 'b', 'c', 'd', 'e'] * 10,
+        'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J'] * 10)}
     )
     
     exog_predict = df_exog.copy()
@@ -470,15 +472,15 @@ def test_create_predict_inputs_output_when_categorical_features_native_implement
          np.array([[0.61289453, 0.51948512, 0.98555979, 0.48303426, 0.25045537, 
                     0.34345601, 0.2408559 , 0.39887629, 0.15112745, 0.6917018 ,
                     4.        , 4.        , 0.38483781]])],
-        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-        pd.RangeIndex(start=45, stop=50, step=1),
         ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5',
          'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
-         'exog_2', 'exog_3', 'exog_1']
+         'exog_2', 'exog_3', 'exog_1'],
+        [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+        pd.RangeIndex(start=50, stop=60, step=1)
     )
     
     for step in range(len(expected[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
-    pd.testing.assert_index_equal(results[2], expected[2])
-    assert results[3] == expected[3]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
