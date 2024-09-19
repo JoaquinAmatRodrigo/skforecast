@@ -1321,8 +1321,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         predictions_index = expand_index(index=last_window_index, steps=max(steps))
         predictions_index = predictions_index[np.array(steps) - 1]
-        if isinstance(last_window_index, pd.DatetimeIndex) and steps == np.arange(
-            min(steps), max(steps) + 1
+        if isinstance(last_window_index, pd.DatetimeIndex) and np.array_equal(
+            steps, np.arange(min(steps), max(steps)) + 1
         ):
             predictions_index.freq = last_window_index.freq
             

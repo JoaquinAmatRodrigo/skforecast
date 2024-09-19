@@ -414,7 +414,7 @@ def _calculate_metrics_multiseries(
         # aggregation: pooling
         y_true_pred_levels, y_train_levels = zip(
             *[
-                (a, b)
+                (a, b.iloc[window_size:])  # Exclude observations used to create predictors
                 for a, b in zip(y_true_pred_levels, y_train_levels)
                 if a is not None
             ]
@@ -561,7 +561,10 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
     ]
     metric_names = [(m if isinstance(m, str) else m.__name__) for m in metrics]
 
-    freq = series.index.freq if isinstance(series, pd.DataFrame) else series[levels[0]].index.freq
+    if isinstance(series[levels[0]].index, pd.DatetimeIndex):
+        freq = series[levels[0]].index.freq
+    else:
+        freq = series[levels[0]].index.step
 
     if type(forecaster).__name__ == 'ForecasterAutoregMultiVariate':
         step = 1
@@ -598,7 +601,6 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
         },
         index=y_train.index,
     ).groupby('_level_skforecast')
-    y_train_per_level = {key: group for key, group in y_train_per_level}
     # Interleaved Nan values were excluded fom y_train. They are reestored
     y_train_per_level = {key: group.asfreq(freq) for key, group in y_train_per_level}
 
@@ -636,17 +638,6 @@ def _predict_and_calculate_metrics_multiseries_one_step_ahead(
     metrics_levels = []
     for level in levels:
         if level in predictions_per_level:
-            if level == "id_1003":
-                print(predictions_per_level[level].loc[:, 'y_true'].sum())
-                print(predictions_per_level[level].loc[:, 'y_pred'].sum())
-                print(y_train_per_level[level].loc[:, 'y_train'].sum())
-                print(predictions_per_level[level].loc[:, 'y_true'].diff().sum())
-                print(predictions_per_level[level].loc[:, 'y_pred'].diff().sum())
-                print(y_train_per_level[level].loc[:, 'y_train'].diff().sum())
-                print(predictions_per_level[level].loc[:, 'y_true'])
-                print(predictions_per_level[level].loc[:, 'y_pred'])
-                print(y_train_per_level[level].loc[:, 'y_train'])
-
             metrics_level = [
                 m(
                     y_true = predictions_per_level[level].loc[:, 'y_true'],
