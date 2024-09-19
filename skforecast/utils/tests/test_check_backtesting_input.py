@@ -905,7 +905,7 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_None_and_ref
                      regressor = Ridge(random_state=123),
                      lags      = 2
                  )
-    forecaster.fitted = True
+    forecaster.is_fitted = True
 
     initial_train_size = None
     refit = True

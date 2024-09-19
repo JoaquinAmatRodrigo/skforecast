@@ -226,7 +226,7 @@ class ForecasterRnn(ForecasterBase):
         self.differentiator = None   # Ignored in this forecaster
 
         # Infer parameters from the model
-        self.regressor = copy(regressor)
+        self.regressor = regressor  #TODO: Create copy of regressor copy(regressor)
         layer_init = self.regressor.layers[0]
 
         if lags == "auto":

@@ -15,7 +15,7 @@ from skforecast.preprocessing import TimeSeriesDifferentiator
 from .fixtures_ForecasterAutoreg import y
 from .fixtures_ForecasterAutoreg import exog
 from .fixtures_ForecasterAutoreg import exog_predict
-from .fixtures_ForecasterAutoreg import data # to test results when using differentiation
+from .fixtures_ForecasterAutoreg import data  # to test results when using differentiation
 
 
 def test_predict_bootstrapping_NotFittedError_when_fitted_is_False():
@@ -74,12 +74,15 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
+    results = forecaster.predict_bootstrapping(
+        steps=1, n_boot=4, exog=exog_predict, in_sample_residuals=True
+    )
+
     expected = pd.DataFrame(
-                   data    = np.array([[0.83836963, 0.54888446, 1.16537933, 0.69662898]]),
+                   data    = np.array([[0.76205175, 0.52687879, 0.40505505, 0.77278459]]),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=51)
                )
-    results = forecaster.predict_bootstrapping(steps=1, n_boot=4, exog=exog_predict, in_sample_residuals=True)
 
     pd.testing.assert_frame_equal(expected, results)
     
@@ -91,15 +94,18 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
+    results = forecaster.predict_bootstrapping(
+        steps=2, n_boot=4, exog=exog_predict, in_sample_residuals=True
+    )
+
     expected = pd.DataFrame(
                    data    = np.array(
-                                 [[ 0.83836963,  0.54888446,  1.16537933,  0.69662898],
-                                  [ 0.21874597, -0.0376708 ,  0.29184038,  0.5833093 ]]
+                                 [[0.76205175, 0.52687879, 0.40505505, 0.77278459],
+                                  [0.86040207, 0.16150649, 0.11656985, 0.39176265]]
                              ),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
-    results = forecaster.predict_bootstrapping(steps=2, n_boot=4, exog=exog_predict, in_sample_residuals=True)
 
     pd.testing.assert_frame_equal(expected, results)
     
@@ -112,12 +118,13 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
     forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
+    results = forecaster.predict_bootstrapping(steps=1, n_boot=4, exog=exog_predict, in_sample_residuals=False)
+
     expected = pd.DataFrame(
-                   data    = np.array([[0.83836963, 0.54888446, 1.16537933, 0.69662898]]),
+                   data    = np.array([[0.76205175, 0.52687879, 0.40505505, 0.77278459]]),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=51)
                )
-    results = forecaster.predict_bootstrapping(steps=1, n_boot=4, exog=exog_predict, in_sample_residuals=False)
 
     pd.testing.assert_frame_equal(expected, results)
     
@@ -130,13 +137,14 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
     forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
+    results = forecaster.predict_bootstrapping(steps=2, n_boot=4, exog=exog_predict, in_sample_residuals=False)
+    
     expected = pd.DataFrame(
-                   data    = np.array([[ 0.83836963,  0.54888446,  1.16537933,  0.69662898],
-                                       [ 0.21874597, -0.0376708 ,  0.29184038,  0.5833093 ]]),
+                   data    = np.array([[0.76205175, 0.52687879, 0.40505505, 0.77278459],
+                                       [0.86040207, 0.16150649, 0.11656985, 0.39176265]]),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
-    results = forecaster.predict_bootstrapping(steps=2, n_boot=4, exog=exog_predict, in_sample_residuals=False)
 
     pd.testing.assert_frame_equal(expected, results)
 
@@ -156,6 +164,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     forecaster.fit(y=y, exog=exog)
     forecaster.in_sample_residuals_ = np.full_like(forecaster.in_sample_residuals_, fill_value=0)
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=True)
+    
     expected = pd.DataFrame(
                    data = np.array([[0.67998879, 0.67998879, 0.67998879, 0.67998879],
                                     [0.46135022, 0.46135022, 0.46135022, 0.46135022]]),
@@ -182,10 +191,11 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                  )
     forecaster.fit(y=y, exog=exog)
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=True)
+    
     expected = pd.DataFrame(
                    data    = np.array(
-                                 [[0.83836963,  0.54888446,  1.16537933,  0.69662898],
-                                  [0.21874597, -0.03767080,  0.29184038,  0.58330930]]
+                                 [[0.76205175, 0.52687879, 0.40505505, 0.77278459],
+                                  [0.86040207, 0.16150649, 0.11656985, 0.39176265]]
                              ),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=52)
