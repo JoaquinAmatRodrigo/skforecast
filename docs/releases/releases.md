@@ -14,11 +14,16 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
-+ ...
++ <span class="badge text-bg-enhancement">Enhancement</span> Refactor the prediction process in <code>[ForecasterAutoregMultiSeries]</code> to improve performance when predicting multiple series.
+
++ <span class="badge text-bg-enhancement">Enhancement</span> The bootstrapping process in the `predict_bootstrapping` method of all forecasters has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
+
 
 **Added**
 
 + Create `transform_numpy` function in the <code>[utils]</code> module to carry out the transformation of the modeled time series and exogenous variables as numpy arrays.
+
++ `random_state` argument in the `fit` method of <code>[ForecasterAutoreg]</code> to set a seed for the random generator so that the stored sample residuals are always deterministic.
 
 + New argument `method` in <code>[grid_search_forecaster]</code>, <code>`random_search_forecaster`</code>, <code>[bayesian_search_forecaster]</code>, <code>[grid_search_forecaster_multiseries]</code>, <code>`random_search_forecaster_multiseries`</code> and <code>[bayesian_search_forecaster_multiseries]</code> that allows the user to select the method used to identify the best combination of hyperparameters and lags. The available methods are 'basktesting' (default) and 'on_step_ahead'.
 
@@ -26,9 +31,12 @@ The main changes in this release are:
 
 + New private function `_calculate_metrics_one_step_ahead` to `model_selection` module to calculate the metrics when predicting one step ahead.
 
+
 **Changed**
 
-+ Refactor `recursive_predict` in <code>[ForecasterAutoregMultiSeries]</code> to predict all series at once. This improves performance when predicting multiple series.
++ Refactor `recursive_predict` in <code>[ForecasterAutoregMultiSeries]</code> to predict all series at once and include option of adding residuals. This improves performance when predicting multiple series.
+
++ Refactor `predict_bootstrapping` in <code>[ForecasterAutoreg]</code> and <code>[ForecasterAutoregMultiSeries]</code>. The bootstrapping process has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
 
 + Change the default value of `encoding` to `ordinal` in <code>[ForecasterAutoregMultiSeries]</code>. This will avoid conflicts if the regressor does not support categorical variables by default.
 
@@ -90,6 +98,7 @@ The main changes in this release are:
 
 + Removed argument `engine` fom <code>[bayesian_search_forecaster]</code> and <code>[bayesian_search_forecaster_multiseries]</code>.
 
+
 **Fixed**
 
 + ...
@@ -114,7 +123,7 @@ The main changes in this release are:
 + <span class="badge text-bg-api-change">API Change</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.
 
 + <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
-  
+
 **Added**
 
 + Support for `python 3.12`.

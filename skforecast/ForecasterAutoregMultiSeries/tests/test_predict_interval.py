@@ -70,8 +70,8 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_1_in_sample_
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               transformer_series=None)
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
-    forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
-    forecaster.in_sample_residuals['2'] = np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)
+    forecaster.in_sample_residuals_['1'] = np.full_like(forecaster.in_sample_residuals_['1'], fill_value=10)
+    forecaster.in_sample_residuals_['2'] = np.full_like(forecaster.in_sample_residuals_['2'], fill_value=20)
 
     predictions = forecaster.predict_interval(steps=1, levels=expected_pandas_dataframe[0], 
                                               in_sample_residuals=True, suppress_warnings=True)
@@ -89,7 +89,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
                                               transformer_series=None)
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
-    forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
+    forecaster.in_sample_residuals_['1'] = np.full_like(forecaster.in_sample_residuals_['1'], fill_value=10)
     expected_1 = pd.DataFrame(
                     data = np.array([[10., 20., 20.]]),
                     columns = ['1', '1_lower_bound', '1_upper_bound'],
@@ -97,7 +97,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
                  )
     results_1 = forecaster.predict_interval(steps=1, levels='1', in_sample_residuals=True)
 
-    forecaster.in_sample_residuals['2'] = np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)
+    forecaster.in_sample_residuals_['2'] = np.full_like(forecaster.in_sample_residuals_['2'], fill_value=20)
     expected_2 = pd.DataFrame(
                     data = np.array([[10., 30., 30.]]),
                     columns = ['2', '2_lower_bound', '2_upper_bound'],
@@ -160,8 +160,8 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_2_in_sample_
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               transformer_series=None)
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
-    forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
-    forecaster.in_sample_residuals['2'] = np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)
+    forecaster.in_sample_residuals_['1'] = np.full_like(forecaster.in_sample_residuals_['1'], fill_value=10)
+    forecaster.in_sample_residuals_['2'] = np.full_like(forecaster.in_sample_residuals_['2'], fill_value=20)
 
     predictions = forecaster.predict_interval(steps=2, levels=expected_pandas_dataframe_2[0], in_sample_residuals=True)
     expected = expected_pandas_dataframe_2[1]
@@ -178,7 +178,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
                                               transformer_series=None)
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
-    forecaster.in_sample_residuals['1'] = np.full_like(forecaster.in_sample_residuals['1'], fill_value=10)
+    forecaster.in_sample_residuals_['1'] = np.full_like(forecaster.in_sample_residuals_['1'], fill_value=10)
     expected_1 = pd.DataFrame(
                     np.array([[10., 20.        , 20.],
                               [11., 24.33333333, 24.33333333]
@@ -188,7 +188,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
                  )
     results_1 = forecaster.predict_interval(steps=2, levels='1', in_sample_residuals=True)
 
-    forecaster.in_sample_residuals['2'] = np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)
+    forecaster.in_sample_residuals_['2'] = np.full_like(forecaster.in_sample_residuals_['2'], fill_value=20)
     expected_2 = pd.DataFrame(
                     np.array([[10., 30.              , 30.],
                               [11., 37.66666666666667, 37.66666666666667]
@@ -220,8 +220,8 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_1_in_sample_
                                               transformer_series=None)
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
-    residuals = {'1': np.full_like(forecaster.in_sample_residuals['1'], fill_value=10), 
-                 '2': np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)}
+    residuals = {'1': np.full_like(forecaster.in_sample_residuals_['1'], fill_value=10), 
+                 '2': np.full_like(forecaster.in_sample_residuals_['2'], fill_value=20)}
     forecaster.set_out_sample_residuals(residuals=residuals)
 
     predictions = forecaster.predict_interval(steps=1, levels=expected_pandas_dataframe[0], in_sample_residuals=False)
@@ -239,8 +239,8 @@ def test_predict_output_when_regressor_is_LinearRegression_steps_is_2_in_sample_
                                               transformer_series=None)
     forecaster.fit(series=series_2, store_in_sample_residuals=True)
 
-    residuals = {'1': np.full_like(forecaster.in_sample_residuals['1'], fill_value=10), 
-                 '2': np.full_like(forecaster.in_sample_residuals['2'], fill_value=20)}
+    residuals = {'1': np.full_like(forecaster.in_sample_residuals_['1'], fill_value=10), 
+                 '2': np.full_like(forecaster.in_sample_residuals_['2'], fill_value=20)}
     forecaster.set_out_sample_residuals(residuals=residuals)
 
     predictions = forecaster.predict_interval(steps=2, levels=expected_pandas_dataframe_2[0], in_sample_residuals=False)
@@ -261,11 +261,11 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
     forecaster.fit(series=series)
     predictions = forecaster.predict_interval(steps=5, levels='1')
     expected = pd.DataFrame(
-                   data = np.array([[0.52791431, 0.18396317, 0.95754082],
-                                    [0.44509712, 0.0128976 , 0.84417134],
-                                    [0.42176045, 0.05538845, 0.82860157],
-                                    [0.48087237, 0.13819232, 0.89557796],
-                                    [0.48268008, 0.1309113 , 0.90553765]]),
+                   data = np.array([[0.52791431, 0.16188966, 0.93871914],
+                                    [0.44509712, 0.06269358, 0.86661665],
+                                    [0.42176045, 0.07019270, 0.84061682],
+                                    [0.48087237, 0.04584784, 0.89414593],
+                                    [0.48268008, 0.06083207, 0.88640663]]),
                    index = pd.RangeIndex(start=50, stop=55, step=1),
                    columns = ['1', '1_lower_bound', '1_upper_bound']
                )
@@ -286,11 +286,11 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
     forecaster.fit(series=series)
     predictions = forecaster.predict_interval(steps=5, levels=['1'])
     expected = pd.DataFrame(
-                   data = np.array([[0.59619193, 0.18343628, 1.00239295],
-                                    [0.46282914, 0.05746129, 0.85226151],
-                                    [0.41738496, 0.01752287, 0.8300486 ],
-                                    [0.48522676, 0.11948742, 0.90879137],
-                                    [0.47525733, 0.117253  , 0.88886001]]),
+                   data = np.array([[0.59619193, 0.18343628, 0.99595007],
+                                    [0.46282914, 0.07347660, 0.87366464],
+                                    [0.41738496, 0.05455809, 0.82131060],
+                                    [0.48522676, 0.07808011, 0.88759521],
+                                    [0.47525733, 0.05579861, 0.88300369]]),
                    index = pd.RangeIndex(start=50, stop=55, step=1),
                    columns = ['1', '1_lower_bound', '1_upper_bound']
                )
@@ -318,11 +318,13 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
     forecaster.fit(series=series, exog=exog)
     predictions = forecaster.predict_interval(steps=5, levels=['1', '2'], exog=exog_predict)
     expected = pd.DataFrame(
-                   data = np.array([[0.53267333, 0.17691231, 0.9399491 , 0.55496412, 0.14714165, 0.9246417],
-                                    [0.44478046, 0.04641456, 0.83203647, 0.57787982, 0.14450512, 0.93373637],
-                                    [0.52579563, 0.13671047, 0.92765308, 0.66389117, 0.23054494, 1.02657915],
-                                    [0.57391142, 0.21373477, 0.97709097, 0.65789846, 0.23499484, 1.02002429],
-                                    [0.54633594, 0.1725495 , 0.94995973, 0.5841187 , 0.18811899, 0.9513278 ]]),
+                   data = np.array([
+                              [0.53267333, 0.14385946, 0.93785138, 0.55496412, 0.13040389, 0.92388262],
+                              [0.44478046, 0.04154118, 0.84614330, 0.57787982, 0.16413512, 0.94053783],
+                              [0.52579563, 0.15213146, 0.92786437, 0.66389117, 0.24884422, 1.02136204],
+                              [0.57391142, 0.17585577, 0.97162182, 0.65789846, 0.22047826, 1.00859227],
+                              [0.54633594, 0.13783319, 0.94216581, 0.58411870, 0.15672133, 0.93914218]]
+                          ),
                    index = pd.RangeIndex(start=50, stop=55, step=1),
                    columns = ['1', '1_lower_bound', '1_upper_bound', '2', '2_lower_bound', '2_upper_bound']
                )
@@ -353,21 +355,21 @@ def test_predict_interval_output_when_series_and_exog_dict():
     )
     expected = pd.DataFrame(
         data=np.array([
-            [1438.14154717,  984.89302371, 1866.71388628, 2090.79352613,
-            902.35566771, 2812.9492079 , 2166.9832933 , 1478.23569823,
-            2519.27378966, 7285.52781428, 4241.35466074, 8500.84534052],
-            [1438.14154717, 1368.43204887, 1893.86659752, 2089.11038884,
-            900.67253042, 2812.29873034, 2074.55994929, 1414.59564291,
-            3006.64848384, 7488.18398744, 5727.33006697, 8687.00097656],
-            [1438.14154717, 1051.65779678, 1863.99279153, 2089.11038884,
-            933.86328276, 2912.07131797, 2035.99448247, 1455.42927055,
-            3112.84247337, 7488.18398744, 4229.48737525, 8490.6467214 ],
-            [1403.93625654, 1130.69596556, 1740.72910642, 2089.11038884,
-            900.67253042, 2912.07131797, 2035.99448247, 1522.39553008,
-            1943.48913692, 7488.18398744, 5983.32345864, 9175.53503076],
-            [1403.93625654, 1075.26038028, 1851.5525839 , 2089.11038884,
-            933.86328276, 2909.31686272, 2035.99448247, 1732.93979512,
-            2508.99760524, 7488.18398744, 5073.26873656, 8705.7520813 ]]),
+            [1438.14154717, 1151.25387091, 1834.64267811, 2090.79352613,
+             1352.80566771, 2850.70364521, 2166.9832933 , 1915.71031656,
+             2538.88007772, 7285.52781428, 5289.04209733, 8604.79589441],
+            [1438.14154717,  754.44282535, 1708.80983557, 2089.11038884,
+             933.86328276, 2878.42686855, 2074.55994929, 1491.6401476 ,
+             2447.16553138, 7488.18398744, 5588.65514279, 9175.53503076],
+            [1438.14154717, 1393.20049911, 1786.2144554 , 2089.11038884,
+             934.76328276, 2852.8076229 , 2035.99448247, 1478.62225697,
+             2202.14689944, 7488.18398744, 5330.31083389, 9272.09463487],
+            [1403.93625654, 1097.60654368, 1655.32766412, 2089.11038884,
+             975.32975784, 2909.31686272, 2035.99448247, 1530.74471247,
+             2284.17651415, 7488.18398744, 4379.32842459, 8725.84690603],
+            [1403.93625654, 1271.81039554, 1712.6314556 , 2089.11038884,
+             900.67253042, 2775.32496318, 2035.99448247, 1352.22100994,
+             2023.10287794, 7488.18398744, 4576.01555597, 9477.77316645]]),
         index=pd.date_range(start="2016-08-01", periods=5, freq="D"),
         columns=[
             'id_1000',
@@ -409,7 +411,7 @@ def test_predict_interval_output_when_series_and_exog_dict_unknown_level():
 
     levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
     last_window = pd.DataFrame(
-        {k: v for k, v in forecaster.last_window.items() if k in levels}
+        {k: v for k, v in forecaster.last_window_.items() if k in levels}
     )
     last_window['id_1005'] = last_window['id_1004'] * 0.9
     exog_dict_test_2 = exog_dict_test.copy()
@@ -420,26 +422,26 @@ def test_predict_interval_output_when_series_and_exog_dict_unknown_level():
     )
     expected = pd.DataFrame(
         data=np.array([
-            [1330.53853595, 1234.54638554, 1466.01101346, 2655.95253058,
-             1806.16587168, 2980.80800441, 2645.09087689, 2436.33118532,
-             2896.8958089 , 7897.51938494, 6475.8689303 , 8520.39336408,
-             4890.22840888, 2714.04801977, 6113.89932062],
-            [1401.63085157, 1297.33464356, 1604.49157285, 2503.75247961,
-             1390.65424338, 2780.38027935, 2407.17525054, 2218.88594845,
-             3064.37772365, 8577.09840856, 7096.41496521, 8763.40553896,
-             4756.81020006, 3777.92035635, 5477.79419038],
-            [1387.26572882, 1225.39562421, 1530.74271605, 2446.28038665,
-             1274.09842569, 3059.12744785, 2314.08602238, 2067.62137868,
-             2805.34679097, 8619.98311729, 6304.39688754, 9186.66428031,
-             4947.44052717, 3826.16081797, 5253.17164831],
-            [1310.82275942, 1228.56216954, 1517.4560568 , 2389.3764241 ,
-             1613.21336702, 3084.63006301, 2245.05149747, 1759.35788172,
-             2358.47886659, 8373.80334337, 7640.47624518, 8833.97112851,
-             4972.50918694, 3180.5809587 , 7426.8270528 ],
-            [1279.37274512, 1236.62366009, 1452.44787801, 2185.06104284,
-             1240.87596129, 2946.07346052, 2197.45288166, 1622.570817  ,
-             2074.46153095, 8536.31820994, 7357.82403861, 8997.25758537,
-             5213.7612468 , 3840.69918874, 6307.8333356 ]]),
+            [1330.53853595,  1193.18439697,  1520.46886991,  2655.95253058,
+             2117.99790867,  3164.46774918,  2645.09087689,  2413.68255828,
+             2714.93144634,  7897.51938494,  6897.54816773,  8408.75899232,
+             4890.22840888,  4032.76806221,  5839.5001305 ],
+            [1401.63085157,  1102.76792249,  1496.73904158,  2503.75247961,
+             1696.30950851,  3054.85705656,  2407.17525054,  2103.19159494,
+             2551.12420784,  8577.09840856,  7649.53221732,  9121.38815062,
+             4756.81020006,  4196.95852991,  6296.71335467],
+            [1387.26572882,  1283.49595363,  1535.34888996,  2446.28038665,
+             1379.74372794,  3132.71196912,  2314.08602238,  1824.59807565,
+             2319.72840767,  8619.98311729,  7643.13451622, 10237.69172218,
+             4947.44052717,  2995.3670943 ,  5639.58423386],
+            [1310.82275942,  1263.98299475,  1418.08104408,  2389.3764241 ,
+             1665.80863511,  3283.65732497,  2245.05149747,  1690.30171463,
+             2286.47286188,  8373.80334337,  7925.08454873,  9170.19662943,
+             4972.50918694,  3854.22592844,  6543.05424315],
+            [1279.37274512,  1166.68391264,  1336.93180134,  2185.06104284,
+             1363.74911381,  2889.04815824,  2197.45288166,  1495.02913524,
+             2195.10669302,  8536.31820994,  7008.65077106,  9540.86051966,
+             5213.7612468 ,  4296.64990694,  6414.60074985]]),
         index=pd.date_range(start="2016-08-01", periods=5, freq="D"),
         columns=[
             'id_1000',
@@ -485,7 +487,7 @@ def test_predict_interval_output_when_series_and_exog_dict_encoding_None_unknown
 
     levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
     last_window = pd.DataFrame(
-        {k: v for k, v in forecaster.last_window.items() if k in levels}
+        {k: v for k, v in forecaster.last_window_.items() if k in levels}
     )
     last_window['id_1005'] = last_window['id_1004'] * 0.9
     exog_dict_test_2 = exog_dict_test.copy()
@@ -496,26 +498,26 @@ def test_predict_interval_output_when_series_and_exog_dict_encoding_None_unknown
     )
     expected = pd.DataFrame(
         data=np.array([
-            [1261.93265537,  784.41616115, 1503.55050672, 3109.36774743,
-             2631.85125321, 3350.98559877, 3565.43804407, 3087.92154985,
-             3807.05589541, 7581.0124551 , 7103.49596088, 7822.63030645,
-             6929.60563584, 6452.08914162, 7171.22348719],
-            [1312.20749816,  637.9184331 , 1456.55230372, 3370.63276557,
-             2696.34370051, 3514.97757113, 3486.84974947, 2795.52389009,
-             3631.19455503, 7877.71418945, 7243.41987007, 8022.05899501,
-             7226.30737019, 6592.01305081, 7370.65217575],
-            [1269.60061174,  336.37560258, 1749.69442106, 3451.58214186,
-             2469.45506604, 3906.21421331, 3265.50308765, 2392.65631312,
-             3745.59689697, 7903.88998388, 6991.82265856, 8383.9837932 ,
-             7211.07145676, 6299.00413144, 7691.16526608],
-            [1216.71296132, -803.46566696, 2451.85576454, 3420.93162585,
-             1399.08558266, 4684.62426649, 3279.93748551, 1338.36404222,
-             4737.69647581, 7895.69977262, 5978.62410616, 9257.08365774,
-             7260.90982474, 5309.65908504, 8564.26513062],
-            [1199.80671909, -341.36057715, 2287.58311122, 3410.88134138,
-             1737.91607302, 4481.53218781, 3385.66459202, 1835.69033892,
-             4698.25050698, 7915.94534006, 6423.67830994, 9122.23338527,
-             7281.15539217, 5770.52244805, 8429.41485815]]),
+            [1261.93265537,  -54.92223394, 1663.74382259, 3109.36774743,
+             2834.05294715, 3433.86345449, 3565.43804407, 2010.48988467,
+             6228.58127953, 7581.0124551 , 6286.22433874, 8126.77691062,
+             6929.60563584, 5701.61445078, 7461.52760124],
+            [1312.20749816,  846.82193474, 1979.47123353, 3370.63276557,
+             2829.80711162, 4181.07740596, 3486.84974947, 2355.89401381,
+             6040.01056807, 7877.71418945, 6949.09892306, 8598.60429504,
+             7226.30737019, 5831.8370949 , 8032.64993796],
+            [1269.60061174,  533.03651126, 2202.6484267 , 3451.58214186,
+             2695.91254302, 4378.96352476, 3265.50308765,  993.09722549,
+             5076.21524805, 7903.88998388, 6987.79918911, 8618.47845871,
+             7211.07145676, 5560.79494367, 8245.41102809],
+            [1216.71296132,  708.30263058, 3257.15272095, 3420.93162585,
+             2573.32473893, 4242.48762932, 3279.93748551, 1749.1552736 ,
+             6080.64740059, 7895.69977262, 7141.16482696, 8777.31500381,
+             7260.90982474, 5196.83217466, 8943.71308608],
+            [1199.80671909, 1068.148691  , 3785.98433563, 3410.88134138,
+             2669.37848396, 5273.44882377, 3385.66459202, 1843.03033853,
+             6001.13573768, 7915.94534006, 7115.27808438, 9998.45490231,
+             7281.15539217, 5039.18009578, 8656.83019612]]),
         index=pd.date_range(start="2016-08-01", periods=5, freq="D"),
         columns=[
             'id_1000',

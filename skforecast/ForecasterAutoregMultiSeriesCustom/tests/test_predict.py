@@ -734,7 +734,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_differentia
 
         scaler_dict[k].fit(v.to_numpy().reshape(-1, 1))
         data_scaled = scaler_dict[k].transform(v.copy().to_numpy().reshape(-1, 1))
-        data_scaled = pd.Series(data_scaled.flatten(), index=v.index)
+        data_scaled = pd.Series(data_scaled.ravel(), index=v.index)
         last_value_train = data_scaled.iloc[[-1]]
         df_last_value_train[k] = last_value_train
 

@@ -20,12 +20,12 @@ def test_initialize_transformer_series_when_transformer_series_is_None(forecaste
     """
     Test initialize_transformer_series when `transformer_series` is None.
     """
-    series_col_names = ['col1', 'col2']
+    series_names_in_ = ['col1', 'col2']
     transformer_series = None
     
     transformer_series_ = initialize_transformer_series(
                               forecaster_name    = forecaster_name,
-                              series_col_names   = series_col_names,
+                              series_names_in_   = series_names_in_,
                               encoding           = encoding,
                               transformer_series = transformer_series
                           )
@@ -44,12 +44,12 @@ def test_initialize_transformer_series_when_transformer_series_is_StandardScaler
     """
     Test initialize_transformer_series when `transformer_series` is a StandardScaler.
     """
-    series_col_names = ['col1', 'col2']
+    series_names_in_ = ['col1', 'col2']
     transformer_series = StandardScaler()
     
     transformer_series_ = initialize_transformer_series(
                               forecaster_name    = forecaster_name,
-                              series_col_names   = series_col_names,
+                              series_names_in_   = series_names_in_,
                               encoding           = encoding,
                               transformer_series = transformer_series
                           )
@@ -70,7 +70,7 @@ def test_initialize_transformer_series_when_transformer_series_is_dict(forecaste
     Test initialize_transformer_series when `transformer_series` is a dict.
     Encoding can not be None when transformer_series is a dict.
     """
-    series_col_names = ['col1', 'col2']
+    series_names_in_ = ['col1', 'col2']
     if forecaster_name == 'ForecasterAutoregMultiSeries':
         transformer_series = {'col1': StandardScaler(), 
                               'col2': StandardScaler(), 
@@ -81,7 +81,7 @@ def test_initialize_transformer_series_when_transformer_series_is_dict(forecaste
     
     transformer_series_ = initialize_transformer_series(
                               forecaster_name    = forecaster_name,
-                              series_col_names   = series_col_names,
+                              series_names_in_   = series_names_in_,
                               encoding           = encoding,
                               transformer_series = transformer_series
                           )
@@ -97,12 +97,12 @@ def test_initialize_transformer_series_when_transformer_series_is_dict(forecaste
      ('ForecasterAutoregMultiVariate', None, {'col1': StandardScaler(), 'col2': None}),
      ('ForecasterRNN', None, {'col1': StandardScaler(), 'col2': None})], 
     ids=lambda params: f'params: {params}')
-def test_initialize_transformer_series_IgnoredArgumentWarning_when_levels_of_transformer_series_not_equal_to_series_col_names(forecaster_name, encoding, expected):
+def test_initialize_transformer_series_IgnoredArgumentWarning_when_levels_of_transformer_series_not_equal_to_series_names_in_(forecaster_name, encoding, expected):
     """
     Test IgnoredArgumentWarning is raised when `transformer_series` is a dict and its keys 
-    are not the same as series_col_names.
+    are not the same as series_names_in_.
     """
-    series_col_names = ['col1', 'col2']
+    series_names_in_ = ['col1', 'col2']
     if forecaster_name == 'ForecasterAutoregMultiSeries':
         transformer_series = {'col1': StandardScaler(), 
                               'col3': StandardScaler(), 
@@ -119,7 +119,7 @@ def test_initialize_transformer_series_IgnoredArgumentWarning_when_levels_of_tra
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         transformer_series_ = initialize_transformer_series(
                                   forecaster_name    = forecaster_name,
-                                  series_col_names   = series_col_names,
+                                  series_names_in_   = series_names_in_,
                                   encoding           = encoding,
                                   transformer_series = transformer_series
                               )

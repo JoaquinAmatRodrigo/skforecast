@@ -20,7 +20,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
+    forecaster.in_sample_residuals_ = np.full_like(forecaster.in_sample_residuals_, fill_value=10)
     expected = pd.DataFrame(
                    data    = np.array([[10., 20., 20.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
@@ -38,7 +38,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.in_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
+    forecaster.in_sample_residuals_ = pd.Series(np.full_like(forecaster.in_sample_residuals_, fill_value=10))
     expected = pd.DataFrame(
                    data    = np.array([[10. ,20., 20.],
                                        [11., 24.33333333, 24.33333333]]),
@@ -57,7 +57,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
+    forecaster.out_sample_residuals_ = pd.Series(np.full_like(forecaster.in_sample_residuals_, fill_value=10))
     expected = pd.DataFrame(
                    data    = np.array([[10., 20., 20.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
@@ -98,7 +98,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
+    forecaster.out_sample_residuals_ = pd.Series(np.full_like(forecaster.in_sample_residuals_, fill_value=10))
     expected = pd.DataFrame(
                    data    = np.array([[10. ,20., 20.],
                                        [11., 24.33333333, 24.33333333]]),
@@ -192,7 +192,7 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_5_
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y)
-    forecaster.out_sample_residuals_by_bin = forecaster.in_sample_residuals_by_bin
+    forecaster.out_sample_residuals_by_bin_ = forecaster.in_sample_residuals_by_bin_
     expected = pd.DataFrame(
                    data    = np.array(
                                 [[0.56842545, 0.25304752, 0.98664822],

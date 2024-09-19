@@ -32,7 +32,7 @@ def test_TypeError_check_preprocess_exog_multiseries_when_exog_is_not_valid_type
         check_preprocess_exog_multiseries(
             input_series_is_dict = False,
             series_indexes       = series_indexes,
-            series_col_names     = ['1', '2'],
+            series_names_in_     = ['1', '2'],
             exog                 = not_valid_exog,
             exog_dict            = {'1': None, '2': None}
         )
@@ -57,7 +57,7 @@ def test_TypeError_check_preprocess_exog_multiseries_when_exog_is_not_dict_and_s
         check_preprocess_exog_multiseries(
             input_series_is_dict = True,
             series_indexes       = series_indexes,
-            series_col_names     = ['l1', 'l2'],
+            series_names_in_     = ['l1', 'l2'],
             exog                 = not_valid_exog,
             exog_dict            = {'l1': None, 'l2': None}
         )
@@ -82,7 +82,7 @@ def test_ValueError_check_preprocess_exog_multiseries_when_exog_pandas_with_diff
         check_preprocess_exog_multiseries(
             input_series_is_dict = False,
             series_indexes       = series_indexes,
-            series_col_names     = ['1', '2'],
+            series_names_in_     = ['1', '2'],
             exog                 = not_valid_exog,
             exog_dict            = {'1': None, '2': None}
         )
@@ -103,7 +103,7 @@ def test_ValueError_check_preprocess_exog_multiseries_when_exog_pandas_with_diff
         check_preprocess_exog_multiseries(
             input_series_is_dict = False,
             series_indexes       = series_indexes,
-            series_col_names     = ['1', '2'],
+            series_names_in_     = ['1', '2'],
             exog                 = exog_predict,
             exog_dict            = {'1': None, '2': None}
         )
@@ -115,10 +115,10 @@ def test_check_preprocess_exog_multiseries_when_series_is_pandas_DataFrame():
     """
     _, series_indexes = check_preprocess_series(series=series)
 
-    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+    exog_dict, exog_names_in_ = check_preprocess_exog_multiseries(
                                     input_series_is_dict = False,
                                     series_indexes       = series_indexes,
-                                    series_col_names     = ['1', '2'],
+                                    series_names_in_     = ['1', '2'],
                                     exog                 = exog,
                                     exog_dict            = {'1': None, '2': None}
                                 )
@@ -127,7 +127,7 @@ def test_check_preprocess_exog_multiseries_when_series_is_pandas_DataFrame():
         '1': exog,
         '2': exog
     }
-    expected_exog_col_names = ['exog_1', 'exog_2']
+    expected_exog_names_in_ = ['exog_1', 'exog_2']
 
     assert isinstance(exog_dict, dict)
     assert list(exog_dict.keys()) == ['1', '2']
@@ -135,7 +135,7 @@ def test_check_preprocess_exog_multiseries_when_series_is_pandas_DataFrame():
         pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
         pd.testing.assert_index_equal(exog_dict[k].index, series_indexes['1'])
     
-    assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
+    assert len(set(exog_names_in_) - set(expected_exog_names_in_)) == 0
     
 
 def test_check_preprocess_exog_multiseries_when_series_is_pandas_DataFrame_with_RangeIndex_not_starting_0():
@@ -150,10 +150,10 @@ def test_check_preprocess_exog_multiseries_when_series_is_pandas_DataFrame_with_
     exog_range = exog.copy()
     exog_range.index = pd.RangeIndex(start=3, stop=3+len(exog_range), step=1)
 
-    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+    exog_dict, exog_names_in_ = check_preprocess_exog_multiseries(
                                     input_series_is_dict = False,
                                     series_indexes       = series_indexes,
-                                    series_col_names     = ['1', '2'],
+                                    series_names_in_     = ['1', '2'],
                                     exog                 = exog_range,
                                     exog_dict            = {'1': None, '2': None}
                                 )
@@ -162,7 +162,7 @@ def test_check_preprocess_exog_multiseries_when_series_is_pandas_DataFrame_with_
         '1': exog_range,
         '2': exog_range
     }
-    expected_exog_col_names = ['exog_1', 'exog_2']
+    expected_exog_names_in_ = ['exog_1', 'exog_2']
 
     assert isinstance(exog_dict, dict)
     assert list(exog_dict.keys()) == ['1', '2']
@@ -170,7 +170,7 @@ def test_check_preprocess_exog_multiseries_when_series_is_pandas_DataFrame_with_
         pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
         pd.testing.assert_index_equal(exog_dict[k].index, series_indexes['1'])
     
-    assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
+    assert len(set(exog_names_in_) - set(expected_exog_names_in_)) == 0
     
 
 def test_output_check_preprocess_exog_multiseries_when_series_is_pandas_DataFrame_with_DatetimeIndex():
@@ -187,10 +187,10 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_pandas_DataFram
         start='2000-01-01', periods=len(exog_datetime), freq='D'
     )
 
-    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+    exog_dict, exog_names_in_ = check_preprocess_exog_multiseries(
                                     input_series_is_dict = False,
                                     series_indexes       = series_indexes,
-                                    series_col_names     = ['1', '2'],
+                                    series_names_in_     = ['1', '2'],
                                     exog                 = exog_datetime,
                                     exog_dict            = {'1': None, '2': None}
                                 )
@@ -199,7 +199,7 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_pandas_DataFram
         '1': exog_datetime,
         '2': exog_datetime
     }
-    expected_exog_col_names = ['exog_1', 'exog_2']
+    expected_exog_names_in_ = ['exog_1', 'exog_2']
 
     assert isinstance(exog_dict, dict)
     assert list(exog_dict.keys()) == ['1', '2']
@@ -207,7 +207,7 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_pandas_DataFram
         pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
         pd.testing.assert_index_equal(exog_dict[k].index, series_indexes['1'])
     
-    assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
+    assert len(set(exog_names_in_) - set(expected_exog_names_in_)) == 0
 
 
 def test_TypeError_check_preprocess_exog_multiseries_when_exog_is_dict_with_no_pandas_Series_or_DataFrame():
@@ -231,7 +231,7 @@ def test_TypeError_check_preprocess_exog_multiseries_when_exog_is_dict_with_no_p
         check_preprocess_exog_multiseries(
             input_series_is_dict = False,
             series_indexes       = series_indexes,
-            series_col_names     = ['l1', 'l2'],
+            series_names_in_     = ['l1', 'l2'],
             exog                 = not_valid_exog,
             exog_dict            = {'l1': None, 'l2': None}
         )
@@ -258,7 +258,7 @@ def test_MissingValuesWarning_check_preprocess_exog_multiseries_when_exog_is_dic
         check_preprocess_exog_multiseries(
             input_series_is_dict = False,
             series_indexes       = series_indexes,
-            series_col_names     = ['l1', 'l2'],
+            series_names_in_     = ['l1', 'l2'],
             exog                 = incomplete_exog,
             exog_dict            = {'l1': None, 'l2': None}
         )
@@ -285,7 +285,7 @@ def test_ValueError_check_preprocess_exog_multiseries_when_exog_dict_with_differ
         check_preprocess_exog_multiseries(
             input_series_is_dict = False,
             series_indexes       = series_indexes,
-            series_col_names     = ['l1', 'l2'],
+            series_names_in_     = ['l1', 'l2'],
             exog                 = not_valid_exog,
             exog_dict            = {'l1': None, 'l2': None}
         )
@@ -312,7 +312,7 @@ def test_ValueError_check_preprocess_exog_multiseries_when_exog_dict_with_differ
         check_preprocess_exog_multiseries(
             input_series_is_dict = False,
             series_indexes       = series_indexes,
-            series_col_names     = ['1', '2'],
+            series_names_in_     = ['1', '2'],
             exog                 = not_valid_exog,
             exog_dict            = {'1': None, '2': None}
         )
@@ -333,7 +333,7 @@ def test_TypeError_check_preprocess_exog_multiseries_when_exog_dict_with_differe
         check_preprocess_exog_multiseries(
             input_series_is_dict = True,
             series_indexes       = series_indexes,
-            series_col_names     = ['l1', 'l2'],
+            series_names_in_     = ['l1', 'l2'],
             exog                 = exog_as_dict,
             exog_dict            = {'l1': None, 'l2': None}
         )
@@ -356,7 +356,7 @@ def test_TypeError_check_preprocess_exog_multiseries_when_exog_dict_with_differe
         check_preprocess_exog_multiseries(
             input_series_is_dict = False,
             series_indexes       = series_indexes,
-            series_col_names     = ['1', '2'],
+            series_names_in_     = ['1', '2'],
             exog                 = not_valid_exog,
             exog_dict            = {'1': None, '2': None}
         )
@@ -376,8 +376,7 @@ def test_ValueError_check_preprocess_exog_multiseries_when_exog_has_columns_name
     }
 
     err_msg = re.escape(
-        ("`exog` cannot contain a column named the same as one of the "
-         "series (column names of series).\n"
+        ("`exog` cannot contain a column named the same as one of the series.\n"
          "    `series` columns : ['1', '2'].\n"
          "    `exog`   columns : ['1'].")
     )
@@ -385,7 +384,7 @@ def test_ValueError_check_preprocess_exog_multiseries_when_exog_has_columns_name
         check_preprocess_exog_multiseries(
             input_series_is_dict = False,
             series_indexes       = series_indexes,
-            series_col_names     = ['1', '2'],
+            series_names_in_     = ['1', '2'],
             exog                 = not_valid_exog,
             exog_dict            = {'1': None, '2': None}
         )
@@ -398,10 +397,10 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_e
     """
     series_dict, series_indexes = check_preprocess_series(series=series)
 
-    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+    exog_dict, exog_names_in_ = check_preprocess_exog_multiseries(
                                     input_series_is_dict = False,
                                     series_indexes       = series_indexes,
-                                    series_col_names     = ['1', '2'],
+                                    series_names_in_     = ['1', '2'],
                                     exog                 = exog['exog_1'],
                                     exog_dict            = {'1': None, '2': None}
                                 )
@@ -418,7 +417,7 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_e
                  columns = ['exog_1']
              ),
     }
-    expected_exog_col_names = ['exog_1']
+    expected_exog_names_in_ = ['exog_1']
     
     assert isinstance(exog_dict, dict)
     assert list(exog_dict.keys()) == ['1', '2']
@@ -427,7 +426,7 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_e
         pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
         pd.testing.assert_index_equal(exog_dict[k].index, series_dict[k].index)
 
-    assert exog_col_names == expected_exog_col_names
+    assert exog_names_in_ == expected_exog_names_in_
 
 
 def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_exog_pandas_DataFrame():
@@ -437,10 +436,10 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_e
     """
     series_dict, series_indexes = check_preprocess_series(series=series)
 
-    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+    exog_dict, exog_names_in_ = check_preprocess_exog_multiseries(
                                     input_series_is_dict = False,
                                     series_indexes       = series_indexes,
-                                    series_col_names     = ['1', '2'],
+                                    series_names_in_     = ['1', '2'],
                                     exog                 = exog,
                                     exog_dict            = {'1': None, '2': None}
                                 )
@@ -457,7 +456,7 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_e
                  columns = ['exog_1', 'exog_2']
              ).astype({'exog_1': float}),
     }
-    expected_exog_col_names = ['exog_1', 'exog_2']
+    expected_exog_names_in_ = ['exog_1', 'exog_2']
     
     assert isinstance(exog_dict, dict)
     assert list(exog_dict.keys()) == ['1', '2']
@@ -466,7 +465,7 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_e
         pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
         pd.testing.assert_index_equal(exog_dict[k].index, series_dict[k].index)
 
-    assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
+    assert len(set(exog_names_in_) - set(expected_exog_names_in_)) == 0
 
 
 def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_exog_dict():
@@ -476,10 +475,10 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_e
     """
     series_dict, series_indexes = check_preprocess_series(series=series_2)
 
-    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+    exog_dict, exog_names_in_ = check_preprocess_exog_multiseries(
                                     input_series_is_dict = False,
                                     series_indexes       = series_indexes,
-                                    series_col_names     = ['l1', 'l2'],
+                                    series_names_in_     = ['l1', 'l2'],
                                     exog                 = exog_as_dict_datetime,
                                     exog_dict            = {'l1': None, 'l2': None}
                                 )
@@ -496,7 +495,7 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_e
                   columns = ['exog_1']
               ).astype({'exog_1': float}),
     }
-    expected_exog_col_names = ['exog_1', 'exog_2']
+    expected_exog_names_in_ = ['exog_1', 'exog_2']
     
     assert isinstance(exog_dict, dict)
     assert list(exog_dict.keys()) == ['l1', 'l2']
@@ -505,7 +504,7 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_DataFrame_and_e
         pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
         pd.testing.assert_index_equal(exog_dict[k].index, series_dict[k].index)
 
-    assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
+    assert len(set(exog_names_in_) - set(expected_exog_names_in_)) == 0
 
 
 def test_output_check_preprocess_exog_multiseries_when_series_is_dict_and_exog_dict():
@@ -515,10 +514,10 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_dict_and_exog_d
     """
     series_dict, series_indexes = check_preprocess_series(series=series_as_dict)
 
-    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+    exog_dict, exog_names_in_ = check_preprocess_exog_multiseries(
                                     input_series_is_dict = True,
                                     series_indexes       = series_indexes,
-                                    series_col_names     = ['l1', 'l2'],
+                                    series_names_in_     = ['l1', 'l2'],
                                     exog                 = exog_as_dict_datetime,
                                     exog_dict            = {'l1': None, 'l2': None}
                                 )
@@ -535,7 +534,7 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_dict_and_exog_d
                   columns = ['exog_1']
               ).astype({'exog_1': float}),
     }
-    expected_exog_col_names = ['exog_1', 'exog_2']
+    expected_exog_names_in_ = ['exog_1', 'exog_2']
     
     assert isinstance(exog_dict, dict)
     assert list(exog_dict.keys()) == ['l1', 'l2']
@@ -544,7 +543,7 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_dict_and_exog_d
         pd.testing.assert_frame_equal(exog_dict[k], expected_exog_dict[k])
         pd.testing.assert_index_equal(exog_dict[k].index, series_dict[k].index)
 
-    assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
+    assert len(set(exog_names_in_) - set(expected_exog_names_in_)) == 0
 
 
 def test_output_check_preprocess_exog_multiseries_when_series_is_dict_and_exog_dict_with_different_lengths():
@@ -567,10 +566,10 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_dict_and_exog_d
     exog_test['l1'] = exog_test['l1'].iloc[10:30]
     exog_test['l2'] = exog_test['l2'].iloc[:40]
 
-    exog_dict, exog_col_names = check_preprocess_exog_multiseries(
+    exog_dict, exog_names_in_ = check_preprocess_exog_multiseries(
                                     input_series_is_dict = True,
                                     series_indexes       = series_indexes,
-                                    series_col_names     = ['l1', 'l2', 'l3'],
+                                    series_names_in_     = ['l1', 'l2', 'l3'],
                                     exog                 = exog_test,
                                     exog_dict            = {'l1': None, 'l2': None, 'l3': None}
                                 )
@@ -588,7 +587,7 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_dict_and_exog_d
               ).astype({'exog_1': float}),
         'l3': None
     }
-    expected_exog_col_names = ['exog_1', 'exog_2']
+    expected_exog_names_in_ = ['exog_1', 'exog_2']
     
     assert isinstance(exog_dict, dict)
     assert list(exog_dict.keys()) == ['l1', 'l2', 'l3']
@@ -603,4 +602,4 @@ def test_output_check_preprocess_exog_multiseries_when_series_is_dict_and_exog_d
             )
             assert len(index_intersection) == len(exog_dict[k])
 
-    assert len(set(exog_col_names) - set(expected_exog_col_names)) == 0
+    assert len(set(exog_names_in_) - set(expected_exog_names_in_)) == 0

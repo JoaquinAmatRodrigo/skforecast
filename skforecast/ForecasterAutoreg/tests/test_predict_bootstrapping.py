@@ -41,10 +41,9 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     forecaster.fit(y=pd.Series(np.arange(10)))
 
     err_msg = re.escape(
-        ("`forecaster.out_sample_residuals` is `None`. Use "
-         "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-         "before `predict_interval()`, `predict_bootstrapping()`, "
-         "`predict_quantiles()` or `predict_dist()`.")
+        ("`forecaster.out_sample_residuals_` is `None`. Use "
+         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
+         "method before predicting.")
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False)
@@ -59,10 +58,9 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_by_bin_is_No
     forecaster.fit(y=pd.Series(np.arange(10)))
 
     err_msg = re.escape(
-        ("`forecaster.out_sample_residuals_by_bin` is `None`. Use "
-         "`in_sample_residuals=True` or method `set_out_sample_residuals()` "
-         "before `predict_interval()`, `predict_bootstrapping()`, "
-         "`predict_quantiles()` or `predict_dist()`.")
+        ("`forecaster.out_sample_residuals_by_bin_` is `None`. Use "
+         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
+         "method before predicting.")
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False,
@@ -113,7 +111,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
-    forecaster.out_sample_residuals = forecaster.in_sample_residuals
+    forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     expected = pd.DataFrame(
                    data    = np.array([[0.83836963, 0.54888446, 1.16537933, 0.69662898]]),
                    columns = [f"pred_boot_{i}" for i in range(4)],
@@ -131,7 +129,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
-    forecaster.out_sample_residuals = forecaster.in_sample_residuals
+    forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     expected = pd.DataFrame(
                    data    = np.array([[ 0.83836963,  0.54888446,  1.16537933,  0.69662898],
                                        [ 0.21874597, -0.0376708 ,  0.29184038,  0.5833093 ]]),
@@ -156,11 +154,11 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                      transformer_exog = StandardScaler(),
                  )
     forecaster.fit(y=y, exog=exog)
-    forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=0)
+    forecaster.in_sample_residuals_ = np.full_like(forecaster.in_sample_residuals_, fill_value=0)
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=True)
     expected = pd.DataFrame(
                    data = np.array([[0.67998879, 0.67998879, 0.67998879, 0.67998879],
-                                   [0.46135022, 0.46135022, 0.46135022, 0.46135022]]),
+                                    [0.46135022, 0.46135022, 0.46135022, 0.46135022]]),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -186,8 +184,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=True)
     expected = pd.DataFrame(
                    data    = np.array(
-                                 [[ 0.83836963,  0.54888446,  1.16537933,  0.69662898],
-                                  [ 0.21874597, -0.0376708 ,  0.29184038,  0.5833093 ]]
+                                 [[0.83836963,  0.54888446,  1.16537933,  0.69662898],
+                                  [0.21874597, -0.03767080,  0.29184038,  0.58330930]]
                              ),
                    columns = [f"pred_boot_{i}" for i in range(4)],
                    index   = pd.RangeIndex(start=50, stop=52)

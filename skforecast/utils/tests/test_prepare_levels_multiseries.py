@@ -13,11 +13,10 @@ def test_output_prepare_levels_multiseries(levels, expected_levels, expected_typ
     """
     Test output prepare_levels_multiseries for different inputs.
     """
-    series_X_train = ['l1', 'l2', 'l3']
+    X_train_series_names_in_ = ['l1', 'l2', 'l3']
     levels, input_levels_is_list = prepare_levels_multiseries(
-                                       series_X_train = series_X_train, 
-                                       levels         = levels
-                                   )
+        X_train_series_names_in_=X_train_series_names_in_, levels=levels
+    )
     
     assert levels == expected_levels
     assert input_levels_is_list is expected_type
