@@ -219,14 +219,14 @@ class ForecasterRnn(ForecasterBase):
         self.skforecast_version = skforecast.__version__
         self.python_version = sys.version.split(" ")[0]
         self.forecaster_id = forecaster_id
-        self.history = None
+        self.history = None  # TODO: Change to history_ as come from fit method?
         self.dropna_from_series = False  # Ignored in this forecaster
         self.encoding = None   # Ignored in this forecaster
         self.differentiation = None   # Ignored in this forecaster
         self.differentiator = None   # Ignored in this forecaster
 
         # Infer parameters from the model
-        self.regressor = regressor  #TODO: Create copy of regressor copy(regressor)
+        self.regressor = regressor  # TODO: Create copy of regressor copy(regressor)
         layer_init = self.regressor.layers[0]
 
         if lags == "auto":
