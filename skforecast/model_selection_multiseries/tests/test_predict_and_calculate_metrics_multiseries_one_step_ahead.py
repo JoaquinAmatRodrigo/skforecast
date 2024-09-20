@@ -20,6 +20,7 @@ from skforecast.metrics import mean_absolute_scaled_error
 # Fixtures
 THIS_DIR = Path(__file__).parent
 series = pd.read_parquet(THIS_DIR/'fixture_multi_series_items_sales.parquet')
+series = series.asfreq('D')
 exog = pd.DataFrame({'day_of_week': series.index.dayofweek}, index = series.index)
 series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
 exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
@@ -42,7 +43,7 @@ exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
             ),
             ForecasterAutoregMultiVariate(
                 regressor=Ridge(random_state=678),
-                level='l1',
+                level='item_1',
                 lags=3,
                 steps=1,
                 transformer_series=StandardScaler(),

@@ -22,6 +22,7 @@ tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 from .fixtures_model_selection_multiseries import series
 THIS_DIR = Path(__file__).parent
 series_item_sales = pd.read_parquet(THIS_DIR/'fixture_multi_series_items_sales.parquet')
+series_item_sales = series_item_sales.asfreq('D')
 exog_item_sales = pd.DataFrame({'day_of_week': series_item_sales.index.dayofweek}, index = series_item_sales.index)
 series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
 exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
