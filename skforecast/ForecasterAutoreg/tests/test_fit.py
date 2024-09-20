@@ -9,9 +9,10 @@ from sklearn.linear_model import LinearRegression
 
 # Fixtures
 from .fixtures_ForecasterAutoreg import y
+from .fixtures_ForecasterAutoreg import exog
 
 
-def custom_weights(index): # pragma: no cover
+def custom_weights(index):  # pragma: no cover
     """
     Return 0 if index is one of '2022-01-05', '2022-01-06', 1 otherwise.
     """
@@ -22,6 +23,28 @@ def custom_weights(index): # pragma: no cover
               )
     
     return weights
+
+
+def test_forecaster_y_exog_features_stored():
+    """
+    Test forecaster stores y and exog features after fitting.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
+    forecaster.fit(y=y, exog=exog)
+
+    exog_in_ = True
+    exog_type_in_ = type(exog)
+    exog_names_in_ = ['exog']
+    exog_dtypes_in_ = {'exog': exog.dtype}
+    X_train_exog_names_out_ = ['exog']
+    X_train_features_names_out_ = ['lag_1', 'lag_2', 'lag_3', 'exog']
+    
+    assert forecaster.exog_in_ == exog_in_
+    assert forecaster.exog_type_in_ == exog_type_in_
+    assert forecaster.exog_names_in_ == exog_names_in_
+    assert forecaster.exog_dtypes_in_ == exog_dtypes_in_
+    assert forecaster.X_train_exog_names_out_ == X_train_exog_names_out_
+    assert forecaster.X_train_features_names_out_ == X_train_features_names_out_
 
 
 def test_forecaster_DatetimeIndex_index_freq_stored():
@@ -35,7 +58,7 @@ def test_forecaster_DatetimeIndex_index_freq_stored():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=serie_with_DatetimeIndex)
     expected = serie_with_DatetimeIndex.index.freqstr
-    results = forecaster.index_freq
+    results = forecaster.index_freq_
 
     assert results == expected
 
@@ -48,18 +71,18 @@ def test_forecaster_index_step_stored():
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=y)
     expected = y.index.step
-    results = forecaster.index_freq
+    results = forecaster.index_freq_
 
     assert results == expected
     
     
 def test_fit_in_sample_residuals_stored():
     """
-    Test that values of in_sample_residuals are stored after fitting.
+    Test that values of in_sample_residuals_ are stored after fitting.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(5)))
-    results = forecaster.in_sample_residuals
+    results = forecaster.in_sample_residuals_
     expected = np.array([0., 0.])
 
     assert isinstance(results, np.ndarray)
@@ -107,11 +130,11 @@ def test_fit_in_sample_residuals_by_bin_stored():
     }
 
     np.testing.assert_almost_equal(
-        np.sort(forecaster.in_sample_residuals),
+        np.sort(forecaster.in_sample_residuals_),
         np.sort(expected_1)
     )
     for k in expected_2.keys():
-        np.testing.assert_almost_equal(forecaster.in_sample_residuals_by_bin[k], expected_2[k])
+        np.testing.assert_almost_equal(forecaster.in_sample_residuals_by_bin_[k], expected_2[k])
     for k in expected_3.keys():
         assert forecaster.binner_intervals[k][0] == approx(expected_3[k][0])
         assert forecaster.binner_intervals[k][1] == approx(expected_3[k][1])
@@ -124,10 +147,10 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(1200)))
-    results_1 = forecaster.in_sample_residuals
+    results_1 = forecaster.in_sample_residuals_
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(1200)))
-    results_2 = forecaster.in_sample_residuals
+    results_2 = forecaster.in_sample_residuals_
     
     assert isinstance(results_1, np.ndarray)
     assert isinstance(results_2, np.ndarray)
@@ -136,12 +159,12 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
 
 def test_fit_in_sample_residuals_not_stored():
     """
-    Test that values of in_sample_residuals are not stored after fitting
+    Test that values of in_sample_residuals_ are not stored after fitting
     when `store_in_sample_residuals=False`.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(5)), store_in_sample_residuals=False)
-    results = forecaster.in_sample_residuals
+    results = forecaster.in_sample_residuals_
 
     assert results is None
 
@@ -158,9 +181,9 @@ def test_fit_last_window_stored(store_last_window):
     expected = pd.DataFrame(np.array([47, 48, 49]), index=[47, 48, 49], columns=['y'])
 
     if store_last_window:
-        pd.testing.assert_frame_equal(forecaster.last_window, expected)
+        pd.testing.assert_frame_equal(forecaster.last_window_, expected)
     else:
-        assert forecaster.last_window == None
+        assert forecaster.last_window_ is None
 
 
 def test_fit_model_coef_when_using_weight_func():

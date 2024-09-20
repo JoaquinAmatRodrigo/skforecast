@@ -71,14 +71,14 @@ def test_transform_series_when_transformer_is_StandardScaler_and_inverse_transfo
     transformer = StandardScaler()
     transformer.fit(input_1.to_numpy().reshape(-1, 1))
     input_2 = transformer.transform(input_1.to_numpy().reshape(-1, 1))
-    input_2 = pd.Series(input_2.flatten(), name= 'y')
+    input_2 = pd.Series(input_2.ravel(), name= 'y')
     expected = input_1
-    results =  transform_series(
-                    series = input_2,
-                    transformer = transformer,
-                    fit = False,
-                    inverse_transform = True
-                )
+    results = transform_series(
+                  series = input_2,
+                  transformer = transformer,
+                  fit = False,
+                  inverse_transform = True
+              )
     
     pd.testing.assert_series_equal(results, expected)
 
@@ -130,11 +130,11 @@ def test_transform_series_when_applied_to_serie_with_different_name_than_the_one
                          name = 'pred')
     transformer = StandardScaler()
     transformer.fit(training_series.to_frame())
-    results =  transform_series(
-                    series = input_series,
-                    transformer = transformer,
-                    fit = False,
-                    inverse_transform = False
-               )
+    results = transform_series(
+                  series = input_series,
+                  transformer = transformer,
+                  fit = False,
+                  inverse_transform = False
+              )
     
     pd.testing.assert_series_equal(results, expected)

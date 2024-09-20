@@ -8,7 +8,7 @@
 import logging
 import sys
 import warnings
-from copy import deepcopy
+from copy import deepcopy, copy
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 import matplotlib
 import matplotlib.pyplot as plt
@@ -118,33 +118,33 @@ class ForecasterRnn(ForecasterBase):
     window_size_diff : int
         This attribute has the same value as window_size as this Forecaster 
         doesn't support differentiation. Present here for API consistency.
-    last_window : pandas Series
+    last_window_ : pandas Series
         Last window seen by the forecaster during training. It stores the values
         needed to predict the next `step` immediately after the training data.
-    index_type : type
+    index_type_ : type
         Type of index of the input used in training.
-    index_freq : str
+    index_freq_ : str
         Frequency of Index of the input used in training.
-    training_range: pandas Index
+    training_range_: pandas Index
         First and last values of index of the data used during training.
-    included_exog : bool
+    series_names_in_ : list
+        Names of the series used during training.
+    exog_in_ : bool
         If the forecaster has been trained using exogenous variable/s.
-    exog_type : type
+    exog_names_in_ : list
+        Names of the exogenous variables used during training.
+    exog_type_in_ : type
         Type of exogenous variable/s used in training.
-    exog_dtypes : dict
+    exog_dtypes_in_ : dict
         Type of each exogenous variable/s used in training. If `transformer_exog`
         is used, the dtypes are calculated after the transformation.
-    exog_col_names : list
-        Names of the exogenous variables used during training.
-    series_col_names : list
-        Names of the series used during training.
-    X_train_dim_names : dict
+    X_train_dim_names_ : dict
         Labels for the multi-dimensional arrays created internally for training.
-    y_train_dim_names : dict
+    y_train_dim_names_ : dict
         Labels for the multi-dimensional arrays created internally for training.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
-    in_sample_residuals : dict
+    in_sample_residuals_ : dict
         Residuals of the models when predicting training data. Only stored up to
         1000 values per model in the form `{step: residuals}`. If `transformer_series`
         is not `None`, residuals are stored in the transformed scale.
@@ -153,10 +153,10 @@ class ForecasterRnn(ForecasterBase):
         up to 1000 values per model in the form `{step: residuals}`. If `transformer_series`
         is not `None`, residuals are assumed to be in the transformed scale. Use
         `set_out_sample_residuals()` method to set values.
-    fitted : bool
-        Tag to identify if the regressor has been fitted (trained).
     creation_date : str
         Date of creation.
+    is_fitted : bool
+        Tag to identify if the regressor has been fitted (trained).
     fit_date : str
         Date of last fit.
     skforcast_version : str
@@ -169,6 +169,12 @@ class ForecasterRnn(ForecasterBase):
         Dictionary with the history of the training of each step. It is created
         internally to avoid overwriting.
     dropna_from_series : Ignored
+        Not used, present here for API consistency by convention.
+    encoding : Ignored
+        Not used, present here for API consistency by convention.
+    differentiation : Ignored
+        Not used, present here for API consistency by convention.
+    differentiator : Ignored
         Not used, present here for API consistency by convention.
     
     """
@@ -196,28 +202,31 @@ class ForecasterRnn(ForecasterBase):
         self.source_code_weight_func = None
         self.max_lag = None
         self.window_size = None
-        self.last_window = None
-        self.index_type = None
-        self.index_freq = None
-        self.training_range = None
-        self.included_exog = False
-        self.exog_type = None
-        self.exog_dtypes = None
-        self.exog_col_names = None
-        self.series_col_names = None
-        self.X_train_dim_names = None
-        self.y_train_dim_names = None
-        self.fitted = False
+        self.last_window_ = None
+        self.index_type_ = None
+        self.index_freq_ = None
+        self.training_range_ = None
+        self.exog_in_ = False
+        self.exog_type_in_ = None
+        self.exog_dtypes_in_ = None
+        self.exog_names_in_ = None
+        self.series_names_in_ = None
+        self.X_train_dim_names_ = None
+        self.y_train_dim_names_ = None
+        self.is_fitted = False
         self.creation_date = pd.Timestamp.today().strftime("%Y-%m-%d %H:%M:%S")
         self.fit_date = None
         self.skforecast_version = skforecast.__version__
         self.python_version = sys.version.split(" ")[0]
         self.forecaster_id = forecaster_id
-        self.history = None
-        self.dropna_from_series = False # Ignored in this forecaster
+        self.history = None  # TODO: Change to history_ as come from fit method?
+        self.dropna_from_series = False  # Ignored in this forecaster
+        self.encoding = None   # Ignored in this forecaster
+        self.differentiation = None   # Ignored in this forecaster
+        self.differentiator = None   # Ignored in this forecaster
 
         # Infer parameters from the model
-        self.regressor = regressor
+        self.regressor = regressor  # TODO: Create copy of regressor copy(regressor)
         layer_init = self.regressor.layers[0]
 
         if lags == "auto":
@@ -332,11 +341,11 @@ class ForecasterRnn(ForecasterBase):
             f"Transformer for series: {self.transformer_series} \n"
             f"Window size: {self.window_size} \n"
             f"Target series, levels: {self.levels} \n"
-            f"Multivariate series (names): {self.series_col_names} \n"
+            f"Multivariate series (names): {self.series_names_in_} \n"
             f"Maximum steps predicted: {self.steps} \n"
-            f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
-            f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
-            f"Training index frequency: {self.index_freq if self.fitted else None} \n"
+            f"Training range: {self.training_range_.to_list() if self.is_fitted else None} \n"
+            f"Training index type: {str(self.index_type_).split('.')[-1][:-2] if self.is_fitted else None} \n"
+            f"Training index frequency: {self.index_freq_ if self.is_fitted else None} \n"
             f"Model parameters: {params} \n"
             f"Compile parameters: {compile_config} \n"
             f"fit_kwargs: {self.fit_kwargs} \n"
@@ -439,7 +448,7 @@ class ForecasterRnn(ForecasterBase):
         if not isinstance(series, pd.DataFrame):
             raise TypeError(f"`series` must be a pandas DataFrame. Got {type(series)}.")
 
-        series_col_names = list(series.columns)
+        series_names_in_ = list(series.columns)
 
         if not set(self.levels).issubset(set(series.columns)):
             raise ValueError(
@@ -461,13 +470,13 @@ class ForecasterRnn(ForecasterBase):
             )
 
         if self.transformer_series is None:
-            self.transformer_series_ = {serie: None for serie in series_col_names}
+            self.transformer_series_ = {serie: None for serie in series_names_in_}
         elif not isinstance(self.transformer_series, dict):
             self.transformer_series_ = {
-                serie: clone(self.transformer_series) for serie in series_col_names
+                serie: clone(self.transformer_series) for serie in series_names_in_
             }
         else:
-            self.transformer_series_ = {serie: None for serie in series_col_names}
+            self.transformer_series_ = {serie: None for serie in series_names_in_}
             # Only elements already present in transformer_series_ are updated
             self.transformer_series_.update(
                 (k, v)
@@ -558,7 +567,7 @@ class ForecasterRnn(ForecasterBase):
             Training time series.
         store_in_sample_residuals : bool, default `True`
             If `True`, in-sample residuals will be stored in the forecaster object
-            after fitting.
+            after fitting (`in_sample_residuals_` attribute).
         exog : Ignored
             Not used, present here for API consistency by convention.
         suppress_warnings : bool, default `False`
@@ -576,25 +585,25 @@ class ForecasterRnn(ForecasterBase):
         set_skforecast_warnings(suppress_warnings, action='ignore')
                 
         # Reset values in case the forecaster has already been fitted.
-        self.index_type = None
-        self.index_freq = None
-        self.last_window = None
-        self.included_exog = None
-        self.exog_type = None
-        self.exog_dtypes = None
-        self.exog_col_names = None
-        self.series_col_names = None
-        self.X_train_dim_names = None
-        self.y_train_dim_names = None
-        self.in_sample_residuals = None
-        self.fitted = False
-        self.training_range = None
+        self.index_type_ = None
+        self.index_freq_ = None
+        self.last_window_ = None
+        self.exog_in_ = None
+        self.exog_type_in_ = None
+        self.exog_dtypes_in_ = None
+        self.exog_names_in_ = None
+        self.series_names_in_ = None
+        self.X_train_dim_names_ = None
+        self.y_train_dim_names_ = None
+        self.in_sample_residuals_ = None
+        self.is_fitted = False
+        self.training_range_ = None
 
-        self.series_col_names = list(series.columns)
+        self.series_names_in_ = list(series.columns)
 
-        X_train, y_train, X_train_dim_names = self.create_train_X_y(series=series)
-        self.X_train_dim_names = X_train_dim_names["X_train"]
-        self.y_train_dim_names = X_train_dim_names["y_train"]
+        X_train, y_train, X_train_dim_names_ = self.create_train_X_y(series=series)
+        self.X_train_dim_names_ = X_train_dim_names_["X_train"]
+        self.y_train_dim_names_ = X_train_dim_names_["y_train"]
 
         if self.series_val is not None:
             X_val, y_val, _ = self.create_train_X_y(series=self.series_val)
@@ -605,17 +614,17 @@ class ForecasterRnn(ForecasterBase):
             history = self.regressor.fit(x=X_train, y=y_train, **self.fit_kwargs)
 
         self.history = history.history
-        self.fitted = True
+        self.is_fitted = True
         self.fit_date = pd.Timestamp.today().strftime("%Y-%m-%d %H:%M:%S")
         _, y_index = preprocess_y(y=series[self.levels], return_values=False)
-        self.training_range = y_index[[0, -1]]
-        self.index_type = type(y_index)
+        self.training_range_ = y_index[[0, -1]]
+        self.index_type_ = type(y_index)
         if isinstance(y_index, pd.DatetimeIndex):
-            self.index_freq = y_index.freqstr
+            self.index_freq_ = y_index.freqstr
         else:
-            self.index_freq = y_index.step
+            self.index_freq_ = y_index.step
 
-        self.last_window = series.iloc[-self.max_lag :].copy()
+        self.last_window_ = series.iloc[-self.max_lag :].copy()
 
         set_skforecast_warnings(suppress_warnings, action='default')
 
@@ -649,7 +658,7 @@ class ForecasterRnn(ForecasterBase):
         last_window : pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the
             first iteration of the prediction (t + 1).
-            If `last_window = None`, the values stored in `self.last_window` are
+            If `last_window = None`, the values stored in `self.last_window_` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
         exog : Ignored
@@ -692,32 +701,30 @@ class ForecasterRnn(ForecasterBase):
                 )
 
         if last_window is None:
-            last_window = self.last_window
+            last_window = self.last_window_
 
         check_predict_input(
             forecaster_name=type(self).__name__,
             steps=steps,
-            fitted=self.fitted,
-            included_exog=self.included_exog,
-            index_type=self.index_type,
-            index_freq=self.index_freq,
+            is_fitted=self.is_fitted,
+            exog_in_=self.exog_in_,
+            index_type_=self.index_type_,
+            index_freq_=self.index_freq_,
             window_size=self.window_size,
             last_window=last_window,
-            last_window_exog=None,
             exog=None,
-            exog_type=None,
-            exog_col_names=None,
+            exog_type_in_=None,
+            exog_names_in_=None,
             interval=None,
-            alpha=None,
             max_steps=self.max_step,
             levels=levels,
             levels_forecaster=self.levels,
-            series_col_names=self.series_col_names,
+            series_names_in_=self.series_names_in_,
         )
 
         last_window = last_window.iloc[-self.window_size :,].copy()
 
-        for serie_name in self.series_col_names:
+        for serie_name in self.series_names_in_:
             last_window_serie = transform_series(
                 series=last_window[serie_name],
                 transformer=self.transformer_series_[serie_name],
@@ -836,7 +843,7 @@ class ForecasterRnn(ForecasterBase):
     #     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
     #     n_boot: int = 500,
     #     random_state: int = 123,
-    #     in_sample_residuals: bool = True,
+    #     use_in_sample_residuals: bool = True,
     #     levels: Any = None,
     # ) -> pd.DataFrame:
     #     """
@@ -870,7 +877,7 @@ class ForecasterRnn(ForecasterBase):
     #     random_state : int, default `123`
     #         Sets a seed to the random generator, so that boot intervals are always
     #         deterministic.
-    #     in_sample_residuals : bool, default `True`
+    #     use_in_sample_residuals : bool, default `True`
     #         If `True`, residuals from the training data are used as proxy of
     #         prediction error to create prediction intervals. If `False`, out of
     #         sample residuals are used. In the latter case, the user should have
@@ -900,7 +907,7 @@ class ForecasterRnn(ForecasterBase):
     #     elif isinstance(steps, list):
     #         steps = list(np.array(steps))
 
-    #     if in_sample_residuals:
+    #     if use_in_sample_residuals:
     #         if not set(steps).issubset(set(self.in_sample_residuals.keys())):
     #             raise ValueError(
     #                 (

@@ -94,7 +94,7 @@ def test_fit_correct_dict_create_series_weights_weight_func_transformer_series()
 
 def test_forecaster_DatetimeIndex_index_freq_stored():
     """
-    Test serie_with_DatetimeIndex.index.freqstr is stored in forecaster.index_freq.
+    Test serie_with_DatetimeIndex.index.freqstr is stored in forecaster.index_freq_.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))})
@@ -103,7 +103,7 @@ def test_forecaster_DatetimeIndex_index_freq_stored():
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
-    results = forecaster.index_freq
+    results = forecaster.index_freq_
 
     expected = series.index.freqstr
 
@@ -112,14 +112,14 @@ def test_forecaster_DatetimeIndex_index_freq_stored():
 
 def test_forecaster_index_step_stored():
     """
-    Test serie without DatetimeIndex, step is stored in forecaster.index_freq.
+    Test serie without DatetimeIndex, step is stored in forecaster.index_freq_.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))})
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
-    results = forecaster.index_freq
+    results = forecaster.index_freq_
 
     expected = series.index.step
 
@@ -131,7 +131,7 @@ def test_forecaster_index_step_stored():
                          ids = lambda encoding: f'encoding: {encoding}')
 def test_fit_in_sample_residuals_stored(encoding):
     """
-    Test that values of in_sample_residuals are stored after fitting
+    Test that values of in_sample_residuals_ are stored after fitting
     when `store_in_sample_residuals=True`.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
@@ -140,19 +140,21 @@ def test_fit_in_sample_residuals_stored(encoding):
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               encoding=encoding)
     forecaster.fit(series=series, store_in_sample_residuals=True)
-    results = forecaster.in_sample_residuals
+    results = forecaster.in_sample_residuals_
 
     expected = {'1': np.array([-4.4408921e-16, 0.0000000e+00]),
                 '2': np.array([0., 0.]),
                 '_unknown_level': np.array([-4.4408921e-16, 0.0000000e+00, 0., 0.])}
     
-    X_train_col_names = (['lag_1', 'lag_2', 'lag_3', '_level_skforecast'] 
-    if encoding != 'onehot' 
-    else ['lag_1', 'lag_2', 'lag_3', '1', '2'])
+    X_train_features_names_out_ = (
+        ['lag_1', 'lag_2', 'lag_3', '_level_skforecast'] 
+        if encoding != 'onehot' 
+        else ['lag_1', 'lag_2', 'lag_3', '1', '2']
+    )
 
-    assert forecaster.series_col_names == ['1', '2']
-    assert forecaster.series_X_train == ['1', '2']
-    assert forecaster.X_train_col_names == X_train_col_names
+    assert forecaster.series_names_in_ == ['1', '2']
+    assert forecaster.X_train_series_names_in_ == ['1', '2']
+    assert forecaster.X_train_features_names_out_ == X_train_features_names_out_
     assert isinstance(results, dict)
     assert np.all(isinstance(x, np.ndarray) for x in results.values())
     assert results.keys() == expected.keys()
@@ -161,7 +163,7 @@ def test_fit_in_sample_residuals_stored(encoding):
 
 def test_fit_in_sample_residuals_stored_encoding_None():
     """
-    Test that values of in_sample_residuals are stored after fitting
+    Test that values of in_sample_residuals_ are stored after fitting
     when `store_in_sample_residuals=True` and encoding=None.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
@@ -170,13 +172,13 @@ def test_fit_in_sample_residuals_stored_encoding_None():
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               encoding=None)
     forecaster.fit(series=series, store_in_sample_residuals=True)
-    results = forecaster.in_sample_residuals
+    results = forecaster.in_sample_residuals_
 
     expected = {'_unknown_level': np.array([-4.4408921e-16, 0.0000000e+00, 0., 0.])}
 
-    assert forecaster.series_col_names == ['1', '2']
-    assert forecaster.series_X_train == ['1', '2']
-    assert forecaster.X_train_col_names == ['lag_1', 'lag_2', 'lag_3']
+    assert forecaster.series_names_in_ == ['1', '2']
+    assert forecaster.X_train_series_names_in_ == ['1', '2']
+    assert forecaster.X_train_features_names_out_ == ['lag_1', 'lag_2', 'lag_3']
     assert isinstance(results, dict)
     assert np.all(isinstance(x, np.ndarray) for x in results.values())
     assert results.keys() == expected.keys()
@@ -198,12 +200,12 @@ def test_fit_same_residuals_when_residuals_greater_than_1000(encoding):
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               encoding=encoding)
     forecaster.fit(series=series, store_in_sample_residuals=True)
-    results_1 = forecaster.in_sample_residuals
+    results_1 = forecaster.in_sample_residuals_
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               encoding=encoding)
     forecaster.fit(series=series, store_in_sample_residuals=True)
-    results_2 = forecaster.in_sample_residuals
+    results_2 = forecaster.in_sample_residuals_
 
     assert isinstance(results_1, dict)
     assert np.all(isinstance(x, np.ndarray) for x in results_1.values())
@@ -227,12 +229,12 @@ def test_fit_same_residuals_when_residuals_greater_than_1000_encoding_None():
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               encoding=None)
     forecaster.fit(series=series, store_in_sample_residuals=True)
-    results_1 = forecaster.in_sample_residuals
+    results_1 = forecaster.in_sample_residuals_
     
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               encoding=None)
     forecaster.fit(series=series, store_in_sample_residuals=True)
-    results_2 = forecaster.in_sample_residuals
+    results_2 = forecaster.in_sample_residuals_
 
     assert isinstance(results_1, dict)
     assert np.all(isinstance(x, np.ndarray) for x in results_1.values())
@@ -249,7 +251,7 @@ def test_fit_same_residuals_when_residuals_greater_than_1000_encoding_None():
                          ids = lambda encoding: f'encoding: {encoding}')
 def test_fit_in_sample_residuals_not_stored(encoding):
     """
-    Test that values of in_sample_residuals are not stored after fitting
+    Test that values of in_sample_residuals_ are not stored after fitting
     when `store_in_sample_residuals=False`.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
@@ -258,7 +260,7 @@ def test_fit_in_sample_residuals_not_stored(encoding):
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               encoding=encoding)
     forecaster.fit(series=series, store_in_sample_residuals=False)
-    results = forecaster.in_sample_residuals
+    results = forecaster.in_sample_residuals_
 
     expected = {'1': None, '2': None, '_unknown_level': None}
 
@@ -269,7 +271,7 @@ def test_fit_in_sample_residuals_not_stored(encoding):
 
 def test_fit_in_sample_residuals_not_stored_encoding_None():
     """
-    Test that values of in_sample_residuals are not stored after fitting
+    Test that values of in_sample_residuals_ are not stored after fitting
     when `store_in_sample_residuals=False` and encoding=None.
     """
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
@@ -278,7 +280,7 @@ def test_fit_in_sample_residuals_not_stored_encoding_None():
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               encoding=None)
     forecaster.fit(series=series, store_in_sample_residuals=False)
-    results = forecaster.in_sample_residuals
+    results = forecaster.in_sample_residuals_
 
     expected = {'_unknown_level': None}
 
@@ -312,17 +314,17 @@ def test_fit_last_window_stored():
              )
     }
 
-    for k in forecaster.last_window.keys():
-        pd.testing.assert_series_equal(forecaster.last_window[k], expected[k])
+    for k in forecaster.last_window_.keys():
+        pd.testing.assert_series_equal(forecaster.last_window_[k], expected[k])
 
 
-@pytest.mark.parametrize("encoding, encoding_mapping", 
+@pytest.mark.parametrize("encoding, encoding_mapping_", 
                          [('ordinal'         , {'1': 0, '2': 1}), 
                           ('ordinal_category', {'1': 0, '2': 1}),
                           ('onehot'          , {'1': 0, '2': 1}),
                           (None              , {'1': 0, '2': 1})], 
                          ids = lambda dt: f'encoding, mapping: {dt}')
-def test_fit_encoding_mapping(encoding, encoding_mapping):
+def test_fit_encoding_mapping(encoding, encoding_mapping_):
     """
     Test the encoding mapping of _create_train_X_y.
     """
@@ -336,4 +338,4 @@ def test_fit_encoding_mapping(encoding, encoding_mapping):
                  )
     forecaster.fit(series=series, suppress_warnings=True)
     
-    assert forecaster.encoding_mapping == encoding_mapping
+    assert forecaster.encoding_mapping_ == encoding_mapping_

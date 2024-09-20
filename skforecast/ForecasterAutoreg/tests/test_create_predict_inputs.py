@@ -50,13 +50,13 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression():
 
     expected = (
         np.array([45., 46., 47., 48., 49.]),
-        pd.RangeIndex(start=45, stop=50, step=1),
-        None
+        None,
+        pd.RangeIndex(start=50, stop=55, step=1)
     )
     
     np.testing.assert_array_almost_equal(results[0], expected[0])
-    pd.testing.assert_index_equal(results[1], expected[1])
-    assert results[2] is None
+    assert results[1] is None
+    pd.testing.assert_index_equal(results[2], expected[2])
 
 
 def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform_y():
@@ -80,13 +80,13 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
 
     expected = (
         np.array([-0.1056608, -0.30987914, -0.45194408, -0.28324197, -0.52297655]),
-        pd.RangeIndex(start=15, stop=20, step=1),
-        None
+        None,
+        pd.RangeIndex(start=20, stop=25, step=1)
     )
     
     np.testing.assert_array_almost_equal(results[0], expected[0])
-    pd.testing.assert_index_equal(results[1], expected[1])
-    assert results[2] is None
+    assert results[1] is None
+    pd.testing.assert_index_equal(results[2], expected[2])
 
 
 def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform_y_and_transform_exog_series():
@@ -110,13 +110,13 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
 
     expected = (
         np.array([1.16937289, -2.34810076, 0.89246539, 0.27129451, 0.0542589]),
-        pd.RangeIndex(start=3, stop=8, step=1),
-        np.array([[-1.76425513], [-1.00989936], [ 0.59254869], [ 0.45863938], [ 0.1640389 ]])
+        np.array([[-1.76425513], [-1.00989936], [0.59254869], [0.45863938], [0.1640389]]),
+        pd.RangeIndex(start=8, stop=13, step=1)
     )
     
     np.testing.assert_array_almost_equal(results[0], expected[0])
-    pd.testing.assert_index_equal(results[1], expected[1])
-    np.testing.assert_array_almost_equal(results[2], expected[2])
+    np.testing.assert_array_almost_equal(results[1], expected[1])
+    pd.testing.assert_index_equal(results[2], expected[2])
 
 
 def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform_y_and_transform_exog_df():
@@ -153,17 +153,17 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
     
     expected = (
         np.array([1.16937289, -2.34810076, 0.89246539,  0.27129451,  0.0542589]),
-        pd.RangeIndex(start=3, stop=8, step=1),
         np.array([[-1.76425513,  1.        ,  0.        ],
                   [-1.00989936,  1.        ,  0.        ],
                   [ 0.59254869,  1.        ,  0.        ],
                   [ 0.45863938,  1.        ,  0.        ],
-                  [ 0.1640389 ,  0.        ,  1.        ]])
+                  [ 0.1640389 ,  0.        ,  1.        ]]),
+        pd.RangeIndex(start=8, stop=13, step=1)
     )
     
     np.testing.assert_array_almost_equal(results[0], expected[0])
-    pd.testing.assert_index_equal(results[1], expected[1])
-    np.testing.assert_array_almost_equal(results[2], expected[2])
+    np.testing.assert_array_almost_equal(results[1], expected[1])
+    pd.testing.assert_index_equal(results[2], expected[2])
 
 
 def test_create_predict_inputs_when_categorical_features_native_implementation_HistGradientBoostingRegressor():
@@ -208,7 +208,6 @@ def test_create_predict_inputs_when_categorical_features_native_implementation_H
     
     expected = (
         np.array([0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453]),
-        pd.RangeIndex(start=45, stop=50, step=1),
         np.array([[0.        , 0.        , 0.12062867],
                   [1.        , 1.        , 0.8263408 ],
                   [2.        , 2.        , 0.60306013],
@@ -218,12 +217,13 @@ def test_create_predict_inputs_when_categorical_features_native_implementation_H
                   [1.        , 1.        , 0.41702221],
                   [2.        , 2.        , 0.68130077],
                   [3.        , 3.        , 0.87545684],
-                  [4.        , 4.        , 0.51042234]])
+                  [4.        , 4.        , 0.51042234]]),
+        pd.RangeIndex(start=50, stop=60, step=1)
     )
     
     np.testing.assert_array_almost_equal(results[0], expected[0])
-    pd.testing.assert_index_equal(results[1], expected[1])
-    np.testing.assert_array_almost_equal(results[2], expected[2])
+    np.testing.assert_array_almost_equal(results[1], expected[1])
+    pd.testing.assert_index_equal(results[2], expected[2])
 
 
 def test_create_predict_inputs_when_regressor_is_LinearRegression_with_exog_differentiation_is_1_and_transformer_y():
@@ -256,7 +256,6 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_exog_diff
              0.02377842, -0.01018012,  0.10597971, -0.01463081, -0.48984868,
              0.07503713]
         ),
-        pd.date_range(start='2001-12-01', periods=16, freq='MS'),
         np.array([[ 1.16172882], [ 0.29468848], [-0.4399757 ], [ 1.25008389],
                   [ 1.37496887], [-0.41673182], [ 0.32732157], [ 1.57848827],
                   [ 0.40402941], [ 1.34466867], [-1.0724777 ], [ 0.14619469],
@@ -273,9 +272,10 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_exog_diff
                   [-1.34347494], [-0.07230096], [-1.51146602], [-0.66840335], 
                   [-0.78148407], [-0.27354003], [-0.27128144], [-0.6389055 ], 
                   [ 0.19573233], [-0.67321672], [ 1.1559056 ]]
-        )
+        ),
+        pd.date_range(start='2003-04-01', periods=63, freq='MS')
     )
     
     np.testing.assert_array_almost_equal(results[0], expected[0])
-    pd.testing.assert_index_equal(results[1], expected[1])
-    np.testing.assert_array_almost_equal(results[2], expected[2])
+    np.testing.assert_array_almost_equal(results[1], expected[1])
+    pd.testing.assert_index_equal(results[2], expected[2])

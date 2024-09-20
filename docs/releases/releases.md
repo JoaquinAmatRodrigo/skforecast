@@ -10,6 +10,112 @@ All significant changes to this project are documented in this release file.
 | <span class="badge text-bg-danger">Fix</span>              | Bug fix                               |
 
 
+## 0.14.0 <small>In development</small> { id="0.14.0" }
+
+The main changes in this release are:
+
++ <span class="badge text-bg-enhancement">Enhancement</span> Refactor the prediction process in <code>[ForecasterAutoregMultiSeries]</code> to improve performance when predicting multiple series.
+
++ <span class="badge text-bg-enhancement">Enhancement</span> The bootstrapping process in the `predict_bootstrapping` method of all forecasters has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
+
+
+**Added**
+
++ Create `transform_numpy` function in the <code>[utils]</code> module to carry out the transformation of the modeled time series and exogenous variables as numpy arrays.
+
++ `random_state` argument in the `fit` method of <code>[ForecasterAutoreg]</code> to set a seed for the random generator so that the stored sample residuals are always deterministic.
+
++ New argument `method` in <code>[grid_search_forecaster]</code>, <code>[random_search_forecaster]</code>, <code>[bayesian_search_forecaster]</code>, <code>[grid_search_forecaster_multiseries]</code>, <code>[random_search_forecaster_multiseries]</code> and <code>[bayesian_search_forecaster_multiseries]</code> that allows the user to select the method used to identify the best combination of hyperparameters and lags. The available methods are `'backtesting'` (default) and `'one_step_ahead'`.
+
++ New private method `_train_test_split_one_step_ahead` in all forecasters.
+
++ New private function `_calculate_metrics_one_step_ahead` to `model_selection` module to calculate the metrics when predicting one step ahead.
+
+
+**Changed**
+
++ Refactor `recursive_predict` in <code>[ForecasterAutoregMultiSeries]</code> to predict all series at once and include option of adding residuals. This improves performance when predicting multiple series.
+
++ Refactor `predict_bootstrapping` in all Forecasters. The bootstrapping process has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
+
++ Change the default value of `encoding` to `ordinal` in <code>[ForecasterAutoregMultiSeries]</code>. This will avoid conflicts if the regressor does not support categorical variables by default.
+
++ Removed argument `engine` fom <code>[bayesian_search_forecaster]</code> and <code>[bayesian_search_forecaster_multiseries]</code>.
+
++ Renamed attributes in all Forecasters:
+
+    + `encoding_mapping` has been renamed to `encoding_mapping_`.
+
+    + `last_window` has been renamed to `last_window_`.
+
+    + `index_type` has been renamed to `index_type_`.
+
+    + `index_freq` has been renamed to `index_freq_`.
+
+    + `training_range` has been renamed to `training_range_`.
+
+    + `series_col_names` has been renamed to `series_names_in_`.
+
+    + `included_exog` has been renamed to `exog_in_`.
+
+    + `exog_type` has been renamed to `exog_type_in_`.
+
+    + `exog_dtypes` has been renamed to `exog_dtypes_in_`.
+
+    + `exog_col_names` has been renamed to `exog_names_in_`.
+
+    + `series_X_train` has been renamed to `X_train_series_names_in_`.
+
+    + `X_train_col_names` has been renamed to `X_train_features_names_out_`.
+
+    + `in_sample_residuals` has been renamed to `in_sample_residuals_`.
+
+    + `out_sample_residuals` has been renamed to `out_sample_residuals_`.
+
+    + `fitted` has been renamed to `is_fitted`.
+
++ Renamed arguments in different functions and methods:
+
+    + `in_sample_residuals` has been renamed to `use_in_sample_residuals`.
+
+    + `binned_residuals` has been renamed to `use_binned_residuals`.
+
+    + `series_col_names` has been renamed to `series_names_in_` in the `check_predict_input`, `check_preprocess_exog_multiseries` and `initialize_transformer_series` functions in the <code>[utils]</code> module.
+
+    + `series_X_train` has been renamed to `X_train_series_names_in_` in the `prepare_levels_multiseries` function in the <code>[utils]</code> module.
+
+    + `exog_col_names` has been renamed to `exog_names_in_` in the `check_predict_input` and `check_preprocess_exog_multiseries` functions in the <code>[utils]</code> module.
+
+    + `index_type` has been renamed to `index_type_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `index_freq` has been renamed to `index_freq_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `included_exog` has been renamed to `exog_in_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `exog_type` has been renamed to `exog_type_in_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `exog_dtypes` has been renamed to `exog_dtypes_in_` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `fitted` has been renamed to `is_fitted` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `use_in_sample` has been renamed to `use_in_sample_residuals` in the `prepare_residuals_multiseries` function in the <code>[utils]</code> module.
+
+    + `in_sample_residuals` has been renamed to `use_in_sample_residuals` in the <code>[backtesting_forecaster]</code>, <code>[backtesting_forecaster_multiseries]</code> and `check_backtesting_input` (<code>[utils]</code> module) functions.
+
+   + `binned_residuals` has been renamed to `use_binned_residuals` in the <code>[backtesting_forecaster]</code> function.
+
+    + `in_sample_residuals` has been renamed to `in_sample_residuals_` in the `prepare_residuals_multiseries` function in the <code>[utils]</code> module.
+
+    + `out_sample_residuals` has been renamed to `out_sample_residuals_` in the `prepare_residuals_multiseries` function in the <code>[utils]</code> module.
+
+    + `last_window` has been renamed to `last_window_` in the `preprocess_levels_self_last_window_multiseries` function in the <code>[utils]</code> module.
+
+
+**Fixed**
+
++ ...
+
+
 ## 0.13.0 <small>Aug 01, 2024</small> { id="0.13.0" }
 
 The main changes in this release are:
@@ -29,7 +135,7 @@ The main changes in this release are:
 + <span class="badge text-bg-api-change">API Change</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.
 
 + <span class="badge text-bg-api-change">API Change</span> Changed the default value of the `transformer_series` argument to `None` in the Global Forecasters <code>[ForecasterAutoregMultiSeries]</code> and <code>[ForecasterAutoregMultiSeriesCustom]</code>. In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.
-  
+
 **Added**
 
 + Support for `python 3.12`.

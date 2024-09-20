@@ -23,7 +23,7 @@ from skforecast.preprocessing import TimeSeriesDifferentiator
 # Fixtures
 from .fixtures_ForecasterAutoreg import y as y_categorical
 from .fixtures_ForecasterAutoreg import exog as exog_categorical
-from .fixtures_ForecasterAutoreg import data # to test results when using differentiation
+from .fixtures_ForecasterAutoreg import data  # to test results when using differentiation
 
 
 def test_predict_NotFittedError_when_fitted_is_False():
@@ -356,7 +356,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_differentia
     scaler = StandardScaler()
     scaler.fit(data.loc[:end_train].to_numpy().reshape(-1, 1))
     data_scaled = scaler.transform(data.to_numpy().reshape(-1, 1))
-    data_scaled = pd.Series(data_scaled.flatten(), index=data.index)
+    data_scaled = pd.Series(data_scaled.ravel(), index=data.index)
     data_scaled_diff = TimeSeriesDifferentiator(order=1).fit_transform(data_scaled.to_numpy())
     data_scaled_diff = pd.Series(data_scaled_diff, index=data.index).dropna()
     # Simulated exogenous variable
@@ -375,7 +375,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_differentia
     predictions_1 = pd.concat([last_value_train, predictions_diff]).cumsum()[1:]
     # Revert the scaling
     predictions_1 = scaler.inverse_transform(predictions_1.to_numpy().reshape(-1, 1))
-    predictions_1 = pd.Series(predictions_1.flatten(), index=data.loc[end_train:].index)
+    predictions_1 = pd.Series(predictions_1.ravel(), index=data.loc[end_train:].index)
 
     forecaster_2 = ForecasterAutoreg(regressor=LinearRegression(), lags=15, differentiation=1)
     forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])

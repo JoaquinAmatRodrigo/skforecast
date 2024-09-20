@@ -39,16 +39,16 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     
     forecaster.fit(series=series, exog=exog)
     results = forecaster.predict_dist(
-                  steps               = 2,
-                  exog                = exog_predict,
-                  distribution        = norm,
-                  n_boot              = 4,
-                  in_sample_residuals = True
+                  steps                   = 2,
+                  exog                    = exog_predict,
+                  distribution            = norm,
+                  n_boot                  = 4,
+                  use_in_sample_residuals = True
               )
     
     expected = pd.DataFrame(
                    data    = np.array([[0.53808076, 0.11721631],
-                                       [0.48555937, 0.26296157]]),
+                                       [0.32552242, 0.1713172]]),
                    columns = ['l1_loc', 'l1_scale'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -72,18 +72,18 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                  )
     
     forecaster.fit(series=series, exog=exog)
-    forecaster.out_sample_residuals = forecaster.in_sample_residuals
+    forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_dist(
-                  steps               = 2,
-                  exog                = exog_predict,
-                  distribution        = norm,
-                  n_boot              = 4,
-                  in_sample_residuals = False
+                  steps                   = 2,
+                  exog                    = exog_predict,
+                  distribution            = norm,
+                  n_boot                  = 4,
+                  use_in_sample_residuals = False
               )
     
     expected = pd.DataFrame(
                    data    = np.array([[0.53808076, 0.11721631],
-                                       [0.48555937, 0.26296157]]),
+                                       [0.32552242, 0.1713172]]),
                    columns = ['l1_loc', 'l1_scale'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )

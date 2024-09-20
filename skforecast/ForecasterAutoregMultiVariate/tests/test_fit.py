@@ -4,9 +4,60 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
-from sklearn.linear_model import LinearRegression
+from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.linear_model import LinearRegression
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
+
+# Fixtures
+from .fixtures_ForecasterAutoregMultiVariate import series as series_fixtures
+from .fixtures_ForecasterAutoregMultiVariate import exog
+
+transformer_exog = ColumnTransformer(
+                       [('scale', StandardScaler(), ['exog_1']),
+                        ('onehot', OneHotEncoder(), ['exog_2'])],
+                       remainder = 'passthrough',
+                       verbose_feature_names_out = False
+                   )
+
+
+def test_forecaster_y_exog_features_stored():
+    """
+    Test forecaster stores y and exog features after fitting.
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(), 
+                     level              = 'l1',
+                     lags               = 3,
+                     steps              = 2,
+                     transformer_exog   = transformer_exog
+                 )
+    forecaster.fit(series=series_fixtures, exog=exog)
+
+    series_names_in_ = ['l1', 'l2']
+    X_train_series_names_in_ = ['l1', 'l2']
+    exog_in_ = True
+    exog_type_in_ = type(exog)
+    exog_names_in_ = ['exog_1', 'exog_2']
+    exog_dtypes_in_ = {'exog_1': exog['exog_1'].dtype, 'exog_2': exog['exog_2'].dtype}
+    X_train_exog_names_out_ = ['exog_1', 'exog_2_a', 'exog_2_b']
+    X_train_direct_exog_names_out_ = ['exog_1_step_1', 'exog_2_a_step_1', 'exog_2_b_step_1',
+                                      'exog_1_step_2', 'exog_2_a_step_2', 'exog_2_b_step_2']
+    X_train_features_names_out_ = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3',
+                                   'l2_lag_1', 'l2_lag_2', 'l2_lag_3',
+                                   'exog_1_step_1', 'exog_2_a_step_1', 'exog_2_b_step_1', 
+                                   'exog_1_step_2', 'exog_2_a_step_2', 'exog_2_b_step_2']
+    
+    assert forecaster.series_names_in_ == series_names_in_
+    assert forecaster.X_train_series_names_in_ == X_train_series_names_in_
+    assert forecaster.exog_in_ == exog_in_
+    assert forecaster.exog_type_in_ == exog_type_in_
+    assert forecaster.exog_names_in_ == exog_names_in_
+    assert forecaster.exog_dtypes_in_ == exog_dtypes_in_
+    assert forecaster.X_train_exog_names_out_ == X_train_exog_names_out_
+    assert forecaster.X_train_direct_exog_names_out_ == X_train_direct_exog_names_out_
+    assert forecaster.X_train_features_names_out_ == X_train_features_names_out_
 
 
 def test_fit_correct_dict_create_transformer_series():
@@ -51,14 +102,14 @@ def test_forecaster_DatetimeIndex_index_freq_stored():
                                                level='l1', lags=3, steps=1)
     forecaster.fit(series=series)
     expected = series.index.freqstr
-    results = forecaster.index_freq
+    results = forecaster.index_freq_
 
     assert results == expected
 
 
 def test_forecaster_index_step_stored():
     """
-    Test serie without DatetimeIndex, step is stored in forecaster.index_freq.
+    Test serie without DatetimeIndex, step is stored in forecaster.index_freq_.
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
                            'l2': pd.Series(np.arange(10))})
@@ -67,7 +118,7 @@ def test_forecaster_index_step_stored():
                                                level='l1', lags=3, steps=2)
     forecaster.fit(series=series)
     expected = series.index.step
-    results = forecaster.index_freq
+    results = forecaster.index_freq_
 
     assert results == expected
     
@@ -76,7 +127,7 @@ def test_forecaster_index_step_stored():
                          ids=lambda n_jobs: f'n_jobs: {n_jobs}')
 def test_fit_in_sample_residuals_stored(n_jobs):
     """
-    Test that values of in_sample_residuals are stored after fitting.
+    Test that values of in_sample_residuals_ are stored after fitting.
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(10)), 
                            'l2': pd.Series(np.arange(10))})
@@ -87,7 +138,7 @@ def test_fit_in_sample_residuals_stored(n_jobs):
     expected = {1: np.array([0.0000000e+00, 0.0000000e+00, 0.0000000e+00, 
                              0.0000000e+00, 0.0000000e+00, 8.8817842e-16]),
                 2: np.array([0., 0., 0., 0., 0., 0.])}
-    results = forecaster.in_sample_residuals
+    results = forecaster.in_sample_residuals_
 
     assert isinstance(results, dict)
     assert np.all(isinstance(x, np.ndarray) for x in results.values())
@@ -108,12 +159,12 @@ def test_fit_same_residuals_when_residuals_greater_than_1000(n_jobs):
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', 
                                                lags=3, steps=2, n_jobs=n_jobs)
     forecaster.fit(series=series)
-    results_1 = forecaster.in_sample_residuals
+    results_1 = forecaster.in_sample_residuals_
 
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(),  
                                                level='l1', lags=3, steps=2)
     forecaster.fit(series=series)
-    results_2 = forecaster.in_sample_residuals
+    results_2 = forecaster.in_sample_residuals_
 
     assert isinstance(results_1, dict)
     assert np.all(isinstance(x, np.ndarray) for x in results_1.values())
@@ -129,7 +180,7 @@ def test_fit_same_residuals_when_residuals_greater_than_1000(n_jobs):
                          ids=lambda n_jobs: f'n_jobs: {n_jobs}')
 def test_fit_in_sample_residuals_not_stored(n_jobs):
     """
-    Test that values of in_sample_residuals are not stored after fitting
+    Test that values of in_sample_residuals_ are not stored after fitting
     when `store_in_sample_residuals=False`.
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(5)), 
@@ -139,7 +190,7 @@ def test_fit_in_sample_residuals_not_stored(n_jobs):
                                                lags=3, steps=2, n_jobs=n_jobs)
     forecaster.fit(series=series, store_in_sample_residuals=False)
     expected = {1: None, 2: None}
-    results = forecaster.in_sample_residuals
+    results = forecaster.in_sample_residuals_
 
     assert isinstance(results, dict)
     assert results.keys() == expected.keys()
@@ -167,11 +218,11 @@ def test_fit_last_window_stored(store_last_window):
     expected.index = pd.RangeIndex(start=7, stop=10, step=1)
 
     if store_last_window:
-        pd.testing.assert_frame_equal(forecaster.last_window, expected)
-        assert forecaster.series_col_names == ['l1', 'l2']
-        assert forecaster.series_X_train == ['l1', 'l2']
+        pd.testing.assert_frame_equal(forecaster.last_window_, expected)
+        assert forecaster.series_names_in_ == ['l1', 'l2']
+        assert forecaster.X_train_series_names_in_ == ['l1', 'l2']
     else:
-        assert forecaster.last_window == None
+        assert forecaster.last_window_ is None
 
 
 def test_fit_last_window_stored_when_different_lags():
@@ -193,9 +244,9 @@ def test_fit_last_window_stored_when_different_lags():
     })
     expected.index = pd.RangeIndex(start=5, stop=10, step=1)
 
-    pd.testing.assert_frame_equal(forecaster.last_window, expected)
-    assert forecaster.series_col_names == ['l1', 'l2']
-    assert forecaster.series_X_train == ['l1', 'l2']
+    pd.testing.assert_frame_equal(forecaster.last_window_, expected)
+    assert forecaster.series_names_in_ == ['l1', 'l2']
+    assert forecaster.X_train_series_names_in_ == ['l1', 'l2']
 
 
 @pytest.mark.parametrize("level",
@@ -217,6 +268,6 @@ def test_fit_last_window_stored_when_lags_dict_with_None(level):
     expected = pd.DataFrame({'l1': pd.Series(np.array([7, 8, 9]))})
     expected.index = pd.RangeIndex(start=7, stop=10, step=1)
 
-    pd.testing.assert_frame_equal(forecaster.last_window, expected)
-    assert forecaster.series_col_names == ['l1'] if level == 'l1' else ['l1', 'l2']
-    assert forecaster.series_X_train == ['l1']
+    pd.testing.assert_frame_equal(forecaster.last_window_, expected)
+    assert forecaster.series_names_in_ == ['l1'] if level == 'l1' else ['l1', 'l2']
+    assert forecaster.X_train_series_names_in_ == ['l1']

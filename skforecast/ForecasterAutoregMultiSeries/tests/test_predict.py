@@ -66,7 +66,7 @@ def test_predict_IgnoredArgumentWarning_when_not_available_self_last_window_for_
 
     warn_msg = re.escape(
         ("Levels {'2'} are excluded from prediction "
-         "since they were not stored in `last_window` attribute "
+         "since they were not stored in `last_window_` attribute "
          "during training. If you don't want to retrain the "
          "Forecaster, provide `last_window` as argument.")
     )
@@ -95,7 +95,7 @@ def test_predict_ValueError_when_not_available_self_last_window_for_levels(store
 
     err_msg = re.escape(
         ("No series to predict. None of the series {'2'} are present in "
-         "`last_window` attribute. Provide `last_window` as argument "
+         "`last_window_` attribute. Provide `last_window` as argument "
          "in predict method.")
     )
     with pytest.raises(ValueError, match = err_msg):
@@ -662,7 +662,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_differentia
 
         scaler_dict[k].fit(v.to_numpy().reshape(-1, 1))
         data_scaled = scaler_dict[k].transform(v.copy().to_numpy().reshape(-1, 1))
-        data_scaled = pd.Series(data_scaled.flatten(), index=v.index)
+        data_scaled = pd.Series(data_scaled.ravel(), index=v.index)
         last_value_train = data_scaled.iloc[[-1]]
         df_last_value_train[k] = last_value_train
 
@@ -787,7 +787,7 @@ def test_predict_output_when_series_and_exog_dict_encoding_None_unknown_level():
 
     levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
     last_window = pd.DataFrame(
-        {k: v for k, v in forecaster.last_window.items() if k in levels}
+        {k: v for k, v in forecaster.last_window_.items() if k in levels}
     )
     last_window['id_1005'] = last_window['id_1004'] * 0.9
     predictions = forecaster.predict(
@@ -830,7 +830,7 @@ def test_predict_output_when_series_and_exog_dict_encoding_None_transformer_seri
 
     levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
     last_window = pd.DataFrame(
-        {k: v for k, v in forecaster.last_window.items() if k in levels}
+        {k: v for k, v in forecaster.last_window_.items() if k in levels}
     )
     last_window['id_1005'] = last_window['id_1004'] * 0.9
     exog_dict_test_2 = exog_dict_test.copy()
@@ -874,7 +874,7 @@ def test_predict_output_when_series_and_exog_dict_unknown_level():
 
     levels = ['id_1000', 'id_1001', 'id_1003', 'id_1004', 'id_1005']
     last_window = pd.DataFrame(
-        {k: v for k, v in forecaster.last_window.items() if k in levels}
+        {k: v for k, v in forecaster.last_window_.items() if k in levels}
     )
     last_window['id_1005'] = last_window['id_1004'] * 0.9
     exog_dict_test_2 = exog_dict_test.copy()

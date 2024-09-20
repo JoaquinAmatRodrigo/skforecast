@@ -37,14 +37,14 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
                  )
     forecaster.fit(series=series, exog=exog)
     results = forecaster.predict_interval(
-                  steps               = 2,
-                  exog                = exog_predict,
-                  n_boot              = 4,
-                  in_sample_residuals = True
+                  steps                   = 2,
+                  exog                    = exog_predict,
+                  n_boot                  = 4,
+                  use_in_sample_residuals = True
               )
     expected = pd.DataFrame(
                    data    = np.array([[0.61820497, 0.39855187, 0.67329092],
-                                       [0.41314101, 0.17729748, 0.81780586]]),
+                                       [0.41314101, 0.20291844, 0.56528096]]),
                    columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -67,16 +67,16 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
                      transformer_exog   = transformer_exog
                  )
     forecaster.fit(series=series, exog=exog)
-    forecaster.out_sample_residuals = forecaster.in_sample_residuals
+    forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_interval(
-                  steps               = 2,
-                  exog                = exog_predict,
-                  n_boot              = 4,
-                  in_sample_residuals = False
+                  steps                   = 2,
+                  exog                    = exog_predict,
+                  n_boot                  = 4,
+                  use_in_sample_residuals = False
               )
     expected = pd.DataFrame(
                    data    = np.array([[0.61820497, 0.39855187, 0.67329092],
-                                       [0.41314101, 0.17729748, 0.81780586]]),
+                                       [0.41314101, 0.20291844, 0.56528096]]),
                    columns = ['l1', 'l1_lower_bound', 'l1_upper_bound'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )

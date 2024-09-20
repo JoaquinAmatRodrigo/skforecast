@@ -13,7 +13,7 @@ from sklearn.preprocessing import StandardScaler
 y = pd.Series(np.arange(15))
 
 
-@pytest.mark.parametrize("residuals", [[1, 2, 3], {1: [1,2,3,4]}], 
+@pytest.mark.parametrize("residuals", [[1, 2, 3], {1: [1, 2, 3, 4]}], 
                          ids=lambda residuals: f'residuals: {residuals}')
 def test_set_out_sample_residuals_TypeError_when_residuals_is_not_a_dict_of_numpy_ndarray(residuals):
     """
@@ -21,10 +21,10 @@ def test_set_out_sample_residuals_TypeError_when_residuals_is_not_a_dict_of_nump
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(fit_intercept=True), lags=3, steps=2)
     err_msg = re.escape(
-                f"`residuals` argument must be a dict of numpy ndarrays in the form "
-                "`{step: residuals}`. " 
-                f"Got {type(residuals)}."
-            )
+        f"`residuals` argument must be a dict of numpy ndarrays in the form "
+        "`{step: residuals}`. " 
+        f"Got {type(residuals)}."
+    )
     with pytest.raises(TypeError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
 
@@ -38,9 +38,9 @@ def test_set_out_sample_residuals_NotFittedError_when_forecaster_not_fitted():
                  2: np.array([1, 2, 3, 4, 5])}
 
     err_msg = re.escape(
-                ("This forecaster is not fitted yet. Call `fit` with appropriate "
-                 "arguments before using `set_out_sample_residuals()`.")
-            )
+        ("This forecaster is not fitted yet. Call `fit` with appropriate "
+         "arguments before using `set_out_sample_residuals()`.")
+    )
     with pytest.raises(NotFittedError, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
 
@@ -54,12 +54,10 @@ def test_set_out_sample_residuals_UserWarning_when_residuals_not_for_all_steps()
     residuals = {1: np.array([1, 2, 3])}
 
     err_msg = re.escape(
-                f"""
-                Only residuals of models (steps) 
-                {set({1: None, 2: None}.keys()).intersection(set(residuals.keys()))} 
-                are updated.
-                """
-            )
+        (f"Only residuals of models (steps) "
+         f"{set({1: None, 2: None}.keys()).intersection(set(residuals.keys()))} "
+         f"are updated.")
+    )
     with pytest.warns(UserWarning, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
 
@@ -73,10 +71,10 @@ def test_set_out_sample_residuals_UserWarning_when_forecaster_has_transformer_an
     residuals = {1: np.array([1, 2, 3]), 2: np.array([1, 2, 3])}
 
     err_msg = re.escape(
-                (f"Argument `transform` is set to `False` but forecaster was trained "
-                 f"using a transformer {forecaster.transformer_y}. Ensure that the new residuals "
-                 f"are already transformed or set `transform=True`.")
-            )
+        (f"Argument `transform` is set to `False` but forecaster was trained "
+         f"using a transformer {forecaster.transformer_y}. Ensure that the new residuals "
+         f"are already transformed or set `transform=True`.")
+    )
     with pytest.warns(UserWarning, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=False)
 
@@ -90,10 +88,10 @@ def test_set_out_sample_residuals_UserWarning_when_forecaster_has_transformer_an
     residuals = {1: np.array([1, 2, 3]), 2: np.array([1, 2, 3])}
 
     err_msg = re.escape(
-                (f"Residuals will be transformed using the same transformer used "
-                 f"when training the forecaster ({forecaster.transformer_y}). Ensure the "
-                 f"new residuals are on the same scale as the original time series.")
-            )
+        (f"Residuals will be transformed using the same transformer used "
+         f"when training the forecaster ({forecaster.transformer_y}). Ensure the "
+         f"new residuals are on the same scale as the original time series.")
+    )
     with pytest.warns(UserWarning, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=True)
 
@@ -110,10 +108,10 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no
     forecaster.set_out_sample_residuals(residuals=residuals)
     forecaster.set_out_sample_residuals(residuals=new_residuals, append=False)
     expected = {1: np.arange(20), 2: np.arange(20)}
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     assert expected.keys() == results.keys()
-    assert all(all(expected[k] ==results[k]) for k in expected.keys())
+    assert all(all(expected[k] == results[k]) for k in expected.keys())
 
 
 def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_append():
@@ -128,7 +126,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_ap
     forecaster.set_out_sample_residuals(residuals=residuals, append=True)
     expected = {1: np.append(np.arange(10), np.arange(10)),
                 2: np.append(np.arange(10), np.arange(10))}
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     assert expected.keys() == results.keys()
     assert all(all(expected[k] == results[k]) for k in expected.keys())
@@ -143,10 +141,10 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
     residuals = {1: np.arange(2000), 2: np.arange(2000)}
 
     forecaster.set_out_sample_residuals(residuals=residuals)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     assert list(results.keys()) == [1, 2]
-    assert all(len(value)==1000 for value in results.values())
+    assert all(len(value) == 1000 for value in results.values())
 
 
 def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_append():
@@ -168,11 +166,11 @@ def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_ap
         expected_2 = rng.choice(a=value, size=1000, replace=False)
         expected[key] = np.append(np.arange(10), expected_2)[:1000]
 
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     assert expected.keys() == results.keys()
     assert all(all(expected[k] == results[k]) for k in expected.keys())
-    assert all(len(value)==1000 for value in results.values())
+    assert all(len(value) == 1000 for value in results.values())
 
 
 def test_set_out_sample_residuals_when_residuals_keys_do_not_match():
@@ -184,7 +182,7 @@ def test_set_out_sample_residuals_when_residuals_keys_do_not_match():
     residuals = {3: np.arange(10), 4: np.arange(10)}
 
     forecaster.set_out_sample_residuals(residuals=residuals)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     assert results == {1: None, 2: None}
 
@@ -198,7 +196,7 @@ def test_set_out_sample_residuals_when_residuals_keys_partially_match():
     residuals = {1: np.arange(10), 4: np.arange(10)}
 
     forecaster.set_out_sample_residuals(residuals=residuals)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     assert list(results.keys()) == [1, 2]
     assert all(results[1] == np.arange(10))

@@ -61,12 +61,13 @@ def test_predict_output_when_regressor_is_LinearRegression(steps):
     Test predict output when using LinearRegression as regressor.
     """
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)
-    forecaster.fit(y=pd.Series(np.arange(50)))
+    forecaster.fit(y=pd.Series(np.arange(50), 
+                   index=pd.date_range(start='2020-01-01', periods=50, freq='D')))
     results = forecaster.predict(steps=steps)
 
     expected = pd.Series(
                    data  = np.array([50., 51., 52.]),
-                   index = pd.RangeIndex(start=50, stop=53, step=1),
+                   index = pd.date_range(start='2020-02-20', periods=3, freq='D'),
                    name  = 'pred'
                )
     
@@ -84,7 +85,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_list_intersperse
     
     expected = pd.Series(
                    data  = np.array([50., 53.]),
-                   index = pd.RangeIndex(start=50, stop=55, step=1)[[0, 3]],
+                   index = pd.RangeIndex(start=50, stop=54, step=1)[[0, 3]],
                    name  = 'pred'
                )
     

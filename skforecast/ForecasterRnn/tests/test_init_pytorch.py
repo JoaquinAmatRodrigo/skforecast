@@ -60,7 +60,7 @@ def test_init(levels, steps, lags):
     assert isinstance(forecaster, ForecasterRnn)
 
     # Assert that the forecaster is not fitted
-    assert forecaster.fitted == False
+    assert forecaster.is_fitted is False
 
     # Assert that the model is compiled with the correct optimizer and loss
     assert forecaster.regressor.optimizer == optimizer

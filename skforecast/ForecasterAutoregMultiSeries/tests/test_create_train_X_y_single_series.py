@@ -270,7 +270,7 @@ def test_create_train_X_y_single_series_output_when_transformer_and_fitted():
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
                                               transformer_series=None)
     forecaster.transformer_series_ = {'l1': transformer}
-    forecaster.fitted = True
+    forecaster.is_fitted = True
 
     new_y = pd.Series(np.arange(10, 19, dtype=float), name='l1')
     results = forecaster._create_train_X_y_single_series(y=new_y, ignore_exog=True)
@@ -300,10 +300,10 @@ def test_create_train_X_y_single_series_output_when_transformer_and_fitted():
     pd.testing.assert_series_equal(results[2], expected[2])
 
 
-@pytest.mark.parametrize("fitted", 
+@pytest.mark.parametrize("is_fitted", 
                          [True, False], 
-                         ids = lambda fitted : f'fitted: {fitted}')
-def test_create_train_X_y_single_series_output_when_series_and_exog_and_differentitation_1(fitted):
+                         ids = lambda is_fitted : f'is_fitted: {is_fitted}')
+def test_create_train_X_y_single_series_output_when_series_and_exog_and_differentitation_1(is_fitted):
     """
     Test the output of _create_train_X_y_single_series when exog is a 
     pandas DataFrame with one column and differentiation=1.
@@ -316,7 +316,7 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_and_differen
                                               differentiation    = 1)
     forecaster.transformer_series_ = {'l1': None}
     forecaster.differentiator_ = {'l1': clone(forecaster.differentiator)}
-    forecaster.fitted = fitted
+    forecaster.is_fitted = is_fitted
 
     results = forecaster._create_train_X_y_single_series(
                   y           = y,
@@ -352,10 +352,10 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_and_differen
     pd.testing.assert_series_equal(results[2], expected[2])
 
 
-@pytest.mark.parametrize("fitted", 
+@pytest.mark.parametrize("is_fitted", 
                          [True, False], 
-                         ids = lambda fitted: f'fitted: {fitted}')
-def test_create_train_X_y_single_series_output_when_series_and_exog_and_differentitation_2(fitted):
+                         ids = lambda is_fitted: f'is_fitted: {is_fitted}')
+def test_create_train_X_y_single_series_output_when_series_and_exog_and_differentitation_2(is_fitted):
     """
     Test the output of _create_train_X_y_single_series when exog is a 
     pandas DataFrame with one column and differentiation=2.
@@ -368,7 +368,7 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_and_differen
                                               differentiation    = 2)
     forecaster.transformer_series_ = {'l1': None}
     forecaster.differentiator_ = {'l1': clone(forecaster.differentiator)}
-    forecaster.fitted = fitted
+    forecaster.is_fitted = is_fitted
 
     results = forecaster._create_train_X_y_single_series(
                   y           = y,

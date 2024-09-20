@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 import pmdarima
 from copy import copy
+import textwrap
 from pmdarima.arima import ARIMA
 from sklearn.base import clone
 from sklearn.exceptions import NotFittedError
@@ -22,6 +23,7 @@ from ..exceptions import IgnoredArgumentWarning
 from ..utils import check_select_fit_kwargs
 from ..utils import check_y
 from ..utils import check_exog
+from ..utils import get_exog_dtypes
 from ..utils import check_predict_input
 from ..utils import expand_index
 from ..utils import transform_series
@@ -76,34 +78,41 @@ class ForecasterSarimax():
         forecaster. `inverse_transform` is not available when using ColumnTransformers.
     window_size : int
         Not used, present here for API consistency by convention.
-    last_window : pandas Series
+    last_window_ : pandas Series
         Last window the forecaster has seen during training. It stores the
         values needed to predict the next `step` immediately after the training data.
-    extended_index : pandas Index
+    extended_index_ : pandas Index
         When predicting using `last_window` and `last_window_exog`, the internal
         statsmodels SARIMAX will be updated using its append method. To do this,
         `last_window` data must start at the end of the index seen by the 
-        forecaster, this is stored in forecaster.extended_index.
+        forecaster, this is stored in forecaster.extended_index_.
         Check https://www.statsmodels.org/dev/generated/statsmodels.tsa.arima.model.ARIMAResults.append.html
         to know more about statsmodels append method.
-    fitted : bool
-        Tag to identify if the regressor has been fitted (trained).
-    index_type : type
+    index_type_ : type
         Type of index of the input used in training.
-    index_freq : str
+    index_freq_ : str
         Frequency of Index of the input used in training.
-    training_range : pandas Index
+    training_range_ : pandas Index
         First and last values of index of the data used during training.
-    included_exog : bool
+    exog_in_ : bool
         If the forecaster has been trained using exogenous variable/s.
-    exog_type : type
-        Type of exogenous variable/s used in training.
-    exog_col_names : list
+    exog_names_in_ : list
         Names of the exogenous variables used during training.
+    exog_type_in_ : type
+        Type of exogenous variable/s used in training.
+    exog_dtypes_in_ : dict
+        Type of each exogenous variable/s used in training. If `transformer_exog` 
+        is used, the dtypes are calculated after the transformation.
+    X_train_exog_names_out_ : list
+        Names of the exogenous variables included in the matrix `X_train` created
+        internally for training. It can be different from `exog_names_in_` if
+        some exogenous variables are transformed during the training process.
     fit_kwargs : dict
         Additional arguments to be passed to the `fit` method of the regressor.
     creation_date : str
         Date of creation.
+    is_fitted : bool
+        Tag to identify if the regressor has been fitted (trained).
     fit_date : str
         Date of last fit.
     skforecast_version : str
@@ -124,24 +133,26 @@ class ForecasterSarimax():
         forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
         
-        self.regressor          = copy(regressor)
-        self.transformer_y      = transformer_y
-        self.transformer_exog   = transformer_exog
-        self.window_size        = 1
-        self.last_window        = None
-        self.extended_index     = None
-        self.fitted             = False
-        self.index_type         = None
-        self.index_freq         = None
-        self.training_range     = None
-        self.included_exog      = False
-        self.exog_type          = None
-        self.exog_col_names     = None
-        self.creation_date      = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.fit_date           = None
-        self.skforecast_version = skforecast.__version__
-        self.python_version     = sys.version.split(" ")[0]
-        self.forecaster_id      = forecaster_id
+        self.regressor               = copy(regressor)
+        self.transformer_y           = transformer_y
+        self.transformer_exog        = transformer_exog
+        self.window_size             = 1
+        self.last_window_            = None
+        self.extended_index_         = None
+        self.index_type_             = None
+        self.index_freq_             = None
+        self.training_range_         = None
+        self.exog_in_                = False
+        self.exog_names_in_          = None
+        self.exog_type_in_           = None
+        self.exog_dtypes_in_         = None
+        self.X_train_exog_names_out_ = None
+        self.creation_date           = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.is_fitted               = False
+        self.fit_date                = None
+        self.skforecast_version      = skforecast.__version__
+        self.python_version          = sys.version.split(" ")[0]
+        self.forecaster_id           = forecaster_id
         
         if isinstance(self.regressor, pmdarima.arima.ARIMA):
             self.engine = 'pmdarima'
@@ -177,25 +188,38 @@ class ForecasterSarimax():
         Information displayed when a ForecasterSarimax object is printed.
         """
 
+        params = self.params
+        params = "\n    " + textwrap.fill(str(params), width=80, subsequent_indent="    ")
+
+        exog_names_in_ = None
+        if self.exog_names_in_ is not None:
+            exog_names_in_ = copy(self.exog_names_in_)
+            if len(exog_names_in_) > 50:
+                exog_names_in_ = exog_names_in_[:50] + ["..."]
+            exog_names_in_ = ", ".join(exog_names_in_)
+            if len(exog_names_in_) > 58:
+                exog_names_in_ = "\n    " + textwrap.fill(
+                    exog_names_in_, width=80, subsequent_indent="    "
+                )
+
         info = (
             f"{'=' * len(type(self).__name__)} \n"
             f"{type(self).__name__} \n"
             f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
-            f"Regressor parameters: {self.params} \n"
             f"Window size: {self.window_size} \n"
-            f"Exogenous included: {self.included_exog} \n"
-            f"Type of exogenous variable: {self.exog_type} \n"
-            f"Exogenous variables names: {self.exog_col_names} \n"
+            f"Exogenous included: {self.exog_in_} \n"
+            f"Exogenous names: {exog_names_in_} \n"
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
-            f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
-            f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
-            f"Training index frequency: {self.index_freq if self.fitted else None} \n"
+            f"Training range: {self.training_range_.to_list() if self.is_fitted else None} \n"
+            f"Training index type: {str(self.index_type_).split('.')[-1][:-2] if self.is_fitted else None} \n"
+            f"Training index frequency: {self.index_freq_ if self.is_fitted else None} \n"
+            f"Regressor parameters: {params} \n"
+            f"fit_kwargs: {self.fit_kwargs} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
-            f"fit_kwargs: {self.fit_kwargs} \n"
-            f"Index seen by the forecaster: {self.extended_index} \n"
+            f"Index seen by the forecaster: {self.extended_index_} \n"
             f"Skforecast version: {self.skforecast_version} \n"
             f"Python version: {self.python_version} \n"
             f"Forecaster id: {self.forecaster_id} \n"
@@ -226,7 +250,7 @@ class ForecasterSarimax():
             number of observations as `y` and their indexes must be aligned so
             that y[i] is regressed on exog[i].
         store_last_window : bool, default `True`
-            Whether or not to store the last window of training data.
+            Whether or not to store the last window (`last_window_`) of training data.
         suppress_warnings : bool, default `False`
             If `True`, warnings generated during fitting will be ignored.
 
@@ -246,22 +270,25 @@ class ForecasterSarimax():
             check_exog(exog=exog)
 
         # Reset values in case the forecaster has already been fitted.
-        self.index_type          = None
-        self.index_freq          = None
-        self.last_window         = None
-        self.extended_index      = None
-        self.included_exog       = False
-        self.exog_type           = None
-        self.exog_col_names      = None
-        self.X_train_col_names   = None
-        self.in_sample_residuals = None
-        self.fitted              = False
-        self.training_range      = None
+        self.last_window_            = None
+        self.extended_index_         = None
+        self.index_type_             = None
+        self.index_freq_             = None
+        self.training_range_         = None
+        self.exog_in_                = False
+        self.exog_names_in_          = None
+        self.exog_type_in_           = None
+        self.exog_dtypes_in_         = None
+        self.X_train_exog_names_out_ = None
+        self.in_sample_residuals_    = None
+        self.is_fitted               = False
+        self.fit_date                = None
         
         if exog is not None:
-            self.included_exog = True
-            self.exog_type = type(exog)
-            self.exog_col_names = \
+            self.exog_in_ = True
+            self.exog_type_in_ = type(exog)
+            self.exog_dtypes_in_ = get_exog_dtypes(exog=exog)
+            self.exog_names_in_ = \
                  exog.columns.to_list() if isinstance(exog, pd.DataFrame) else exog.name
 
         y = transform_series(
@@ -282,6 +309,7 @@ class ForecasterSarimax():
                        fit               = True,
                        inverse_transform = False
                    )
+            self.X_train_exog_names_out_ = exog.columns.to_list()
             
         if suppress_warnings:
             warnings.filterwarnings("ignore")
@@ -294,22 +322,22 @@ class ForecasterSarimax():
         if suppress_warnings:
             warnings.filterwarnings("default")
 
-        self.fitted = True
+        self.is_fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.training_range = y.index[[0, -1]]
-        self.index_type = type(y.index)
+        self.training_range_ = y.index[[0, -1]]
+        self.index_type_ = type(y.index)
         if isinstance(y.index, pd.DatetimeIndex):
-            self.index_freq = y.index.freqstr
+            self.index_freq_ = y.index.freqstr
         else: 
-            self.index_freq = y.index.step
+            self.index_freq_ = y.index.step
 
         if store_last_window:
-            self.last_window = y.copy()
+            self.last_window_ = y.copy()
         
         if self.engine == 'pmdarima':
-            self.extended_index = self.regressor.arima_res_.fittedvalues.index.copy()
+            self.extended_index_ = self.regressor.arima_res_.fittedvalues.index.copy()
         else:
-            self.extended_index = self.regressor.sarimax_res.fittedvalues.index.copy()
+            self.extended_index_ = self.regressor.sarimax_res.fittedvalues.index.copy()
 
         self.params = self.regressor.get_params(deep=True)
 
@@ -337,7 +365,7 @@ class ForecasterSarimax():
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
-            If `last_window = None`, the values stored in `self.last_window` are
+            If `last_window = None`, the values stored in `self.last_window_` are
             used to calculate the initial predictors, and the predictions start
             right after training data.
         last_window_exog : pandas Series, pandas DataFrame, default `None`
@@ -362,26 +390,23 @@ class ForecasterSarimax():
 
         # Needs to be a new variable to avoid arima_res_.append when using 
         # self.last_window. It already has it stored.
-        last_window_check = last_window if last_window is not None else self.last_window
+        last_window_check = last_window if last_window is not None else self.last_window_
 
         check_predict_input(
             forecaster_name  = type(self).__name__,
             steps            = steps,
-            fitted           = self.fitted,
-            included_exog    = self.included_exog,
-            index_type       = self.index_type,
-            index_freq       = self.index_freq,
+            is_fitted        = self.is_fitted,
+            exog_in_         = self.exog_in_,
+            index_type_      = self.index_type_,
+            index_freq_      = self.index_freq_,
             window_size      = self.window_size,
             last_window      = last_window_check,
             last_window_exog = last_window_exog,
             exog             = exog,
-            exog_type        = self.exog_type,
-            exog_col_names   = self.exog_col_names,
+            exog_type_in_    = self.exog_type_in_,
+            exog_names_in_   = self.exog_names_in_,
             interval         = None,
-            alpha            = None,
-            max_steps        = None,
-            levels           = None,
-            series_col_names = None
+            alpha            = None
         )
         
         # If not last_window is provided, last_window needs to be None
@@ -396,7 +421,7 @@ class ForecasterSarimax():
             )
 
         # Check if forecaster needs exog
-        if last_window is not None and last_window_exog is None and self.included_exog:
+        if last_window is not None and last_window_exog is None and self.exog_in_:
             raise ValueError(
                 ("Forecaster trained with exogenous variable/s. To make predictions "
                  "unrelated to the original data, same variable/s must be provided "
@@ -410,12 +435,12 @@ class ForecasterSarimax():
             # training series.
 
             # check index append values
-            expected_index = expand_index(index=self.extended_index, steps=1)[0]
+            expected_index = expand_index(index=self.extended_index_, steps=1)[0]
             if expected_index != last_window.index[0]:
                 raise ValueError(
                     (f"To make predictions unrelated to the original data, `last_window` "
                      f"has to start at the end of the index seen by the forecaster.\n"
-                     f"    Series last index         : {self.extended_index[-1]}.\n"
+                     f"    Series last index         : {self.extended_index_[-1]}.\n"
                      f"    Expected index            : {expected_index}.\n"
                      f"    `last_window` index start : {last_window.index[0]}.")
                 )
@@ -441,7 +466,7 @@ class ForecasterSarimax():
                     raise ValueError(
                         (f"To make predictions unrelated to the original data, `last_window_exog` "
                          f"has to start at the end of the index seen by the forecaster.\n"
-                         f"    Series last index              : {self.extended_index[-1]}.\n"
+                         f"    Series last index              : {self.extended_index_[-1]}.\n"
                          f"    Expected index                 : {expected_index}.\n"
                          f"    `last_window_exog` index start : {last_window_exog.index[0]}.")
                     )
@@ -491,7 +516,7 @@ class ForecasterSarimax():
         When predicting using `last_window` and `last_window_exog`, the internal
         statsmodels SARIMAX will be updated using its append method. To do this,
         `last_window` data must start at the end of the index seen by the 
-        forecaster, this is stored in forecaster.extended_index.
+        forecaster, this is stored in forecaster.extended_index_.
 
         Check https://www.statsmodels.org/dev/generated/statsmodels.tsa.arima.model.ARIMAResults.append.html
         to know more about statsmodels append method.
@@ -534,14 +559,14 @@ class ForecasterSarimax():
                                                 exog  = last_window_exog,
                                                 refit = False
                                             )
-                self.extended_index = self.regressor.arima_res_.fittedvalues.index
+                self.extended_index_ = self.regressor.arima_res_.fittedvalues.index
             else:
                 self.regressor.append(
                     y     = last_window,
                     exog  = last_window_exog,
                     refit = False
                 )
-                self.extended_index = self.regressor.sarimax_res.fittedvalues.index
+                self.extended_index_ = self.regressor.sarimax_res.fittedvalues.index
 
         # Get following n steps predictions
         if self.engine == 'pmdarima':
@@ -587,7 +612,7 @@ class ForecasterSarimax():
         When predicting using `last_window` and `last_window_exog`, the internal
         statsmodels SARIMAX will be updated using its append method. To do this,
         `last_window` data must start at the end of the index seen by the 
-        forecaster, this is stored in forecaster.extended_index.
+        forecaster, this is stored in forecaster.extended_index_.
 
         Check https://www.statsmodels.org/dev/generated/statsmodels.tsa.arima.model.ARIMAResults.append.html
         to know more about statsmodels append method.
@@ -651,14 +676,14 @@ class ForecasterSarimax():
                                                 exog  = last_window_exog,
                                                 refit = False
                                             )
-                self.extended_index = self.regressor.arima_res_.fittedvalues.index
+                self.extended_index_ = self.regressor.arima_res_.fittedvalues.index
             else:
                 self.regressor.append(
                     y     = last_window,
                     exog  = last_window_exog,
                     refit = False
                 )
-                self.extended_index = self.regressor.sarimax_res.fittedvalues.index
+                self.extended_index_ = self.regressor.sarimax_res.fittedvalues.index
 
         # Get following n steps predictions with intervals
         if self.engine == 'pmdarima':
@@ -680,15 +705,13 @@ class ForecasterSarimax():
                               alpha = alpha
                           )
 
-        # Reverse the transformation if needed
         if self.transformer_y:
-            for col in predictions.columns:
-                predictions[col] = transform_series(
-                                    series            = predictions[col],
-                                    transformer       = self.transformer_y,
-                                    fit               = False,
-                                    inverse_transform = True
-                               )
+            predictions = predictions.apply(lambda col: transform_series(
+                              series            = col,
+                              transformer       = self.transformer_y,
+                              fit               = False,
+                              inverse_transform = True
+                          ))
 
         return predictions
 
@@ -765,7 +788,7 @@ class ForecasterSarimax():
 
         """
 
-        if not self.fitted:
+        if not self.is_fitted:
             raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `get_feature_importances()`.")
