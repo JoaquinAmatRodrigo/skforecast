@@ -1449,7 +1449,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         last_window: Optional[pd.DataFrame] = None,
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
         predict_boot: bool = False,
-        in_sample_residuals: bool = True,
+        use_in_sample_residuals: bool = True,
         check_inputs: bool = True
     ) -> Tuple[pd.DataFrame, dict, list, pd.Index, Optional[dict]]:
         """
@@ -1474,7 +1474,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Exogenous variable/s included as predictor/s.
         predict_boot : bool, default `False`
             If `True`, residuals are returned to generate bootstrapping predictions.
-        in_sample_residuals : bool, default `True`
+        use_in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create predictions. If `False`, out of sample 
             residuals are used. In the latter case, the user should have
@@ -1518,11 +1518,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
         if self.is_fitted and predict_boot:
             residuals = prepare_residuals_multiseries(
-                            levels                = levels,
-                            use_in_sample         = in_sample_residuals,
-                            encoding              = self.encoding,
-                            in_sample_residuals_  = self.in_sample_residuals_,
-                            out_sample_residuals_ = self.out_sample_residuals_
+                            levels                  = levels,
+                            use_in_sample_residuals = use_in_sample_residuals,
+                            encoding                = self.encoding,
+                            in_sample_residuals_    = self.in_sample_residuals_,
+                            out_sample_residuals_   = self.out_sample_residuals_
                         )
         else:
             residuals = None
@@ -1942,7 +1942,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
         n_boot: int = 500,
         random_state: int = 123,
-        in_sample_residuals: bool = True,
+        use_in_sample_residuals: bool = True,
         suppress_warnings: bool = False
     ) -> dict:
         """
@@ -1972,7 +1972,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
-        in_sample_residuals : bool, default `True`
+        use_in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create predictions. If `False`, out of sample 
             residuals are used. In the latter case, the user should have
@@ -2006,12 +2006,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             prediction_index,
             residuals
         ) = self._create_predict_inputs(
-            steps               = steps,
-            levels              = levels,
-            last_window         = last_window,
-            exog                = exog,
-            predict_boot        = True,
-            in_sample_residuals = in_sample_residuals
+            steps                   = steps,
+            levels                  = levels,
+            last_window             = last_window,
+            exog                    = exog,
+            predict_boot            = True,
+            use_in_sample_residuals = use_in_sample_residuals
         )
 
         n_levels = len(levels)
@@ -2084,7 +2084,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         interval: list = [5, 95],
         n_boot: int = 500,
         random_state: int = 123,
-        in_sample_residuals: bool = True,
+        use_in_sample_residuals: bool = True,
         suppress_warnings: bool = False
     ) -> pd.DataFrame:
         """
@@ -2117,7 +2117,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
-        in_sample_residuals : bool, default `True`
+        use_in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create predictions. If `False`, out of sample 
             residuals are used. In the latter case, the user should have
@@ -2151,14 +2151,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         check_interval(interval=interval)
 
         boot_predictions = self.predict_bootstrapping(
-                               steps               = steps,
-                               levels              = levels,
-                               last_window         = last_window,
-                               exog                = exog,
-                               n_boot              = n_boot,
-                               random_state        = random_state,
-                               in_sample_residuals = in_sample_residuals,
-                               suppress_warnings   = suppress_warnings
+                               steps                   = steps,
+                               levels                  = levels,
+                               last_window             = last_window,
+                               exog                    = exog,
+                               n_boot                  = n_boot,
+                               random_state            = random_state,
+                               use_in_sample_residuals = use_in_sample_residuals,
+                               suppress_warnings       = suppress_warnings
                            )
         
         preds = self.predict(
@@ -2195,7 +2195,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         quantiles: list = [0.05, 0.5, 0.95],
         n_boot: int = 500,
         random_state: int = 123,
-        in_sample_residuals: bool = True,
+        use_in_sample_residuals: bool = True,
         suppress_warnings: bool = False
     ) -> pd.DataFrame:
         """
@@ -2227,7 +2227,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot quantiles are always 
             deterministic.
-        in_sample_residuals : bool, default `True`
+        use_in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create quantiles. If `False`, out of sample 
             residuals are used. In the latter case, the user should have
@@ -2257,14 +2257,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         check_interval(quantiles=quantiles)
 
         boot_predictions = self.predict_bootstrapping(
-                               steps               = steps,
-                               levels              = levels,
-                               last_window         = last_window,
-                               exog                = exog,
-                               n_boot              = n_boot,
-                               random_state        = random_state,
-                               in_sample_residuals = in_sample_residuals,
-                               suppress_warnings   = suppress_warnings
+                               steps                   = steps,
+                               levels                  = levels,
+                               last_window             = last_window,
+                               exog                    = exog,
+                               n_boot                  = n_boot,
+                               random_state            = random_state,
+                               use_in_sample_residuals = use_in_sample_residuals,
+                               suppress_warnings       = suppress_warnings
                            )
 
         predictions = []
@@ -2290,7 +2290,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
         n_boot: int = 500,
         random_state: int = 123,
-        in_sample_residuals: bool = True,
+        use_in_sample_residuals: bool = True,
         suppress_warnings: bool = False
     ) -> pd.DataFrame:
         """
@@ -2320,7 +2320,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
-        in_sample_residuals : bool, default `True`
+        use_in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create predictions. If `False`, out of sample 
             residuals are used. In the latter case, the user should have
@@ -2341,14 +2341,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         set_skforecast_warnings(suppress_warnings, action='ignore')
 
         boot_samples = self.predict_bootstrapping(
-                           steps               = steps,
-                           levels              = levels,
-                           last_window         = last_window,
-                           exog                = exog,
-                           n_boot              = n_boot,
-                           random_state        = random_state,
-                           in_sample_residuals = in_sample_residuals,
-                           suppress_warnings   = suppress_warnings
+                           steps                   = steps,
+                           levels                  = levels,
+                           last_window             = last_window,
+                           exog                    = exog,
+                           n_boot                  = n_boot,
+                           random_state            = random_state,
+                           use_in_sample_residuals = use_in_sample_residuals,
+                           suppress_warnings       = suppress_warnings
                        )
 
         param_names = [

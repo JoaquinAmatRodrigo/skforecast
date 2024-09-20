@@ -74,6 +74,12 @@ The main changes in this release are:
 
     + `fitted` has been renamed to `is_fitted`.
 
++ Renamed arguments in different functions and methods:
+
+    + `in_sample_residuals` has been renamed to `use_in_sample_residuals`.
+
+    + `binned_residuals` has been renamed to `use_binned_residuals`.
+
     + `series_col_names` has been renamed to `series_names_in_` in the `check_predict_input`, `check_preprocess_exog_multiseries` and `initialize_transformer_series` functions in the <code>[utils]</code> module.
 
     + `series_X_train` has been renamed to `X_train_series_names_in_` in the `prepare_levels_multiseries` function in the <code>[utils]</code> module.
@@ -91,6 +97,12 @@ The main changes in this release are:
     + `exog_dtypes` has been renamed to `exog_dtypes_in_` in the `check_predict_input` function in the <code>[utils]</code> module.
 
     + `fitted` has been renamed to `is_fitted` in the `check_predict_input` function in the <code>[utils]</code> module.
+
+    + `use_in_sample` has been renamed to `use_in_sample_residuals` in the `prepare_residuals_multiseries` function in the <code>[utils]</code> module.
+
+    + `in_sample_residuals` has been renamed to `use_in_sample_residuals` in the <code>[backtesting_forecaster]</code>, <code>[backtesting_forecaster_multiseries]</code> and `check_backtesting_input` (<code>[utils]</code> module) functions.
+
+   + `binned_residuals` has been renamed to `use_binned_residuals` in the <code>[backtesting_forecaster]</code> function.
 
     + `in_sample_residuals` has been renamed to `in_sample_residuals_` in the `prepare_residuals_multiseries` function in the <code>[utils]</code> module.
 

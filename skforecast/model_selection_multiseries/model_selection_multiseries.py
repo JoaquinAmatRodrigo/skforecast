@@ -750,7 +750,7 @@ def _backtesting_forecaster_multiseries(
     interval: Optional[list] = None,
     n_boot: int = 500,
     random_state: int = 123,
-    in_sample_residuals: bool = True,
+    use_in_sample_residuals: bool = True,
     n_jobs: Union[int, str] = 'auto',
     verbose: bool = False,
     show_progress: bool = True,
@@ -835,7 +835,7 @@ def _backtesting_forecaster_multiseries(
     random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
-    in_sample_residuals : bool, default `True`
+    use_in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of prediction
         error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
@@ -1053,15 +1053,15 @@ def _backtesting_forecaster_multiseries(
                    )
         else:
             pred = forecaster.predict_interval(
-                       steps               = steps,
-                       levels              = levels_predict, 
-                       last_window         = last_window_series,
-                       exog                = next_window_exog,
-                       interval            = interval,
-                       n_boot              = n_boot,
-                       random_state        = random_state,
-                       in_sample_residuals = in_sample_residuals,
-                       suppress_warnings   = suppress_warnings
+                       steps                   = steps,
+                       levels                  = levels_predict, 
+                       last_window             = last_window_series,
+                       exog                    = next_window_exog,
+                       interval                = interval,
+                       n_boot                  = n_boot,
+                       random_state            = random_state,
+                       use_in_sample_residuals = use_in_sample_residuals,
+                       suppress_warnings       = suppress_warnings
                    )
 
         if type(forecaster).__name__ != 'ForecasterAutoregMultiVariate' and gap > 0:
@@ -1129,7 +1129,7 @@ def backtesting_forecaster_multiseries(
     interval: Optional[list] = None,
     n_boot: int = 500,
     random_state: int = 123,
-    in_sample_residuals: bool = True,
+    use_in_sample_residuals: bool = True,
     n_jobs: Union[int, str] = 'auto',
     verbose: bool = False,
     show_progress: bool = True,
@@ -1216,7 +1216,7 @@ def backtesting_forecaster_multiseries(
     random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
-    in_sample_residuals : bool, default `True`
+    use_in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals. If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
@@ -1265,50 +1265,50 @@ def backtesting_forecaster_multiseries(
         )
     
     check_backtesting_input(
-        forecaster            = forecaster,
-        steps                 = steps,
-        metric                = metric,
-        add_aggregated_metric = add_aggregated_metric,
-        series                = series,
-        exog                  = exog,
-        initial_train_size    = initial_train_size,
-        fixed_train_size      = fixed_train_size,
-        gap                   = gap,
-        skip_folds            = skip_folds,
-        allow_incomplete_fold = allow_incomplete_fold,
-        refit                 = refit,
-        interval              = interval,
-        n_boot                = n_boot,
-        random_state          = random_state,
-        in_sample_residuals   = in_sample_residuals,
-        n_jobs                = n_jobs,
-        verbose               = verbose,
-        show_progress         = show_progress,
-        suppress_warnings     = suppress_warnings
+        forecaster              = forecaster,
+        steps                   = steps,
+        metric                  = metric,
+        add_aggregated_metric   = add_aggregated_metric,
+        series                  = series,
+        exog                    = exog,
+        initial_train_size      = initial_train_size,
+        fixed_train_size        = fixed_train_size,
+        gap                     = gap,
+        skip_folds              = skip_folds,
+        allow_incomplete_fold   = allow_incomplete_fold,
+        refit                   = refit,
+        interval                = interval,
+        n_boot                  = n_boot,
+        random_state            = random_state,
+        use_in_sample_residuals = use_in_sample_residuals,
+        n_jobs                  = n_jobs,
+        verbose                 = verbose,
+        show_progress           = show_progress,
+        suppress_warnings       = suppress_warnings
     )
 
     metrics_levels, backtest_predictions = _backtesting_forecaster_multiseries(
-        forecaster            = forecaster,
-        series                = series,
-        steps                 = steps,
-        levels                = levels,
-        metric                = metric,
-        add_aggregated_metric = add_aggregated_metric,
-        initial_train_size    = initial_train_size,
-        fixed_train_size      = fixed_train_size,
-        gap                   = gap,
-        skip_folds            = skip_folds,
-        allow_incomplete_fold = allow_incomplete_fold,
-        exog                  = exog,
-        refit                 = refit,
-        interval              = interval,
-        n_boot                = n_boot,
-        random_state          = random_state,
-        in_sample_residuals   = in_sample_residuals,
-        n_jobs                = n_jobs,
-        verbose               = verbose,
-        show_progress         = show_progress,
-        suppress_warnings     = suppress_warnings
+        forecaster              = forecaster,
+        series                  = series,
+        steps                   = steps,
+        levels                  = levels,
+        metric                  = metric,
+        add_aggregated_metric   = add_aggregated_metric,
+        initial_train_size      = initial_train_size,
+        fixed_train_size        = fixed_train_size,
+        gap                     = gap,
+        skip_folds              = skip_folds,
+        allow_incomplete_fold   = allow_incomplete_fold,
+        exog                    = exog,
+        refit                   = refit,
+        interval                = interval,
+        n_boot                  = n_boot,
+        random_state            = random_state,
+        use_in_sample_residuals = use_in_sample_residuals,
+        n_jobs                  = n_jobs,
+        verbose                 = verbose,
+        show_progress           = show_progress,
+        suppress_warnings       = suppress_warnings
     )
 
     return metrics_levels, backtest_predictions

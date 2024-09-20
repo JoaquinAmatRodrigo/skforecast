@@ -34,37 +34,37 @@ def test_predict_bootstrapping_NotFittedError_when_fitted_is_False():
 
 def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     """
-    Test ValueError is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals is None.
+    Test ValueError is raised when use_in_sample_residuals=False and
+    forecaster.out_sample_residuals_ is None.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
 
     err_msg = re.escape(
         ("`forecaster.out_sample_residuals_` is `None`. Use "
-         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
-         "method before predicting.")
+         "`use_in_sample_residuals=True` or the "
+         "`set_out_sample_residuals()` method before predicting.")
     )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False)
+        forecaster.predict_bootstrapping(steps=1, use_in_sample_residuals=False)
 
 
 def test_predict_bootstrapping_ValueError_when_out_sample_residuals_by_bin_is_None():
     """
-    Test ValueError is raised when in_sample_residuals=False and
-    forecaster.out_sample_residuals is None.
+    Test ValueError is raised when use_in_sample_residuals=False and
+    forecaster.out_sample_residuals_by_bin_ is None.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
 
     err_msg = re.escape(
         ("`forecaster.out_sample_residuals_by_bin_` is `None`. Use "
-         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
-         "method before predicting.")
+         "`use_in_sample_residuals=True` or the "
+         "`set_out_sample_residuals()` method before predicting.")
     )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict_bootstrapping(steps=1, in_sample_residuals=False,
-                                         binned_residuals=True)
+        forecaster.predict_bootstrapping(steps=1, use_in_sample_residuals=False,
+                                         use_binned_residuals=True)
 
 
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_steps_is_1_in_sample_residuals_is_True():
@@ -75,7 +75,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
     results = forecaster.predict_bootstrapping(
-        steps=1, n_boot=4, exog=exog_predict, in_sample_residuals=True
+        steps=1, n_boot=4, exog=exog_predict, use_in_sample_residuals=True
     )
 
     expected = pd.DataFrame(
@@ -95,7 +95,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
     results = forecaster.predict_bootstrapping(
-        steps=2, n_boot=4, exog=exog_predict, in_sample_residuals=True
+        steps=2, n_boot=4, exog=exog_predict, use_in_sample_residuals=True
     )
 
     expected = pd.DataFrame(
@@ -118,7 +118,9 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
     forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
-    results = forecaster.predict_bootstrapping(steps=1, n_boot=4, exog=exog_predict, in_sample_residuals=False)
+    results = forecaster.predict_bootstrapping(
+        steps=1, n_boot=4, exog=exog_predict, use_in_sample_residuals=False
+    )
 
     expected = pd.DataFrame(
                    data    = np.array([[0.76205175, 0.52687879, 0.40505505, 0.77278459]]),
@@ -137,7 +139,9 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y, exog=exog)
     forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
-    results = forecaster.predict_bootstrapping(steps=2, n_boot=4, exog=exog_predict, in_sample_residuals=False)
+    results = forecaster.predict_bootstrapping(
+        steps=2, n_boot=4, exog=exog_predict, use_in_sample_residuals=False
+    )
     
     expected = pd.DataFrame(
                    data    = np.array([[0.76205175, 0.52687879, 0.40505505, 0.77278459],
@@ -163,7 +167,9 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                  )
     forecaster.fit(y=y, exog=exog)
     forecaster.in_sample_residuals_ = np.full_like(forecaster.in_sample_residuals_, fill_value=0)
-    results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=True)
+    results = forecaster.predict_bootstrapping(
+        steps=2, exog=exog_predict, n_boot=4, use_in_sample_residuals=True
+    )
     
     expected = pd.DataFrame(
                    data = np.array([[0.67998879, 0.67998879, 0.67998879, 0.67998879],
@@ -190,7 +196,9 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                      binner_kwargs    = {'n_bins': 15}
                  )
     forecaster.fit(y=y, exog=exog)
-    results = forecaster.predict_bootstrapping(steps=2, exog=exog_predict, n_boot=4, in_sample_residuals=True)
+    results = forecaster.predict_bootstrapping(
+        steps=2, exog=exog_predict, n_boot=4, use_in_sample_residuals=True
+    )
     
     expected = pd.DataFrame(
                    data    = np.array(

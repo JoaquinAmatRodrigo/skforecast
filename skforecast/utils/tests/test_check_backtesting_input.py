@@ -20,7 +20,7 @@ from skforecast.utils import check_backtesting_input
 from skforecast.model_selection.tests.fixtures_model_selection import y
 from skforecast.model_selection_multiseries.tests.fixtures_model_selection_multiseries import series
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 3 lags of a time series.
     """
@@ -35,8 +35,8 @@ def create_predictors(y): # pragma: no cover
                           ForecasterAutoregCustom(regressor=Ridge(), window_size=3,
                                                   fun_predictors=create_predictors),
                           ForecasterAutoregDirect(regressor=Ridge(), lags=2, steps=3),
-                          ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))], 
-                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+                          ForecasterSarimax(regressor=ARIMA(order=(1, 1, 1)))], 
+                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
 def test_check_backtesting_input_TypeError_when_y_is_not_pandas_Series_uniseries(forecaster):
     """
     Test TypeError is raised in check_backtesting_input if `y` is not a 
@@ -47,31 +47,31 @@ def test_check_backtesting_input_TypeError_when_y_is_not_pandas_Series_uniseries
     err_msg = re.escape("`y` must be a pandas Series.")
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = bad_y,
-            series                = None,
-            initial_train_size    = len(bad_y[:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = bad_y,
+            series                  = None,
+            initial_train_size      = len(bad_y[:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoregMultiVariate(regressor=Ridge(), lags=2, 
                                                         steps=3, level='l1')], 
-                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
 def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_multiseries(forecaster):
     """
     Test TypeError is raised in check_backtesting_input if `series` is not a 
@@ -82,24 +82,24 @@ def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_m
     err_msg = re.escape("`series` must be a pandas DataFrame.")
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = None,
-            series                = bad_series,
-            initial_train_size    = len(bad_series[:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = None,
+            series                  = bad_series,
+            initial_train_size      = len(bad_series[:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -108,7 +108,7 @@ def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_m
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
                                                              window_size=3,
                                                              fun_predictors=create_predictors)], 
-                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
 def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_multiseries_dict(forecaster):
     """
     Test TypeError is raised in check_backtesting_input if `series` is not a 
@@ -122,24 +122,24 @@ def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_m
     )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = None,
-            series                = bad_series,
-            initial_train_size    = len(bad_series[:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = None,
+            series                  = bad_series,
+            initial_train_size      = len(bad_series[:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -148,7 +148,7 @@ def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_m
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
                                                              window_size=3,
                                                              fun_predictors=create_predictors)], 
-                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
 def test_check_backtesting_input_TypeError_when_series_is_dict_of_pandas_Series_multiseries_dict(forecaster):
     """
     Test TypeError is raised in check_backtesting_input if `series` is not a 
@@ -163,24 +163,24 @@ def test_check_backtesting_input_TypeError_when_series_is_dict_of_pandas_Series_
     )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = None,
-            series                = bad_series,
-            initial_train_size    = len(bad_series['l1'][:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = None,
+            series                  = bad_series,
+            initial_train_size      = len(bad_series['l1'][:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -189,7 +189,7 @@ def test_check_backtesting_input_TypeError_when_series_is_dict_of_pandas_Series_
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
                                                              window_size=3,
                                                              fun_predictors=create_predictors)], 
-                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
 def test_check_backtesting_input_ValueError_when_series_is_dict_no_DatetimeIndex_multiseries_dict(forecaster):
     """
     Test ValueError is raised in check_backtesting_input if `series` is a 
@@ -207,24 +207,24 @@ def test_check_backtesting_input_ValueError_when_series_is_dict_no_DatetimeIndex
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = None,
-            series                = series_dict,
-            initial_train_size    = len(series_dict['l1'][:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = None,
+            series                  = series_dict,
+            initial_train_size      = len(series_dict['l1'][:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -233,7 +233,7 @@ def test_check_backtesting_input_ValueError_when_series_is_dict_no_DatetimeIndex
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
                                                              window_size=3,
                                                              fun_predictors=create_predictors)], 
-                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
 def test_check_backtesting_input_ValueError_when_series_is_dict_diff_freq_multiseries_dict(forecaster):
     """
     Test ValueError is raised in check_backtesting_input if `series` is a 
@@ -257,24 +257,24 @@ def test_check_backtesting_input_ValueError_when_series_is_dict_diff_freq_multis
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = None,
-            series                = series_dict,
-            initial_train_size    = len(series_dict['l1'][:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = None,
+            series                  = series_dict,
+            initial_train_size      = len(series_dict['l1'][:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -283,7 +283,7 @@ def test_check_backtesting_input_ValueError_when_series_is_dict_diff_freq_multis
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
                                                              window_size=3,
                                                              fun_predictors=create_predictors)], 
-                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
 def test_check_backtesting_input_TypeError_when_not_valid_exog_type_multiseries_dict(forecaster):
     """
     Test TypeError is raised in check_backtesting_input if `exog` is not a
@@ -308,25 +308,25 @@ def test_check_backtesting_input_TypeError_when_not_valid_exog_type_multiseries_
     )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = None,
-            series                = series_dict,
-            exog                  = bad_exog,
-            initial_train_size    = len(series_dict['l1'][:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = None,
+            series                  = series_dict,
+            exog                    = bad_exog,
+            initial_train_size      = len(series_dict['l1'][:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -335,7 +335,7 @@ def test_check_backtesting_input_TypeError_when_not_valid_exog_type_multiseries_
                           ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
                                                              window_size=3,
                                                              fun_predictors=create_predictors)], 
-                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
 def test_check_backtesting_input_TypeError_when_not_valid_exog_dict_type_multiseries_dict(forecaster):
     """
     Test TypeError is raised in check_backtesting_input if `exog` is not a
@@ -360,25 +360,25 @@ def test_check_backtesting_input_TypeError_when_not_valid_exog_dict_type_multise
     )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = None,
-            series                = series_dict,
-            exog                  = bad_exog,
-            initial_train_size    = len(series_dict['l1'][:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = None,
+            series                  = series_dict,
+            exog                    = bad_exog,
+            initial_train_size      = len(series_dict['l1'][:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -399,31 +399,31 @@ def test_check_backtesting_input_TypeError_when_not_valid_exog_type():
     )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = None,
-            exog                  = bad_exog,
-            initial_train_size    = len(y[:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = None,
+            exog                    = bad_exog,
+            initial_train_size      = len(y[:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
 @pytest.mark.parametrize("steps", 
                          ['not_int', 2.3, 0], 
-                         ids = lambda value : f'steps: {value}' )
+                         ids = lambda value: f'steps: {value}')
 def test_check_backtesting_input_TypeError_when_steps_not_int_greater_or_equal_1(steps):
     """
     Test TypeError is raised in check_backtesting_input if `steps` is not an 
@@ -439,29 +439,29 @@ def test_check_backtesting_input_TypeError_when_steps_not_int_greater_or_equal_1
     )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = steps,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = None,
-            initial_train_size    = len(y[:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = steps,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = None,
+            initial_train_size      = len(y[:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
 @pytest.mark.parametrize("gap", 
                          ['not_int', 2.3, -1], 
-                         ids = lambda value : f'gap: {value}' )
+                         ids = lambda value: f'gap: {value}')
 def test_check_backtesting_input_TypeError_when_gap_not_int_greater_or_equal_0(gap):
     """
     Test TypeError is raised in check_backtesting_input if `gap` is not an 
@@ -477,29 +477,29 @@ def test_check_backtesting_input_TypeError_when_gap_not_int_greater_or_equal_0(g
     )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = None,
-            initial_train_size    = len(y[:-12]),
-            fixed_train_size      = False,
-            gap                   = gap,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = None,
+            initial_train_size      = len(y[:-12]),
+            fixed_train_size        = False,
+            gap                     = gap,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
 @pytest.mark.parametrize("skip_folds", 
                          ['not_int', 2.3], 
-                         ids = lambda value : f'skip_folds: {value}' )
+                         ids = lambda value: f'skip_folds: {value}')
 def test_check_backtesting_input_TypeError_when_skip_folds_not_int_list_or_None(skip_folds):
     """
     Test TypeError is raised in check_backtesting_input if `skip_folds` is not an 
@@ -516,30 +516,30 @@ def test_check_backtesting_input_TypeError_when_skip_folds_not_int_list_or_None(
     )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = None,
-            initial_train_size    = len(y[:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            skip_folds            = skip_folds,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = None,
+            initial_train_size      = len(y[:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            skip_folds              = skip_folds,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
 @pytest.mark.parametrize("skip_folds", 
                          [0, -1], 
-                         ids = lambda value : f'skip_folds: {value}' )
+                         ids = lambda value: f'skip_folds: {value}')
 def test_check_backtesting_input_ValueError_when_skip_folds_int_less_than_1(skip_folds):
     """
     Test ValueError is raised in check_backtesting_input if `skip_folds` is 
@@ -556,24 +556,24 @@ def test_check_backtesting_input_ValueError_when_skip_folds_int_less_than_1(skip
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = None,
-            initial_train_size    = len(y[:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            skip_folds            = skip_folds,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = None,
+            initial_train_size      = len(y[:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            skip_folds              = skip_folds,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -593,24 +593,24 @@ def test_check_backtesting_input_ValueError_when_skip_folds_list_with_0():
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = None,
-            initial_train_size    = len(y[:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            skip_folds            = [0, 2],
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = None,
+            initial_train_size      = len(y[:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            skip_folds              = [0, 2],
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -631,29 +631,29 @@ def test_check_backtesting_input_TypeError_when_metric_not_correct_type():
     )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 5,
-            metric                = metric,
-            y                     = y,
-            series                = None,
-            initial_train_size    = len(y[:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 5,
+            metric                  = metric,
+            y                       = y,
+            series                  = None,
+            initial_train_size      = len(y[:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
 @pytest.mark.parametrize("initial_train_size", 
                          [20., 21.2, 'not_int'], 
-                         ids = lambda value : f'initial_train_size: {value}' )
+                         ids = lambda value: f'initial_train_size: {value}')
 def test_check_backtesting_input_TypeError_when_initial_train_size_is_not_an_int_or_None(initial_train_size):
     """
     Test TypeError is raised in check_backtesting_input when 
@@ -670,30 +670,30 @@ def test_check_backtesting_input_TypeError_when_initial_train_size_is_not_an_int
     )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = None,
-            initial_train_size    = initial_train_size,
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = None,
+            initial_train_size      = initial_train_size,
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoreg(regressor=Ridge(), lags=2),
                           ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2)], 
-                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
 def test_check_backtesting_input_ValueError_when_initial_train_size_more_than_or_equal_to_data_length(forecaster):
     """
     Test ValueError is raised in check_backtesting_input when 
@@ -714,24 +714,24 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_more_than_or
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = series,
-            initial_train_size    = initial_train_size,
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = series,
+            initial_train_size      = initial_train_size,
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -753,31 +753,31 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_less_than_fo
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = series,
-            initial_train_size    = initial_train_size,
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = series,
+            initial_train_size      = initial_train_size,
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoreg(regressor=Ridge(), lags=2),
                           ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2)], 
-                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
 def test_check_backtesting_input_ValueError_when_initial_train_size_plus_gap_less_than_data_length(forecaster):
     """
     Test ValueError is raised in check_backtesting_input when 
@@ -800,24 +800,24 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_plus_gap_les
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = series,
-            initial_train_size    = initial_train_size,
-            fixed_train_size      = False,
-            gap                   = gap,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = series,
+            initial_train_size      = initial_train_size,
+            fixed_train_size        = False,
+            gap                     = gap,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -826,7 +826,7 @@ def test_check_backtesting_input_ValueError_ForecasterSarimax_when_initial_train
     Test ValueError is raised in check_backtesting_input when initial_train_size 
     is None with a ForecasterSarimax.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1,1,1)))
+    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1, 1, 1)))
 
     initial_train_size = None
     
@@ -836,24 +836,24 @@ def test_check_backtesting_input_ValueError_ForecasterSarimax_when_initial_train
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = series,
-            initial_train_size    = initial_train_size,
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = series,
+            initial_train_size      = initial_train_size,
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -875,24 +875,24 @@ def test_check_backtesting_input_NotFittedError_when_initial_train_size_None_and
     )
     with pytest.raises(NotFittedError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = series,
-            initial_train_size    = initial_train_size,
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = series,
+            initial_train_size      = initial_train_size,
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
@@ -915,30 +915,30 @@ def test_check_backtesting_input_ValueError_when_initial_train_size_None_and_ref
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = series,
-            initial_train_size    = initial_train_size,
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = refit,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = series,
+            initial_train_size      = initial_train_size,
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = refit,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
         
 
 @pytest.mark.parametrize("refit", 
                          ['not_bool_int', -1, 1.5], 
-                         ids = lambda value : f'refit: {value}' )
+                         ids = lambda value: f'refit: {value}')
 def test_check_backtesting_input_TypeError_when_refit_not_bool_or_int(refit):
     """
     Test TypeError is raised in check_backtesting_input when `refit` is not a 
@@ -952,26 +952,27 @@ def test_check_backtesting_input_TypeError_when_refit_not_bool_or_int(refit):
     err_msg = re.escape(f"`refit` must be a boolean or an integer greater than 0. Got {refit}.")
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = series,
-            initial_train_size    = len(y[:-12]),
-            refit                 = refit,
-            gap                   = 0,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
+            forecaster         = forecaster,
+            steps              = 3,
+            metric             = 'mean_absolute_error',
+            y                  = y,
+            series             = series,
+            initial_train_size = len(y[:-12]),
+            refit              = refit,
+            gap                = 0,
+            interval           = None,
+            alpha              = None,
+            n_boot             = 500,
+            random_state       = 123,
         )
 
 
 @pytest.mark.parametrize("boolean_argument", 
                          ['add_aggregated_metric', 'fixed_train_size', 
-                          'allow_incomplete_fold', 'in_sample_residuals', 
-                          'verbose', 'show_progress', 'suppress_warnings'], 
-                         ids = lambda argument : f'{argument}' )
+                          'allow_incomplete_fold', 'use_in_sample_residuals', 
+                          'use_binned_residuals', 'verbose', 
+                          'show_progress', 'suppress_warnings'], 
+                         ids = lambda argument: f'{argument}')
 def test_check_backtesting_input_TypeError_when_boolean_arguments_not_bool(boolean_argument):
     """
     Test TypeError is raised in check_backtesting_input when boolean arguments 
@@ -986,7 +987,8 @@ def test_check_backtesting_input_TypeError_when_boolean_arguments_not_bool(boole
         'add_aggregated_metric': False,
         'fixed_train_size': False,
         'allow_incomplete_fold': False,
-        'in_sample_residuals': False,
+        'use_in_sample_residuals': False,
+        'use_binned_residuals': False,
         'verbose': False,
         'show_progress': False
     }
@@ -995,18 +997,18 @@ def test_check_backtesting_input_TypeError_when_boolean_arguments_not_bool(boole
     err_msg = re.escape(f"`{boolean_argument}` must be a boolean: `True`, `False`.")
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = series,
-            initial_train_size    = len(y[:-12]),
-            refit                 = False,
-            gap                   = 0,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
+            forecaster         = forecaster,
+            steps              = 3,
+            metric             = 'mean_absolute_error',
+            y                  = y,
+            series             = series,
+            initial_train_size = len(y[:-12]),
+            refit              = False,
+            gap                = 0,
+            interval           = None,
+            alpha              = None,
+            n_boot             = 500,
+            random_state       = 123,
             **boolean_arguments
         )
 
@@ -1016,7 +1018,7 @@ def test_check_backtesting_input_TypeError_when_boolean_arguments_not_bool(boole
                           ('n_boot', -2),
                           ('random_state', 'not_int'),  
                           ('random_state', -3)], 
-                         ids = lambda argument : f'{argument}' )
+                         ids = lambda argument: f'{argument}')
 def test_check_backtesting_input_TypeError_when_integer_arguments_not_int_or_greater_than_0(int_argument, value):
     """
     Test TypeError is raised in check_backtesting_input when integer arguments 
@@ -1034,29 +1036,29 @@ def test_check_backtesting_input_TypeError_when_integer_arguments_not_int_or_gre
     err_msg = re.escape(f"`{int_argument}` must be an integer greater than 0. Got {value}.")
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = series,
-            initial_train_size    = len(y[:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False,
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = series,
+            initial_train_size      = len(y[:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False,
             **integer_arguments
         )
 
 
 @pytest.mark.parametrize("n_jobs", 
                          [1.0, 'not_int_auto'], 
-                         ids = lambda value : f'n_jobs: {value}')
+                         ids = lambda value: f'n_jobs: {value}')
 def test_check_backtesting_input_TypeError_when_n_jobs_not_int_or_auto(n_jobs):
     """
     Test TypeError is raised in check_backtesting_input when n_jobs  
@@ -1072,31 +1074,31 @@ def test_check_backtesting_input_TypeError_when_n_jobs_not_int_or_auto(n_jobs):
     )
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = None,
-            initial_train_size    = len(y[:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            n_jobs                = n_jobs,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = 3,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = None,
+            initial_train_size      = len(y[:-12]),
+            fixed_train_size        = False,
+            gap                     = 0,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            n_jobs                  = n_jobs,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )
 
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoreg(regressor=Ridge(), lags=2),
                           ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2)], 
-                         ids = lambda fr : f'forecaster: {type(fr).__name__}' )
+                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
 def test_check_backtesting_input_ValueError_when_not_enough_data_to_create_a_fold(forecaster):
     """
     Test ValueError is raised in check_backtesting_input when there is not enough 
@@ -1119,22 +1121,22 @@ def test_check_backtesting_input_ValueError_when_not_enough_data_to_create_a_fol
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
-            forecaster            = forecaster,
-            steps                 = steps,
-            metric                = 'mean_absolute_error',
-            y                     = y,
-            series                = series,
-            initial_train_size    = initial_train_size,
-            fixed_train_size      = False,
-            gap                   = gap,
-            allow_incomplete_fold = False,
-            refit                 = False,
-            interval              = None,
-            alpha                 = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
-            verbose               = False,
-            show_progress         = False,
-            suppress_warnings     = False
+            forecaster              = forecaster,
+            steps                   = steps,
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = series,
+            initial_train_size      = initial_train_size,
+            fixed_train_size        = False,
+            gap                     = gap,
+            allow_incomplete_fold   = False,
+            refit                   = False,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            verbose                 = False,
+            show_progress           = False,
+            suppress_warnings       = False
         )

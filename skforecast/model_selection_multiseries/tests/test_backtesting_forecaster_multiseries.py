@@ -71,29 +71,25 @@ def test_backtesting_forecaster_multiseries_TypeError_when_forecaster_not_a_fore
                  )
 
     err_msg = re.escape(
-            ("`forecaster` must be of type ['ForecasterAutoregMultiSeries', "
-             "'ForecasterAutoregMultiSeriesCustom', 'ForecasterAutoregMultiVariate', "
-             "'ForecasterRnn'], for all other types of forecasters use the functions "
-             "available in the `model_selection` module. "
-             f"Got {type(forecaster).__name__}")
-        )
+        ("`forecaster` must be of type ['ForecasterAutoregMultiSeries', "
+         "'ForecasterAutoregMultiSeriesCustom', 'ForecasterAutoregMultiVariate', "
+         "'ForecasterRnn'], for all other types of forecasters use the functions "
+         "available in the `model_selection` module. "
+         f"Got {type(forecaster).__name__}")
+    )
     with pytest.raises(TypeError, match = err_msg):
         backtesting_forecaster_multiseries(
-            forecaster          = forecaster,
-            series              = series,
-            steps               = 4,
-            levels              = 'l1',
-            metric              = 'mean_absolute_error',
+            forecaster            = forecaster,
+            series                = series,
+            steps                 = 4,
+            levels                = 'l1',
+            metric                = 'mean_absolute_error',
             add_aggregated_metric = False,
-            initial_train_size  = 12,
-            refit               = False,
-            fixed_train_size    = False,
-            exog                = None,
-            interval            = None,
-            n_boot              = 500,
-            random_state        = 123,
-            in_sample_residuals = True,
-            verbose             = False
+            initial_train_size    = 12,
+            refit                 = False,
+            fixed_train_size      = False,
+            exog                  = None,
+            verbose               = False
         )
 
 
@@ -132,31 +128,27 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = 'l1',
-                                               metric              = 'mean_absolute_error',
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = 'l1',
+                                               metric                = 'mean_absolute_error',
                                                add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = False,
-                                               fixed_train_size    = False,
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = True,
-                                               n_jobs              = n_jobs
+                                               initial_train_size    = len(series) - n_validation,
+                                               refit                 = False,
+                                               fixed_train_size      = False,
+                                               exog                  = None,
+                                               verbose               = True,
+                                               n_jobs                = n_jobs
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'],
                                     'mean_absolute_error': [0.20754847190853098]})
     expected_predictions = pd.DataFrame({
-                               'l1':np.array([0.4978839 , 0.46288427, 0.48433446, 
-                                              0.48767779, 0.477799  , 0.48523814, 
-                                              0.49341916, 0.48967772, 0.48517846, 
-                                              0.49868447, 0.4859614 , 0.48480032])},
+                               'l1': np.array([0.4978839 , 0.46288427, 0.48433446, 
+                                               0.48767779, 0.477799  , 0.48523814, 
+                                               0.49341916, 0.48967772, 0.48517846, 
+                                               0.49868447, 0.4859614 , 0.48480032])},
                                index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
@@ -186,36 +178,32 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     initial_train_size = None
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = 'l1',
-                                               metric              = mean_absolute_error,
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = 'l1',
+                                               metric                = mean_absolute_error,
                                                add_aggregated_metric = False,
-                                               initial_train_size  = initial_train_size,
-                                               refit               = False,
-                                               fixed_train_size    = False,
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = False
+                                               initial_train_size    = initial_train_size,
+                                               refit                 = False,
+                                               fixed_train_size      = False,
+                                               exog                  = None,
+                                               verbose               = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'],
                                     'mean_absolute_error': [0.18616882305307128]})
     expected_predictions = pd.DataFrame({
-        'l1':np.array([0.48459053, 0.49259742, 0.51314434, 0.51387387, 0.49192289,
-                       0.53266761, 0.49986433, 0.496257  , 0.49677997, 0.49641078,
-                       0.52024409, 0.49255581, 0.47860725, 0.50888892, 0.51923275,
-                       0.4773962 , 0.49249923, 0.51342903, 0.50350073, 0.50946515,
-                       0.51912045, 0.50583902, 0.50272475, 0.51237963, 0.48600893,
-                       0.49942566, 0.49056705, 0.49810661, 0.51591527, 0.47512221,
-                       0.51005943, 0.5003548 , 0.50409177, 0.49838669, 0.49366925,
-                       0.50348344, 0.52748975, 0.51740335, 0.49023212, 0.50969436,
-                       0.47668736, 0.50262471, 0.50267211, 0.52623492, 0.47776998,
-                       0.50850968, 0.53127329, 0.49010354])},
+        'l1': np.array([0.48459053, 0.49259742, 0.51314434, 0.51387387, 0.49192289,
+                        0.53266761, 0.49986433, 0.496257  , 0.49677997, 0.49641078,
+                        0.52024409, 0.49255581, 0.47860725, 0.50888892, 0.51923275,
+                        0.4773962 , 0.49249923, 0.51342903, 0.50350073, 0.50946515,
+                        0.51912045, 0.50583902, 0.50272475, 0.51237963, 0.48600893,
+                        0.49942566, 0.49056705, 0.49810661, 0.51591527, 0.47512221,
+                        0.51005943, 0.5003548 , 0.50409177, 0.49838669, 0.49366925,
+                        0.50348344, 0.52748975, 0.51740335, 0.49023212, 0.50969436,
+                        0.47668736, 0.50262471, 0.50267211, 0.52623492, 0.47776998,
+                        0.50850968, 0.53127329, 0.49010354])},
         index=pd.RangeIndex(start=2, stop=50, step=1)
     )
                                    
@@ -256,7 +244,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     steps = 3
     n_validation = 12
 
-    def custom_metric(y_true, y_pred): # pragma: no cover
+    def custom_metric(y_true, y_pred):  # pragma: no cover
         """
         """
         metric = mean_absolute_error(y_true, y_pred)
@@ -264,22 +252,18 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
         return metric
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = ['l1'],
-                                               metric              = custom_metric,
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = ['l1'],
+                                               metric                = custom_metric,
                                                add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = True,
-                                               fixed_train_size    = True, 
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = True,
-                                               n_jobs              = n_jobs
+                                               initial_train_size    = len(series) - n_validation,
+                                               refit                 = True,
+                                               fixed_train_size      = True, 
+                                               exog                  = None,
+                                               verbose               = True,
+                                               n_jobs                = n_jobs
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'],
@@ -330,31 +314,27 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = 'l1',
-                                               metric              = 'mean_absolute_error',
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = 'l1',
+                                               metric                = 'mean_absolute_error',
                                                add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = True,
-                                               fixed_train_size    = False,
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = False,
-                                               n_jobs              = n_jobs
+                                               initial_train_size    = len(series) - n_validation,
+                                               refit                 = True,
+                                               fixed_train_size      = False,
+                                               exog                  = None,
+                                               verbose               = False,
+                                               n_jobs                = n_jobs
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.2124129141233719]})
     expected_predictions = pd.DataFrame({
-        'l1':np.array([0.4978838984103099, 0.46288426670127997, 0.48433446479429937, 
-                       0.510664891759972, 0.49734477162307983, 0.5009680695304023,
-                       0.48647770856843825, 0.4884651517014008, 0.48643766346259326, 
-                       0.4973047492523979, 0.4899104838474172, 0.4891085370228432])},
+        'l1': np.array([0.4978838984103099, 0.46288426670127997, 0.48433446479429937, 
+                        0.510664891759972, 0.49734477162307983, 0.5009680695304023,
+                        0.48647770856843825, 0.4884651517014008, 0.48643766346259326, 
+                        0.4973047492523979, 0.4899104838474172, 0.4891085370228432])},
         index=pd.RangeIndex(start=38, stop=50, step=1)
     )
                                    
@@ -382,21 +362,17 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = 'l1',
-                                               metric              = ['mean_absolute_error', mean_absolute_error],
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = 'l1',
+                                               metric                = ['mean_absolute_error', mean_absolute_error],
                                                add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = True,
-                                               fixed_train_size    = False,
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = False
+                                               initial_train_size    = len(series) - n_validation,
+                                               refit                 = True,
+                                               fixed_train_size      = False,
+                                               exog                  = None,
+                                               verbose               = False
                                            )
     
     expected_metric = pd.DataFrame(
@@ -404,10 +380,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
         columns = ['levels', 'mean_absolute_error', 'mean_absolute_error']
     )
     expected_predictions = pd.DataFrame({
-        'l1':np.array([0.4978838984103099, 0.46288426670127997, 0.48433446479429937, 
-                       0.510664891759972, 0.49734477162307983, 0.5009680695304023,
-                       0.48647770856843825, 0.4884651517014008, 0.48643766346259326, 
-                       0.4973047492523979, 0.4899104838474172, 0.4891085370228432])},
+        'l1': np.array([0.4978838984103099, 0.46288426670127997, 0.48433446479429937, 
+                        0.510664891759972, 0.49734477162307983, 0.5009680695304023,
+                        0.48647770856843825, 0.4884651517014008, 0.48643766346259326, 
+                        0.4973047492523979, 0.4899104838474172, 0.4891085370228432])},
         index=pd.RangeIndex(start=38, stop=50, step=1)
     )
                                    
@@ -435,21 +411,17 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = None,
-                                               metric              = ['mean_absolute_error', mean_absolute_error],
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = None,
+                                               metric                = ['mean_absolute_error', mean_absolute_error],
                                                add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = False,
-                                               fixed_train_size    = False,
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = False
+                                               initial_train_size    = len(series) - n_validation,
+                                               refit                 = False,
+                                               fixed_train_size      = False,
+                                               exog                  = None,
+                                               verbose               = False
                                            )
     
     expected_metric = pd.DataFrame(
@@ -458,12 +430,12 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
         columns = ['levels', 'mean_absolute_error', 'mean_absolute_error']
     )
     expected_predictions = pd.DataFrame({
-        'l1':np.array([0.4978839 , 0.46288427, 0.48433446, 0.48677605, 0.48562473,
-                       0.50259242, 0.49536197, 0.48478881, 0.48496106, 0.48555902,
-                       0.49673897, 0.4576795 ]),
-        'l2':np.array([0.50266337, 0.53045945, 0.50527774, 0.50315834, 0.50452649,
-                       0.47372756, 0.51226827, 0.50650107, 0.50420766, 0.50448097,
-                       0.52211914, 0.51092531])},
+        'l1': np.array([0.4978839 , 0.46288427, 0.48433446, 0.48677605, 0.48562473,
+                        0.50259242, 0.49536197, 0.48478881, 0.48496106, 0.48555902,
+                        0.49673897, 0.4576795 ]),
+        'l2': np.array([0.50266337, 0.53045945, 0.50527774, 0.50315834, 0.50452649,
+                        0.47372756, 0.51226827, 0.50650107, 0.50420766, 0.50448097,
+                        0.52211914, 0.51092531])},
         index=pd.RangeIndex(start=38, stop=50, step=1)
     )
                                    
@@ -491,21 +463,17 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = None,
-                                               metric              = ['mean_absolute_error', mean_absolute_error],
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = None,
+                                               metric                = ['mean_absolute_error', mean_absolute_error],
                                                add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = True,
-                                               fixed_train_size    = False,
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = False
+                                               initial_train_size    = len(series) - n_validation,
+                                               refit                 = True,
+                                               fixed_train_size      = False,
+                                               exog                  = None,
+                                               verbose               = False
                                            )
     
     expected_metric = pd.DataFrame(
@@ -514,12 +482,12 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
         columns = ['levels', 'mean_absolute_error', 'mean_absolute_error']
     )
     expected_predictions = pd.DataFrame({
-        'l1':np.array([0.4978839 , 0.46288427, 0.48433446, 0.48677605, 0.48562473,
-                       0.49724331, 0.4990606 , 0.4886555 , 0.48776085, 0.48830266,
-                       0.52381728, 0.47432451]),
-        'l2':np.array([0.50266337, 0.53045945, 0.50527774, 0.50315834, 0.50452649,
-                       0.46847508, 0.5144631 , 0.51135241, 0.50842259, 0.50838289,
-                       0.52555989, 0.51801796])},
+        'l1': np.array([0.4978839 , 0.46288427, 0.48433446, 0.48677605, 0.48562473,
+                        0.49724331, 0.4990606 , 0.4886555 , 0.48776085, 0.48830266,
+                        0.52381728, 0.47432451]),
+        'l2': np.array([0.50266337, 0.53045945, 0.50527774, 0.50315834, 0.50452649,
+                        0.46847508, 0.5144631 , 0.51135241, 0.50842259, 0.50838289,
+                        0.52555989, 0.51801796])},
         index=pd.RangeIndex(start=38, stop=50, step=1)
     )
                                    
@@ -547,21 +515,21 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = ['l1'],
-                                               metric              = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = False,
-                                               fixed_train_size    = False,
-                                               exog                = series['l1'].rename('exog_1'),
-                                               interval            = [5, 95],
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = False
+                                               forecaster              = forecaster,
+                                               series                  = series,
+                                               steps                   = steps,
+                                               levels                  = ['l1'],
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series) - n_validation,
+                                               refit                   = False,
+                                               fixed_train_size        = False,
+                                               exog                    = series['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 500,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -607,21 +575,21 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = 'l1',
-                                               metric              = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = True,
-                                               fixed_train_size    = True,
-                                               exog                = series['l1'].rename('exog_1'),
-                                               interval            = [5, 95],
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = False
+                                               forecaster              = forecaster,
+                                               series                  = series,
+                                               steps                   = steps,
+                                               levels                  = 'l1',
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series) - n_validation,
+                                               refit                   = True,
+                                               fixed_train_size        = True,
+                                               exog                    = series['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 500,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -667,23 +635,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     gap = 3
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series,
-                                               steps                 = steps,
-                                               levels                = 'l1',
-                                               metric                = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size    = len(series) - n_validation,
-                                               gap                   = gap,
-                                               allow_incomplete_fold = True,
-                                               refit                 = False,
-                                               fixed_train_size      = False,
-                                               exog                  = series['l1'].rename('exog_1'),
-                                               interval              = [5, 95],
-                                               n_boot                = 150,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
+                                               forecaster              = forecaster,
+                                               series                  = series,
+                                               steps                   = steps,
+                                               levels                  = 'l1',
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series) - n_validation,
+                                               gap                     = gap,
+                                               allow_incomplete_fold   = True,
+                                               refit                   = False,
+                                               fixed_train_size        = False,
+                                               exog                    = series['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 150,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -734,23 +702,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     gap = 3
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series,
-                                               steps                 = steps,
-                                               levels                = 'l1',
-                                               metric                = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size    = len(series) - n_validation,
-                                               gap                   = gap,
-                                               allow_incomplete_fold = False,
-                                               refit                 = True,
-                                               fixed_train_size      = False,
-                                               exog                  = series['l1'].rename('exog_1'),
-                                               interval              = [5, 95],
-                                               n_boot                = 150,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
+                                               forecaster              = forecaster,
+                                               series                  = series,
+                                               steps                   = steps,
+                                               levels                  = 'l1',
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series) - n_validation,
+                                               gap                     = gap,
+                                               allow_incomplete_fold   = False,
+                                               refit                   = True,
+                                               fixed_train_size        = False,
+                                               exog                    = series['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 150,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -802,23 +770,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     gap = 5
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series_datetime,
-                                               steps                 = steps,
-                                               levels                = 'l1',
-                                               metric                = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size    = len(series_datetime) - n_validation,
-                                               gap                   = gap,
-                                               allow_incomplete_fold = False,
-                                               refit                 = True,
-                                               fixed_train_size      = True,
-                                               exog                  = series_datetime['l1'].rename('exog_1'),
-                                               interval              = [5, 95],
-                                               n_boot                = 150,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
+                                               forecaster              = forecaster,
+                                               series                  = series_datetime,
+                                               steps                   = steps,
+                                               levels                  = 'l1',
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series_datetime) - n_validation,
+                                               gap                     = gap,
+                                               allow_incomplete_fold   = False,
+                                               refit                   = True,
+                                               fixed_train_size        = True,
+                                               exog                    = series_datetime['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 150,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -868,23 +836,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     gap = 3
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series_with_nans,
-                                               steps                 = steps,
-                                               levels                = 'l1',
-                                               metric                = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size    = len(series_with_nans) - n_validation,
-                                               gap                   = gap,
-                                               allow_incomplete_fold = True,
-                                               refit                 = False,
-                                               fixed_train_size      = False,
-                                               exog                  = series_with_nans['l1'].rename('exog_1'),
-                                               interval              = [5, 95],
-                                               n_boot                = 150,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
+                                               forecaster              = forecaster,
+                                               series                  = series_with_nans,
+                                               steps                   = steps,
+                                               levels                  = 'l1',
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series_with_nans) - n_validation,
+                                               gap                     = gap,
+                                               allow_incomplete_fold   = True,
+                                               refit                   = False,
+                                               fixed_train_size        = False,
+                                               exog                    = series_with_nans['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 150,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -935,23 +903,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     gap = 3
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series_with_nans,
-                                               steps                 = steps,
-                                               levels                = 'l1',
-                                               metric                = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size    = len(series_with_nans) - n_validation,
-                                               gap                   = gap,
-                                               allow_incomplete_fold = False,
-                                               refit                 = True,
-                                               fixed_train_size      = False,
-                                               exog                  = series_with_nans['l1'].rename('exog_1'),
-                                               interval              = [5, 95],
-                                               n_boot                = 150,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
+                                               forecaster              = forecaster,
+                                               series                  = series_with_nans,
+                                               steps                   = steps,
+                                               levels                  = 'l1',
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series_with_nans) - n_validation,
+                                               gap                     = gap,
+                                               allow_incomplete_fold   = False,
+                                               refit                   = True,
+                                               fixed_train_size        = False,
+                                               exog                    = series_with_nans['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 150,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -1003,23 +971,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     gap = 5
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series_with_nans_datetime,
-                                               steps                 = steps,
-                                               levels                = 'l1',
-                                               metric                = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size    = len(series_with_nans_datetime) - n_validation,
-                                               gap                   = gap,
-                                               allow_incomplete_fold = False,
-                                               refit                 = True,
-                                               fixed_train_size      = True,
-                                               exog                  = series_with_nans_datetime['l1'].rename('exog_1'),
-                                               interval              = [5, 95],
-                                               n_boot                = 150,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
+                                               forecaster              = forecaster,
+                                               series                  = series_with_nans_datetime,
+                                               steps                   = steps,
+                                               levels                  = 'l1',
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series_with_nans_datetime) - n_validation,
+                                               gap                     = gap,
+                                               allow_incomplete_fold   = False,
+                                               refit                   = True,
+                                               fixed_train_size        = True,
+                                               exog                    = series_with_nans_datetime['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 150,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -1068,23 +1036,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     steps = 2
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series,
-                                               steps                 = steps,
-                                               levels                = None,
-                                               metric                = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size    = len(series) - n_validation,
-                                               gap                   = 0,
-                                               allow_incomplete_fold = False,
-                                               refit                 = refit,
-                                               fixed_train_size      = True,
-                                               exog                  = series['l1'].rename('exog_1'),
-                                               interval              = [5, 95],
-                                               n_boot                = 150,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
+                                               forecaster              = forecaster,
+                                               series                  = series,
+                                               steps                   = steps,
+                                               levels                  = None,
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series) - n_validation,
+                                               gap                     = 0,
+                                               allow_incomplete_fold   = False,
+                                               refit                   = refit,
+                                               fixed_train_size        = True,
+                                               exog                    = series['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 150,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame(
@@ -1166,23 +1134,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     gap = 3
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series_with_index,
-                                               steps                 = steps,
-                                               levels                = ['l2'],
-                                               metric                = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size    = len(series_with_index) - n_validation,
-                                               gap                   = gap,
-                                               allow_incomplete_fold = False,
-                                               refit                 = refit,
-                                               fixed_train_size      = False,
-                                               exog                  = exog_with_index,
-                                               interval              = [5, 95],
-                                               n_boot                = 100,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
+                                               forecaster              = forecaster,
+                                               series                  = series_with_index,
+                                               steps                   = steps,
+                                               levels                  = ['l2'],
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series_with_index) - n_validation,
+                                               gap                     = gap,
+                                               allow_incomplete_fold   = False,
+                                               refit                   = refit,
+                                               fixed_train_size        = False,
+                                               exog                    = exog_with_index,
+                                               interval                = [5, 95],
+                                               n_boot                  = 100,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame(
@@ -1309,21 +1277,17 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiSeries_
     n_validation = 12
 
     metrics, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = None,
-                                               metric              = ['mean_absolute_error', 'mean_absolute_scaled_error'],
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = None,
+                                               metric                = ['mean_absolute_error', 'mean_absolute_scaled_error'],
                                                add_aggregated_metric = True,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = False,
-                                               fixed_train_size    = False,
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = False
+                                               initial_train_size    = len(series) - n_validation,
+                                               refit                 = False,
+                                               fixed_train_size      = False,
+                                               exog                  = None,
+                                               verbose               = False
                                            )
     
     expected_metrics = pd.DataFrame({
@@ -1666,22 +1630,18 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = 'l1',
-                                               metric              = 'mean_absolute_error',
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = 'l1',
+                                               metric                = 'mean_absolute_error',
                                                add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = False,
-                                               fixed_train_size    = False,
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               n_jobs              = n_jobs,
-                                               verbose             = True
+                                               initial_train_size    = len(series) - n_validation,
+                                               refit                 = False,
+                                               fixed_train_size      = False,
+                                               exog                  = None,
+                                               n_jobs                = n_jobs,
+                                               verbose               = True
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'],
@@ -1718,36 +1678,32 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     initial_train_size = None
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = ['l1'],
-                                               metric              = mean_absolute_error,
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = ['l1'],
+                                               metric                = mean_absolute_error,
                                                add_aggregated_metric = False,
-                                               initial_train_size  = initial_train_size,
-                                               refit               = False,
-                                               fixed_train_size    = False,
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = False
+                                               initial_train_size    = initial_train_size,
+                                               refit                 = False,
+                                               fixed_train_size      = False,
+                                               exog                  = None,
+                                               verbose               = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'],
                                     'mean_absolute_error': [0.17959810844511925]})
     expected_predictions = pd.DataFrame({
-        'l1':np.array([0.42102839, 0.47138953, 0.52252844, 0.54594276, 0.51253167,
-                       0.57557448, 0.45455673, 0.42240387, 0.48555804, 0.46974027,
-                       0.52264755, 0.45674877, 0.43440543, 0.47187135, 0.59653789,
-                       0.41804686, 0.53408781, 0.58853203, 0.49880785, 0.57834799,
-                       0.47345798, 0.46890693, 0.45765737, 0.59034503, 0.46198262,
-                       0.49384858, 0.54212837, 0.56867955, 0.5095804 , 0.47751184,
-                       0.50402253, 0.48993588, 0.52583999, 0.4306855 , 0.42782129,
-                       0.52841356, 0.62570147, 0.55585762, 0.48719966, 0.48508799,
-                       0.37122115, 0.53115279, 0.47119561, 0.52734455, 0.41557646,
-                       0.57546277, 0.57700474, 0.50898628])},
+        'l1': np.array([0.42102839, 0.47138953, 0.52252844, 0.54594276, 0.51253167,
+                        0.57557448, 0.45455673, 0.42240387, 0.48555804, 0.46974027,
+                        0.52264755, 0.45674877, 0.43440543, 0.47187135, 0.59653789,
+                        0.41804686, 0.53408781, 0.58853203, 0.49880785, 0.57834799,
+                        0.47345798, 0.46890693, 0.45765737, 0.59034503, 0.46198262,
+                        0.49384858, 0.54212837, 0.56867955, 0.5095804 , 0.47751184,
+                        0.50402253, 0.48993588, 0.52583999, 0.4306855 , 0.42782129,
+                        0.52841356, 0.62570147, 0.55585762, 0.48719966, 0.48508799,
+                        0.37122115, 0.53115279, 0.47119561, 0.52734455, 0.41557646,
+                        0.57546277, 0.57700474, 0.50898628])},
         index=pd.RangeIndex(start=2, stop=50, step=1)
     )
                                    
@@ -1774,7 +1730,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     steps = 3
     n_validation = 12
 
-    def custom_metric(y_true, y_pred): # pragma: no cover
+    def custom_metric(y_true, y_pred):  # pragma: no cover
         """
         """
         metric = mean_absolute_error(y_true, y_pred)
@@ -1782,31 +1738,27 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
         return metric
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = None,
-                                               metric              = custom_metric,
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = None,
+                                               metric                = custom_metric,
                                                add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = True,
-                                               fixed_train_size    = True, 
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               n_jobs              = n_jobs,
-                                               verbose             = True
+                                               initial_train_size    = len(series) - n_validation,
+                                               refit                 = True,
+                                               fixed_train_size      = True, 
+                                               exog                  = None,
+                                               n_jobs                = n_jobs,
+                                               verbose               = True
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l2'],
                                     'custom_metric': [0.2326510995879597]})
     expected_predictions = pd.DataFrame({
-                               'l2':np.array([0.58478895, 0.56729494, 0.54469663,
-                                              0.50326485, 0.53339207, 0.50892268, 
-                                              0.46841857, 0.48498214, 0.52778775,
-                                              0.51476103, 0.48480385, 0.53470992])},
+                               'l2': np.array([0.58478895, 0.56729494, 0.54469663,
+                                               0.50326485, 0.53339207, 0.50892268, 
+                                               0.46841857, 0.48498214, 0.52778775,
+                                               0.51476103, 0.48480385, 0.53470992])},
                                index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
@@ -1834,31 +1786,27 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = 'l1',
-                                               metric              = 'mean_absolute_error',
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = 'l1',
+                                               metric                = 'mean_absolute_error',
                                                add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = True,
-                                               fixed_train_size    = False,
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               n_jobs              = n_jobs,
-                                               verbose             = False
+                                               initial_train_size    = len(series) - n_validation,
+                                               refit                 = True,
+                                               fixed_train_size      = False,
+                                               exog                  = None,
+                                               n_jobs                = n_jobs,
+                                               verbose               = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.20733067815663564]})
     expected_predictions = pd.DataFrame({
-                               'l1':np.array([0.55397908, 0.48026456, 0.52368724, 
-                                              0.49816586, 0.48470807, 0.54162611,
-                                              0.45270749, 0.47194035, 0.53386908,
-                                              0.55296942, 0.53498642, 0.44772825])},
+                               'l1': np.array([0.55397908, 0.48026456, 0.52368724, 
+                                               0.49816586, 0.48470807, 0.54162611,
+                                               0.45270749, 0.47194035, 0.53386908,
+                                               0.55296942, 0.53498642, 0.44772825])},
                                index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
@@ -1885,21 +1833,17 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = 'l1',
-                                               metric              = ['mean_absolute_error', mean_absolute_error],
+                                               forecaster            = forecaster,
+                                               series                = series,
+                                               steps                 = steps,
+                                               levels                = 'l1',
+                                               metric                = ['mean_absolute_error', mean_absolute_error],
                                                add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = True,
-                                               fixed_train_size    = False,
-                                               exog                = None,
-                                               interval            = None,
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = False
+                                               initial_train_size    = len(series) - n_validation,
+                                               refit                 = True,
+                                               fixed_train_size      = False,
+                                               exog                  = None,
+                                               verbose               = False
                                            )
     
     expected_metric = pd.DataFrame(
@@ -1907,10 +1851,10 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
         columns = ['levels', 'mean_absolute_error', 'mean_absolute_error']
     )
     expected_predictions = pd.DataFrame({
-                               'l1':np.array([0.55397908, 0.48026456, 0.52368724, 
-                                              0.49816586, 0.48470807, 0.54162611, 
-                                              0.45270749, 0.47194035, 0.53386908, 
-                                              0.55296942, 0.53498642, 0.44772825])},
+                               'l1': np.array([0.55397908, 0.48026456, 0.52368724, 
+                                               0.49816586, 0.48470807, 0.54162611, 
+                                               0.45270749, 0.47194035, 0.53386908, 
+                                               0.55296942, 0.53498642, 0.44772825])},
                                index=pd.RangeIndex(start=38, stop=50, step=1)
                            )
                                    
@@ -1937,21 +1881,21 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = ['l1'],
-                                               metric              = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = False,
-                                               fixed_train_size    = False,
-                                               exog                = series['l1'].rename('exog_1'),
-                                               interval            = [5, 95],
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = False
+                                               forecaster              = forecaster,
+                                               series                  = series,
+                                               steps                   = steps,
+                                               levels                  = ['l1'],
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series) - n_validation,
+                                               refit                   = False,
+                                               fixed_train_size        = False,
+                                               exog                    = series['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 500,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -1996,21 +1940,21 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     n_validation = 12
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster          = forecaster,
-                                               series              = series,
-                                               steps               = steps,
-                                               levels              = 'l1',
-                                               metric              = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size  = len(series) - n_validation,
-                                               refit               = True,
-                                               fixed_train_size    = True,
-                                               exog                = series['l1'].rename('exog_1'),
-                                               interval            = [5, 95],
-                                               n_boot              = 500,
-                                               random_state        = 123,
-                                               in_sample_residuals = True,
-                                               verbose             = False
+                                               forecaster              = forecaster,
+                                               series                  = series,
+                                               steps                   = steps,
+                                               levels                  = 'l1',
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series) - n_validation,
+                                               refit                   = True,
+                                               fixed_train_size        = True,
+                                               exog                    = series['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 500,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -2055,23 +1999,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     gap = 3
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series,
-                                               steps                 = steps,
-                                               levels                = 'l1',
-                                               metric                = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size    = len(series) - n_validation,
-                                               gap                   = gap,
-                                               allow_incomplete_fold = True,
-                                               refit                 = False,
-                                               fixed_train_size      = False,
-                                               exog                  = series['l1'].rename('exog_1'),
-                                               interval              = [5, 95],
-                                               n_boot                = 150,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
+                                               forecaster              = forecaster,
+                                               series                  = series,
+                                               steps                   = steps,
+                                               levels                  = 'l1',
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series) - n_validation,
+                                               gap                     = gap,
+                                               allow_incomplete_fold   = True,
+                                               refit                   = False,
+                                               fixed_train_size        = False,
+                                               exog                    = series['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 150,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -2121,23 +2065,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     gap = 3
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series,
-                                               steps                 = steps,
-                                               levels                = 'l1',
-                                               metric                = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size    = len(series) - n_validation,
-                                               gap                   = gap,
-                                               allow_incomplete_fold = False,
-                                               refit                 = True,
-                                               fixed_train_size      = False,
-                                               exog                  = series['l1'].rename('exog_1'),
-                                               interval              = [5, 95],
-                                               n_boot                = 150,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
+                                               forecaster              = forecaster,
+                                               series                  = series,
+                                               steps                   = steps,
+                                               levels                  = 'l1',
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series) - n_validation,
+                                               gap                     = gap,
+                                               allow_incomplete_fold   = False,
+                                               refit                   = True,
+                                               fixed_train_size        = False,
+                                               exog                    = series['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 150,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -2188,23 +2132,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     gap = 5
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series_datetime,
-                                               steps                 = steps,
-                                               levels                = 'l1',
-                                               metric                = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size    = len(series_datetime) - n_validation,
-                                               gap                   = gap,
-                                               allow_incomplete_fold = False,
-                                               refit                 = True,
-                                               fixed_train_size      = True,
-                                               exog                  = series_datetime['l1'].rename('exog_1'),
-                                               interval              = [5, 95],
-                                               n_boot                = 150,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
+                                               forecaster              = forecaster,
+                                               series                  = series_datetime,
+                                               steps                   = steps,
+                                               levels                  = 'l1',
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series_datetime) - n_validation,
+                                               gap                     = gap,
+                                               allow_incomplete_fold   = False,
+                                               refit                   = True,
+                                               fixed_train_size        = True,
+                                               exog                    = series_datetime['l1'].rename('exog_1'),
+                                               interval                = [5, 95],
+                                               n_boot                  = 150,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
@@ -2259,24 +2203,24 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                                   forecaster            = forecaster,
-                                                   series                = series,
-                                                   steps                 = steps,
-                                                   levels                = 'l1',
-                                                   metric                = 'mean_absolute_error',
-                                                   add_aggregated_metric = False,
-                                                   initial_train_size    = len(series) - n_validation,
-                                                   gap                   = 0,
-                                                   allow_incomplete_fold = False,
-                                                   refit                 = refit,
-                                                   fixed_train_size      = True,
-                                                   exog                  = series['l1'].rename('exog_1'),
-                                                   interval              = [5, 95],
-                                                   n_boot                = 100,
-                                                   random_state          = 123,
-                                                   in_sample_residuals   = True,
-                                                   verbose               = False,
-                                                   n_jobs                = n_jobs
+                                                   forecaster              = forecaster,
+                                                   series                  = series,
+                                                   steps                   = steps,
+                                                   levels                  = 'l1',
+                                                   metric                  = 'mean_absolute_error',
+                                                   add_aggregated_metric   = False,
+                                                   initial_train_size      = len(series) - n_validation,
+                                                   gap                     = 0,
+                                                   allow_incomplete_fold   = False,
+                                                   refit                   = refit,
+                                                   fixed_train_size        = True,
+                                                   exog                    = series['l1'].rename('exog_1'),
+                                                   interval                = [5, 95],
+                                                   n_boot                  = 100,
+                                                   random_state            = 123,
+                                                   use_in_sample_residuals = True,
+                                                   verbose                 = False,
+                                                   n_jobs                  = n_jobs
                                                )
     
     expected_metric = pd.DataFrame(
@@ -2337,23 +2281,23 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
     gap = 3
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
-                                               forecaster            = forecaster,
-                                               series                = series_with_index,
-                                               steps                 = steps,
-                                               levels                = ['l1'],
-                                               metric                = 'mean_absolute_error',
-                                               add_aggregated_metric = False,
-                                               initial_train_size    = len(series_with_index) - n_validation,
-                                               gap                   = gap,
-                                               allow_incomplete_fold = False,
-                                               refit                 = refit,
-                                               fixed_train_size      = False,
-                                               exog                  = exog_with_index,
-                                               interval              = [5, 95],
-                                               n_boot                = 100,
-                                               random_state          = 123,
-                                               in_sample_residuals   = True,
-                                               verbose               = False
+                                               forecaster              = forecaster,
+                                               series                  = series_with_index,
+                                               steps                   = steps,
+                                               levels                  = ['l1'],
+                                               metric                  = 'mean_absolute_error',
+                                               add_aggregated_metric   = False,
+                                               initial_train_size      = len(series_with_index) - n_validation,
+                                               gap                     = gap,
+                                               allow_incomplete_fold   = False,
+                                               refit                   = refit,
+                                               fixed_train_size        = False,
+                                               exog                    = exog_with_index,
+                                               interval                = [5, 95],
+                                               n_boot                  = 100,
+                                               random_state            = 123,
+                                               use_in_sample_residuals = True,
+                                               verbose                 = False
                                            )
     
     expected_metric = pd.DataFrame(

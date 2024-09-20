@@ -78,7 +78,7 @@ def test_forecaster_index_step_stored():
     
 def test_fit_in_sample_residuals_stored():
     """
-    Test that values of in_sample_residuals are stored after fitting.
+    Test that values of in_sample_residuals_ are stored after fitting.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(5)))
@@ -159,7 +159,7 @@ def test_fit_same_residuals_when_residuals_greater_than_1000():
 
 def test_fit_in_sample_residuals_not_stored():
     """
-    Test that values of in_sample_residuals are not stored after fitting
+    Test that values of in_sample_residuals_ are not stored after fitting
     when `store_in_sample_residuals=False`.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)

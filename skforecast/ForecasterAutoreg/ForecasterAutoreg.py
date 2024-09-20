@@ -956,8 +956,8 @@ class ForecasterAutoreg(ForecasterBase):
         last_window: Optional[Union[pd.Series, pd.DataFrame]] = None,
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
         predict_boot: bool = False,
-        in_sample_residuals: bool = True,
-        binned_residuals: bool = False,
+        use_in_sample_residuals: bool = True,
+        use_binned_residuals: bool = False,
         check_inputs: bool = True
     ) -> Tuple[np.ndarray, np.ndarray, pd.Index]:
         """
@@ -979,13 +979,13 @@ class ForecasterAutoreg(ForecasterBase):
             Exogenous variable/s included as predictor/s.
         predict_boot : bool, default `False`
             If `True`, residuals are returned to generate bootstrapping predictions.
-        in_sample_residuals : bool, default `True`
+        use_in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create predictions. If `False`, out of sample 
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
-        binned_residuals : bool, default `False`
+        use_binned_residuals : bool, default `False`
             If `True`, residuals used in each bootstrapping iteration are selected
             conditioning on the predicted values. If `False`, residuals are selected
             randomly without conditioning on the predicted values.
@@ -1028,18 +1028,18 @@ class ForecasterAutoreg(ForecasterBase):
                 max_steps        = None
             )
         
-            if predict_boot and not in_sample_residuals:
-                if not binned_residuals and self.out_sample_residuals_ is None:
+            if predict_boot and not use_in_sample_residuals:
+                if not use_binned_residuals and self.out_sample_residuals_ is None:
                     raise ValueError(
                         ("`forecaster.out_sample_residuals_` is `None`. Use "
-                         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
-                         "method before predicting.")
+                         "`use_in_sample_residuals=True` or the "
+                         "`set_out_sample_residuals()` method before predicting.")
                     )
-                if binned_residuals and self.out_sample_residuals_by_bin_ is None:
+                if use_binned_residuals and self.out_sample_residuals_by_bin_ is None:
                     raise ValueError(
                         ("`forecaster.out_sample_residuals_by_bin_` is `None`. Use "
-                         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
-                         "method before predicting.")
+                         "`use_in_sample_residuals=True` or the "
+                         "`set_out_sample_residuals()` method before predicting.")
                     )
 
         last_window = last_window.iloc[-self.window_size_diff:].copy()
@@ -1084,7 +1084,7 @@ class ForecasterAutoreg(ForecasterBase):
         last_window_values: np.ndarray,
         exog_values: Optional[np.ndarray] = None,
         residuals: Optional[np.ndarray] = None,
-        binned_residuals: bool = False,
+        use_binned_residuals: bool = False,
         rng: Optional[np.random.Generator] = None
     ) -> np.ndarray:
         """
@@ -1102,7 +1102,7 @@ class ForecasterAutoreg(ForecasterBase):
             Exogenous variable/s included as predictor/s.
         residuals : numpy ndarray, default `None`
             Residuals used to generate bootstrapping predictions.
-        binned_residuals : bool, default `False`
+        use_binned_residuals : bool, default `False`
             If `True`, residuals used in each bootstrapping iteration are selected
             conditioning on the predicted values. If `False`, residuals are selected
             randomly without conditioning on the predicted values.
@@ -1140,7 +1140,7 @@ class ForecasterAutoreg(ForecasterBase):
                 pred = self.regressor.predict(X.reshape(1, -1)).ravel()
             
             if residuals is not None:
-                if binned_residuals:
+                if use_binned_residuals:
                     predicted_bin = (
                         int(self.binner.transform(pred.reshape(1, -1))[0, 0])
                     )
@@ -1280,10 +1280,6 @@ class ForecasterAutoreg(ForecasterBase):
         return predictions
 
 
-    # TODO: change in_sample_residuals to use_in_sample_residuals
-    # use_in_sample, apply_in_sample, use_train_data, apply_train_residuals, in_sample_mode
-    # TODO: change binned_residuals to use_binned_residuals
-    # use_binned_residuals, apply_binned, binned_mode, use_bins, apply_conditioning
     def predict_bootstrapping(
         self,
         steps: int,
@@ -1291,8 +1287,8 @@ class ForecasterAutoreg(ForecasterBase):
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
         n_boot: int = 250,
         random_state: int = 123,
-        in_sample_residuals: bool = True,
-        binned_residuals: bool = False
+        use_in_sample_residuals: bool = True,
+        use_binned_residuals: bool = False
     ) -> pd.DataFrame:
         """
         Generate multiple forecasting predictions using a bootstrapping process. 
@@ -1317,13 +1313,13 @@ class ForecasterAutoreg(ForecasterBase):
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
-        in_sample_residuals : bool, default `True`
+        use_in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create predictions. If `False`, out of sample 
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
-        binned_residuals : bool, default `False`
+        use_binned_residuals : bool, default `False`
             If `True`, residuals used in each bootstrapping iteration are selected
             conditioning on the predicted values. If `False`, residuals are selected
             randomly without conditioning on the predicted values.
@@ -1350,15 +1346,15 @@ class ForecasterAutoreg(ForecasterBase):
             exog_values,
             prediction_index
         ) = self._create_predict_inputs(
-            steps               = steps, 
-            last_window         = last_window, 
-            exog                = exog,
-            predict_boot        = True, 
-            in_sample_residuals = in_sample_residuals,
-            binned_residuals    = binned_residuals
+            steps                   = steps, 
+            last_window             = last_window, 
+            exog                    = exog,
+            predict_boot            = True, 
+            use_in_sample_residuals = use_in_sample_residuals,
+            use_binned_residuals    = use_binned_residuals
         )
 
-        if in_sample_residuals:
+        if use_in_sample_residuals:
             residuals = self.in_sample_residuals_
             residuals_by_bin = self.in_sample_residuals_by_bin_
         else:
@@ -1366,7 +1362,7 @@ class ForecasterAutoreg(ForecasterBase):
             residuals_by_bin = self.out_sample_residuals_by_bin_
 
         rng = np.random.default_rng(seed=random_state)
-        if not binned_residuals:
+        if not use_binned_residuals:
             sampled_residuals = rng.choice(
                                     a       = residuals,
                                     size    = (steps, n_boot),
@@ -1383,12 +1379,12 @@ class ForecasterAutoreg(ForecasterBase):
 
             boot_columns.append(f"pred_boot_{i}")
             boot_predictions[:, i] = self._recursive_predict(
-                steps              = steps,
-                last_window_values = last_window_values,
-                exog_values        = exog_values,
-                residuals          = residuals_by_bin if binned_residuals else sampled_residuals[:, i],
-                binned_residuals   = binned_residuals,
-                rng                = rng
+                steps                = steps,
+                last_window_values   = last_window_values,
+                exog_values          = exog_values,
+                residuals            = residuals_by_bin if use_binned_residuals else sampled_residuals[:, i],
+                use_binned_residuals = use_binned_residuals,
+                rng                  = rng
             )
 
         if self.differentiation is not None:
@@ -1423,8 +1419,8 @@ class ForecasterAutoreg(ForecasterBase):
         interval: list = [5, 95],
         n_boot: int = 250,
         random_state: int = 123,
-        in_sample_residuals: bool = True,
-        binned_residuals: bool = False
+        use_in_sample_residuals: bool = True,
+        use_binned_residuals: bool = False
     ) -> pd.DataFrame:
         """
         Iterative process in which each prediction is used as a predictor
@@ -1452,13 +1448,13 @@ class ForecasterAutoreg(ForecasterBase):
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
-        in_sample_residuals : bool, default `True`
+        use_in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create predictions. If `False`, out of sample 
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
-        binned_residuals : bool, default `False`
+        use_binned_residuals : bool, default `False`
             If `True`, residuals used in each bootstrapping iteration are selected
             conditioning on the predicted values. If `False`, residuals are selected
             randomly without conditioning on the predicted values.
@@ -1487,13 +1483,13 @@ class ForecasterAutoreg(ForecasterBase):
         check_interval(interval=interval)
 
         boot_predictions = self.predict_bootstrapping(
-                               steps               = steps,
-                               last_window         = last_window,
-                               exog                = exog,
-                               n_boot              = n_boot,
-                               random_state        = random_state,
-                               in_sample_residuals = in_sample_residuals,
-                               binned_residuals    = binned_residuals
+                               steps                   = steps,
+                               last_window             = last_window,
+                               exog                    = exog,
+                               n_boot                  = n_boot,
+                               random_state            = random_state,
+                               use_in_sample_residuals = use_in_sample_residuals,
+                               use_binned_residuals    = use_binned_residuals
                            )
 
         predictions = self.predict(
@@ -1519,8 +1515,8 @@ class ForecasterAutoreg(ForecasterBase):
         quantiles: list = [0.05, 0.5, 0.95],
         n_boot: int = 250,
         random_state: int = 123,
-        in_sample_residuals: bool = True,
-        binned_residuals: bool = False
+        use_in_sample_residuals: bool = True,
+        use_binned_residuals: bool = False
     ) -> pd.DataFrame:
         """
         Calculate the specified quantiles for each step. After generating 
@@ -1548,13 +1544,13 @@ class ForecasterAutoreg(ForecasterBase):
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot quantiles are always 
             deterministic.
-        in_sample_residuals : bool, default `True`
+        use_in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create prediction quantiles. If `False`, out of
             sample residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
-        binned_residuals : bool, default `False`
+        use_binned_residuals : bool, default `False`
             If `True`, residuals used in each bootstrapping iteration are selected
             conditioning on the predicted values. If `False`, residuals are selected
             randomly without conditioning on the predicted values.
@@ -1579,13 +1575,13 @@ class ForecasterAutoreg(ForecasterBase):
         check_interval(quantiles=quantiles)
 
         boot_predictions = self.predict_bootstrapping(
-                               steps               = steps,
-                               last_window         = last_window,
-                               exog                = exog,
-                               n_boot              = n_boot,
-                               random_state        = random_state,
-                               in_sample_residuals = in_sample_residuals,
-                               binned_residuals    = binned_residuals
+                               steps                   = steps,
+                               last_window             = last_window,
+                               exog                    = exog,
+                               n_boot                  = n_boot,
+                               random_state            = random_state,
+                               use_in_sample_residuals = use_in_sample_residuals,
+                               use_binned_residuals    = use_binned_residuals
                            )
 
         predictions = boot_predictions.quantile(q=quantiles, axis=1).transpose()
@@ -1602,8 +1598,8 @@ class ForecasterAutoreg(ForecasterBase):
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
         n_boot: int = 250,
         random_state: int = 123,
-        in_sample_residuals: bool = True,
-        binned_residuals: bool = False
+        use_in_sample_residuals: bool = True,
+        use_binned_residuals: bool = False
     ) -> pd.DataFrame:
         """
         Fit a given probability distribution for each step. After generating 
@@ -1629,13 +1625,13 @@ class ForecasterAutoreg(ForecasterBase):
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot predictions are always 
             deterministic.
-        in_sample_residuals : bool, default `True`
+        use_in_sample_residuals : bool, default `True`
             If `True`, residuals from the training data are used as proxy of
             prediction error to create predictions. If `False`, out of sample 
             residuals are used. In the latter case, the user should have
             calculated and stored the residuals within the forecaster (see
             `set_out_sample_residuals()`).
-        binned_residuals : bool, default `False`
+        use_binned_residuals : bool, default `False`
             If `True`, residuals used in each bootstrapping iteration are selected
             conditioning on the predicted values. If `False`, residuals are selected
             randomly without conditioning on the predicted values.
@@ -1651,13 +1647,13 @@ class ForecasterAutoreg(ForecasterBase):
         """
 
         boot_samples = self.predict_bootstrapping(
-                           steps               = steps,
-                           last_window         = last_window,
-                           exog                = exog,
-                           n_boot              = n_boot,
-                           random_state        = random_state,
-                           in_sample_residuals = in_sample_residuals,
-                           binned_residuals    = binned_residuals
+                           steps                   = steps,
+                           last_window             = last_window,
+                           exog                    = exog,
+                           n_boot                  = n_boot,
+                           random_state            = random_state,
+                           use_in_sample_residuals = use_in_sample_residuals,
+                           use_binned_residuals    = use_binned_residuals
                        )       
 
         param_names = [p for p in inspect.signature(distribution._pdf).parameters

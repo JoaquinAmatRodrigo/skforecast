@@ -49,10 +49,6 @@ def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
             allow_incomplete_fold = False,
             exog                  = None,
             refit                 = False,
-            interval              = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
             verbose               = False,
             show_progress         = False
         )
@@ -89,10 +85,6 @@ def test_backtesting_forecaster_ValueError_when_ForecasterAutoregDirect_not_enou
             allow_incomplete_fold = False,
             exog                  = None,
             refit                 = False,
-            interval              = None,
-            n_boot                = 500,
-            random_state          = 123,
-            in_sample_residuals   = True,
             verbose               = False,
             show_progress         = False
         )

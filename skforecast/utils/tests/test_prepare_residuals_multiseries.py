@@ -19,7 +19,7 @@ def test_prepare_residuals_multiseries_ValueError_when_not_in_sample_residuals_f
     Test ValueError is raised when there is no in_sample_residuals_ for any level.
     """
     levels = ['1', '2']
-    use_in_sample = True
+    use_in_sample_residuals = True
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series['1'].to_frame())
@@ -32,11 +32,11 @@ def test_prepare_residuals_multiseries_ValueError_when_not_in_sample_residuals_f
     )
     with pytest.warns(UnknownLevelWarning, match = warn_msg):
         residuals = prepare_residuals_multiseries(
-                        levels                = levels,
-                        use_in_sample         = use_in_sample, 
-                        encoding              = forecaster.encoding,
-                        in_sample_residuals_  = forecaster.in_sample_residuals_,
-                        out_sample_residuals_ = forecaster.out_sample_residuals_
+                        levels                  = levels,
+                        use_in_sample_residuals = use_in_sample_residuals, 
+                        encoding                = forecaster.encoding,
+                        in_sample_residuals_    = forecaster.in_sample_residuals_,
+                        out_sample_residuals_   = forecaster.out_sample_residuals_
                     )
         
     expected = {
@@ -51,27 +51,27 @@ def test_prepare_residuals_multiseries_ValueError_when_not_in_sample_residuals_f
 
 def test_prepare_residuals_multiseries_ValueError_when_out_sample_residuals_is_None():
     """
-    Test ValueError is raised when `use_in_sample` is False and 
+    Test ValueError is raised when `use_in_sample_residuals` is False and 
     `out_sample_residuals_` is None.
     """
     levels = ['1', '2']
-    use_in_sample = False
+    use_in_sample_residuals = False
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
     forecaster.fit(series=series)
 
     err_msg = re.escape(
         ("`forecaster.out_sample_residuals_` is `None`. Use "
-         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
+         "`use_in_sample_residuals=True` or the `set_out_sample_residuals()` "
          "method before predicting.")
     )
     with pytest.raises(ValueError, match = err_msg):
         prepare_residuals_multiseries(
-            levels                = levels,
-            use_in_sample         = use_in_sample, 
-            encoding              = forecaster.encoding,
-            in_sample_residuals_  = forecaster.in_sample_residuals_,
-            out_sample_residuals_ = forecaster.out_sample_residuals_
+            levels                  = levels,
+            use_in_sample_residuals = use_in_sample_residuals, 
+            encoding                = forecaster.encoding,
+            in_sample_residuals_    = forecaster.in_sample_residuals_,
+            out_sample_residuals_   = forecaster.out_sample_residuals_
         )
 
 
@@ -81,7 +81,7 @@ def test_prepare_residuals_multiseries_ValueError_when_not_out_sample_residuals_
     available for all levels.
     """
     levels = ['1', '2']
-    use_in_sample = False
+    use_in_sample_residuals = False
     new_residuals = {'1': np.array([1, 2, 3, 4, 5])}
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
@@ -97,11 +97,11 @@ def test_prepare_residuals_multiseries_ValueError_when_not_out_sample_residuals_
     )
     with pytest.warns(UnknownLevelWarning, match = warn_msg):
         residuals = prepare_residuals_multiseries(
-                        levels                = levels,
-                        use_in_sample         = use_in_sample, 
-                        encoding              = forecaster.encoding,
-                        in_sample_residuals_  = forecaster.in_sample_residuals_,
-                        out_sample_residuals_ = forecaster.out_sample_residuals_
+                        levels                  = levels,
+                        use_in_sample_residuals = use_in_sample_residuals, 
+                        encoding                = forecaster.encoding,
+                        in_sample_residuals_    = forecaster.in_sample_residuals_,
+                        out_sample_residuals_   = forecaster.out_sample_residuals_
                     )
         
     expected = {
@@ -119,11 +119,11 @@ def test_prepare_residuals_multiseries_ValueError_when_not_out_sample_residuals_
                          ids = lambda tr: f'transformer_series type: {type(tr)}')
 def test_prepare_residuals_multiseries_ValueError_when_level_out_sample_residuals_value_is_None(transformer_series):
     """
-    Test ValueError is raised when use_in_sample=False and
+    Test ValueError is raised when use_in_sample_residuals=False and
     forecaster.out_sample_residuals_ has a level with a None.
     """
     levels = ['1', '2']
-    use_in_sample = False
+    use_in_sample_residuals = False
     out_sample_residuals_ = {'1': np.array([1, 2, 3, 4, 5])}
 
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
@@ -137,11 +137,11 @@ def test_prepare_residuals_multiseries_ValueError_when_level_out_sample_residual
     )
     with pytest.raises(ValueError, match = err_msg):
         prepare_residuals_multiseries(
-            levels                = levels,
-            use_in_sample         = use_in_sample, 
-            encoding              = forecaster.encoding,
-            in_sample_residuals_  = forecaster.in_sample_residuals_,
-            out_sample_residuals_ = forecaster.out_sample_residuals_
+            levels                  = levels,
+            use_in_sample_residuals = use_in_sample_residuals, 
+            encoding                = forecaster.encoding,
+            in_sample_residuals_    = forecaster.in_sample_residuals_,
+            out_sample_residuals_   = forecaster.out_sample_residuals_
         )
 
 
@@ -150,11 +150,11 @@ def test_prepare_residuals_multiseries_ValueError_when_level_out_sample_residual
                          ids = lambda tr: f'transformer_series type: {type(tr)}')
 def test_prepare_residuals_multiseries_ValueError_when_level_out_sample_residuals_value_contains_None_or_NaNs(transformer_series):
     """
-    Test ValueError is raised when in_sample_residuals=False and
+    Test ValueError is raised when use_in_sample_residuals=False and
     forecaster.out_sample_residuals_ has a level with a None or NaN value.
     """
     levels = ['1', '2']
-    use_in_sample = False
+    use_in_sample_residuals = False
     out_sample_residuals_ = {
         '1': np.array([1, 2, 3, 4, 5]),
         '2': np.array([1, 2, 3, 4, None])  # StandardScaler() transforms None to NaN
@@ -171,20 +171,20 @@ def test_prepare_residuals_multiseries_ValueError_when_level_out_sample_residual
     )
     with pytest.raises(ValueError, match = err_msg):
         prepare_residuals_multiseries(
-            levels                = levels,
-            use_in_sample         = use_in_sample, 
-            encoding              = forecaster.encoding,
-            in_sample_residuals_  = forecaster.in_sample_residuals_,
-            out_sample_residuals_ = forecaster.out_sample_residuals_
+            levels                  = levels,
+            use_in_sample_residuals = use_in_sample_residuals, 
+            encoding                = forecaster.encoding,
+            in_sample_residuals_    = forecaster.in_sample_residuals_,
+            out_sample_residuals_   = forecaster.out_sample_residuals_
         )
 
 
-@pytest.mark.parametrize("use_in_sample", 
+@pytest.mark.parametrize("use_in_sample_residuals", 
                          [True, False],
-                         ids = lambda use_in_sample: f'use_in_sample: {use_in_sample}')
-def test_output_prepare_residuals_multiseries(use_in_sample):
+                         ids = lambda use_in_sample_residuals: f'use_in_sample_residuals: {use_in_sample_residuals}')
+def test_output_prepare_residuals_multiseries(use_in_sample_residuals):
     """
-    Test output of prepare_residuals_multiseries when use_in_sample=True and False.
+    Test output of prepare_residuals_multiseries when use_in_sample_residuals=True and False.
     """
     levels = ['1', '2']
     residuals = {
@@ -200,11 +200,11 @@ def test_output_prepare_residuals_multiseries(use_in_sample):
     forecaster.set_out_sample_residuals(residuals=residuals)
 
     residuals_levels = prepare_residuals_multiseries(
-                            levels                = levels,
-                            use_in_sample         = use_in_sample, 
-                            encoding              = forecaster.encoding,
-                            in_sample_residuals_  = forecaster.in_sample_residuals_,
-                            out_sample_residuals_ = forecaster.out_sample_residuals_
+                            levels                  = levels,
+                            use_in_sample_residuals = use_in_sample_residuals, 
+                            encoding                = forecaster.encoding,
+                            in_sample_residuals_    = forecaster.in_sample_residuals_,
+                            out_sample_residuals_   = forecaster.out_sample_residuals_
                        )
     
     for level in residuals.keys():

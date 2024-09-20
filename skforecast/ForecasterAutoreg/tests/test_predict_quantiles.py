@@ -28,11 +28,11 @@ def test_predict_quantiles_output_when_forecaster_is_LinearRegression_steps_is_2
 
     forecaster.fit(y=y, exog=exog)
     results = forecaster.predict_quantiles(
-                  steps               = 2,
-                  exog                = exog_predict,
-                  quantiles           = [0.05, 0.55, 0.95],
-                  n_boot              = 4,
-                  in_sample_residuals = True
+                  steps                   = 2,
+                  exog                    = exog_predict,
+                  quantiles               = [0.05, 0.55, 0.95],
+                  n_boot                  = 4,
+                  use_in_sample_residuals = True
               )
     
     expected = pd.DataFrame(
@@ -62,11 +62,11 @@ def test_predict_quantiles_output_when_forecaster_is_LinearRegression_steps_is_2
     forecaster.fit(y=y, exog=exog)
     forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_quantiles(
-                  steps               = 2,
-                  exog                = exog_predict,
-                  quantiles           = [0.05, 0.55, 0.95],
-                  n_boot              = 4,
-                  in_sample_residuals = False
+                  steps                   = 2,
+                  exog                    = exog_predict,
+                  quantiles               = [0.05, 0.55, 0.95],
+                  n_boot                  = 4,
+                  use_in_sample_residuals = False
               )
     
     expected = pd.DataFrame(

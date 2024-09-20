@@ -843,7 +843,7 @@ class ForecasterRnn(ForecasterBase):
     #     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
     #     n_boot: int = 500,
     #     random_state: int = 123,
-    #     in_sample_residuals: bool = True,
+    #     use_in_sample_residuals: bool = True,
     #     levels: Any = None,
     # ) -> pd.DataFrame:
     #     """
@@ -877,7 +877,7 @@ class ForecasterRnn(ForecasterBase):
     #     random_state : int, default `123`
     #         Sets a seed to the random generator, so that boot intervals are always
     #         deterministic.
-    #     in_sample_residuals : bool, default `True`
+    #     use_in_sample_residuals : bool, default `True`
     #         If `True`, residuals from the training data are used as proxy of
     #         prediction error to create prediction intervals. If `False`, out of
     #         sample residuals are used. In the latter case, the user should have
@@ -907,7 +907,7 @@ class ForecasterRnn(ForecasterBase):
     #     elif isinstance(steps, list):
     #         steps = list(np.array(steps))
 
-    #     if in_sample_residuals:
+    #     if use_in_sample_residuals:
     #         if not set(steps).issubset(set(self.in_sample_residuals.keys())):
     #             raise ValueError(
     #                 (

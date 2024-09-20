@@ -41,13 +41,13 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     
     forecaster.fit(series=series, exog=exog)
     results = forecaster.predict_dist(
-                  steps               = 2,
-                  distribution        = norm,
-                  levels              = level,
-                  exog                = exog_predict,
-                  n_boot              = 4,
-                  in_sample_residuals = True,
-                  suppress_warnings   = True
+                  steps                   = 2,
+                  distribution            = norm,
+                  levels                  = level,
+                  exog                    = exog_predict,
+                  n_boot                  = 4,
+                  use_in_sample_residuals = True,
+                  suppress_warnings       = True
               )
     
     expected = pd.DataFrame(
@@ -79,12 +79,12 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     forecaster.fit(series=series, exog=exog)
     forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_dist(
-                  steps               = 2,
-                  distribution        = norm,
-                  levels              = levels,
-                  exog                = exog_predict,
-                  n_boot              = 4,
-                  in_sample_residuals = False
+                  steps                   = 2,
+                  distribution            = norm,
+                  levels                  = levels,
+                  exog                    = exog_predict,
+                  n_boot                  = 4,
+                  use_in_sample_residuals = False
               )
     
     expected = pd.DataFrame(

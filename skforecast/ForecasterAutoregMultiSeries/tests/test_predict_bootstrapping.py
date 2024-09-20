@@ -59,11 +59,11 @@ def test_predict_bootstrapping_IgnoredArgumentWarning_when_not_available_self_la
     )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         results = forecaster.predict_bootstrapping(
-                      steps               = 1,
-                      levels              = ['1', '2'],
-                      n_boot              = 4, 
-                      exog                = exog_predict['exog_1'], 
-                      in_sample_residuals = True
+                      steps                   = 1,
+                      levels                  = ['1', '2'],
+                      n_boot                  = 4, 
+                      exog                    = exog_predict['exog_1'], 
+                      use_in_sample_residuals = True
                   )
 
     expected_1 = pd.DataFrame(
@@ -131,11 +131,11 @@ def test_predict_bootstrapping_IgnoredArgumentWarning_when_levels_is_list_and_di
     )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         results = forecaster.predict_bootstrapping(
-                      steps               = 1,
-                      levels              = ['1', '2'],
-                      n_boot              = 4, 
-                      exog                = exog_2_pred, 
-                      in_sample_residuals = True
+                      steps                   = 1,
+                      levels                  = ['1', '2'],
+                      n_boot                  = 4, 
+                      exog                    = exog_2_pred, 
+                      use_in_sample_residuals = True
                   )
 
     expected = {
@@ -153,7 +153,7 @@ def test_predict_bootstrapping_IgnoredArgumentWarning_when_levels_is_list_and_di
 def test_predict_bootstrapping_UnknownLevelWarning_when_not_in_sample_residuals_for_level():
     """
     Test UnknownLevelWarning is raised when predicting an unknown level and 
-    in_sample_residuals is True (using _unknown_level residuals).
+    use_in_sample_residuals is True (using _unknown_level residuals).
     """
     forecaster = ForecasterAutoregMultiSeries(
         LGBMRegressor(verbose=-1), lags=3, encoding='ordinal'
@@ -169,11 +169,11 @@ def test_predict_bootstrapping_UnknownLevelWarning_when_not_in_sample_residuals_
     )
     with pytest.warns(UnknownLevelWarning, match = warn_msg):
         results = forecaster.predict_bootstrapping(
-                      steps               = 1,
-                      levels              = ['1', '2', '3'],
-                      last_window         = last_window,
-                      n_boot              = 4,
-                      in_sample_residuals = True
+                      steps                   = 1,
+                      levels                  = ['1', '2', '3'],
+                      last_window             = last_window,
+                      n_boot                  = 4,
+                      use_in_sample_residuals = True
                   )
 
     warn_msg = re.escape(
@@ -184,11 +184,11 @@ def test_predict_bootstrapping_UnknownLevelWarning_when_not_in_sample_residuals_
     )
     with pytest.warns(UnknownLevelWarning, match = warn_msg):
         results = forecaster.predict_bootstrapping(
-                      steps               = 1,
-                      levels              = ['1', '2', '3'],
-                      last_window         = last_window,
-                      n_boot              = 4,
-                      in_sample_residuals = True
+                      steps                   = 1,
+                      levels                  = ['1', '2', '3'],
+                      last_window             = last_window,
+                      n_boot                  = 4,
+                      use_in_sample_residuals = True
                   )
 
     expected = {
@@ -226,11 +226,11 @@ def test_predict_bootstrapping_encoding_None_unknown_level():
     last_window['3'] = last_window['1']
 
     results = forecaster.predict_bootstrapping(
-                  steps               = 1,
-                  levels              = ['1', '2', '3'],
-                  last_window         = last_window,
-                  n_boot              = 4,
-                  in_sample_residuals = True
+                  steps                   = 1,
+                  levels                  = ['1', '2', '3'],
+                  last_window             = last_window,
+                  n_boot                  = 4,
+                  use_in_sample_residuals = True
               )
 
     expected = {
@@ -268,11 +268,11 @@ def test_predict_bootstrapping_encoding_None_unknown_level_differentiation():
     last_window['3'] = last_window['1'] * 0.9
 
     results = forecaster.predict_bootstrapping(
-                  steps               = 1,
-                  levels              = ['1', '2', '3'],
-                  last_window         = last_window,
-                  n_boot              = 5,
-                  in_sample_residuals = True
+                  steps                   = 1,
+                  levels                  = ['1', '2', '3'],
+                  last_window             = last_window,
+                  n_boot                  = 5,
+                  use_in_sample_residuals = True
               )
 
     expected = {
@@ -299,7 +299,7 @@ def test_predict_bootstrapping_encoding_None_unknown_level_differentiation():
 
 def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
     """
-    Test ValueError is raised when in_sample_residuals=False and
+    Test ValueError is raised when use_in_sample_residuals=False and
     forecaster.out_sample_residuals_ is None.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
@@ -307,11 +307,13 @@ def test_predict_bootstrapping_ValueError_when_out_sample_residuals_is_None():
 
     err_msg = re.escape(
         ("`forecaster.out_sample_residuals_` is `None`. Use "
-         "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
-         "method before predicting.")
+         "`use_in_sample_residuals=True` or the "
+         "`set_out_sample_residuals()` method before predicting.")
     )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict_bootstrapping(steps=1, levels='1', in_sample_residuals=False)
+        forecaster.predict_bootstrapping(
+            steps=1, levels='1', use_in_sample_residuals=False
+        )
 
 
 def test_predict_bootstrapping_UnknownLevelWarning_out_sample_residuals_with_encoding_None():
@@ -337,11 +339,11 @@ def test_predict_bootstrapping_UnknownLevelWarning_out_sample_residuals_with_enc
     last_window = pd.DataFrame(forecaster.last_window_)
     last_window['3'] = last_window['1']
     results = forecaster.predict_bootstrapping(
-                  steps               = 1,
-                  levels              = ['1', '2', '3'],
-                  last_window         = last_window,
-                  n_boot              = 4,
-                  in_sample_residuals = False
+                  steps                   = 1,
+                  levels                  = ['1', '2', '3'],
+                  last_window             = last_window,
+                  n_boot                  = 4,
+                  use_in_sample_residuals = False
               )
 
     expected = {
@@ -371,7 +373,7 @@ def test_predict_bootstrapping_UnknownLevelWarning_out_sample_residuals_with_enc
                          ids = lambda tr: f'transformer_series type: {type(tr)}')
 def test_predict_bootstrapping_ValueError_when_not_level_in_out_sample_residuals(transformer_series):
     """
-    Test ValueError is raised when in_sample_residuals=False and
+    Test ValueError is raised when use_in_sample_residuals=False and
     forecaster.out_sample_residuals_ is missing a level.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
@@ -385,7 +387,7 @@ def test_predict_bootstrapping_ValueError_when_not_level_in_out_sample_residuals
          "Check `forecaster.out_sample_residuals_`.")
     )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
+        forecaster.predict_bootstrapping(steps=3, use_in_sample_residuals=False)
 
 
 @pytest.mark.parametrize("transformer_series", 
@@ -393,7 +395,7 @@ def test_predict_bootstrapping_ValueError_when_not_level_in_out_sample_residuals
                          ids = lambda tr: f'transformer_series type: {type(tr)}')
 def test_predict_bootstrapping_ValueError_when_level_out_sample_residuals_value_contains_None_or_NaNs(transformer_series):
     """
-    Test ValueError is raised when in_sample_residuals=False and
+    Test ValueError is raised when use_in_sample_residuals=False and
     forecaster.out_sample_residuals_ has a level with a None or NaN value.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
@@ -408,7 +410,7 @@ def test_predict_bootstrapping_ValueError_when_level_out_sample_residuals_value_
          "or `NaNs` values. Check `forecaster.out_sample_residuals_`.")
     )
     with pytest.raises(ValueError, match = err_msg):
-        forecaster.predict_bootstrapping(steps=3, in_sample_residuals=False)
+        forecaster.predict_bootstrapping(steps=3, use_in_sample_residuals=False)
 
 
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_steps_is_1_in_sample_residuals_is_True():
@@ -420,10 +422,10 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
                                               transformer_series=None)
     forecaster.fit(series=series, exog=exog['exog_1'])
     results = forecaster.predict_bootstrapping(
-                  steps               = 1, 
-                  n_boot              = 4, 
-                  exog                = exog_predict['exog_1'], 
-                  in_sample_residuals = True
+                  steps                   = 1, 
+                  n_boot                  = 4, 
+                  exog                    = exog_predict['exog_1'], 
+                  use_in_sample_residuals = True
               )
 
     expected_1 = pd.DataFrame(
@@ -452,10 +454,10 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
                                               transformer_series=None)
     forecaster.fit(series=series, exog=exog['exog_1'])
     results = forecaster.predict_bootstrapping(
-                  steps               = 2, 
-                  n_boot              = 4, 
-                  exog                = exog_predict['exog_1'], 
-                  in_sample_residuals = True
+                  steps                   = 2, 
+                  n_boot                  = 4, 
+                  exog                    = exog_predict['exog_1'], 
+                  use_in_sample_residuals = True
               )
 
     expected_1 = pd.DataFrame(
@@ -487,11 +489,11 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster.fit(series=series, exog=exog['exog_1'])
     forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_bootstrapping(
-                  steps               = 1, 
-                  n_boot              = 4, 
-                  exog                = exog_predict['exog_1'], 
-                  in_sample_residuals = False,
-                  suppress_warnings   = True
+                  steps                   = 1, 
+                  n_boot                  = 4, 
+                  exog                    = exog_predict['exog_1'], 
+                  use_in_sample_residuals = False,
+                  suppress_warnings       = True
               )
 
     expected_1 = pd.DataFrame(
@@ -521,10 +523,10 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
     forecaster.fit(series=series, exog=exog['exog_1'])
     forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_bootstrapping(
-                  steps               = 2, 
-                  n_boot              = 4, 
-                  exog                = exog_predict['exog_1'], 
-                  in_sample_residuals = False
+                  steps                   = 2, 
+                  n_boot                  = 4, 
+                  exog                    = exog_predict['exog_1'], 
+                  use_in_sample_residuals = False
               )
     
     expected_1 = pd.DataFrame(
@@ -563,10 +565,10 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
     forecaster.in_sample_residuals_['1'] = np.full_like(forecaster.in_sample_residuals_['1'], fill_value=0)
     forecaster.in_sample_residuals_['2'] = np.full_like(forecaster.in_sample_residuals_['2'], fill_value=0)
     results = forecaster.predict_bootstrapping(
-                  steps               = 2, 
-                  n_boot              = 4, 
-                  exog                = exog_predict, 
-                  in_sample_residuals = True
+                  steps                   = 2, 
+                  n_boot                  = 4, 
+                  exog                    = exog_predict, 
+                  use_in_sample_residuals = True
               )
     
     expected_1 = pd.DataFrame(
@@ -602,10 +604,10 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                  )
     forecaster.fit(series=series, exog=exog)
     results = forecaster.predict_bootstrapping(
-                  steps               = 2, 
-                  n_boot              = 4, 
-                  exog                = exog_predict, 
-                  in_sample_residuals = True
+                  steps                   = 2, 
+                  n_boot                  = 4, 
+                  exog                    = exog_predict, 
+                  use_in_sample_residuals = True
               )
     
     expected_1 = pd.DataFrame(
@@ -642,10 +644,10 @@ def test_predict_bootstrapping_output_when_differentiation():
                  )
     forecaster.fit(series=series, exog=exog)
     results = forecaster.predict_bootstrapping(
-                  steps               = 3, 
-                  n_boot              = 10, 
-                  exog                = exog_predict, 
-                  in_sample_residuals = True
+                  steps                   = 3, 
+                  n_boot                  = 10, 
+                  exog                    = exog_predict, 
+                  use_in_sample_residuals = True
               )
     
     expected_1 = pd.DataFrame(

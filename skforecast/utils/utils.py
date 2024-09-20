@@ -1956,7 +1956,8 @@ def check_backtesting_input(
     alpha: Optional[float] = None,
     n_boot: int = 500,
     random_state: int = 123,
-    in_sample_residuals: bool = True,
+    use_in_sample_residuals: bool = True,
+    use_binned_residuals: bool = False,
     n_jobs: Union[int, str] = 'auto',
     verbose: bool = False,
     show_progress: bool = True,
@@ -2015,10 +2016,14 @@ def check_backtesting_input(
     random_state : int, default `123`
         Sets a seed to the random generator, so that boot intervals are always 
         deterministic.
-    in_sample_residuals : bool, default `True`
+    use_in_sample_residuals : bool, default `True`
         If `True`, residuals from the training data are used as proxy of prediction 
         error to create prediction intervals.  If `False`, out_sample_residuals 
         are used if they are already stored inside the forecaster.
+    use_binned_residuals : bool, default `False`
+        If `True`, residuals used in each bootstrapping iteration are selected
+        conditioning on the predicted values. If `False`, residuals are selected
+        randomly without conditioning on the predicted values.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the fuction
@@ -2222,8 +2227,10 @@ def check_backtesting_input(
         raise TypeError(f"`n_boot` must be an integer greater than 0. Got {n_boot}.")
     if not isinstance(random_state, (int, np.integer)) or random_state < 0:
         raise TypeError(f"`random_state` must be an integer greater than 0. Got {random_state}.")
-    if not isinstance(in_sample_residuals, bool):
-        raise TypeError("`in_sample_residuals` must be a boolean: `True`, `False`.")
+    if not isinstance(use_in_sample_residuals, bool):
+        raise TypeError("`use_in_sample_residuals` must be a boolean: `True`, `False`.")
+    if not isinstance(use_binned_residuals, bool):
+        raise TypeError("`use_binned_residuals` must be a boolean: `True`, `False`.")
     if not isinstance(n_jobs, int) and n_jobs != 'auto':
         raise TypeError(f"`n_jobs` must be an integer or `'auto'`. Got {n_jobs}.")
     if not isinstance(verbose, bool):
@@ -2842,7 +2849,7 @@ def preprocess_levels_self_last_window_multiseries(
 
 def prepare_residuals_multiseries(
     levels: list,
-    use_in_sample: bool,
+    use_in_sample_residuals: bool,
     encoding: Optional[str] = None,
     in_sample_residuals_: Optional[dict] = None,
     out_sample_residuals_: Optional[dict] = None
@@ -2854,9 +2861,8 @@ def prepare_residuals_multiseries(
     ----------
     levels : list
         Names of the series (levels) to be predicted.
-    use_in_sample : bool
-        Indicates if in_sample_residuals_ are used. Same as `in_sample_residuals`
-        argument in predict method.
+    use_in_sample_residuals : bool
+        Indicates if `forecaster.in_sample_residuals_` are used.
     encoding : str, default `None`
         Encoding used to identify the different series (`ForecasterAutoregMultiSeries`, 
         `ForecasterAutoregMultiSeriesCustom`).
@@ -2879,7 +2885,7 @@ def prepare_residuals_multiseries(
 
     """
 
-    if use_in_sample:
+    if use_in_sample_residuals:
         unknown_levels = set(levels) - set(in_sample_residuals_.keys())
         if unknown_levels and encoding is not None:
             warnings.warn(
@@ -2894,8 +2900,8 @@ def prepare_residuals_multiseries(
         if out_sample_residuals_ is None:
             raise ValueError(
                 ("`forecaster.out_sample_residuals_` is `None`. Use "
-                 "`in_sample_residuals=True` or the `set_out_sample_residuals()` "
-                 "method before predicting.")
+                 "`use_in_sample_residuals=True` or the "
+                 "`set_out_sample_residuals()` method before predicting.")
             )
         else:
             unknown_levels = set(levels) - set(out_sample_residuals_.keys())
@@ -2911,7 +2917,7 @@ def prepare_residuals_multiseries(
             residuals = out_sample_residuals_.copy()
 
     check_residuals = (
-        "forecaster.in_sample_residuals_" if use_in_sample
+        "forecaster.in_sample_residuals_" if use_in_sample_residuals
         else "forecaster.out_sample_residuals_"
     )
     for level in levels:
