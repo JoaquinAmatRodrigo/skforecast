@@ -5,7 +5,10 @@ import os
 import pytest
 import numpy as np
 import pandas as pd
+import joblib
+from pathlib import Path
 from sklearn.linear_model import Ridge
+from lightgbm import LGBMRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import mean_absolute_percentage_error
@@ -27,6 +30,9 @@ from .fixtures_model_selection_multiseries import series
 from .fixtures_model_selection_multiseries import exog
 series.index = pd.date_range(start='2024-01-01', periods=len(series), freq='D')
 exog.index = pd.date_range(start='2024-01-01', periods=len(exog), freq='D')
+THIS_DIR = Path(__file__).parent
+series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
+exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
 
 
 def create_predictors(y):  # pragma: no cover
@@ -1511,32 +1517,39 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate
     os.remove(output_file)
 
 
-forecasters = [
-    ForecasterAutoregMultiSeries(regressor=Ridge(random_state=678), lags=3),
-    ForecasterAutoregMultiSeries(
-        regressor=Ridge(random_state=678),
-        lags=3,
-        transformer_series=None,
-    ),
-    ForecasterAutoregMultiSeries(
-        regressor=Ridge(random_state=678),
-        lags=3,
-        transformer_series=StandardScaler(),
-        transformer_exog=StandardScaler()
-    ),
-    ForecasterAutoregMultiVariate(
-        regressor=Ridge(random_state=678),
-        level='l1',
-        lags=3,
-        steps=1,
-        transformer_series=StandardScaler(),
-        transformer_exog=StandardScaler()
-    )
-]
-@pytest.mark.parametrize("forecaster", forecasters)
-def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_one_step_ahead(
+@pytest.mark.parametrize(
+        "forecaster",
+        [
+            ForecasterAutoregMultiSeries(regressor=Ridge(random_state=678), lags=3),
+            ForecasterAutoregMultiSeries(
+                regressor=Ridge(random_state=678),
+                lags=3,
+                transformer_series=None,
+            ),
+            ForecasterAutoregMultiSeries(
+                regressor=Ridge(random_state=678),
+                lags=3,
+                transformer_series=StandardScaler(),
+                transformer_exog=StandardScaler()
+            ),
+            ForecasterAutoregMultiVariate(
+                regressor=Ridge(random_state=678),
+                level='l1',
+                lags=3,
+                steps=1,
+                transformer_series=StandardScaler(),
+                transformer_exog=StandardScaler()
+            )
+        ]
+)
+def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_step_ahead(
     forecaster,
 ):
+    """
+    Test that the output of _evaluate_grid_hyperparameters for backtesting and one-step-ahead
+    is equivalent when steps=1 and refit=False.
+    Results are not equivalent if diferentiation is included.
+    """
 
     metrics = [
         "mean_absolute_error",
@@ -1563,6 +1576,7 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_one_step_a
         metric             = metrics,
         initial_train_size = initial_train_size,
         method             = 'backtesting',
+        aggregate_metric   = ["average", "weighted_average", "pooling"],
         fixed_train_size   = False,
         return_best        = False,
         n_jobs             = 'auto',
@@ -1578,9 +1592,72 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_one_step_a
         metric             = metrics,
         initial_train_size = initial_train_size,
         method             = 'one_step_ahead',
+        aggregate_metric   = ["average", "weighted_average", "pooling"],
         return_best        = False,
         verbose            = False,
         show_progress      = False
     )
 
     pd.testing.assert_frame_equal(results_backtesting, results_one_step_ahead)
+
+
+@pytest.mark.parametrize(
+        "forecaster",
+        [
+            ForecasterAutoregMultiSeries(regressor=LGBMRegressor(random_state=678, verbose=-1), lags=3, forecaster_id=1),
+            ForecasterAutoregMultiSeries(
+                regressor=LGBMRegressor(random_state=678, verbose=-1),
+                lags=3,
+                transformer_series=None,
+                forecaster_id=2
+            ),
+            ForecasterAutoregMultiSeries(
+                regressor=LGBMRegressor(random_state=678, verbose=-1),
+                lags=3,
+                transformer_series=StandardScaler(),
+                transformer_exog=StandardScaler(),
+                forecaster_id=3
+            )
+        ]
+)
+def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_step_ahead_when_series_is_dict(
+    forecaster,
+):
+    """
+    Test that the output of evaluate_grid_hyperparameters for backtesting and one-step-ahead
+    is equivalent when steps=1 and refit=False. Using series and exog as dictionaries.
+    Results are not equivalent if diferentiation is included.
+    ForecasterMultiVariate is not included because it is not possible to use dictionaries
+    as input.
+    """
+
+    metrics = [
+        "mean_absolute_error",
+        "mean_squared_error",
+        mean_absolute_percentage_error,
+        mean_absolute_scaled_error,
+        root_mean_squared_scaled_error,
+    ]
+    steps = 1
+    initial_train_size = 213
+    param_grid = {
+        "n_estimators": [5, 10],
+        "max_depth": [2, 3]
+    }
+    lags_grid = [3, 5]
+    param_grid = list(ParameterGrid(param_grid))
+    results_backtesting = _evaluate_grid_hyperparameters_multiseries(
+        forecaster         = forecaster,
+        series             = series_dict,
+        exog               = exog_dict,
+        param_grid         = param_grid,
+        lags_grid          = lags_grid,
+        steps              = steps,
+        refit              = False,
+        metric             = metrics,
+        initial_train_size = initial_train_size,
+        method             = 'backtesting',
+        aggregate_metric   = ["average", "weighted_average", "pooling"],
+        fixed_train_size   = False,
+        return_best        = False,
+        n_jobs             = 'auto',

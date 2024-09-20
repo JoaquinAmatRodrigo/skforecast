@@ -2,11 +2,17 @@
 # ==============================================================================
 import numpy as np
 import pandas as pd
+import joblib
+from pathlib import Path
 from sklearn.linear_model import Ridge
+from lightgbm import LGBMRegressor
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import grid_search_forecaster_multiseries
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import mean_absolute_percentage_error
+from skforecast.metrics import mean_absolute_scaled_error
 
 from tqdm import tqdm
 from functools import partialmethod
@@ -14,6 +20,12 @@ tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
+THIS_DIR = Path(__file__).parent
+series_item_sales = pd.read_parquet(THIS_DIR/'fixture_multi_series_items_sales.parquet')
+exog_item_sales = pd.DataFrame({'day_of_week': series_item_sales.index.dayofweek}, index = series_item_sales.index)
+series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
+exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
+
 
 def create_predictors(y):  # pragma: no cover
     """
@@ -273,6 +285,451 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate
         'alpha': np.array([0.01, 0.1, 1., 1., 0.1, 0.01])
         },
         index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
+    )
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_one_step_ahead():
+    """
+    Test output of grid_search_forecaster_multiseries when series and exog are DataFrames,
+    forecaster is ForecasterAutoregMultiSeries and method is one_step_ahead.
+    """
+    metrics = ['mean_absolute_error', mean_absolute_percentage_error, mean_absolute_scaled_error]
+    forecaster = ForecasterAutoregMultiSeries(
+            regressor          = Ridge(random_state=123),
+            lags               = 10,
+            encoding           = 'ordinal',
+            transformer_series = StandardScaler(),
+            transformer_exog   = StandardScaler(),
+            weight_func        = None,
+            series_weights     = None,
+            differentiation    = None,
+            dropna_from_series = False,
+        )
+
+    steps = 10
+    initial_train_size = 1000
+    levels = ["item_1", "item_2", "item_3"]
+    param_grid = {
+        "alpha": np.logspace(-1, 1, 3),
+    }
+    lags_grid = [3, 7]
+
+    results = grid_search_forecaster_multiseries(
+        forecaster         = forecaster,
+        series             = series_item_sales,
+        exog               = exog_item_sales,
+        param_grid         = param_grid,
+        lags_grid          = lags_grid,
+        steps              = steps,
+        refit              = False,
+        metric             = metrics,
+        initial_train_size = initial_train_size,
+        method             = 'one_step_ahead',
+        aggregate_metric   = ["average", "weighted_average", "pooling"],
+        levels            = levels,
+        fixed_train_size   = False,
+        return_best        = False,
+        n_jobs             = 'auto',
+        verbose            = False,
+        show_progress      = False
+    )
+    
+    expected_results = pd.DataFrame({
+        "levels": [
+            ["item_1", "item_2", "item_3"],
+            ["item_1", "item_2", "item_3"],
+            ["item_1", "item_2", "item_3"],
+            ["item_1", "item_2", "item_3"],
+            ["item_1", "item_2", "item_3"],
+            ["item_1", "item_2", "item_3"],
+        ],
+        "lags": [
+            np.array([1, 2, 3, 4, 5, 6, 7]),
+            np.array([1, 2, 3, 4, 5, 6, 7]),
+            np.array([1, 2, 3, 4, 5, 6, 7]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3]),
+        ],
+        "lags_label": [
+            np.array([1, 2, 3, 4, 5, 6, 7]),
+            np.array([1, 2, 3, 4, 5, 6, 7]),
+            np.array([1, 2, 3, 4, 5, 6, 7]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3]),
+        ],
+        "params": [
+            {"alpha": 10.0},
+            {"alpha": 1.0},
+            {"alpha": 0.1},
+            {"alpha": 10.0},
+            {"alpha": 1.0},
+            {"alpha": 0.1},
+        ],
+        "mean_absolute_error__average": [
+            2.3946101679147835,
+            2.396947110515903,
+            2.3971835092279474,
+            2.601624329202654,
+            2.605630817902648,
+            2.6060367442128034,
+        ],
+        "mean_absolute_error__weighted_average": [
+            2.3946101679147835,
+            2.396947110515903,
+            2.3971835092279474,
+            2.601624329202654,
+            2.605630817902648,
+            2.606036744212804,
+        ],
+        "mean_absolute_error__pooling": [
+            2.3946101679147835,
+            2.396947110515903,
+            2.3971835092279483,
+            2.601624329202654,
+            2.6056308179026484,
+            2.606036744212804,
+        ],
+        "mean_absolute_percentage_error__average": [
+            0.13256162082722348,
+            0.13271450150371536,
+            0.13272997272758183,
+            0.1426513799658221,
+            0.14290701426454108,
+            0.1429329239957371,
+        ],
+        "mean_absolute_percentage_error__weighted_average": [
+            0.13256162082722348,
+            0.13271450150371536,
+            0.13272997272758183,
+            0.1426513799658221,
+            0.14290701426454108,
+            0.1429329239957371,
+        ],
+        "mean_absolute_percentage_error__pooling": [
+            0.13256162082722345,
+            0.1327145015037154,
+            0.13272997272758183,
+            0.1426513799658221,
+            0.14290701426454108,
+            0.14293292399573712,
+        ],
+        "mean_absolute_scaled_error__average": [
+            0.9160114137335943,
+            0.9165140769691532,
+            0.916564930542703,
+            0.9988413247804616,
+            0.9998432724761427,
+            0.9999449761167062,
+        ],
+        "mean_absolute_scaled_error__weighted_average": [
+            0.9160114137335942,
+            0.9165140769691533,
+            0.916564930542703,
+            0.9988413247804617,
+            0.9998432724761427,
+            0.9999449761167061,
+        ],
+        "mean_absolute_scaled_error__pooling": [
+            0.9579938854777973,
+            0.9589288087285971,
+            0.9590233830036539,
+            1.0399318034229648,
+            1.041533293296968,
+            1.041695551804101,
+        ],
+        "alpha": [10.0, 1.0, 0.1, 10.0, 1.0, 0.1],
+    },
+    index = pd.RangeIndex(start=0, stop=6, step=1)
+    )
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate_one_step_ahead():
+    """
+    Test output of grid_search_forecaster_multiseries when series and exog are DataFrames,
+    forecaster is ForecasterAutoregMultiVariate and method is one_step_ahead.
+    """
+    metrics = ['mean_absolute_error', mean_absolute_percentage_error, mean_absolute_scaled_error]
+    forecaster = ForecasterAutoregMultiVariate(
+                    regressor          = Ridge(random_state=123),
+                    lags               = 10,
+                    steps              = 10,
+                    level              = 'item_1',
+                    transformer_series = StandardScaler(),
+                    transformer_exog   = StandardScaler(),
+                )
+
+    initial_train_size = 1000
+    levels = ["item_1", "item_2", "item_3"]
+    param_grid = {
+        "alpha": np.logspace(-1, 1, 3),
+    }
+    lags_grid = [3, 7]
+
+    results = grid_search_forecaster_multiseries(
+        forecaster         = forecaster,
+        series             = series_item_sales,
+        exog               = exog_item_sales,
+        param_grid         = param_grid,
+        lags_grid          = lags_grid,
+        metric             = metrics,
+        initial_train_size = initial_train_size,
+        method             = 'one_step_ahead',
+        aggregate_metric   = ["average", "weighted_average", "pooling"],
+        levels             = levels,
+        return_best        = False,
+        verbose            = False,
+        show_progress      = False
+    )
+    
+    expected_results = pd.DataFrame(
+        {
+            "levels": [
+                ["item_1"],
+                ["item_1"],
+                ["item_1"],
+                ["item_1"],
+                ["item_1"],
+                ["item_1"],
+            ],
+            "lags": [
+                np.array([1, 2, 3, 4, 5, 6, 7]),
+                np.array([1, 2, 3, 4, 5, 6, 7]),
+                np.array([1, 2, 3, 4, 5, 6, 7]),
+                np.array([1, 2, 3]),
+                np.array([1, 2, 3]),
+                np.array([1, 2, 3]),
+            ],
+            "lags_label": [
+                np.array([1, 2, 3, 4, 5, 6, 7]),
+                np.array([1, 2, 3, 4, 5, 6, 7]),
+                np.array([1, 2, 3, 4, 5, 6, 7]),
+                np.array([1, 2, 3]),
+                np.array([1, 2, 3]),
+                np.array([1, 2, 3]),
+            ],
+            "params": [
+                {"alpha": 10.0},
+                {"alpha": 1.0},
+                {"alpha": 0.1},
+                {"alpha": 10.0},
+                {"alpha": 1.0},
+                {"alpha": 0.1},
+            ],
+            "mean_absolute_error": [
+                0.7629704997414917,
+                0.7667482865205157,
+                0.7671081143069952,
+                0.8525261078812101,
+                0.8541841441709307,
+                0.8543521794925618,
+            ],
+            "mean_absolute_percentage_error": [
+                0.03604811720204804,
+                0.036197365349618,
+                0.03621109426633075,
+                0.04045012068206693,
+                0.040460698841325624,
+                0.04046154712278539,
+            ],
+            "mean_absolute_scaled_error": [
+                0.5008239495431114,
+                0.5033037388611042,
+                0.5035399345898264,
+                0.5579807349172816,
+                0.5590659243313126,
+                0.5591759039218367,
+            ],
+            "alpha": [10.0, 1.0, 0.1, 10.0, 1.0, 0.1],
+        },
+        index=pd.RangeIndex(start=0, stop=6, step=1),
+    )
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
+
+
+def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_one_step_ahead_input_is_dict():
+    """
+    Test output of grid_search_forecaster_multiseries when series and exog are dictionaries,
+    forecaster is ForecasterAutoregMultiSeries and method is one_step_ahead.
+    """
+    metrics = ['mean_absolute_error', mean_absolute_percentage_error, mean_absolute_scaled_error]
+    forecaster = ForecasterAutoregMultiSeries(
+            regressor          = LGBMRegressor(random_state=678, verbose=-1),
+            lags               = 3,
+            encoding           = 'ordinal',
+            transformer_series = StandardScaler(),
+            transformer_exog   = StandardScaler(),
+            weight_func        = None,
+            series_weights     = None,
+            differentiation    = None,
+            dropna_from_series = False,
+        )
+    initial_train_size = 213
+    levels = ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"]
+    param_grid = {
+            "n_estimators": [5, 10],
+            "max_depth": [2, 3]
+        }
+    lags_grid = [3, 5]
+
+    results = grid_search_forecaster_multiseries(
+        forecaster         = forecaster,
+        series             = series_dict,
+        exog               = exog_dict,
+        param_grid         = param_grid,
+        lags_grid          = lags_grid,
+        metric             = metrics,
+        initial_train_size = initial_train_size,
+        method             = 'one_step_ahead',
+        aggregate_metric   = ["average", "weighted_average", "pooling"],
+        levels             = levels,
+        return_best        = False,
+        verbose            = False,
+        show_progress      = False
+    )
+    
+    expected_results = pd.DataFrame({
+        "levels": [
+            ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+            ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+            ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+            ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+            ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+            ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+            ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+            ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+        ],
+        "lags": [
+            np.array([1, 2, 3, 4, 5]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3, 4, 5]),
+            np.array([1, 2, 3, 4, 5]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3, 4, 5]),
+        ],
+        "lags_label": [
+            np.array([1, 2, 3, 4, 5]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3, 4, 5]),
+            np.array([1, 2, 3, 4, 5]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3]),
+            np.array([1, 2, 3, 4, 5]),
+        ],
+        "params": [
+            {"max_depth": 3, "n_estimators": 10},
+            {"max_depth": 3, "n_estimators": 10},
+            {"max_depth": 2, "n_estimators": 10},
+            {"max_depth": 2, "n_estimators": 10},
+            {"max_depth": 3, "n_estimators": 5},
+            {"max_depth": 3, "n_estimators": 5},
+            {"max_depth": 2, "n_estimators": 5},
+            {"max_depth": 2, "n_estimators": 5},
+        ],
+        "mean_absolute_error__average": [
+            595.4248731239852,
+            601.61658409234,
+            641.5971327961081,
+            643.5830924971917,
+            677.9145593017354,
+            687.1976066932838,
+            709.8383108516048,
+            712.5538939535741,
+        ],
+        "mean_absolute_error__weighted_average": [
+            601.0754794775827,
+            602.8512611773792,
+            637.9906397322952,
+            635.3319731010223,
+            669.4535161312964,
+            674.4638410667131,
+            694.4718207943295,
+            695.1809840497659,
+        ],
+        "mean_absolute_error__pooling": [
+            601.0754794775827,
+            602.8512611773791,
+            637.9906397322952,
+            635.3319731010222,
+            669.4535161312965,
+            674.4638410667131,
+            694.4718207943295,
+            695.1809840497659,
+        ],
+        "mean_absolute_percentage_error__average": [
+            1.13122611897686e16,
+            1.1653837498770236e16,
+            1.1977069509022024e16,
+            1.2092182501085004e16,
+            1.2255524771350234e16,
+            1.2487020718197592e16,
+            1.3255138678699688e16,
+            1.320416830274058e16,
+        ],
+        "mean_absolute_percentage_error__weighted_average": [
+            1.6602167501530896e16,
+            1.7103473739202362e16,
+            1.757785740892441e16,
+            1.7746800217419718e16,
+            1.7986525563708256e16,
+            1.832627501087992e16,
+            1.945358482341537e16,
+            1.9378779379561716e16,
+        ],
+        "mean_absolute_percentage_error__pooling": [
+            1.6602167501530896e16,
+            1.7103473739202362e16,
+            1.7577857408924412e16,
+            1.7746800217419718e16,
+            1.7986525563708258e16,
+            1.832627501087992e16,
+            1.9453584823415372e16,
+            1.9378779379561716e16,
+        ],
+        "mean_absolute_scaled_error__average": [
+            1.338257547877582,
+            1.3458574988611296,
+            1.418344242255843,
+            1.4196630001824362,
+            1.502472367026163,
+            1.516064192858667,
+            1.5547477191379595,
+            1.5594122630466858,
+        ],
+        "mean_absolute_scaled_error__weighted_average": [
+            1.6314647598931409,
+            1.627988835703755,
+            1.720233806106665,
+            1.7212080197022548,
+            1.8204941416870104,
+            1.8231712390456873,
+            1.8766737381944514,
+            1.8860125959513818,
+        ],
+        "mean_absolute_scaled_error__pooling": [
+            1.4086529286833727,
+            1.4224992984312164,
+            1.505414844206229,
+            1.4889348761536338,
+            1.5689005596025196,
+            1.5914777035729348,
+            1.6386889129680593,
+            1.6291942735674578,
+        ],
+        "max_depth": [3, 3, 2, 2, 3, 3, 2, 2],
+        "n_estimators": [10, 10, 10, 10, 5, 5, 5, 5],
+        },
+        index = pd.RangeIndex(start=0, stop=8, step=1)
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
