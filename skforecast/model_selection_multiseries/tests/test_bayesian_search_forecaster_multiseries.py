@@ -14,6 +14,8 @@ from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import bayesian_search_forecaster_multiseries
+from sklearn.metrics import mean_absolute_percentage_error
+from skforecast.metrics import mean_absolute_scaled_error
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
