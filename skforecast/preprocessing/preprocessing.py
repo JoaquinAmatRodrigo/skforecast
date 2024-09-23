@@ -693,7 +693,7 @@ class RollingFeatures():
         fill_strategy: Optional[Union[str, float]] = None
     ) -> None:
         
-        self._validate_preprocess_params(
+        self._validate_params(
             stats,
             window_sizes,
             min_periods,
@@ -747,7 +747,7 @@ class RollingFeatures():
 
         self.unique_rolling_windows = unique_rolling_windows
 
-    def _validate_preprocess_params(
+    def _validate_params(
         self, 
         stats, 
         window_sizes, 
