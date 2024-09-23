@@ -39,7 +39,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
         )
     )
 
-    expected_X_trian = pd.DataFrame(
+    expected_X_train = pd.DataFrame(
         {
             "lag_1": [4.0, 5.0, 6.0, 7.0, 8.0, 54.0, 55.0, 56.0, 57.0, 58.0],
             "lag_2": [3.0, 4.0, 5.0, 6.0, 7.0, 53.0, 54.0, 55.0, 56.0, 57.0],
@@ -211,7 +211,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
         ),
     )
 
-    pd.testing.assert_frame_equal(X_train, expected_X_trian)
+    pd.testing.assert_frame_equal(X_train, expected_X_train)
     pd.testing.assert_series_equal(y_train, expected_y_train)
     pd.testing.assert_frame_equal(X_test, expected_X_test)
     pd.testing.assert_series_equal(y_test, expected_y_test)
@@ -252,7 +252,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
         )
     )
 
-    expected_X_trian = pd.DataFrame(
+    expected_X_train = pd.DataFrame(
         {
             "lag_1": [4.0, 5.0, 6.0, 7.0, 8.0, 54.0, 55.0, 56.0, 57.0, 58.0],
             "lag_2": [3.0, 4.0, 5.0, 6.0, 7.0, 53.0, 54.0, 55.0, 56.0, 57.0],
@@ -426,7 +426,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
         ),
     )
 
-    pd.testing.assert_frame_equal(X_train, expected_X_trian)
+    pd.testing.assert_frame_equal(X_train, expected_X_train)
     pd.testing.assert_series_equal(y_train, expected_y_train)
     pd.testing.assert_frame_equal(X_test, expected_X_test)
     pd.testing.assert_series_equal(y_test, expected_y_test)
@@ -467,7 +467,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
         )
     )
 
-    expected_X_trian = pd.DataFrame(
+    expected_X_train = pd.DataFrame(
         {
             "lag_1": [4.0, 5.0, 6.0, 7.0, 8.0, 54.0, 55.0, 56.0, 57.0, 58.0],
             "lag_2": [3.0, 4.0, 5.0, 6.0, 7.0, 53.0, 54.0, 55.0, 56.0, 57.0],
@@ -637,7 +637,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
         ),
     )
 
-    pd.testing.assert_frame_equal(X_train, expected_X_trian)
+    pd.testing.assert_frame_equal(X_train, expected_X_train)
     pd.testing.assert_series_equal(y_train, expected_y_train)
     pd.testing.assert_frame_equal(X_test, expected_X_test)
     pd.testing.assert_series_equal(y_test, expected_y_test)
@@ -682,7 +682,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dict():
         )
     )
 
-    expected_X_trian = pd.DataFrame(
+    expected_X_train = pd.DataFrame(
         {
             "lag_1": [4.0, 5.0, 6.0, 7.0, 8.0, 54.0, 55.0, 56.0, 57.0, 58.0],
             "lag_2": [3.0, 4.0, 5.0, 6.0, 7.0, 53.0, 54.0, 55.0, 56.0, 57.0],
@@ -854,7 +854,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dict():
         ),
     )
 
-    pd.testing.assert_frame_equal(X_train, expected_X_trian)
+    pd.testing.assert_frame_equal(X_train, expected_X_train)
     pd.testing.assert_series_equal(y_train, expected_y_train)
     pd.testing.assert_frame_equal(X_test, expected_X_test)
     pd.testing.assert_series_equal(y_test, expected_y_test)

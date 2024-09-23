@@ -86,53 +86,13 @@ def test_ValueError_bayesian_search_forecaster_multiseries_when_return_best_and_
             random_state       = 123,
             return_best        = True,
             verbose            = False,
-            engine             = 'optuna'
         )
 
 
-def test_bayesian_search_forecaster_multiseries_ValueError_when_engine_not_optuna():
-    """
-    Test ValueError in bayesian_search_forecaster_multiseries is raised when engine 
-    is not 'optuna'.
-    """
-    forecaster = ForecasterAutoregMultiSeries(
-                     regressor = Ridge(random_state=123),
-                     lags      = 2,
-                     encoding  = 'onehot'
-                 )
-
-    def search_space(trial): # pragma: no cover
-        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
-
-        return search_space
-
-    engine = 'not_optuna'
-    
-    err_msg = re.escape(f"`engine` only allows 'optuna', got {engine}.")
-    with pytest.raises(ValueError, match = err_msg):
-        bayesian_search_forecaster_multiseries(
-            forecaster         = forecaster,
-            series             = series,
-            search_space       = search_space,
-            steps              = 3,
-            metric             = 'mean_absolute_error',
-            aggregate_metric   = 'weighted_average',
-            refit              = True,
-            initial_train_size = len(series[:-12]),
-            fixed_train_size   = True,
-            n_trials           = 10,
-            random_state       = 123,
-            return_best        = False,
-            verbose            = False,
-            engine             = engine
-        )
-
-
-def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_ForecasterAutoregMultiSeries():
+def test_results_output_bayesian_search_forecaster_multiseries_ForecasterAutoregMultiSeries():
     """
     Test output of bayesian_search_forecaster_multiseries in 
-    ForecasterAutoregMultiSeries with mocked using 
-    optuna engine (mocked done in Skforecast v0.12.0).
+    ForecasterAutoregMultiSeries with mocked (mocked done in Skforecast v0.12.0).
     """
     forecaster = ForecasterAutoregMultiSeries(
                      regressor = Ridge(random_state=123),
@@ -164,7 +124,6 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
                   random_state       = 123,
                   return_best        = False,
                   verbose            = False,
-                  engine             = 'optuna'
               )[0]
     
     expected_results = pd.DataFrame(
@@ -203,11 +162,10 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
     pd.testing.assert_frame_equal(results, expected_results)
 
 
-def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_ForecasterAutoregMultiSeriesCustom():
+def test_results_output_bayesian_search_forecaster_multiseries_ForecasterAutoregMultiSeriesCustom():
     """
     Test output of bayesian_search_forecaster_multiseries in 
-    ForecasterAutoregMultiSeriesCustom with mocked using 
-    optuna engine (mocked done in Skforecast v0.12.0).
+    ForecasterAutoregMultiSeriesCustom with mocked (mocked done in Skforecast v0.12.0).
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = Ridge(random_state=123),
@@ -238,7 +196,6 @@ def test_results_output_bayesian_search_forecaster_multiseries_optuna_engine_For
                   random_state       = 123,
                   return_best        = False,
                   verbose            = False,
-                  engine             = 'optuna'
               )[0]
     
     expected_results = pd.DataFrame(
@@ -646,11 +603,10 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
     pd.testing.assert_frame_equal(expected, results_search)
 
 
-def test_results_output_bayesian_search_forecaster_multivariate_optuna_engine_ForecasterAutoregMultiVariate():
+def test_results_output_bayesian_search_forecaster_multivariate_ForecasterAutoregMultiVariate():
     """
     Test output of bayesian_search_forecaster_multivariate in 
-    ForecasterAutoregMultiVariate with mocked using 
-    optuna engine (mocked done in Skforecast v0.12.0).
+    ForecasterAutoregMultiVariate with mocked (mocked done in Skforecast v0.12.0).
     """
     forecaster = ForecasterAutoregMultiVariate(
                      regressor = Ridge(random_state=123),
@@ -683,7 +639,6 @@ def test_results_output_bayesian_search_forecaster_multivariate_optuna_engine_Fo
                   random_state       = 123,
                   return_best        = False,
                   verbose            = False,
-                  engine             = 'optuna'
               )[0]
     
     expected_results = pd.DataFrame(

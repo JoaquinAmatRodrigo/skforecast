@@ -29,7 +29,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_15_and_exog_is_datafra
         y=y, exog=exog, initial_train_size=10
     )
 
-    expected_X_trian = pd.DataFrame(
+    expected_X_train = pd.DataFrame(
         {
             "lag_1": [4.0, 5.0, 6.0, 7.0, 8.0],
             "lag_2": [3.0, 4.0, 5.0, 6.0, 7.0],
@@ -83,7 +83,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_15_and_exog_is_datafra
         )
     }
 
-    pd.testing.assert_frame_equal(X_train, expected_X_trian)
+    pd.testing.assert_frame_equal(X_train, expected_X_train)
     pd.testing.assert_series_equal(y_train[1], expected_y_train[1])
     pd.testing.assert_frame_equal(X_test, expected_X_test)
     pd.testing.assert_series_equal(y_test[1], expected_y_test[1])

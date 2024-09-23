@@ -1661,3 +1661,4 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_st
         fixed_train_size   = False,
         return_best        = False,
         n_jobs             = 'auto',
+    )
