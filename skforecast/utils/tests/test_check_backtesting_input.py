@@ -4,9 +4,9 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from pmdarima.arima import ARIMA
 from sklearn.linear_model import Ridge
 from sklearn.exceptions import NotFittedError
+from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
@@ -35,7 +35,7 @@ def create_predictors(y):  # pragma: no cover
                           ForecasterAutoregCustom(regressor=Ridge(), window_size=3,
                                                   fun_predictors=create_predictors),
                           ForecasterAutoregDirect(regressor=Ridge(), lags=2, steps=3),
-                          ForecasterSarimax(regressor=ARIMA(order=(1, 1, 1)))], 
+                          ForecasterSarimax(regressor=Sarimax(order=(1, 1, 1)))], 
                          ids = lambda fr: f'forecaster: {type(fr).__name__}')
 def test_check_backtesting_input_TypeError_when_y_is_not_pandas_Series_uniseries(forecaster):
     """
@@ -826,7 +826,7 @@ def test_check_backtesting_input_ValueError_ForecasterSarimax_when_initial_train
     Test ValueError is raised in check_backtesting_input when initial_train_size 
     is None with a ForecasterSarimax.
     """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1, 1, 1)))
+    forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 1, 1)))
 
     initial_train_size = None
     

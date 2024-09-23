@@ -18,6 +18,8 @@ The main changes in this release are:
 
 + <span class="badge text-bg-enhancement">Enhancement</span> The bootstrapping process in the `predict_bootstrapping` method of all forecasters has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
 
++ <span class="badge text-bg-api-change">API Change</span> The `pmdarima.ARIMA` regressor is no longer supported by the <code>[ForecasterSarimax]</code>. You can use the `skforecast.Sarimax.Sarimax` model or, to continue using it, use skforecast 0.13.0 or lower.
+
 
 **Added**
 
@@ -41,6 +43,8 @@ The main changes in this release are:
 + Change the default value of `encoding` to `ordinal` in <code>[ForecasterAutoregMultiSeries]</code>. This will avoid conflicts if the regressor does not support categorical variables by default.
 
 + Removed argument `engine` fom <code>[bayesian_search_forecaster]</code> and <code>[bayesian_search_forecaster_multiseries]</code>.
+
++ The `pmdarima.ARIMA` regressor is no longer supported by the `ForecasterSarimax`. You can use the `skforecast.Sarimax.Sarimax` model or, to continue using it, use skforecast 0.13.0 or lower.
 
 + Renamed attributes in all Forecasters:
 
