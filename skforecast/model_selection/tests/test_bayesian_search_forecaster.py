@@ -34,9 +34,8 @@ def test_ValueError_bayesian_search_forecaster_when_return_best_and_len_y_exog_d
                  )
     exog = y[:30]
 
-    def search_space(trial): # pragma: no cover
-        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)
-                        }
+    def search_space(trial):  # pragma: no cover
+        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
         return search_space
 
     err_msg = re.escape(
@@ -64,16 +63,15 @@ def test_ValueError_bayesian_search_forecaster_when_return_best_and_len_y_exog_d
 def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutoreg_with_mocked():
     """
     Test output of bayesian_search_forecaster in ForecasterAutoreg with 
-    mocked using optuna engine (mocked done in Skforecast v0.4.3).
+    mocked using optuna (mocked done in Skforecast v0.4.3).
     """    
     forecaster = ForecasterAutoreg(
                      regressor = Ridge(random_state=123),
                      lags      = 4
                  )
 
-    def search_space(trial): # pragma: no cover
-        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)}
-        
+    def search_space(trial):  # pragma: no cover
+        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
         return search_space
 
     results = bayesian_search_forecaster(
@@ -125,7 +123,7 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
 def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutoregCustom_with_mocked():
     """
     Test output of bayesian_search_forecaster in ForecasterAutoregCustom with 
-    mocked using optuna engine (mocked done in Skforecast v0.4.3).
+    mocked using optuna (mocked done in Skforecast v0.4.3).
     """    
     forecaster = ForecasterAutoregCustom(
                      regressor      = Ridge(random_state=123),
@@ -133,9 +131,8 @@ def test_results_output_bayesian_search_forecaster_optuna_engine_ForecasterAutor
                      window_size    = 4
                  )
 
-    def search_space(trial): # pragma: no cover
-        search_space  = {'alpha' : trial.suggest_float('alpha', 1e-2, 1.0)}
-
+    def search_space(trial):  # pragma: no cover
+        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
         return search_space
 
     results = bayesian_search_forecaster(
