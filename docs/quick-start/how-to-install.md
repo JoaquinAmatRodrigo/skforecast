@@ -33,6 +33,7 @@ The following dependencies are installed with the default installation:
 + scikit-learn>=1.2
 + optuna>=2.10
 + joblib>=1.1
++ numba>=0.59
 
 
 ## **Optional dependencies**

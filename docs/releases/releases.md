@@ -23,6 +23,8 @@ The main changes in this release are:
 
 **Added**
 
++ Added `numba>=0.59` as hard dependency.
+
 + Create `transform_numpy` function in the <code>[utils]</code> module to carry out the transformation of the modeled time series and exogenous variables as numpy arrays.
 
 + `random_state` argument in the `fit` method of <code>[ForecasterAutoreg]</code> to set a seed for the random generator so that the stored sample residuals are always deterministic.
