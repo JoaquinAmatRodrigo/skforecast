@@ -93,7 +93,6 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         self.initial_values = []
         self.last_values = []
 
-
     @_check_X_numpy_ndarray_1d()
     def fit(
         self, 
@@ -132,7 +131,6 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
 
         return self
 
-
     @_check_X_numpy_ndarray_1d()
     def transform(
         self, 
@@ -162,7 +160,6 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         X_diff = np.append((np.full(shape=self.order, fill_value=np.nan)), X_diff)
 
         return X_diff
-
 
     @_check_X_numpy_ndarray_1d()
     def inverse_transform(
@@ -199,7 +196,6 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
                 X_undiff = np.cumsum(X_undiff, dtype=float)
 
         return X_undiff
-
 
     @_check_X_numpy_ndarray_1d(ensure_1d=False)
     def inverse_transform_next_window(
@@ -564,16 +560,17 @@ class DateTimeFeatureTransformer(BaseEstimator, TransformerMixin):
 
 @njit
 def _np_mean_jit(x):
+    """
+    NumPy mean function implemented with Numba JIT.
+    """
     return np.mean(x)
 
 
 @njit
-def _np_median_jit(x):
-    return np.median(x)
-
-
-@njit
 def _np_std_jit(x, ddof=1):
+    """
+    Standard deviation function implemented with Numba JIT.
+    """
     a_a, b_b = 0, 0
     for i in x:
         a_a = a_a + i
@@ -586,27 +583,50 @@ def _np_std_jit(x, ddof=1):
 
 
 @njit
-def _np_sum_jit(x):
-    return np.sum(x)
-
-
-@njit
 def _np_min_jit(x):
+    """
+    NumPy min function implemented with Numba JIT.
+    """
     return np.min(x)
 
 
 @njit
 def _np_max_jit(x):
+    """
+    NumPy max function implemented with Numba JIT.
+    """
     return np.max(x)
 
 
 @njit
+def _np_sum_jit(x):
+    """
+    NumPy sum function implemented with Numba JIT.
+    """
+    return np.sum(x)
+
+
+@njit
+def _np_median_jit(x):
+    """
+    NumPy median function implemented with Numba JIT.
+    """
+    return np.median(x)
+
+
+@njit
 def _np_min_max_ratio_jit(x):
+    """
+    NumPy min-max ratio function implemented with Numba JIT.
+    """
     return np.min(x) / np.max(x)
 
 
 @njit
 def _np_cv_jit(x):
+    """
+    Coefficient of variation function implemented with Numba JIT.
+    """
     a_a, b_b = 0, 0
     for i in x:
         a_a = a_a + i
@@ -626,42 +646,41 @@ class RollingFeatures():
     ----------
     stats : str, list
         Statistics to compute over the rolling window. Can be a `string` or a `list`,
-        and can have repeats. Must be common between pandas and numpy 
-        (e.g., 'mean', 'std', 'min', 'max', 'sum', 'median', etc.). 
+        and can have repeats. Available statistics are: 'mean', 'std', 'min', 'max',
+        'sum', 'median', 'ratio_min_max', 'coef_variation'.
     window_sizes : int, list
         Size of the rolling window for each statistic. If an `int`, all stats share 
         the same window size. If a `list`, it should have the same length as stats.
-    features_names : list, default `None`
-        Names of the output features. If `None`, default names will be used in the 
-        format '_SeriesName_statistic'.
     min_periods : int, list, default `None`
         Minimum number of observations in window required to have a value. 
         Similar to pandas rolling `min_periods` argument. If `None`, defaults 
         to `window_sizes`.
-    closed : str, list, default `'left'`
-        - If 'left', the last point in the window is excluded from calculations.
-        - If 'right', the first point in the window is excluded from calculations.
-        - If 'both', the no points in the window are excluded from calculations.
-        - If 'neither', the first and last points in the window are excluded from calculations.
+    features_names : list, default `None`
+        Names of the output features. If `None`, default names will be used in the 
+        format 'roll_stat_window_size', for example 'roll_mean_7'.
     fill_strategy : str, float, default `None`
-        Strategy to fill missing values in `transform_batch` method. Common pandas 
-        methods for filling  missing values (e.g., 'ffill', 'bfill', 'mean', 
-        'median', 'zero').
+        Strategy to fill missing values in `transform_batch` method. Available 
+        strategies are: 'mean', 'median', 'ffill', 'bfill', or a float value.
     
     Attributes
     ----------
     stats : list
         Statistics to compute over the rolling window.
+    n_stats : int
+        Number of statistics to compute.
     window_sizes : list
         Size of the rolling window for each statistic.
-    features_names : list
-        Names of the output features.
+    max_window_size : int
+        Maximum window size.
     min_periods : list
         Minimum number of observations in window required to have a value.
-    closed : list
-        Closing method for the rolling window.
-    fill_strategy : list
+    features_names : list
+        Names of the output features.
+    fill_strategy : str, float
         Strategy to fill missing values in `transform_batch` method.
+    unique_rolling_windows : dict
+        Dictionary containing unique rolling window parameters and the corresponding
+        statistics.
         
     """
 
@@ -669,44 +688,43 @@ class RollingFeatures():
         self, 
         stats, 
         window_sizes, 
-        features_names: Union[str, list] = None, 
-        min_periods: Union[int, list] = None,
-        closed: Union[str, list] = 'left',
-        fill_strategy: Union[str, float] = None
+        min_periods: Optional[Union[int, list]] = None,
+        features_names: Optional[Union[str, list]] = None, 
+        fill_strategy: Optional[Union[str, float]] = None
     ) -> None:
         
-        # TODO: Return of method or method to set attributes?
         self._validate_preprocess_params(
-            stats, 
-            window_sizes, 
-            features_names, 
+            stats,
+            window_sizes,
             min_periods,
+            features_names,
             fill_strategy
         )
 
-        # (
-        #     stats,
-        #     window_sizes,
-        #     features_names,
-        #     min_periods,
-        #     closed,
-        #     fill_strategy
-        # ) = self._validate_preprocess_params(
-        #         stats, 
-        #         window_sizes, 
-        #         features_names, 
-        #         min_periods,
-        #         closed,
-        #         fill_strategy
-        #     )
+        if isinstance(stats, str):
+            stats = [stats]
+        self.stats = stats
+        self.n_stats = len(stats)
+
+        if isinstance(window_sizes, int):
+            window_sizes = [window_sizes] * self.n_stats
+        self.window_sizes = window_sizes
+        self.max_window_size = max(window_sizes)
         
-        # self.stats = stats
-        # self.window_sizes = window_sizes
-        # self.max_window_size = max(window_sizes)
-        # self.features_names = features_names
-        # self.min_periods = min_periods
-        # self.closed = closed
-        # self.fill_strategy = fill_strategy
+        if min_periods is None:
+            min_periods = self.window_sizes
+        elif isinstance(min_periods, int):
+            min_periods = [min_periods] * self.n_stats
+        self.min_periods = min_periods
+
+        if features_names is None:
+            features_names = [
+                f"roll_{stat}_{window_size}" 
+                for stat, window_size in zip(self.stats, self.window_sizes)
+            ]
+        self.features_names = features_names
+        
+        self.fill_strategy = fill_strategy
 
         window_params_list = []
         for i in range(len(self.stats)):
@@ -721,174 +739,154 @@ class RollingFeatures():
                 unique_rolling_windows[key] = {
                     'params': {'window': params[0], 'min_periods': params[1]},
                     'stats_idx': [], 
+                    'stats_names': [], 
                     'rolling_obj': None
                 }
             unique_rolling_windows[key]['stats_idx'].append(i)
+            unique_rolling_windows[key]['stats_names'].append(self.features_names[i])
 
         self.unique_rolling_windows = unique_rolling_windows
-
 
     def _validate_preprocess_params(
         self, 
         stats, 
         window_sizes, 
-        features_names: Union[str, list] = None, 
-        min_periods: Union[int, list] = None,
-        closed: Union[str, list] = 'left',
-        fill_strategy: Union[str, list] = None,
-        fill_strategy_predict: Union[float, list] = None
-    ) -> Union[list, list, list, list, list, list, list]:
+        min_periods: Optional[Union[int, list]] = None,
+        features_names: Optional[Union[str, list]] = None, 
+        fill_strategy: Optional[Union[str, float]] = None
+    ) -> None:
         """
+        Validate the parameters of the RollingFeatures class.
+
+        Parameters
+        ----------
+        stats : str, list
+            Statistics to compute over the rolling window. Can be a `string` or a `list`,
+            and can have repeats. Available statistics are: 'mean', 'std', 'min', 'max',
+            'sum', 'median', 'ratio_min_max', 'coef_variation'.
+        window_sizes : int, list
+            Size of the rolling window for each statistic. If an `int`, all stats share 
+            the same window size. If a `list`, it should have the same length as stats.
+        min_periods : int, list, default `None`
+            Minimum number of observations in window required to have a value. 
+            Similar to pandas rolling `min_periods` argument. If `None`, defaults 
+            to `window_sizes`.
+        features_names : list, default `None`
+            Names of the output features. If `None`, default names will be used in the 
+            format 'roll_stat_window_size', for example 'roll_mean_7'.
+        fill_strategy : str, float, default `None`
+            Strategy to fill missing values in `transform_batch` method. Available 
+            strategies are: 'mean', 'median', 'ffill', 'bfill', or a float value.
+
+        Returns
+        -------
+        None
+
         """
 
         # stats
-        if isinstance(stats, str):
-            stats = [stats]
-        elif isinstance(stats, list):
-            pass
-        else:
+        if not isinstance(stats, (str, list)):
             raise TypeError(
                 f"`stats` must be a string or a list of strings. Got {type(stats)}."
-            )
+            )        
         
-        # TODO: Review list with pandas docs
-        allowed_stats = ['mean', 'std', 'min', 'max', 'sum', 'median', 'ratio_min_max', 'coef_variation']
+        if isinstance(stats, str):
+            stats = [stats]
+        allowed_stats = ['mean', 'std', 'min', 'max', 'sum', 'median', 
+                         'ratio_min_max', 'coef_variation']
         for stat in set(stats):
             if stat not in allowed_stats:
                 raise ValueError(
                     f"Statistic '{stat}' is not allowed. Allowed stats are {allowed_stats}."
                 )
         
-        self.stats = stats
         n_stats = len(stats)
-        self.n_stats = len(stats)
         
         # window_sizes
-        if isinstance(window_sizes, int):
-            self.window_sizes = [window_sizes] * n_stats
-        elif isinstance(window_sizes, list):
+        if not isinstance(window_sizes, (int, list)):
+            raise TypeError(
+                f"`window_sizes` must be an int or a list of ints. Got {type(window_sizes)}."
+            )
+        
+        if isinstance(window_sizes, list):
             n_window_sizes = len(window_sizes)
             if n_window_sizes != n_stats:
                 raise ValueError(
                     (f"Length of `window_sizes` list ({n_window_sizes}) "
                      f"must match length of `stats` list ({n_stats}).")
                 )
-            self.window_sizes = window_sizes
-        else:
-            raise TypeError(
-                f"`window_sizes` must be an int or a list of ints. Got {type(window_sizes)}."
-            )
-        
-        self.max_window_size = max(window_sizes)
-        
-        # features_names
-        if features_names is None:
-            self.features_names = None  # Will generate default names later
-        elif isinstance(features_names, list):
-            n_features_names = len(window_sizes)
-            if n_features_names != n_stats:
-                raise ValueError(
-                    (f"Length of `features_names` list ({n_features_names}) "
-                     f"must match length of `stats` list ({n_stats}).")
-                )
-            self.features_names = features_names
-        else:
-            raise TypeError(
-                f"`features_names` must be a list of strings or None. Got {type(window_sizes)}."
-            )
+            
+        # Check duplicates (stats, window_sizes)
+        if isinstance(window_sizes, int):
+            window_sizes = [window_sizes] * n_stats
+        if len(set(zip(stats, window_sizes))) != n_stats:
+            raise ValueError("Duplicate (stat, window_size) pairs are not allowed.")
         
         # min_periods
-        if min_periods is None:
-            self.min_periods = self.window_sizes
-        elif isinstance(min_periods, int):
-            self.min_periods = [min_periods] * n_stats
-        elif isinstance(min_periods, list):
+        if not isinstance(min_periods, (int, list, type(None))):
+            raise TypeError(
+                f"`min_periods` must be an int, list of ints, or None. Got {type(min_periods)}."
+            )
+        
+        if isinstance(min_periods, list):
             n_min_periods = len(min_periods)
             if n_min_periods != n_stats:
                 raise ValueError(
                     (f"Length of `min_periods` list ({n_min_periods}) "
                      f"must match length of `stats` list ({n_stats}).")
                 )
-            self.min_periods = min_periods
-        else:
+        
+        # features_names
+        if not isinstance(features_names, (list, type(None))):
             raise TypeError(
-                f"`min_periods` must be an int, list of ints, or None. Got {type(window_sizes)}."
+                f"`features_names` must be a list of strings or None. Got {type(features_names)}."
             )
         
-        # closed
-        # allowed_closed = ['right', 'left', 'both', 'neither']
-        # if isinstance(closed, str):
-        #     closed = [closed] * n_stats
-        # elif isinstance(closed, list):
-        #     n_closed = len(closed)
-        #     if n_closed != n_stats:
-        #         raise ValueError(
-        #             (f"Length of `closed` list ({n_closed}) "
-        #              f"must match length of `stats` list ({n_stats}).")
-        #         )
-        # else:
-        #     raise TypeError(
-        #         f"`closed` must be a string or a list of strings. Got {type(window_sizes)}."
-        #     )
-        
-        # allowed_closed = ['right', 'left', 'both', 'neither']
-        # for c in set(closed):
-        #     if c not in allowed_closed:
-        #         raise ValueError(
-        #             f"'{c}' is not allowed. Allowed `closed` values are {allowed_closed}."
-        #         )
-        
-        # self.closed = closed
+        if isinstance(features_names, list):
+            n_features_names = len(features_names)
+            if n_features_names != n_stats:
+                raise ValueError(
+                    (f"Length of `features_names` list ({n_features_names}) "
+                     f"must match length of `stats` list ({n_stats}).")
+                )
         
         # fill_strategy
-        if fill_strategy is None:
-            fill_strategy = [None] * n_stats
-        elif isinstance(fill_strategy, str):
-            fill_strategy = [fill_strategy] * n_stats
-        elif isinstance(fill_strategy, list):
-            n_fill_strategy = len(fill_strategy)
-            if n_fill_strategy != n_stats:
-                raise ValueError(
-                    (f"Length of `fill_strategy` list ({n_fill_strategy}) "
-                     f"must match length of `stats` list ({n_stats})")
+        if fill_strategy is not None:
+            if not isinstance(fill_strategy, (int, float, str)):
+                raise TypeError(
+                    f"`fill_strategy` must be a float, string, or None. Got {type(fill_strategy)}."
                 )
-        else:
-            raise TypeError(
-                f"`fill_strategy` must be a string or a list of strings. Got {type(fill_strategy)}"
-            )
-        
-        # TODO: Complete
-        # allowed_fill_strategy = ['right', 'left', 'both', 'neither']
-        # for fs in set(fill_strategy):
-        #     if fs not in allowed_fill_strategy:
-        #         raise ValueError(
-        #             (f"'{fs}' is not allowed. Allowed `fill_strategy` "
-        #              f"values are {allowed_fill_strategy}.")
-        #         )
-        
-        self.fill_strategy = fill_strategy
-        
-        # fill_strategy_predict        
-        if fill_strategy_predict is None:
-            fill_strategy_predict = [None] * n_stats
-        elif isinstance(fill_strategy_predict, (int, float)):
-            fill_strategy_predict = [fill_strategy_predict] * n_stats
-        elif isinstance(fill_strategy_predict, list):
-            n_fill_strategy_predict = len(fill_strategy_predict)
-            if n_fill_strategy_predict != n_stats:
-                raise ValueError(
-                    (f"Length of `fill_strategy_predict` list ({n_fill_strategy_predict}) "
-                     f"must match length of `stats` list ({n_stats})")
-                )
-        else:
-            raise TypeError(
-                f"`fill_strategy_predict` must be a float or a list of float. Got {type(fill_strategy_predict)}"
-            )
+            
+            if isinstance(fill_strategy, str):
+                allowed_fill_strategy = ['mean', 'median', 'ffill', 'bfill']
+                if fill_strategy not in allowed_fill_strategy:
+                    raise ValueError(
+                        (f"'{fill_strategy}' is not allowed. Allowed `fill_strategy` "
+                         "values are 'mean', 'median', 'ffill', 'bfill' or a float value.")
+                    )
 
+    def _apply_stat_pandas(
+        self, 
+        rolling_obj: pd.core.window.rolling.Rolling, 
+        stat: str
+    ) -> pd.Series:
+        """
+        Apply the specified statistic to a pandas rolling object.
 
-    def _apply_stat_pandas(self, rolling_obj, stat):
+        Parameters
+        ----------
+        rolling_obj : pandas Rolling
+            Rolling object to apply the statistic.
+        stat : str
+            Statistic to compute.
+        
+        Returns
+        -------
+        stat_series : pandas Series
+            Series with the computed statistic.
+        
         """
-        """
+
         if stat == 'mean':
             return rolling_obj.mean()
         elif stat == 'median':
@@ -906,8 +904,7 @@ class RollingFeatures():
         elif stat == 'coef_variation':
             return rolling_obj.std() / rolling_obj.mean()
         else:
-            raise ValueError(f"Statistic '{stat}' is not implemented")
-
+            raise ValueError(f"Statistic '{stat}' is not implemented.")
 
     def transform_batch(
         self, 
@@ -924,104 +921,7 @@ class RollingFeatures():
 
         Returns
         -------
-        results : pandas DataFrame
-            A DataFrame containing the rolling features.
-        
-        """
-        
-        rolling_features = pd.DataFrame(index=X.index)
-
-        for k in self.unique_rolling_windows.keys():
-            rolling_obj = X.rolling(**self.unique_rolling_windows[k]['params'])
-            self.unique_rolling_windows[k]['rolling_obj'] = rolling_obj
-        
-        for i, stat in enumerate(self.stats):
-            window_size = self.window_sizes[i]
-            min_periods = self.min_periods[i]
-            fill_strategy = self.fill_strategy[i]
-
-            key = f"{window_size}_{min_periods}"
-            rolling_obj = self.unique_rolling_windows[key]['rolling_obj']
-            
-            if self.features_names is not None:
-                feature_name = self.features_names[i]
-            else:
-                feature_name = f"roll_{stat}_{window_size}"  # roll_mean_7
-            
-            # Get the function corresponding to the statistic
-            stat_series = self._apply_stat_pandas(rolling_obj=rolling_obj, stat=stat)
-
-
-            # else:
-            #     # Try to convert fill_strategy to a number
-            #     try:
-            #         fill_value = float(fill_strategy)
-            #         stat_series = stat_series.fillna(fill_value)
-            #     except ValueError:
-            #         raise ValueError(f"fill_strategy '{fill_strategy}' is not recognized")
-            
-            rolling_features[feature_name] = stat_series
-
-        rolling_features = rolling_features.iloc[self.max_window_size - 1:]
-
-        # TODO: Review
-        # Fill missing values if fill_strategy is specified
-        if fill_strategy is not None:
-            if fill_strategy == 'mean':
-                rolling_features = rolling_features.fillna(rolling_features.mean())
-            elif fill_strategy == 'median':
-                rolling_features = rolling_features.fillna(rolling_features.median())
-            elif fill_strategy == 'ffill':
-                rolling_features = rolling_features.ffill()
-            elif fill_strategy == 'bfill':
-                rolling_features = rolling_features.bfill()
-            # elif fill_strategy == 'zero':
-            #     rolling_features = rolling_features.fillna(0)
-            else:
-                rolling_features = rolling_features.fillna(fill_strategy)
-        
-        return rolling_features
-
-
-    def _apply_stat_numpy(self, X_window, stat):
-        """
-        """
-        if stat == 'mean':
-            return _np_mean_jit(X_window)
-        elif stat == 'median':
-            return _np_median_jit(X_window)
-        elif stat == 'std':
-            return _np_std_jit(X_window)
-        elif stat == 'sum':
-            return _np_sum_jit(X_window)
-        elif stat == 'min':
-            return _np_min_jit(X_window)
-        elif stat == 'max':
-            return _np_max_jit(X_window)
-        elif stat == 'ratio_min_max':
-            return _np_min_max_ratio_jit(X_window)
-        elif stat == 'coef_variation':
-            return _np_cv_jit(X_window)
-        else:
-            raise ValueError(f"Statistic '{stat}' is not implemented")
-
-
-    def transform_batch_2(
-        self, 
-        X: pd.Series
-    ) -> pd.DataFrame:
-        """
-        Transform an entire pandas Series using rolling windows and compute the 
-        specified statistics.
-
-        Parameters
-        ----------
-        X : pandas Series
-            The input data series to transform.
-
-        Returns
-        -------
-        results : pandas DataFrame
+        rolling_features : pandas DataFrame
             A DataFrame containing the rolling features.
         
         """
@@ -1034,57 +934,53 @@ class RollingFeatures():
         for i, stat in enumerate(self.stats):
             window_size = self.window_sizes[i]
             min_periods = self.min_periods[i]
-            fill_strategy = self.fill_strategy[i]
 
             key = f"{window_size}_{min_periods}"
             rolling_obj = self.unique_rolling_windows[key]['rolling_obj']
-            
-            if self.features_names is not None:
-                feature_name = self.features_names[i]
-            else:
-                feature_name = f"roll_{stat}_{window_size}"  # roll_mean_7
-            
-            # Get the function corresponding to the statistic
-            stat_series = self._apply_stat_pandas(rolling_obj=rolling_obj, stat=stat)
-            stat_series.name = feature_name
 
-
-            # else:
-            #     # Try to convert fill_strategy to a number
-            #     try:
-            #         fill_value = float(fill_strategy)
-            #         stat_series = stat_series.fillna(fill_value)
-            #     except ValueError:
-            #         raise ValueError(f"fill_strategy '{fill_strategy}' is not recognized")
-            
+            stat_series = self._apply_stat_pandas(rolling_obj=rolling_obj, stat=stat)            
             rolling_features.append(stat_series)
 
         rolling_features = pd.concat(rolling_features, axis=1)
-        # rolling_features.columns = self.features_names
+        rolling_features.columns = self.features_names
         rolling_features = rolling_features.iloc[self.max_window_size - 1:]
 
-        # TODO: Review
-        # Fill missing values if fill_strategy is specified
-        if fill_strategy is not None:
-            if fill_strategy == 'mean':
+        if self.fill_strategy is not None:
+            if self.fill_strategy == 'mean':
                 rolling_features = rolling_features.fillna(rolling_features.mean())
-            elif fill_strategy == 'median':
+            elif self.fill_strategy == 'median':
                 rolling_features = rolling_features.fillna(rolling_features.median())
-            elif fill_strategy == 'ffill':
+            elif self.fill_strategy == 'ffill':
                 rolling_features = rolling_features.ffill()
-            elif fill_strategy == 'bfill':
+            elif self.fill_strategy == 'bfill':
                 rolling_features = rolling_features.bfill()
-            # elif fill_strategy == 'zero':
-            #     rolling_features = rolling_features.fillna(0)
             else:
-                rolling_features = rolling_features.fillna(fill_strategy)
+                rolling_features = rolling_features.fillna(self.fill_strategy)
         
         return rolling_features
 
+    def _apply_stat_numpy_jit(
+        self, 
+        X_window: np.ndarray, 
+        stat: str
+    ) -> float:
+        """
+        Apply the specified statistic to a numpy array using Numba JIT.
 
-    def _apply_stat_numpy(self, X_window, stat):
+        Parameters
+        ----------
+        X_window : numpy array
+            Array with the rolling window.
+        stat : str
+            Statistic to compute.
+
+        Returns
+        -------
+        stat_value : float
+            Value of the computed statistic.
+        
         """
-        """
+
         if stat == 'mean':
             return _np_mean_jit(X_window)
         elif stat == 'median':
@@ -1102,36 +998,38 @@ class RollingFeatures():
         elif stat == 'coef_variation':
             return _np_cv_jit(X_window)
         else:
-            raise ValueError(f"Statistic '{stat}' is not implemented")
-
+            raise ValueError(f"Statistic '{stat}' is not implemented.")
 
     def transform(
         self, 
         X: np.ndarray
     ) -> np.ndarray:
         """
-        Transform a numpy array using rolling windows and compute the specified statistics.
+        Transform a numpy array using rolling windows and compute the 
+        specified statistics.
 
         Parameters
         ----------
-        X : np.ndarray
-            The input data array to transform. Should be at least as long as the maximum window size.
+        X : numpy ndarray
+            The input data array to transform.
 
         Returns
         -------
-        rolling_features : numpy array
+        rolling_features : numpy ndarray
             An array containing the computed statistics.
         
         """
+
+        # TODO: Check shape of X
         
         X = X[~np.isnan(X)]
 
         rolling_features = np.full(shape=self.n_stats, fill_value=np.nan, dtype=float)
         for i, stat in enumerate(self.stats):
+
             window_size = self.window_sizes[i]
-            X_window = X[-window_size:]  # Take the last window_size observations
-            
-            # Compute the statistic using numpy, handling NaNs
+            X_window = X[-window_size:]
+
             rolling_features[i] = self._apply_stat_numpy(X_window, stat)
         
         return rolling_features
