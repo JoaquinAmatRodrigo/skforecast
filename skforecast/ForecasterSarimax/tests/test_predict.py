@@ -5,7 +5,6 @@ import pytest
 import platform
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from pmdarima.arima import ARIMA
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from sklearn.compose import ColumnTransformer
@@ -90,36 +89,6 @@ def test_predict_ValueError_when_ForecasterSarimax_last_window_exog_is_None_and_
             last_window      = y_lw, 
             last_window_exog = None
         )
-
-
-@pytest.mark.parametrize("kwargs, data", 
-                         [({'order': (1, 0, 1), 
-                            'seasonal_order': (0, 0, 0, 0)}, 
-                            [0.61923435, 0.60938063, 0.60478499, 0.60264165, 0.60164203]), 
-                          ({'order': (1, 1, 1), 
-                            'seasonal_order': (1, 1, 1, 2)}, 
-                            [0.57507034, 0.57645772, 0.54832774, 0.55617331, 0.52401109])])
-def test_predict_output_ForecasterSarimax_pmdarima_ARIMA(kwargs, data):
-    """
-    Test predict output of ForecasterSarimax using ARIMA from pmdarima.
-    """
-    forecaster = ForecasterSarimax(
-                     regressor = ARIMA(maxiter = 1000, 
-                                       trend     = None, 
-                                       method    = 'nm', 
-                                    #  ftol      = 1e-19, 
-                                       **kwargs
-                                 )
-                 )
-    forecaster.fit(y=y)
-    predictions = forecaster.predict(steps=5)
-    expected = pd.Series(
-                   data  = data,
-                   index = pd.RangeIndex(start=50, stop=55, step=1),
-                   name  = 'pred'
-               )
-    
-    pd.testing.assert_series_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("kwargs, data", 
@@ -399,21 +368,17 @@ def test_predict_output_ForecasterSarimax_with_last_window_and_exog_and_transfor
     pd.testing.assert_series_equal(predictions, expected, atol=0.0001)
 
 
-@pytest.mark.parametrize("regressor", 
-                         [ARIMA(order=(1, 0, 0)), 
-                          Sarimax(order=(1, 0, 0))], 
-                         ids = lambda reg: f'regressor: {type(reg)}')
 @pytest.mark.parametrize("y          , idx", 
                          [(y         , pd.RangeIndex(start=0, stop=50)), 
                           (y_datetime, pd.date_range(start='2000', periods=50, freq='YE'))], 
                          ids = lambda values: f'y, index: {type(values)}')
-def test_predict_ForecasterSarimax_updates_extended_index_twice(regressor, y, idx):
+def test_predict_ForecasterSarimax_updates_extended_index_twice(y, idx):
     """
     Test forecaster.extended_index_ is updated when using predict twice.
     """
     y_fit = y.iloc[:30].copy()
 
-    forecaster = ForecasterSarimax(regressor=regressor)
+    forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 0, 0)))
     forecaster.fit(y=y_fit)
 
     lw_1 = y.iloc[30:40].copy()

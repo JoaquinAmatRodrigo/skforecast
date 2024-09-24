@@ -2,27 +2,23 @@
 # ==============================================================================
 import re
 import pytest
-from pytest import approx
-import numpy as np
-import pandas as pd
-from pmdarima.arima import ARIMA
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.exceptions import IgnoredArgumentWarning
 from sklearn.linear_model import LinearRegression
 
 
-def test_TypeError_when_regressor_is_not_pmdarima_ARIMA_when_initialization():
+def test_TypeError_when_regressor_is_not_Sarimax_when_initialization():
     """
-    Raise TypeError if regressor is not of type pmdarima.arima.ARIMA or 
+    Raise TypeError if regressor is not of type 
     skforecast.Sarimax.Sarimax when initializing the forecaster.
     """
     regressor = LinearRegression()
 
     err_msg = re.escape(
-        (f"`regressor` must be an instance of type pmdarima.arima.ARIMA "
-         f"or skforecast.Sarimax.Sarimax. Got {type(regressor)}.")
-    ) 
+        (f"`regressor` must be an instance of type "
+         f"`skforecast.Sarimax.Sarimax`. Got '{type(regressor)}'.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         ForecasterSarimax(regressor = regressor)
 
@@ -33,16 +29,6 @@ def test_skforecast_Sarimax_params_are_stored_when_initialization():
     """
     forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 0, 1)))
     expected_params = Sarimax(order=(1, 0, 1)).get_params(deep=True)
-
-    assert forecaster.params == expected_params
-
-
-def test_pmdarima_ARIMA_params_are_stored_when_initialization():
-    """
-    Check `params` are stored in the forecaster.
-    """
-    forecaster = ForecasterSarimax(regressor=ARIMA(order=(1, 1, 1)))
-    expected_params = ARIMA(order=(1, 1, 1)).get_params(deep=True)
 
     assert forecaster.params == expected_params
 

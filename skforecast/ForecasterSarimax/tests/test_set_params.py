@@ -1,34 +1,7 @@
 # Unit test set_params ForecasterSarimax
 # ==============================================================================
-from pmdarima.arima import ARIMA
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
-
-
-def test_ForecasterSarimax_set_params_pmdarima():
-    """
-    Test set_params() method pmdarima.
-    """
-    forecaster = ForecasterSarimax(regressor = ARIMA(order=(1,1,1)))
-    new_params = {'order': (2,2,2), 'seasonal_order': (1,1,1,2)}
-    forecaster.set_params(new_params)
-    results = forecaster.regressor.get_params()
-
-    expected = {
-        'maxiter'           : 50,
-        'method'            : 'lbfgs',
-        'order'             : (2, 2, 2),
-        'out_of_sample_size': 0,
-        'scoring'           : 'mse',
-        'scoring_args'      : None,
-        'seasonal_order'    : (1, 1, 1, 2),
-        'start_params'      : None,
-        'suppress_warnings' : False,
-        'trend'             : None,
-        'with_intercept'    : True
-    }
-
-    assert results == expected
 
 
 def test_ForecasterSarimax_set_params_skforecast():
