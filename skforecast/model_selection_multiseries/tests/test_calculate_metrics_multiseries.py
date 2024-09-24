@@ -277,12 +277,12 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric(
                 2.633361,
             ],
             "mean_absolute_scaled_error": [
-                0.610914,
-                1.170113,
-                0.656176,
-                0.812401,
-                0.812401,
-                0.799851,
+                0.8388579569071319,
+                1.261808218733781,
+                0.6816085701001846,
+                0.9274249152470325,
+                0.9274249152470325,
+                0.8940507968656655,
             ],
         }
     )
@@ -369,12 +369,12 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_predict
                 2.613332,
             ],
             "mean_absolute_scaled_error": [
-                0.610914,
-                1.170113,
-                0.707757,
-                0.829595,
-                0.855141,
-                0.793768,
+                0.8388579569071319,
+                1.261808218733781,
+                0.7351889788709302,
+                0.9452850515039476,
+                0.9893374538302255,
+                0.8872509680588639,
             ],
         }
     )
@@ -400,25 +400,33 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_one_lev
         add_aggregated_metric=True,
     )
 
-    expected = pd.DataFrame({
-        'levels': {0: 'item_1',
-        1: 'item_2',
-        2: 'item_3',
-        3: 'average',
-        4: 'weighted_average',
-        5: 'pooling'},
-        'mean_absolute_error': {0: 1.47756696,
-        1: 3.48012924,
-        2: np.nan,
-        3: 2.4788481,
-        4: 2.4788481,
-        5: 2.4788481},
-        'mean_absolute_scaled_error': {0: 0.6109141681923469,
-        1: 1.170112564935368,
-        2: np.nan,
-        3: 0.8905133665638575,
-        4: 0.8905133665638574,
-        5: 0.9193177167796042}
-    })
+    expected = pd.DataFrame(
+        {
+            "levels": [
+                "item_1",
+                "item_2",
+                "item_3",
+                "average",
+                "weighted_average",
+                "pooling",
+            ],
+            "mean_absolute_error": [
+                1.47756696,
+                3.48012924,
+                np.nan,
+                2.4788481,
+                2.4788481,
+                2.4788481,
+            ],
+            "mean_absolute_scaled_error": [
+                0.8388579569071319,
+                1.261808218733781,
+                np.nan,
+                1.0503330878204564,
+                1.0503330878204564,
+                1.096968360536767,
+            ],
+        }
+    )
 
     pd.testing.assert_frame_equal(results, expected)

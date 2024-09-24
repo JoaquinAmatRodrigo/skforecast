@@ -320,7 +320,7 @@ def _calculate_metrics_multiseries(
         raise TypeError("`folds` must be a list or a tqdm object.")
     if not isinstance(span_index, (pd.DatetimeIndex, pd.RangeIndex)):
         raise TypeError("`span_index` must be a pandas DatetimeIndex or pandas RangeIndex.")
-    if not isinstance(window_size, int):
+    if not isinstance(window_size, (int, np.integer)):
         raise TypeError("`window_size` must be an integer.")
     if not isinstance(metrics, list):
         raise TypeError("`metrics` must be a list.")

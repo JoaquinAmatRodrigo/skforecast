@@ -349,8 +349,8 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
 def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_multiple_metrics_aggregated_with_mocked():
     """
     Test output of bayesian_search_forecaster_multiseries in ForecasterAutoregMultiSeries
-    and ForecasterAutoregMultiSeriesCustom when series and exog are dictionaries and 
-    multiple aggregated metrics (mocked done in Skforecast v0.12.0).
+    when series and exog are dictionaries and multiple aggregated metrics
+    (mocked done in Skforecast v0.12.0).
     """
 
     forecaster = ForecasterAutoregMultiSeries(
@@ -378,7 +378,7 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_mult
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning, module="optuna")
 
-        results_search, best_trial = bayesian_search_forecaster_multiseries(
+        results_search, _ = bayesian_search_forecaster_multiseries(
             forecaster         = forecaster,
             series             = series_dict,
             exog               = exog_dict,
@@ -395,51 +395,53 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_mult
             suppress_warnings  = True,
         )
 
-    expected = pd.DataFrame({
-        "levels": {
-            0: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
-            1: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
-            2: ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
-        },
-        "lags": {0: np.array([1, 7, 14]), 1: np.array([1, 7, 14]), 2: np.array([5])},
-        "params": {
-            0: {"n_estimators": 4, "max_depth": 3},
-            1: {"n_estimators": 3, "max_depth": 3},
-            2: {"n_estimators": 4, "max_depth": 3},
-        },
-        "mean_absolute_error__weighted_average": {
-            0: 749.8761502029433,
-            1: 760.659082077477,
-            2: 777.6874712018467,
-        },
-        "mean_absolute_error__average": {
-            0: 709.8836514262415,
-            1: 721.1848222120482,
-            2: 754.3537196425694,
-        },
-        "mean_absolute_error__pooling": {
-            0: 709.8836514262414,
-            1: 721.1848222120483,
-            2: 754.3537196425694,
-        },
-        "mean_absolute_scaled_error__weighted_average": {
-            0: 1.7214020008755428,
-            1: 1.7480018562024022,
-            2: 1.8159623522099073,
-        },
-        "mean_absolute_scaled_error__average": {
-            0: 2.0671251354627653,
-            1: 2.099920474995049,
-            2: 2.1945202856306465,
-        },
-        "mean_absolute_scaled_error__pooling": {
-            0: 1.6864677542505797,
-            1: 1.7133159005309597,
-            2: 1.7921151176255248,
-        },
-        "n_estimators": {0: 4, 1: 3, 2: 4},
-        "max_depth": {0: 3, 1: 3, 2: 3},
-    })
+    expected = pd.DataFrame(
+        {
+            "levels": [
+                ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+                ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+                ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"],
+            ],
+            "lags": [np.array([1, 7, 14]), np.array([1, 7, 14]), np.array([5])],
+            "params": [
+                {"n_estimators": 4, "max_depth": 3},
+                {"n_estimators": 3, "max_depth": 3},
+                {"n_estimators": 4, "max_depth": 3},
+            ],
+            "mean_absolute_error__weighted_average": [
+                749.8761502029433,
+                760.659082077477,
+                777.6874712018467,
+            ],
+            "mean_absolute_error__average": [
+                709.8836514262415,
+                721.1848222120482,
+                754.3537196425694,
+            ],
+            "mean_absolute_error__pooling": [
+                709.8836514262414,
+                721.1848222120483,
+                754.3537196425694,
+            ],
+            "mean_absolute_scaled_error__weighted_average": [
+                1.720281630023928,
+                1.7468333254211739,
+                1.7217882951816943,
+            ],
+            "mean_absolute_scaled_error__average": [
+                2.0713511786893473,
+                2.104173580194738,
+                2.06373433155371,
+            ],
+            "mean_absolute_scaled_error__pooling": [
+                1.7240004031507636,
+                1.7514460598462835,
+                1.7678687830707494,
+            ],
+            "n_estimators": [4, 3, 4],
+            "max_depth": [3, 3, 3],
+        }
+    )
 
     pd.testing.assert_frame_equal(expected, results_search)
 
