@@ -75,7 +75,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
                 "2020-01-10",
             ]
         ),
-    ).astype({"exog_2": int})
+    ).astype({"_level_skforecast": int, "exog_2": int})
 
     expected_y_train = pd.Series(
         [5.0, 6.0, 7.0, 8.0, 9.0, 55.0, 56.0, 57.0, 58.0, 59.0],
@@ -132,7 +132,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
                 "2020-01-15",
             ]
         ),
-    ).astype({"exog_2": int})
+    ).astype({"_level_skforecast": int, "exog_2": int})
 
     expected_y_test = pd.Series(
         [10.0, 11.0, 12.0, 13.0, 14.0, 60.0, 61.0, 62.0, 63.0, 64.0],
@@ -289,7 +289,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
                 "2020-01-10",
             ]
         ),
-    ).astype({"exog_2": int})
+    ).astype({"series_1": int, "series_2": int, "exog_2": int})
 
     expected_y_train = pd.Series(
         [5.0, 6.0, 7.0, 8.0, 9.0, 55.0, 56.0, 57.0, 58.0, 59.0],
@@ -347,7 +347,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
                 "2020-01-15",
             ]
         ),
-    ).astype({"exog_2": int})
+    ).astype({"series_1": int, "series_2": int, "exog_2": int})
 
     expected_y_test = pd.Series(
         [10.0, 11.0, 12.0, 13.0, 14.0, 60.0, 61.0, 62.0, 63.0, 64.0],
@@ -718,7 +718,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dict():
                 "2020-01-10",
             ]
         ),
-    ).astype({"exog_2": int})
+    ).astype({"_level_skforecast": int, "exog_2": int})
 
     expected_y_train = pd.Series(
         [5.0, 6.0, 7.0, 8.0, 9.0, 55.0, 56.0, 57.0, 58.0, 59.0],
@@ -775,7 +775,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dict():
                 "2020-01-15",
             ]
         ),
-    ).astype({"exog_2": int})
+    ).astype({"_level_skforecast": int, "exog_2": int})
 
     expected_y_test = pd.Series(
         [10.0, 11.0, 12.0, 13.0, 14.0, 60.0, 61.0, 62.0, 63.0, 64.0],

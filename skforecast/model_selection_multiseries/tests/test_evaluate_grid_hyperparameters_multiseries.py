@@ -503,11 +503,11 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
 
     expected_lags = np.array([1, 2, 3, 4])
     expected_alpha = 0.01
-    expected_series_col_names = ['l1', 'l2']
+    expected_series_names_in_ = ['l1', 'l2']
     
     assert (expected_lags == forecaster.lags).all()
     assert expected_alpha == forecaster.regressor.alpha
-    assert expected_series_col_names ==  forecaster.series_col_names
+    assert expected_series_names_in_ ==  forecaster.series_names_in_
 
 
 def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_output_file_single_level():
@@ -794,10 +794,10 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     )
 
     expected_alpha = 0.01
-    expected_series_col_names = ['l1', 'l2']
+    expected_series_names_in_ = ['l1', 'l2']
     
     assert expected_alpha == forecaster.regressor.alpha
-    assert expected_series_col_names ==  forecaster.series_col_names
+    assert expected_series_names_in_ ==  forecaster.series_names_in_
 
 
 def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_output_file_single_level():
@@ -1403,7 +1403,7 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
         steps              = steps,
         metric             = 'mean_absolute_error',
         aggregate_metric   = 'weighted_average',
-                  initial_train_size = len(series) - n_validation,
+        initial_train_size = len(series) - n_validation,
         fixed_train_size   = False,
         levels             = None,
         exog               = None,
@@ -1416,12 +1416,12 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
 
     expected_lags = np.array([1, 2])
     expected_alpha = 0.01
-    expected_series_col_names = ['l1', 'l2']
+    expected_series_names_in_ = ['l1', 'l2']
     
     assert (expected_lags == forecaster.lags).all()
     for i in range(1, forecaster.steps + 1):
         assert expected_alpha == forecaster.regressors_[i].alpha
-    assert expected_series_col_names ==  forecaster.series_col_names
+    assert expected_series_names_in_ ==  forecaster.series_names_in_
 
 
 def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate_output_file_single_level():
