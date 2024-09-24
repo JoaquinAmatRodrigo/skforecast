@@ -1150,11 +1150,11 @@ class ForecasterAutoreg(ForecasterBase):
                 
                 pred += step_residual
             
-            predictions[i] = pred
+            predictions[i] = pred[0]
 
             # Update `last_window` values. The first position is discarded and 
             # the new prediction is added at the end.
-            last_window[-(steps - i)] = pred
+            last_window[-(steps - i)] = pred[0]
 
         return predictions
 

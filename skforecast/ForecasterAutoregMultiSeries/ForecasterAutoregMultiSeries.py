@@ -1100,7 +1100,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         _exog_names_in_ = self.exog_names_in_
 
         self.is_fitted = False
-        X_train, y_train, _, series_names_in_, _, exog_names_in_, _, _ = (
+        X_train, y_train, _, series_names_in_, _, exog_names_in_, *_ = (
             self._create_train_X_y(
                 series            = series_train,
                 exog              = exog_train,
