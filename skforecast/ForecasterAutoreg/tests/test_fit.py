@@ -136,8 +136,8 @@ def test_fit_in_sample_residuals_by_bin_stored():
     for k in expected_2.keys():
         np.testing.assert_almost_equal(forecaster.in_sample_residuals_by_bin_[k], expected_2[k])
     for k in expected_3.keys():
-        assert forecaster.binner_intervals[k][0] == approx(expected_3[k][0])
-        assert forecaster.binner_intervals[k][1] == approx(expected_3[k][1])
+        assert forecaster.binner_intervals_[k][0] == approx(expected_3[k][0])
+        assert forecaster.binner_intervals_[k][1] == approx(expected_3[k][1])
 
 
 def test_fit_same_residuals_when_residuals_greater_than_1000():

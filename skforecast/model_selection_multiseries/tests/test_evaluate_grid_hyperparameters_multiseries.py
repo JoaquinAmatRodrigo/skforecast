@@ -28,8 +28,6 @@ tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 # Fixtures
 from .fixtures_model_selection_multiseries import series
 from .fixtures_model_selection_multiseries import exog
-series.index = pd.date_range(start='2024-01-01', periods=len(series), freq='D')
-exog.index = pd.date_range(start='2024-01-01', periods=len(exog), freq='D')
 THIS_DIR = Path(__file__).parent
 series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
 exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
@@ -503,11 +501,11 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
 
     expected_lags = np.array([1, 2, 3, 4])
     expected_alpha = 0.01
-    expected_series_col_names = ['l1', 'l2']
+    expected_series_names_in_ = ['l1', 'l2']
     
     assert (expected_lags == forecaster.lags).all()
     assert expected_alpha == forecaster.regressor.alpha
-    assert expected_series_col_names ==  forecaster.series_col_names
+    assert expected_series_names_in_ ==  forecaster.series_names_in_
 
 
 def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_output_file_single_level():
@@ -794,10 +792,10 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
     )
 
     expected_alpha = 0.01
-    expected_series_col_names = ['l1', 'l2']
+    expected_series_names_in_ = ['l1', 'l2']
     
     assert expected_alpha == forecaster.regressor.alpha
-    assert expected_series_col_names ==  forecaster.series_col_names
+    assert expected_series_names_in_ ==  forecaster.series_names_in_
 
 
 def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeriesCustom_output_file_single_level():
@@ -982,29 +980,27 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
             4: 0.21078653208835063,
             5: 0.21078779920557153,
         },
-        "mean_absolute_scaled_error__weighted_average": {
-            0: 0.7969369551529275,
-            1: 0.7969838748911608,
-            2: 0.7973389652448446,
-            3: 0.8009631048212882,
-            4: 0.8009302953795885,
-            5: 0.8009249124659391,
-        },
-        "mean_absolute_scaled_error__average": {
-            0: 0.7969369551529275,
-            1: 0.7969838748911608,
-            2: 0.7973389652448445,
-            3: 0.8009631048212883,
-            4: 0.8009302953795885,
-            5: 0.8009249124659391,
-        },
-        "mean_absolute_scaled_error__pooling": {
-            0: 0.7809734688246502,
-            1: 0.7810166484905049,
-            2: 0.7813401480275807,
-            3: 0.7850423618302551,
-            4: 0.785091090032226,
-            5: 0.7850958095104122,
+        'mean_absolute_scaled_error__weighted_average': {
+            0: 0.798335248515498,
+            1: 0.7983823516895249,
+            2: 0.7987389489370742,
+            3: 0.8120054679421529,
+            4: 0.8119798820564519,
+            5: 0.8119753734760063},
+        'mean_absolute_scaled_error__average': {
+            0: 0.7983352485154981,
+            1: 0.7983823516895249,
+            2: 0.7987389489370743,
+            3: 0.812005467942153,
+            4: 0.8119798820564519,
+            5: 0.8119753734760063},
+        'mean_absolute_scaled_error__pooling': {
+            0: 0.7811335117239494,
+            1: 0.7811767002385028,
+            2: 0.7815002660695128,
+            3: 0.7988421945907456,
+            4: 0.7988917793592797,
+            5: 0.7988965817986066
         },
         "alpha": {0: 0.01, 1: 0.1, 2: 1.0, 3: 1.0, 4: 0.1, 5: 0.01},
     })
@@ -1403,7 +1399,7 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
         steps              = steps,
         metric             = 'mean_absolute_error',
         aggregate_metric   = 'weighted_average',
-                  initial_train_size = len(series) - n_validation,
+        initial_train_size = len(series) - n_validation,
         fixed_train_size   = False,
         levels             = None,
         exog               = None,
@@ -1416,12 +1412,12 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
 
     expected_lags = np.array([1, 2])
     expected_alpha = 0.01
-    expected_series_col_names = ['l1', 'l2']
+    expected_series_names_in_ = ['l1', 'l2']
     
     assert (expected_lags == forecaster.lags).all()
     for i in range(1, forecaster.steps + 1):
         assert expected_alpha == forecaster.regressors_[i].alpha
-    assert expected_series_col_names ==  forecaster.series_col_names
+    assert expected_series_names_in_ ==  forecaster.series_names_in_
 
 
 def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate_output_file_single_level():
@@ -1520,17 +1516,18 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate
 @pytest.mark.parametrize(
         "forecaster",
         [
-            ForecasterAutoregMultiSeries(regressor=Ridge(random_state=678), lags=3),
             ForecasterAutoregMultiSeries(
                 regressor=Ridge(random_state=678),
                 lags=3,
                 transformer_series=None,
+                forecaster_id='Multiseries_no_transformer'
             ),
             ForecasterAutoregMultiSeries(
                 regressor=Ridge(random_state=678),
                 lags=3,
                 transformer_series=StandardScaler(),
-                transformer_exog=StandardScaler()
+                transformer_exog=StandardScaler(),
+                forecaster_id='Multiseries_transformer'
             ),
             ForecasterAutoregMultiVariate(
                 regressor=Ridge(random_state=678),
@@ -1538,10 +1535,11 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate
                 lags=3,
                 steps=1,
                 transformer_series=StandardScaler(),
-                transformer_exog=StandardScaler()
+                transformer_exog=StandardScaler(),
+                forecaster_id='Multivariate'
             )
-        ]
-)
+        ], 
+ids=lambda forecaster: f'forecaster: {forecaster.forecaster_id}')
 def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_step_ahead(
     forecaster,
 ):
@@ -1550,6 +1548,10 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_st
     is equivalent when steps=1 and refit=False.
     Results are not equivalent if diferentiation is included.
     """
+    series_datetime = series.copy()
+    series_datetime.index = pd.date_range(start='2024-01-01', periods=len(series), freq='D')
+    exog_datetime = exog.copy()
+    exog_datetime.index = pd.date_range(start='2024-01-01', periods=len(exog), freq='D')
 
     metrics = [
         "mean_absolute_error",
@@ -1567,8 +1569,8 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_st
     param_grid = list(ParameterGrid(param_grid))
     results_backtesting = _evaluate_grid_hyperparameters_multiseries(
         forecaster         = forecaster,
-        series             = series,
-        exog               = exog,
+        series             = series_datetime,
+        exog               = exog_datetime,
         param_grid         = param_grid,
         lags_grid          = lags_grid,
         steps              = steps,
@@ -1585,8 +1587,8 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_st
     )
     results_one_step_ahead = _evaluate_grid_hyperparameters_multiseries(
         forecaster         = forecaster,
-        series             = series,
-        exog               = exog,
+        series             = series_datetime,
+        exog               = exog_datetime,
         param_grid         = param_grid,
         lags_grid          = lags_grid,
         metric             = metrics,
@@ -1604,22 +1606,21 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_st
 @pytest.mark.parametrize(
         "forecaster",
         [
-            ForecasterAutoregMultiSeries(regressor=LGBMRegressor(random_state=678, verbose=-1), lags=3, forecaster_id=1),
             ForecasterAutoregMultiSeries(
                 regressor=LGBMRegressor(random_state=678, verbose=-1),
                 lags=3,
                 transformer_series=None,
-                forecaster_id=2
+                forecaster_id='Multiseries_no_transformer'
             ),
             ForecasterAutoregMultiSeries(
                 regressor=LGBMRegressor(random_state=678, verbose=-1),
                 lags=3,
                 transformer_series=StandardScaler(),
                 transformer_exog=StandardScaler(),
-                forecaster_id=3
+                forecaster_id='Multiseries_transformer'
             )
-        ]
-)
+        ],
+ids=lambda forecaster: f'forecaster: {forecaster.forecaster_id}')
 def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_step_ahead_when_series_is_dict(
     forecaster,
 ):
@@ -1662,3 +1663,21 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_st
         return_best        = False,
         n_jobs             = 'auto',
     )
+    results_one_step_ahead = _evaluate_grid_hyperparameters_multiseries(
+        forecaster         = forecaster,
+        series             = series_dict,
+        exog               = exog_dict,
+        param_grid         = param_grid,
+        lags_grid          = lags_grid,
+        steps              = steps,
+        refit              = False,
+        metric             = metrics,
+        initial_train_size = initial_train_size,
+        method             = 'one_step_ahead',
+        aggregate_metric   = ["average", "weighted_average", "pooling"],
+        fixed_train_size   = False,
+        return_best        = False,
+        n_jobs             = 'auto',
+    )
+
+    pd.testing.assert_frame_equal(results_backtesting, results_one_step_ahead)

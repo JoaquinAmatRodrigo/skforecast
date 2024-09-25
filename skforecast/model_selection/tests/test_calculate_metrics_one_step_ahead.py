@@ -1,5 +1,6 @@
 # Unit test _calculate_metrics_one_step_ahead
 # ==============================================================================
+import numpy as np
 from sklearn.metrics import mean_absolute_error
 from sklearn.metrics import mean_absolute_percentage_error
 from skforecast.metrics import mean_absolute_scaled_error
@@ -13,8 +14,6 @@ from skforecast.metrics import add_y_train_argument
 # Fixtures
 from .fixtures_model_selection import y
 from .fixtures_model_selection import exog
-
-# TODO: add test with differenciation and transformation
 
 
 def test_calculate_metrics_one_step_ahead_when_forecaster_autoreg():
@@ -47,10 +46,10 @@ def test_calculate_metrics_one_step_ahead_when_forecaster_autoreg():
         X_test=X_test,
         y_test=y_test,
     )
-    results = [float(result) for result in results]
-    expected = [0.5516310508466604, 1.2750659053445799, 1.9249024647280362]
+    results = np.array([float(result) for result in results])
+    expected = np.array([0.5516310508466604, 1.2750659053445799, 1.9249024647280362])
 
-    assert results == expected
+    np.testing.assert_array_almost_equal(results, expected)
 
 
 def test_calculate_metrics_one_step_ahead_when_forecaster_autoreg_direct():
@@ -83,7 +82,7 @@ def test_calculate_metrics_one_step_ahead_when_forecaster_autoreg_direct():
         X_test=X_test,
         y_test=y_test,
     )
-    results = [float(result) for result in results]
-    expected = [0.3277718194807295, 1.3574261666383498, 0.767982227299475]
+    results = np.array([float(result) for result in results])
+    expected = np.array([0.3277718194807295, 1.3574261666383498, 0.767982227299475])
 
-    assert results == expected
+    np.testing.assert_array_almost_equal(results, expected)

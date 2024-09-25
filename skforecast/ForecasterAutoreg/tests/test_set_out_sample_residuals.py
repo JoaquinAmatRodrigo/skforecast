@@ -306,7 +306,7 @@ def test_set_out_sample_residuals_when_there_are_no_residuals_for_some_bins():
         (
             f"The following bins have no out of sample residuals: [0]. "
             f"No predicted values fall in the interval "
-            f"[{forecaster.binner_intervals[0]}]. "
+            f"[{forecaster.binner_intervals_[0]}]. "
             f"Empty bins will be filled with a random sample of residuals from "
             f"the other bins."
         )

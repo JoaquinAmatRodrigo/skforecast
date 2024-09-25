@@ -127,6 +127,10 @@ class ForecasterAutoreg(ForecasterBase):
         `KBinsDiscretizer` used to discretize residuals into k bins according 
         to the predicted values associated with each residual.
         **New in version 0.12.0**
+    binner_intervals_ : dict
+        Intervals used to discretize residuals into k bins according to the predicted
+        values associated with each residual.
+        **New in version 0.12.0**
     binner_kwargs : dict
         Additional arguments to pass to the `KBinsDiscretizer` used to discretize 
         the residuals into k bins according to the predicted values associated 
@@ -271,7 +275,7 @@ class ForecasterAutoreg(ForecasterBase):
             self.binner_kwargs['encode'] = 'ordinal'
             self.binner_kwargs['dtype'] = np.float64
         self.binner = KBinsDiscretizer(**self.binner_kwargs).set_output(transform="default")
-        self.binner_intervals = None
+        self.binner_intervals_ = None
 
         if self.differentiation is not None:
             if not isinstance(differentiation, int) or differentiation < 1:
@@ -937,7 +941,7 @@ class ForecasterAutoreg(ForecasterBase):
             self.in_sample_residuals_by_bin_.values()
         ))
 
-        self.binner_intervals = {
+        self.binner_intervals_ = {
             i: (
                 self.binner.bin_edges_[0][i],
                 (
@@ -1922,7 +1926,7 @@ class ForecasterAutoreg(ForecasterBase):
                 warnings.warn(
                     (f"The following bins have no out of sample residuals: {empty_bins}. "
                      f"No predicted values fall in the interval "
-                     f"{[self.binner_intervals[bin] for bin in empty_bins]}. "
+                     f"{[self.binner_intervals_[bin] for bin in empty_bins]}. "
                      f"Empty bins will be filled with a random sample of residuals from "
                      f"the other bins.")
                 )
