@@ -74,6 +74,8 @@ The main changes in this release are:
 
     + `X_train_col_names` has been renamed to `X_train_features_names_out_`.
 
+    + `binner_intervals` has been renamed to `binner_intervals_`.
+
     + `in_sample_residuals` has been renamed to `in_sample_residuals_`.
 
     + `out_sample_residuals` has been renamed to `out_sample_residuals_`.

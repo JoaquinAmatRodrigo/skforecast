@@ -58,7 +58,7 @@ def test_binning_in_sample_residuals_output():
     np.testing.assert_almost_equal(forecaster.in_sample_residuals_, expected_1)
     for k in expected_2.keys():
         np.testing.assert_almost_equal(forecaster.in_sample_residuals_by_bin_[k], expected_2[k])
-    assert forecaster.binner_intervals == expected_3
+    assert forecaster.binner_intervals_ == expected_3
 
 
 def test_binning_in_sample_residuals_stores_maximum_200_residuals_per_bin():
