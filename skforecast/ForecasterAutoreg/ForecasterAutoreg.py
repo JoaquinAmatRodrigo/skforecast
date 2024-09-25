@@ -130,6 +130,7 @@ class ForecasterAutoreg(ForecasterBase):
     binner_intervals_ : dict
         Intervals used to discretize residuals into k bins according to the predicted
         values associated with each residual.
+        **New in version 0.12.0**
     binner_kwargs : dict
         Additional arguments to pass to the `KBinsDiscretizer` used to discretize 
         the residuals into k bins according to the predicted values associated 
