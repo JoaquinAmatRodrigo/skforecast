@@ -2,6 +2,7 @@
 # ==============================================================================
 import numpy as np
 import pandas as pd
+from sklearn.metrics import mean_absolute_error
 
 # Fixtures
 # series_1 = np.random.rand(50)
@@ -90,4 +91,11 @@ exog = pd.DataFrame({
           0.76451127,  0.37253453,  0.37938831,  0.12500821,  0.30680189])
      ),
 })
-                         
+
+
+def custom_metric(y_true, y_pred):  # pragma: no cover
+    """
+    """
+    metric = mean_absolute_error(y_true, y_pred)
+    
+    return metric
