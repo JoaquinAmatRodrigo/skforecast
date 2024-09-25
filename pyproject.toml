@@ -96,6 +96,7 @@ test = [
     "tensorflow>=2.13, <2.17",
     "torch>=2.2, <2.3",
     "tomli>=2.0, <2.1",
+    "pandas[parquet]>=1.5"
 ]
 
 
