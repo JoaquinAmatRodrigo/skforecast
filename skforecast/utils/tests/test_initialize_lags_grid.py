@@ -11,7 +11,7 @@ from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMulti
 from skforecast.utils import initialize_lags_grid
 from skforecast.exceptions import IgnoredArgumentWarning
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 4 lags of a time series, used in ForecasterAutoregCustom.
     """
@@ -29,9 +29,9 @@ def test_TypeError_initialize_lags__rid_when_not_list_dict_or_None():
     lags_grid = 'not_valid_type'
 
     err_msg = re.escape(
-            (f"`lags_grid` argument must be a list, dict or None. "
-             f"Got {type(lags_grid)}.")
-        )
+        (f"`lags_grid` argument must be a list, dict or None. "
+         f"Got {type(lags_grid)}.")
+    )
     with pytest.raises(TypeError, match = err_msg):
         initialize_lags_grid(forecaster, lags_grid)
 
@@ -54,8 +54,8 @@ def test_IgnoredArgumentWarning_initialize_lags_grid_when_forecaster_has_custom_
     lags_grid = [1, 2, 3]
 
     warn_msg = re.escape(
-            (f"`lags_grid` ignored if forecaster is an instance of "
-             f"`{type(forecaster).__name__}`."),
+        (f"`lags_grid` ignored if forecaster is an instance of "
+         f"`{type(forecaster).__name__}`."),
     )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         initialize_lags_grid(forecaster, lags_grid)

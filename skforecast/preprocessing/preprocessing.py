@@ -686,8 +686,8 @@ class RollingFeatures():
 
     def __init__(
         self, 
-        stats, 
-        window_sizes, 
+        stats: Union[str, list],
+        window_sizes: Union[int, list],
         min_periods: Optional[Union[int, list]] = None,
         features_names: Optional[Union[str, list]] = None, 
         fillna: Optional[Union[str, float]] = None

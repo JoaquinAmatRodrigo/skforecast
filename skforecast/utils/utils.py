@@ -47,7 +47,7 @@ optional_dependencies = {
 def initialize_lags(
     forecaster_name: str,
     lags: Any
-) -> np.ndarray:
+) -> Union[np.ndarray, int]:
     """
     Check lags argument input and generate the corresponding numpy ndarray.
 
@@ -62,6 +62,8 @@ def initialize_lags(
     -------
     lags : numpy ndarray
         Lags used as predictors.
+    max_lag : int
+        Maximum value of the lags.
     
     """
 
@@ -93,8 +95,105 @@ def initialize_lags(
                 ("`lags` argument must be a dict, int, 1d numpy ndarray, range, tuple or list. "
                  f"Got {type(lags)}.")
             )
+        
+    max_lag = max(lags)
 
-    return lags
+    return lags, max_lag
+
+
+def initialize_window_features(
+    window_features: Any
+) -> Union[list, Optional[int], list]:
+    """
+    Check window_features argument input and generate the corresponding list.
+
+    Parameters
+    ----------
+    window_features : Any
+        Classes used to create window features.
+
+    Returns
+    -------
+    window_features : list
+        List of classes used to create window features.
+    max_size_window_features : int, None
+        Maximum value of the `window_sizes` attribute of all classes.
+    window_features_names : list
+        List with all the features names of the window features.
+    
+    """
+
+    needed_atts = ['window_sizes', 'features_names']
+    needed_methods = ['transform_batch', 'transform']
+    max_size_window_features = None
+
+    if window_features is not None:
+        if not isinstance(window_features, list):
+            window_features = [window_features]
+
+        # TODO: Add link to documentation in the error message: how to create a 
+        # custom window feature class
+        max_window_sizes = []
+        window_features_names = []
+        for wf in window_features:
+            wf_name = type(wf).__name__
+            atts_methods = set([a for a in dir(wf)])
+            if not set(needed_atts).issubset(atts_methods):
+                raise ValueError(
+                    (f"{wf_name} must have the attributes: {needed_atts}.")
+                )
+            if not set(needed_methods).issubset(atts_methods):
+                raise ValueError(
+                    (f"{wf_name} must have the methods: {needed_methods}.")
+                )
+            
+            window_sizes = wf.window_sizes
+            if not isinstance(window_sizes, (int, list)):
+                raise TypeError(
+                    (f"Attribute `window_sizes` of {wf_name} must be an int or a list "
+                     f"of ints. Got {type(window_sizes)}.")
+                )
+            
+            if isinstance(window_sizes, int):
+                if window_sizes < 1:
+                    raise ValueError(
+                        (f"If argument `window_sizes` is an integer, it must be equal "
+                         f"to or greater than 1. Got {window_sizes} from {wf_name}.")
+                    )
+                max_window_sizes.append(window_sizes)
+            else:
+                if not all(isinstance(ws, int) for ws in window_sizes) or not all(
+                    ws >= 1 for ws in window_sizes
+                ):                    
+                    raise ValueError(
+                        (f"If argument `window_sizes` is a list, all elements must be integers "
+                         f"equal to or greater than 1. Got {window_sizes} from {wf_name}.")
+                    )
+                max_window_sizes.append(max(window_sizes))
+
+            features_names = wf.features_names
+            if not isinstance(features_names, (str, list)):
+                raise TypeError(
+                    (f"Attribute `features_names` of {wf_name} must be a str or "
+                     f"a list of strings. Got {type(features_names)}.")
+                )
+            if isinstance(features_names, str):
+                window_features_names.append(features_names)
+            else:
+                if not all(isinstance(fn, str) for fn in features_names):
+                    raise TypeError(
+                        (f"If argument `features_names` is a list, all elements "
+                         f"must be strings. Got {features_names} from {wf_name}.")
+                    )
+                window_features_names.extend(features_names)
+
+        max_size_window_features = max(max_window_sizes)
+        if len(set(window_features_names)) != len(window_features_names):
+            raise ValueError(
+                (f"All window features names must be unique. Got {window_features_names}.")
+            )
+
+    return window_features, max_size_window_features, window_features_names
 
 
 def initialize_weights(
@@ -303,7 +402,7 @@ def initialize_lags_grid(
     if isinstance(lags_grid, list):
         lags_grid = {f'{lags}': lags for lags in lags_grid}
     elif lags_grid is None:
-        lags = [int(lag) for lag in forecaster.lags] # Required since numpy 2.0
+        lags = [int(lag) for lag in forecaster.lags]  # Required since numpy 2.0
         lags_grid = {f'{lags}': lags}
     else:
         lags_label = 'keys'

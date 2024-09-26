@@ -34,7 +34,7 @@ def test_ValueError_initialize_lags_when_lags_numpy_ndarray_with_more_than_1_dim
 
 @pytest.mark.parametrize("lags", 
                          [[], (), range(0), np.array([])], 
-                         ids = lambda lags : f'lags type: {type(lags)}')
+                         ids = lambda lags: f'lags type: {type(lags)}')
 def test_ValueError_initialize_lags_when_lags_list_tuple_range_or_numpy_ndarray_with_no_values(lags):
     """
     Test ValueError is raised when lags is list, tuple, range or numpy ndarray 
@@ -52,7 +52,7 @@ def test_ValueError_initialize_lags_when_lags_list_tuple_range_or_numpy_ndarray_
                          [[1, 1.5], 
                           (1, 1.5), 
                           np.array([1.2, 1.5])], 
-                         ids = lambda lags : f'lags: {lags}')
+                         ids = lambda lags: f'lags: {lags}')
 def test_TypeError_initialize_lags_when_lags_list_tuple_or_numpy_array_with_values_not_int(lags):
     """
     Test TypeError is raised when lags is list, tuple or numpy ndarray with 
@@ -68,7 +68,7 @@ def test_TypeError_initialize_lags_when_lags_list_tuple_or_numpy_array_with_valu
 
 @pytest.mark.parametrize("lags", 
                          [[0, 1], (0, 1), range(0, 2), np.arange(0, 2)], 
-                         ids = lambda lags : f'lags: {lags}')
+                         ids = lambda lags: f'lags: {lags}')
 def test_ValueError_initialize_lags_when_lags_has_values_lower_than_1(lags):
     """
     Test ValueError is raised when lags is initialized with any value lower than 1.
@@ -83,7 +83,7 @@ def test_ValueError_initialize_lags_when_lags_has_values_lower_than_1(lags):
 
 @pytest.mark.parametrize("lags", 
                          [1.5, 'not_valid_type'], 
-                         ids = lambda lags : f'lags: {lags}')
+                         ids = lambda lags: f'lags: {lags}')
 def test_TypeError_initialize_lags_when_lags_is_not_valid_type(lags):
     """
     Test TypeError is raised when lags is not a valid type.
@@ -101,7 +101,7 @@ def test_TypeError_initialize_lags_when_lags_is_not_valid_type(lags):
 
 @pytest.mark.parametrize("lags", 
                          [1.5, 'not_valid_type'], 
-                         ids = lambda lags : f'lags: {lags}')
+                         ids = lambda lags: f'lags: {lags}')
 def test_TypeError_initialize_lags_when_lags_is_not_valid_type_ForecasterAutoregMultiVariate(lags):
     """
     Test TypeError is raised when lags is not a valid type in ForecasterAutoregMultiVariate.
@@ -118,19 +118,20 @@ def test_TypeError_initialize_lags_when_lags_is_not_valid_type_ForecasterAutoreg
 
 
 @pytest.mark.parametrize("lags             , expected", 
-                         [(10              , np.arange(10) + 1), 
-                          ([1, 2, 3]       , np.array([1, 2, 3])),
-                          ((1, 2, 3)       , np.array((1, 2, 3))),  
-                          (range(1, 4)     , np.array(range(1, 4))), 
-                          (np.arange(1, 10), np.arange(1, 10))], 
-                         ids = lambda values : f'values: {values}' )
+                         [(10              , (np.arange(10) + 1, 10)), 
+                          ([1, 2, 3]       , (np.array([1, 2, 3]), 3)),
+                          ((4, 5, 6)       , (np.array((4, 5, 6)), 6)),  
+                          (range(1, 4)     , (np.array([1, 2, 3]), 3)), 
+                          (np.arange(1, 10), (np.arange(1, 10), 9))], 
+                         ids = lambda values: f'values: {values}')
 def test_initialize_lags_input_lags_parameter(lags, expected):
     """
     Test creation of attribute lags with different arguments.
     """
-    lags = initialize_lags(
-               forecaster_name = 'ForecasterAutoreg',
-               lags            = lags
-           )
+    lags, max_lag = initialize_lags(
+                        forecaster_name = 'ForecasterAutoreg',
+                        lags            = lags
+                    )
 
-    assert (lags == expected).all()
+    assert (lags == expected[0]).all()
+    assert max_lag == expected[1]
