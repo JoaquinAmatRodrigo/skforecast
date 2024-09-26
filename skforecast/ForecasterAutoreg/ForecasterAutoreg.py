@@ -514,16 +514,15 @@ class ForecasterAutoreg(ForecasterBase):
         Returns
         -------
         X_data : numpy ndarray
-            2d numpy ndarray with the lagged values (predictors). 
-            Shape: (samples - max(self.lags), len(self.lags))
+            2d numpy ndarray with the lagged values (predictors).
         y_data : numpy ndarray
             1d numpy ndarray with the values of the time series related to each 
-            row of `X_data`. 
-            Shape: (samples - max(self.lags), )
+            row of `X_data`.
         
         """
 
-        n_splits = len(y) - self.max_lag
+        # TODO: Move this error to create_train_X_y, check with window_size
+        n_splits = len(y) - self.window_size
         if n_splits <= 0:
             raise ValueError(
                 (f"The maximum lag ({self.max_lag}) must be less than the length "
@@ -531,11 +530,10 @@ class ForecasterAutoreg(ForecasterBase):
             )
 
         X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
-
         for i, lag in enumerate(self.lags):
-            X_data[:, i] = y[self.max_lag - lag: -lag]
+            X_data[:, i] = y[self.window_size - lag: -lag]
 
-        y_data = y[self.max_lag:]
+        y_data = y[self.window_size:]
 
         return X_data, y_data
 
@@ -640,12 +638,13 @@ class ForecasterAutoreg(ForecasterBase):
 
         # TODO: Allow no lags
         X_train_lags, y_train = self._create_lags(y=y_values)
-        X_train_lags = pd.DataFrame(
-                           data    = X_train_lags,
-                           columns = [f"lag_{i}" for i in self.lags],
-                           index   = y_index[self.max_lag:]
-                       )
-        X_train.append(X_train_lags)
+        if X_train_lags is not None:
+            X_train_lags = pd.DataFrame(
+                               data    = X_train_lags,
+                               columns = [f"lag_{i}" for i in self.lags],
+                               index   = y_index[self.max_lag:]
+                           )
+            X_train.append(X_train_lags)
         
         X_train_window_features_names_out_ = None
         if self.window_features is not None:
@@ -667,14 +666,16 @@ class ForecasterAutoreg(ForecasterBase):
         if exog is not None:
             # The first `self.max_lag` positions have to be removed from exog
             # since they are not in X_train.
-            exog_to_train = exog.iloc[self.max_lag:, ]
-            exog_to_train.index = exog_index[self.max_lag:]
+            # exog_to_train = exog.iloc[self.max_lag:, ]
+            # exog_to_train.index = exog_index[self.max_lag:]
             X_train_exog_names_out_ = exog_to_train.columns.to_list()
             X_train.append(exog_to_train)
 
 
         # TODO: Filter window_size in all X_train
+        y_train_index = y_index[self.window_size - self.max_lag:]
         X_train = pd.concat(X_train, axis=1)
+        X_train = X_train.iloc[-len(y_train_index):,]
         # TODO: DataFrame or Series?
         y_train = pd.Series(
                       data  = y_train,
