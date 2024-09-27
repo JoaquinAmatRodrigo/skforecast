@@ -614,6 +614,51 @@ class TimeSeriesFold():
         print("")
 
 
+class TimeSeriesOneStepAhead():
+    """
+    Class to split time series data into train and test folds for one-step-ahead
+    forecasting.
+
+    Parameters
+    ----------
+    initial_train_size : int, default=None
+        Number of observations used for initial training. If `None` or 0, the initial
+        forecaster is not trained in the first fold.
+    window_size : int
+        Number of observations needed to generate the autoregressive predictors.
+    differentiation : int, default=None
+        Number of observations to use for differentiation. This is used to extend the
+        `last_window` as many observations as the differentiation order.
+    gap : int, default=0
+        Number of observations between the end of the training set and the start of the
+        test set.
+    return_all_indexes : bool, default=False
+        Whether to return all indexes or only the start and end indexes of each fold.
+    verbose : bool, default=True
+        Whether to print information about generated folds.
+
+    Attributes
+    ----------
+    steps : int, default=1
+        Number of observations used to be predicted in each fold. Since it is
+        one-step-ahead forecasting, the default value is 1.
+    initial_train_size : int, default=None
+        Number of observations used for initial training. If `None` or 0, the initial
+        forecaster is not trained in the first fold.
+    window_size : int
+        Number of observations needed to generate the autoregressive predictors.
+    differentiation : int, default=None 
+        Number of observations to use for differentiation. This is used to extend the
+        `last_window` as many observations as the differentiation order.
+    return_all_indexes : bool, default=False
+        Whether to return all indexes or only the start and end indexes of each fold.
+
+    Returns
+    -------
+    
+        
+    """
+
 def _backtesting_forecaster(
     forecaster: object,
     y: pd.Series,
