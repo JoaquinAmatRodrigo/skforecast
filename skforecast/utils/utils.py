@@ -103,7 +103,7 @@ def initialize_lags(
 
 def initialize_window_features(
     window_features: Any
-) -> Union[list, Optional[int], list]:
+) -> Union[Optional[list], Optional[int], Optional[list]]:
     """
     Check window_features argument input and generate the corresponding list.
 
@@ -114,11 +114,11 @@ def initialize_window_features(
 
     Returns
     -------
-    window_features : list
+    window_features : list, None
         List of classes used to create window features.
     max_size_window_features : int, None
         Maximum value of the `window_sizes` attribute of all classes.
-    window_features_names : list
+    window_features_names : list, None
         List with all the features names of the window features.
     
     """
@@ -127,6 +127,8 @@ def initialize_window_features(
     needed_methods = ['transform_batch', 'transform']
     max_size_window_features = None
 
+    max_window_sizes = None
+    window_features_names = None
     if window_features is not None:
         if not isinstance(window_features, list):
             window_features = [window_features]

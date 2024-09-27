@@ -321,7 +321,9 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_bo
             dtype = float
         ),
         ['exog_1', 'exog_2'],
+        None,
         ['exog_1', 'exog_2'],
+        ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog_1', 'exog_2'],
         {'exog_1': exog['exog_1'].dtypes, 'exog_2': exog['exog_2'].dtypes}
     )
 
@@ -329,8 +331,10 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_bo
     pd.testing.assert_series_equal(results[1], expected[1])
     assert results[2] == expected[2]
     assert results[3] == expected[3]
-    for k in results[4].keys():
-        assert results[4][k] == expected[4][k]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
 
 
 def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_category():
