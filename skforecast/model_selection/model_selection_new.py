@@ -13,6 +13,7 @@ from typing import Union, Tuple, Optional, Callable, Any
 import warnings
 import numpy as np
 import pandas as pd
+import itertools
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
 import optuna
@@ -35,7 +36,6 @@ logging.basicConfig(
 
 
 class TimeSeriesFold():
-    # incluir argumento as_data_frame en el split para devolver los folds como dataframe y se sean más interpretables
     """
     Class to split time series data into train and test folds.
 
@@ -289,7 +289,8 @@ class TimeSeriesFold():
             self,
             X: Union[pd.Series, pd.DataFrame, pd.Index, dict],
             externally_fitted: bool = False,
-    ) -> list:
+            as_data_frame: bool = False
+    ) -> Union[list, pd.DataFrame]:
         """
         Split the time series data into train and test folds.
 
@@ -300,10 +301,13 @@ class TimeSeriesFold():
         externally_fitted : bool, default=False
             If True, the forecaster is assumed to be already fitted so no training is
             done in the first fold.
+        as_data_frame : bool, default=False
+            If True, the folds are returned as a DataFrame. This is useful to visualize
+            the folds in a more interpretable way.
 
         Returns
         -------
-        list
+        list, pd.DataFrame
             A list of tuples containing the indices (position) for for each fold. Each list
             contains 4 tuples and a boolean with the following information:
 
@@ -327,6 +331,11 @@ class TimeSeriesFold():
             It is important to note that the returned values are the positions of the
             observations and not the actual values of the index, so they can be used to
             slice the data directly using iloc.
+
+            If `as_data_frame` is `True`, the folds are returned as a DataFrame with the
+            following columns: 'fold', 'train_start', 'train_end', 'last_window_start',
+            'last_window_end', 'test_start', 'test_end', 'test_start_with_gap',
+            'test_end_with_gap', 'fit_forecaster'.      
 
         """
 
@@ -436,6 +445,24 @@ class TimeSeriesFold():
                 fold[4]] 
                 for fold in folds
             ]
+
+        if as_data_frame:
+            folds = pd.DataFrame(
+                data = [list(itertools.chain(*fold[:-1])) + [fold[-1]] for fold in folds],
+                columns = [
+                    'train_start',
+                    'train_end',
+                    'last_window_start',
+                    'last_window_end',
+                    'test_start',
+                    'test_end',
+                    'test_start_with_gap',
+                    'test_end_with_gap',
+                    'fit_forecaster'
+                ],
+            )
+            folds.insert(0, 'fold', range(len(folds)))
+            
 
         return folds
     
