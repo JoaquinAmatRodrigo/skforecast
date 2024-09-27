@@ -447,20 +447,32 @@ class TimeSeriesFold():
             ]
 
         if as_data_frame:
-            folds = pd.DataFrame(
-                data = [list(itertools.chain(*fold[:-1])) + [fold[-1]] for fold in folds],
-                columns = [
-                    'train_start',
-                    'train_end',
-                    'last_window_start',
-                    'last_window_end',
-                    'test_start',
-                    'test_end',
-                    'test_start_with_gap',
-                    'test_end_with_gap',
-                    'fit_forecaster'
-                ],
-            )
+            if not self.return_all_indexes:
+                folds = pd.DataFrame(
+                    data = [list(itertools.chain(*fold[:-1])) + [fold[-1]] for fold in folds],
+                    columns = [
+                        'train_start',
+                        'train_end',
+                        'last_window_start',
+                        'last_window_end',
+                        'test_start',
+                        'test_end',
+                        'test_start_with_gap',
+                        'test_end_with_gap',
+                        'fit_forecaster'
+                    ],
+                )
+            else:
+                folds = pd.DataFrame(
+                    data = folds,
+                    columns = [
+                        'train_index',
+                        'last_window_index',
+                        'test_index',
+                        'test_index_with_gap',
+                        'fit_forecaster'
+                    ],
+                )
             folds.insert(0, 'fold', range(len(folds)))
             
 
@@ -615,6 +627,9 @@ class TimeSeriesFold():
 
 
 class TimeSeriesOneStepAhead():
+    # TODO: this is a dummy class. Is it needed? cv argument in gried search 
+    # could allow to use TimeSeriesFold() or "one_step_ahead" as a string to use this
+    # class.
     """
     Class to split time series data into train and test folds for one-step-ahead
     forecasting.
@@ -629,9 +644,6 @@ class TimeSeriesOneStepAhead():
     differentiation : int, default=None
         Number of observations to use for differentiation. This is used to extend the
         `last_window` as many observations as the differentiation order.
-    gap : int, default=0
-        Number of observations between the end of the training set and the start of the
-        test set.
     return_all_indexes : bool, default=False
         Whether to return all indexes or only the start and end indexes of each fold.
     verbose : bool, default=True
@@ -655,9 +667,84 @@ class TimeSeriesOneStepAhead():
 
     Returns
     -------
+
     
-        
     """
+
+    def __init__(
+            self,
+            initial_train_size: Optional[int] = None,
+            window_size: Optional[int] = None,
+            differentiation: Optional[int] = None,
+            return_all_indexes: bool = False,
+            verbose: bool = True
+    ) -> None:
+
+        self.initial_train_size = initial_train_size
+        self.window_size = window_size
+        self.differentiation = differentiation
+        self.return_all_indexes = return_all_indexes
+        self.verbose = verbose
+
+    def split(
+            self,
+            X: Union[pd.Series, pd.DataFrame, pd.Index, dict],
+            as_data_frame: bool = False
+    ) -> Union[list, pd.DataFrame]:
+        """
+        Split the time series data into train and test folds.
+
+        Parameters
+        ----------
+        X : pandas Series, DataFrame, Index, or dictionary
+            Time series data or index to split.
+        as_data_frame : bool, default=False
+            If True, the folds are returned as a DataFrame. This is useful to visualize
+            the folds in a more interpretable way.
+        
+        Returns
+        -------
+        """
+        
+        fold = [
+            [0, self.initial_train_size],
+            [self.initial_train_size, len(X)],
+            True
+        ]
+
+        if self.return_all_indexes:
+            fold = [
+                [range(fold[0][0], fold[0][1])],
+                [range(fold[1][0], fold[1][1])],
+                fold[2]
+            ]
+
+        if as_data_frame:
+            if not self.return_all_indexes:
+                fold = pd.DataFrame(
+                    data = [list(itertools.chain(*fold[:-1])) + [fold[-1]]],
+                    columns = [
+                        'train_start',
+                        'train_end',
+                        'test_start',
+                        'test_end',
+                        'fit_forecaster'
+                    ],
+                )
+            else:
+                fold = pd.DataFrame(
+                    data = [fold],
+                    columns = [
+                        'train_index',
+                        'test_index',
+                        'fit_forecaster'
+                    ],
+                )
+            fold.insert(0, 'fold', range(len(fold)))
+
+        return fold
+
+
 
 def _backtesting_forecaster(
     forecaster: object,
