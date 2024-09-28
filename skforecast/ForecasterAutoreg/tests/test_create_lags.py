@@ -2,8 +2,13 @@
 # ==============================================================================
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.linear_model import LinearRegression
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
+
+rolling = RollingFeatures(
+    stats=['mean', 'median', 'sum'], window_sizes=[5, 5, 6]
+)
 
 
 def test_create_lags_output():
@@ -29,7 +34,7 @@ def test_create_lags_output():
 
 def test_create_lags_output_interspersed_lags():
     """
-    Test matrix of lags is is a list with interspersed lags.
+    Test matrix of lags if list with interspersed lags.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=[2, 3])
     results = forecaster._create_lags(y=np.arange(10))
@@ -75,4 +80,20 @@ def test_create_lags_output_pandas():
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
+    np.testing.assert_array_almost_equal(results[1], expected[1])
+
+
+def test_create_lags_output_lags_None():
+    """
+    Test matrix of lags when lags=None.
+    """
+    forecaster = ForecasterAutoreg(LinearRegression(), lags=None,
+                                   window_features=rolling)
+    results = forecaster._create_lags(y=np.arange(10))
+    expected = (
+        None,
+        np.array([6., 7., 8., 9.])
+    )
+
+    assert results[0] == expected[0]
     np.testing.assert_array_almost_equal(results[1], expected[1])

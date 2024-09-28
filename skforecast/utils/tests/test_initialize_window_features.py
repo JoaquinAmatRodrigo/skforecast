@@ -142,6 +142,20 @@ def test_ValueError_initialize_window_features_when_not_unique_features_names():
         initialize_window_features(window_features)
 
 
+def test_initialize_window_features_when_None():
+    """
+    Test initialize_window_features with None.
+    """
+
+    window_features, max_size_window_features, window_features_names = (
+        initialize_window_features(None)
+    )
+
+    assert window_features is None
+    assert max_size_window_features is None
+    assert window_features_names is None
+
+
 def test_initialize_window_features_valid():
     """
     Test initialize_window_features with valid values.

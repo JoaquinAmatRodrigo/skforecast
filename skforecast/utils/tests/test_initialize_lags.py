@@ -118,7 +118,8 @@ def test_TypeError_initialize_lags_when_lags_is_not_valid_type_ForecasterAutoreg
 
 
 @pytest.mark.parametrize("lags             , expected", 
-                         [(10              , (np.arange(10) + 1, 10)), 
+                         [(None            , (None, None)),
+                          (10              , (np.arange(10) + 1, 10)), 
                           ([1, 2, 3]       , (np.array([1, 2, 3]), 3)),
                           ((4, 5, 6)       , (np.array((4, 5, 6)), 6)),  
                           (range(1, 4)     , (np.array([1, 2, 3]), 3)), 
@@ -133,5 +134,9 @@ def test_initialize_lags_input_lags_parameter(lags, expected):
                         lags            = lags
                     )
 
-    assert (lags == expected[0]).all()
-    assert max_lag == expected[1]
+    if lags is None:
+        assert lags is expected[0]
+        assert max_lag is expected[1]
+    else:
+        np.testing.assert_array_almost_equal(lags, expected[0])
+        assert max_lag == expected[1]
