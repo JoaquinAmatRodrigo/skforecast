@@ -727,26 +727,26 @@ def backtesting_forecaster(
              f"modules.")
         )
     
-    check_backtesting_input(
-        forecaster              = forecaster,
-        steps                   = steps,
-        metric                  = metric,
-        y                       = y,
-        initial_train_size      = initial_train_size,
-        fixed_train_size        = fixed_train_size,
-        gap                     = gap,
-        skip_folds              = skip_folds,
-        allow_incomplete_fold   = allow_incomplete_fold,
-        refit                   = refit,
-        interval                = interval,
-        n_boot                  = n_boot,
-        random_state            = random_state,
-        use_in_sample_residuals = use_in_sample_residuals,
-        use_binned_residuals    = use_binned_residuals,
-        n_jobs                  = n_jobs,
-        verbose                 = verbose,
-        show_progress           = show_progress
-    )
+    # check_backtesting_input(
+    #     forecaster              = forecaster,
+    #     steps                   = steps,
+    #     metric                  = metric,
+    #     y                       = y,
+    #     initial_train_size      = initial_train_size,
+    #     fixed_train_size        = fixed_train_size,
+    #     gap                     = gap,
+    #     skip_folds              = skip_folds,
+    #     allow_incomplete_fold   = allow_incomplete_fold,
+    #     refit                   = refit,
+    #     interval                = interval,
+    #     n_boot                  = n_boot,
+    #     random_state            = random_state,
+    #     use_in_sample_residuals = use_in_sample_residuals,
+    #     use_binned_residuals    = use_binned_residuals,
+    #     n_jobs                  = n_jobs,
+    #     verbose                 = verbose,
+    #     show_progress           = show_progress
+    # )
     
     if type(forecaster).__name__ == 'ForecasterAutoregDirect' and \
        forecaster.steps < steps + gap:
