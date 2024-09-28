@@ -62,7 +62,12 @@ class ForecasterAutoreg(ForecasterBase):
         - `list`, `1d numpy ndarray` or `range`: include only lags present in 
         `lags`, all elements must be int.
     window_features : object, list, default `None`
-        ............................
+        Class or list of classes used to create window features. Window features
+        are created from the original time series and are included as predictors.
+        The classes must have a method `transform_batch` that receives a pandas
+        Series and returns a pandas DataFrame. The method `transform_batch` must
+        return the same number of rows as the input Series. The window features
+
     transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
@@ -103,6 +108,21 @@ class ForecasterAutoreg(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
     lags : numpy ndarray
         Lags used as predictors.
+    max_lag : int
+        Maximum value of lag included in `lags`.
+    window_features : list
+        Class or list of classes used to create window features.
+    window_features_names : list
+        Names of the window features to be included in the `X_train` matrix.
+    window_features_class_names : list
+        Names of the classes used to create the window features.
+    max_size_window_features : int
+        Maximum window size required by the window features.
+    window_size : int
+        The window size needed to create the predictors. It is calculated as the 
+        maximum value between `max_lag` and `max_size_window_features`. If 
+        differentiation is used, `window_size` is increased by n units equal to 
+        the order of differentiation so that predictors can be generated correctly.
     transformer_y : object transformer (preprocessor)
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
@@ -147,12 +167,6 @@ class ForecasterAutoreg(ForecasterBase):
         forecaster.
     differentiator : TimeSeriesDifferentiator
         Skforecast object used to differentiate the time series.
-    max_lag : int
-        Maximum value of lag included in `lags`.
-    window_size : int
-        Size of the window needed to create the predictors. When using
-        differentiation, the `window_size` is increased by the order of differentiation
-        so that the predictors can be created correctly.
     last_window_ : pandas DataFrame
         This window represents the most recent data observed by the predictor
         during its training phase. It contains the values needed to predict the
@@ -177,6 +191,9 @@ class ForecasterAutoreg(ForecasterBase):
     exog_dtypes_in_ : dict
         Type of each exogenous variable/s used in training. If `transformer_exog` 
         is used, the dtypes are calculated after the transformation.
+    X_train_window_features_names_out_ : list
+        Names of the window features included in the matrix `X_train` created
+        internally for training.
     X_train_exog_names_out_ : list
         Names of the exogenous variables included in the matrix `X_train` created
         internally for training. It can be different from `exog_names_in_` if
@@ -248,7 +265,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.exog_names_in_                     = None
         self.exog_type_in_                      = None
         self.exog_dtypes_in_                    = None
-        self.X_train_window_features_names_out_ = None  # TODO: Include in docstring
+        self.X_train_window_features_names_out_ = None
         self.X_train_exog_names_out_            = None
         self.X_train_features_names_out_        = None
         self.in_sample_residuals_               = None
@@ -265,9 +282,9 @@ class ForecasterAutoreg(ForecasterBase):
         self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
         self.window_features, self.max_size_window_features, self.window_features_names = (
             initialize_window_features(window_features)
-        )  # TODO: Include in docstring
+        )
         if window_features is not None:
-            self.window_features_class_names = [type(wf).__name__ for wf in self.window_features]  # TODO: Include in docstring
+            self.window_features_class_names = [type(wf).__name__ for wf in self.window_features]
             self.window_size = max(self.max_lag, self.max_size_window_features)
         else:
             self.window_size = self.max_lag
@@ -506,17 +523,15 @@ class ForecasterAutoreg(ForecasterBase):
         train_index: Optional[pd.Index] = None
     ) -> Tuple[Union[np.ndarray, pd.DataFrame], np.ndarray]:
         """
-        Transforms a 1d array into a 2d array (X) and a 1d array (y). Each row
-        in X is associated with a value of y and it represents the lags that
-        precede it.
+        Create the lagged values and their target variable from a time series.
         
-        Notice that, the returned matrix X_data, contains the lag 1 in the first
-        column, the lag 2 in the second column and so on.
+        Note that the returned matrix `X_data` contains the lag 1 in the first 
+        column, the lag 2 in the in the second column and so on.
         
         Parameters
         ----------
         y : numpy ndarray
-            Training time series.
+            Training time series values.
         X_as_pandas : bool, default `False`
             If `True`, the returned matrix `X_data` is a pandas DataFrame.
         train_index : pandas Index, default `None`
@@ -551,19 +566,29 @@ class ForecasterAutoreg(ForecasterBase):
 
     def _create_window_features(
         self, 
-        y: np.ndarray,
+        y: pd.Series,
         X_as_pandas: bool = False,
         train_index: Optional[pd.Index] = None
-    ) -> Tuple[Union[np.ndarray, pd.DataFrame], np.ndarray]:
+    ) -> Tuple[list, list]:
         """
         
         Parameters
         ----------
-        y : numpy ndarray
+        y : pandas Series
             Training time series.
+        X_as_pandas : bool, default `False`
+            If `True`, the returned matrix `X_train_window_features` is a 
+            pandas DataFrame.
+        train_index : pandas Index, default `None`
+            Index of the training data. It is used to create the pandas DataFrame
+            `X_train_window_features` when `X_as_pandas` is `True`.
 
         Returns
         -------
+        X_train_window_features : list
+            List of numpy ndarrays or pandas DataFrames with the window features.
+        X_train_window_features_names_out_ : list
+            Names of the window features.
         
         """
 
@@ -590,11 +615,11 @@ class ForecasterAutoreg(ForecasterBase):
                      f"must return a DataFrame with the same index as "
                      f"the input time series - `window_size`.")
                 )
-            if not X_as_pandas:
-                X_train_wf = X_train_wf.to_numpy()
-                
-            X_train_window_features.append(X_train_wf)
+            
             X_train_window_features_names_out_.extend(X_train_wf.columns)
+            if not X_as_pandas:
+                X_train_wf = X_train_wf.to_numpy()     
+            X_train_window_features.append(X_train_wf)
 
         return X_train_window_features, X_train_window_features_names_out_
 
@@ -634,7 +659,7 @@ class ForecasterAutoreg(ForecasterBase):
             internally for training. It can be different from `exog_names_in_` if
             some exogenous variables are transformed during the training process.
         X_train_features_names_out_ : list
-            Names of columns of the matrix created internally for training.
+            Names of the columns of the matrix created internally for training.
         exog_dtypes_in_ : dict
             Type of each exogenous variable/s used in training. If `transformer_exog` 
             is used, the dtypes are calculated before the transformation.
@@ -644,7 +669,7 @@ class ForecasterAutoreg(ForecasterBase):
         check_y(y=y)
         y = input_to_frame(data=y, input_name='y')
 
-        if len(y) < self.window_size:
+        if len(y) <= self.window_size:
             raise ValueError(
                 (f"Length of `y` must be greater than the maximum window size "
                  f"needed by the forecaster.\n"
@@ -724,7 +749,7 @@ class ForecasterAutoreg(ForecasterBase):
         if self.window_features is not None:
             X_train_window_features, X_train_window_features_names_out_ = (
                 self._create_window_features(
-                    y=y_values, X_as_pandas=X_as_pandas, train_index=train_index
+                    y=y, X_as_pandas=X_as_pandas, train_index=train_index
                 )
             )
             X_train.extend(X_train_window_features)
