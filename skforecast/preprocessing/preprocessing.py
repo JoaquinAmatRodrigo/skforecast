@@ -689,7 +689,7 @@ class RollingFeatures():
         stats: Union[str, list],
         window_sizes: Union[int, list],
         min_periods: Optional[Union[int, list]] = None,
-        features_names: Optional[Union[str, list]] = None, 
+        features_names: Optional[list] = None, 
         fillna: Optional[Union[str, float]] = None
     ) -> None:
         

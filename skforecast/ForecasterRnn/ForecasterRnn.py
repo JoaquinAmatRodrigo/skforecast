@@ -112,7 +112,7 @@ class ForecasterRnn(ForecasterBase):
     transformer_exog : Ignored
         Not used, present here for API consistency by convention.
     max_lag : int
-        Maximum value of lag included in `lags`.
+        Maximum lag included in `lags`.
     window_size : int
         Size of the window needed to create the predictors.
     window_size_diff : int

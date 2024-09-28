@@ -55,19 +55,16 @@ class ForecasterAutoreg(ForecasterBase):
     ----------
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API
-    lags : int, list, numpy ndarray, range
+    lags : int, list, numpy ndarray, range, default `None`
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1. 
     
         - `int`: include lags from 1 to `lags` (included).
         - `list`, `1d numpy ndarray` or `range`: include only lags present in 
         `lags`, all elements must be int.
+        - `None`: no lags are included as predictors. 
     window_features : object, list, default `None`
         Class or list of classes used to create window features. Window features
         are created from the original time series and are included as predictors.
-        The classes must have a method `transform_batch` that receives a pandas
-        Series and returns a pandas DataFrame. The method `transform_batch` must
-        return the same number of rows as the input Series. The window features
-
     transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
@@ -109,7 +106,7 @@ class ForecasterAutoreg(ForecasterBase):
     lags : numpy ndarray
         Lags used as predictors.
     max_lag : int
-        Maximum value of lag included in `lags`.
+        Maximum lag included in `lags`.
     window_features : list
         Class or list of classes used to create window features.
     window_features_names : list
@@ -283,13 +280,20 @@ class ForecasterAutoreg(ForecasterBase):
         self.window_features, self.max_size_window_features, self.window_features_names = (
             initialize_window_features(window_features)
         )
+        if self.window_features is None and self.lags is None:
+            raise ValueError(
+                ("At least one of the arguments `lags` or `window_features` "
+                 "must be different from None. This is required to create the "
+                 "predictors used in training the forecaster.")
+            )
+        
+        max_lag_ws = self.max_lag if self.lags is not None else 0
+        max_size_window_features_ws = (
+            self.max_size_window_features if self.window_features is not None else 0
+        )
+        self.window_size = max(max_lag_ws, max_size_window_features_ws)
         if window_features is not None:
-            self.window_features_class_names = [type(wf).__name__ for wf in self.window_features]
-            self.window_size = max(self.max_lag, self.max_size_window_features)
-        else:
-            self.window_size = self.max_lag
-
-        # TODO: Check there is lags or window_features
+            self.window_features_class_names = [type(wf).__name__ for wf in self.window_features] 
 
         self.binner_kwargs = binner_kwargs
         if binner_kwargs is None:
@@ -521,7 +525,7 @@ class ForecasterAutoreg(ForecasterBase):
         y: np.ndarray,
         X_as_pandas: bool = False,
         train_index: Optional[pd.Index] = None
-    ) -> Tuple[Union[np.ndarray, pd.DataFrame], np.ndarray]:
+    ) -> Tuple[Optional[Union[np.ndarray, pd.DataFrame]], np.ndarray]:
         """
         Create the lagged values and their target variable from a time series.
         
@@ -540,26 +544,28 @@ class ForecasterAutoreg(ForecasterBase):
 
         Returns
         -------
-        X_data : numpy ndarray, pandas DataFrame
+        X_data : numpy ndarray, pandas DataFrame, None
             Lagged values (predictors).
         y_data : numpy ndarray
             Values of the time series related to each row of `X_data`.
         
         """
 
-        n_splits = len(y) - self.window_size
-        X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
-        for i, lag in enumerate(self.lags):
-            X_data[:, i] = y[self.window_size - lag: -lag]
+        X_data = None
+        if self.lags is not None:
+            n_splits = len(y) - self.window_size
+            X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
+            for i, lag in enumerate(self.lags):
+                X_data[:, i] = y[self.window_size - lag: -lag]
+
+            if X_as_pandas:
+                X_data = pd.DataFrame(
+                            data    = X_data,
+                            columns = [f"lag_{i}" for i in self.lags],
+                            index   = train_index
+                        )
 
         y_data = y[self.window_size:]
-
-        if X_as_pandas:
-            X_data = pd.DataFrame(
-                         data    = X_data,
-                         columns = [f"lag_{i}" for i in self.lags],
-                         index   = train_index
-                     )
 
         return X_data, y_data
 
@@ -567,8 +573,8 @@ class ForecasterAutoreg(ForecasterBase):
     def _create_window_features(
         self, 
         y: pd.Series,
+        train_index: pd.Index,
         X_as_pandas: bool = False,
-        train_index: Optional[pd.Index] = None
     ) -> Tuple[list, list]:
         """
         
@@ -576,12 +582,12 @@ class ForecasterAutoreg(ForecasterBase):
         ----------
         y : pandas Series
             Training time series.
+        train_index : pandas Index
+            Index of the training data. It is used to create the pandas DataFrame
+            `X_train_window_features` when `X_as_pandas` is `True`.
         X_as_pandas : bool, default `False`
             If `True`, the returned matrix `X_train_window_features` is a 
             pandas DataFrame.
-        train_index : pandas Index, default `None`
-            Index of the training data. It is used to create the pandas DataFrame
-            `X_train_window_features` when `X_as_pandas` is `True`.
 
         Returns
         -------
@@ -1872,7 +1878,7 @@ class ForecasterAutoreg(ForecasterBase):
         self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
 
 
-    # TODO: Review this method with window features
+    # TODO: Review this method with window features, if any are None
     def set_lags(
         self, 
         lags: Union[int, list, np.ndarray, range]

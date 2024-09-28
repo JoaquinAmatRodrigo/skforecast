@@ -47,7 +47,7 @@ optional_dependencies = {
 def initialize_lags(
     forecaster_name: str,
     lags: Any
-) -> Union[np.ndarray, int]:
+) -> Union[Optional[np.ndarray], Optional[int]]:
     """
     Check lags argument input and generate the corresponding numpy ndarray.
 
@@ -60,43 +60,45 @@ def initialize_lags(
 
     Returns
     -------
-    lags : numpy ndarray
+    lags : numpy ndarray, None
         Lags used as predictors.
-    max_lag : int
+    max_lag : int, None
         Maximum value of the lags.
     
     """
 
-    if isinstance(lags, int):
-        if lags < 1:
-            raise ValueError("Minimum value of lags allowed is 1.")
-        lags = np.arange(1, lags + 1)
+    max_lag = None
+    if lags is not None:
+        if isinstance(lags, int):
+            if lags < 1:
+                raise ValueError("Minimum value of lags allowed is 1.")
+            lags = np.arange(1, lags + 1)
 
-    if isinstance(lags, (list, tuple, range)):
-        lags = np.array(lags)
-    
-    if isinstance(lags, np.ndarray):
-        if lags.ndim != 1:
-            raise ValueError("`lags` must be a 1-dimensional array.")
-        if lags.size == 0:
-            raise ValueError("Argument `lags` must contain at least one value.")
-        if not np.issubdtype(lags.dtype, np.integer):
-            raise TypeError("All values in `lags` must be integers.")
-        if np.any(lags < 1):
-            raise ValueError("Minimum value of lags allowed is 1.")
-    else:
-        if forecaster_name != 'ForecasterAutoregMultiVariate':
-            raise TypeError(
-                (f"`lags` argument must be an int, 1d numpy ndarray, range, tuple or list. "
-                 f"Got {type(lags)}.")
-            )
-        else:
-            raise TypeError(
-                ("`lags` argument must be a dict, int, 1d numpy ndarray, range, tuple or list. "
-                 f"Got {type(lags)}.")
-            )
+        if isinstance(lags, (list, tuple, range)):
+            lags = np.array(lags)
         
-    max_lag = max(lags)
+        if isinstance(lags, np.ndarray):
+            if lags.ndim != 1:
+                raise ValueError("`lags` must be a 1-dimensional array.")
+            if lags.size == 0:
+                raise ValueError("Argument `lags` must contain at least one value.")
+            if not np.issubdtype(lags.dtype, np.integer):
+                raise TypeError("All values in `lags` must be integers.")
+            if np.any(lags < 1):
+                raise ValueError("Minimum value of lags allowed is 1.")
+        else:
+            if forecaster_name != 'ForecasterAutoregMultiVariate':
+                raise TypeError(
+                    (f"`lags` argument must be an int, 1d numpy ndarray, range, tuple or list. "
+                    f"Got {type(lags)}.")
+                )
+            else:
+                raise TypeError(
+                    ("`lags` argument must be a dict, int, 1d numpy ndarray, range, tuple or list. "
+                    f"Got {type(lags)}.")
+                )
+            
+        max_lag = max(lags)
 
     return lags, max_lag
 

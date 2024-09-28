@@ -124,7 +124,7 @@ class ForecasterAutoregDirect(ForecasterBase):
     source_code_weight_func : str
         Source code of the custom function used to create weights.
     max_lag : int
-        Maximum value of lag included in `lags`.
+        Maximum lag included in `lags`.
     window_size : int
         Size of the window needed to create the predictors. It is equal to `max_lag`.
     window_size_diff : int

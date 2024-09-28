@@ -212,7 +212,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     dropna_from_series : bool
         Determine whether NaN detected in the training matrices will be dropped.
     max_lag : int
-        Maximum value of lag included in `lags`.
+        Maximum lag included in `lags`.
     window_size : int
         Size of the window needed to create the predictors. It is equal to `max_lag`.
     window_size_diff : int
