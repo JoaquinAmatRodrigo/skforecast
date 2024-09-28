@@ -38,8 +38,8 @@ def test_create_train_X_y_ValueError_when_Forecaster_fitted_and_different_column
     of the series are different from the columns names used to fit the forecaster.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fitted = True
-    forecaster.series_col_names = ['l1', 'l2']
+    forecaster.is_fitted = True
+    forecaster.series_names_in_ = ['l1', 'l2']
 
     new_series = pd.DataFrame({
         'l1': pd.Series(np.arange(10)),
@@ -47,8 +47,8 @@ def test_create_train_X_y_ValueError_when_Forecaster_fitted_and_different_column
     })
 
     err_msg = re.escape(
-        ("Once the Forecaster has been trained, `series` must have the "
-         "same columns as the series used during training:\n" 
+        ("Once the Forecaster has been trained, `series` must contain "
+         "the same series names as those used during training:\n"
          " Got      : ['l1', 'l4']\n"
          " Expected : ['l1', 'l2']")
     )
@@ -62,9 +62,9 @@ def test_create_train_X_y_ValueError_when_Forecaster_fitted_without_exog_and_exo
     exog is not None.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fitted = True
-    forecaster.series_col_names = ['l1', 'l2']
-    forecaster.exog_col_names = None
+    forecaster.is_fitted = True
+    forecaster.series_names_in_ = ['l1', 'l2']
+    forecaster.exog_names_in_ = None
 
     series = pd.DataFrame({
         'l1': pd.Series(np.arange(10)),
@@ -86,9 +86,9 @@ def test_create_train_X_y_ValueError_when_Forecaster_fitted_and_different_exog_c
     of exog are different from the columns names used to fit the forecaster.
     """
     forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.fitted = True
-    forecaster.series_col_names = ['l1', 'l2']
-    forecaster.exog_col_names = ['exog']
+    forecaster.is_fitted = True
+    forecaster.series_names_in_ = ['l1', 'l2']
+    forecaster.exog_names_in_ = ['exog']
 
     series = pd.DataFrame({
         'l1': pd.Series(np.arange(10)),
@@ -97,8 +97,8 @@ def test_create_train_X_y_ValueError_when_Forecaster_fitted_and_different_exog_c
     new_exog = pd.Series(np.arange(10), name='exog2')
 
     err_msg = re.escape(
-        ("Once the Forecaster has been trained, `exog` must have the "
-         "same columns as the series used during training:\n" 
+        ("Once the Forecaster has been trained, `exog` must contain "
+         "the same exogenous variables as those used during training:\n" 
          " Got      : ['exog2']\n"
          " Expected : ['exog']")
     )
@@ -146,6 +146,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
         ['1', '2'],
         None,
         None,
+        None,
         {'1': pd.Series(
                   data  = np.array([4., 5., 6.]),
                   index = pd.RangeIndex(start=4, stop=7, step=1),
@@ -169,8 +170,9 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
     assert results[4] == expected[4]
     assert isinstance(results[5], type(None))
     assert isinstance(results[6], type(None))
-    for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+    assert isinstance(results[7], type(None))
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 @pytest.mark.parametrize("encoding, dtype", 
@@ -218,6 +220,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_None_ordinal_encoding(e
         ['1', '2'],
         None,
         None,
+        None,
         {'1': pd.Series(
                   data  = np.array([4., 5., 6.]),
                   index = pd.RangeIndex(start=4, stop=7, step=1),
@@ -241,8 +244,9 @@ def test_create_train_X_y_output_when_series_and_exog_is_None_ordinal_encoding(e
     assert results[4] == expected[4]
     assert isinstance(results[5], type(None))
     assert isinstance(results[6], type(None))
-    for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+    assert isinstance(results[7], type(None))
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 def test_create_train_X_y_output_when_series_and_exog_no_pandas_index():
@@ -294,6 +298,7 @@ def test_create_train_X_y_output_when_series_and_exog_no_pandas_index():
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog'],
+        ['exog'],
         {'exog': exog.dtypes},
         {'l1': pd.Series(
                    data  = np.array([5., 6., 7., 8., 9.]),
@@ -316,11 +321,12 @@ def test_create_train_X_y_output_when_series_and_exog_no_pandas_index():
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 @pytest.mark.parametrize("encoding, dtype", 
@@ -380,6 +386,7 @@ def test_create_train_X_y_output_when_series_and_exog_no_pandas_index_ordinal_en
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog'],
+        ['exog'],
         {'exog': exog.dtypes},
         {'l1': pd.Series(
                    data  = np.array([5., 6., 7., 8., 9.]),
@@ -402,11 +409,12 @@ def test_create_train_X_y_output_when_series_and_exog_no_pandas_index_ordinal_en
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 @pytest.mark.parametrize("dtype", 
@@ -454,6 +462,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_float_int(
         ['1', '2'],
         ['1', '2'],
         ['exog'],
+        ['exog'],
         {'exog': exog.dtypes},
         {'1': pd.Series(
                   data  = np.array([5., 6., 7., 8., 9.]),
@@ -470,11 +479,12 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_float_int(
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 @pytest.mark.parametrize("dtype", 
@@ -533,6 +543,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
         ['1', '2'],
         ['1', '2'],
         ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2'],
         {'exog_1': exog['exog_1'].dtypes, 'exog_2': exog['exog_2'].dtypes},
         None
     )
@@ -543,10 +554,11 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
-    assert isinstance(results[7], type(None))
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    for k in results[7].keys():
+        assert results[7][k] == expected[7][k]
+    assert isinstance(results[8], type(None))
 
 
 @pytest.mark.parametrize("exog_values, dtype", 
@@ -600,6 +612,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_bool_str(e
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog'],
+        ['exog'],
         {'exog': exog.dtypes},
          None
     )
@@ -610,10 +623,11 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_bool_str(e
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
-    assert isinstance(results[7], type(None))
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    for k in results[7].keys():
+        assert results[7][k] == expected[7][k]
+    assert isinstance(results[8], type(None))
 
 
 @pytest.mark.parametrize("v_exog_1   , v_exog_2  , dtype", 
@@ -670,6 +684,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_bool_st
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2'],
         {'exog_1': exog['exog_1'].dtypes, 'exog_2': exog['exog_2'].dtypes},
          None
     )
@@ -680,10 +695,11 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_bool_st
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
-    assert isinstance(results[7], type(None))
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    for k in results[7].keys():
+        assert results[7][k] == expected[7][k]
+    assert isinstance(results[8], type(None))
 
 
 def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_category():
@@ -732,6 +748,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_category()
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog'],
+        ['exog'],
         {'exog': exog.dtypes},
          None
     )
@@ -742,10 +759,11 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_series_of_category()
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
-    assert isinstance(results[7], type(None))
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    for k in results[7].keys():
+        assert results[7][k] == expected[7][k]
+    assert isinstance(results[8], type(None))
 
 
 def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_category():
@@ -779,10 +797,10 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_categor
             index   = pd.Index([5, 6, 7, 8, 9, 5, 6, 7, 8, 9]),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
         ).assign(
-            l1     = [1.]*5 + [0.]*5, 
-            l2     = [0.]*5 + [1.]*5,
-            exog_1 = pd.Categorical([5, 6, 7, 8, 9]*2, categories=range(10)),
-            exog_2 = pd.Categorical([105, 106, 107, 108, 109]*2, categories=range(100, 110))
+            l1     = [1.] * 5 + [0.] * 5, 
+            l2     = [0.] * 5 + [1.] * 5,
+            exog_1 = pd.Categorical([5, 6, 7, 8, 9] * 2, categories=range(10)),
+            exog_2 = pd.Categorical([105, 106, 107, 108, 109] * 2, categories=range(100, 110))
         ).astype({'l1': int, 'l2': int}
         ),
         pd.Series(
@@ -796,6 +814,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_categor
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2'],
         {'exog_1': exog['exog_1'].dtypes, 'exog_2': exog['exog_2'].dtypes},
          None
     )
@@ -806,10 +825,11 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_categor
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
-    assert isinstance(results[7], type(None))
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    for k in results[7].keys():
+        assert results[7][k] == expected[7][k]
+    assert isinstance(results[8], type(None))
 
 
 def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_int_category():
@@ -862,6 +882,7 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog_1', 'exog_2', 'exog_3'],
+        ['exog_1', 'exog_2', 'exog_3'],
         {'exog_1': exog['exog_1'].dtypes, 
          'exog_2': exog['exog_2'].dtypes,
          'exog_3': exog['exog_3'].dtypes},
@@ -874,10 +895,11 @@ def test_create_train_X_y_output_when_series_10_and_exog_is_dataframe_of_float_i
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
-    assert isinstance(results[7], type(None))
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    for k in results[7].keys():
+        assert results[7][k] == expected[7][k]
+    assert isinstance(results[8], type(None))
 
 
 @pytest.mark.parametrize("encoding, dtype", 
@@ -940,6 +962,7 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
         ['1', '2'],
         ['1', '2'],
         ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2'],
         {'exog_1': exog['exog_1'].dtypes, 
          'exog_2': exog['exog_2'].dtypes},
         {'1': pd.Series(
@@ -963,11 +986,12 @@ def test_create_train_X_y_output_when_series_and_exog_is_dataframe_datetime_inde
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 def test_create_train_X_y_output_when_series_10_and_transformer_series_is_StandardScaler():
@@ -1014,6 +1038,7 @@ def test_create_train_X_y_output_when_series_10_and_transformer_series_is_Standa
         ['l1', 'l2'],
         None,
         None,
+        None,
         {'l1': pd.Series(
                    data  = np.array([5., 6., 7., 8., 9.]),
                    index = pd.RangeIndex(start=5, stop=10, step=1),
@@ -1037,8 +1062,9 @@ def test_create_train_X_y_output_when_series_10_and_transformer_series_is_Standa
     assert results[4] == expected[4]
     assert isinstance(results[5], type(None))
     assert isinstance(results[6], type(None))
-    for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+    assert isinstance(results[7], type(None))
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 def test_create_train_X_y_output_when_exog_is_None_and_transformer_exog_is_not_None():
@@ -1083,6 +1109,7 @@ def test_create_train_X_y_output_when_exog_is_None_and_transformer_exog_is_not_N
         ['1', '2'],
         None,
         None,
+        None,
         None
     )
 
@@ -1095,6 +1122,7 @@ def test_create_train_X_y_output_when_exog_is_None_and_transformer_exog_is_not_N
     assert isinstance(results[5], type(None))
     assert isinstance(results[6], type(None))
     assert isinstance(results[7], type(None))
+    assert isinstance(results[8], type(None))
 
 
 @pytest.mark.parametrize("transformer_series", 
@@ -1179,6 +1207,7 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog(tr
         ['1', '2'],
         ['1', '2'],
         ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2_a', 'exog_2_b'],
         {'exog_1': exog['exog_1'].dtypes, 
          'exog_2': exog['exog_2'].dtypes},
         {'1': pd.Series(
@@ -1202,11 +1231,12 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog(tr
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 def test_create_train_X_y_output_when_series_different_length_and_exog_is_dataframe_of_float_int_category():
@@ -1268,6 +1298,7 @@ def test_create_train_X_y_output_when_series_different_length_and_exog_is_datafr
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog_1', 'exog_2', 'exog_3'],
+        ['exog_1', 'exog_2', 'exog_3'],
         {'exog_1': exog['exog_1'].dtypes, 
          'exog_2': exog['exog_2'].dtypes,
          'exog_3': exog['exog_3'].dtypes},
@@ -1292,11 +1323,12 @@ def test_create_train_X_y_output_when_series_different_length_and_exog_is_datafr
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 @pytest.mark.parametrize("transformer_series", 
@@ -1361,7 +1393,7 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
                           )
                       ),
             columns = ['lag_1', 'lag_2', 'lag_3', 'l1', 'l2', 'l3',
-                       'exog_1','exog_2_a', 'exog_2_b']
+                       'exog_1', 'exog_2_a', 'exog_2_b']
         ).astype({'l1': int, 'l2': int, 'l3': int}
         ),
         pd.Series(
@@ -1384,6 +1416,7 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
         ['l1', 'l2', 'l3'],
         ['l1', 'l2', 'l3'],
         ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2_a', 'exog_2_b'],
         {'exog_1': exog['exog_1'].dtypes, 
          'exog_2': exog['exog_2'].dtypes},
          None
@@ -1395,10 +1428,11 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_wi
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
-    assert isinstance(results[7], type(None))
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    for k in results[7].keys():
+        assert results[7][k] == expected[7][k]
+    assert isinstance(results[8], type(None))
 
 
 def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_y_train():
@@ -1452,6 +1486,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_y_train():
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog'],
+        ['exog'],
         {'exog': exog.dtypes},
         {'l1': pd.Series(
                    data  = np.array([np.nan, 6., 7., 8., 9.]),
@@ -1474,11 +1509,12 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_y_train():
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_y_train_datetime():
@@ -1544,6 +1580,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_y_train_datetime()
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog'],
+        ['exog'],
         {'exog': exog.dtypes},
         {'l1': pd.Series(
                    data  = np.array([np.nan, 6., 7., 8., 9.]),
@@ -1566,11 +1603,12 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_y_train_datetime()
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_True():
@@ -1621,6 +1659,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_T
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog'],
+        ['exog'],
         {'exog': exog.dtypes},
         {'l1': pd.Series(
                    data  = np.array([5, 6., 7., 8., 9.]),
@@ -1643,11 +1682,12 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_T
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_True_datetime():
@@ -1711,6 +1751,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_T
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog'],
+        ['exog'],
         {'exog': exog.dtypes},
         {'l1': pd.Series(
                    data  = np.array([5., 6., 7., 8., 9.]),
@@ -1733,11 +1774,12 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_T
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_False():
@@ -1791,6 +1833,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_F
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog'],
+        ['exog'],
         {'exog': exog.dtypes},
         {'l1': pd.Series(
                    data  = np.array([5., 6., 7., 8., 9.]),
@@ -1813,11 +1856,12 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_F
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_False_datetime():
@@ -1884,6 +1928,7 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_F
         ['l1', 'l2'],
         ['l1', 'l2'],
         ['exog'],
+        ['exog'],
         {'exog': exog.dtypes},
         {'l1': pd.Series(
                    data  = np.array([5., 6., 7., 8., 9.]),
@@ -1906,11 +1951,12 @@ def test_create_train_X_y_output_series_DataFrame_and_NaNs_in_X_train_drop_nan_F
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 def test_ValueError_create_train_X_series_DataFrame_exog_dict_and_empty_X_train_drop_nan_True():
@@ -2020,6 +2066,7 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
         ['l1', 'l2', 'l3'],
         ['l1', 'l2', 'l3'],
         ['exog_1', 'exog_2'],
+        ['exog_1', 'exog_2'],
         {'exog_1': exog['l1'].dtypes,
          'exog_2': exog['l3'].dtypes},
         {'l1': pd.Series(
@@ -2050,11 +2097,12 @@ def test_create_train_X_y_output_series_dict_and_exog_dict():
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 @pytest.mark.parametrize(
@@ -2178,6 +2226,7 @@ def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
         ["l1", "l2", "l3"],
         ["l1", "l2", "l3"],
         ["exog_1", "exog_2"],
+        ['exog_1', 'exog_2'],
         {"exog_1": exog["l1"].dtypes, "exog_2": exog["l3"].dtypes},
         {
             "l1": pd.Series(
@@ -2208,20 +2257,21 @@ def test_create_train_X_y_output_series_dict_and_exog_dict_ordinal_encoding(
         pd.testing.assert_index_equal(results[2][k], expected[2][k])
     assert results[3] == expected[3]
     assert results[4] == expected[4]
-    assert set(results[5]) == set(expected[5])
-    for k in results[6].keys():
-        assert results[6] == expected[6]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
     for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+        assert results[7][k] == expected[7][k]
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
-@pytest.mark.parametrize("encoding, encoding_mapping", 
+@pytest.mark.parametrize("encoding, encoding_mapping_", 
                          [('ordinal'         , {'1': 0, '2': 1}), 
                           ('ordinal_category', {'1': 0, '2': 1}),
                           ('onehot'          , {'1': 0, '2': 1}),
                           (None              , {'1': 0, '2': 1})], 
                          ids = lambda dt : f'encoding, mapping: {dt}')
-def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping):
+def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping_):
     """
     Test the encoding mapping of _create_train_X_y.
     """
@@ -2234,12 +2284,12 @@ def test_create_train_X_y_encoding_mapping(encoding, encoding_mapping):
     )
     _ = forecaster._create_train_X_y(series=series)
     
-    assert forecaster.encoding_mapping == encoding_mapping
+    assert forecaster.encoding_mapping_ == encoding_mapping_
 
 
 @pytest.mark.parametrize("fit_forecaster", 
                          [True, False], 
-                         ids = lambda fitted: f'fit_forecaster: {fitted}')
+                         ids = lambda is_fitted: f'fit_forecaster: {is_fitted}')
 def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and_already_trained(fit_forecaster):
     """
     Test the output of _create_train_X_y when differentiation=1 and already 
@@ -2306,6 +2356,7 @@ def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and
         ['l1', 'l2', 'l3'],
         None,
         None,
+        None,
         {'l1': pd.Series(
                    data  = np.array([6., 7., 8., 9.]),
                    index = pd.date_range("1990-01-07", periods=4, freq='D'),
@@ -2335,13 +2386,14 @@ def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and
     assert results[4] == expected[4]
     assert isinstance(results[5], type(None))
     assert isinstance(results[6], type(None))
-    for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+    assert isinstance(results[7], type(None))
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 @pytest.mark.parametrize("fit_forecaster", 
                          [True, False], 
-                         ids = lambda fitted: f'fit_forecaster: {fitted}')
+                         ids = lambda is_fitted: f'fit_forecaster: {is_fitted}')
 def test_create_train_X_y_output_when_series_and_exog_and_already_trained_encoding_None(fit_forecaster):
     """
     Test the output of _create_train_X_y when encoding None and already 
@@ -2412,6 +2464,7 @@ def test_create_train_X_y_output_when_series_and_exog_and_already_trained_encodi
         ['l1', 'l2', 'l3'],
         None,
         None,
+        None,
         {'l1': pd.Series(
                    data  = np.array([7., 8., 9.]),
                    index = pd.date_range("1990-01-08", periods=3, freq='D'),
@@ -2441,13 +2494,14 @@ def test_create_train_X_y_output_when_series_and_exog_and_already_trained_encodi
     assert results[4] == expected[4]
     assert isinstance(results[5], type(None))
     assert isinstance(results[6], type(None))
-    for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+    assert isinstance(results[7], type(None))
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])
 
 
 @pytest.mark.parametrize("fit_forecaster", 
                          [True, False], 
-                         ids = lambda fitted: f'fit_forecaster: {fitted}')
+                         ids = lambda is_fitted: f'fit_forecaster: {is_fitted}')
 def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and_already_trained_encoding_None(fit_forecaster):
     """
     Test the output of _create_train_X_y when differentiation=1,
@@ -2514,6 +2568,7 @@ def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and
         ['l1', 'l2', 'l3'],
         None,
         None,
+        None,
         {'l1': pd.Series(
                    data  = np.array([6., 7., 8., 9.]),
                    index = pd.date_range("1990-01-07", periods=4, freq='D'),
@@ -2543,5 +2598,6 @@ def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and
     assert results[4] == expected[4]
     assert isinstance(results[5], type(None))
     assert isinstance(results[6], type(None))
-    for k in results[7].keys():
-        pd.testing.assert_series_equal(results[7][k], expected[7][k])
+    assert isinstance(results[7], type(None))
+    for k in results[8].keys():
+        pd.testing.assert_series_equal(results[8][k], expected[8][k])

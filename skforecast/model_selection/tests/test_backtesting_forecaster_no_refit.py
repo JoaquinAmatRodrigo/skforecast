@@ -40,19 +40,15 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoreg_wi
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
-                                       forecaster          = forecaster,
-                                       y                   = y,
-                                       exog                = None,
-                                       refit               = False,
-                                       initial_train_size  = len(y_train),
-                                       steps               = 4,
-                                       metric              = 'mean_squared_error',
-                                       interval            = None,
-                                       n_boot              = 500,
-                                       random_state        = 123,
-                                       in_sample_residuals = True,
-                                       n_jobs              = n_jobs,
-                                       verbose             = False
+                                       forecaster         = forecaster,
+                                       y                  = y,
+                                       exog               = None,
+                                       refit              = False,
+                                       initial_train_size = len(y_train),
+                                       steps              = 4,
+                                       metric             = 'mean_squared_error',
+                                       n_jobs             = n_jobs,
+                                       verbose            = False
                                    )
                                    
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -89,18 +85,14 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoregCus
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = None,
-                                        refit               = refit,
-                                        initial_train_size  = len(y_train),
-                                        steps               = 4,
-                                        metric              = 'mean_squared_error',
-                                        interval            = None,
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = True,
-                                        verbose             = False
+                                        forecaster         = forecaster,
+                                        y                  = y,
+                                        exog               = None,
+                                        refit              = refit,
+                                        initial_train_size = len(y_train),
+                                        steps              = 4,
+                                        metric             = 'mean_squared_error',
+                                        verbose            = False
                                    )
                                    
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -127,18 +119,14 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoregDir
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = None,
-                                        refit               = False,
-                                        initial_train_size  = len(y_train),
-                                        steps               = 4,
-                                        metric              = 'mean_squared_error',
-                                        interval            = None,
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = True,
-                                        verbose             = False
+                                        forecaster         = forecaster,
+                                        y                  = y,
+                                        exog               = None,
+                                        refit              = False,
+                                        initial_train_size = len(y_train),
+                                        steps              = 4,
+                                        metric             = 'mean_squared_error',
+                                        verbose            = False
                                    )
                                    
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -170,18 +158,14 @@ def test_output_backtesting_forecaster_no_exog_no_initial_train_size_with_mocked
     forecaster.fit(y=y)
     initial_train_size = None
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = None,
-                                        refit               = False,
-                                        initial_train_size  = initial_train_size,
-                                        steps               = 1,
-                                        metric              = 'mean_squared_error',
-                                        interval            = None,
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = True,
-                                        verbose             = False
+                                        forecaster         = forecaster,
+                                        y                  = y,
+                                        exog               = None,
+                                        refit              = False,
+                                        initial_train_size = initial_train_size,
+                                        steps              = 1,
+                                        metric             = 'mean_squared_error',
+                                        verbose            = False
                                    )                
     pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
@@ -202,18 +186,14 @@ def test_output_backtesting_forecaster_no_exog_yes_remainder_with_mocked():
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = None,
-                                        refit               = False,
-                                        initial_train_size  = len(y_train),
-                                        steps               = 5,
-                                        metric              = 'mean_squared_error',
-                                        interval            = None,
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = True,
-                                        verbose             = False
+                                        forecaster         = forecaster,
+                                        y                  = y,
+                                        exog               = None,
+                                        refit              = False,
+                                        initial_train_size = len(y_train),
+                                        steps              = 5,
+                                        metric             = 'mean_squared_error',
+                                        verbose            = False
                                    )         
     pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
@@ -227,25 +207,21 @@ def test_output_backtesting_forecaster_yes_exog_no_remainder_with_mocked():
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.05585411566592716]})
     expected_predictions = pd.DataFrame({
-    'pred':np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.41316188, 0.51416101, 
-                     0.42705363, 0.4384041 , 0.42611891, 0.59547291, 0.5170294 , 0.4982889 ])
-                                                                 }, index=pd.RangeIndex(start=38, stop=50, step=1))
+    'pred': np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.41316188, 0.51416101, 
+                      0.42705363, 0.4384041 , 0.42611891, 0.59547291, 0.5170294 , 0.4982889 ])
+    }, index=pd.RangeIndex(start=38, stop=50, step=1))
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = exog,
-                                        refit               = False,
-                                        initial_train_size  = len(y_train),
-                                        steps               = 4,
-                                        metric              = 'mean_squared_error',
-                                        interval            = None,
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = True,
-                                        verbose             = False
+                                        forecaster         = forecaster,
+                                        y                  = y,
+                                        exog               = exog,
+                                        refit              = False,
+                                        initial_train_size = len(y_train),
+                                        steps              = 4,
+                                        metric             = 'mean_squared_error',
+                                        verbose            = False
                                    )
 
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -267,18 +243,14 @@ def test_output_backtesting_forecaster_yes_exog_yes_remainder_with_mocked():
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = exog,
-                                        refit               = False,
-                                        initial_train_size  = len(y_train),
-                                        steps               = 5,
-                                        metric              = 'mean_squared_error',
-                                        interval            = None,
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = True,
-                                        verbose             = False
+                                        forecaster         = forecaster,
+                                        y                  = y,
+                                        exog               = exog,
+                                        refit              = False,
+                                        initial_train_size = len(y_train),
+                                        steps              = 5,
+                                        metric             = 'mean_squared_error',
+                                        verbose            = False
                                    )
     pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
@@ -319,10 +291,6 @@ def test_output_backtesting_forecaster_yes_exog_yes_remainder_skip_folds_with_mo
         steps=5,
         skip_folds=2,
         metric="mean_squared_error",
-        interval=None,
-        n_boot=500,
-        random_state=123,
-        in_sample_residuals=True,
         verbose=True,
     )
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -338,44 +306,48 @@ def test_output_backtesting_forecaster_interval_no_exog_no_remainder_with_mocked
     Test output of _backtesting_forecaster with backtesting mocked, interval yes.
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
-    'in_sample_residuals = True'
+    'use_in_sample_residuals = True'
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.06464382862831312]})
     expected_predictions = pd.DataFrame(
         data = np.array([
-            [0.55717779, 0.19882822, 0.95368172],
-            [0.43355138, 0.05699193, 0.8646772 ],
-            [0.54969767, 0.20857548, 0.93889056],
-            [0.52945466, 0.17670586, 0.87242694],
-            [0.39585199, 0.03750242, 0.79235592],
-            [0.55935949, 0.18280004, 0.99048531],
-            [0.45263533, 0.11151314, 0.84182822],
-            [0.4578669 , 0.1051181 , 0.80083918],
-            [0.36988237, 0.01153279, 0.76638629],
-            [0.57912951, 0.20257006, 1.01025533],
-            [0.48686057, 0.14573839, 0.87605347],
-            [0.45709952, 0.10435072, 0.8000718 ]]),
+            [0.55717779, 0.24709348, 0.95368172],
+            [0.43355138, 0.08322668, 0.78788097],
+            [0.54969767, 0.18838016, 0.9154328 ],
+            [0.52945466, 0.15832868, 0.88376994],
+            [0.39585199, 0.08576768, 0.79235592],
+            [0.55935949, 0.20903479, 0.91368908],
+            [0.45263533, 0.09131783, 0.81837046],
+            [0.4578669 , 0.08674092, 0.81218218],
+            [0.36988237, 0.05979805, 0.76638629],
+            [0.57912951, 0.22880481, 0.9334591 ],
+            [0.48686057, 0.12554307, 0.8525957 ],
+            [0.45709952, 0.08597354, 0.8114148 ]]),
         columns=['pred', 'lower_bound', 'upper_bound'],
         index=pd.RangeIndex(start=38, stop=50, step=1)
     )
-    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
+    
+    forecaster = ForecasterAutoreg(
+        regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15}
+    )
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = None,
-                                        refit               = False,
-                                        initial_train_size  = len(y_train),
-                                        steps               = 4,
-                                        metric              = 'mean_squared_error',
-                                        interval            = [5, 95],
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = True,
-                                        verbose             = False,
-                                        show_progress       = False
-                                   )                             
+                                        forecaster              = forecaster,
+                                        y                       = y,
+                                        exog                    = None,
+                                        refit                   = False,
+                                        initial_train_size      = len(y_train),
+                                        steps                   = 4,
+                                        metric                  = 'mean_squared_error',
+                                        interval                = [5, 95],
+                                        n_boot                  = 500,
+                                        random_state            = 123,
+                                        use_in_sample_residuals = True,
+                                        verbose                 = False,
+                                        show_progress           = False
+                                   )
+                            
     pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
@@ -385,43 +357,47 @@ def test_output_backtesting_forecaster_interval_no_exog_yes_remainder_with_mocke
     Test output of _backtesting_forecaster with backtesting mocked, interval yes. 
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error',
-    'in_sample_residuals = True'
+    'use_in_sample_residuals = True'
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.07085869503962372]})
     expected_predictions = pd.DataFrame(
         data = np.array([
-                [0.55717779, 0.19882822, 0.95368172],
-                [0.43355138, 0.05699193, 0.8646772 ],
-                [0.54969767, 0.20857548, 0.93889056],
-                [0.52945466, 0.17670586, 0.87242694],
-                [0.48308861, 0.12598277, 0.8744728 ],
-                [0.54252612, 0.18417655, 0.93903005],
-                [0.46139434, 0.08483489, 0.89252016],
-                [0.44730047, 0.10617829, 0.83649337],
-                [0.50031862, 0.14756982, 0.8432909 ],
-                [0.49831103, 0.14120519, 0.88969522],
-                [0.55613172, 0.19778215, 0.95263565],
-                [0.42970914, 0.05314969, 0.86083496]]),
+                [0.55717779, 0.24709348, 0.95368172],
+                [0.43355138, 0.08322668, 0.78788097],
+                [0.54969767, 0.18838016, 0.9154328 ],
+                [0.52945466, 0.15832868, 0.88376994],
+                [0.48308861, 0.1261428 , 0.86164685],
+                [0.54252612, 0.2324418 , 0.93903005],
+                [0.46139434, 0.11106964, 0.81572393],
+                [0.44730047, 0.08598297, 0.8130356 ],
+                [0.50031862, 0.12919264, 0.8546339 ],
+                [0.49831103, 0.14136522, 0.87686927],
+                [0.55613172, 0.2460474 , 0.95263565],
+                [0.42970914, 0.07938444, 0.78403873]]),
         columns=['pred', 'lower_bound', 'upper_bound'],
         index=pd.RangeIndex(start=38, stop=50, step=1)
     )
-    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
+
+    forecaster = ForecasterAutoreg(
+        regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15}
+    )
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = None,
-                                        refit               = False,
-                                        initial_train_size  = len(y_train),
-                                        steps               = 5,
-                                        metric              = 'mean_squared_error',
-                                        interval            = [5, 95],
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = True,
-                                        verbose             = False
+                                        forecaster              = forecaster,
+                                        y                       = y,
+                                        exog                    = None,
+                                        refit                   = False,
+                                        initial_train_size      = len(y_train),
+                                        steps                   = 5,
+                                        metric                  = 'mean_squared_error',
+                                        interval                = [5, 95],
+                                        n_boot                  = 500,
+                                        random_state            = 123,
+                                        use_in_sample_residuals = True,
+                                        verbose                 = False
                                    )
+    
     pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
@@ -431,43 +407,44 @@ def test_output_backtesting_forecaster_interval_yes_exog_no_remainder_with_mocke
     Test output of _backtesting_forecaster with backtesting mocked, interval yes.
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
-    'in_sample_residuals = True'
+    'use_in_sample_residuals = True'
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.05585411566592716]})
     expected_predictions = pd.DataFrame(
     data = np.array([
-            [0.59059622, 0.24619375, 0.95777604],
-            [0.47257504, 0.11801273, 0.84870551],
-            [0.53024098, 0.15322187, 0.91489125],
-            [0.46163343, 0.0970681 , 0.84865478],
-            [0.41316188, 0.06875941, 0.7803417 ],
-            [0.51416101, 0.1595987 , 0.89029149],
-            [0.42705363, 0.05003453, 0.81170391],
-            [0.4384041 , 0.07383877, 0.82542545],
-            [0.42611891, 0.08171644, 0.79329874],
-            [0.59547291, 0.2409106 , 0.97160338],
-            [0.5170294 , 0.1400103 , 0.90167968],
-            [0.4982889 , 0.13372357, 0.88531025]]
+            [0.59059622, 0.24604234, 0.95777604],
+            [0.47257504, 0.11196002, 0.85369193],
+            [0.53024098, 0.1682998 , 0.91037299],
+            [0.46163343, 0.10223625, 0.8247796 ],
+            [0.41316188, 0.068608  , 0.7803417 ],
+            [0.51416101, 0.153546  , 0.89527791],
+            [0.42705363, 0.06511245, 0.80718564],
+            [0.4384041 , 0.07900692, 0.80155027],
+            [0.42611891, 0.08156504, 0.79329874],
+            [0.59547291, 0.23485789, 0.9765898 ],
+            [0.5170294 , 0.15508823, 0.89716141],
+            [0.4982889 , 0.13889172, 0.86143507]]
         ),
         columns=['pred', 'lower_bound', 'upper_bound'],
         index=pd.RangeIndex(start=38, stop=50, step=1)
     )
+
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = exog,
-                                        refit               = False,
-                                        initial_train_size  = len(y_train),
-                                        steps               = 4,
-                                        metric              = 'mean_squared_error',
-                                        interval            = [5, 95],
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = True,
-                                        verbose             = False
+                                        forecaster              = forecaster,
+                                        y                       = y,
+                                        exog                    = exog,
+                                        refit                   = False,
+                                        initial_train_size      = len(y_train),
+                                        steps                   = 4,
+                                        metric                  = 'mean_squared_error',
+                                        interval                = [5, 95],
+                                        n_boot                  = 500,
+                                        random_state            = 123,
+                                        use_in_sample_residuals = True,
+                                        verbose                 = False
                                    )
     
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -479,43 +456,48 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_with_mock
     Test output of _backtesting_forecaster with backtesting mocked, interval yes. 
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error',
-    'in_sample_residuals = True'
+    'use_in_sample_residuals = True'
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.06313056651237414]})
     expected_predictions = pd.DataFrame(
         data = np.array([
-            [0.59059622, 0.24619375, 0.95777604],
-            [0.47257504, 0.11801273, 0.84870551],
-            [0.53024098, 0.15322187, 0.91489125],
-            [0.46163343, 0.0970681 , 0.84865478],
-            [0.50035119, 0.14541886, 0.8608513 ],
-            [0.49157332, 0.14717085, 0.85875315],
-            [0.43327346, 0.07871115, 0.80940394],
-            [0.42420804, 0.04718894, 0.80885832],
-            [0.53389427, 0.16932894, 0.92091562],
-            [0.51693094, 0.16199861, 0.87743105],
-            [0.60207937, 0.25767689, 0.96925919],
-            [0.48227974, 0.12771743, 0.85841022]]),
+            [0.59059622, 0.24604234, 0.95777604],
+            [0.47257504, 0.11196002, 0.85369193],
+            [0.53024098, 0.1682998 , 0.91037299],
+            [0.46163343, 0.10223625, 0.8247796 ],
+            [0.50035119, 0.14659333, 0.85331366],
+            [0.49157332, 0.14701945, 0.85875315],
+            [0.43327346, 0.07265845, 0.81439035],
+            [0.42420804, 0.06226687, 0.80434005],
+            [0.53389427, 0.1744971 , 0.89704045],
+            [0.51693094, 0.16317308, 0.86989341],
+            [0.60207937, 0.25752549, 0.96925919],
+            [0.48227974, 0.12166473, 0.86339664]]),
         columns=['pred', 'lower_bound', 'upper_bound'],
-        index=pd.RangeIndex(start=38, stop=50, step=1))
-    forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
+        index=pd.RangeIndex(start=38, stop=50, step=1)
+    )
+    
+    forecaster = ForecasterAutoreg(
+        regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15}
+    )
     n_backtest = 12
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = exog,
-                                        refit               = False,
-                                        initial_train_size  = len(y_train),
-                                        steps               = 5,
-                                        metric              = 'mean_squared_error',
-                                        interval            = [5, 95],
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = True,
-                                        verbose             = False,
-                                        show_progress       = False
+                                        forecaster              = forecaster,
+                                        y                       = y,
+                                        exog                    = exog,
+                                        refit                   = False,
+                                        initial_train_size      = len(y_train),
+                                        steps                   = 5,
+                                        metric                  = 'mean_squared_error',
+                                        interval                = [5, 95],
+                                        n_boot                  = 500,
+                                        random_state            = 123,
+                                        use_in_sample_residuals = True,
+                                        verbose                 = False,
+                                        show_progress           = False
                                    )
+    
     pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
@@ -529,17 +511,26 @@ def test_output_backtesting_forecaster_interval_out_sample_residuals_no_exog_no_
     Test output of _backtesting_forecaster with backtesting mocked, interval yes.
     Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error',
-    'in_sample_residuals = False'
+    'use_in_sample_residuals = False'
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.0646438286283131]})
-    expected_predictions = pd.DataFrame({
-        'pred': np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.39585199, 0.55935949, 
-                         0.45263533, 0.4578669 , 0.36988237, 0.57912951, 0.48686057, 0.45709952]),
-        'lower_bound': np.array([0.63654358, 0.62989756, 0.67156167, 0.70363265, 0.47521778, 0.75570567, 
-                                0.57449933, 0.63204489, 0.44924816, 0.7754757 , 0.60872458, 0.63127751]),
-        'upper_bound': np.array([1.54070487, 1.5131313 , 1.56749058, 1.62564968, 1.37937907, 1.63893941, 
-                                1.47042824, 1.55406192, 1.35340944, 1.65870943, 1.50465348, 1.55329453])
-                                                                            }, index=pd.RangeIndex(start=38, stop=50, step=1))
+    expected_predictions = pd.DataFrame(
+        data = np.array([
+            [0.55717779, 0.63654358, 1.5406994 ],
+            [0.43355138, 0.5760887 , 1.53342317],
+            [0.54969767, 0.68344933, 1.57809559],
+            [0.52945466, 0.69548679, 1.63622589],
+            [0.39585199, 0.47521778, 1.3793736 ],
+            [0.55935949, 0.70189681, 1.65923128],
+            [0.45263533, 0.58638699, 1.48103325],
+            [0.4578669 , 0.62389903, 1.56463813],
+            [0.36988237, 0.44924816, 1.35340398],
+            [0.57912951, 0.72166684, 1.67900131],
+            [0.48686057, 0.62061223, 1.51525849],
+            [0.45709952, 0.62313165, 1.56387074]]),
+        columns=['pred', 'lower_bound', 'upper_bound'],
+        index=pd.RangeIndex(start=38, stop=50, step=1)
+    )
 
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
     forecaster.set_out_sample_residuals(residuals=out_sample_residuals, append=False)
@@ -548,18 +539,18 @@ def test_output_backtesting_forecaster_interval_out_sample_residuals_no_exog_no_
     y_train = y[:-n_backtest]
 
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = None,
-                                        refit               = False,
-                                        initial_train_size  = len(y_train),
-                                        steps               = 4,
-                                        metric              = 'mean_squared_error',
-                                        interval            = [5, 95],
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = False,
-                                        verbose             = False
+                                        forecaster              = forecaster,
+                                        y                       = y,
+                                        exog                    = None,
+                                        refit                   = False,
+                                        initial_train_size      = len(y_train),
+                                        steps                   = 4,
+                                        metric                  = 'mean_squared_error',
+                                        interval                = [5, 95],
+                                        n_boot                  = 500,
+                                        random_state            = 123,
+                                        use_in_sample_residuals = False,
+                                        verbose                 = False
                                    )
 
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -570,13 +561,14 @@ def test_output_backtesting_forecaster_interval_out_sample_residuals_no_exog_no_
 # * Callable metric                                                           *
 # ******************************************************************************
 
-def my_metric(y_true, y_pred): # pragma: no cover
+def my_metric(y_true, y_pred):  # pragma: no cover
     """
     Callable metric
     """
-    metric = ((y_true - y_pred)/len(y_true)).mean()
+    metric = ((y_true - y_pred) / len(y_true)).mean()
     
     return metric
+
 
 def test_callable_metric_backtesting_forecaster_no_exog_no_remainder_with_mocked():
     """
@@ -595,18 +587,14 @@ def test_callable_metric_backtesting_forecaster_no_exog_no_remainder_with_mocked
     y_train = y[:-n_backtest]
 
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = None,
-                                        refit               = False,
-                                        initial_train_size  = len(y_train),
-                                        steps               = 4,
-                                        metric              = my_metric,
-                                        interval            = None,
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = True,
-                                        verbose             = False
+                                        forecaster         = forecaster,
+                                        y                  = y,
+                                        exog               = None,
+                                        refit              = False,
+                                        initial_train_size = len(y_train),
+                                        steps              = 4,
+                                        metric             = my_metric,
+                                        verbose            = False
                                    )
 
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -626,7 +614,7 @@ def test_list_metrics_backtesting_forecaster_no_exog_no_remainder_with_mocked():
     expected_predictions = pd.DataFrame({
     'pred': np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.39585199, 0.55935949, 
                      0.45263533, 0.4578669 , 0.36988237, 0.57912951, 0.48686057, 0.45709952])
-                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
+    }, index=pd.RangeIndex(start=38, stop=50, step=1))
 
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
@@ -634,18 +622,14 @@ def test_list_metrics_backtesting_forecaster_no_exog_no_remainder_with_mocked():
     y_train = y[:-n_backtest]
 
     metrics, backtest_predictions = _backtesting_forecaster(
-                                        forecaster          = forecaster,
-                                        y                   = y,
-                                        exog                = None,
-                                        refit               = False,
-                                        initial_train_size  = len(y_train),
-                                        steps               = 4,
-                                        metric              = ['mean_absolute_error', mean_squared_error],
-                                        interval            = None,
-                                        n_boot              = 500,
-                                        random_state        = 123,
-                                        in_sample_residuals = True,
-                                        verbose             = False
+                                        forecaster         = forecaster,
+                                        y                  = y,
+                                        exog               = None,
+                                        refit              = False,
+                                        initial_train_size = len(y_train),
+                                        steps              = 4,
+                                        metric             = ['mean_absolute_error', mean_squared_error],
+                                        verbose            = False
                                    )
 
     pd.testing.assert_frame_equal(expected_metrics, metrics)
@@ -662,7 +646,7 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_gap_with_
     Test output of _backtesting_forecaster with backtesting mocked, interval yes. 
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
     20 observations to backtest, steps=5 and gap=3, metric='mean_squared_error',
-    'in_sample_residuals = True'
+    'use_in_sample_residuals = True'
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.07965887934114284]})
     expected_predictions = pd.DataFrame(
@@ -726,6 +710,29 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_gap_with_
             },
         }
     )
+    expected_predictions = pd.DataFrame(
+        data = np.array([
+            [0.65022999,  0.27183154, 1.06503914],
+            [0.52364637,  0.19453326, 0.88265459],
+            [0.46809256,  0.12440678, 0.75395058],
+            [0.48759732,  0.24079549, 0.86300276],
+            [0.47172445,  0.14533367, 0.80742469],
+            [0.57585845,  0.19746   , 0.99066759],
+            [0.53592933,  0.20681622, 0.89493754],
+            [0.48995122,  0.14626544, 0.77580924],
+            [0.45271317,  0.20591135, 0.82811861],
+            [0.49519413,  0.16880335, 0.83089437],
+            [0.27167824, -0.10672021, 0.68648739],
+            [0.27813822, -0.05097489, 0.63714644],
+            [0.31569424, -0.02799154, 0.60155226],
+            [0.3983224 ,  0.15152057, 0.77372784],
+            [0.34822681,  0.02183603, 0.68392705],
+            [0.62098686,  0.24258841, 1.035796  ],
+            [0.47190757,  0.14279445, 0.83091578]]),
+        columns=['pred', 'lower_bound', 'upper_bound'],
+        index=pd.RangeIndex(start=33, stop=50, step=1)
+    )
+
     forecaster = ForecasterAutoregDirect(
                      regressor = LinearRegression(), 
                      lags      = 3,
@@ -734,21 +741,22 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_gap_with_
     n_backtest = 20
     y_train = y[:-n_backtest]
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster            = forecaster,
-                                        y                     = y,
-                                        exog                  = exog,
-                                        refit                 = False,
-                                        initial_train_size    = len(y_train),
-                                        gap                   = 3,
-                                        allow_incomplete_fold = True,
-                                        steps                 = 5,
-                                        metric                = 'mean_squared_error',
-                                        interval              = [5, 95],
-                                        n_boot                = 500,
-                                        random_state          = 123,
-                                        in_sample_residuals   = True,
-                                        verbose               = False
+                                        forecaster              = forecaster,
+                                        y                       = y,
+                                        exog                    = exog,
+                                        refit                   = False,
+                                        initial_train_size      = len(y_train),
+                                        gap                     = 3,
+                                        allow_incomplete_fold   = True,
+                                        steps                   = 5,
+                                        metric                  = 'mean_squared_error',
+                                        interval                = [5, 95],
+                                        n_boot                  = 500,
+                                        random_state            = 123,
+                                        use_in_sample_residuals = True,
+                                        verbose                 = False
                                    )
+    
     pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
@@ -758,7 +766,7 @@ def test_output_backtesting_forecaster_interval_yes_exog_not_allow_remainder_gap
     Test output of _backtesting_forecaster with backtesting mocked, interval yes. 
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
     20 observations to backtest, steps=5 and gap=3, metric='mean_squared_error',
-    'in_sample_residuals = True', allow_incomplete_fold = False
+    'use_in_sample_residuals = True', allow_incomplete_fold = False
     """
     y_with_index = y.copy()
     y_with_index.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
@@ -767,21 +775,21 @@ def test_output_backtesting_forecaster_interval_yes_exog_not_allow_remainder_gap
 
     expected_metric = pd.DataFrame({"mean_squared_error": [0.08826806818628832]})
     expected_predictions = pd.DataFrame(
-        data = np.array([[0.65022999,  0.27183154,  1.06503914],
-                         [0.52364637,  0.19453326,  0.923044  ],
-                         [0.46809256,  0.12440678,  0.75395058],
-                         [0.48759732,  0.12107577,  0.83145059],
-                         [0.47172445,  0.14533367,  0.74697552],
-                         [0.57585845,  0.19746   ,  0.99066759],
-                         [0.53592933,  0.20681622,  0.93532696],
-                         [0.48995122,  0.14626544,  0.77580924],
-                         [0.45271317,  0.08619163,  0.79656645],
-                         [0.49519413,  0.16880335,  0.7704452 ],
-                         [0.27167824, -0.10672021,  0.68648739],
-                         [0.27813822, -0.05097489,  0.67753585],
-                         [0.31569424, -0.02799154,  0.60155226],
-                         [0.3983224 ,  0.03180086,  0.74217568],
-                         [0.34822681,  0.02183603,  0.62347788]]),
+        data = np.array([[0.65022999,  0.27183154, 1.06503914],
+                         [0.52364637,  0.19453326, 0.88265459],
+                         [0.46809256,  0.12440678, 0.75395058],
+                         [0.48759732,  0.24079549, 0.86300276],
+                         [0.47172445,  0.14533367, 0.80742469],
+                         [0.57585845,  0.19746   , 0.99066759],
+                         [0.53592933,  0.20681622, 0.89493754],
+                         [0.48995122,  0.14626544, 0.77580924],
+                         [0.45271317,  0.20591135, 0.82811861],
+                         [0.49519413,  0.16880335, 0.83089437],
+                         [0.27167824, -0.10672021, 0.68648739],
+                         [0.27813822, -0.05097489, 0.63714644],
+                         [0.31569424, -0.02799154, 0.60155226],
+                         [0.3983224 ,  0.15152057, 0.77372784],
+                         [0.34822681,  0.02183603, 0.68392705]]),
         columns = ['pred', 'lower_bound', 'upper_bound'],
         index = pd.date_range(start='2022-02-03', periods=15, freq='D')
     )
@@ -793,20 +801,20 @@ def test_output_backtesting_forecaster_interval_yes_exog_not_allow_remainder_gap
                  )
 
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster            = forecaster,
-                                        y                     = y_with_index,
-                                        exog                  = exog_with_index,
-                                        refit                 = False,
-                                        initial_train_size    = len(y_with_index) - 20,
-                                        gap                   = 3,
-                                        allow_incomplete_fold = False,
-                                        steps                 = 5,
-                                        metric                = 'mean_squared_error',
-                                        interval              = [5, 95],
-                                        n_boot                = 500,
-                                        random_state          = 123,
-                                        in_sample_residuals   = True,
-                                        verbose               = False
+                                        forecaster              = forecaster,
+                                        y                       = y_with_index,
+                                        exog                    = exog_with_index,
+                                        refit                   = False,
+                                        initial_train_size      = len(y_with_index) - 20,
+                                        gap                     = 3,
+                                        allow_incomplete_fold   = False,
+                                        steps                   = 5,
+                                        metric                  = 'mean_squared_error',
+                                        interval                = [5, 95],
+                                        n_boot                  = 500,
+                                        random_state            = 123,
+                                        use_in_sample_residuals = True,
+                                        verbose                 = False
                                    )
     backtest_predictions = backtest_predictions.asfreq('D')
 

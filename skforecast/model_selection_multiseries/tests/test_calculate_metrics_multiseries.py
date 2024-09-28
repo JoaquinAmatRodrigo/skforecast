@@ -110,10 +110,10 @@ folds = [
     [[0, 25], [34, 35], [35, 45], [35, 45], False],
     [[0, 25], [44, 45], [45, 50], [45, 50], False],
 ]
-
+window_size = 2
 levels = ["item_1", "item_2", "item_3"]
 
-def custom_metric(y_true, y_pred): # pragma: no cover
+def custom_metric(y_true, y_pred):  # pragma: no cover
     """
     Calculate the mean absolute error excluding predictions between '2012-01-05'
     and '2012-01-10'.
@@ -141,6 +141,7 @@ def test_calculate_metrics_multiseries_input_types():
     )
     folds = [{"train": (0, 1), "test": (2, 3)}]
     span_index = pd.date_range(start="2020-01-01", periods=3)
+    window_size = 2
     metrics = ["mean_absolute_error"]
     levels = ["level1", "level2"]
 
@@ -148,42 +149,49 @@ def test_calculate_metrics_multiseries_input_types():
     msg = "`series` must be a pandas DataFrame or a dictionary of pandas DataFrames."
     with pytest.raises(TypeError, match=msg):
         _calculate_metrics_multiseries(
-            "invalid_series_type", predictions, folds, span_index, metrics, levels
+            "invalid_series_type", predictions, folds, span_index, window_size, metrics, levels
         )
 
     # Test invalid type for predictions
     msg = "`predictions` must be a pandas DataFrame."
     with pytest.raises(TypeError, match=msg):
         _calculate_metrics_multiseries(
-            series_df, "invalid_predictions_type", folds, span_index, metrics, levels
+            series_df, "invalid_predictions_type", folds, span_index, window_size, metrics, levels
         )
 
     # Test invalid type for folds
     msg = "`folds` must be a list."
     with pytest.raises(TypeError, match=msg):
         _calculate_metrics_multiseries(
-            series_df, predictions, "invalid_folds_type", span_index, metrics, levels
+            series_df, predictions, "invalid_folds_type", span_index, window_size, metrics, levels
         )
 
     # Test invalid type for span_index
     msg = "`span_index` must be a pandas DatetimeIndex or pandas RangeIndex."
     with pytest.raises(TypeError, match=msg):
         _calculate_metrics_multiseries(
-            series_df, predictions, folds, "invalid_span_index_type", metrics, levels
+            series_df, predictions, folds, "invalid_span_index_type", window_size, metrics, levels
+        )
+
+    # Test invalid type for window_size
+    msg = "`window_size` must be an integer."
+    with pytest.raises(TypeError, match=msg):
+        _calculate_metrics_multiseries(
+            series_df, predictions, folds, span_index, "invalid_window_size_type", metrics, levels
         )
 
     # Test invalid type for metrics
     msg = "`metrics` must be a list."
     with pytest.raises(TypeError, match=msg):
         _calculate_metrics_multiseries(
-            series_df, predictions, folds, span_index, "invalid_metrics_type", levels
+            series_df, predictions, folds, span_index, window_size, "invalid_metrics_type", levels
         )
 
     # Test invalid type for levels
     msg = "`levels` must be a list."
     with pytest.raises(TypeError, match=msg):
         _calculate_metrics_multiseries(
-            series_df, predictions, folds, span_index, metrics, "invalid_levels_type"
+            series_df, predictions, folds, span_index, window_size, metrics, "invalid_levels_type"
         )
 
     # Test invalid type for add_aggregated_metric
@@ -194,6 +202,7 @@ def test_calculate_metrics_multiseries_input_types():
             predictions,
             folds,
             span_index,
+            window_size,
             metrics,
             levels,
             add_aggregated_metric="invalid_type",
@@ -213,6 +222,7 @@ def test_calculate_metrics_multiseries_output_when_no_aggregated_metric(
         predictions=predictions,
         folds=folds,
         span_index=span_index,
+        window_size=window_size,
         metrics=metrics,
         levels=levels,
         add_aggregated_metric=False,
@@ -222,7 +232,7 @@ def test_calculate_metrics_multiseries_output_when_no_aggregated_metric(
         data={
             "levels": ["item_1", "item_2", "item_3"],
             "mean_absolute_error": [1.477567, 3.480129, 2.942386],
-            "mean_absolute_scaled_error": [0.610914, 1.170113, 0.656176],
+            "mean_absolute_scaled_error": [0.8388579569071319, 1.261808218733781, 0.6816085701001846],
         }
     )
 
@@ -242,6 +252,7 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric(
         predictions=predictions,
         folds=folds,
         span_index=span_index,
+        window_size=window_size,
         metrics=metrics,
         levels=levels,
         add_aggregated_metric=True,
@@ -266,12 +277,12 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric(
                 2.633361,
             ],
             "mean_absolute_scaled_error": [
-                0.610914,
-                1.170113,
-                0.656176,
-                0.812401,
-                0.812401,
-                0.799851,
+                0.8388579569071319,
+                1.261808218733781,
+                0.6816085701001846,
+                0.9274249152470325,
+                0.9274249152470325,
+                0.8940507968656655,
             ],
         }
     )
@@ -292,6 +303,7 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_custome
         predictions=predictions,
         folds=folds,
         span_index=span_index,
+        window_size=window_size,
         metrics=metrics,
         levels=levels,
         add_aggregated_metric=True,
@@ -332,6 +344,7 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_predict
         predictions=predictions_different_lenght,
         folds=folds,
         span_index=span_index,
+        window_size=window_size,
         metrics=metrics,
         levels=levels,
         add_aggregated_metric=True,
@@ -356,12 +369,12 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_predict
                 2.613332,
             ],
             "mean_absolute_scaled_error": [
-                0.610914,
-                1.170113,
-                0.707757,
-                0.829595,
-                0.855141,
-                0.793768,
+                0.8388579569071319,
+                1.261808218733781,
+                0.7351889788709302,
+                0.9452850515039476,
+                0.9893374538302255,
+                0.8872509680588639,
             ],
         }
     )
@@ -381,30 +394,39 @@ def test_calculate_metrics_multiseries_output_when_aggregated_metric_and_one_lev
         predictions=predictions_missing_level,
         folds=folds,
         span_index=span_index,
+        window_size=window_size,
         metrics=metrics,
         levels=levels,
         add_aggregated_metric=True,
     )
 
-    expected = pd.DataFrame({
-        'levels': {0: 'item_1',
-        1: 'item_2',
-        2: 'item_3',
-        3: 'average',
-        4: 'weighted_average',
-        5: 'pooling'},
-        'mean_absolute_error': {0: 1.47756696,
-        1: 3.48012924,
-        2: np.nan,
-        3: 2.4788481,
-        4: 2.4788481,
-        5: 2.4788481},
-        'mean_absolute_scaled_error': {0: 0.6109141681923469,
-        1: 1.170112564935368,
-        2: np.nan,
-        3: 0.8905133665638575,
-        4: 0.8905133665638574,
-        5: 0.9193177167796042}
-    })
+    expected = pd.DataFrame(
+        {
+            "levels": [
+                "item_1",
+                "item_2",
+                "item_3",
+                "average",
+                "weighted_average",
+                "pooling",
+            ],
+            "mean_absolute_error": [
+                1.47756696,
+                3.48012924,
+                np.nan,
+                2.4788481,
+                2.4788481,
+                2.4788481,
+            ],
+            "mean_absolute_scaled_error": [
+                0.8388579569071319,
+                1.261808218733781,
+                np.nan,
+                1.0503330878204564,
+                1.0503330878204564,
+                1.096968360536767,
+            ],
+        }
+    )
 
     pd.testing.assert_frame_equal(results, expected)

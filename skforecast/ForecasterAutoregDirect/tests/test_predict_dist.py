@@ -29,15 +29,15 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     
     forecaster.fit(y=y, exog=exog)
     results = forecaster.predict_dist(
-                  steps               = 2,
-                  exog                = exog_predict,
-                  distribution        = norm,
-                  n_boot              = 4,
-                  in_sample_residuals = True
+                  steps                   = 2,
+                  exog                    = exog_predict,
+                  distribution            = norm,
+                  n_boot                  = 4,
+                  use_in_sample_residuals = True
               )
     expected = pd.DataFrame(
-                   data    = np.array([[0.54274594, 0.20807726],
-                                       [0.50255276, 0.21780292]]),
+                   data    = np.array([[0.542745939120041, 0.20807726416842307],
+                                       [0.3204638186856599, 0.13511555588800012]]),
                    columns = ['loc', 'scale'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -60,17 +60,17 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                  )
     
     forecaster.fit(y=y, exog=exog)
-    forecaster.out_sample_residuals = forecaster.in_sample_residuals
+    forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_dist(
-                  steps               = 2,
-                  exog                = exog_predict,
-                  distribution        = norm,
-                  n_boot              = 4,
-                  in_sample_residuals = False
+                  steps                   = 2,
+                  exog                    = exog_predict,
+                  distribution            = norm,
+                  n_boot                  = 4,
+                  use_in_sample_residuals = False
               )
     expected = pd.DataFrame(
-                   data    = np.array([[0.54274594, 0.20807726],
-                                       [0.50255276, 0.21780292]]),
+                   data    = np.array([[0.542745939120041, 0.20807726416842307],
+                                       [0.3204638186856599, 0.13511555588800012]]),
                    columns = ['loc', 'scale'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )

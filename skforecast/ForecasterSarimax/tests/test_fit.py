@@ -4,7 +4,6 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from pmdarima.arima import ARIMA
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 
@@ -31,7 +30,7 @@ def test_fit_ValueError_when_len_exog_is_not_the_same_as_len_y():
 
 def test_forecaster_DatetimeIndex_index_freq_stored():
     """
-    Test serie_with_DatetimeIndex.index.freqstr is stored in forecaster.index_freq.
+    Test serie_with_DatetimeIndex.index.freqstr is stored in forecaster.index_freq_.
     """
     serie_with_DatetimeIndex = pd.Series(
         data  = [1, 2, 3, 4, 5],
@@ -40,23 +39,23 @@ def test_forecaster_DatetimeIndex_index_freq_stored():
     forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 0, 0)))
     forecaster.fit(y=serie_with_DatetimeIndex)
     expected = serie_with_DatetimeIndex.index.freqstr
-    results = forecaster.index_freq
+    results = forecaster.index_freq_
 
     assert results == expected
 
 
 @pytest.mark.parametrize("suppress_warnings", 
                          [True, False], 
-                         ids = lambda v : f'suppress_warnings: {v}')
+                         ids = lambda v: f'suppress_warnings: {v}')
 def test_forecaster_index_step_stored_with_suppress_warnings(suppress_warnings):
     """
-    Test serie without DatetimeIndex, step is stored in forecaster.index_freq.
+    Test serie without DatetimeIndex, step is stored in forecaster.index_freq_.
     """
     y = pd.Series(data=np.arange(10))
     forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 0, 0)))
     forecaster.fit(y=y, suppress_warnings=suppress_warnings)
     expected = y.index.step
-    results = forecaster.index_freq
+    results = forecaster.index_freq_
 
     assert results == expected
 
@@ -74,25 +73,21 @@ def test_fit_last_window_stored(store_last_window):
     expected = pd.Series(np.arange(50))
 
     if store_last_window:
-        pd.testing.assert_series_equal(forecaster.last_window, expected)
+        pd.testing.assert_series_equal(forecaster.last_window_, expected)
     else:
-        assert forecaster.last_window == None
+        assert forecaster.last_window_ is None
 
 
-@pytest.mark.parametrize("regressor", 
-                         [ARIMA(order=(1, 0, 0)), 
-                          Sarimax(order=(1, 0, 0))], 
-                         ids = lambda reg : f'regressor: {type(reg)}')
 @pytest.mark.parametrize("y          , idx", 
                          [(y         , pd.RangeIndex(start=0, stop=50)), 
                           (y_datetime, pd.date_range(start='2000', periods=50, freq='YE'))], 
-                         ids = lambda values : f'y, index: {type(values)}')
-def test_fit_extended_index_stored(regressor, y, idx):
+                         ids = lambda values: f'y, index: {type(values)}')
+def test_fit_extended_index_stored(y, idx):
     """
     Test that values of self.regressor.arima_res_.fittedvalues.index are 
-    stored after fitting in forecaster.extended_index.
+    stored after fitting in forecaster.extended_index_.
     """
-    forecaster = ForecasterSarimax(regressor=regressor)
+    forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 0, 0)))
     forecaster.fit(y=y)
 
-    pd.testing.assert_index_equal(forecaster.extended_index, idx)
+    pd.testing.assert_index_equal(forecaster.extended_index_, idx)

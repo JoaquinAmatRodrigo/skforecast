@@ -188,7 +188,7 @@ def test_set_out_sample_residuals_when_transform_is_True():
     forecaster.fit(y=y)
     new_residuals = np.random.normal(size=100)
     new_residuals_transformed = forecaster.transformer_y.transform(new_residuals.reshape(-1, 1))
-    new_residuals_transformed = new_residuals_transformed.flatten()
+    new_residuals_transformed = new_residuals_transformed.ravel()
     forecaster.set_out_sample_residuals(residuals=new_residuals, transform=True)
 
     np.testing.assert_array_equal(new_residuals_transformed, forecaster.out_sample_residuals)

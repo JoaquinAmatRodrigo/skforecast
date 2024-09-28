@@ -99,20 +99,20 @@ class ForecasterEquivalentDate():
     window_size_diff : int
         This attribute has the same value as window_size as this Forecaster 
         doesn't support differentiation.
-    last_window : pandas Series
+    last_window_ : pandas Series
         This window represents the most recent data observed by the predictor
         during its training phase. It contains the past values needed to include
         the last equivalent date according the `offset` and `n_offsets`.
-    index_type : type
+    index_type_ : type
         Type of index of the input used in training.
-    index_freq : str
+    index_freq_ : str
         Frequency of Index of the input used in training.
-    training_range : pandas Index
+    training_range_ : pandas Index
         First and last values of index of the data used during training.
-    fitted : bool
-        Tag to identify if the regressor has been fitted (trained).
     creation_date : str
         Date of creation.
+    is_fitted : bool
+        Tag to identify if the regressor has been fitted (trained).
     fit_date : str
         Date of last fit.
     skforecast_version : str
@@ -139,12 +139,12 @@ class ForecasterEquivalentDate():
         self.offset             = offset
         self.n_offsets          = n_offsets
         self.agg_func           = agg_func
-        self.last_window        = None
-        self.index_type         = None
-        self.index_freq         = None
-        self.training_range     = None
-        self.fitted             = False
+        self.last_window_       = None
+        self.index_type_        = None
+        self.index_freq_        = None
+        self.training_range_    = None
         self.creation_date      = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.is_fitted          = False
         self.fit_date           = None
         self.skforecast_version = skforecast.__version__
         self.python_version     = sys.version.split(" ")[0]
@@ -178,9 +178,9 @@ class ForecasterEquivalentDate():
             f"Number of offsets: {self.n_offsets} \n"
             f"Aggregation function: {self.agg_func.__name__} \n"
             f"Window size: {self.window_size} \n"
-            f"Training range: {self.training_range.to_list() if self.fitted else None} \n"
-            f"Training index type: {str(self.index_type).split('.')[-1][:-2] if self.fitted else None} \n"
-            f"Training index frequency: {self.index_freq if self.fitted else None} \n"
+            f"Training range: {self.training_range_.to_list() if self.is_fitted else None} \n"
+            f"Training index type: {str(self.index_type_).split('.')[-1][:-2] if self.is_fitted else None} \n"
+            f"Training index frequency: {self.index_freq_ if self.is_fitted else None} \n"
             f"Creation date: {self.creation_date} \n"
             f"Last fit date: {self.fit_date} \n"
             f"Skforecast version: {self.skforecast_version} \n"
@@ -228,11 +228,11 @@ class ForecasterEquivalentDate():
                 )
         
         # Reset values in case the forecaster has already been fitted.
-        self.index_type     = None
-        self.index_freq     = None
-        self.last_window    = None
-        self.fitted         = False
-        self.training_range = None
+        self.last_window_    = None
+        self.index_type_     = None
+        self.index_freq_     = None
+        self.training_range_ = None
+        self.is_fitted       = False
 
         _, y_index = preprocess_y(y=y, return_values=False)
 
@@ -268,11 +268,11 @@ class ForecasterEquivalentDate():
                      f"size of `y`.")
                 )
         
-        self.fitted = True
+        self.is_fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.training_range = y_index[[0, -1]]
-        self.index_type = type(y_index)
-        self.index_freq = (
+        self.training_range_ = y_index[[0, -1]]
+        self.index_type_ = type(y_index)
+        self.index_freq_ = (
             y_index.freqstr if isinstance(y_index, pd.DatetimeIndex) else y_index.step
         )
         
@@ -280,7 +280,7 @@ class ForecasterEquivalentDate():
         # dates are available when calling the `predict` method.
         # Store the whole series to avoid errors when the offset is larger 
         # than the data available.
-        self.last_window = y.copy()
+        self.last_window_ = y.copy()
 
 
     def predict(
@@ -299,7 +299,7 @@ class ForecasterEquivalentDate():
         last_window : pandas Series, default `None`
             Past values needed to select the last equivalent dates according to 
             the offset. If `last_window = None`, the values stored in 
-            `self.last_window` are used and the predictions start immediately 
+            `self.last_window_` are used and the predictions start immediately 
             after the training data.
         exog : Ignored
             Not used, present here for API consistency by convention.
@@ -312,26 +312,17 @@ class ForecasterEquivalentDate():
         """
 
         if last_window is None:
-            last_window = self.last_window
+            last_window = self.last_window_
 
         check_predict_input(
-            forecaster_name  = type(self).__name__,
-            steps            = steps,
-            fitted           = self.fitted,
-            included_exog    = None,
-            index_type       = self.index_type,
-            index_freq       = self.index_freq,
-            window_size      = self.window_size,
-            last_window      = last_window,
-            last_window_exog = None,
-            exog             = None,
-            exog_type        = None,
-            exog_col_names   = None,
-            interval         = None,
-            alpha            = None,
-            max_steps        = None,
-            levels           = None,
-            series_col_names = None
+            forecaster_name = type(self).__name__,
+            steps           = steps,
+            is_fitted       = self.is_fitted,
+            exog_in_        = False,
+            index_type_     = self.index_type_,
+            index_freq_     = self.index_freq_,
+            window_size     = self.window_size,
+            last_window     = last_window
         )
 
         last_window = last_window.copy()

@@ -41,18 +41,18 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
     
     forecaster.fit(series=series, exog=exog)
     results = forecaster.predict_dist(
-                  steps               = 2,
-                  distribution        = norm,
-                  levels              = level,
-                  exog                = exog_predict,
-                  n_boot              = 4,
-                  in_sample_residuals = True,
-                  suppress_warnings   = True
+                  steps                   = 2,
+                  distribution            = norm,
+                  levels                  = level,
+                  exog                    = exog_predict,
+                  n_boot                  = 4,
+                  use_in_sample_residuals = True,
+                  suppress_warnings       = True
               )
     
     expected = pd.DataFrame(
-                   data    = np.array([[0.38172712, 0.13932345],
-                                       [0.22554853, 0.16819172]]),
+                   data    = np.array([[0.30718046, 0.14355782],
+                                       [0.33695529, 0.21900963]]),
                    columns = ['1_loc', '1_scale'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -77,19 +77,19 @@ def test_predict_dist_output_when_forecaster_is_LinearRegression_steps_is_2_in_s
                  )
     
     forecaster.fit(series=series, exog=exog)
-    forecaster.out_sample_residuals = forecaster.in_sample_residuals
+    forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_dist(
-                  steps               = 2,
-                  distribution        = norm,
-                  levels              = levels,
-                  exog                = exog_predict,
-                  n_boot              = 4,
-                  in_sample_residuals = False
+                  steps                   = 2,
+                  distribution            = norm,
+                  levels                  = levels,
+                  exog                    = exog_predict,
+                  n_boot                  = 4,
+                  use_in_sample_residuals = False
               )
     
     expected = pd.DataFrame(
-                   data    = np.array([[0.38172712, 0.13932345, 0.54404355, 0.20840904],
-                                       [0.22554853, 0.16819172, 0.42133164, 0.21519488]]),
+                   data    = np.array([[0.30718046, 0.14355782, 0.58121270, 0.31737888],
+                                       [0.33695529, 0.21900963, 0.12968874, 0.06418038]]),
                    columns = ['1_loc', '1_scale', '2_loc', '2_scale'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )

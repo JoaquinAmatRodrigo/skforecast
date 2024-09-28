@@ -28,16 +28,16 @@ def test_predict_quantiles_output_when_forecaster_is_LinearRegression_steps_is_2
 
     forecaster.fit(y=y, exog=exog)
     results = forecaster.predict_quantiles(
-                  steps               = 2,
-                  exog                = exog_predict,
-                  quantiles           = [0.05, 0.55, 0.95],
-                  n_boot              = 4,
-                  in_sample_residuals = True
+                  steps                   = 2,
+                  exog                    = exog_predict,
+                  quantiles               = [0.05, 0.55, 0.95],
+                  n_boot                  = 4,
+                  use_in_sample_residuals = True
               )
     
     expected = pd.DataFrame(
-                   data    = np.array([[5.71046139e-01, 7.88760407e-01, 1.11632787e+00],
-                                       [7.91716441e-04, 2.66257337e-01, 5.39588960e-01]]),
+                   data    = np.array([[0.42332861, 0.67974121, 0.77117466],
+                                       [0.12331034, 0.311173  , 0.79010615]]),
                    columns = ['q_0.05', 'q_0.55', 'q_0.95'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )
@@ -60,18 +60,18 @@ def test_predict_quantiles_output_when_forecaster_is_LinearRegression_steps_is_2
                  )
     
     forecaster.fit(y=y, exog=exog)
-    forecaster.out_sample_residuals = forecaster.in_sample_residuals
+    forecaster.out_sample_residuals_ = forecaster.in_sample_residuals_
     results = forecaster.predict_quantiles(
-                  steps               = 2,
-                  exog                = exog_predict,
-                  quantiles           = [0.05, 0.55, 0.95],
-                  n_boot              = 4,
-                  in_sample_residuals = False
+                  steps                   = 2,
+                  exog                    = exog_predict,
+                  quantiles               = [0.05, 0.55, 0.95],
+                  n_boot                  = 4,
+                  use_in_sample_residuals = False
               )
     
     expected = pd.DataFrame(
-                   data    = np.array([[5.71046139e-01, 7.88760407e-01, 1.11632787e+00],
-                                       [7.91716441e-04, 2.66257337e-01, 5.39588960e-01]]),
+                   data    = np.array([[0.42332861, 0.67974121, 0.77117466],
+                                       [0.12331034, 0.311173  , 0.79010615]]),
                    columns = ['q_0.05', 'q_0.55', 'q_0.95'],
                    index   = pd.RangeIndex(start=50, stop=52)
                )

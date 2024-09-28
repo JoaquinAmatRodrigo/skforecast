@@ -5,7 +5,6 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from pmdarima.arima import ARIMA
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.utils import expand_index
@@ -118,37 +117,6 @@ def test_predict_interval_ValueError_when_interval_is_not_symmetrical():
             alpha    = alpha, 
             interval = interval_not_symmetrical
         )
-
-
-@pytest.mark.parametrize("alpha, interval", 
-                         [(0.05, [1, 99]), 
-                          (None, [2.5, 97.5])], 
-                         ids = lambda values : f'alpha, interval: {values}')
-def test_predict_interval_output_ForecasterSarimax_pmdarima_ARIMA(alpha, interval):
-    """
-    Test predict_interval output of ForecasterSarimax using ARIMA from pmdarima.
-    """
-    forecaster = ForecasterSarimax(
-                     regressor = ARIMA(maxiter = 1000, 
-                                       trend     = None, 
-                                       method    = 'nm', 
-                                    #    ftol      = 1e-19, 
-                                       order = (1, 1, 1)
-                                 )
-                 )
-    forecaster.fit(y=y)
-    predictions = forecaster.predict_interval(steps=5, alpha=alpha, interval=interval)
-    expected = pd.DataFrame(
-                   data    = np.array([[0.66306615, 0.44125671, 0.88487559],
-                                       [0.69348775, 0.43388917, 0.95308633],
-                                       [0.71345977, 0.4407784 , 0.98614114],
-                                       [0.72726861, 0.4495056 , 1.00503162],
-                                       [0.7374424 , 0.45753824, 1.01734656]]),
-                   columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index   = pd.RangeIndex(start=50, stop=55, step=1)
-               )
-    
-    pd.testing.assert_frame_equal(predictions, expected, atol=0.0001)
 
 
 @pytest.mark.parametrize("alpha, interval", 
@@ -278,12 +246,12 @@ def test_predict_interval_ValueError_when_last_window_index_does_not_follow_trai
 
     forecaster = ForecasterSarimax(regressor = Sarimax(order=(1, 0, 0)))
     forecaster.fit(y=y_test)
-    expected_index = expand_index(forecaster.extended_index, 1)[0]
+    expected_index = expand_index(forecaster.extended_index_, 1)[0]
 
     err_msg = re.escape(
         (f"To make predictions unrelated to the original data, `last_window` "
          f"has to start at the end of the index seen by the forecaster.\n"
-         f"    Series last index         : {forecaster.extended_index[-1]}.\n"
+         f"    Series last index         : {forecaster.extended_index_[-1]}.\n"
          f"    Expected index            : {expected_index}.\n"
          f"    `last_window` index start : {lw_test.index[0]}.")
     )
@@ -314,12 +282,12 @@ def test_predict_interval_ValueError_when_last_window_exog_index_does_not_follow
 
     forecaster = ForecasterSarimax(regressor = Sarimax(order=(1, 0, 0)))
     forecaster.fit(y=y_test, exog=exog_test)
-    expected_index = expand_index(forecaster.extended_index, 1)[0]
+    expected_index = expand_index(forecaster.extended_index_, 1)[0]
 
     err_msg = re.escape(
         (f"To make predictions unrelated to the original data, `last_window_exog` "
          f"has to start at the end of the index seen by the forecaster.\n"
-         f"    Series last index              : {forecaster.extended_index[-1]}.\n"
+         f"    Series last index              : {forecaster.extended_index_[-1]}.\n"
          f"    Expected index                 : {expected_index}.\n"
          f"    `last_window_exog` index start : {lw_exog_test.index[0]}.")
     )
@@ -442,30 +410,26 @@ def test_predict_interval_output_ForecasterSarimax_with_last_window_and_exog_and
     pd.testing.assert_frame_equal(predictions, expected, atol=0.0001)
 
 
-@pytest.mark.parametrize("regressor", 
-                         [ARIMA(order=(1, 0, 0)), 
-                          Sarimax(order=(1, 0, 0))], 
-                         ids = lambda reg : f'regressor: {type(reg)}')
 @pytest.mark.parametrize("y          , idx", 
                          [(y         , pd.RangeIndex(start=0, stop=50)), 
                           (y_datetime, pd.date_range(start='2000', periods=50, freq='YE'))], 
-                         ids = lambda values : f'y, index: {type(values)}')
-def test_predict_interval_ForecasterSarimax_updates_extended_index_twice(regressor, y, idx):
+                         ids = lambda values: f'y, index: {type(values)}')
+def test_predict_interval_ForecasterSarimax_updates_extended_index_twice(y, idx):
     """
-    Test forecaster.extended_index is updated when using predict_interval twice.
+    Test forecaster.extended_index_ is updated when using predict_interval twice.
     """
     y_fit = y.iloc[:30].copy()
 
-    forecaster = ForecasterSarimax(regressor=regressor)
+    forecaster = ForecasterSarimax(regressor=Sarimax(order=(1, 0, 0)))
     forecaster.fit(y=y_fit)
 
     lw_1 = y.iloc[30:40].copy()
     forecaster.predict_interval(steps=5, alpha = 0.05, last_window=lw_1)
-    result_1 = forecaster.extended_index.copy()
+    result_1 = forecaster.extended_index_.copy()
     expected_1 = idx[:40]
 
     lw_2 = y.iloc[40:].copy()
     forecaster.predict_interval(steps=5, alpha = 0.05, last_window=lw_2)
 
     pd.testing.assert_index_equal(result_1, expected_1)
-    pd.testing.assert_index_equal(forecaster.extended_index, idx)
+    pd.testing.assert_index_equal(forecaster.extended_index_, idx)

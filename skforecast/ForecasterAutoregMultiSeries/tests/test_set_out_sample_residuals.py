@@ -64,7 +64,7 @@ def test_set_out_sample_residuals_UnknownLevelWarning_when_residuals_levels_but_
     )
     with pytest.warns(UnknownLevelWarning, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     expected = {
         '_unknown_level': np.array([1, 2, 3])
@@ -86,13 +86,13 @@ def test_set_out_sample_residuals_IgnoredArgumentWarning_when_residuals_not_for_
     err_msg = re.escape(
         (
             f"Only residuals of levels "
-            f"{set(forecaster.series_col_names).intersection(set(residuals.keys()))} "
+            f"{set(forecaster.series_names_in_).intersection(set(residuals.keys()))} "
             f"are updated."
         )
     )
     with pytest.warns(IgnoredArgumentWarning, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     expected = {
         'l1': np.array([1, 2, 3]), 
@@ -135,7 +135,7 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     )
     with pytest.warns(UserWarning, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=False)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     expected = {
         'l1': np.array([1, 2, 3]), 
@@ -178,7 +178,7 @@ def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_tr
     )
     with pytest.warns(UserWarning, match = err_msg):
         forecaster.set_out_sample_residuals(residuals=residuals, transform=True)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     expected = {
         'l1': np.array([-1.21854359, -0.87038828, -0.52223297]), 
@@ -210,7 +210,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_no
 
     forecaster.set_out_sample_residuals(residuals=residuals)
     forecaster.set_out_sample_residuals(residuals=new_residuals, append=False)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     expected = {
         'l1': np.arange(20), 
@@ -237,7 +237,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_encodi
 
     forecaster.set_out_sample_residuals(residuals=residuals)
     forecaster.set_out_sample_residuals(residuals=new_residuals, append=False)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     expected = {'_unknown_level': np.arange(20, 40)}
 
@@ -260,7 +260,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_1000_and_ap
     
     forecaster.set_out_sample_residuals(residuals=residuals)
     forecaster.set_out_sample_residuals(residuals=residuals, append=True)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     expected = {
         'l1': np.concatenate((np.arange(10), np.arange(10))), 
@@ -288,7 +288,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000(enc
 
     residuals = {'l1': np.arange(2000), 'l2': np.arange(2000)}
     forecaster.set_out_sample_residuals(residuals=residuals)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     assert list(results.keys()) == ['l1', 'l2', '_unknown_level']
     assert all(len(value) == 1000 for value in results.values())
@@ -306,7 +306,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000_enc
 
     residuals = {'_unknown_level': np.arange(2000)}
     forecaster.set_out_sample_residuals(residuals=residuals)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     assert list(results.keys()) == ['_unknown_level']
     assert all(len(value) == 1000 for value in results.values())
@@ -325,7 +325,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000_and
     forecaster.set_out_sample_residuals(residuals = residuals)
     forecaster.set_out_sample_residuals(residuals = residuals_2,
                                         append    = True)
-    results = forecaster.out_sample_residuals
+    results = forecaster.out_sample_residuals_
 
     expected = {}
     for key, value in residuals_2.items():

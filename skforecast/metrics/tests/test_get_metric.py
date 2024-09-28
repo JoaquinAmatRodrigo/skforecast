@@ -39,7 +39,7 @@ def test_get_metric_ValueError_when_metric_not_in_metrics_allowed():
                           ('mean_absolute_percentage_error', mean_absolute_percentage_error),
                           ('mean_squared_log_error', mean_squared_log_error),
                           ('median_absolute_error', median_absolute_error)], 
-                         ids = lambda dt : f'mertic_str, metric_callable: {dt}')
+                         ids = lambda dt: f'mertic_str, metric_callable: {dt}')
 def test_get_metric_output_for_all_metrics(metric_str, metric_callable):
     """
     Test output for all metrics allowed.

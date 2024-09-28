@@ -250,7 +250,7 @@ def _backtesting_sarimax(
 
         next_window_exog = exog.iloc[test_idx_start:test_idx_end, ] if exog is not None else None
 
-        # After the first fit, ARIMA must use the last windows stored in the model
+        # After the first fit, Sarimax must use the last windows stored in the model
         if fold == folds[0]:
             last_window_y = None
             last_window_exog = None

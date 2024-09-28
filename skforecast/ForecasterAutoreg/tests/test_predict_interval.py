@@ -20,13 +20,13 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.in_sample_residuals = np.full_like(forecaster.in_sample_residuals, fill_value=10)
+    forecaster.in_sample_residuals_ = np.full_like(forecaster.in_sample_residuals_, fill_value=10)
     expected = pd.DataFrame(
                    data    = np.array([[10., 20., 20.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=10, stop=11, step=1)
                )
-    results = forecaster.predict_interval(steps=1, in_sample_residuals=True)
+    results = forecaster.predict_interval(steps=1, use_in_sample_residuals=True)
 
     pd.testing.assert_frame_equal(results, expected)
 
@@ -38,14 +38,14 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.in_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
+    forecaster.in_sample_residuals_ = pd.Series(np.full_like(forecaster.in_sample_residuals_, fill_value=10))
     expected = pd.DataFrame(
                    data    = np.array([[10. ,20., 20.],
                                        [11., 24.33333333, 24.33333333]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=10, stop=12, step=1)
                )
-    results = forecaster.predict_interval(steps=2, in_sample_residuals=True)
+    results = forecaster.predict_interval(steps=2, use_in_sample_residuals=True)
 
     pd.testing.assert_frame_equal(results, expected)
     
@@ -57,13 +57,13 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_1_
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
+    forecaster.out_sample_residuals_ = pd.Series(np.full_like(forecaster.in_sample_residuals_, fill_value=10))
     expected = pd.DataFrame(
                    data    = np.array([[10., 20., 20.]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=10, stop=11, step=1)
                )
-    results = forecaster.predict_interval(steps=1, in_sample_residuals=False)
+    results = forecaster.predict_interval(steps=1, use_in_sample_residuals=False)
 
     pd.testing.assert_frame_equal(results, expected)
 
@@ -75,18 +75,21 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_5_
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y)
+    results = forecaster.predict_interval(
+        steps=5, use_in_sample_residuals=True, use_binned_residuals=True
+    )
+
     expected = pd.DataFrame(
                    data    = np.array(
                                 [[0.56842545, 0.25304752, 0.98664822],
-                                [0.50873285, 0.05687183, 0.95641577],
-                                [0.51189344, 0.25202529, 0.9780938 ],
-                                [0.51559104, 0.16866501, 0.97785889],
-                                [0.51060927, 0.05872579, 0.89504973]]
+                                 [0.50873285, 0.05687183, 0.95641577],
+                                 [0.51189344, 0.23219067, 0.9780938 ],
+                                 [0.51559104, 0.17266757, 0.98236802],
+                                 [0.51060927, 0.1593315 , 0.95014552]]
                             ),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=50, stop=55, step=1)
                )
-    results = forecaster.predict_interval(steps=5, in_sample_residuals=True, binned_residuals=True)
 
     pd.testing.assert_frame_equal(results, expected)
     
@@ -98,14 +101,14 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_2_
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
     forecaster.fit(y=pd.Series(np.arange(10)))
-    forecaster.out_sample_residuals = pd.Series(np.full_like(forecaster.in_sample_residuals, fill_value=10))
+    forecaster.out_sample_residuals_ = pd.Series(np.full_like(forecaster.in_sample_residuals_, fill_value=10))
     expected = pd.DataFrame(
                    data    = np.array([[10. ,20., 20.],
                                        [11., 24.33333333, 24.33333333]]),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=10, stop=12, step=1)
                )
-    results = forecaster.predict_interval(steps=2, in_sample_residuals=False)
+    results = forecaster.predict_interval(steps=2, use_in_sample_residuals=False)
 
     pd.testing.assert_frame_equal(results, expected)
 
@@ -128,12 +131,13 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
                  )
     forecaster.fit(y=y)
     predictions = forecaster.predict_interval(steps=5)
+
     expected = pd.DataFrame(
-                   data = np.array([[-0.1578203 , -1.13499023,  1.55076389],
-                                    [-0.18459942, -1.94268356,  1.13498352],
-                                    [-0.13711051, -1.66269707,  1.50135233],
-                                    [-0.01966358, -1.45879457,  1.4130552 ],
-                                    [-0.03228613, -1.67774065,  0.98407656]]),
+                   data = np.array([[-0.1578203 , -2.02104471,  1.55076389],
+                                    [-0.18459942, -1.98567931,  1.49673592],
+                                    [-0.13711051, -1.89299245,  1.47330827],
+                                    [-0.01966358, -1.60143134,  1.59908257],
+                                    [-0.03228613, -1.73050679,  1.51878244]]),
                    index = pd.RangeIndex(start=20, stop=25, step=1),
                    columns = ['pred', 'lower_bound', 'upper_bound']
                )
@@ -187,24 +191,26 @@ def test_predict_interval_output_when_regressor_is_LinearRegression_with_transfo
 
 def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_5_in_sample_residuals_is_False_binned_residuals_is_True():
     """
-    Test output when regressor is LinearRegression, steps=5, in_sample_residuals=False,
+    Test output when regressor is LinearRegression, steps=5, use_in_sample_residuals=False,
     binned_residuals=True.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     forecaster.fit(y=y)
-    forecaster.out_sample_residuals_by_bin = forecaster.in_sample_residuals_by_bin
+    forecaster.out_sample_residuals_by_bin_ = forecaster.in_sample_residuals_by_bin_
+    results = forecaster.predict_interval(
+        steps=5, use_in_sample_residuals=False, use_binned_residuals=True
+    )
+
     expected = pd.DataFrame(
                    data    = np.array(
                                 [[0.56842545, 0.25304752, 0.98664822],
-                                [0.50873285, 0.05687183, 0.95641577],
-                                [0.51189344, 0.25202529, 0.9780938 ],
-                                [0.51559104, 0.16866501, 0.97785889],
-                                [0.51060927, 0.05872579, 0.89504973]]
+                                 [0.50873285, 0.05687183, 0.95641577],
+                                 [0.51189344, 0.23219067, 0.9780938 ],
+                                 [0.51559104, 0.17266757, 0.98236802],
+                                 [0.51060927, 0.1593315 , 0.95014552]]
                             ),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=50, stop=55, step=1)
                )
-    results = forecaster.predict_interval(
-        steps=5, in_sample_residuals=False, binned_residuals=True
-    )
+    
     pd.testing.assert_frame_equal(results, expected)

@@ -193,7 +193,7 @@ def test_output_align_series_and_exog_multiseries_when_input_series_is_DataFrame
     exog_dict, _ = check_preprocess_exog_multiseries(
                        input_series_is_dict = input_series_is_dict,
                        series_indexes       = series_indexes,
-                       series_col_names     = ['1', '2'],
+                       series_names_in_     = ['1', '2'],
                        exog                 = exog,
                        exog_dict            = {'1': None, '2': None}
                    )
@@ -260,7 +260,7 @@ def test_output_align_series_and_exog_multiseries_when_series_is_DataFrame_diffe
     exog_dict, _ = check_preprocess_exog_multiseries(
                        input_series_is_dict = input_series_is_dict,
                        series_indexes       = series_indexes,
-                       series_col_names     = ['1', '2'],
+                       series_names_in_     = ['1', '2'],
                        exog                 = exog,
                        exog_dict            = {'1': None, '2': None}
                    )
@@ -330,7 +330,7 @@ def test_output_align_series_and_exog_multiseries_when_series_is_DataFrame_diffe
     exog_dict, _ = check_preprocess_exog_multiseries(
                        input_series_is_dict = input_series_is_dict,
                        series_indexes       = series_indexes,
-                       series_col_names     = ['l1', 'l2'],
+                       series_names_in_     = ['l1', 'l2'],
                        exog                 = exog_datetime,
                        exog_dict            = {'l1': None, 'l2': None}
                    )
@@ -395,7 +395,7 @@ def test_output_align_series_and_exog_multiseries_when_input_series_is_DataFrame
     exog_dict, _ = check_preprocess_exog_multiseries(
                        input_series_is_dict = input_series_is_dict,
                        series_indexes       = series_indexes,
-                       series_col_names     = ['1', '2'],
+                       series_names_in_     = ['1', '2'],
                        exog                 = exog_dict,
                        exog_dict            = {'1': None, '2': None}
                    )
@@ -467,7 +467,7 @@ def test_output_align_series_and_exog_multiseries_when_series_is_DataFrame_diffe
     exog_dict, _ = check_preprocess_exog_multiseries(
                        input_series_is_dict = input_series_is_dict,
                        series_indexes       = series_indexes,
-                       series_col_names     = ['1', '2'],
+                       series_names_in_     = ['1', '2'],
                        exog                 = exog_dict,
                        exog_dict            = {'1': None, '2': None}
                    )
@@ -534,7 +534,7 @@ def test_output_align_series_and_exog_multiseries_when_series_is_DataFrame_diffe
     exog_dict, _ = check_preprocess_exog_multiseries(
                        input_series_is_dict = input_series_is_dict,
                        series_indexes       = series_indexes,
-                       series_col_names     = ['l1', 'l2'],
+                       series_names_in_     = ['l1', 'l2'],
                        exog                 = exog_as_dict_datetime,
                        exog_dict            = {'l1': None, 'l2': None}
                    )
@@ -594,7 +594,7 @@ def test_output_align_series_and_exog_multiseries_when_series_dict_and_exog_dict
     exog_dict, _ = check_preprocess_exog_multiseries(
                        input_series_is_dict = input_series_is_dict,
                        series_indexes       = series_indexes,
-                       series_col_names     = ['l1', 'l2'],
+                       series_names_in_     = ['l1', 'l2'],
                        exog                 = exog_as_dict_datetime,
                        exog_dict            = {'l1': None, 'l2': None}
                    )
@@ -664,7 +664,7 @@ def test_output_align_series_and_exog_multiseries_when_series_is_dict_different_
     exog_dict, _ = check_preprocess_exog_multiseries(
                        input_series_is_dict = input_series_is_dict,
                        series_indexes       = series_indexes,
-                       series_col_names     = ['l1', 'l2'],
+                       series_names_in_     = ['l1', 'l2'],
                        exog                 = exog_as_dict_datetime,
                        exog_dict            = {'l1': None, 'l2': None}
                    )
@@ -741,7 +741,7 @@ def test_output_align_series_and_exog_multiseries_when_series_is_dict_and_length
     exog_dict, _ = check_preprocess_exog_multiseries(
                        input_series_is_dict = input_series_is_dict,
                        series_indexes       = series_indexes,
-                       series_col_names     = ['l1', 'l2'],
+                       series_names_in_     = ['l1', 'l2'],
                        exog                 = exog_no_intersection,
                        exog_dict            = {'l1': None, 'l2': None}
                    )
@@ -826,7 +826,7 @@ def test_output_align_series_and_exog_multiseries_when_series_is_dict_and_differ
     exog_dict, _ = check_preprocess_exog_multiseries(
                        input_series_is_dict = input_series_is_dict,
                        series_indexes       = series_indexes,
-                       series_col_names     = ['l1', 'l2'],
+                       series_names_in_     = ['l1', 'l2'],
                        exog                 = exog_half_intersection,
                        exog_dict            = {'l1': None, 'l2': None}
                    )

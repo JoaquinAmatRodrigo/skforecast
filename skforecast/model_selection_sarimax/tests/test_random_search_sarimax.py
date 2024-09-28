@@ -1,8 +1,5 @@
 # Unit test random_search_sarimax
 # ==============================================================================
-import re
-import pytest
-import platform
 import numpy as np
 import pandas as pd
 from skforecast.Sarimax import Sarimax
@@ -11,7 +8,7 @@ from skforecast.model_selection_sarimax import random_search_sarimax
 
 from tqdm import tqdm
 from functools import partialmethod
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 # Fixtures
 from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import y_datetime
@@ -37,7 +34,7 @@ def test_output_random_search_sarimax_sarimax_with_mocked():
                   steps               = 3,
                   refit               = False,
                   metric              = 'mean_absolute_error',
-                  initial_train_size  = len(y_datetime)-12,
+                  initial_train_size  = len(y_datetime) - 12,
                   fixed_train_size    = False,
                   return_best         = False,
                   verbose             = False
