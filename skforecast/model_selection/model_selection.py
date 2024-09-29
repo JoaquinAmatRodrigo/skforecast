@@ -1968,8 +1968,9 @@ def select_features(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoreg
-        Forecaster model.
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
+        Forecaster model. If forecaster is a ForecasterAutoregDirect, the
+        selector will only be applied to the features of the first step.
     selector : object
         A feature selector from sklearn.feature_selection.
     y : pandas Series, pandas DataFrame
@@ -1981,9 +1982,9 @@ def select_features(
     select_only : str, default `None`
         Decide what type of features to include in the selection process. 
         
-        - If `'autoreg'`, only autoregressive features (lags or custom 
-        predictors) are evaluated by the selector. All exogenous features are 
-        included in the output (`selected_exog`).
+        - If `'autoreg'`, only autoregressive features (lags and window features)
+        are evaluated by the selector. All exogenous features are included in the
+        output (`selected_exog`).
         - If `'exog'`, only exogenous features are evaluated without the presence
         of autoregressive features. All autoregressive features are included 
         in the output (`selected_autoreg`).
@@ -2012,9 +2013,7 @@ def select_features(
 
     """
 
-    valid_forecasters = [
-        'ForecasterAutoreg'
-    ]
+    valid_forecasters = ['ForecasterAutoreg', 'ForecasterAutoregDirect']
 
     if type(forecaster).__name__ not in valid_forecasters:
         raise TypeError(
@@ -2034,18 +2033,35 @@ def select_features(
     forecaster = deepcopy(forecaster)
     forecaster.fitted = False
     X_train, y_train = forecaster.create_train_X_y(y=y, exog=exog)
+    if type(forecaster).__name__ == 'ForecasterAutoregDirect':
+        X_train, y_train = forecaster.filter_train_X_y_for_step(
+                                step          = 1,
+                                X_train       = X_train,
+                                y_train       = y_train,
+                                remove_suffix = True
+                            )
 
-    if hasattr(forecaster, 'lags'):
-        autoreg_cols = [f"lag_{lag}" for lag in forecaster.lags]
-    else:
-        if forecaster.name_predictors is not None:
-            autoreg_cols = forecaster.name_predictors
-        else:
-            autoreg_cols = [
-                col
-                for col in X_train.columns
-                if re.match(r'^custom_predictor_\d+', col)
-            ]
+    # if hasattr(forecaster, 'lags'):
+    #     autoreg_cols = [f"lag_{lag}" for lag in forecaster.lags]
+    # else:
+    #     if forecaster.name_predictors is not None:
+    #         autoreg_cols = forecaster.name_predictors
+    #     else:
+    #         autoreg_cols = [
+    #             col
+    #             for col in X_train.columns
+    #             if re.match(r'^custom_predictor_\d+', col)
+    #         ]
+    # exog_cols = [col for col in X_train.columns if col not in autoreg_cols]
+
+
+    # TODO: de dónde sacar el nombre de los predictores si el forecaster no ha sido entrenado?
+    autoreg_cols = []
+    if forecaster.lags is not None:
+        autoreg_cols.extend([f"lag_{lag}" for lag in forecaster.lags])
+    if forecaster.window_features is not None:
+        autoreg_cols.extend(forecaster.window_features_names)
+
     exog_cols = [col for col in X_train.columns if col not in autoreg_cols]
 
     forced_autoreg = []
@@ -2108,9 +2124,10 @@ def select_features(
              "using the `force_inclusion` parameter.")
         )
     else:
-        if hasattr(forecaster, 'lags'):
-            selected_autoreg = [int(feature.replace('lag_', '')) 
-                                for feature in selected_autoreg]
+        selected_autoreg = [
+            int(feature.replace('lag_', '')) if feature.startswith('lag_') else feature
+            for feature in selected_autoreg
+        ]
 
     if verbose:
         print(f"Recursive feature elimination ({selector.__class__.__name__})")
