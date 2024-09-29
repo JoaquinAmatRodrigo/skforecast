@@ -52,6 +52,8 @@ The main changes in this release are:
 
 + Removed attribute `window_size_diff` from all Forecasters. The window size extended by the order of differentiation is now calculated on `window_size`.
 
++ `lags` can be None when initializing any Forecaster that includes window features.
+
 + Renamed attributes in all Forecasters:
 
     + `encoding_mapping` has been renamed to `encoding_mapping_`.

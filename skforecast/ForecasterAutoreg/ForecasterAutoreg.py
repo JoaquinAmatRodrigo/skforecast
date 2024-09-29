@@ -653,10 +653,8 @@ class ForecasterAutoreg(ForecasterBase):
         -------
         X_train : pandas DataFrame
             Training values (predictors).
-            Shape: (len(y) - self.max_lag, len(self.lags))
         y_train : pandas Series
-            Values (target) of the time series related to each row of `X_train`.
-            Shape: (len(y) - self.max_lag, )
+            Values of the time series related to each row of `X_data`.
         exog_names_in_ : list
             Names of the exogenous variables used during training.
         X_train_window_features_names_out_ : list
@@ -709,7 +707,7 @@ class ForecasterAutoreg(ForecasterBase):
         if exog is not None:
             check_exog(exog=exog, allow_nan=True)
             exog = input_to_frame(data=exog, input_name='exog')
-            # TODO: Check if this check can be checked vs y_train. As happend
+            # TODO: Check if this check can be checked vs y_train. As happened
             # in base on data (more data from y than exog, but can be aligned
             # because of the window_size.
             if len(exog) != len(y):
@@ -770,7 +768,6 @@ class ForecasterAutoreg(ForecasterBase):
             X_train_exog_names_out_ = exog.columns.to_list()
             if X_as_pandas:
                 exog_to_train = exog.iloc[self.window_size:, ]
-                # exog_to_train.index = exog_index[self.window_size:]
                 exog_to_train.index = train_index
             else:
                 exog_to_train = exog.to_numpy()[self.window_size:, ]
@@ -793,11 +790,6 @@ class ForecasterAutoreg(ForecasterBase):
                       index = train_index,
                       name  = 'y'
                   )
-        
-        # TODO: Check if needed
-        # if self.differentiation is not None:
-        #     X_train = X_train.iloc[self.differentiation:]
-        #     y_train = y_train.iloc[self.differentiation:]
 
         return (
             X_train,
@@ -830,10 +822,8 @@ class ForecasterAutoreg(ForecasterBase):
         -------
         X_train : pandas DataFrame
             Training values (predictors).
-            Shape: (len(y) - self.max_lag, len(self.lags))
         y_train : pandas Series
-            Values (target) of the time series related to each row of `X_train`.
-            Shape: (len(y) - self.max_lag, )
+            Values of the time series related to each row of `X_data`.
         
         """
 
@@ -1122,7 +1112,7 @@ class ForecasterAutoreg(ForecasterBase):
         use_in_sample_residuals: bool = True,
         use_binned_residuals: bool = False,
         check_inputs: bool = True
-    ) -> Tuple[np.ndarray, np.ndarray, pd.Index]:
+    ) -> Tuple[np.ndarray, Optional[np.ndarray], pd.Index]:
         """
         Create inputs needed for the first iteration of the prediction process. 
         Since it is a recursive process, last window is updated at each 
@@ -1881,6 +1871,7 @@ class ForecasterAutoreg(ForecasterBase):
 
 
     # TODO: Review this method with window features, if any are None
+    # TODO: method set_window_features?
     def set_lags(
         self, 
         lags: Union[int, list, np.ndarray, range]
@@ -1905,7 +1896,10 @@ class ForecasterAutoreg(ForecasterBase):
         """
 
         self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
-        self.window_size = max(self.max_lag, self.max_size_window_features)
+        self.window_size = max(
+            [ws for ws in [self.max_lag, self.max_size_window_features] 
+             if ws is not None]
+        )
         if self.differentiation is not None:
             self.window_size += self.differentiation        
 

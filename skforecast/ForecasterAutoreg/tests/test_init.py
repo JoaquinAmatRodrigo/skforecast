@@ -5,7 +5,52 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+from skforecast.preprocessing import RollingFeatures
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
+
+
+def test_init_ValueError_when_no_lags_or_window_features():
+    """
+    Test ValueError is raised when no lags or window_features are passed.
+    """
+    err_msg = re.escape(
+        ("At least one of the arguments `lags` or `window_features` "
+         "must be different from None. This is required to create the "
+         "predictors used in training the forecaster.")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        ForecasterAutoreg(
+            regressor       = LinearRegression(),
+            lags            = None,
+            window_features = None
+        )
+
+
+@pytest.mark.parametrize("lags, window_features, expected", 
+                         [(5, None, 5), 
+                          (None, True, 6), 
+                          (5, True, 6)], 
+                         ids = lambda dt: f'lags, window_features, expected: {dt}')
+def test_init_window_size_correctly_stored(lags, window_features, expected):
+    """
+    Test window_size is correctly stored when lags or window_features are passed.
+    """
+    if window_features:
+        window_features = RollingFeatures(
+            stats=['ratio_min_max', 'median'], window_sizes=[5, 6]
+        )
+
+    forecaster = ForecasterAutoreg(
+                     regressor       = LinearRegression(),
+                     lags            = lags,
+                     window_features = window_features
+                 )
+    
+    assert forecaster.window_size == expected
+    if window_features:
+        assert forecaster.window_features_class_names == ['RollingFeatures']
+    else:
+        assert forecaster.window_features_class_names is None
 
 
 @pytest.mark.parametrize("dif", 
@@ -40,8 +85,7 @@ def test_init_window_size_is_increased_when_differentiation(dif):
                      differentiation = dif
                  )
     
-    assert forecaster.window_size == len(forecaster.lags)
-    assert forecaster.window_size_diff == len(forecaster.lags) + dif
+    assert forecaster.window_size == len(forecaster.lags) + dif
 
 
 def test_init_binner_is_created_when_binner_kwargs_is_None():
