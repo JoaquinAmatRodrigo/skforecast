@@ -132,6 +132,10 @@ def initialize_window_features(
     max_window_sizes = None
     window_features_names = None
     if window_features is not None:
+        if isinstance(window_features, list) and len(window_features) < 1:
+            raise ValueError(
+                "Argument `window_features` must contain at least one element."
+            )
         if not isinstance(window_features, list):
             window_features = [window_features]
 

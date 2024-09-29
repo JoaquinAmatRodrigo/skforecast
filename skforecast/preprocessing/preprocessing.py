@@ -1023,7 +1023,7 @@ class RollingFeatures():
     ) -> np.ndarray:
         """
         Transform a numpy array using rolling windows and compute the 
-        specified statistics.
+        specified statistics. The input array must be a 1D array.
 
         Parameters
         ----------
@@ -1036,8 +1036,6 @@ class RollingFeatures():
             An array containing the computed statistics.
         
         """
-
-        # TODO: Check shape of X
 
         rolling_features = np.full(shape=self.n_stats, fill_value=np.nan, dtype=float)
         for i, stat in enumerate(self.stats):

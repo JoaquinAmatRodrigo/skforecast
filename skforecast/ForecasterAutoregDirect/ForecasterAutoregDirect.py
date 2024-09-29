@@ -127,9 +127,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         Maximum lag included in `lags`.
     window_size : int
         Size of the window needed to create the predictors. It is equal to `max_lag`.
-    window_size_diff : int
-        This attribute has the same value as window_size as this Forecaster 
-        doesn't support differentiation.
     last_window_ : pandas DataFrame
         Last window the forecaster has seen during training. It stores the
         values needed to predict `steps` immediately after the training data.
@@ -255,7 +252,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
-        self.window_size_diff = self.max_lag
 
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name = type(self).__name__, 
@@ -601,7 +597,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             exog = exog.iloc[: initial_train_size] if exog is not None else None
         )
 
-        test_init = initial_train_size - self.window_size_diff
+        test_init = initial_train_size - self.window_size
         self.is_fitted = True
         X_test, y_test = self.create_train_X_y(
             y    = y.iloc[test_init:],
@@ -815,7 +811,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         if store_last_window:
             self.last_window_ = (
-                y.iloc[-self.window_size_diff:]
+                y.iloc[-self.window_size:]
                 .copy()
                 .to_frame(name=y.name if y.name is not None else 'y')
             )
@@ -878,22 +874,22 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         if check_inputs:
             check_predict_input(
-                forecaster_name  = type(self).__name__,
-                steps            = steps,
-                is_fitted        = self.is_fitted,
-                exog_in_         = self.exog_in_,
-                index_type_      = self.index_type_,
-                index_freq_      = self.index_freq_,
-                window_size      = self.window_size_diff,
-                last_window      = last_window,
-                exog             = exog,
-                exog_type_in_    = self.exog_type_in_,
-                exog_names_in_   = self.exog_names_in_,
-                interval         = None,
-                max_steps        = None
+                forecaster_name = type(self).__name__,
+                steps           = steps,
+                is_fitted       = self.is_fitted,
+                exog_in_        = self.exog_in_,
+                index_type_     = self.index_type_,
+                index_freq_     = self.index_freq_,
+                window_size     = self.window_size,
+                last_window     = last_window,
+                exog            = exog,
+                exog_type_in_   = self.exog_type_in_,
+                exog_names_in_  = self.exog_names_in_,
+                interval        = None,
+                max_steps       = None
             )
 
-        last_window = last_window.iloc[-self.window_size_diff:].copy()
+        last_window = last_window.iloc[-self.window_size:].copy()
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
@@ -1540,7 +1536,7 @@ class ForecasterAutoregDirect(ForecasterBase):
     ) -> None:
         """
         Set new value to the attribute `lags`. Attributes `max_lag`, 
-        `window_size` and  `window_size_diff` are also updated.
+        `window_size` are also updated.
         
         Parameters
         ----------
@@ -1560,7 +1556,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.lags = initialize_lags(type(self).__name__, lags)
         self.max_lag = max(self.lags)
         self.window_size = self.max_lag
-        self.window_size_diff = self.max_lag
 
 
     def set_out_sample_residuals(

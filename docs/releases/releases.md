@@ -18,6 +18,8 @@ The main changes in this release are:
 
 + <span class="badge text-bg-enhancement">Enhancement</span> The bootstrapping process in the `predict_bootstrapping` method of all forecasters has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
 
++ <span class="badge text-bg-api-change">API Change</span> <code>[ForecasterAutoregCustom]</code> has been deprecated. Window features can be added using the `window_features` argument in the <code>[ForecasterAutoreg]</code>.
+
 + <span class="badge text-bg-api-change">API Change</span> The `pmdarima.ARIMA` regressor is no longer supported by the <code>[ForecasterSarimax]</code>. You can use the `skforecast.Sarimax.Sarimax` model or, to continue using it, use skforecast 0.13.0 or lower.
 
 
@@ -37,6 +39,8 @@ The main changes in this release are:
 
 
 **Changed**
+
++ <code>[ForecasterAutoregCustom]</code> has been deprecated. Window features can be added using the `window_features` argument in the <code>[ForecasterAutoreg]</code>.
 
 + Refactor `recursive_predict` in <code>[ForecasterAutoregMultiSeries]</code> to predict all series at once and include option of adding residuals. This improves performance when predicting multiple series.
 
@@ -947,7 +951,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 <!-- Links to API Reference -->
 <!-- Forecasters -->
 [ForecasterAutoreg]: https://skforecast.org/latest/api/forecasterautoreg
-[ForecasterAutoregCustom]: https://skforecast.org/latest/api/forecasterautoregcustom
+[ForecasterAutoregCustom]: https://skforecast.org/0.13.0/api/forecasterautoregcustom
 [ForecasterAutoregDirect]: https://skforecast.org/latest/api/forecasterautoregdirect
 [ForecasterAutoregMultiSeries]: https://skforecast.org/latest/api/forecastermultiseries
 [ForecasterAutoregMultiSeriesCustom]: https://skforecast.org/latest/api/forecastermultiseriescustom

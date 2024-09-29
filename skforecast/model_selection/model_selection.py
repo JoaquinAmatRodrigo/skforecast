@@ -310,7 +310,7 @@ def _backtesting_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
         Training time series.
@@ -437,18 +437,16 @@ def _backtesting_forecaster(
             exog                      = exog_train,
             store_in_sample_residuals = store_in_sample_residuals
         )
-        window_size = forecaster.window_size_diff
         externally_fitted = False
     else:
         # Although not used for training, first observations are needed to create
         # the initial predictors
-        window_size = forecaster.window_size_diff
-        initial_train_size = window_size
+        initial_train_size = forecaster.window_size
         externally_fitted = True
 
     folds = _create_backtesting_folds(
                 data                  = y,
-                window_size           = window_size,
+                window_size           = forecaster.window_size,
                 initial_train_size    = initial_train_size,
                 test_size             = steps,
                 externally_fitted     = externally_fitted,
@@ -564,7 +562,7 @@ def _backtesting_forecaster(
     for i, fold in enumerate(folds):
         fit_fold = fold[-1]
         if i == 0 or fit_fold:
-            train_iloc_start = fold[0][0] + window_size  # Exclude observations used to create predictors
+            train_iloc_start = fold[0][0] + forecaster.window_size  # Exclude observations used to create predictors
             train_iloc_end = fold[0][1]
             train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
     
@@ -628,7 +626,7 @@ def backtesting_forecaster(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
         Training time series.
@@ -715,7 +713,6 @@ def backtesting_forecaster(
 
     forecaters_allowed = [
         'ForecasterAutoreg', 
-        'ForecasterAutoregCustom', 
         'ForecasterAutoregDirect',
         'ForecasterEquivalentDate'
     ]
@@ -808,7 +805,7 @@ def grid_search_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
         Training time series. 
@@ -859,9 +856,7 @@ def grid_search_forecaster(
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
-        DataFrame, and the values are used as the lists of lags to try. Ignored 
-        if the forecaster is an instance of `ForecasterAutoregCustom` or 
-        `ForecasterAutoregMultiSeriesCustom`.
+        DataFrame, and the values are used as the lists of lags to try.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
         the Forecaster will be trained every that number of iterations.
@@ -954,7 +949,7 @@ def random_search_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
         Training time series. 
@@ -1005,9 +1000,7 @@ def random_search_forecaster(
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
-        DataFrame, and the values are used as the lists of lags to try. Ignored 
-        if the forecaster is an instance of `ForecasterAutoregCustom` or 
-        `ForecasterAutoregMultiSeriesCustom`.
+        DataFrame, and the values are used as the lists of lags to try.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
         the Forecaster will be trained every that number of iterations.
@@ -1140,7 +1133,7 @@ def _calculate_metrics_one_step_ahead(
     if forecaster.differentiation is not None:
         differentiator = copy(forecaster.differentiator)
         differentiator.initial_values = (
-            [y.iloc[forecaster.window_size_diff - forecaster.differentiation]]
+            [y.iloc[forecaster.window_size - forecaster.differentiation]]
         )
         pred = differentiator.inverse_transform_next_window(pred)
         y_test = differentiator.inverse_transform_next_window(y_test)
@@ -1186,7 +1179,7 @@ def _evaluate_grid_hyperparameters(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
         Training time series. 
@@ -1237,9 +1230,7 @@ def _evaluate_grid_hyperparameters(
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
-        DataFrame, and the values are used as the lists of lags to try. Ignored 
-        if the forecaster is an instance of `ForecasterAutoregCustom` or 
-        `ForecasterAutoregMultiSeriesCustom`.
+        DataFrame, and the values are used as the lists of lags to try.
     refit : bool, int, default `False`
         Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
         the Forecaster will be trained every that number of iterations.
@@ -1326,11 +1317,10 @@ def _evaluate_grid_hyperparameters(
     params_list = []
     for lags_k, lags_v in lags_grid_tqdm:
         
-        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-            forecaster.set_lags(lags_v)
-            lags_v = forecaster.lags.copy()
-            if lags_label == 'values':
-                lags_k = lags_v
+        forecaster.set_lags(lags_v)
+        lags_v = forecaster.lags.copy()
+        if lags_label == 'values':
+            lags_k = lags_v
 
         if method == 'one_step_ahead':
 
@@ -1426,8 +1416,7 @@ def _evaluate_grid_hyperparameters(
         best_params = results.loc[0, 'params']
         best_metric = results.loc[0, list(metric_dict.keys())[0]]
         
-        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-            forecaster.set_lags(best_lags)
+        forecaster.set_lags(best_lags)
         forecaster.set_params(best_params)
 
         forecaster.fit(y=y, exog=exog, store_in_sample_residuals=True)
@@ -1473,7 +1462,7 @@ def bayesian_search_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
         Training time series. 
@@ -1636,7 +1625,7 @@ def _bayesian_search_optuna(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
         Training time series. 
@@ -1783,9 +1772,8 @@ def _bayesian_search_optuna(
             sample = search_space(trial)
             sample_params = {k: v for k, v in sample.items() if k != 'lags'}
             forecaster.set_params(sample_params)
-            if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-                if "lags" in sample:
-                    forecaster.set_lags(sample['lags'])
+            if "lags" in sample:
+                forecaster.set_lags(sample['lags'])
             
             metrics, _ = backtesting_forecaster(
                             forecaster            = forecaster,
@@ -1826,9 +1814,8 @@ def _bayesian_search_optuna(
             sample = search_space(trial)
             sample_params = {k: v for k, v in sample.items() if k != 'lags'}
             forecaster.set_params(sample_params)
-            if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-                if "lags" in sample:
-                    forecaster.set_lags(sample['lags'])
+            if "lags" in sample:
+                forecaster.set_lags(sample['lags'])
 
             (
                 X_train,
@@ -1916,17 +1903,10 @@ def _bayesian_search_optuna(
             m_name = m if isinstance(m, str) else m.__name__
             metric_dict[m_name].append(m_values)
     
-    if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-        lags_list = [
-            initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)
-            for lag in lags_list
-        ]
-    else:
-        lags_list = [
-            f"custom function: {forecaster.fun_predictors.__name__}"
-            for _
-            in lags_list
-        ]
+    lags_list = [
+        initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)
+        for lag in lags_list
+    ]
 
     results = pd.DataFrame({
                   'lags': lags_list,
@@ -1946,8 +1926,7 @@ def _bayesian_search_optuna(
         best_params = results.loc[0, 'params']
         best_metric = results.loc[0, list(metric_dict.keys())[0]]
         
-        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-            forecaster.set_lags(best_lags)
+        forecaster.set_lags(best_lags)
         forecaster.set_params(best_params)
 
         forecaster.fit(y=y, exog=exog, store_in_sample_residuals=True)
@@ -1962,7 +1941,8 @@ def _bayesian_search_optuna(
             
     return results, best_trial
 
-
+# TODO: Review window_features
+# TODO: Review with ForecasterAutoregDirect
 def select_features(
     forecaster: object,
     selector: object,
@@ -1988,7 +1968,7 @@ def select_features(
 
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom
+    forecaster : ForecasterAutoreg
         Forecaster model.
     selector : object
         A feature selector from sklearn.feature_selection.
@@ -2033,8 +2013,7 @@ def select_features(
     """
 
     valid_forecasters = [
-        'ForecasterAutoreg',
-        'ForecasterAutoregCustom'
+        'ForecasterAutoreg'
     ]
 
     if type(forecaster).__name__ not in valid_forecasters:

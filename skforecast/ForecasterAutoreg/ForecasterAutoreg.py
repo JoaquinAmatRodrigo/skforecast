@@ -7,7 +7,6 @@
 
 from typing import Union, Tuple, Optional, Callable
 import warnings
-import logging
 import sys
 import numpy as np
 import pandas as pd
@@ -40,11 +39,6 @@ from ..utils import transform_numpy
 from ..utils import transform_dataframe
 from ..preprocessing import TimeSeriesDifferentiator
 
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
-)
-
 
 class ForecasterAutoreg(ForecasterBase):
     """
@@ -63,7 +57,7 @@ class ForecasterAutoreg(ForecasterBase):
         `lags`, all elements must be int.
         - `None`: no lags are included as predictors. 
     window_features : object, list, default `None`
-        Class or list of classes used to create window features. Window features
+        Instance or list of instances used to create window features. Window features
         are created from the original time series and are included as predictors.
     transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -236,7 +230,7 @@ class ForecasterAutoreg(ForecasterBase):
     def __init__(
         self,
         regressor: object,
-        lags: Optional[Union[int, np.ndarray, list]] = None,
+        lags: Optional[Union[int, np.ndarray, list, range]] = None,
         window_features: Optional[Union[object, list]] = None,
         transformer_y: Optional[object] = None,
         transformer_exog: Optional[object] = None,
@@ -743,7 +737,6 @@ class ForecasterAutoreg(ForecasterBase):
         train_index = y_index[self.window_size:]
         X_as_pandas = True if categorical_features else False
 
-        # TODO: Allow no lags
         X_train_lags, y_train = self._create_lags(
             y=y_values, X_as_pandas=X_as_pandas, train_index=train_index
         )
@@ -1273,14 +1266,28 @@ class ForecasterAutoreg(ForecasterBase):
         
         """
 
-        predictions = np.full(shape=steps, fill_value=np.nan)
+        n_lags = len(self.lags) if self.lags is not None else 0
+        n_window_features = (
+            len(self.X_train_window_features_names_out_) if self.window_features is not None else 0
+        )
+        n_exog = exog_values.shape[1] if exog_values is not None else 0
+
+        X = np.full(
+            shape=(n_lags + n_window_features + n_exog), fill_value=np.nan, dtype=float
+        )
+        predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
         last_window = np.concatenate((last_window_values, predictions))
 
         for i in range(steps):
 
-            X = last_window[-self.lags - (steps - i)]
+            if self.lags is not None:
+                X[:n_lags] = last_window[-self.lags - (steps - i)]
+            if self.window_features is not None:
+                X[n_lags:n_lags + n_window_features] = np.concatenate(
+                    [wf.transform(last_window[i:-(steps - i)]) for wf in self.window_features]
+                )
             if exog_values is not None:
-                X = np.concatenate((X, exog_values[i, ]))
+                X[n_lags + n_window_features:] = exog_values[i]
         
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,
@@ -1870,11 +1877,9 @@ class ForecasterAutoreg(ForecasterBase):
         self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
 
 
-    # TODO: Review this method with window features, if any are None
-    # TODO: method set_window_features?
     def set_lags(
         self, 
-        lags: Union[int, list, np.ndarray, range]
+        lags: Optional[Union[int, np.ndarray, list, range]] = None
     ) -> None:
         """
         Set new value to the attribute `lags`. Attributes `max_lag` and 
@@ -1882,12 +1887,13 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        lags : int, list, numpy ndarray, range
-            Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-
+        lags : int, list, numpy ndarray, range, default `None`
+            Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1. 
+        
             - `int`: include lags from 1 to `lags` (included).
             - `list`, `1d numpy ndarray` or `range`: include only lags present in 
             `lags`, all elements must be int.
+            - `None`: no lags are included as predictors. 
 
         Returns
         -------
@@ -1895,13 +1901,62 @@ class ForecasterAutoreg(ForecasterBase):
         
         """
 
+        if self.window_features is None and lags is None:
+            raise ValueError(
+                ("At least one of the arguments `lags` or `window_features` "
+                 "must be different from None. This is required to create the "
+                 "predictors used in training the forecaster.")
+            )
+        
         self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
         self.window_size = max(
             [ws for ws in [self.max_lag, self.max_size_window_features] 
              if ws is not None]
         )
         if self.differentiation is not None:
-            self.window_size += self.differentiation        
+            self.window_size += self.differentiation
+
+
+    def set_window_features(
+        self, 
+        window_features: Optional[Union[object, list]] = None
+    ) -> None:
+        """
+        Set new value to the attribute `window_features`. Attributes 
+        `max_size_window_features`, `window_features_names`, 
+        `window_features_class_names` and `window_size` are also updated.
+        
+        Parameters
+        ----------
+        window_features : object, list, default `None`
+            Instance or list of instances used to create window features. Window features
+            are created from the original time series and are included as predictors.
+
+        Returns
+        -------
+        None
+        
+        """
+
+        if window_features is None and self.lags is None:
+            raise ValueError(
+                ("At least one of the arguments `lags` or `window_features` "
+                 "must be different from None. This is required to create the "
+                 "predictors used in training the forecaster.")
+            )
+        
+        self.window_features, self.max_size_window_features, self.window_features_names = (
+            initialize_window_features(window_features)
+        )
+        self.window_features_class_names = [
+            type(wf).__name__ for wf in self.window_features
+        ] 
+        self.window_size = max(
+            [ws for ws in [self.max_lag, self.max_size_window_features] 
+             if ws is not None]
+        )
+        if self.differentiation is not None:
+            self.window_size += self.differentiation   
 
 
     def set_out_sample_residuals(
