@@ -640,7 +640,9 @@ def _np_cv_jit(x):
 
 class RollingFeatures():
     """
-    This class computes rolling features.
+    This class computes rolling features. To avoid data leakage, the last point 
+    in the window is excluded from calculations, ('closed': 'left' and 
+    'center': False).
 
     Parameters
     ----------
@@ -737,7 +739,12 @@ class RollingFeatures():
             key = f"{params[0]}_{params[1]}"
             if key not in unique_rolling_windows:
                 unique_rolling_windows[key] = {
-                    'params': {'window': params[0], 'min_periods': params[1]},
+                    'params': {
+                        'window': params[0], 
+                        'min_periods': params[1], 
+                        'center': False,
+                        'closed': 'left'
+                    },
                     'stats_idx': [], 
                     'stats_names': [], 
                     'rolling_obj': None
@@ -953,7 +960,7 @@ class RollingFeatures():
 
         rolling_features = pd.concat(rolling_features, axis=1)
         rolling_features.columns = self.features_names
-        rolling_features = rolling_features.iloc[self.max_window_size - 1:]
+        rolling_features = rolling_features.iloc[self.max_window_size:]
 
         if self.fillna is not None:
             if self.fillna == 'mean':

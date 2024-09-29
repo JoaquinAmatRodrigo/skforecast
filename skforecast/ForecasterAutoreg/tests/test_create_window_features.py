@@ -114,7 +114,7 @@ def test_create_window_features_output():
     Test window features are created properly.
     """
     y = pd.Series(np.arange(10))
-    train_index = pd.RangeIndex(start=5, stop=10, step=1)
+    train_index = pd.RangeIndex(start=6, stop=10, step=1)
     rolling = RollingFeatures(
         stats=['mean', 'median', 'sum'], window_sizes=[5, 5, 6]
     )
@@ -129,8 +129,7 @@ def test_create_window_features_output():
             np.array([[3., 3., 15.],
                       [4., 4., 21.],
                       [5., 5., 27.],
-                      [6., 6., 33.],
-                      [7., 7., 39.]])
+                      [6., 6., 33.]])
         ],
         ['roll_mean_5', 'roll_median_5', 'roll_sum_6']
     )
@@ -147,7 +146,7 @@ def test_create_window_features_output_as_pandas():
     y_datetime = pd.Series(
         np.arange(10), pd.date_range(start='2020-01-01', periods=10)
     )
-    train_index = pd.date_range(start='2020-01-06', periods=5)
+    train_index = pd.date_range(start='2020-01-07', periods=4)
     rolling = RollingFeatures(
         stats=['mean', 'median', 'sum'], window_sizes=[5, 5, 6]
     )
@@ -164,8 +163,7 @@ def test_create_window_features_output_as_pandas():
                            [[3., 3., 15.],
                             [4., 4., 21.],
                             [5., 5., 27.],
-                            [6., 6., 33.],
-                            [7., 7., 39.]]),
+                            [6., 6., 33.]]),
                 index = train_index,
                 columns = ['roll_mean_5', 'roll_median_5', 'roll_sum_6']
             )
@@ -183,7 +181,7 @@ def test_create_window_features_output_list():
     Test window features are created properly when `window_features` is a list.
     """
     y = pd.Series(np.arange(10))
-    train_index = pd.RangeIndex(start=5, stop=10, step=1)
+    train_index = pd.RangeIndex(start=6, stop=10, step=1)
     rolling_1 = RollingFeatures(
         stats=['mean', 'median'], window_sizes=[5, 5]
     )
@@ -199,13 +197,11 @@ def test_create_window_features_output_list():
             np.array([[3., 3.],
                       [4., 4.],
                       [5., 5.],
-                      [6., 6.],
-                      [7., 7.]]),
+                      [6., 6.]]),
             np.array([[15.],
                       [21.],
                       [27.],
-                      [33.],
-                      [39.]])
+                      [33.]])
         ],
         ['roll_mean_5', 'roll_median_5', 'feature_2']
     )

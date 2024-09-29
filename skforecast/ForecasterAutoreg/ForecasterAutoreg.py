@@ -287,13 +287,15 @@ class ForecasterAutoreg(ForecasterBase):
                  "predictors used in training the forecaster.")
             )
         
-        max_lag_ws = self.max_lag if self.lags is not None else 0
-        max_size_window_features_ws = (
-            self.max_size_window_features if self.window_features is not None else 0
+        self.window_size = max(
+            [ws for ws in [self.max_lag, self.max_size_window_features] 
+             if ws is not None]
         )
-        self.window_size = max(max_lag_ws, max_size_window_features_ws)
+        self.window_features_class_names = None
         if window_features is not None:
-            self.window_features_class_names = [type(wf).__name__ for wf in self.window_features] 
+            self.window_features_class_names = [
+                type(wf).__name__ for wf in self.window_features
+            ] 
 
         self.binner_kwargs = binner_kwargs
         if binner_kwargs is None:

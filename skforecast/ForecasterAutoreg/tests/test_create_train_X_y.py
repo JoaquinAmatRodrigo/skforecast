@@ -821,3 +821,5 @@ def test_create_train_X_y_output_when_window_features_and_exog():
     assert results[5] == expected[5]
     for k in results[6].keys():
         assert results[6][k] == expected[6][k]
+
+# TODO: Include tests with transformer_y and diff
