@@ -47,7 +47,7 @@ class TimeSeriesFold():
     initial_train_size : int, default=None
         Number of observations used for initial training. If `None` or 0, the initial
         forecaster is not trained in the first fold.
-     window_size : int
+    window_size : int
         Number of observations needed to generate the autoregressive predictors.
     differentiation : int, default=None
         Number of observations to use for differentiation. This is used to extend the
@@ -292,7 +292,7 @@ class TimeSeriesFold():
             self,
             X: Union[pd.Series, pd.DataFrame, pd.Index, dict],
             externally_fitted: bool = False,
-            as_data_frame: bool = False
+            as_pandas: bool = False
     ) -> Union[list, pd.DataFrame]:
         """
         Split the time series data into train and test folds.
@@ -304,7 +304,7 @@ class TimeSeriesFold():
         externally_fitted : bool, default=False
             If True, the forecaster is assumed to be already fitted so no training is
             done in the first fold.
-        as_data_frame : bool, default=False
+        as_pandas : bool, default=False
             If True, the folds are returned as a DataFrame. This is useful to visualize
             the folds in a more interpretable way.
 
@@ -335,7 +335,7 @@ class TimeSeriesFold():
             observations and not the actual values of the index, so they can be used to
             slice the data directly using iloc.
 
-            If `as_data_frame` is `True`, the folds are returned as a DataFrame with the
+            If `as_pandas` is `True`, the folds are returned as a DataFrame with the
             following columns: 'fold', 'train_start', 'train_end', 'last_window_start',
             'last_window_end', 'test_start', 'test_end', 'test_start_with_gap',
             'test_end_with_gap', 'fit_forecaster'.
@@ -352,6 +352,11 @@ class TimeSeriesFold():
                 f"Got {type(X)}."
             )
         
+        if self.window_size is None:
+            warnings.warn(
+                "Last window cannot be calculated because `window_size` is None. "
+            )
+
         index = self._extract_index(X)
         idx = range(len(X))
         folds = []
@@ -454,7 +459,11 @@ class TimeSeriesFold():
                 for fold in folds
             ]
 
-        if as_data_frame:
+        if as_pandas:
+            if self.window_size is None:
+                for fold in folds:
+                    fold[1] = [None, None]
+
             if not self.return_all_indexes:
                 folds = pd.DataFrame(
                     data = [list(itertools.chain(*fold[:-1])) + [fold[-1]] for fold in folds],
@@ -705,7 +714,7 @@ class OneStepAheadFold():
     def split(
             self,
             X: Union[pd.Series, pd.DataFrame, pd.Index, dict],
-            as_data_frame: bool = False,
+            as_pandas: bool = False,
             externally_fitted: any = None
     ) -> Union[list, pd.DataFrame]:
         """
@@ -715,7 +724,7 @@ class OneStepAheadFold():
         ----------
         X : pandas Series, DataFrame, Index, or dictionary
             Time series data or index to split.
-        as_data_frame : bool, default=False
+        as_pandas : bool, default=False
             If True, the folds are returned as a DataFrame. This is useful to visualize
             the folds in a more interpretable way.
         externally_fitted : any
@@ -736,7 +745,7 @@ class OneStepAheadFold():
             observations and not the actual values of the index, so they can be used to
             slice the data directly using iloc.
 
-            If `as_data_frame` is `True`, the folds are returned as a DataFrame with the
+            If `as_pandas` is `True`, the folds are returned as a DataFrame with the
             following columns: 'fold', 'train_start', 'train_end', 'test_start', 'test_end'.
 
             Following the python convention, the start index is inclusive and the end
@@ -764,7 +773,7 @@ class OneStepAheadFold():
                 fold[2]
             ]
 
-        if as_data_frame:
+        if as_pandas:
             if not self.return_all_indexes:
                 fold = pd.DataFrame(
                     data = [list(itertools.chain(*fold[:-1])) + [fold[-1]]],
@@ -868,15 +877,12 @@ class OneStepAheadFold():
         if self.differentiation is None:
             self.differentiation = 0
         
-        print(fold)
-        training_start    = index[fold[0][0] + self.differentiation]
-        print(training_start)
-        training_end      = index[fold[0][-1]]
-        print(training_end)
-        training_length   = training_end - training_start
+        training_start = index[fold[0][0] + self.differentiation]
+        training_end = index[fold[0][-1]]
+        training_length = self.initial_train_size
         test_start  = index[fold[1][0]]
         test_end    = index[fold[1][-1]-1]
-        test_length = test_end - test_start
+        test_length = len(index) - self.initial_train_size
 
         print(
             f"Training : {training_start} -- {training_end} (n={training_length})"
@@ -1027,12 +1033,12 @@ def _backtesting_forecaster(
     else:
         # Although not used for training, first observations are needed to create
         # the initial predictors
-        cv.set_params({'initial_train_size': forecaster.window_size_diff})
+        cv.set_params({'initial_train_size': forecaster.window_size})
         externally_fitted = True
 
     cv.set_params({
         'window_size': forecaster.window_size,
-        'differentiation': forecaster.differentiation, # TODO: Differentiation is already included in the forecaster's window_size
+        'differentiation': forecaster.differentiation,
         'return_all_indexes': False,
         'verbose': verbose
     })
@@ -1596,7 +1602,7 @@ def _calculate_metrics_one_step_ahead(
     if forecaster.differentiation is not None:
         differentiator = copy(forecaster.differentiator)
         differentiator.initial_values = (
-            [y.iloc[forecaster.window_size_diff - forecaster.differentiation]]
+            [y.iloc[forecaster.window_size - forecaster.differentiation]]
         )
         pred = differentiator.inverse_transform_next_window(pred)
         y_test = differentiator.inverse_transform_next_window(y_test)
