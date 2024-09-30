@@ -129,15 +129,18 @@ class TimeSeriesFold():
     the index, so they can be used to slice the data directly using iloc. For example,
     if the input series is `X = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]`, the 
     `initial_train_size = 3`, `window_size = 2`, `steps = 4`, and `gap = 1`,
-    the output of the first fold will: [(0, 3), (1, 3), (3, 8), (4, 8), True].
+    the output of the first fold will: [[0, 3], [1, 3], [3, 8], [4, 8], True].
 
-    The first tuple `(0, 3)` indicates that the training set goes from the first to the
-    third observation. The second tuple `(1, 3)` indicates that the last window seen by
+    The first list `[0, 3]` indicates that the training set goes from the first to the
+    third observation. The second list `[1, 3]` indicates that the last window seen by
     the forecaster during training goes from the second to the third observation. The
-    third tuple `(3, 8)` indicates that the test set goes from the fourth to the eighth
-    observation. The fourth tuple `(4, 8)` indicates that the test set including the gap
+    third list `[3, 8]` indicates that the test set goes from the fourth to the eighth
+    observation. The fourth list `[4, 8]` indicates that the test set including the gap
     goes from the fifth to the eighth observation. The boolean `False` indicates that the
     forecaster should not be trained in this fold.
+
+    Following the python convention, the start index is inclusive and the end index is
+    exclusive. This means that the last index is not included in the slice.
 
     """
 
@@ -308,20 +311,20 @@ class TimeSeriesFold():
         Returns
         -------
         list, pd.DataFrame
-            A list of tuples containing the indices (position) for for each fold. Each list
-            contains 4 tuples and a boolean with the following information:
+            A list of lists containing the indices (position) for for each fold. Each list
+            contains 4 lists and a boolean with the following information:
 
-            - (train_start, train_end): tuple with the start and end positions of the
+            - [train_start, train_end]: list with the start and end positions of the
             training set.
-            - (last_window_start, last_window_end): tuple with the start and end positions
+            - [last_window_start, last_window_end]: list with the start and end positions
             of the last window seen by the forecaster during training. The last window
             is used to generate the lags use as predictors. If `diferentiation` is
             included, the interval is extended as many observations as the
-            differentiation order. If the arguemnt `window_size` is `None`, this tuple is
+            differentiation order. If the arguemnt `window_size` is `None`, this list is
             empty.
-            - (test_start, test_end): tuple with the start and end positions of the test
+            - [test_start, test_end]: list with the start and end positions of the test
             set. These are the observations used to evaluate the forecaster.
-            - (test_start_with_gap, test_end_with_gap): tuple with the start and end
+            - [test_start_with_gap, test_end_with_gap]: list with the start and end
             positions of the test set including the gap. The gap is the number of
             observations bwetween the end of the training set and the start of the test
             set.
@@ -335,13 +338,18 @@ class TimeSeriesFold():
             If `as_data_frame` is `True`, the folds are returned as a DataFrame with the
             following columns: 'fold', 'train_start', 'train_end', 'last_window_start',
             'last_window_end', 'test_start', 'test_end', 'test_start_with_gap',
-            'test_end_with_gap', 'fit_forecaster'.      
+            'test_end_with_gap', 'fit_forecaster'.
+
+            Following the python convention, the start index is inclusive and the end
+            index is exclusive. This means that the last index is not included in the
+            slice.
 
         """
 
         if not isinstance(X, (pd.Series, pd.DataFrame, pd.Index, dict)):
             raise ValueError(
-                f"X must be a pandas Series, DataFrame, Index or a dictionary. Got {type(X)}."
+                f"X must be a pandas Series, DataFrame, Index or a dictionary. "
+                f"Got {type(X)}."
             )
         
         index = self._extract_index(X)
@@ -626,10 +634,7 @@ class TimeSeriesFold():
         print("")
 
 
-class TimeSeriesOneStepAhead():
-    # TODO: this is a dummy class. Is it needed? cv argument in gried search 
-    # could allow to use TimeSeriesFold() or "one_step_ahead" as a string to use this
-    # class.
+class OneStepAheadFold():
     """
     Class to split time series data into train and test folds for one-step-ahead
     forecasting.
@@ -637,9 +642,8 @@ class TimeSeriesOneStepAhead():
     Parameters
     ----------
     initial_train_size : int, default=None
-        Number of observations used for initial training. If `None` or 0, the initial
-        forecaster is not trained in the first fold.
-    window_size : int
+        Number of observations used for initial training.
+    window_size : int, default=None
         Number of observations needed to generate the autoregressive predictors.
     differentiation : int, default=None
         Number of observations to use for differentiation. This is used to extend the
@@ -652,8 +656,7 @@ class TimeSeriesOneStepAhead():
     Attributes
     ----------
     initial_train_size : int, default=None
-        Number of observations used for initial training. If `None` or 0, the initial
-        forecaster is not trained in the first fold.
+        Number of observations used for initial training.
     window_size : int
         Number of observations needed to generate the autoregressive predictors.
     differentiation : int, default=None 
@@ -674,21 +677,16 @@ class TimeSeriesOneStepAhead():
     refit : any
         This attribute is not used in this class. It is included for API consistency.
     
-
-    Returns
-    -------
-
-    
     """
 
     def __init__(
             self,
             initial_train_size: Optional[int] = None,
-            steps: int = 1,
             window_size: Optional[int] = None,
             differentiation: Optional[int] = None,
             return_all_indexes: bool = False,
-            verbose: bool = True
+            verbose: bool = True,
+            steps: int = 1,
     ) -> None:
 
         self.initial_train_size = initial_train_size
@@ -725,13 +723,39 @@ class TimeSeriesOneStepAhead():
         
         Returns
         -------
-        """
+        list, pd.DataFrame
+            A list of lists containing the indices (position) for for each fold. Each list
+            contains 2 lists the following information:
+
+            - [train_start, train_end]: list with the start and end positions of the
+            training set.
+            - [test_start, test_end]: list with the start and end positions of the test
+            set. These are the observations used to evaluate the forecaster.
         
+            It is important to note that the returned values are the positions of the
+            observations and not the actual values of the index, so they can be used to
+            slice the data directly using iloc.
+
+            If `as_data_frame` is `True`, the folds are returned as a DataFrame with the
+            following columns: 'fold', 'train_start', 'train_end', 'test_start', 'test_end'.
+
+            Following the python convention, the start index is inclusive and the end
+            index is exclusive. This means that the last index is not included in the
+            slice.
+        """
+
+        index = self._extract_index(X)
         fold = [
             [0, self.initial_train_size],
             [self.initial_train_size, len(X)],
             True
         ]
+
+        if self.verbose:
+            self._print_info(
+                index = index,
+                fold = fold,
+            )
 
         if self.return_all_indexes:
             fold = [
@@ -766,9 +790,46 @@ class TimeSeriesOneStepAhead():
         return fold
     
 
+    def _extract_index(
+        self,
+        X: Union[pd.Series, pd.DataFrame, pd.Index, dict]
+    ) -> pd.Index:
+        """
+        Extracts and returns the index from the input data X.
+
+        Parameters
+        ----------
+        X : pandas Series, DataFrame, Index, or dictionary
+            Time series data or index to split.
+
+        Returns
+        -------
+        pd.Index
+            Index extracted from the input data.
+        """
+
+        if isinstance(X, (pd.Series, pd.DataFrame)):
+            index = X.index
+        elif isinstance(X, dict):
+            freqs = [s.index.freq for s in X.values() if s.index.freq is not None]
+            if not freqs:
+                raise ValueError("At least one series must have a frequency.")
+            if not all(f == freqs[0] for f in freqs):
+                raise ValueError(
+                    "All series with frequency must have the same frequency."
+                )
+            min_index = min([v.index[0] for v in X.values()])
+            max_index = max([v.index[-1] for v in X.values()])
+            index = pd.date_range(start=min_index, end=max_index, freq=freqs[0])
+        else:
+            index = X
+            
+        return index
+    
+
     def set_params(self, params: dict) -> None:
         """
-        Set the parameters of the TimeSeriesOneStepAhead object.
+        Set the parameters of the OneStepAheadFold object.
 
         Parameters
         ----------
@@ -782,6 +843,48 @@ class TimeSeriesOneStepAhead():
             )
         for key, value in params.items():
             setattr(self, key, value)
+
+
+    def _print_info(
+            self,
+            index: pd.Index,
+            fold: list,
+    ) -> None:
+        """
+        Print information about folds.
+        """
+
+        print("Information of folds")
+        print("--------------------")
+        print(
+            f"Number of observations used for initial training: "
+            f"{self.initial_train_size}"
+        )
+        print(
+            f"Number of observations in test: "
+            f"{len(index) - self.initial_train_size}"
+        )
+ 
+        if self.differentiation is None:
+            self.differentiation = 0
+        
+        print(fold)
+        training_start    = index[fold[0][0] + self.differentiation]
+        print(training_start)
+        training_end      = index[fold[0][-1]]
+        print(training_end)
+        training_length   = training_end - training_start
+        test_start  = index[fold[1][0]]
+        test_end    = index[fold[1][-1]-1]
+        test_length = test_end - test_start
+
+        print(
+            f"Training : {training_start} -- {training_end} (n={training_length})"
+        )
+        print(
+            f"Test     : {test_start} -- {test_end} (n={test_length})"
+        )
+        print("")
 
 
 
@@ -929,7 +1032,7 @@ def _backtesting_forecaster(
 
     cv.set_params({
         'window_size': forecaster.window_size,
-        'differentiation': forecaster.differentiation,
+        'differentiation': forecaster.differentiation, # TODO: Differentiation is already included in the forecaster's window_size
         'return_all_indexes': False,
         'verbose': verbose
     })
@@ -1293,9 +1396,9 @@ def grid_search_forecaster(
         - additional n columns with param = value.
     
     """
-    if type(cv).__name__ not in ['TimeSeriesFold', 'TimeSeriesOneStepAhead']:
+    if type(cv).__name__ not in ['TimeSeriesFold', 'OneStepAheadFold']:
         raise ValueError(
-            f"`cv` must be an instance of TimeSeriesFold or TimeSeriesOneStepAhead. "
+            f"`cv` must be an instance of TimeSeriesFold or OneStepAheadFold. "
             f"Got {type(cv)}."
         )
 
@@ -1403,9 +1506,9 @@ def random_search_forecaster(
         - additional n columns with param = value.
     
     """
-    if type(cv).__name__ not in ['TimeSeriesFold', 'TimeSeriesOneStepAhead']:
+    if type(cv).__name__ not in ['TimeSeriesFold', 'OneStepAheadFold']:
         raise ValueError(
-            f"`cv` must be an instance of TimeSeriesFold or TimeSeriesOneStepAhead. "
+            f"`cv` must be an instance of TimeSeriesFold or OneStepAheadFold. "
             f"Got {type(cv)}."
         )
 
@@ -1590,13 +1693,13 @@ def _evaluate_grid_hyperparameters(
 
     """
 
-    if type(cv).__name__ not in ['TimeSeriesFold', 'TimeSeriesOneStepAhead']:
+    if type(cv).__name__ not in ['TimeSeriesFold', 'OneStepAheadFold']:
         raise ValueError(
-            f"`cv` must be an instance of TimeSeriesFold or TimeSeriesOneStepAhead. "
+            f"`cv` must be an instance of TimeSeriesFold or OneStepAheadFold. "
             f"Got {type(cv)}."
         )
     
-    if type(cv).__name__ == 'TimeSeriesOneStepAhead':
+    if type(cv).__name__ == 'OneStepAheadFold':
         warnings.warn(
             ("One-step-ahead predictions are used for faster model comparison, but they "
              "may not fully represent multi-step prediction performance. It is recommended "
@@ -1651,7 +1754,7 @@ def _evaluate_grid_hyperparameters(
             if lags_label == 'values':
                 lags_k = lags_v
 
-        if type(cv).__name__ == 'TimeSeriesOneStepAhead':
+        if type(cv).__name__ == 'OneStepAheadFold':
 
             (
                 X_train,
