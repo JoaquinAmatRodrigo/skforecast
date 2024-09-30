@@ -1941,8 +1941,7 @@ def _bayesian_search_optuna(
             
     return results, best_trial
 
-# TODO: Review window_features
-# TODO: Review with ForecasterAutoregDirect
+
 def select_features(
     forecaster: object,
     selector: object,
@@ -1957,14 +1956,14 @@ def select_features(
     """
     Feature selection using any of the sklearn.feature_selection module selectors 
     (such as `RFECV`, `SelectFromModel`, etc.). Two groups of features are
-    evaluated: autoregressive features and exogenous features. By default, the 
-    selection process is performed on both sets of features at the same time, 
-    so that the most relevant autoregressive and exogenous features are selected. 
-    However, using the `select_only` argument, the selection process can focus 
-    only on the autoregressive or exogenous features without taking into account 
-    the other features. Therefore, all other features will remain in the model. 
-    It is also possible to force the inclusion of certain features in the final 
-    list of selected features using the `force_inclusion` parameter.
+    evaluated: autoregressive features (lags and window features) and exogenous
+    features. By default, the selection process is performed on both sets of features
+    at the same time, so that the most relevant autoregressive and exogenous features
+    are selected. However, using the `select_only` argument, the selection process
+    can focus only on the autoregressive or exogenous features without taking into
+    account the other features. Therefore, all other features will remain in the model. 
+    It is also possible to force the inclusion of certain features in the final list
+    of selected features using the `force_inclusion` parameter.
 
     Parameters
     ----------
@@ -2031,7 +2030,7 @@ def select_features(
         )
     
     forecaster = deepcopy(forecaster)
-    forecaster.fitted = False
+    forecaster.is_fitted = False
     X_train, y_train = forecaster.create_train_X_y(y=y, exog=exog)
     if type(forecaster).__name__ == 'ForecasterAutoregDirect':
         X_train, y_train = forecaster.filter_train_X_y_for_step(
@@ -2040,22 +2039,6 @@ def select_features(
                                 y_train       = y_train,
                                 remove_suffix = True
                             )
-
-    # if hasattr(forecaster, 'lags'):
-    #     autoreg_cols = [f"lag_{lag}" for lag in forecaster.lags]
-    # else:
-    #     if forecaster.name_predictors is not None:
-    #         autoreg_cols = forecaster.name_predictors
-    #     else:
-    #         autoreg_cols = [
-    #             col
-    #             for col in X_train.columns
-    #             if re.match(r'^custom_predictor_\d+', col)
-    #         ]
-    # exog_cols = [col for col in X_train.columns if col not in autoreg_cols]
-
-
-    # TODO: de dónde sacar el nombre de los predictores si el forecaster no ha sido entrenado?
     autoreg_cols = []
     if forecaster.lags is not None:
         autoreg_cols.extend([f"lag_{lag}" for lag in forecaster.lags])

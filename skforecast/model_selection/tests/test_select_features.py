@@ -4,12 +4,11 @@ import re
 import pytest
 import pandas as pd
 from sklearn.feature_selection import RFE
-from sklearn.datasets import make_regression
 from sklearn.linear_model import LinearRegression
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.model_selection import select_features
+from skforecast.preprocessing import RollingFeatures
 
 # Fixtures
 from .fixtures_model_selection import y_feature_selection as y
@@ -20,16 +19,12 @@ def test_TypeError_select_features_raise_when_forecaster_is_not_supported():
     """
     Test TypeError is raised in select_features when forecaster is not supported.
     """
-    forecaster = ForecasterAutoregDirect(
-                     regressor = LinearRegression(),
-                     lags      = 5,
-                     steps     = 3
-                 )
-    selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
+    forecaster = object()
+    selector = RFE(estimator=LinearRegression(), n_features_to_select=3)
 
     err_msg = re.escape(
         "`forecaster` must be one of the following classes: ['ForecasterAutoreg', "
-        "'ForecasterAutoregCustom']."
+        "'ForecasterAutoregDirect']."
     )
     with pytest.raises(TypeError, match = err_msg):
         select_features(
@@ -93,10 +88,11 @@ def test_ValueError_select_features_raise_when_subsample_is_not_greater_0_less_e
         )
 
 
-def test_select_features_when_selector_is_RFE_and_select_only_is_exog():
+def test_select_features_when_selector_is_RFE_select_only_is_exog_ForecasterAutoreg_no_window_features():
     """
     Test that select_features returns the expected values when selector is RFE
-    and select_only is 'exog'.
+    and select_only is 'exog'. Forecaster is ForecasterAutoreg and no window
+    features are included.
     """
     forecaster = ForecasterAutoreg(
                      regressor = LinearRegression(),
@@ -117,40 +113,20 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_exog():
     assert selected_exog == ['exog_1', 'exog_2', 'exog_4']
 
 
-def test_select_features_when_selector_is_RFE_and_select_only_is_exog_regressor():
+def test_select_features_when_selector_is_RFE_select_only_is_exog_ForecasterAutoreg_window_features():
     """
     Test that select_features returns the expected values when selector is RFE
-    and select_only is 'exog' and regressor is passed to the selector instead
-    of forecaster.regressor.
+    and select_only is 'exog'. Forecaster is ForecasterAutoreg and window
+    features are included.
     """
+    roll_features = RollingFeatures(
+                        stats=['mean', 'std'],
+                        window_sizes=[3, 5],
+                    )
     forecaster = ForecasterAutoreg(
-                     regressor = LinearRegression(),
-                     lags      = 5,
-                 )
-    selector = RFE(estimator=LinearRegression(), n_features_to_select=3)
-
-    selected_autoreg, selected_exog = select_features(
-        selector    = selector,
-        forecaster  = forecaster,
-        y           = y,
-        exog        = exog,
-        select_only = 'exog',
-        verbose     = False,
-    )
-
-    assert selected_autoreg == [1, 2, 3, 4, 5]
-    assert selected_exog == ['exog_1', 'exog_2', 'exog_4']
-
-
-def test_select_features_when_selector_is_RFE_and_select_only_is_exog_ForecasterAutoregCustom():
-    """
-    Test that select_features returns the expected values when selector is RFE
-    select_only is 'exog' and forecaster is ForecasterAutoregCustom.
-    """
-    forecaster = ForecasterAutoregCustom(
                      regressor      = LinearRegression(),
-                     fun_predictors = lambda y: y[-1:-6:-1],
-                     window_size    = 5,
+                     lags           = 5,
+                    window_features = roll_features
                  )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
@@ -160,18 +136,19 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_exog_Forecaster
         y           = y,
         exog        = exog,
         select_only = 'exog',
-        verbose     = False,
+        verbose     = True,
     )
 
-    assert selected_autoreg == ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2',
-                                'custom_predictor_3', 'custom_predictor_4']
+    assert selected_autoreg == [1, 2, 3, 4, 5, 'roll_mean_3', 'roll_std_5']
     assert selected_exog == ['exog_1', 'exog_2', 'exog_4']
 
 
-def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg():
+
+def test_select_features_when_selector_is_RFE_select_only_is_autoreg_ForecasterAutoreg_no_window_features():
     """
     Test that select_features returns the expected values when selector is RFE
-    and select_only is 'autoreg'.
+    and select_only is 'autoreg'. Forecaster is ForecasterAutoreg and no window
+    features are included.
     """
     forecaster = ForecasterAutoreg(
                      regressor = LinearRegression(),
@@ -192,17 +169,22 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg():
     assert selected_exog == ['exog_0', 'exog_1', 'exog_2', 'exog_3', 'exog_4']
 
 
-def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg_ForecasterAutoregCustom():
+def test_select_features_when_selector_is_RFE_select_only_is_autoreg_ForecasterAutoreg_window_features():
     """
     Test that select_features returns the expected values when selector is RFE
-    select_only is 'autoreg' and forecaster is ForecasterAutoregCustom.
+    and select_only is 'autoreg'. Forecaster is ForecasterAutoreg and window
+    features are used.
     """
-    forecaster = ForecasterAutoregCustom(
+    roll_features = RollingFeatures(
+                        stats=['mean', 'std'],
+                        window_sizes=[3, 5],
+                    )
+    forecaster = ForecasterAutoreg(
                      regressor      = LinearRegression(),
-                     fun_predictors = lambda y: y[-1:-6:-1],
-                     window_size    = 5,
+                     lags           = 5,
+                     window_features = roll_features
                  )
-    selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
+    selector = RFE(estimator=forecaster.regressor, n_features_to_select=4)
 
     selected_autoreg, selected_exog = select_features(
         selector    = selector,
@@ -213,18 +195,24 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg_Forecas
         verbose     = False,
     )
 
-    assert selected_autoreg == ['custom_predictor_0', 'custom_predictor_2', 'custom_predictor_3']
+    assert selected_autoreg == [1, 3, 4, 'roll_std_5']
     assert selected_exog == ['exog_0', 'exog_1', 'exog_2', 'exog_3', 'exog_4']
 
 
-def test_select_features_when_selector_is_RFE_and_select_only_is_None():
+def test_select_features_when_selector_is_RFE_select_only_is_None_ForecasterAutoreg_window_features():
     """
     Test that select_features returns the expected values when selector is RFE
-    and select_only is None.
+    and select_only is None. Forecaster is ForecasterAutoreg and window
+    features are included.
     """
+    roll_features = RollingFeatures(
+                        stats=['mean', 'std'],
+                        window_sizes=[3, 5],
+                    )
     forecaster = ForecasterAutoreg(
                      regressor = LinearRegression(),
                      lags      = 5,
+                     window_features = roll_features
                  )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=5)
 
@@ -246,46 +234,21 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_None():
     assert selected_autoreg == []
     assert selected_exog == ['exog_0', 'exog_1', 'exog_2', 'exog_3', 'exog_4']
 
-
-def test_select_features_when_selector_is_RFE_and_select_only_is_None_ForecasterAutoregCustom():
-    """
-    Test that select_features returns the expected values when selector is RFE
-    select_only is None and forecaster is ForecasterAutoregCustom.
-    """
-    forecaster = ForecasterAutoregCustom(
-                     regressor      = LinearRegression(),
-                     fun_predictors = lambda y: y[-1:-6:-1],
-                     window_size    = 5,
-                 )
-    selector = RFE(estimator=forecaster.regressor, n_features_to_select=5)
-
-    warn_msg = re.escape(
-        ("No autoregressive features have been selected. Since a Forecaster "
-         "cannot be created without them, be sure to include at least one "
-         "using the `force_inclusion` parameter.")
-    )
-    with pytest.warns(UserWarning, match = warn_msg):
-        selected_autoreg, selected_exog = select_features(
-            selector    = selector,
-            forecaster  = forecaster,
-            y           = y,
-            exog        = exog,
-            select_only = None,
-            verbose     = False,
-        )
-
-    assert selected_autoreg == []
-    assert selected_exog == ['exog_0', 'exog_1', 'exog_2', 'exog_3', 'exog_4']
 
 
 def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force_inclusion_is_regex():
     """
     Test that select_features returns the expected values when selector is RFE
-    select_only_exog is True and force_inclusion is regex.
+    select_only is "exog" and force_inclusion is regex "^exog_3".
     """
+    roll_features = RollingFeatures(
+                        stats=['mean', 'std'],
+                        window_sizes=[3, 5],
+                    )
     forecaster = ForecasterAutoreg(
                      regressor = LinearRegression(),
                      lags      = 5,
+                     window_features = roll_features
                  )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
@@ -299,21 +262,24 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force
         verbose         = False,
     )
 
-    assert selected_autoreg == [1, 2, 3, 4, 5]
+    assert selected_autoreg == [1, 2, 3, 4, 5, 'roll_mean_3', 'roll_std_5']
     assert selected_exog == ['exog_1', 'exog_2', 'exog_3', 'exog_4']
 
 
-def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_force_inclusion_is_regex_ForecasterAutoregCustom():
+def test_select_features_when_selector_is_RFE_and_force_inclusion_is_regex():
     """
     Test that select_features returns the expected values when selector is RFE
-    select_only_exog is False and force_inclusion is regex and forecaster is
-    ForecasterAutoregCustom.
+    select_only is None and force_inclusion is regex "^roll_mean".
     """
-    forecaster = ForecasterAutoregCustom(
-                     regressor      = LinearRegression(),
-                     fun_predictors = lambda y: y[-1:-6:-1],
-                     window_size    = 5,
-                 )
+    roll_features = RollingFeatures(
+                        stats=['mean', 'std'],
+                        window_sizes=[3, 5],
+                    )
+    forecaster = ForecasterAutoreg(
+                        regressor = LinearRegression(),
+                        lags      = 5,
+                        window_features = roll_features
+                    )
     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
     selected_autoreg, selected_exog = select_features(
@@ -322,19 +288,18 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_forc
         y               = y,
         exog            = exog,
         select_only     = None,
-        force_inclusion = "^custom_predictor_",
-        verbose         = False,
+        force_inclusion = "^roll_mean",
+        verbose         = True,
     )
 
-    assert selected_autoreg == ['custom_predictor_0', 'custom_predictor_1', 'custom_predictor_2',
-                                'custom_predictor_3', 'custom_predictor_4']
+    assert selected_autoreg == ['roll_mean_3']
     assert selected_exog == ['exog_1', 'exog_2', 'exog_4']
 
 
-def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_force_inclusion_is_list():
+def test_select_features_when_selector_is_RFE_select_force_inclusion_is_list():
     """
     Test that select_features returns the expected values when selector is RFE
-    select_only_exog is False and force_inclusion is list.
+    select_only  is None and force_inclusion is list.
     """
     forecaster = ForecasterAutoreg(
                      regressor = LinearRegression(),
@@ -356,29 +321,59 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_forc
     assert selected_exog == ['exog_1', 'exog_2', 'exog_4']
 
 
-def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force_inclusion_is_list_ForecasterAutoregCustom():
-    """
-    Test that select_features returns the expected values when selector is RFE
-    select_only_exog is True and force_inclusion is list and forecaster is
-    ForecasterAutoregCustom.
-    """
-    forecaster = ForecasterAutoregCustom(
-                     regressor       = LinearRegression(),
-                     fun_predictors  = lambda y: y[-1:-6:-1],
-                     name_predictors = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
-                     window_size     = 5,
-                 )
-    selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
+ # TODO: remove when ForecasterAutoregDirect has a window_features attribute
+# def test_select_features_when_selector_is_RFE_select_only_is_exog_ForecasterAutoregDirect_no_window_features():
+#     """
+#     Test that select_features returns the expected values when selector is RFE
+#     and select_only is 'exog'. Forecaster is ForecasterAutoregDirect and no window
+#     features are included.
+#     """
+#     forecaster = ForecasterAutoregDirect(
+#                      regressor = LinearRegression(),
+#                      lags      = 5,
+#                      steps     = 3
+#                  )
+#     forecaster.window_features = None
+#     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
 
-    selected_autoreg, selected_exog = select_features(
-        selector        = selector,
-        forecaster      = forecaster,
-        y               = y,
-        exog            = exog,
-        select_only     = 'autoreg',
-        force_inclusion = ['lag_5', 'exog_4'],
-        verbose         = True,
-    )
+#     selected_autoreg, selected_exog = select_features(
+#         selector    = selector,
+#         forecaster  = forecaster,
+#         y           = y,
+#         exog        = exog,
+#         select_only = 'exog',
+#         verbose     = True,
+#     )
 
-    assert selected_autoreg == ['lag_1', 'lag_3', 'lag_4', 'lag_5']
-    assert selected_exog == ['exog_0', 'exog_1', 'exog_2', 'exog_3', 'exog_4']
+#     assert selected_autoreg == [1, 2, 3, 4, 5]
+#     assert selected_exog == ['exog_1', 'exog_2', 'exog_4']
+
+# def test_select_features_when_selector_is_RFE_select_only_is_exog_ForecasterAutoregDirect_window_features():
+#     """
+#     Test that select_features returns the expected values when selector is RFE
+#     and select_only is 'exog'. Forecaster is ForecasterAutoregDirect and window
+#     features are included.
+#     """
+#     roll_features = RollingFeatures(
+#                         stats=['mean', 'std'],
+#                         window_sizes=[3, 5],
+#                     )
+#     forecaster = ForecasterAutoregDirect(
+#                      regressor       = LinearRegression(),
+#                      lags            = 5,
+#                      window_features = roll_features,
+#                      steps           = 3
+#                  )
+#     selector = RFE(estimator=forecaster.regressor, n_features_to_select=3)
+
+#     selected_autoreg, selected_exog = select_features(
+#         selector    = selector,
+#         forecaster  = forecaster,
+#         y           = y,
+#         exog        = exog,
+#         select_only = 'exog',
+#         verbose     = True,
+#     )
+
+#     assert selected_autoreg == [1, 2, 3, 4, 5, 'roll_mean_3', 'roll_std_5']
+#     assert selected_exog == ['exog_1', 'exog_2', 'exog_4']
