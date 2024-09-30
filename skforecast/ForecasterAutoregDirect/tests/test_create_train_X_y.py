@@ -55,11 +55,16 @@ def test_create_train_X_y_ValueError_when_len_y_is_lower_than_maximum_lag_plus_s
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)
 
     err_msg = re.escape(
-                (f"Minimum length of `y` for training this forecaster is "
-                 f"{forecaster.max_lag + forecaster.steps}. Got {len(y)}. Reduce the "
-                 f"number of predicted steps, {forecaster.steps}, or the maximum "
-                 f"lag, {forecaster.max_lag}, if no more data is available.")
-            )
+        ("Minimum length of `y` for training this forecaster is "
+         "6. Reduce the number of "
+         "predicted steps, 3, or the maximum "
+         "window_size, 3, if no more data is available.\n"
+         "    Length `y`: 5.\n"
+         "    Max step : 3.\n"
+         "    Max window size: 3.\n"
+         "    Lags window size: 3.\n"
+         "    Window features window size: None.")
+    )
     with pytest.raises(ValueError, match = err_msg):
         forecaster.create_train_X_y(y=y)
 
@@ -251,7 +256,7 @@ def test_create_train_X_y_output_when_y_is_series_10_steps_1_and_exog_is_series_
             index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
                        'exog_step_1']
-        ).astype({'exog_step_1': dtype}),
+        ).astype({'exog_step_1': float}),
         {1: pd.Series(
                 data  = np.array([5., 6., 7., 8., 9.], dtype=float), 
                 index = pd.RangeIndex(start=5, stop=10, step=1),
@@ -289,7 +294,7 @@ def test_create_train_X_y_output_when_y_is_series_10_steps_2_and_exog_is_series_
             index   = pd.RangeIndex(start=6, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
                        'exog_step_1', 'exog_step_2']
-        ).astype({'exog_step_1': dtype, 'exog_step_2': dtype}),
+        ).astype({'exog_step_1': float, 'exog_step_2': float}),
         {1: pd.Series(
                 data  = np.array([5., 6., 7., 8.], dtype=float), 
                 index = pd.RangeIndex(start=5, stop=9, step=1),
@@ -336,7 +341,7 @@ def test_create_train_X_y_output_when_y_is_series_10_steps_1_and_exog_is_datafra
             index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
                        'exog_1_step_1', 'exog_2_step_1']
-        ).astype({'exog_1_step_1': dtype, 'exog_2_step_1': dtype}),
+        ).astype({'exog_1_step_1': float, 'exog_2_step_1': float}),
         {1: pd.Series(
                 data  = np.array([5., 6., 7., 8., 9.], dtype=float), 
                 index = pd.RangeIndex(start=5, stop=10, step=1),
@@ -355,7 +360,7 @@ def test_create_train_X_y_output_when_y_is_series_10_steps_1_and_exog_is_datafra
 
 @pytest.mark.parametrize("dtype", 
                          [float, int], 
-                         ids = lambda dt : f'dtype: {dt}')
+                         ids = lambda dt: f'dtype: {dt}')
 def test_create_train_X_y_output_when_y_is_series_10_steps_3_and_exog_is_dataframe_of_float_int(dtype):
     """
     Test the output of create_train_X_y when y=pd.Series(np.arange(10)), steps=3 
@@ -379,9 +384,9 @@ def test_create_train_X_y_output_when_y_is_series_10_steps_3_and_exog_is_datafra
                        'exog_1_step_1', 'exog_2_step_1', 
                        'exog_1_step_2', 'exog_2_step_2', 
                        'exog_1_step_3', 'exog_2_step_3']
-        ).astype({'exog_1_step_1': dtype, 'exog_2_step_1': dtype, 
-                  'exog_1_step_2': dtype, 'exog_2_step_2': dtype, 
-                  'exog_1_step_3': dtype, 'exog_2_step_3': dtype}),
+        ).astype({'exog_1_step_1': float, 'exog_2_step_1': float, 
+                  'exog_1_step_2': float, 'exog_2_step_2': float, 
+                  'exog_1_step_3': float, 'exog_2_step_3': float}),
         {1: pd.Series(
                 data  = np.array([5., 6., 7.], dtype=float), 
                 index = pd.RangeIndex(start=5, stop=8, step=1),

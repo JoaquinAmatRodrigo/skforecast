@@ -50,7 +50,7 @@ class ForecasterAutoreg(ForecasterBase):
     regressor : regressor or pipeline compatible with the scikit-learn API
         An instance of a regressor or pipeline compatible with the scikit-learn API
     lags : int, list, numpy ndarray, range, default `None`
-        Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1. 
+        Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
     
         - `int`: include lags from 1 to `lags` (included).
         - `list`, `1d numpy ndarray` or `range`: include only lags present in 
@@ -81,7 +81,6 @@ class ForecasterAutoreg(ForecasterBase):
         Differentiation is reversed in the output of `predict()` and `predict_interval()`.
         **WARNING: This argument is newly introduced and requires special attention. It
         is still experimental and may undergo changes.**
-        **New in version 0.10.0**
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
     binner_kwargs : dict, default `None`
@@ -556,10 +555,10 @@ class ForecasterAutoreg(ForecasterBase):
 
             if X_as_pandas:
                 X_data = pd.DataFrame(
-                            data    = X_data,
-                            columns = [f"lag_{i}" for i in self.lags],
-                            index   = train_index
-                        )
+                             data    = X_data,
+                             columns = [f"lag_{i}" for i in self.lags],
+                             index   = train_index
+                         )
 
         y_data = y[self.window_size:]
 
@@ -648,7 +647,7 @@ class ForecasterAutoreg(ForecasterBase):
         X_train : pandas DataFrame
             Training values (predictors).
         y_train : pandas Series
-            Values of the time series related to each row of `X_data`.
+            Values of the time series related to each row of `X_train`.
         exog_names_in_ : list
             Names of the exogenous variables used during training.
         X_train_window_features_names_out_ : list
@@ -688,6 +687,7 @@ class ForecasterAutoreg(ForecasterBase):
             )
         y_values, y_index = preprocess_y(y=y)
 
+        # TODO: Error here, if diff y != y_values. Window features calculated with y
         if self.differentiation is not None:
             if not self.is_fitted:
                 y_values = self.differentiator.fit_transform(y_values)
@@ -794,11 +794,12 @@ class ForecasterAutoreg(ForecasterBase):
             exog_dtypes_in_
         )
 
+
     def create_train_X_y(
         self,
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None
-    ) -> Tuple[pd.DataFrame, pd.Series, list, list, dict]:
+    ) -> Tuple[pd.DataFrame, pd.Series]:
         """
         Create training matrices from univariate time series and exogenous
         variables.
@@ -1107,9 +1108,9 @@ class ForecasterAutoreg(ForecasterBase):
         check_inputs: bool = True
     ) -> Tuple[np.ndarray, Optional[np.ndarray], pd.Index]:
         """
-        Create inputs needed for the first iteration of the prediction process. 
-        Since it is a recursive process, last window is updated at each 
-        iteration of the prediction process.
+        Create the inputs needed for the first iteration of the prediction 
+        process. As this is a recursive process, the last window is updated at 
+        each iteration of the prediction process.
         
         Parameters
         ----------
@@ -1360,15 +1361,33 @@ class ForecasterAutoreg(ForecasterBase):
         last_window_values, exog_values, prediction_index = self._create_predict_inputs(
             steps=steps, last_window=last_window, exog=exog, check_inputs=False
         )
-        
+
+        X_predict = []
         full_predictors = np.concatenate((last_window_values, predictions))
-        idx = np.arange(-steps, 0)[:, None] - self.lags
-        X_predict = full_predictors[idx + len(full_predictors)]
+
+        if self.lags is not None:
+            idx = np.arange(-steps, 0)[:, None] - self.lags
+            X_lags = full_predictors[idx + len(full_predictors)]
+            X_predict.append(X_lags)
+
+        if self.window_features is not None:
+            X_window_features = np.full(
+                shape      = (steps, len(self.X_train_window_features_names_out_)), 
+                fill_value = np.nan, 
+                dtype      = float
+            )
+            for i in range(steps):
+                X_window_features[i, :] = np.concatenate(
+                    [wf.transform(full_predictors[i:-(steps - i)]) 
+                     for wf in self.window_features]
+                )
+            X_predict.append(X_window_features)
+
         if exog is not None:
-            X_predict = np.concatenate([X_predict, exog_values], axis=1)
+            X_predict.append(exog_values)
 
         X_predict = pd.DataFrame(
-                        data    = X_predict,
+                        data    = np.concatenate(X_predict, axis=1),
                         columns = self.X_train_features_names_out_,
                         index   = prediction_index
                     )
@@ -1434,7 +1453,7 @@ class ForecasterAutoreg(ForecasterBase):
         predictions = pd.Series(
                           data  = predictions,
                           index = prediction_index,
-                          name = 'pred'
+                          name  = 'pred'
                       )
 
         return predictions
@@ -1876,7 +1895,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
 
-
+    # TODO: Create test when set lags to None
     def set_lags(
         self, 
         lags: Optional[Union[int, np.ndarray, list, range]] = None
@@ -1916,7 +1935,7 @@ class ForecasterAutoreg(ForecasterBase):
         if self.differentiation is not None:
             self.window_size += self.differentiation
 
-
+    # TODO: Create tests
     def set_window_features(
         self, 
         window_features: Optional[Union[object, list]] = None

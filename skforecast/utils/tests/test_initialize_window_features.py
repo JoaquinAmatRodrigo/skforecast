@@ -31,6 +31,17 @@ class InvalidWindowFeatureNoMethods:
         self.features_names = features_names
 
 
+def test_ValueError_initialize_window_features_when_empty_list():
+    """
+    Test ValueError is raised when `window_features` is an empty list.
+    """
+    err_msg = re.escape(
+        "Argument `window_features` must contain at least one element."
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        initialize_window_features(window_features=[])
+
+
 def test_ValueError_initialize_window_features_when_no_required_attributes():
     """
     Test ValueError is raised when window feature does not have the required attributes.

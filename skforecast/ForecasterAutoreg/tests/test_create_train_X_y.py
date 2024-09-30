@@ -35,6 +35,7 @@ def test_create_train_X_y_ValueError_when_len_y_less_than_window_size():
     with pytest.raises(ValueError, match = err_msg):
         forecaster._create_train_X_y(y=y)
 
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=6)
     forecaster = ForecasterAutoreg(LinearRegression(), lags=2, window_features=rolling)
     err_msg = re.escape(
         ("Length of `y` must be greater than the maximum window size "
@@ -223,7 +224,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_series_of_float
                              [8., 7., 6., 5., 4., 109.]]),
             index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog']
-        ).astype({'exog': dtype}),
+        ).astype({'exog': float}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
             index = pd.RangeIndex(start=5, stop=10, step=1),
@@ -270,7 +271,7 @@ def test_create_train_X_y_output_when_y_is_series_10_and_exog_is_dataframe_of_fl
                              [8., 7., 6., 5., 4., 109., 1009.]]),
             index   = pd.RangeIndex(start=5, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog_1', 'exog_2']
-        ).astype({'exog_1': dtype, 'exog_2': dtype}),
+        ).astype({'exog_1': float, 'exog_2': float}),
         pd.Series(
             data  = np.array([5, 6, 7, 8, 9]),
             index = pd.RangeIndex(start=5, stop=10, step=1),
@@ -784,6 +785,67 @@ def test_create_train_X_y_output_when_window_features_and_exog():
 
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5, window_features=rolling)
     results = forecaster._create_train_X_y(y=y_datetime, exog=exog_datetime)
+    
+    expected = (
+        pd.DataFrame(
+            data = np.array([[5., 4., 3., 2., 1., 3., 3., 15., 106.],
+                             [6., 5., 4., 3., 2., 4., 4., 21., 107.],
+                             [7., 6., 5., 4., 3., 5., 5., 27., 108.],
+                             [8., 7., 6., 5., 4., 6., 6., 33., 109.],
+                             [9., 8., 7., 6., 5., 7., 7., 39., 110.],
+                             [10., 9., 8., 7., 6., 8., 8., 45., 111.],
+                             [11., 10., 9., 8., 7., 9., 9., 51., 112.],
+                             [12., 11., 10., 9., 8., 10., 10., 57., 113.],
+                             [13., 12., 11., 10., 9., 11., 11., 63., 114.]]),
+            index   = pd.date_range('2000-01-07', periods=9, freq='D'),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       'roll_mean_5', 'roll_median_5', 'roll_sum_6', 'exog']
+        ),
+        pd.Series(
+            data  = np.array([6, 7, 8, 9, 10, 11, 12, 13, 14]),
+            index = pd.date_range('2000-01-07', periods=9, freq='D'),
+            name  = 'y',
+            dtype = float
+        ),
+        ['exog'],
+        ['roll_mean_5', 'roll_median_5', 'roll_sum_6'],
+        ['exog'],
+        ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+         'roll_mean_5', 'roll_median_5', 'roll_sum_6', 'exog'],
+        {'exog': exog_datetime.dtypes}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
+
+
+def test_create_train_X_y_output_when_two_window_features_and_exog():
+    """
+    Test the output of _create_train_X_y when using 2 window_features and exog 
+    with datetime index.
+    """
+    y_datetime = pd.Series(
+        np.arange(15), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='y', dtype=float
+    )
+    exog_datetime = pd.Series(
+        np.arange(100, 115), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='exog', dtype=float
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoreg(
+        LinearRegression(), lags=5, window_features=[rolling, rolling_2]
+    )
+    results = forecaster._create_train_X_y(y=y_datetime, exog=exog_datetime)
+
     expected = (
         pd.DataFrame(
             data = np.array([[5., 4., 3., 2., 1., 3., 3., 15., 106.],
@@ -842,6 +904,7 @@ def test_create_train_X_y_output_when_window_features_lags_None_and_exog():
 
     forecaster = ForecasterAutoreg(LinearRegression(), lags=None, window_features=rolling)
     results = forecaster._create_train_X_y(y=y_datetime, exog=exog_datetime)
+    
     expected = (
         pd.DataFrame(
             data = np.array([[3., 3., 15., 106.],
@@ -915,6 +978,7 @@ def test_create_train_X_y_output_when_window_features_and_exog_transformers_diff
                      differentiation  = 2
                  )
     results = forecaster._create_train_X_y(y=y_datetime, exog=exog)
+    
     expected = (
         pd.DataFrame(
             data = np.array([[-1.56436158, -0.14173746, -7.22222222, -0.34909411,  0.04040264,
@@ -949,5 +1013,3 @@ def test_create_train_X_y_output_when_window_features_and_exog_transformers_diff
     assert results[5] == expected[5]
     for k in results[6].keys():
         assert results[6][k] == expected[6][k]
-
-# TODO: tests with 2 window_features

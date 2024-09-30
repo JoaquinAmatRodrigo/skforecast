@@ -5,8 +5,9 @@
 ################################################################################
 # coding=utf-8
 
-from typing import Union, Optional, Callable
+from typing import Any
 import warnings
+
 
 # TODO: Update warning with user guide link
 class ForecasterAutoregCustom():
@@ -18,16 +19,16 @@ class ForecasterAutoregCustom():
     
     def __init__(
         self, 
-        regressor: object = None, 
-        fun_predictors: Callable = None, 
-        window_size: int = None,
-        name_predictors: Optional[list] = None,
-        transformer_y: Optional[object] = None,
-        transformer_exog: Optional[object] = None,
-        weight_func: Optional[Callable] = None,
-        differentiation: Optional[int] = None,
-        fit_kwargs: Optional[dict] = None,
-        forecaster_id: Optional[Union[str, int]] = None
+        regressor: Any = None, 
+        fun_predictors: Any = None, 
+        window_size: Any = None,
+        name_predictors: Any = None,
+        transformer_y: Any = None,
+        transformer_exog: Any = None,
+        weight_func: Any = None,
+        differentiation: Any = None,
+        fit_kwargs: Any = None,
+        forecaster_id: Any = None
     ) -> None:
         
         warnings.warn(

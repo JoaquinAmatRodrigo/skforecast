@@ -19,7 +19,6 @@ def test_set_lags_when_lags_argument_is_int():
     assert (forecaster.lags == np.array([1, 2, 3, 4, 5])).all()
     assert forecaster.max_lag == 5
     assert forecaster.window_size == 5
-    assert forecaster.window_size_diff == 5
 
  
 def test_set_lags_when_lags_argument_is_list():
@@ -33,7 +32,6 @@ def test_set_lags_when_lags_argument_is_list():
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     assert forecaster.max_lag == 3
     assert forecaster.window_size == 3
-    assert forecaster.window_size_diff == 3
     
 
 def test_set_lags_when_lags_argument_is_1d_numpy_array():
@@ -47,4 +45,21 @@ def test_set_lags_when_lags_argument_is_1d_numpy_array():
     assert (forecaster.lags == np.array([1, 2, 3])).all()
     assert forecaster.max_lag == 3
     assert forecaster.window_size == 3
-    assert forecaster.window_size_diff == 3
+
+
+def test_set_lags_when_differentiation_is_not_None():
+    """
+    Test how `window_size` is also updated when the forecaster includes differentiation.
+    """
+    forecaster = ForecasterAutoregDirect(
+                     regressor       = LinearRegression(),
+                     lags            = 3,
+                     steps           = 2,
+                     differentiation = 1
+                 )
+    
+    forecaster.set_lags(lags=5)
+
+    assert (forecaster.lags == np.array([1, 2, 3, 4, 5])).all()
+    assert forecaster.max_lag == 5
+    assert forecaster.window_size == 5 + 1
