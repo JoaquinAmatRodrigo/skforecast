@@ -140,7 +140,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_exog_regressor(
 def test_select_features_when_selector_is_RFE_and_select_only_is_exog_ForecasterAutoregMultiseriesCustom():
     """
     Test that select_features returns the expected values when selector is RFE
-    select_only is 'exog' and forecaster is ForecasterAutoregCustom.
+    select_only is 'exog' and forecaster is ForecasterAutoregMultiSeriesCustom.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = LinearRegression(),
@@ -191,7 +191,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg():
 def test_select_features_when_selector_is_RFE_and_select_only_is_autoreg_ForecasterAutoregMultiseriesCustom():
     """
     Test that select_features returns the expected values when selector is RFE
-    select_only is 'autoreg' and forecaster is ForecasterAutoregCustom.
+    select_only is 'autoreg' and forecaster is ForecasterAutoregMultiSeriesCustom.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = LinearRegression(),
@@ -249,7 +249,7 @@ def test_select_features_when_selector_is_RFE_and_select_only_is_None():
 def test_select_features_when_selector_is_RFE_and_select_only_is_None_ForecasterAutoregMultiseriesCustom():
     """
     Test that select_features returns the expected values when selector is RFE
-    select_only is None and forecaster is ForecasterAutoregCustom.
+    select_only is None and forecaster is ForecasterAutoregMultiSeriesCustom.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor       = LinearRegression(),
@@ -311,7 +311,7 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_forc
     """
     Test that select_features returns the expected values when selector is RFE
     select_only_exog is False and force_inclusion is regex and forecaster is
-    ForecasterAutoregCustom.
+    ForecasterAutoregMultiSeriesCustom.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
                      regressor      = LinearRegression(),
@@ -364,11 +364,11 @@ def test_select_features_when_selector_is_RFE_select_only_exog_is_False_and_forc
     assert selected_exog == ['exog1', 'exog3', 'exog4']
 
 
-def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force_inclusion_is_list_ForecasterAutoregCustom():
+def test_select_features_when_selector_is_RFE_select_only_exog_is_True_and_force_inclusion_is_list_ForecasterAutoregMultiSeriesCustom():
     """
     Test that select_features returns the expected values when selector is RFE
     select_only_exog is True and force_inclusion is list and forecaster is
-    ForecasterAutoregCustom.
+    ForecasterAutoregMultiSeriesCustom.
     """
     forecaster = ForecasterAutoregMultiSeriesCustom(
         regressor=LinearRegression(),

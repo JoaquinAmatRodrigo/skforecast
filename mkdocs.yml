@@ -65,7 +65,6 @@ nav:
 
   - API Reference:
     - ForecasterAutoreg: api/ForecasterAutoreg.md
-    - ForecasterAutoregCustom: api/ForecasterAutoregCustom.md
     - ForecasterAutoregDirect: api/ForecasterAutoregDirect.md
     - ForecasterMultiSeries: api/ForecasterMultiSeries.md
     - ForecasterMultiSeriesCustom: api/ForecasterMultiSeriesCustom.md

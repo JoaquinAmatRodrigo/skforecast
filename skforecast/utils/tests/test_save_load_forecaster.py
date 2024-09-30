@@ -16,7 +16,7 @@ from skforecast.exceptions import SkforecastVersionWarning
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
-def create_predictors(y): # pragma: no cover
+def create_predictors(y):  # pragma: no cover
     """
     Create first 2 lags of a time series.
     """
@@ -25,15 +25,15 @@ def create_predictors(y): # pragma: no cover
     
     return lags
 
-def custom_weights(y): # pragma: no cover
+def custom_weights(y):  # pragma: no cover
     """
     """
     return np.ones(len(y))
 
-def custom_weights2(y): # pragma: no cover
+def custom_weights2(y):  # pragma: no cover
     """
     """
-    return np.arange(1, len(y)+1)
+    return np.arange(1, len(y) + 1)
 
 
 def test_save_and_load_forecaster_persistence():

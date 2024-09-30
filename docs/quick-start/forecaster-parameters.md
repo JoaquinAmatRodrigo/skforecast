@@ -154,7 +154,7 @@ More information: [Time series differentiation](https://skforecast.org/latest/fa
 
 !!! warning
 
-    The `differentiation` parameter is only available for the `ForecasterAutoreg`, `ForecasterAutoregCustom`, `ForecasterAutoregMultiSeries` and `ForecasterAutoregMultiSeriesCustom` in the following versions it will be incorporated to the rest of the Forecasters.
+    The `differentiation` parameter is only available for the `ForecasterAutoreg` and `ForecasterAutoregMultiSeries` in the following versions it will be incorporated to the rest of the Forecasters.
 
 ```python
 # Create a forecaster

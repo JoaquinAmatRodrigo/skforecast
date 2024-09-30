@@ -6,7 +6,6 @@ import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_squared_error
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.model_selection.model_selection import _backtesting_forecaster
 
@@ -49,50 +48,6 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoreg_wi
                                        metric             = 'mean_squared_error',
                                        n_jobs             = n_jobs,
                                        verbose            = False
-                                   )
-                                   
-    pd.testing.assert_frame_equal(expected_metric, metric)
-    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
-
-
-def create_predictors(y):  # pragma: no cover
-    """
-    Create first 3 lags of a time series.
-    """
-    lags = y[-1:-4:-1]
-    return lags 
-
-
-@pytest.mark.parametrize("refit", [False, 0],
-                         ids=lambda n: f'refit: {n}')
-def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoregCustom_with_mocked(refit):
-    """
-    Test output of _backtesting_forecaster with backtesting mocked, interval no.
-    Regressor is LinearRegression with lags=3, Series y is mocked, no exog, 
-    12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
-    ForecasterAutoregCustom.
-    """
-    expected_metric = pd.DataFrame({"mean_squared_error": [0.06464382862831312]})
-    expected_predictions = pd.DataFrame({
-    'pred':np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.39585199, 0.55935949, 
-                     0.45263533, 0.4578669 , 0.36988237, 0.57912951, 0.48686057, 0.45709952])
-                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
-    forecaster = ForecasterAutoregCustom(
-                     regressor      = LinearRegression(), 
-                     fun_predictors = create_predictors,
-                     window_size    = 3
-                 )
-    n_backtest = 12
-    y_train = y[:-n_backtest]
-    metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster         = forecaster,
-                                        y                  = y,
-                                        exog               = None,
-                                        refit              = refit,
-                                        initial_train_size = len(y_train),
-                                        steps              = 4,
-                                        metric             = 'mean_squared_error',
-                                        verbose            = False
                                    )
                                    
     pd.testing.assert_frame_equal(expected_metric, metric)

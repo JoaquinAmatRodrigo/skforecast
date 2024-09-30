@@ -14,7 +14,7 @@ from .fixtures_model_selection_multiseries import series
 
 def create_predictors(y): # pragma: no cover
     """
-    Create first 4 lags of a time series, used in ForecasterAutoregCustom.
+    Create first 4 lags of a time series, used in ForecasterAutoregMultiSeriesCustom.
     """
 
     lags = y[-1:-5:-1]

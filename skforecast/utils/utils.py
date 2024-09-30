@@ -371,15 +371,12 @@ def initialize_lags_grid(
     Parameters
     ----------
     forecaster : Forecaster
-        Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
-        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+        Forecaster model. ForecasterAutoreg, ForecasterAutoregDirect, 
+        ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate.
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
-        DataFrame, and the values are used as the lists of lags to try. Ignored 
-        if the forecaster is an instance of `ForecasterAutoregCustom` or 
-        `ForecasterAutoregMultiSeriesCustom`.
+        DataFrame, and the values are used as the lists of lags to try.
 
     Returns
     -------
@@ -395,16 +392,6 @@ def initialize_lags_grid(
             (f"`lags_grid` argument must be a list, dict or None. "
              f"Got {type(lags_grid)}.")
         )
-
-    if type(forecaster).__name__ in ['ForecasterAutoregCustom', 
-                                     'ForecasterAutoregMultiSeriesCustom']:
-        if lags_grid is not None:
-            warnings.warn(
-                (f"`lags_grid` ignored if forecaster is an instance of "
-                 f"`{type(forecaster).__name__}`."),
-                IgnoredArgumentWarning
-            )
-        lags_grid = ['custom predictors']
 
     lags_label = 'values'
     if isinstance(lags_grid, list):
@@ -2152,7 +2139,6 @@ def check_backtesting_input(
 
     forecasters_uni = [
         "ForecasterAutoreg",
-        "ForecasterAutoregCustom",
         "ForecasterAutoregDirect",
         "ForecasterSarimax",
         "ForecasterEquivalentDate",
@@ -2162,8 +2148,7 @@ def check_backtesting_input(
         "ForecasterRnn",
     ]
     forecasters_multi_dict = [
-        "ForecasterAutoregMultiSeries",
-        "ForecasterAutoregMultiSeriesCustom",
+        "ForecasterAutoregMultiSeries"
     ]
 
     forecaster_name = type(forecaster).__name__
@@ -2371,14 +2356,12 @@ def select_n_jobs_backtesting(
 
     - If `refit` is an integer, then `n_jobs = 1`. This is because parallelization doesn't 
     work with intermittent refit.
-    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
-    regressor is a linear regressor, then `n_jobs = 1`.
-    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor is not a linear regressor and `refit = True`, then
-    `n_jobs = cpu_count() - 1`.
-    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor is not a linear regressor and `refit = False`, then
-    `n_jobs = 1`.
+    - If forecaster is 'ForecasterAutoreg' and regressor is a linear regressor, 
+    then `n_jobs = 1`.
+    - If forecaster is 'ForecasterAutoreg' and regressor is not a linear 
+    regressor and `refit = True`, then `n_jobs = cpu_count() - 1`.
+    - If forecaster is 'ForecasterAutoreg' and regressor is not a linear 
+    regressor and `refit = False`, then `n_jobs = 1`.
     - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and `refit = True`, then `n_jobs = cpu_count() - 1`.
     - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
@@ -2423,14 +2406,14 @@ def select_n_jobs_backtesting(
     if not isinstance(refit, bool) and refit != 1:
         n_jobs = 1
     else:
-        if forecaster_name in ['ForecasterAutoreg', 'ForecasterAutoregCustom']:
+        if forecaster_name in ['ForecasterAutoreg']:
             if regressor_name in linear_regressors or regressor_name == 'LGBMRegressor':
                 n_jobs = 1
             else:
                 n_jobs = joblib.cpu_count() - 1 if refit else 1
         elif forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
             n_jobs = 1
-        elif forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
+        elif forecaster_name in ['ForecasterAutoregMultiSeries']:
             if regressor_name == 'LGBMRegressor':
                 n_jobs = 1
             else:

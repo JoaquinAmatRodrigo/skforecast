@@ -8,7 +8,6 @@ from sklearn.linear_model import Ridge
 from sklearn.exceptions import NotFittedError
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
@@ -20,20 +19,9 @@ from skforecast.utils import check_backtesting_input
 from skforecast.model_selection.tests.fixtures_model_selection import y
 from skforecast.model_selection_multiseries.tests.fixtures_model_selection_multiseries import series
 
-def create_predictors(y):  # pragma: no cover
-    """
-    Create first 3 lags of a time series.
-    """
-    
-    lags = y[-1:-4:-1]
-    
-    return lags
-
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoreg(regressor=Ridge(), lags=2),
-                          ForecasterAutoregCustom(regressor=Ridge(), window_size=3,
-                                                  fun_predictors=create_predictors),
                           ForecasterAutoregDirect(regressor=Ridge(), lags=2, steps=3),
                           ForecasterSarimax(regressor=Sarimax(order=(1, 1, 1)))], 
                          ids = lambda fr: f'forecaster: {type(fr).__name__}')
