@@ -37,7 +37,11 @@ logging.basicConfig(
 
 class TimeSeriesFold():
     """
-    Class to split time series data into train and test folds.
+    Class to split time series data into train and test folds. 
+    When used within a backtesting or hiperparameter search, arguments
+    'initial_train_size', 'window_size' and 'differentiation' are not required
+    since they are set automatically by the backtesting or hyperparameter search
+    functions.
 
     Parameters
     ----------
@@ -187,8 +191,8 @@ class TimeSeriesFold():
     def _validate_params(
         self,
         steps: int,
-        initial_train_size: Optional[int],
-        window_size: Optional[int],
+        initial_train_size: Optional[int] = None,
+        window_size: Optional[int] = None,
         differentiation: Optional[int] = None,
         refit: Union[bool, int] = False,
         fixed_train_size: bool = True,
@@ -204,22 +208,22 @@ class TimeSeriesFold():
         """
 
         if (
-            not isinstance(window_size, (int, type(None)))
+            not isinstance(window_size, (int, np.integer, type(None)))
             or window_size is not None
             and window_size < 1
         ):
             raise ValueError(
                 f"`window_size` must be an integer greater than 0. Got {window_size}."
             )
-        if not isinstance(initial_train_size, int) and initial_train_size is not None:
+        if not isinstance(initial_train_size, (int, np.integer)) and initial_train_size is not None:
             raise ValueError(
                 f"`initial_train_size` must be an integer or None. Got {initial_train_size}."
             )
-        if not isinstance(steps, int) or steps < 1:
+        if not isinstance(steps, (int, np.integer)) or steps < 1:
             raise ValueError(
                 f"`steps` must be an integer greater than 0. Got {steps}."
             )
-        if not isinstance(refit, (bool, int)):
+        if not isinstance(refit, (bool, int, np.integer)):
             raise ValueError(
                 f"`refit` must be a boolean or an integer. Got {refit}."
             )
@@ -227,16 +231,16 @@ class TimeSeriesFold():
             raise ValueError(
                 f"`fixed_train_size` must be a boolean. Got {fixed_train_size}."
             )
-        if not isinstance(gap, int) or gap < 0:
+        if not isinstance(gap, (int, np.integer)) or gap < 0:
             raise ValueError(
                 f"`gap` must be an integer greater than or equal to 0. Got {gap}."
             )
         if skip_folds is not None:
-            if not isinstance(skip_folds, (int, list, type(None))):
+            if not isinstance(skip_folds, (int, np.integer, list, type(None))):
                 raise ValueError(
                     f"`skip_folds` must be an integer, list or None. Got {skip_folds}."
                 )
-            if isinstance(skip_folds, int) and skip_folds < 1:
+            if isinstance(skip_folds, (int, np.integer)) and skip_folds < 1:
                 raise ValueError(
                     f"`skip_folds` must be an integer greater than 0. Got {skip_folds}."
                 )
@@ -255,9 +259,10 @@ class TimeSeriesFold():
                 f"`return_all_indexes` must be a boolean. Got {return_all_indexes}."
             )
         if differentiation is not None:
-            if not isinstance(differentiation, int) or differentiation < 1:
+            if not isinstance(differentiation, (int, np.integer)) or differentiation < 0:
                 raise ValueError(
-                    f"differentiation must be an integer greater than 0. Got {differentiation}."
+                    f"differentiation must be None or an integer greater than or equal to 0. "
+                    f"Got {differentiation}."
                 )
         if not isinstance(verbose, bool):
             raise ValueError(
@@ -431,7 +436,7 @@ class TimeSeriesFold():
 
         index_to_skip = []
         if self.skip_folds is not None:
-            if isinstance(self.skip_folds, int) and self.skip_folds > 0:
+            if isinstance(self.skip_folds, (int, np.integer)) and self.skip_folds > 0:
                 index_to_keep = np.arange(0, len(folds), self.skip_folds)
                 index_to_skip = np.setdiff1d(np.arange(0, len(folds)), index_to_keep, assume_unique=True)
                 index_to_skip = [int(x) for x in index_to_skip] # Required since numpy 2.0
@@ -535,7 +540,8 @@ class TimeSeriesFold():
 
     def set_params(self, params: dict) -> None:
         """
-        Set the parameters of the TimeSeriesFold object.
+        Set the parameters of the TimeSeriesFold object. Before overwriting the
+        current parameters, the input parameters are validated to ensure correctness.
 
         Parameters
         ----------
@@ -547,7 +553,19 @@ class TimeSeriesFold():
             raise ValueError(
                 f"`params` must be a dictionary. Got {type(params)}."
             )
-        for key, value in params.items():
+        
+        current_params = deepcopy(vars(self))
+        unknown_params = set(params.keys()) - set(current_params.keys())
+        if unknown_params:
+            warnings.warn(
+                f"Unknown parameters: {unknown_params}. They have been ignored.",
+                IgnoredArgumentWarning,
+            )
+        updated_params = {**current_params, **params}
+        print(updated_params)
+        print(type(updated_params['window_size']))
+        self._validate_params(**updated_params)
+        for key, value in updated_params.items():
             setattr(self, key, value)
     
 
