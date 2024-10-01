@@ -1482,7 +1482,7 @@ def exog_to_direct(
     
     return exog_transformed
 
-
+# TODO: See if can return direct cols names
 def exog_to_direct_numpy(
     exog: np.ndarray,
     steps: int

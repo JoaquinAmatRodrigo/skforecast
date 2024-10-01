@@ -746,9 +746,11 @@ class ForecasterAutoreg(ForecasterBase):
         
         X_train_window_features_names_out_ = None
         if self.window_features is not None:
+            n_diff = 0 if self.differentiation is None else self.differentiation
+            y_window_features = pd.Series(y_values[n_diff:], index=y_index[n_diff:])
             X_train_window_features, X_train_window_features_names_out_ = (
                 self._create_window_features(
-                    y=y, X_as_pandas=X_as_pandas, train_index=train_index
+                    y=y_window_features, X_as_pandas=X_as_pandas, train_index=train_index
                 )
             )
             X_train.extend(X_train_window_features)
@@ -1895,7 +1897,7 @@ class ForecasterAutoreg(ForecasterBase):
 
         self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
 
-    # TODO: Create test when set lags to None
+
     def set_lags(
         self, 
         lags: Optional[Union[int, np.ndarray, list, range]] = None
@@ -1935,7 +1937,7 @@ class ForecasterAutoreg(ForecasterBase):
         if self.differentiation is not None:
             self.window_size += self.differentiation
 
-    # TODO: Create tests
+
     def set_window_features(
         self, 
         window_features: Optional[Union[object, list]] = None
@@ -1967,9 +1969,11 @@ class ForecasterAutoreg(ForecasterBase):
         self.window_features, self.max_size_window_features, self.window_features_names = (
             initialize_window_features(window_features)
         )
-        self.window_features_class_names = [
-            type(wf).__name__ for wf in self.window_features
-        ] 
+        self.window_features_class_names = None
+        if window_features is not None:
+            self.window_features_class_names = [
+                type(wf).__name__ for wf in self.window_features
+            ] 
         self.window_size = max(
             [ws for ws in [self.max_lag, self.max_size_window_features] 
              if ws is not None]

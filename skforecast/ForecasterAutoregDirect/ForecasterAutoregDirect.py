@@ -297,11 +297,6 @@ class ForecasterAutoregDirect(ForecasterBase):
             raise ValueError(
                 f"`steps` argument must be greater than or equal to 1. Got {steps}."
             )
-        
-        if not isinstance(n_jobs, int) and n_jobs != 'auto':
-            raise TypeError(
-                f"`n_jobs` must be an integer or `'auto'`. Got {type(n_jobs)}."
-            )
 
         self.regressors_ = {step: clone(self.regressor) for step in range(1, steps + 1)}
         self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
@@ -355,6 +350,10 @@ class ForecasterAutoregDirect(ForecasterBase):
                               regressor_name  = type(self.regressor).__name__,
                           )
         else:
+            if not isinstance(n_jobs, int):
+                raise TypeError(
+                    f"`n_jobs` must be an integer or `'auto'`. Got {type(n_jobs)}."
+                )
             self.n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
 
@@ -645,7 +644,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 raise ValueError(
                     (f"The method `transform_batch` of {type(wf).__name__} "
                      f"must return a DataFrame with the same number of rows as "
-                     f"the input time series - `window_size`: {len_train_index}.")
+                     f"the input time series - (`window_size` + (`steps` - 1)): {len_train_index}.")
                 )
             X_train_wf.index = train_index
             
@@ -786,9 +785,13 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         X_train_window_features_names_out_ = None
         if self.window_features is not None:
+            n_diff = 0 if self.differentiation is None else self.differentiation
+            y_window_features = pd.Series(
+                y_values[n_diff:-(self.steps - 1)], index=y_index[n_diff:-(self.steps - 1)]
+            )
             X_train_window_features, X_train_window_features_names_out_ = (
                 self._create_window_features(
-                    y           = y[:-(self.steps - 1)], 
+                    y           = y_window_features, 
                     X_as_pandas = X_as_pandas, 
                     train_index = train_index
                 )
@@ -801,11 +804,13 @@ class ForecasterAutoregDirect(ForecasterBase):
             # The first `self.window_size` positions have to be removed from exog
             # since they are not in X_train.
             X_train_exog_names_out_ = exog.columns.to_list()
+            # TODO: See if can return direct cols names with exog_to_direct_numpy
             exog_to_train = exog_to_direct(
                                 exog  = exog,
                                 steps = self.steps
                             )
             exog_to_train = exog_to_train.iloc[-len_train_index:, :]
+            # Need here for filter_train_X_y_for_step to work without fitting
             self.X_train_direct_exog_names_out_ = exog_to_train.columns.to_list()
             if X_as_pandas:
                 exog_to_train.index = train_index
@@ -1946,7 +1951,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
 
-    # TODO: Create test when set lags to None
+
     def set_lags(
         self, 
         lags: Optional[Union[int, np.ndarray, list, range]] = None
@@ -1986,7 +1991,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         if self.differentiation is not None:
             self.window_size += self.differentiation
 
-    # TODO: Create tests
+
     def set_window_features(
         self, 
         window_features: Optional[Union[object, list]] = None
@@ -2018,9 +2023,11 @@ class ForecasterAutoregDirect(ForecasterBase):
         self.window_features, self.max_size_window_features, self.window_features_names = (
             initialize_window_features(window_features)
         )
-        self.window_features_class_names = [
-            type(wf).__name__ for wf in self.window_features
-        ] 
+        self.window_features_class_names = None
+        if window_features is not None:
+            self.window_features_class_names = [
+                type(wf).__name__ for wf in self.window_features
+            ] 
         self.window_size = max(
             [ws for ws in [self.max_lag, self.max_size_window_features] 
              if ws is not None]

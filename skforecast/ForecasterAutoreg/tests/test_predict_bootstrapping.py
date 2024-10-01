@@ -7,9 +7,11 @@ import pandas as pd
 from sklearn.exceptions import NotFittedError
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
+from lightgbm import LGBMRegressor
 
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.preprocessing import RollingFeatures
 from skforecast.preprocessing import TimeSeriesDifferentiator
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
 
 # Fixtures
 from .fixtures_ForecasterAutoreg import y
@@ -254,3 +256,41 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_and_di
                         )
     
     pd.testing.assert_frame_equal(boot_predictions_1, boot_predictions_2)
+    
+    
+def test_predict_bootstrapping_output_when_window_features():
+    """
+    Test output of predict_bootstrapping when regressor is LGBMRegressor and
+    2 steps ahead are predicted with exog and window features using in-sample residuals.
+    """
+    y_datetime = y.copy()
+    y_datetime.index = pd.date_range(start='2001-01-01', periods=len(y), freq='D')
+    exog_datetime = exog.copy()
+    exog_datetime.index = pd.date_range(start='2001-01-01', periods=len(exog), freq='D')
+    exog_predict_datetime = exog_predict.copy()
+    exog_predict_datetime.index = pd.date_range(start='2001-02-20', periods=len(exog_predict), freq='D')
+    rolling = RollingFeatures(stats=['mean', 'sum'], window_sizes=[3, 5])
+    forecaster = ForecasterAutoreg(
+        LGBMRegressor(verbose=-1, random_state=123), lags=3, window_features=rolling
+    )
+    forecaster.fit(y=y_datetime, exog=exog_datetime)
+    results = forecaster.predict_bootstrapping(
+        steps=4, n_boot=10, exog=exog_predict_datetime, use_in_sample_residuals=True
+    )
+
+    expected = pd.DataFrame(
+                   data    = np.array(
+                                 [[0.61866004, 0.89697256, 0.14325579, 0.18128852, 0.86846565,
+                                   0.55020849, 0.25870679, 0.51670634, 0.29239436, 0.42315364],
+                                  [0.26475697, 0.67230222, 0.18926364, 0.45124373, 0.34317802,
+                                   0.6900186 , 0.43134277, 0.67230222, 0.20674374, 0.84082826],
+                                  [0.40053981, 0.32295891, 0.61577585, 0.15682665, 0.43966009,
+                                   0.46585818, 0.5110144 , 0.5225711 , 0.56031677, 0.47247859],
+                                  [0.39037942, 0.06805095, 0.86630916, 0.52190308, 0.47247859,
+                                   0.43966009, 0.46227478, 0.58525714, 0.5189877 , 0.28131971]]
+                             ),
+                   columns = [f"pred_boot_{i}" for i in range(10)],
+                   index   = pd.date_range(start='2001-02-20', periods=4, freq='D')
+               )
+
+    pd.testing.assert_frame_equal(expected, results)
