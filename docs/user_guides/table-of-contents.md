@@ -1,4 +1,4 @@
-# User Guides Table of Contents
+# Table of Contents
 
 Welcome to the skforecast user guides! This comprehensive collection of guides is designed to help you navigate through the various features and functionalities of skforecast. Whether you are a beginner or an advanced user, you will find the necessary resources to master time series forecasting with skforecast. Below, you will find the user guides categorized by topic for easier navigation.
 

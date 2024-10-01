@@ -9,55 +9,68 @@ use_directory_urls: false
 copyright: Copyright &copy; 2021 - 2024 Joaquín Amat Rodrigo, Javier Escobar Ortiz
 
 nav:
-  - Home:
+  - Home: 
     - Welcome to skforecast: README.md
-    - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
-    - Quick start: quick-start/quick-start-skforecast.ipynb
-    - User Guides: user_guides/user-guides.md
-    - Examples and tutorials: examples/examples_english.md
-    - API Reference: api/ForecasterAutoreg.md
-    - FAQ and Tips: faq/faq.md
-    - Releases: releases/releases.md
-    - Authors: authors/authors.md
+    # - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
+    # - Quick start: quick-start/quick-start-skforecast.ipynb
+    # - User Guides: user_guides/table-of-contents-home.mod
+    # - Examples and tutorials: examples/examples_english.md
+    # - API Reference: api/ForecasterAutoreg.md
+    # - FAQ and Tips: faq/faq.md
+    # - Releases: releases/releases.md
+    # - Authors: authors/authors.md
   
-  - Introduction to forecasting: 
-    - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
+  - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
   
   - Quick start:
-    - Quick start: quick-start/quick-start-skforecast.ipynb
+    - quick-start/quick-start-skforecast.ipynb
     - Forecaster Parameters: quick-start/forecaster-parameters.md
     - Forecaster Attributes: quick-start/forecaster-attributes.ipynb
     - How to install: quick-start/how-to-install.md
 
   - User Guides:
-    - Table of contents: user_guides/user-guides.md
+    - Table of contents: user_guides/table-of-contents.md
     - Input data: user_guides/input-data.ipynb
-    - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
-    - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb
-    - "Global Models : Independent multi-time series forecasting": user_guides/independent-multi-time-series-forecasting.ipynb
-    - "Global Models : Series with different lengths and different exogenous variables": user_guides/multi-series-with-different-length-and-different_exog.ipynb
-    - "Global Models : Dependent multivariate series forecasting": user_guides/dependent-multi-series-multivariate-forecasting.ipynb
-    - Deep learning Recurrent Neural Networks: user_guides/forecasting-with-deep-learning-rnn-lstm.ipynb
-    - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
-    - Foreasting baseline: user_guides/forecasting-baseline.ipynb
-    - Exogenous variables: user_guides/exogenous-variables.ipynb
-    - Window and custom features: user_guides/window-features-and-custom-features.ipynb
-    - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
-    - Backtesting forecaster: user_guides/backtesting.ipynb
-    - Metrics: user_guides/metrics.ipynb
-    - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
-    - Data transformation: user_guides/sklearn-transformers-and-pipeline.ipynb
-    - Probabilistic forecasting: user_guides/probabilistic-forecasting.ipynb
-    - Categorical features: user_guides/categorical-features.ipynb
-    - Calendars features: user_guides/calendar-features.ipynb
-    - Feature selection: user_guides/feature-selection.ipynb
-    - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
-    - Forecaster in production: user_guides/forecaster-in-production.ipynb
-    - Save and load forecaster: user_guides/save-load-forecaster.ipynb
-    - Explainability: user_guides/explainability.ipynb
-    - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
-    - Plotting: user_guides/plotting.ipynb
-    - Datasets: user_guides/datasets.ipynb
+    - Single series Forecasters:
+      - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
+      - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb
+      - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
+      - Foreasting baseline: user_guides/forecasting-baseline.ipynb
+    - Global Forecasters (multiple series):
+      - Independent multi-time series forecasting": user_guides/independent-multi-time-series-forecasting.ipynb
+      - Series with different lengths and different exogenous variables": user_guides/multi-series-with-different-length-and-different_exog.ipynb
+      - Dependent multivariate series forecasting": user_guides/dependent-multi-series-multivariate-forecasting.ipynb
+      - Deep learning Recurrent Neural Networks: user_guides/forecasting-with-deep-learning-rnn-lstm.ipynb
+    - Feature Engineering:
+      - Exogenous variables: user_guides/exogenous-variables.ipynb
+      - Window and custom features: user_guides/window-features-and-custom-features.ipynb
+      - Categorical features: user_guides/categorical-features.ipynb
+      - Calendars features: user_guides/calendar-features.ipynb
+      - Data transformation: user_guides/sklearn-transformers-and-pipeline.ipynb
+      - Feature selection: user_guides/feature-selection.ipynb
+    - Model Evaluation and Tuning:
+      - Metrics: user_guides/metrics.ipynb
+      - Backtesting forecaster: user_guides/backtesting.ipynb
+      - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
+      - Feature selection: user_guides/feature-selection.ipynb
+    - Probabilistic Forecasting:
+      - Probabilistic forecasting: user_guides/probabilistic-forecasting.ipynb
+    - Model Explainability:
+      - Explainability: user_guides/explainability.ipynb
+    - Model deployment:
+      - Save and load forecaster: user_guides/save-load-forecaster.ipynb
+      - Forecaster in production: user_guides/forecaster-in-production.ipynb
+    - Plotting:
+      - Plotting: user_guides/plotting.ipynb
+    - Datasets:
+      - Datasets: user_guides/datasets.ipynb
+    - Additional Resources:
+      - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
+      - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
+      - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
+    - FAQ and forecasting tips:
+      - FAQ and Tips: faq/faq.md
+
 
   - Examples and tutorials:
     - English: examples/examples_english.md
@@ -114,6 +127,7 @@ plugins:
             members_order: source
             docstring_options:
               ignore_init_summary: true
+              show_if_no_docstring: true
   - mkdocs-jupyter:
       ignore_h1_titles: True
       include_source: True
@@ -140,8 +154,9 @@ theme:
   features:
     - navigation.tabs
     - navigation.tabs.sticky
-    - navigation.sections
-    - navigation.expand
+    #- navigation.sections # To expand sections on the table of contents
+    #- navigation.expand # To expand sections on the table of contents
+    #- navigation.indexes
     - navigation.top
   font:
     text: Open Sans
