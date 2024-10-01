@@ -273,7 +273,7 @@ class TimeSeriesFold():
         self
     ) -> str:
         """
-        Information displayed when a ForecasterAutoreg object is printed.
+        Information displayed when printed.
         """
             
         return (
@@ -562,8 +562,6 @@ class TimeSeriesFold():
                 IgnoredArgumentWarning,
             )
         updated_params = {**current_params, **params}
-        print(updated_params)
-        print(type(updated_params['window_size']))
         self._validate_params(**updated_params)
         for key, value in updated_params.items():
             setattr(self, key, value)
@@ -713,8 +711,14 @@ class OneStepAheadFold():
             differentiation: Optional[int] = None,
             return_all_indexes: bool = False,
             verbose: bool = True,
-            steps: int = 1,
     ) -> None:
+
+        self._validate_params(
+            initial_train_size,
+            window_size,
+            differentiation,
+            return_all_indexes,
+        )
 
         self.initial_train_size = initial_train_size
         self.window_size = window_size
@@ -728,6 +732,67 @@ class OneStepAheadFold():
         self.skip_folds = None
         self.allow_incomplete_fold = False
         self.refit = False
+
+
+    def _validate_params(
+        self,
+        initial_train_size: Optional[int] = None,
+        window_size: Optional[int] = None,
+        differentiation: Optional[int] = None,
+        return_all_indexes: bool = False,
+        verbose: bool = True
+    ) -> None:
+                
+        """
+        Validate all input parameters to ensure correctness.
+        """
+
+        if (
+            not isinstance(window_size, (int, np.integer, type(None)))
+            or window_size is not None
+            and window_size < 1
+        ):
+            raise ValueError(
+                f"`window_size` must be an integer greater than 0. Got {window_size}."
+            )
+        if not isinstance(initial_train_size, (int, np.integer)) and initial_train_size is not None:
+            raise ValueError(
+                f"`initial_train_size` must be an integer or None. Got {initial_train_size}."
+            )
+    
+        if not isinstance(return_all_indexes, bool):
+            raise ValueError(
+                f"`return_all_indexes` must be a boolean. Got {return_all_indexes}."
+            )
+        if differentiation is not None:
+            if not isinstance(differentiation, (int, np.integer)) or differentiation < 0:
+                raise ValueError(
+                    f"differentiation must be None or an integer greater than or equal to 0. "
+                    f"Got {differentiation}."
+                )
+        if not isinstance(verbose, bool):
+            raise ValueError(
+                f"`verbose` must be a boolean. Got {verbose}."
+            )
+
+
+    def __repr__(
+        self
+    ) -> str:
+        """
+        Information displayed when printed.
+        """
+            
+        return (
+            f"OneStepAheadFold(\n"
+            f"    initial_train_size={self.initial_train_size},\n"
+            f"    window_size={self.window_size},\n"
+            f"    differentiation={self.differentiation},\n"
+            f"    return_all_indexes={self.return_all_indexes},\n"
+            f"    verbose={self.verbose}\n"
+            f")"
+        )
+        
 
     def split(
             self,
@@ -868,7 +933,17 @@ class OneStepAheadFold():
             raise ValueError(
                 f"`params` must be a dictionary. Got {type(params)}."
             )
-        for key, value in params.items():
+        
+        current_params = deepcopy(vars(self))
+        unknown_params = set(params.keys()) - set(current_params.keys())
+        if unknown_params:
+            warnings.warn(
+                f"Unknown parameters: {unknown_params}. They have been ignored.",
+                IgnoredArgumentWarning,
+            )
+        updated_params = {**current_params, **params}
+        self._validate_params(**updated_params)
+        for key, value in updated_params.items():
             setattr(self, key, value)
 
 
@@ -1007,6 +1082,13 @@ def _backtesting_forecaster(
     forecaster = deepcopy(forecaster)
     cv = deepcopy(cv)
 
+    cv.set_params({
+        'window_size': forecaster.window_size,
+        'differentiation': forecaster.differentiation,
+        'return_all_indexes': False,
+        'verbose': verbose
+    })
+
     if n_jobs == 'auto':
         n_jobs = select_n_jobs_backtesting(
                      forecaster = forecaster,
@@ -1053,13 +1135,6 @@ def _backtesting_forecaster(
         # the initial predictors
         cv.set_params({'initial_train_size': forecaster.window_size})
         externally_fitted = True
-
-    cv.set_params({
-        'window_size': forecaster.window_size,
-        'differentiation': forecaster.differentiation,
-        'return_all_indexes': False,
-        'verbose': verbose
-    })
 
     folds = cv.split(
                 X                  = y,
@@ -1346,7 +1421,7 @@ def backtesting_forecaster(
 def grid_search_forecaster(
     forecaster: object,
     y: pd.Series,
-    cv: TimeSeriesFold,
+    cv: Union[TimeSeriesFold, OneStepAheadFold],
     param_grid: dict,
     metric: Union[str, Callable, list],
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
@@ -1367,8 +1442,9 @@ def grid_search_forecaster(
         Forecaster model.
     y : pandas Series
         Training time series.
-    cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data into folds.
+    cv : TimeSeriesFold, OneStepAheadFold
+        TimeSeriesFold or OneStepAheadFold object with the information needed to split
+        the data into folds.
         **New in version 0.14.0**
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
@@ -1449,7 +1525,7 @@ def grid_search_forecaster(
 def random_search_forecaster(
     forecaster: object,
     y: pd.Series,
-    cv: TimeSeriesFold,
+    cv: Union[TimeSeriesFold, OneStepAheadFold],
     param_distributions: dict,
     metric: Union[str, Callable, list],
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
@@ -1472,8 +1548,9 @@ def random_search_forecaster(
         Forecaster model.
     y : pandas Series
         Training time series.
-    cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data into folds.
+    cv : TimeSeriesFold, OneStepAheadFold
+        TimeSeriesFold or OneStepAheadFold object with the information needed to split
+        the data into folds.
         **New in version 0.14.0**
     param_distributions : dict
         Dictionary with parameters names (`str`) as keys and 
@@ -1643,7 +1720,7 @@ def _calculate_metrics_one_step_ahead(
 def _evaluate_grid_hyperparameters(
     forecaster: object,
     y: pd.Series,
-    cv: TimeSeriesFold,
+    cv: Union[TimeSeriesFold, OneStepAheadFold],
     param_grid: dict,
     metric: Union[str, Callable, list],
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
@@ -1663,8 +1740,9 @@ def _evaluate_grid_hyperparameters(
         Forecaster model.
     y : pandas Series
         Training time series.
-    cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data into folds.
+    cv : TimeSeriesFold, OneStepAheadFold
+        TimeSeriesFold or OneStepAheadFold object with the information needed to split
+        the data into folds.
         **New in version 0.14.0**
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
@@ -1877,7 +1955,8 @@ def _evaluate_grid_hyperparameters(
             f"and the whole data set: \n"
             f"  Lags: {best_lags} \n"
             f"  Parameters: {best_params}\n"
-            f"  Backtesting metric: {best_metric}\n"
+            f"  {'Backtesting' if type(cv).__name__ == 'TimeSeriesFold' else 'One-step-ahead'} "
+            f"metric: {best_metric}"
         )
             
     return results
@@ -1886,17 +1965,10 @@ def _evaluate_grid_hyperparameters(
 def bayesian_search_forecaster(
     forecaster: object,
     y: pd.Series,
+    cv: Union[TimeSeriesFold, OneStepAheadFold],
     search_space: Callable,
     metric: Union[str, Callable, list],
-    initial_train_size: int,
-    steps: Optional[int] = None,
-    method: str = 'backtesting',
-    fixed_train_size: bool = True,
-    gap: int = 0,
-    skip_folds: Optional[Union[int, list]] = None,
-    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    refit: Union[bool, int] = False,
     n_trials: int = 10,
     random_state: int = 123,
     return_best: bool = True,
@@ -1916,7 +1988,11 @@ def bayesian_search_forecaster(
     forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
-        Training time series. 
+        Training time series.
+    cv : TimeSeriesFold, OneStepAheadFold
+        TimeSeriesFold or OneStepAheadFold object with the information needed to split
+        the data into folds.
+        **New in version 0.14.0**
     search_space : Callable (optuna)
         Function with argument `trial` which returns a dictionary with parameters names 
         (`str`) as keys and Trial object from optuna (trial.suggest_float, 
@@ -1930,41 +2006,10 @@ def bayesian_search_forecaster(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
-    initial_train_size : int 
-        Number of samples in the initial train split.
-    steps : int, default `None`
-        Number of steps to predict.
-    method : str, default `'backtesting'`
-        Method used to evaluate the model.
-
-        - 'backtesting': the model is evaluated using backtesting process in which
-        the model predicts `steps` ahead in each iteration.
-        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
-        This is faster than backtesting but the results may not reflect the actual
-        performance of the model when predicting multiple steps ahead. Arguments `steps`,
-        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
-        ignored when `method` is 'one_step_ahead'.
-        **New in version 0.14.0**
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
-    gap : int, default `0`
-        Number of samples to be excluded after the end of each training set and 
-        before the test set.
-    skip_folds : int, list, default `None`
-        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
-        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
-        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
-        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
-    allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to have a smaller number of samples than the 
-        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -2013,25 +2058,19 @@ def bayesian_search_forecaster(
              f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
         )
     
-    if method not in ['backtesting', 'one_step_ahead']:
+    if type(cv).__name__ not in ['TimeSeriesFold', 'OneStepAheadFold']:
         raise ValueError(
-            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
+            f"`cv` must be an instance of TimeSeriesFold or OneStepAheadFold. "
+            f"Got {type(cv)}."
         )
             
     results, best_trial = _bayesian_search_optuna(
                                 forecaster            = forecaster,
                                 y                     = y,
+                                cv                    = cv,
                                 exog                  = exog,
                                 search_space          = search_space,
-                                steps                 = steps,
                                 metric                = metric,
-                                refit                 = refit,
-                                initial_train_size    = initial_train_size,
-                                method                = method,
-                                fixed_train_size      = fixed_train_size,
-                                gap                   = gap,
-                                skip_folds            = skip_folds,
-                                allow_incomplete_fold = allow_incomplete_fold,
                                 n_trials              = n_trials,
                                 random_state          = random_state,
                                 return_best           = return_best,
@@ -2049,17 +2088,10 @@ def bayesian_search_forecaster(
 def _bayesian_search_optuna(
     forecaster: object,
     y: pd.Series,
+    cv: Union[TimeSeriesFold, OneStepAheadFold],
     search_space: Callable,
     metric: Union[str, Callable, list],
-    initial_train_size: int,
-    steps: Optional[int] = None,
-    method: str = 'backtesting',
-    fixed_train_size: bool = True,
-    gap: int = 0,
-    skip_folds: Optional[Union[int, list]] = None,
-    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    refit: Union[bool, int] = False,
     n_trials: int = 10,
     random_state: int = 123,
     return_best: bool = True,
@@ -2080,6 +2112,10 @@ def _bayesian_search_optuna(
         Forecaster model.
     y : pandas Series
         Training time series. 
+    cv : TimeSeriesFold, OneStepAheadFold
+        TimeSeriesFold or OneStepAheadFold object with the information needed to split
+        the data into folds.
+        **New in version 0.
     search_space : Callable
         Function with argument `trial` which returns a dictionary with parameters names 
         (`str`) as keys and Trial object from optuna (trial.suggest_float, 
@@ -2093,41 +2129,10 @@ def _bayesian_search_optuna(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
-    initial_train_size : int 
-        Number of samples in the initial train split.
-    steps : int, default `None`
-        Number of steps to predict.
-    method : str, default `'backtesting'`
-        Method used to evaluate the model.
-
-        - 'backtesting': the model is evaluated using backtesting process in which
-        the model predicts `steps` ahead in each iteration.
-        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
-        This is faster than backtesting but the results may not reflect the actual
-        performance of the model when predicting multiple steps ahead. Arguments `steps`,
-        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
-        ignored when `method` is 'one_step_ahead'.
-        **New in version 0.14.0**
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
-    gap : int, default `0`
-        Number of samples to be excluded after the end of each training set and 
-        before the test set.
-    skip_folds : int, list, default `None`
-        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
-        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
-        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
-        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
-    allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to have a smaller number of samples than the 
-        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
-        the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -2170,12 +2175,13 @@ def _bayesian_search_optuna(
 
     """
 
-    if method not in ['backtesting', 'one_step_ahead']:
+    if type(cv).__name__ not in ['TimeSeriesFold', 'OneStepAheadFold']:
         raise ValueError(
-            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
+            f"`cv` must be an instance of TimeSeriesFold or OneStepAheadFold. "
+            f"Got {type(cv)}."
         )
     
-    if method == 'one_step_ahead':
+    if type(cv).__name__ == 'OneStepAheadFold':
         warnings.warn(
             ("One-step-ahead predictions are used for faster model comparison, but they "
              "may not fully represent multi-step prediction performance. It is recommended "
@@ -2200,22 +2206,16 @@ def _bayesian_search_optuna(
         )
         
     # Objective function using backtesting_forecaster
-    if method == 'backtesting':
+    if type(cv).__name__ == 'TimeSeriesFold':
 
         def _objective(
             trial,
             search_space          = search_space,
             forecaster            = forecaster,
             y                     = y,
+            cv                    = cv,
             exog                  = exog,
-            steps                 = steps,
             metric                = metric,
-            initial_train_size    = initial_train_size,
-            fixed_train_size      = fixed_train_size,
-            gap                   = gap,
-            skip_folds            = skip_folds,
-            allow_incomplete_fold = allow_incomplete_fold,
-            refit                 = refit,
             n_jobs                = n_jobs,
             verbose               = verbose,
         ) -> float:
@@ -2230,15 +2230,9 @@ def _bayesian_search_optuna(
             metrics, _ = backtesting_forecaster(
                             forecaster            = forecaster,
                             y                     = y,
+                            cv                    = cv,
                             exog                  = exog,
-                            steps                 = steps,
                             metric                = metric,
-                            initial_train_size    = initial_train_size,
-                            fixed_train_size      = fixed_train_size,
-                            skip_folds            = skip_folds,
-                            gap                   = gap,
-                            allow_incomplete_fold = allow_incomplete_fold,
-                            refit                 = refit,
                             n_jobs                = n_jobs,
                             verbose               = verbose,
                             show_progress         = False
@@ -2258,9 +2252,9 @@ def _bayesian_search_optuna(
             search_space          = search_space,
             forecaster            = forecaster,
             y                     = y,
+            cv                    = cv,
             exog                  = exog,
-            metric                = metric,
-            initial_train_size    = initial_train_size,
+            metric                = metric
         ) -> float:
             
             sample = search_space(trial)
@@ -2276,7 +2270,7 @@ def _bayesian_search_optuna(
                 X_test,
                 y_test
             ) = forecaster._train_test_split_one_step_ahead(
-                y=y, initial_train_size=initial_train_size, exog=exog
+                y=y, initial_train_size=cv.initial_train_size, exog=exog
             )
 
             metrics = _calculate_metrics_one_step_ahead(
@@ -2397,7 +2391,8 @@ def _bayesian_search_optuna(
             f"and the whole data set: \n"
             f"  Lags: {best_lags} \n"
             f"  Parameters: {best_params}\n"
-            f"  Backtesting metric: {best_metric}\n"
+            f"  {'Backtesting' if type(cv).__name__ == 'TimeSeriesFold' else 'One-step-ahead'} "
+            f"metric: {best_metric}"
         )
             
     return results, best_trial
