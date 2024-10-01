@@ -3,7 +3,7 @@ extra_css:
   - stylesheets/extra.css
 repo_url: https://github.com/JoaquinAmatRodrigo/skforecast
 site_url: https://joaquinamatrodrigo.github.io/skforecast/
-site_description: Python library that eases using machine learning models as single and multi-step forecasters. It works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).
+site_description: Python library for time series forecasting using machine learning models. It works with any regressor compatible with the scikit-learn API, including popular options like LightGBM, XGBoost, CatBoost, Keras, and many others.
 site_author: Joaquin Amat Rodrigo and Javier Escobar Ortiz
 use_directory_urls: false
 copyright: Copyright &copy; 2021 - 2024 Joaquín Amat Rodrigo, Javier Escobar Ortiz
@@ -47,6 +47,7 @@ nav:
       - Categorical features: user_guides/categorical-features.ipynb
       - Calendars features: user_guides/calendar-features.ipynb
       - Data transformation: user_guides/sklearn-transformers-and-pipeline.ipynb
+      - Differentiation: user_guides/time-series-differentiation.ipynb
       - Feature selection: user_guides/feature-selection.ipynb
     - Model Evaluation and Tuning:
       - Metrics: user_guides/metrics.ipynb
@@ -66,11 +67,17 @@ nav:
       - Datasets: user_guides/datasets.ipynb
     - Additional Resources:
       - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
+      - Stacking multiple models: user_guides/stacking-ensemble-models-forecasting.ipynb
       - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
       - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
     - FAQ and forecasting tips:
-      - FAQ and Tips: faq/faq.md
-
+      - Time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
+      - Non negative predictions: faq/non-negative-predictions.ipynb
+      - Forecasting with delayed data: faq/forecasting-with-delayed-historical-data.ipynb
+      - Parallelization: faq/parallelization-skforecast.ipynb
+      - Time series aggregation: faq/time-series-aggregation.ipynb
+      - Profiling skforecast: faq/profiling-skforecast.ipynb
+      - Backtesting vs One-step-ahead: faq/parameters-search-backetesting-vs-one-step-ahead.ipynb
 
   - Examples and tutorials:
     - English: examples/examples_english.md
@@ -156,7 +163,6 @@ theme:
     - navigation.tabs.sticky
     #- navigation.sections # To expand sections on the table of contents
     #- navigation.expand # To expand sections on the table of contents
-    #- navigation.indexes
     - navigation.top
   font:
     text: Open Sans
