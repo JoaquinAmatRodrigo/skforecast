@@ -783,11 +783,18 @@ class ForecasterAutoregDirect(ForecasterBase):
             X_train.append(X_train_lags)
             X_train_features_names_out_.extend([f"lag_{i}" for i in self.lags])
         
+        # TODO: Review with Ximo y values pased to create_window_features
         X_train_window_features_names_out_ = None
         if self.window_features is not None:
             n_diff = 0 if self.differentiation is None else self.differentiation
+            print(y_values)
+            print(n_diff,-(self.steps - 1))
+            print(y_values[n_diff:-(self.steps  - 1)])
+            print(y_index[n_diff:-(self.steps  - 1)])
+            print(train_index)
+            end_wf = None if self.steps == 1 else -(self.steps - 1)
             y_window_features = pd.Series(
-                y_values[n_diff:-(self.steps - 1)], index=y_index[n_diff:-(self.steps - 1)]
+                y_values[n_diff:end_wf], index=y_index[n_diff:end_wf]
             )
             X_train_window_features, X_train_window_features_names_out_ = (
                 self._create_window_features(

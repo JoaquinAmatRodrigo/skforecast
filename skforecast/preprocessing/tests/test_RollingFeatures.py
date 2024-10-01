@@ -323,7 +323,7 @@ def test_RollingFeatures_transform_batch_different_rolling_and_fillna():
         "fillna", 
         ['mean', 'median', 'ffill', 'bfill', None, 5., 0], 
         ids = lambda fillna: f'fillna: {fillna}')
-def test_RollingFeatures_transform_fillna_all_methods(fillna):
+def test_RollingFeatures_transform_batch_fillna_all_methods(fillna):
     """
     Test RollingFeatures transform_batch method with all fillna methods.
     """

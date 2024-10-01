@@ -1309,3 +1309,537 @@ def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentia
     assert output_1[5] == output_2[5]
     for k in output_1[6].keys():
         assert output_1[6][k] == output_2[6][k]
+
+
+@pytest.mark.parametrize("fit_forecaster", 
+                         [True, False], 
+                         ids = lambda fitted: f'fit_forecaster: {fitted}')
+def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_1_steps_3(fit_forecaster):
+    """
+    Test the output of _create_train_X_y when using differentiation=1. Comparing 
+    the matrix created with and without differentiating the series with steps=3.
+    """
+    # Data differentiated
+    diferenciator = TimeSeriesDifferentiator(order=1)
+    data_diff = diferenciator.fit_transform(data.to_numpy())
+    data_diff = pd.Series(data_diff, index=data.index).dropna()
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff = exog.iloc[1:]
+    end_train = '2003-03-01 23:59:00'
+
+    forecaster_1 = ForecasterAutoregDirect(LinearRegression(), steps=3, lags=5)
+    forecaster_2 = ForecasterAutoregDirect(LinearRegression(), steps=3, lags=5, differentiation=1)
+    
+    if fit_forecaster:
+        forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+
+    output_1 = forecaster_1._create_train_X_y(
+                   y    = data_diff.loc[:end_train],
+                   exog = exog_diff.loc[:end_train]
+               )
+    output_2 = forecaster_2._create_train_X_y(
+                   y    = data.loc[:end_train],
+                   exog = exog.loc[:end_train]
+               )
+    
+    pd.testing.assert_frame_equal(output_1[0], output_2[0], check_names=True)
+    for key in output_1[1]: 
+        pd.testing.assert_series_equal(output_1[1][key], output_2[1][key], check_names=True) 
+    assert output_1[2] == output_2[2]
+    assert output_1[3] == output_2[3]
+    assert output_1[4] == output_2[4]
+    assert output_1[5] == output_2[5]
+    for k in output_1[6].keys():
+        assert output_1[6][k] == output_2[6][k]
+
+
+def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_2():
+    """
+    Test the output of _create_train_X_y when using differentiation=2. Comparing 
+    the matrix created with and without differentiating the series.
+    """
+
+    # Data differentiated
+    diferenciator = TimeSeriesDifferentiator(order=2)
+    data_diff_2 = diferenciator.fit_transform(data.to_numpy())
+    data_diff_2 = pd.Series(data_diff_2, index=data.index).dropna()
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff_2 = exog.iloc[2:]
+    end_train = '2003-03-01 23:59:00'
+
+    forecaster_1 = ForecasterAutoregDirect(LinearRegression(), steps=1, lags=5)
+    forecaster_2 = ForecasterAutoregDirect(LinearRegression(), steps=1, lags=5, differentiation=2)
+
+    output_1 = forecaster_1._create_train_X_y(
+                   y    = data_diff_2.loc[:end_train],
+                   exog = exog_diff_2.loc[:end_train]
+               )
+    output_2 = forecaster_2._create_train_X_y(
+                   y    = data.loc[:end_train],
+                   exog = exog.loc[:end_train]
+               )
+    
+    pd.testing.assert_frame_equal(output_1[0], output_2[0], check_names=True)
+    for key in output_1[1]: 
+        pd.testing.assert_series_equal(output_1[1][key], output_2[1][key], check_names=True) 
+    assert output_1[2] == output_2[2]
+    assert output_1[3] == output_2[3]
+    assert output_1[4] == output_2[4]
+    assert output_1[5] == output_2[5]
+    for k in output_1[6].keys():
+        assert output_1[6][k] == output_2[6][k]
+
+
+def test_create_train_X_y_output_when_window_features_and_exog():
+    """
+    Test the output of _create_train_X_y when using window_features and exog 
+    with datetime index and steps=1.
+    """
+    y_datetime = pd.Series(
+        np.arange(15), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='y', dtype=float
+    )
+    exog_datetime = pd.Series(
+        np.arange(100, 115), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='exog', dtype=float
+    )
+    rolling = RollingFeatures(
+        stats=['mean', 'median', 'sum'], window_sizes=[5, 5, 6]
+    )
+
+    forecaster = ForecasterAutoregDirect(
+        LinearRegression(), steps=1, lags=5, window_features=rolling
+    )
+    results = forecaster._create_train_X_y(y=y_datetime, exog=exog_datetime)
+    
+    expected = (
+        pd.DataFrame(
+            data = np.array([[5., 4., 3., 2., 1., 3., 3., 15., 106.],
+                             [6., 5., 4., 3., 2., 4., 4., 21., 107.],
+                             [7., 6., 5., 4., 3., 5., 5., 27., 108.],
+                             [8., 7., 6., 5., 4., 6., 6., 33., 109.],
+                             [9., 8., 7., 6., 5., 7., 7., 39., 110.],
+                             [10., 9., 8., 7., 6., 8., 8., 45., 111.],
+                             [11., 10., 9., 8., 7., 9., 9., 51., 112.],
+                             [12., 11., 10., 9., 8., 10., 10., 57., 113.],
+                             [13., 12., 11., 10., 9., 11., 11., 63., 114.]]),
+            index   = pd.date_range('2000-01-07', periods=9, freq='D'),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       'roll_mean_5', 'roll_median_5', 'roll_sum_6', 'exog_step_1']
+        ),
+        {1: pd.Series(
+                data  = np.array([6, 7, 8, 9, 10, 11, 12, 13, 14]),
+                index = pd.date_range('2000-01-07', periods=9, freq='D'),
+                name  = 'y_step_1',
+                dtype = float
+            )
+        },
+        ['exog'],
+        ['roll_mean_5', 'roll_median_5', 'roll_sum_6'],
+        ['exog'],
+        ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+         'roll_mean_5', 'roll_median_5', 'roll_sum_6', 'exog_step_1'],
+        {'exog': exog_datetime.dtypes}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
+
+
+def test_create_train_X_y_output_when_window_features_and_exog_steps_2():
+    """
+    Test the output of _create_train_X_y when using window_features and exog 
+    with datetime index and steps=2.
+    """
+    y_datetime = pd.Series(
+        np.arange(15), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='y', dtype=float
+    )
+    exog_datetime = pd.Series(
+        np.arange(100, 115), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='exog', dtype=float
+    )
+    rolling = RollingFeatures(
+        stats=['mean', 'median', 'sum'], window_sizes=[5, 5, 6]
+    )
+
+    forecaster = ForecasterAutoregDirect(
+        LinearRegression(), steps=2, lags=5, window_features=rolling
+    )
+    results = forecaster._create_train_X_y(y=y_datetime, exog=exog_datetime)
+    
+    expected = (
+        pd.DataFrame(
+            data = np.array([[5., 4., 3., 2., 1., 3., 3., 15., 106., 107.],
+                             [6., 5., 4., 3., 2., 4., 4., 21., 107., 108.],
+                             [7., 6., 5., 4., 3., 5., 5., 27., 108., 109.],
+                             [8., 7., 6., 5., 4., 6., 6., 33., 109., 110.],
+                             [9., 8., 7., 6., 5., 7., 7., 39., 110., 111.],
+                             [10., 9., 8., 7., 6., 8., 8., 45., 111., 112.],
+                             [11., 10., 9., 8., 7., 9., 9., 51., 112., 113.],
+                             [12., 11., 10., 9., 8., 10., 10., 57., 113., 114.]]),
+            index   = pd.date_range('2000-01-08', periods=8, freq='D'),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       'roll_mean_5', 'roll_median_5', 'roll_sum_6', 
+                       'exog_step_1', 'exog_step_2']
+        ),
+        {1: pd.Series(
+                data  = np.array([6, 7, 8, 9, 10, 11, 12, 13]),
+                index = pd.date_range('2000-01-07', periods=8, freq='D'),
+                name  = 'y_step_1',
+                dtype = float
+            ),
+         2: pd.Series(
+                data  = np.array([7, 8, 9, 10, 11, 12, 13, 14]),
+                index = pd.date_range('2000-01-08', periods=8, freq='D'),
+                name  = 'y_step_2',
+                dtype = float
+            )   
+        },
+        ['exog'],
+        ['roll_mean_5', 'roll_median_5', 'roll_sum_6'],
+        ['exog'],
+        ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+         'roll_mean_5', 'roll_median_5', 'roll_sum_6', 
+         'exog_step_1', 'exog_step_2'],
+        {'exog': exog_datetime.dtypes}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
+
+
+def test_create_train_X_y_output_when_two_window_features_and_exog_steps_2():
+    """
+    Test the output of _create_train_X_y when using 2 window_features and exog 
+    with datetime index and steps=2.
+    """
+    y_datetime = pd.Series(
+        np.arange(15), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='y', dtype=float
+    )
+    exog_datetime = pd.Series(
+        np.arange(100, 115), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='exog', dtype=float
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoregDirect(
+        LinearRegression(), steps=2, lags=5, window_features=[rolling, rolling_2]
+    )
+    results = forecaster._create_train_X_y(y=y_datetime, exog=exog_datetime)
+    
+    expected = (
+        pd.DataFrame(
+            data = np.array([[5., 4., 3., 2., 1., 3., 3., 15., 106., 107.],
+                             [6., 5., 4., 3., 2., 4., 4., 21., 107., 108.],
+                             [7., 6., 5., 4., 3., 5., 5., 27., 108., 109.],
+                             [8., 7., 6., 5., 4., 6., 6., 33., 109., 110.],
+                             [9., 8., 7., 6., 5., 7., 7., 39., 110., 111.],
+                             [10., 9., 8., 7., 6., 8., 8., 45., 111., 112.],
+                             [11., 10., 9., 8., 7., 9., 9., 51., 112., 113.],
+                             [12., 11., 10., 9., 8., 10., 10., 57., 113., 114.]]),
+            index   = pd.date_range('2000-01-08', periods=8, freq='D'),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                       'roll_mean_5', 'roll_median_5', 'roll_sum_6', 
+                       'exog_step_1', 'exog_step_2']
+        ),
+        {1: pd.Series(
+                data  = np.array([6, 7, 8, 9, 10, 11, 12, 13]),
+                index = pd.date_range('2000-01-07', periods=8, freq='D'),
+                name  = 'y_step_1',
+                dtype = float
+            ),
+         2: pd.Series(
+                data  = np.array([7, 8, 9, 10, 11, 12, 13, 14]),
+                index = pd.date_range('2000-01-08', periods=8, freq='D'),
+                name  = 'y_step_2',
+                dtype = float
+            )   
+        },
+        ['exog'],
+        ['roll_mean_5', 'roll_median_5', 'roll_sum_6'],
+        ['exog'],
+        ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+         'roll_mean_5', 'roll_median_5', 'roll_sum_6', 
+         'exog_step_1', 'exog_step_2'],
+        {'exog': exog_datetime.dtypes}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
+
+
+def test_create_train_X_y_output_when_window_features_lags_None_and_exog():
+    """
+    Test the output of _create_train_X_y when using window_features and exog 
+    with datetime index and lags=None and steps=1.
+    """
+    y_datetime = pd.Series(
+        np.arange(15), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='y', dtype=float
+    )
+    exog_datetime = pd.Series(
+        np.arange(100, 115), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='exog', dtype=float
+    )
+    rolling = RollingFeatures(
+        stats=['mean', 'median', 'sum'], window_sizes=[5, 5, 6]
+    )
+
+    forecaster = ForecasterAutoregDirect(
+        LinearRegression(), steps=1, lags=None, window_features=rolling
+    )
+    results = forecaster._create_train_X_y(y=y_datetime, exog=exog_datetime)
+    
+    expected = (
+        pd.DataFrame(
+            data = np.array([[3., 3., 15., 106.],
+                             [4., 4., 21., 107.],
+                             [5., 5., 27., 108.],
+                             [6., 6., 33., 109.],
+                             [7., 7., 39., 110.],
+                             [8., 8., 45., 111.],
+                             [9., 9., 51., 112.],
+                             [10., 10., 57., 113.],
+                             [11., 11., 63., 114.]]),
+            index   = pd.date_range('2000-01-07', periods=9, freq='D'),
+            columns = ['roll_mean_5', 'roll_median_5', 'roll_sum_6', 
+                       'exog_step_1']
+        ),
+        {1: pd.Series(
+                data  = np.array([6, 7, 8, 9, 10, 11, 12, 13, 14]),
+                index = pd.date_range('2000-01-07', periods=9, freq='D'),
+                name  = 'y_step_1',
+                dtype = float
+            )
+        },
+        ['exog'],
+        ['roll_mean_5', 'roll_median_5', 'roll_sum_6'],
+        ['exog'],
+        ['roll_mean_5', 'roll_median_5', 'roll_sum_6', 'exog_step_1'],
+        {'exog': exog_datetime.dtypes}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
+
+
+def test_create_train_X_y_output_when_window_features_and_exog_transformers_diff():
+    """
+    Test the output of _create_train_X_y when using window_features, exog, 
+    transformers and differentiation with steps=1.
+    """
+    y_datetime = pd.Series(
+        [25.3, 29.1, 27.5, 24.3, 2.1, 46.5, 31.3, 87.1, 133.5, 4.3],
+        index=pd.date_range('2000-01-01', periods=10, freq='D'),
+        name='y', dtype=float
+    )
+    exog = pd.DataFrame({
+               'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4, 14.6, 73.5],
+               'col_2': ['a', 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'b']},
+               index = pd.date_range('2000-01-01', periods=10, freq='D')
+           )
+
+    transformer_y = StandardScaler()
+    transformer_exog = ColumnTransformer(
+                            [('scale', StandardScaler(), ['col_1']),
+                             ('onehot', OneHotEncoder(), ['col_2'])],
+                            remainder = 'passthrough',
+                            verbose_feature_names_out = False
+                        )
+    rolling = RollingFeatures(
+        stats=['ratio_min_max', 'median'], window_sizes=4
+    )
+
+    forecaster = ForecasterAutoregDirect(
+                     LinearRegression(), 
+                     steps            = 1,
+                     lags             = [1, 5], 
+                     window_features  = rolling,
+                     transformer_y    = transformer_y,
+                     transformer_exog = transformer_exog,
+                     differentiation  = 2
+                 )
+    results = forecaster._create_train_X_y(y=y_datetime, exog=exog)
+    
+    expected = (
+        pd.DataFrame(
+            data = np.array([[-1.56436158, -0.14173746, -0.89489489, -0.27035108,  0.04040264,
+                               0.        ,  1.        ],
+                             [ 1.8635851 , -0.04199628, -0.83943662,  0.62469472, -1.32578962,
+                               0.        ,  1.        ],
+                             [-0.24672817, -0.49870587, -0.83943662,  0.75068358,  1.12752513,
+                               0.        ,  1.        ]]),
+            index   = pd.date_range('2000-01-08', periods=3, freq='D'),
+            columns = ['lag_1', 'lag_5', 'roll_ratio_min_max_4', 'roll_median_4',
+                       'col_1_step_1', 'col_2_a_step_1', 'col_2_b_step_1']
+        ),
+        {1: pd.Series(
+                data  = np.array([1.8635851, -0.24672817, -4.60909217]),
+                index = pd.date_range('2000-01-08', periods=3, freq='D'),
+                name  = 'y_step_1',
+                dtype = float
+            )
+        },
+        ['col_1', 'col_2'],
+        ['roll_ratio_min_max_4', 'roll_median_4'],
+        ['col_1', 'col_2_a', 'col_2_b'],
+        ['lag_1', 'lag_5', 'roll_ratio_min_max_4', 'roll_median_4',
+         'col_1_step_1', 'col_2_a_step_1', 'col_2_b_step_1'],
+        {'col_1': exog['col_1'].dtypes, 'col_2': exog['col_2'].dtypes}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
+
+
+def test_create_train_X_y_output_when_window_features_and_exog_transformers_diff_steps_2():
+    """
+    Test the output of _create_train_X_y when using window_features, exog, 
+    transformers and differentiation with steps=2.
+    """
+    y_datetime = pd.Series(
+        [25.3, 29.1, 27.5, 24.3, 2.1, 46.5, 31.3, 87.1, 133.5, 4.3],
+        index=pd.date_range('2000-01-01', periods=10, freq='D'),
+        name='y', dtype=float
+    )
+    exog = pd.DataFrame({
+               'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4, 14.6, 73.5],
+               'col_2': ['a', 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'b']},
+               index = pd.date_range('2000-01-01', periods=10, freq='D')
+           )
+
+    transformer_y = StandardScaler()
+    transformer_exog = ColumnTransformer(
+                            [('scale', StandardScaler(), ['col_1']),
+                             ('onehot', OneHotEncoder(), ['col_2'])],
+                            remainder = 'passthrough',
+                            verbose_feature_names_out = False
+                        )
+    rolling = RollingFeatures(
+        stats=['ratio_min_max', 'median'], window_sizes=4
+    )
+
+    forecaster = ForecasterAutoregDirect(
+                     LinearRegression(), 
+                     steps            = 2,
+                     lags             = [1, 5], 
+                     window_features  = rolling,
+                     transformer_y    = transformer_y,
+                     transformer_exog = transformer_exog,
+                     differentiation  = 1
+                 )
+    results = forecaster._create_train_X_y(y=y_datetime, exog=exog)
+    
+    expected = (
+        pd.DataFrame(
+            data = np.array([
+                       [ 1.16539688,  0.09974117, -0.5       , -0.06299443,  1.69816032,
+                         0.        ,  1.        ,  0.04040264,  0.        ,  1.        ],
+                       [-0.3989647 , -0.04199628, -0.5       , -0.24147863,  0.04040264,
+                         0.        ,  1.        , -1.32578962,  0.        ,  1.        ],
+                       [ 1.46462041, -0.08399257, -0.39784946,  0.38321609, -1.32578962,
+                         0.        ,  1.        ,  1.12752513,  0.        ,  1.        ]]
+                   ),
+            index   = pd.date_range('2000-01-08', periods=3, freq='D'),
+            columns = ['lag_1', 'lag_5', 'roll_ratio_min_max_4', 'roll_median_4',
+                       'col_1_step_1', 'col_2_a_step_1', 'col_2_b_step_1', 
+                       'col_1_step_2', 'col_2_a_step_2', 'col_2_b_step_2']
+        ),
+        {1: pd.Series(
+                data  = np.array([-0.3989647, 1.46462041, 1.21789224]),
+                index = pd.date_range('2000-01-07', periods=3, freq='D'),
+                name  = 'y_step_1',
+                dtype = float
+            ),
+         2: pd.Series(
+                data  = np.array([1.46462041, 1.21789224, -3.39119993]),
+                index = pd.date_range('2000-01-08', periods=3, freq='D'),
+                name  = 'y_step_2',
+                dtype = float
+            )
+        },
+        ['col_1', 'col_2'],
+        ['roll_ratio_min_max_4', 'roll_median_4'],
+        ['col_1', 'col_2_a', 'col_2_b'],
+        ['lag_1', 'lag_5', 'roll_ratio_min_max_4', 'roll_median_4',
+         'col_1_step_1', 'col_2_a_step_1', 'col_2_b_step_1', 
+         'col_1_step_2', 'col_2_a_step_2', 'col_2_b_step_2'],
+        {'col_1': exog['col_1'].dtypes, 'col_2': exog['col_2'].dtypes}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    for k in results[6].keys():
+        assert results[6][k] == expected[6][k]
+
