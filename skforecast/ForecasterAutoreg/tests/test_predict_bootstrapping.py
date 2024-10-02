@@ -256,12 +256,12 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_and_di
                         )
     
     pd.testing.assert_frame_equal(boot_predictions_1, boot_predictions_2)
-    
-    
+
+
 def test_predict_bootstrapping_output_when_window_features():
     """
     Test output of predict_bootstrapping when regressor is LGBMRegressor and
-    2 steps ahead are predicted with exog and window features using in-sample residuals.
+    4 steps ahead are predicted with exog and window features using in-sample residuals.
     """
     y_datetime = y.copy()
     y_datetime.index = pd.date_range(start='2001-01-01', periods=len(y), freq='D')

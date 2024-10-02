@@ -579,11 +579,13 @@ class ForecasterAutoregDirect(ForecasterBase):
             Values of the time series related to each row of `X_data`.
         
         """
-
+        
         X_data = None
-        n_splits = len(y) - self.window_size - (self.steps - 1)  # rows of y_data   
+        n_rows = len(y) - self.window_size - (self.steps - 1)
         if self.lags is not None:         
-            X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
+            X_data = np.full(
+                shape=(n_rows, len(self.lags)), fill_value=np.nan, order='F', dtype=float
+            )
             for i, lag in enumerate(self.lags):
                 X_data[:, i] = y[self.window_size - lag : -(lag + self.steps - 1)] 
 
@@ -594,9 +596,11 @@ class ForecasterAutoregDirect(ForecasterBase):
                              index   = train_index
                          )
 
-        y_data = np.full(shape=(self.steps, n_splits), fill_value=np.nan, dtype=float)
+        y_data = np.full(
+            shape=(self.steps, n_rows), fill_value=np.nan, order='C', dtype=float
+        )
         for step in range(self.steps):
-            y_data[step, :] = y[self.window_size + step : self.window_size + step + n_splits]
+            y_data[step, :] = y[self.window_size + step : self.window_size + step + n_rows]
         
         return X_data, y_data
 
@@ -724,7 +728,6 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
         y_values, y_index = preprocess_y(y=y)
 
-        # TODO: Error here, if diff y != y_values. Window features calculated with y
         if self.differentiation is not None:
             if not self.is_fitted:
                 y_values = self.differentiator.fit_transform(y_values)
@@ -787,11 +790,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         X_train_window_features_names_out_ = None
         if self.window_features is not None:
             n_diff = 0 if self.differentiation is None else self.differentiation
-            print(y_values)
-            print(n_diff,-(self.steps - 1))
-            print(y_values[n_diff:-(self.steps  - 1)])
-            print(y_index[n_diff:-(self.steps  - 1)])
-            print(train_index)
             end_wf = None if self.steps == 1 else -(self.steps - 1)
             y_window_features = pd.Series(
                 y_values[n_diff:end_wf], index=y_index[n_diff:end_wf]
@@ -838,7 +836,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                       )
 
         y_train = {step: pd.Series(
-                             data  = y_train[step - 1], 
+                             data  = y_train[step - 1, :], 
                              index = y_index[self.window_size + step - 1:][:len_train_index],
                              name  = f"y_step_{step}"
                          )
@@ -1481,6 +1479,9 @@ class ForecasterAutoregDirect(ForecasterBase):
                 for regressor, X in zip(regressors, Xs)
             ])
 
+        if self.differentiation is not None:
+            predictions = self.differentiator.inverse_transform_next_window(predictions)
+
         predictions = transform_numpy(
                           array             = predictions,
                           transformer       = self.transformer_y,
@@ -1606,20 +1607,26 @@ class ForecasterAutoregDirect(ForecasterBase):
                          f"Check {check_residuals}.")
                     )
 
-        predictions = self.predict(
-                          steps       = steps,
-                          last_window = last_window,
-                          exog        = exog 
-                      )
+        Xs, _, steps, prediction_index = self._create_predict_inputs(
+            steps=steps, last_window=last_window, exog=exog
+        )
 
-        # Predictions must be in the transformed scale before adding residuals
-        boot_predictions = transform_numpy(
-                               array             = predictions.to_numpy().ravel(),
-                               transformer       = self.transformer_y,
-                               fit               = False,
-                               inverse_transform = False
-                           )
-        boot_predictions = np.tile(boot_predictions, (n_boot, 1)).T
+        # Predictions must be transformed and differenced before adding residuals
+        regressors = [self.regressors_[step] for step in steps]
+        with warnings.catch_warnings():
+            # Suppress scikit-learn warning: "X does not have valid feature names,
+            # but NoOpTransformer was fitted with feature names".
+            warnings.filterwarnings(
+                "ignore", 
+                message="X does not have valid feature names", 
+                category=UserWarning
+            )
+            predictions = np.array([
+                regressor.predict(X).ravel()[0] 
+                for regressor, X in zip(regressors, Xs)
+            ])
+
+        boot_predictions = np.tile(predictions, (n_boot, 1)).T
         boot_columns = [f"pred_boot_{i}" for i in range(n_boot)]
 
         rng = np.random.default_rng(seed=random_state)
@@ -1630,6 +1637,11 @@ class ForecasterAutoregDirect(ForecasterBase):
                                    replace = True
                                )
             boot_predictions[i, :] = boot_predictions[i, :] + sample_residuals
+
+        if self.differentiation is not None:
+            boot_predictions = (
+                self.differentiator.inverse_transform_next_window(boot_predictions)
+            )
 
         if self.transformer_y:
             boot_predictions = np.apply_along_axis(
@@ -1643,7 +1655,7 @@ class ForecasterAutoregDirect(ForecasterBase):
     
         boot_predictions = pd.DataFrame(
                                data    = boot_predictions,
-                               index   = predictions.index,
+                               index   = prediction_index,
                                columns = boot_columns
                            )
         

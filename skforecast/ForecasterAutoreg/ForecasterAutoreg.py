@@ -548,8 +548,10 @@ class ForecasterAutoreg(ForecasterBase):
 
         X_data = None
         if self.lags is not None:
-            n_splits = len(y) - self.window_size
-            X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
+            n_rows = len(y) - self.window_size
+            X_data = np.full(
+                shape=(n_rows, len(self.lags)), fill_value=np.nan, order='F', dtype=float
+            )
             for i, lag in enumerate(self.lags):
                 X_data[:, i] = y[self.window_size - lag: -lag]
 
@@ -687,7 +689,6 @@ class ForecasterAutoreg(ForecasterBase):
             )
         y_values, y_index = preprocess_y(y=y)
 
-        # TODO: Error here, if diff y != y_values. Window features calculated with y
         if self.differentiation is not None:
             if not self.is_fitted:
                 y_values = self.differentiator.fit_transform(y_values)
@@ -1376,6 +1377,7 @@ class ForecasterAutoreg(ForecasterBase):
             X_window_features = np.full(
                 shape      = (steps, len(self.X_train_window_features_names_out_)), 
                 fill_value = np.nan, 
+                order      = 'C',
                 dtype      = float
             )
             for i in range(steps):
@@ -1554,6 +1556,7 @@ class ForecasterAutoreg(ForecasterBase):
         boot_predictions = np.full(
                                shape      = (steps, n_boot),
                                fill_value = np.nan,
+                               order      = 'F',
                                dtype      = float
                            )
         for i in range(n_boot):
@@ -1981,7 +1984,7 @@ class ForecasterAutoreg(ForecasterBase):
         if self.differentiation is not None:
             self.window_size += self.differentiation   
 
-
+    # TODO: See what happen when forecaster has diff
     def set_out_sample_residuals(
         self, 
         residuals: Union[pd.Series, np.ndarray],

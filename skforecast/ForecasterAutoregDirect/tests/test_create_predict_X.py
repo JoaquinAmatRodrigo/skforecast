@@ -5,7 +5,6 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
@@ -13,10 +12,13 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.compose import make_column_transformer
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import HistGradientBoostingRegressor
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 
 # Fixtures
 from .fixtures_ForecasterAutoregDirect import y as y_categorical
 from .fixtures_ForecasterAutoregDirect import exog as exog_categorical
+from .fixtures_ForecasterAutoregDirect import data  # to test results when using differentiation
 
 
 @pytest.mark.parametrize("steps", [[1, 2.0, 3], [1, 4.]], 
@@ -297,4 +299,208 @@ def test_create_predict_X_output_when_categorical_features_native_implementation
         index = pd.RangeIndex(start=50, stop=60, step=1)
     )
     
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_create_predict_X_when_regressor_is_LinearRegression_with_exog_differentiation_is_1_and_transformer_y_steps_1():
+    """
+    Test create_predict_X when using LinearRegression as regressor and differentiation=1,
+    and transformer_y is StandardScaler, steps=1.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+
+    forecaster = ForecasterAutoregDirect(
+                     regressor       = LinearRegression(),
+                     lags            = [1, 5],
+                     steps           = 1,
+                     differentiation = 1
+                )
+    forecaster.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    results = forecaster.create_predict_X(exog=exog.loc[end_train:])
+
+    expected = pd.DataFrame(
+        data = np.array([
+            [0.07503713, -0.01018012,  1.16172882]]
+        ),
+        columns = ['lag_1', 'lag_5', 'exog'],
+        index = pd.date_range(start='2003-04-01', periods=1, freq='MS')
+    )
+    
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_create_predict_X_when_regressor_is_LinearRegression_with_exog_differentiation_is_1_and_transformer_y_steps_5():
+    """
+    Test create_predict_X when using LinearRegression as regressor and differentiation=1,
+    and transformer_y is StandardScaler, steps=5.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+
+    forecaster = ForecasterAutoregDirect(
+                     regressor       = LinearRegression(),
+                     lags            = [1, 5],
+                     steps           = 5,
+                     differentiation = 1
+                )
+    forecaster.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    results = forecaster.create_predict_X(exog=exog.loc[end_train:])
+
+    expected = pd.DataFrame(
+        data = np.array([
+            [0.07503713, -0.01018012,  1.16172882],
+            [0.07503713, -0.01018012,  0.29468848],
+            [0.07503713, -0.01018012, -0.4399757 ],
+            [0.07503713, -0.01018012,  1.25008389],
+            [0.07503713, -0.01018012,  1.37496887]]
+        ),
+        columns = ['lag_1', 'lag_5', 'exog'],
+        index = pd.date_range(start='2003-04-01', periods=5, freq='MS')
+    )
+    
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_create_predict_X_when_window_features_steps_1():
+    """
+    Test the output of create_predict_X when using window_features and exog 
+    with datetime index and steps=1.
+    """
+    y_datetime = pd.Series(
+        np.arange(15), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='y', dtype=float
+    )
+    exog_datetime = pd.Series(
+        np.arange(100, 115), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='exog', dtype=float
+    )
+    exog_datetime_pred = pd.Series(
+        np.arange(115, 120), index=pd.date_range('2000-01-16', periods=5, freq='D'),
+        name='exog', dtype=float
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoregDirect(
+        LinearRegression(), steps=1, lags=5, window_features=[rolling, rolling_2]
+    )
+    forecaster.fit(y=y_datetime, exog=exog_datetime)
+    results = forecaster.create_predict_X(exog=exog_datetime_pred)
+
+    expected = pd.DataFrame(
+        data = np.array([
+                    [14., 13., 12., 11., 10., 12., 12., 69., 115.]]),
+        index   = pd.date_range('2000-01-16', periods=1, freq='D'),
+        columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                   'roll_mean_5', 'roll_median_5', 'roll_sum_6', 'exog']
+    )
+
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_create_predict_X_when_window_features_steps_10():
+    """
+    Test the output of create_predict_X when using window_features and exog 
+    with datetime index and steps=10.
+    """
+    y_datetime = pd.Series(
+        np.arange(20), index=pd.date_range('2000-01-01', periods=20, freq='D'),
+        name='y', dtype=float
+    )
+    exog_datetime = pd.DataFrame(
+        {'exog_1': np.arange(100, 120), 
+         'exog_2': np.arange(200, 220)},
+        index=pd.date_range('2000-01-01', periods=20, freq='D')
+    )
+    exog_datetime_pred = pd.DataFrame(
+        {'exog_1': np.arange(120, 130),
+         'exog_2': np.arange(220, 230)},
+        index=pd.date_range('2000-01-21', periods=10, freq='D')
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoregDirect(
+        LinearRegression(), steps=10, lags=5, window_features=[rolling, rolling_2]
+    )
+    forecaster.fit(y=y_datetime, exog=exog_datetime)
+    results = forecaster.create_predict_X(exog=exog_datetime_pred)
+
+    expected = pd.DataFrame(
+        data = np.array([
+                    [19., 18., 17., 16., 15., 17., 17., 99., 120., 220.],
+                    [19., 18., 17., 16., 15., 17., 17., 99., 121., 221.],
+                    [19., 18., 17., 16., 15., 17., 17., 99., 122., 222.],
+                    [19., 18., 17., 16., 15., 17., 17., 99., 123., 223.],
+                    [19., 18., 17., 16., 15., 17., 17., 99., 124., 224.],
+                    [19., 18., 17., 16., 15., 17., 17., 99., 125., 225.],
+                    [19., 18., 17., 16., 15., 17., 17., 99., 126., 226.],
+                    [19., 18., 17., 16., 15., 17., 17., 99., 127., 227.],
+                    [19., 18., 17., 16., 15., 17., 17., 99., 128., 228.],
+                    [19., 18., 17., 16., 15., 17., 17., 99., 129., 229.]]),
+        index   = pd.date_range('2000-01-21', periods=10, freq='D'),
+        columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                   'roll_mean_5', 'roll_median_5', 'roll_sum_6', 'exog_1', 'exog_2']
+    )
+
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_create_predict_X_when_window_features_and_lags_None_steps_10():
+    """
+    Test the output of create_predict_X when using window_features and exog 
+    with datetime index, lags=None and steps=10.
+    """
+    y_datetime = pd.Series(
+        np.arange(20), index=pd.date_range('2000-01-01', periods=20, freq='D'),
+        name='y', dtype=float
+    )
+    exog_datetime = pd.DataFrame(
+        {'exog_1': np.arange(100, 120), 
+         'exog_2': np.arange(200, 220)},
+        index=pd.date_range('2000-01-01', periods=20, freq='D')
+    )
+    exog_datetime_pred = pd.DataFrame(
+        {'exog_1': np.arange(120, 130),
+         'exog_2': np.arange(220, 230)},
+        index=pd.date_range('2000-01-21', periods=10, freq='D')
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoregDirect(
+        LinearRegression(), steps=10, lags=None, window_features=[rolling, rolling_2]
+    )
+    forecaster.fit(y=y_datetime, exog=exog_datetime)
+    results = forecaster.create_predict_X(exog=exog_datetime_pred)
+
+    expected = pd.DataFrame(
+        data = np.array([
+                    [17., 17., 99., 120., 220.],
+                    [17., 17., 99., 121., 221.],
+                    [17., 17., 99., 122., 222.],
+                    [17., 17., 99., 123., 223.],
+                    [17., 17., 99., 124., 224.],
+                    [17., 17., 99., 125., 225.],
+                    [17., 17., 99., 126., 226.],
+                    [17., 17., 99., 127., 227.],
+                    [17., 17., 99., 128., 228.],
+                    [17., 17., 99., 129., 229.]]),
+        index   = pd.date_range('2000-01-21', periods=10, freq='D'),
+        columns = ['roll_mean_5', 'roll_median_5', 'roll_sum_6', 'exog_1', 'exog_2']
+    )
+
     pd.testing.assert_frame_equal(results, expected)
