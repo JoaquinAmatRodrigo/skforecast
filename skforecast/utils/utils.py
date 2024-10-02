@@ -89,13 +89,13 @@ def initialize_lags(
         else:
             if forecaster_name != 'ForecasterAutoregMultiVariate':
                 raise TypeError(
-                    (f"`lags` argument must be an int, 1d numpy ndarray, range, tuple or list. "
-                    f"Got {type(lags)}.")
+                    (f"`lags` argument must be an int, 1d numpy ndarray, range, "
+                     f"tuple or list. Got {type(lags)}.")
                 )
             else:
                 raise TypeError(
-                    ("`lags` argument must be a dict, int, 1d numpy ndarray, range, tuple or list. "
-                    f"Got {type(lags)}.")
+                    (f"`lags` argument must be a dict, int, 1d numpy ndarray, range, "
+                     f"tuple or list. Got {type(lags)}.")
                 )
             
         max_lag = max(lags)
@@ -241,8 +241,7 @@ def initialize_weights(
 
     if weight_func is not None:
 
-        if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                               'ForecasterAutoregMultiSeriesCustom']:
+        if forecaster_name in ['ForecasterAutoregMultiSeries']:
             if not isinstance(weight_func, (Callable, dict)):
                 raise TypeError(
                     (f"Argument `weight_func` must be a Callable or a dict of "
@@ -309,8 +308,7 @@ def initialize_transformer_series(
     series_names_in_ : list
         Names of the series (levels) used during training.
     encoding : str, default `None`
-        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiSeriesCustom`).
+        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`).
     transformer_series : object, dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -325,8 +323,7 @@ def initialize_transformer_series(
     """
 
     multiseries_forecasters = [
-        'ForecasterAutoregMultiSeries',
-        'ForecasterAutoregMultiSeriesCustom'
+        'ForecasterAutoregMultiSeries'
     ]
 
     if forecaster_name in multiseries_forecasters:
@@ -779,18 +776,16 @@ def check_predict_input(
         Maximum number of steps allowed (`ForecasterAutoregDirect` and 
         `ForecasterAutoregMultiVariate`).
     levels : str, list, default `None`
-        Time series to be predicted (`ForecasterAutoregMultiSeries`,
-        `ForecasterAutoregMultiSeriesCustom` and `ForecasterRnn).
+        Time series to be predicted (`ForecasterAutoregMultiSeries`
+        and `ForecasterRnn).
     levels_forecaster : str, list, default `None`
         Time series used as output data of a multiseries problem in a RNN problem
         (`ForecasterRnn`).
     series_names_in_ : list, default `None`
         Names of the columns used during fit (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiSeriesCustom`, `ForecasterAutoregMultiVariate`
-        and `ForecasterRnn`).
+        `ForecasterAutoregMultiVariate` and `ForecasterRnn`).
     encoding : str, default `None`
-        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiSeriesCustom`).
+        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`).
 
     Returns
     -------
@@ -827,7 +822,6 @@ def check_predict_input(
         check_interval(interval=interval, alpha=alpha)
 
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                           'ForecasterAutoregMultiSeriesCustom',
                            'ForecasterRnn']:
         if not isinstance(levels, (type(None), str, list)):
             raise TypeError(
@@ -878,7 +872,6 @@ def check_predict_input(
     # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
     if isinstance(last_window, type(None)) and forecaster_name not in [
         'ForecasterAutoregMultiSeries', 
-        'ForecasterAutoregMultiSeriesCustom',
         'ForecasterRnn'
     ]:
         raise ValueError(
@@ -887,7 +880,6 @@ def check_predict_input(
         )
 
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                           'ForecasterAutoregMultiSeriesCustom',
                            'ForecasterAutoregMultiVariate',
                            'ForecasterRnn']:
         if not isinstance(last_window, pd.DataFrame):
@@ -898,7 +890,6 @@ def check_predict_input(
         last_window_cols = last_window.columns.to_list()
 
         if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                               'ForecasterAutoregMultiSeriesCustom',
                                'ForecasterRnn'] and \
             len(set(levels) - set(last_window_cols)) != 0:
             raise ValueError(
@@ -955,8 +946,7 @@ def check_predict_input(
     if exog is not None:
 
         # Check type, nulls and expected type
-        if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                               'ForecasterAutoregMultiSeriesCustom']:
+        if forecaster_name in ['ForecasterAutoregMultiSeries']:
             if not isinstance(exog, (pd.Series, pd.DataFrame, dict)):
                 raise TypeError(
                     f"`exog` must be a pandas Series, DataFrame or dict. Got {type(exog)}."
@@ -1005,8 +995,7 @@ def check_predict_input(
             # Check exog has many values as distance to max step predicted
             last_step = max(steps) if isinstance(steps, list) else steps
             if len(exog_to_check) < last_step:
-                if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                                       'ForecasterAutoregMultiSeriesCustom']:
+                if forecaster_name in ['ForecasterAutoregMultiSeries']:
                     warnings.warn(
                         (f"{exog_name} doesn't have as many values as steps "
                          f"predicted, {last_step}. Missing values are filled "
@@ -1024,8 +1013,7 @@ def check_predict_input(
             if isinstance(exog_to_check, pd.DataFrame):
                 col_missing = set(exog_names_in_).difference(set(exog_to_check.columns))
                 if col_missing:
-                    if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                                           'ForecasterAutoregMultiSeriesCustom']:
+                    if forecaster_name in ['ForecasterAutoregMultiSeries']:
                         warnings.warn(
                             (f"{col_missing} not present in {exog_name}. All "
                              f"values will be NaN."),
@@ -1043,8 +1031,7 @@ def check_predict_input(
                     )
 
                 if exog_to_check.name not in exog_names_in_:
-                    if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                                           'ForecasterAutoregMultiSeriesCustom']:
+                    if forecaster_name in ['ForecasterAutoregMultiSeries']:
                         warnings.warn(
                             (f"'{exog_to_check.name}' was not observed during training. "
                              f"{exog_name} is ignored. Exogenous variables must be one "
@@ -1067,8 +1054,7 @@ def check_predict_input(
                     (f"Expected index of type {index_type_} for {exog_name}. "
                      f"Got {type(exog_index)}.")
                 )
-            if forecaster_name not in ['ForecasterAutoregMultiSeries', 
-                                       'ForecasterAutoregMultiSeriesCustom']:
+            if forecaster_name not in ['ForecasterAutoregMultiSeries']:
                 if isinstance(exog_index, pd.DatetimeIndex):
                     if not exog_index.freqstr == index_freq_:
                         raise TypeError(
@@ -1079,8 +1065,7 @@ def check_predict_input(
             # Check exog starts one step ahead of last_window end.
             expected_index = expand_index(last_window.index, 1)[0]
             if expected_index != exog_to_check.index[0]:
-                if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                                       'ForecasterAutoregMultiSeriesCustom']:
+                if forecaster_name in ['ForecasterAutoregMultiSeries']:
                     warnings.warn(
                         (f"To make predictions {exog_name} must start one step "
                          f"ahead of `last_window`. Missing values are filled "
@@ -2366,8 +2351,7 @@ def select_n_jobs_backtesting(
     and `refit = True`, then `n_jobs = cpu_count() - 1`.
     - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and `refit = False`, then `n_jobs = 1`.
-    - If forecaster is 'ForecasterAutoregMultiSeries' or 
-    'ForecasterAutoregMultiSeriesCustom', then `n_jobs = cpu_count() - 1`.
+    - If forecaster is 'ForecasterAutoregMultiSeries', then `n_jobs = cpu_count() - 1`.
     - If forecaster is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
     then `n_jobs = 1`.
     - If regressor is a `LGBMRegressor`, then `n_jobs = 1`. This is because `lightgbm` 
@@ -2480,8 +2464,7 @@ def check_preprocess_series(
     series: Union[pd.DataFrame, dict],
 ) -> Tuple[dict, pd.Index]:
     """
-    Check and preprocess `series` argument in `ForecasterAutoregMultiSeries` and
-    `ForecasterAutoregMultiSeriesCustom` classes.
+    Check and preprocess `series` argument in `ForecasterAutoregMultiSeries` class.
 
     - If `series` is a pandas DataFrame, it is converted to a dict of pandas 
     Series and index is overwritten according to the rules of preprocess_y.
@@ -2587,8 +2570,7 @@ def check_preprocess_exog_multiseries(
     exog_dict: dict,
 ) -> Tuple[dict, list]:
     """
-    Check and preprocess `exog` argument in `ForecasterAutoregMultiSeries` and
-    `ForecasterAutoregMultiSeriesCustom` classes.
+    Check and preprocess `exog` argument in `ForecasterAutoregMultiSeries` class.
 
     - If input series is a pandas DataFrame (input_series_is_dict = False),  
     checks that input exog (pandas Series, DataFrame or dict) has the same index 
@@ -2952,8 +2934,7 @@ def prepare_residuals_multiseries(
     use_in_sample_residuals : bool
         Indicates if `forecaster.in_sample_residuals_` are used.
     encoding : str, default `None`
-        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiSeriesCustom`).
+        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`).
     in_sample_residuals_ : dict, default `None`
         Residuals of the model when predicting training data. Only stored up to
         1000 values in the form `{level: residuals}`. If `transformer_series` 

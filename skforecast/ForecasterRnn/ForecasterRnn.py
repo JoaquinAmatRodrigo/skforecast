@@ -5,7 +5,6 @@
 ################################################################################
 # coding=utf-8
 
-import logging
 import sys
 import warnings
 from copy import deepcopy, copy
@@ -31,11 +30,6 @@ from ..utils import (
     preprocess_y,
     transform_series,
     set_skforecast_warnings,
-)
-
-logging.basicConfig(
-    format="%(name)-10s %(levelname)-5s %(message)s",
-    level=logging.INFO,
 )
 
 
@@ -115,9 +109,6 @@ class ForecasterRnn(ForecasterBase):
         Maximum lag included in `lags`.
     window_size : int
         Size of the window needed to create the predictors.
-    window_size_diff : int
-        This attribute has the same value as window_size as this Forecaster 
-        doesn't support differentiation. Present here for API consistency.
     last_window_ : pandas Series
         Last window seen by the forecaster during training. It stores the values
         needed to predict the next `step` immediately after the training data.
@@ -250,7 +241,6 @@ class ForecasterRnn(ForecasterBase):
 
         self.max_lag = np.max(self.lags)
         self.window_size = self.max_lag
-        self.window_size_diff = self.max_lag
 
         layer_end = self.regressor.layers[-1]
 

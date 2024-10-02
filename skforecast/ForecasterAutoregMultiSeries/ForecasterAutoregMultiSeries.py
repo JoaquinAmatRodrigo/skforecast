@@ -7,7 +7,6 @@
 
 from typing import Union, Tuple, Optional, Callable
 import warnings
-import logging
 import sys
 import numpy as np
 import pandas as pd
@@ -48,12 +47,6 @@ from ..utils import transform_dataframe
 from ..utils import set_skforecast_warnings
 from ..preprocessing import TimeSeriesDifferentiator
 from ..model_selection_multiseries.model_selection_multiseries import _extract_data_folds_multiseries
-
-
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
-)
 
 
 class ForecasterAutoregMultiSeries(ForecasterBase):
@@ -214,11 +207,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     max_lag : int
         Maximum lag included in `lags`.
     window_size : int
-        Size of the window needed to create the predictors. It is equal to `max_lag`.
-    window_size_diff : int
-        Size of the window extended by the order of differentiation. When using
-        differentiation, the `window_size` is increased by the order of differentiation
-        so that the predictors can be created correctly.
+        Size of the window needed to create the predictors. When using
+        differentiation, the `window_size` is increased by the order of 
+        differentiation so that the predictors can be created correctly.
     last_window_ : dict
         Last window of training data for each series. It stores the values 
         needed to predict the next `step` immediately after the training data.
@@ -345,10 +336,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.python_version              = sys.version.split(" ")[0]
         self.forecaster_id               = forecaster_id
 
-        self.lags = initialize_lags(type(self).__name__, lags)
-        self.max_lag = max(self.lags)
+        self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
         self.window_size = self.max_lag
-        self.window_size_diff = self.max_lag
 
         self.weight_func, self.source_code_weight_func, self.series_weights = initialize_weights(
             forecaster_name = type(self).__name__,
@@ -363,7 +352,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     (f"Argument `differentiation` must be an integer equal to or "
                      f"greater than 1. Got {differentiation}.")
                 )
-            self.window_size_diff += self.differentiation
+            self.window_size += self.differentiation
             self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
 
         self.fit_kwargs = check_select_fit_kwargs(
@@ -931,7 +920,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
             if series_to_store:
                 last_window_ = {
-                    k: v.iloc[-self.window_size_diff:].copy()
+                    k: v.iloc[-self.window_size:].copy()
                     for k, v in series_dict.items()
                     if k in series_to_store
                 }
@@ -1066,8 +1055,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         fold = [
             [0, initial_train_size],
-            [initial_train_size - self.window_size_diff, initial_train_size],
-            [initial_train_size - self.window_size_diff, len(span_index)],
+            [initial_train_size - self.window_size, initial_train_size],
+            [initial_train_size - self.window_size, len(span_index)],
             [0, 0],  # Dummy value
             True
         ]
@@ -1075,14 +1064,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                         series             = series,
                         folds              = [fold],
                         span_index         = span_index,
-                        window_size        = self.window_size_diff,
+                        window_size        = self.window_size,
                         exog               = exog,
                         dropna_last_window = self.dropna_from_series,
                         externally_fitted  = False
                     )
         series_train, _, levels_last_window, exog_train, exog_test, _ = next(data_fold)
 
-        start_test_idx = initial_train_size - self.window_size_diff
+        start_test_idx = initial_train_size - self.window_size
         if isinstance(series, pd.DataFrame):
             series_test = series.iloc[start_test_idx:, :]
             series_test = series_test.loc[:, levels_last_window]
@@ -1535,7 +1524,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 exog_in_         = self.exog_in_,
                 index_type_      = self.index_type_,
                 index_freq_      = self.index_freq_,
-                window_size      = self.window_size_diff,
+                window_size      = self.window_size,
                 last_window      = last_window,
                 last_window_exog = None,
                 exog             = exog,
@@ -1550,7 +1539,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             )
 
         last_window = last_window.iloc[
-            -self.window_size_diff :, last_window.columns.get_indexer(levels)
+            -self.window_size :, last_window.columns.get_indexer(levels)
         ].copy()
         _, last_window_index = preprocess_last_window(
                                    last_window   = last_window,
@@ -2427,8 +2416,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         lags: Union[int, list, np.ndarray, range]
     ) -> None:
         """
-        Set new value to the attribute `lags`. Attributes `max_lag`, 
-        `window_size` and  `window_size_diff` are also updated.
+        Set new value to the attribute `lags`. Attributes `max_lag` and 
+        `window_size` are also updated.
         
         Parameters
         ----------
@@ -2445,12 +2434,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
 
-        self.lags = initialize_lags(type(self).__name__, lags)
-        self.max_lag  = max(self.lags)
+        self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
         self.window_size = max(self.lags)
-        self.window_size_diff = max(self.lags)
         if self.differentiation is not None:
-            self.window_size_diff += self.differentiation
+            self.window_size += self.differentiation
 
 
     def set_out_sample_residuals(

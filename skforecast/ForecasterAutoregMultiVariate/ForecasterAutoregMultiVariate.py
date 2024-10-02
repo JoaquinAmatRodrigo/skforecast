@@ -7,7 +7,6 @@
 
 from typing import Union, Tuple, Any, Optional, Callable
 import warnings
-import logging
 import sys
 import numpy as np
 import pandas as pd
@@ -48,11 +47,6 @@ from ..utils import transform_dataframe
 from ..utils import select_n_jobs_fit_forecaster
 from ..utils import set_skforecast_warnings
 from ..model_selection_multiseries.model_selection_multiseries import _extract_data_folds_multiseries
-
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
-)
 
 
 class ForecasterAutoregMultiVariate(ForecasterBase):
@@ -150,11 +144,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     max_lag : int
         Maximum lag included in `lags`.
     window_size : int
-        Size of the window needed to create the predictors. It is equal to
-        `max_lag`.
-    window_size_diff : int
-        This attribute has the same value as window_size as this Forecaster 
-        doesn't support differentiation. Present here for API consistency.
+        Size of the window needed to create the predictors. When using
+        differentiation, the `window_size` is increased by the order of 
+        differentiation so that the predictors can be created correctly.
     last_window_ : pandas DataFrame
         Last window the forecaster has seen during training. It stores the
         values needed to predict `steps` immediately after the training data.
@@ -289,37 +281,29 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 f"`steps` argument must be greater than or equal to 1. Got {steps}."
             )
         
-        if not isinstance(n_jobs, int) and n_jobs != 'auto':
-            raise TypeError(
-                f"`n_jobs` must be an integer or `'auto'`. Got {type(n_jobs)}."
-            )
-        
         self.regressors_ = {step: clone(self.regressor) for step in range(1, steps + 1)}
 
         if isinstance(lags, dict):
             self.lags = {}
+            list_max_lags = []
             for key in lags:
                 if lags[key] is None:
                     self.lags[key] = None
                 else:
-                    self.lags[key] = initialize_lags(
-                                         forecaster_name = type(self).__name__,
-                                         lags            = lags[key]
-                                     )
+                    self.lags[key], max_lag = initialize_lags(
+                        forecaster_name = type(self).__name__,
+                        lags            = lags[key]
+                    )
+                    list_max_lags.append(max_lag)
+            self.max_lag = max(list_max_lags)
         else:
-            self.lags = initialize_lags(
-                            forecaster_name = type(self).__name__, 
-                            lags            = lags
-                        )
+            self.lags, self.max_lag = initialize_lags(
+                forecaster_name = type(self).__name__, 
+                lags            = lags
+            )
 
         self.lags_ = self.lags
-        self.max_lag = (
-            max(chain(*[v for v in self.lags.values() if v is not None]))
-            if isinstance(self.lags, dict)
-            else max(self.lags)
-        )
         self.window_size = self.max_lag
-        self.window_size_diff = self.max_lag
             
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name = type(self).__name__, 
@@ -342,6 +326,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                               regressor_name  = type(self.regressor).__name__,
                           )
         else:
+            if not isinstance(n_jobs, int):
+                raise TypeError(
+                    f"`n_jobs` must be an integer or `'auto'`. Got {type(n_jobs)}."
+                )
             self.n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
 
@@ -866,8 +854,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         fold = [
             [0, initial_train_size],
-            [initial_train_size - self.window_size_diff, initial_train_size],
-            [initial_train_size - self.window_size_diff, len(span_index)],
+            [initial_train_size - self.window_size, initial_train_size],
+            [initial_train_size - self.window_size, len(span_index)],
             [0, 0],  # Dummy value
             True
         ]
@@ -875,14 +863,14 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                         series             = series,
                         folds              = [fold],
                         span_index         = span_index,
-                        window_size        = self.window_size_diff,
+                        window_size        = self.window_size,
                         exog               = exog,
                         dropna_last_window = self.dropna_from_series,
                         externally_fitted  = False
                     )
         series_train, _, levels_last_window, exog_train, exog_test, _ = next(data_fold)
 
-        start_test_idx = initial_train_size - self.window_size_diff
+        start_test_idx = initial_train_size - self.window_size
         series_test = series.iloc[start_test_idx:, :]
         series_test = series_test.loc[:, levels_last_window]
         series_test = series_test.dropna(axis=1, how='all')
@@ -1929,8 +1917,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         lags: Union[int, np.ndarray, list, dict]
     ) -> None:
         """
-        Set new value to the attribute `lags`. Attributes `max_lag`, 
-        `window_size` and  `window_size_diff` are also updated.
+        Set new value to the attribute `lags`. Attributes `max_lag` and 
+        `window_size` are also updated.
         
         Parameters
         ----------
@@ -1951,28 +1939,25 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         if isinstance(lags, dict):
             self.lags = {}
+            list_max_lags = []
             for key in lags:
-                if isinstance(lags[key], type(None)):
+                if lags[key] is None:
                     self.lags[key] = None
                 else:
-                    self.lags[key] = initialize_lags(
-                                         forecaster_name = type(self).__name__,
-                                         lags            = lags[key]
-                                     )
+                    self.lags[key], max_lag = initialize_lags(
+                        forecaster_name = type(self).__name__,
+                        lags            = lags[key]
+                    )
+                    list_max_lags.append(max_lag)
+            self.max_lag = max(list_max_lags)
         else:
-            self.lags = initialize_lags(
-                            forecaster_name = type(self).__name__, 
-                            lags            = lags
-                        )
+            self.lags, self.max_lag = initialize_lags(
+                forecaster_name = type(self).__name__, 
+                lags            = lags
+            )
         
         self.lags_ = self.lags
-        self.max_lag = (
-            max(chain(*[v for v in self.lags.values() if v is not None]))
-            if isinstance(self.lags, dict)
-            else max(self.lags)
-        )
         self.window_size = self.max_lag
-        self.window_size_diff = self.max_lag
 
 
     def set_out_sample_residuals(

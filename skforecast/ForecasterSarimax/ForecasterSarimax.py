@@ -7,7 +7,6 @@
 
 from typing import Union, Optional, Tuple
 import warnings
-import logging
 import sys
 import pandas as pd
 from copy import copy
@@ -24,11 +23,6 @@ from ..utils import check_predict_input
 from ..utils import expand_index
 from ..utils import transform_series
 from ..utils import transform_dataframe
-
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
-)
 
 
 class ForecasterSarimax():
