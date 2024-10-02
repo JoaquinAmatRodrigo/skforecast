@@ -11,14 +11,6 @@ copyright: Copyright &copy; 2021 - 2024 Joaquín Amat Rodrigo, Javier Escobar Or
 nav:
   - Home: 
     - Welcome to skforecast: README.md
-    # - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
-    # - Quick start: quick-start/quick-start-skforecast.ipynb
-    # - User Guides: user_guides/table-of-contents-home.mod
-    # - Examples and tutorials: examples/examples_english.md
-    # - API Reference: api/ForecasterAutoreg.md
-    # - FAQ and Tips: faq/faq.md
-    # - Releases: releases/releases.md
-    # - Authors: authors/authors.md
   
   - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
   
