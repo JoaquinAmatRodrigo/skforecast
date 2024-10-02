@@ -2578,7 +2578,7 @@ def _bayesian_search_optuna_multiseries(
     if type(forecaster).__name__ not in ['ForecasterAutoregMultiSeriesCustom',
                                          'ForecasterAutoregMultiVariate']:
         lags_list = [
-            initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)
+            initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)[0]
             for lag in lags_list
         ]
     elif type(forecaster).__name__ == 'ForecasterAutoregMultiSeriesCustom':
@@ -2597,12 +2597,12 @@ def _bayesian_search_optuna_multiseries(
                         lags[key] = initialize_lags(
                                         forecaster_name = type(forecaster).__name__,
                                         lags            = lags[key]
-                                    )
+                                    )[0]
             else:
                 lags = initialize_lags(
                            forecaster_name = type(forecaster).__name__,
                            lags            = lags
-                       )
+                       )[0]
             lags_list_initialized.append(lags)
         
         lags_list = lags_list_initialized

@@ -1904,7 +1904,7 @@ def _bayesian_search_optuna(
             metric_dict[m_name].append(m_values)
     
     lags_list = [
-        initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)
+        initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)[0]
         for lag in lags_list
     ]
 
