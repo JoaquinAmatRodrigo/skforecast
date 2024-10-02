@@ -23,7 +23,7 @@ nav:
   - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
   
   - Quick start:
-    - quick-start/quick-start-skforecast.ipynb
+    - Quick start: quick-start/quick-start-skforecast.ipynb
     - Forecaster Parameters: quick-start/forecaster-parameters.md
     - Forecaster Attributes: quick-start/forecaster-attributes.ipynb
     - How to install: quick-start/how-to-install.md
