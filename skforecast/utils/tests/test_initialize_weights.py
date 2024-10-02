@@ -32,10 +32,7 @@ def test_TypeError_initialize_weights_when_weight_func_is_not_a_Callable(forecas
         )
 
 
-@pytest.mark.parametrize("forecaster_name", 
-                         ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom'], 
-                         ids=lambda fn: f'forecaster_name: {fn}')
-def test_TypeError_initialize_weights_when_weight_func_is_not_a_Callable_or_dict(forecaster_name):
+def test_TypeError_initialize_weights_when_weight_func_is_not_a_Callable_or_dict():
     """
     Test TypeError is raised when weight_func is not a Callable or a dict.
     """
@@ -45,17 +42,14 @@ def test_TypeError_initialize_weights_when_weight_func_is_not_a_Callable_or_dict
     )
     with pytest.raises(TypeError, match = err_msg):
         initialize_weights(
-            forecaster_name = forecaster_name, 
+            forecaster_name = 'ForecasterAutoregMultiSeries', 
             regressor       = LinearRegression(), 
             weight_func     = weight_func, 
             series_weights  = None
         )
 
 
-@pytest.mark.parametrize("forecaster_name", 
-                         ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom'], 
-                         ids=lambda fn: f'forecaster_name: {fn}')
-def test_TypeError_initialize_weights_when_series_weights_is_not_a_dict(forecaster_name):
+def test_TypeError_initialize_weights_when_series_weights_is_not_a_dict():
     """
     Test TypeError is raised when series_weights is not a dict.
     """
@@ -66,7 +60,7 @@ def test_TypeError_initialize_weights_when_series_weights_is_not_a_dict(forecast
     )
     with pytest.raises(TypeError, match = err_msg):
         initialize_weights(
-            forecaster_name = forecaster_name, 
+            forecaster_name = 'ForecasterAutoregMultiSeries', 
             regressor       = LinearRegression(), 
             weight_func     = None, 
             series_weights  = series_weights
@@ -203,7 +197,7 @@ def test_output_initialize_weights_source_code_weight_func_when_weight_func_dict
     weight_func = {'series_1': test_weight_func, 'series_2': test_weight_func_2}    
 
     weight_func, source_code_weight_func, series_weights = initialize_weights(
-        forecaster_name = 'ForecasterAutoregMultiSeriesCustom', 
+        forecaster_name = 'ForecasterAutoregMultiSeries', 
         regressor       = LinearRegression(), 
         weight_func     = weight_func, 
         series_weights  = None

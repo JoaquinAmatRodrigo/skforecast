@@ -7,34 +7,25 @@ from pathlib import Path
 from sklearn.linear_model import Ridge
 from lightgbm import LGBMRegressor
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
-from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import grid_search_forecaster_multiseries
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_percentage_error
 from skforecast.metrics import mean_absolute_scaled_error
 
+# Fixtures
+from .fixtures_model_selection_multiseries import series
+
 from tqdm import tqdm
 from functools import partialmethod
 tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
-# Fixtures
-from .fixtures_model_selection_multiseries import series
 THIS_DIR = Path(__file__).parent
 series_item_sales = pd.read_parquet(THIS_DIR/'fixture_multi_series_items_sales.parquet')
 series_item_sales = series_item_sales.asfreq('D')
 exog_item_sales = pd.DataFrame({'day_of_week': series_item_sales.index.dayofweek}, index = series_item_sales.index)
 series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
 exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
-
-
-def create_predictors(y):  # pragma: no cover
-    """
-    Create first 2 lags of a time series.
-    """
-    lags = y[-1:-3:-1]
-
-    return lags
 
 
 def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_with_mocked():
@@ -186,56 +177,6 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
         5: 0.7988965817986066},
         'alpha': {0: 0.01, 1: 0.1, 2: 1.0, 3: 1.0, 4: 0.1, 5: 0.01}
     })
-
-    pd.testing.assert_frame_equal(results, expected_results)
-
-
-def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeriesCustom_with_mocked():
-    """
-    Test output of grid_search_forecaster_multiseries in ForecasterAutoregMultiSeriesCustom
-    with mocked (mocked done in Skforecast v0.5.0)
-    """
-    forecaster = ForecasterAutoregMultiSeriesCustom(
-                     regressor          = Ridge(random_state=123),
-                     fun_predictors     = create_predictors,
-                     window_size        = 2, 
-                     encoding           = 'onehot',
-                     transformer_series = None
-                 )
-
-    steps = 3
-    n_validation = 12
-    param_grid = {'alpha': [0.01, 0.1, 1]}
-
-    results = grid_search_forecaster_multiseries(
-                  forecaster          = forecaster,
-                  series              = series,
-                  param_grid          = param_grid,
-                  steps               = steps,
-                  metric              = 'mean_absolute_error',
-                  aggregate_metric    = 'weighted_average',
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
-                  levels              = None,
-                  exog                = None,
-                  lags_grid           = None,
-                  refit               = False,
-                  return_best         = False,
-                  verbose             = True
-              )
-    
-    expected_results = pd.DataFrame({
-        'levels': [['l1', 'l2'], ['l1', 'l2'], ['l1', 'l2']],
-        'lags'  : ['custom predictors', 'custom predictors', 'custom predictors'],
-        'lags_label': ['custom predictors', 'custom predictors', 'custom predictors'],
-        'params': [{'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_absolute_error__weighted_average':  np.array(
-            [0.21077344827205086, 0.21078653113227208, 0.21078779824759553]
-        ),                                                               
-        'alpha' : np.array([1., 0.1, 0.01])
-        },
-        index = pd.Index([0, 1, 2], dtype='int64')
-    )
 
     pd.testing.assert_frame_equal(results, expected_results)
 
@@ -552,7 +493,6 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
-
 
 
 def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_one_step_ahead_input_is_dict():

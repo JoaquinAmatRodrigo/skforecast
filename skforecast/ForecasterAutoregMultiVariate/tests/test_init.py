@@ -45,7 +45,7 @@ def test_init_ValueError_when_steps_is_less_than_1():
                          [(3, 3), 
                           ({'l1': 3, 'l2': 4}, 4), 
                           ({'l1': None, 'l2': 5}, 5)],
-                         ids = lambda value : f'lags: {value}')
+                         ids = lambda value: f'lags: {value}')
 def test_init_max_lag_stored(lags, max_lag):
     """
     Test max_lag is equal to the maximum lag.
@@ -59,7 +59,7 @@ def test_init_max_lag_stored(lags, max_lag):
 
 @pytest.mark.parametrize("n_jobs", 
                          [1.0, 'not_int_auto'], 
-                         ids = lambda value : f'n_jobs: {value}')
+                         ids = lambda value: f'n_jobs: {value}')
 def test_init_TypeError_when_n_jobs_not_int_or_auto(n_jobs):
     """
     Test TypeError is raised in when n_jobs is not an integer or 'auto'.

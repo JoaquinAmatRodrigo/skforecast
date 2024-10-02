@@ -6,9 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.utils import initialize_lags_grid
-from skforecast.exceptions import IgnoredArgumentWarning
 
 
 def test_TypeError_initialize_lags__rid_when_not_list_dict_or_None():
