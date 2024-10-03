@@ -28,11 +28,6 @@ from ..utils import initialize_lags_grid
 from ..utils import initialize_lags
 from ..utils import select_n_jobs_backtesting
 
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
-)
-
 
 def _create_backtesting_folds(
     data: Union[pd.Series, pd.DataFrame],

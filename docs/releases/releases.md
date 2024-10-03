@@ -64,6 +64,10 @@ The main changes in this release are:
 
 + `lags` can be None when initializing any Forecaster that includes window features.
 
++ `model_selection` module has been divided internally into different modules to improve code organization (`_validation`, `_search`, `_split`).
+
++ Added `feature_selection` module. The functions <code>[select_features]</code> and <code>[select_features_multiseries]</code> have been moved to this module.
+
 + Renamed attributes in all Forecasters:
 
     + `encoding_mapping` has been renamed to `encoding_mapping_`.

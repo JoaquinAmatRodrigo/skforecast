@@ -2030,7 +2030,6 @@ def check_backtesting_input(
     use_in_sample_residuals: bool = True,
     use_binned_residuals: bool = False,
     n_jobs: Union[int, str] = 'auto',
-    verbose: bool = False,
     show_progress: bool = True,
     suppress_warnings: bool = False
 ) -> None:
@@ -2082,9 +2081,6 @@ def check_backtesting_input(
         set to the number of cores. If 'auto', `n_jobs` is set using the fuction
         skforecast.utils.select_n_jobs_fit_forecaster.
         **New in version 0.9.0**
-    verbose : bool, default `False`
-        Print number of folds and index of training and validation sets used 
-        for backtesting.
     show_progress : bool, default `True`
         Whether to show a progress bar.
     suppress_warnings: bool, default `False`
@@ -2100,9 +2096,7 @@ def check_backtesting_input(
 
     steps = cv.steps
     initial_train_size = cv.initial_train_size
-    fixed_train_size = cv.fixed_train_size
     gap = cv.gap
-    skip_folds = cv.skip_folds
     allow_incomplete_fold = cv.allow_incomplete_fold
     refit = cv.refit
 
@@ -2208,33 +2202,6 @@ def check_backtesting_input(
                     (f"`exog` must be a pandas Series, DataFrame or None. Got {type(exog)}.")
                 )
 
-    # TODO: all this checks are already done in TimeSeriesFold
-    # --------------------------------------------------------
-    if not isinstance(steps, (int, np.integer)) or steps < 1:
-        raise TypeError(
-            f"`steps` must be an integer greater than or equal to 1. Got {steps}."
-        )
-    if not isinstance(gap, (int, np.integer)) or gap < 0:
-        raise TypeError(
-            f"`gap` must be an integer greater than or equal to 0. Got {gap}."
-        )
-    if not isinstance(skip_folds, (int, list, type(None))):
-        raise TypeError(
-            (f"`skip_folds` must be an integer greater than 0, a list of "
-             f"integers or `None`. Got {type(skip_folds)}.")
-        )
-    if isinstance(skip_folds, int) and skip_folds < 1:
-        raise ValueError(
-            (f"`skip_folds` must be an integer greater than 0, a list of "
-             f"integers or `None`. Got {skip_folds}.")
-        )
-    if isinstance(skip_folds, list) and 0 in skip_folds:
-        raise ValueError(
-            ("`skip_folds` cannot contain the value 0, the first fold is "
-             "needed to train the forecaster.")
-        )
-    # --------------------------------------------------------
-
     if hasattr(forecaster, 'differentiaion'):
         if forecaster.differentiation != cv.differentiation:
             raise ValueError(
@@ -2295,12 +2262,6 @@ def check_backtesting_input(
 
     if not isinstance(add_aggregated_metric, bool):
         raise TypeError("`add_aggregated_metric` must be a boolean: `True`, `False`.")
-    if not isinstance(fixed_train_size, bool):
-        raise TypeError("`fixed_train_size` must be a boolean: `True`, `False`.")
-    if not isinstance(allow_incomplete_fold, bool):
-        raise TypeError("`allow_incomplete_fold` must be a boolean: `True`, `False`.")
-    if not isinstance(refit, (bool, int, np.integer)) or refit < 0:
-        raise TypeError(f"`refit` must be a boolean or an integer greater than 0. Got {refit}.")
     if not isinstance(n_boot, (int, np.integer)) or n_boot < 0:
         raise TypeError(f"`n_boot` must be an integer greater than 0. Got {n_boot}.")
     if not isinstance(random_state, (int, np.integer)) or random_state < 0:
@@ -2311,8 +2272,6 @@ def check_backtesting_input(
         raise TypeError("`use_binned_residuals` must be a boolean: `True`, `False`.")
     if not isinstance(n_jobs, int) and n_jobs != 'auto':
         raise TypeError(f"`n_jobs` must be an integer or `'auto'`. Got {n_jobs}.")
-    if not isinstance(verbose, bool):
-        raise TypeError("`verbose` must be a boolean: `True`, `False`.")
     if not isinstance(show_progress, bool):
         raise TypeError("`show_progress` must be a boolean: `True`, `False`.")
     if not isinstance(suppress_warnings, bool):
