@@ -3,6 +3,7 @@ extra_css:
   - stylesheets/extra.css
 repo_url: https://github.com/JoaquinAmatRodrigo/skforecast
 site_url: https://joaquinamatrodrigo.github.io/skforecast/
+remote_branch: docs_dev
 site_description: Python library for time series forecasting using machine learning models. It works with any regressor compatible with the scikit-learn API, including popular options like LightGBM, XGBoost, CatBoost, Keras, and many others.
 site_author: Joaquin Amat Rodrigo and Javier Escobar Ortiz
 use_directory_urls: false
@@ -79,7 +80,6 @@ nav:
     - ForecasterAutoreg: api/ForecasterAutoreg.md
     - ForecasterAutoregDirect: api/ForecasterAutoregDirect.md
     - ForecasterMultiSeries: api/ForecasterMultiSeries.md
-    - ForecasterMultiSeriesCustom: api/ForecasterMultiSeriesCustom.md
     - ForecasterMultiVariate: api/ForecasterMultiVariate.md
     - ForecasterRnn: api/ForecasterRnn.md
     - ForecasterSarimax: api/ForecasterSarimax.md
