@@ -7,18 +7,12 @@
 
 from typing import Union, Optional
 import warnings
-import logging
 import inspect
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.exceptions import NotFittedError
 from statsmodels.tsa.statespace.sarimax import SARIMAX
-
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
-)
 
 
 def _check_fitted(func):

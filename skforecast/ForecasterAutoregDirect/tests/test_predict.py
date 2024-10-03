@@ -5,7 +5,6 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
@@ -18,9 +17,15 @@ from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import HistGradientBoostingRegressor
 from lightgbm import LGBMRegressor
 
+from skforecast.preprocessing import RollingFeatures
+from skforecast.preprocessing import TimeSeriesDifferentiator
+from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
+
 # Fixtures
 from .fixtures_ForecasterAutoregDirect import y as y_categorical
 from .fixtures_ForecasterAutoregDirect import exog as exog_categorical
+from .fixtures_ForecasterAutoregDirect import exog_predict as exog_predict_categorical
+from .fixtures_ForecasterAutoregDirect import data  # to test results when using differentiation
 
 
 @pytest.mark.parametrize("steps", [[1, 2.0, 3], [1, 4.]], 
@@ -180,7 +185,7 @@ def test_predict_output_when_regressor_is_LinearRegression_with_transform_y_and_
     exog = pd.DataFrame({
                 'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4, 60.3, 87.2,
                           7.5, 60.4, 50.3, 57.3, 24.7, 87.4, 87.2, 60.4, 50.7, 7.5],
-                'col_2': ['a']*10 + ['b']*10}
+                'col_2': ['a'] * 10 + ['b'] * 10}
            )
     exog_predict = exog.copy()
     exog_predict.index = pd.RangeIndex(start=20, stop=40)
@@ -248,8 +253,8 @@ def test_predict_output_when_categorical_features_native_implementation_HistGrad
     Test predict output when using HistGradientBoostingRegressor and categorical variables.
     """
     df_exog = pd.DataFrame({'exog_1': exog_categorical,
-                            'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
+                            'exog_2': ['a', 'b', 'c', 'd', 'e'] * 10,
+                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J'] * 10)})
     
     exog_predict = df_exog.copy()
     exog_predict.index = pd.RangeIndex(start=50, stop=100)
@@ -298,8 +303,8 @@ def test_predict_output_when_categorical_features_native_implementation_LGBMRegr
     Test predict output when using LGBMRegressor and categorical variables.
     """
     df_exog = pd.DataFrame({'exog_1': exog_categorical,
-                            'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
+                            'exog_2': ['a', 'b', 'c', 'd', 'e'] * 10,
+                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J'] * 10)})
     
     exog_predict = df_exog.copy()
     exog_predict.index = pd.RangeIndex(start=50, stop=100)
@@ -347,8 +352,8 @@ def test_predict_output_when_categorical_features_native_implementation_LGBMRegr
     categorical_features='auto'.
     """
     df_exog = pd.DataFrame({'exog_1': exog_categorical,
-                            'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)})
+                            'exog_2': ['a', 'b', 'c', 'd', 'e'] * 10,
+                            'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J'] * 10)})
     
     exog_predict = df_exog.copy()
     exog_predict.index = pd.RangeIndex(start=50, stop=100)
@@ -390,6 +395,207 @@ def test_predict_output_when_categorical_features_native_implementation_LGBMRegr
                                     0.47754412, 0.47360906, 0.47749395, 0.48461923, 
                                     0.48686681, 0.50223394]),
                    index = pd.RangeIndex(start=50, stop=60, step=1),
+                   name = 'pred'
+               )
+    
+    pd.testing.assert_series_equal(predictions, expected)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differentiation_is_1_steps_1():
+    """
+    Test predict output when using LinearRegression as regressor and 
+    differentiation=1 and steps=1.
+    """
+
+    # Data differentiated
+    diferenciator = TimeSeriesDifferentiator(order=1)
+    data_diff = diferenciator.fit_transform(data.to_numpy())
+    data_diff = pd.Series(data_diff, index=data.index).dropna()
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff = exog.iloc[1:]
+    end_train = '2003-03-01 23:59:00'
+
+    forecaster_1 = ForecasterAutoregDirect(regressor=LinearRegression(), steps=1, lags=15)
+    forecaster_1.fit(y=data_diff.loc[:end_train], exog=exog_diff.loc[:end_train])
+    predictions_diff = forecaster_1.predict(exog=exog_diff.loc[end_train:])
+    # Revert the differentiation
+    last_value_train = data.loc[:end_train].iloc[[-1]]
+    predictions_1 = pd.concat([last_value_train, predictions_diff]).cumsum()[1:]
+
+    forecaster_2 = ForecasterAutoregDirect(regressor=LinearRegression(), steps=1, lags=15, differentiation=1)
+    forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    predictions_2 = forecaster_2.predict(exog=exog.loc[end_train:])
+
+    pd.testing.assert_series_equal(predictions_1.asfreq('MS'), predictions_2, check_names=False)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differentiation_is_1_steps_10():
+    """
+    Test predict output when using LinearRegression as regressor and 
+    differentiation=1 and steps=10.
+    """
+
+    # Data differentiated
+    diferenciator = TimeSeriesDifferentiator(order=1)
+    data_diff = diferenciator.fit_transform(data.to_numpy())
+    data_diff = pd.Series(data_diff, index=data.index).dropna()
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff = exog.iloc[1:]
+    end_train = '2003-03-01 23:59:00'
+
+    forecaster_1 = ForecasterAutoregDirect(regressor=LinearRegression(), steps=10, lags=15)
+    forecaster_1.fit(y=data_diff.loc[:end_train], exog=exog_diff.loc[:end_train])
+    predictions_diff = forecaster_1.predict(exog=exog_diff.loc[end_train:])
+    # Revert the differentiation
+    last_value_train = data.loc[:end_train].iloc[[-1]]
+    predictions_1 = pd.concat([last_value_train, predictions_diff]).cumsum()[1:]
+
+    forecaster_2 = ForecasterAutoregDirect(regressor=LinearRegression(), steps=10, lags=15, differentiation=1)
+    forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    predictions_2 = forecaster_2.predict(exog=exog.loc[end_train:])
+
+    pd.testing.assert_series_equal(predictions_1.asfreq('MS'), predictions_2, check_names=False)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differentiation_is_2():
+    """
+    Test predict output when using LinearRegression as regressor and differentiation=2.
+    """
+
+    # Data differentiated
+    diferenciator_1 = TimeSeriesDifferentiator(order=1)
+    diferenciator_2 = TimeSeriesDifferentiator(order=2)
+    data_diff_1 = diferenciator_1.fit_transform(data.to_numpy())
+    data_diff_1 = pd.Series(data_diff_1, index=data.index).dropna()
+    data_diff_2 = diferenciator_2.fit_transform(data.to_numpy())
+    data_diff_2 = pd.Series(data_diff_2, index=data.index).dropna()
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff_2 = exog.iloc[2:]
+    end_train = '2003-03-01 23:59:00'
+
+    forecaster_1 = ForecasterAutoregDirect(regressor=LinearRegression(), steps=1, lags=15)
+    forecaster_1.fit(y=data_diff_2.loc[:end_train], exog=exog_diff_2.loc[:end_train])
+    predictions_diff_2 = forecaster_1.predict(exog=exog_diff_2.loc[end_train:])
+    
+    # Revert the differentiation
+    last_value_train_diff = data_diff_1.loc[:end_train].iloc[[-1]]
+    predictions_diff_1 = pd.concat([last_value_train_diff, predictions_diff_2]).cumsum()[1:]
+    last_value_train = data.loc[:end_train].iloc[[-1]]
+    predictions_1 = pd.concat([last_value_train, predictions_diff_1]).cumsum()[1:]
+
+    forecaster_2 = ForecasterAutoregDirect(regressor=LinearRegression(), steps=1, lags=15, differentiation=2)
+    forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    predictions_2 = forecaster_2.predict(exog=exog.loc[end_train:])
+
+    pd.testing.assert_series_equal(predictions_1.asfreq('MS'), predictions_2, check_names=False)
+
+
+def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differentiation_is_2_steps_10():
+    """
+    Test predict output when using LinearRegression as regressor and 
+    differentiation=2 and steps=10.
+    """
+
+    # Data differentiated
+    diferenciator_1 = TimeSeriesDifferentiator(order=1)
+    diferenciator_2 = TimeSeriesDifferentiator(order=2)
+    data_diff_1 = diferenciator_1.fit_transform(data.to_numpy())
+    data_diff_1 = pd.Series(data_diff_1, index=data.index).dropna()
+    data_diff_2 = diferenciator_2.fit_transform(data.to_numpy())
+    data_diff_2 = pd.Series(data_diff_2, index=data.index).dropna()
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff_2 = exog.iloc[2:]
+    end_train = '2003-03-01 23:59:00'
+    
+    forecaster_1 = ForecasterAutoregDirect(regressor=LinearRegression(), steps=10, lags=15)
+    forecaster_1.fit(y=data_diff_2.loc[:end_train], exog=exog_diff_2.loc[:end_train])
+    predictions_diff_2 = forecaster_1.predict(exog=exog_diff_2.loc[end_train:])
+    
+    # Revert the differentiation
+    last_value_train_diff = data_diff_1.loc[:end_train].iloc[[-1]]
+    predictions_diff_1 = pd.concat([last_value_train_diff, predictions_diff_2]).cumsum()[1:]
+    last_value_train = data.loc[:end_train].iloc[[-1]]
+    predictions_1 = pd.concat([last_value_train, predictions_diff_1]).cumsum()[1:]
+
+    forecaster_2 = ForecasterAutoregDirect(regressor=LinearRegression(), steps=10, lags=15, differentiation=2)
+    forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    predictions_2 = forecaster_2.predict(exog=exog.loc[end_train:])
+
+    pd.testing.assert_series_equal(predictions_1.asfreq('MS'), predictions_2, check_names=False)
+
+
+def test_predict_output_when_window_features_steps_1():
+    """
+    Test output of predict when regressor is LGBMRegressor and window features
+    with steps=1.
+    """
+    y_datetime = y_categorical.copy()
+    y_datetime.index = pd.date_range(start='2001-01-01', periods=len(y_datetime), freq='D')
+    exog_datetime = exog_categorical.copy()
+    exog_datetime.index = pd.date_range(start='2001-01-01', periods=len(exog_datetime), freq='D')
+    exog_predict_datetime = exog_predict_categorical.copy()
+    exog_predict_datetime.index = pd.date_range(start='2001-02-20', periods=len(exog_predict_datetime), freq='D')
+    
+    rolling = RollingFeatures(stats=['mean', 'sum'], window_sizes=[3, 5])
+    forecaster = ForecasterAutoregDirect(
+        LGBMRegressor(verbose=-1, random_state=123), steps=1, lags=3, window_features=rolling
+    )
+    forecaster.fit(y=y_datetime, exog=exog_datetime)
+    predictions = forecaster.predict(exog=exog_predict_datetime)
+
+    expected = pd.Series(
+                   data = np.array([0.5326654111553376]),
+                   index = pd.date_range(start='2001-02-20', periods=1, freq='D'),
+                   name = 'pred'
+               )
+    
+    pd.testing.assert_series_equal(predictions, expected)
+
+
+def test_predict_output_when_window_features_steps_10():
+    """
+    Test output of predict when regressor is LGBMRegressor and window features
+    with steps=10.
+    """
+    y_datetime = y_categorical.copy()
+    y_datetime.index = pd.date_range(start='2001-01-01', periods=len(y_datetime), freq='D')
+    exog_datetime = exog_categorical.copy()
+    exog_datetime.index = pd.date_range(start='2001-01-01', periods=len(exog_datetime), freq='D')
+    exog_predict_datetime = exog_predict_categorical.copy()
+    exog_predict_datetime.index = pd.date_range(start='2001-02-20', periods=len(exog_predict_datetime), freq='D')
+    
+    rolling = RollingFeatures(stats=['mean', 'sum'], window_sizes=[3, 5])
+    forecaster = ForecasterAutoregDirect(
+        LGBMRegressor(verbose=-1, random_state=123), steps=10, lags=3, window_features=rolling
+    )
+    forecaster.fit(y=y_datetime, exog=exog_datetime)
+    predictions = forecaster.predict(exog=exog_predict_datetime)
+
+    expected = pd.Series(
+                   data = np.array([0.5013105906546116, 0.49276925561328727, 
+                                    0.4743392908324798, 0.4668391936769088, 
+                                    0.47754411751197445, 0.47360905777249074, 
+                                    0.47749395275281536, 0.4846192327224546, 
+                                    0.48686681294606793, 0.50223394172887]),
+                   index = pd.date_range(start='2001-02-20', periods=10, freq='D'),
                    name = 'pred'
                )
     

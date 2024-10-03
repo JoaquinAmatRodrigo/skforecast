@@ -7,7 +7,6 @@
 
 from typing import Union, Tuple, Optional, Callable, Any
 import warnings
-import logging
 import sys
 import numpy as np
 import pandas as pd
@@ -22,6 +21,7 @@ from joblib import Parallel, delayed, cpu_count
 import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..utils import initialize_lags
+from ..utils import initialize_window_features
 from ..utils import initialize_weights
 from ..utils import check_select_fit_kwargs
 from ..utils import check_y
@@ -41,11 +41,7 @@ from ..utils import expand_index
 from ..utils import transform_numpy
 from ..utils import transform_dataframe
 from ..utils import select_n_jobs_fit_forecaster
-
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
-)
+from ..preprocessing import TimeSeriesDifferentiator
 
 
 class ForecasterAutoregDirect(ForecasterBase):
@@ -62,17 +58,21 @@ class ForecasterAutoregDirect(ForecasterBase):
         Maximum number of future steps the forecaster will predict when using
         method `predict()`. Since a different model is created for each step,
         this value should be defined before training.
-    lags : int, list, numpy ndarray, range
+    lags : int, list, numpy ndarray, range, default `None`
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-
+    
         - `int`: include lags from 1 to `lags` (included).
         - `list`, `1d numpy ndarray` or `range`: include only lags present in 
         `lags`, all elements must be int.
+        - `None`: no lags are included as predictors. 
+    window_features : object, list, default `None`
+        Instance or list of instances used to create window features. Window features
+        are created from the original time series and are included as predictors.
     transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
         ColumnTransformers are not allowed since they do not have inverse_transform method.
-        The transformation is applied to `y` before training the forecaster.
+        The transformation is applied to `y` before training the forecaster. 
     transformer_exog : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API. The transformation is applied to `exog` before training the
@@ -82,6 +82,14 @@ class ForecasterAutoregDirect(ForecasterBase):
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
+    differentiation : int, default `None`
+        Order of differencing applied to the time series before training the forecaster.
+        If `None`, no differencing is applied. The order of differentiation is the number
+        of times the differencing operation is applied to a time series. Differencing
+        involves computing the differences between consecutive data points in the series.
+        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
+        **WARNING: This argument is newly introduced and requires special attention. It
+        is still experimental and may undergo changes.**
     fit_kwargs : dict, default `None`
         Additional arguments to be passed to the `fit` method of the regressor.
     n_jobs : int, 'auto', default `'auto'`
@@ -107,6 +115,21 @@ class ForecasterAutoregDirect(ForecasterBase):
         should be defined before training.
     lags : numpy ndarray
         Lags used as predictors.
+    max_lag : int
+        Maximum lag included in `lags`.
+    window_features : list
+        Class or list of classes used to create window features.
+    window_features_names : list
+        Names of the window features to be included in the `X_train` matrix.
+    window_features_class_names : list
+        Names of the classes used to create the window features.
+    max_size_window_features : int
+        Maximum window size required by the window features.
+    window_size : int
+        The window size needed to create the predictors. It is calculated as the 
+        maximum value between `max_lag` and `max_size_window_features`. If 
+        differentiation is used, `window_size` is increased by n units equal to 
+        the order of differentiation so that predictors can be generated correctly.
     transformer_y : object transformer (preprocessor)
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and inverse_transform.
@@ -121,18 +144,30 @@ class ForecasterAutoregDirect(ForecasterBase):
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
+    differentiation : int, default `None`
+        Order of differencing applied to the time series before training the forecaster.
+        If `None`, no differencing is applied. The order of differentiation is the number
+        of times the differencing operation is applied to a time series. Differencing
+        involves computing the differences between consecutive data points in the series.
+        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
+        **WARNING: This argument is newly introduced and requires special attention. It
+        is still experimental and may undergo changes.**
     source_code_weight_func : str
         Source code of the custom function used to create weights.
-    max_lag : int
-        Maximum value of lag included in `lags`.
-    window_size : int
-        Size of the window needed to create the predictors. It is equal to `max_lag`.
-    window_size_diff : int
-        This attribute has the same value as window_size as this Forecaster 
-        doesn't support differentiation.
+    differentiation : int
+        Order of differencing applied to the time series before training the 
+        forecaster.
+    differentiator : TimeSeriesDifferentiator
+        Skforecast object used to differentiate the time series.
     last_window_ : pandas DataFrame
-        Last window the forecaster has seen during training. It stores the
-        values needed to predict `steps` immediately after the training data.
+        This window represents the most recent data observed by the predictor
+        during its training phase. It contains the values needed to predict the
+        next step immediately after the training data. These values are stored
+        in the original scale of the time series before undergoing any transformations
+        or differentiation. When `differentiation` parameter is specified, the
+        dimensions of the `last_window_` are expanded as many values as the order
+        of differentiation. For example, if `lags` = 7 and `differentiation` = 1,
+        `last_window_` will have 8 values.
     index_type_ : type
         Type of index of the input used in training.
     index_freq_ : str
@@ -144,10 +179,13 @@ class ForecasterAutoregDirect(ForecasterBase):
     exog_names_in_ : list
         Names of the exogenous variables used during training.
     exog_type_in_ : type
-        Type of exogenous variable/s used in training.
+        Type of exogenous data (pandas Series or DataFrame) used in training.
     exog_dtypes_in_ : dict
         Type of each exogenous variable/s used in training. If `transformer_exog` 
         is used, the dtypes are calculated after the transformation.
+    X_train_window_features_names_out_ : list
+        Names of the window features included in the matrix `X_train` created
+        internally for training.
     X_train_exog_names_out_ : list
         Names of the exogenous variables included in the matrix `X_train` created
         internally for training. It can be different from `exog_names_in_` if
@@ -184,9 +222,15 @@ class ForecasterAutoregDirect(ForecasterBase):
         skforecast.utils.select_n_jobs_fit_forecaster.
     forecaster_id : str, int
         Name used as an identifier of the forecaster.
-    differentiation : Ignored
+    binner : Ignored
         Not used, present here for API consistency by convention.
-    differentiator : Ignored
+    binner_intervals_ : Ignored
+        Not used, present here for API consistency by convention.
+    binner_kwargs : Ignored
+        Not used, present here for API consistency by convention.
+    in_sample_residuals_by_bin_ : Ignored
+        Not used, present here for API consistency by convention.
+    out_sample_residuals_by_bin_ : Ignored
         Not used, present here for API consistency by convention.
 
     Notes
@@ -195,45 +239,53 @@ class ForecasterAutoregDirect(ForecasterBase):
     note that all models share the same parameter and hyperparameter configuration.
      
     """
-    
+
     def __init__(
-        self, 
+        self,
         regressor: object,
         steps: int,
-        lags: Union[int, np.ndarray, list],
+        lags: Optional[Union[int, np.ndarray, list, range]] = None,
+        window_features: Optional[Union[object, list]] = None,
         transformer_y: Optional[object] = None,
         transformer_exog: Optional[object] = None,
         weight_func: Optional[Callable] = None,
+        differentiation: Optional[int] = None,
         fit_kwargs: Optional[dict] = None,
         n_jobs: Union[int, str] = 'auto',
-        forecaster_id: Optional[Union[str, int]] = None,
+        forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
         
-        self.regressor                      = copy(regressor)
-        self.steps                          = steps
-        self.transformer_y                  = transformer_y
-        self.transformer_exog               = transformer_exog
-        self.weight_func                    = weight_func
-        self.source_code_weight_func        = None
-        self.last_window_                   = None
-        self.index_type_                    = None
-        self.index_freq_                    = None
-        self.training_range_                = None
-        self.exog_in_                       = False
-        self.exog_names_in_                 = None
-        self.exog_type_in_                  = None
-        self.exog_dtypes_in_                = None
-        self.X_train_exog_names_out_        = None
-        self.X_train_direct_exog_names_out_ = None
-        self.X_train_features_names_out_    = None
-        self.creation_date                  = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.is_fitted                      = False
-        self.fit_date                       = None
-        self.skforecast_version             = skforecast.__version__
-        self.python_version                 = sys.version.split(" ")[0]
-        self.forecaster_id                  = forecaster_id
-        self.differentiation                = None
-        self.differentiator                 = None
+        self.regressor                          = copy(regressor)
+        self.steps                              = steps
+        self.transformer_y                      = transformer_y
+        self.transformer_exog                   = transformer_exog
+        self.weight_func                        = weight_func
+        self.source_code_weight_func            = None
+        self.differentiation                    = differentiation
+        self.differentiator                     = None
+        self.last_window_                       = None
+        self.index_type_                        = None
+        self.index_freq_                        = None
+        self.training_range_                    = None
+        self.exog_in_                           = False
+        self.exog_names_in_                     = None
+        self.exog_type_in_                      = None
+        self.exog_dtypes_in_                    = None
+        self.X_train_window_features_names_out_ = None
+        self.X_train_exog_names_out_            = None
+        self.X_train_direct_exog_names_out_     = None
+        self.X_train_features_names_out_        = None
+        self.creation_date                      = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.is_fitted                          = False
+        self.fit_date                           = None
+        self.skforecast_version                 = skforecast.__version__
+        self.python_version                     = sys.version.split(" ")[0]
+        self.forecaster_id                      = forecaster_id
+        self.binner                             = None
+        self.binner_intervals_                  = None
+        self.binner_kwargs                      = None
+        self.in_sample_residuals_by_bin_        = None
+        self.out_sample_residuals_by_bin_       = None
 
         if not isinstance(steps, int):
             raise TypeError(
@@ -245,17 +297,37 @@ class ForecasterAutoregDirect(ForecasterBase):
             raise ValueError(
                 f"`steps` argument must be greater than or equal to 1. Got {steps}."
             )
-        
-        if not isinstance(n_jobs, int) and n_jobs != 'auto':
-            raise TypeError(
-                f"`n_jobs` must be an integer or `'auto'`. Got {type(n_jobs)}."
-            )
 
         self.regressors_ = {step: clone(self.regressor) for step in range(1, steps + 1)}
-        self.lags = initialize_lags(type(self).__name__, lags)
-        self.max_lag = max(self.lags)
-        self.window_size = self.max_lag
-        self.window_size_diff = self.max_lag
+        self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
+        self.window_features, self.max_size_window_features, self.window_features_names = (
+            initialize_window_features(window_features)
+        )
+        if self.window_features is None and self.lags is None:
+            raise ValueError(
+                ("At least one of the arguments `lags` or `window_features` "
+                 "must be different from None. This is required to create the "
+                 "predictors used in training the forecaster.")
+            )
+        
+        self.window_size = max(
+            [ws for ws in [self.max_lag, self.max_size_window_features] 
+             if ws is not None]
+        )
+        self.window_features_class_names = None
+        if window_features is not None:
+            self.window_features_class_names = [
+                type(wf).__name__ for wf in self.window_features
+            ] 
+
+        if self.differentiation is not None:
+            if not isinstance(differentiation, int) or differentiation < 1:
+                raise ValueError(
+                    (f"Argument `differentiation` must be an integer equal to or "
+                     f"greater than 1. Got {differentiation}.")
+                )
+            self.window_size += self.differentiation
+            self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
 
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name = type(self).__name__, 
@@ -278,6 +350,10 @@ class ForecasterAutoregDirect(ForecasterBase):
                               regressor_name  = type(self.regressor).__name__,
                           )
         else:
+            if not isinstance(n_jobs, int):
+                raise TypeError(
+                    f"`n_jobs` must be an integer or `'auto'`. Got {type(n_jobs)}."
+                )
             self.n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
 
@@ -313,6 +389,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
+            f"Window features: {self.window_features_names} \n"
             f"Window size: {self.window_size} \n"
             f"Maximum steps to predict: {self.steps} \n"
             f"Exogenous included: {self.exog_in_} \n"
@@ -320,6 +397,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             f"Transformer for y: {self.transformer_y} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
             f"Weight function included: {True if self.weight_func is not None else False} \n"
+            f"Differentiation order: {self.differentiation} \n"
             f"Training range: {self.training_range_.to_list() if self.is_fitted else None} \n"
             f"Training index type: {str(self.index_type_).split('.')[-1][:-2] if self.is_fitted else None} \n"
             f"Training index frequency: {self.index_freq_ if self.is_fitted else None} \n"
@@ -335,62 +413,262 @@ class ForecasterAutoregDirect(ForecasterBase):
         return info
 
 
+    def _repr_html_(self):
+        """
+        HTML representation of the object.
+        The "General Information" section is expanded by default.
+        """
+        
+        if isinstance(self.regressor, Pipeline):
+            name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
+            params = {key: value for key, value in self.regressor.get_params().items()
+                    if key.startswith(name_pipe_steps)}
+        else:
+            params = self.regressor.get_params(deep=True)
+        params = str(params)
+
+        style = """
+        <style>
+            .container {
+                font-family: 'Arial', sans-serif;
+                font-size: 0.9em;
+                color: #333;
+                border: 1px solid #ddd;
+                background-color: #fafafa;
+                padding: 5px 15px;
+                border-radius: 8px;
+                max-width: 600px;
+                #margin: auto;
+            }
+            .container h2 {
+                font-size: 1.2em;
+                color: #222;
+                border-bottom: 2px solid #ddd;
+                padding-bottom: 5px;
+                margin-bottom: 15px;
+            }
+            .container details {
+                margin: 10px 0;
+            }
+            .container summary {
+                font-weight: bold;
+                font-size: 1.1em;
+                cursor: pointer;
+                margin-bottom: 5px;
+                background-color: #f0f0f0;
+                padding: 5px;
+                border-radius: 5px;
+            }
+            .container summary:hover {
+            background-color: #e0e0e0;
+            }
+            .container ul {
+                font-family: 'Courier New', monospace;
+                list-style-type: none;
+                padding-left: 20px;
+                margin: 10px 0;
+            }
+            .container li {
+                margin: 5px 0;
+                font-family: 'Courier New', monospace;
+            }
+            .container li strong {
+                font-weight: bold;
+                color: #444;
+            }
+            .container li::before {
+                content: "- ";
+                color: #666;
+            }
+        </style>
+        """
+        
+        content = f"""
+        <div class="container">
+            <h2>{type(self).__name__}</h2>
+            <details open>
+                <summary>General Information</summary>
+                <ul>
+                    <li><strong>Regressor:</strong> {self.regressor}</li>
+                    <li><strong>Lags:</strong> {self.lags}</li>
+                    <li><strong>Window features:</strong> {self.window_features_names}</li>
+                    <li><strong>Window size:</strong> {self.window_size}</li>
+                    <li><strong>Maximum steps to predict:</strong> {self.steps}</li>
+                    <li><strong>Exogenous included:</strong> {self.exog_in_}</li>
+                    <li><strong>Weight function included:</strong> {self.weight_func is not None}</li>
+                    <li><strong>Differentiation order:</strong> {self.differentiation}</li>
+                    <li><strong>Creation date:</strong> {self.creation_date}</li>
+                    <li><strong>Last fit date:</strong> {self.fit_date}</li>
+                    <li><strong>Skforecast version:</strong> {self.skforecast_version}</li>
+                    <li><strong>Python version:</strong> {self.python_version}</li>
+                    <li><strong>Forecaster id:</strong> {self.forecaster_id}</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Exogenous Variables</summary>
+                <ul>
+                     {self.exog_names_in_}
+                </ul>
+            </details>
+            <details>
+                <summary>Data Transformations</summary>
+                <ul>
+                    <li><strong>Transformer for y:</strong> {self.transformer_y}</li>
+                    <li><strong>Transformer for exog:</strong> {self.transformer_exog}</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Training Information</summary>
+                <ul>
+                    <li><strong>Training range:</strong> {self.training_range_.to_list() if self.is_fitted else 'Not fitted'}</li>
+                    <li><strong>Training index type:</strong> {str(self.index_type_).split('.')[-1][:-2] if self.is_fitted else 'Not fitted'}</li>
+                    <li><strong>Training index frequency:</strong> {self.index_freq_ if self.is_fitted else 'Not fitted'}</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Regressor Parameters</summary>
+                <ul>
+                    {params}
+                </ul>
+            </details>
+            <details>
+                <summary>Fit Kwargs</summary>
+                <ul>
+                    {self.fit_kwargs}
+                </ul>
+            </details>
+            <p>
+                <a href="https://skforecast.org/{skforecast.__version__}/api/forecasterautoregdirect#forecasterautoregdirect.html">&#128712 <strong>API Reference</strong></a>
+                &nbsp;&nbsp;
+                <a href="https://skforecast.org/{skforecast.__version__}/user_guides/direct-multi-step-forecasting.html">&#128462 <strong>User Guide</strong></a>
+            </p>
+        </div>
+        """
+
+        # Return the combined style and content
+        return style + content
+
+
     def _create_lags(
         self, 
-        y: np.ndarray
-    ) -> Tuple[np.ndarray, np.ndarray]:
+        y: np.ndarray,
+        X_as_pandas: bool = False,
+        train_index: Optional[pd.Index] = None
+    ) -> Tuple[Optional[Union[np.ndarray, pd.DataFrame]], np.ndarray]:
         """
-        Transforms a 1d array into a 2d array (X) and a 2d array (y). Each row
-        in X is associated with a value of y and it represents the lags that
-        precede it.
+        Create the lagged values and their target variable from a time series.
         
-        Notice that, the returned matrix X_data, contains the lag 1 in the first
-        column, the lag 2 in the second column and so on.
+        Note that the returned matrix `X_data` contains the lag 1 in the first 
+        column, the lag 2 in the in the second column and so on.
         
         Parameters
         ----------
         y : numpy ndarray
-            1d numpy ndarray Training time series.
+            Training time series values.
+        X_as_pandas : bool, default `False`
+            If `True`, the returned matrix `X_data` is a pandas DataFrame.
+        train_index : pandas Index, default `None`
+            Index of the training data. It is used to create the pandas DataFrame
+            `X_data` when `X_as_pandas` is `True`.
 
         Returns
         -------
-        X_data : numpy ndarray
-            2d numpy ndarray with the lagged values (predictors). 
-            Shape: (samples - max(self.lags), len(self.lags))
+        X_data : numpy ndarray, pandas DataFrame, None
+            Lagged values (predictors).
         y_data : numpy ndarray
-            2d numpy ndarray with the values of the time series related to each 
-            row of `X_data` for each step. 
-            Shape: (len(self.steps), samples - max(self.lags))
+            Values of the time series related to each row of `X_data`.
         
         """
-
-        n_splits = len(y) - self.max_lag - (self.steps - 1)  # rows of y_data
-        if n_splits <= 0:
-            raise ValueError(
-                (f"The maximum lag ({self.max_lag}) must be less than the length "
-                 f"of the series minus the number of steps ({len(y) - (self.steps - 1)}).")
-            )
         
-        X_data = np.full(shape=(n_splits, len(self.lags)), fill_value=np.nan, dtype=float)
-        for i, lag in enumerate(self.lags):
-            X_data[:, i] = y[self.max_lag - lag : -(lag + self.steps - 1)] 
+        X_data = None
+        n_rows = len(y) - self.window_size - (self.steps - 1)
+        if self.lags is not None:         
+            X_data = np.full(
+                shape=(n_rows, len(self.lags)), fill_value=np.nan, order='F', dtype=float
+            )
+            for i, lag in enumerate(self.lags):
+                X_data[:, i] = y[self.window_size - lag : -(lag + self.steps - 1)] 
 
-        y_data = np.full(shape=(self.steps, n_splits), fill_value=np.nan, dtype=float)
+            if X_as_pandas:
+                X_data = pd.DataFrame(
+                             data    = X_data,
+                             columns = [f"lag_{i}" for i in self.lags],
+                             index   = train_index
+                         )
+
+        y_data = np.full(
+            shape=(self.steps, n_rows), fill_value=np.nan, order='C', dtype=float
+        )
         for step in range(self.steps):
-            y_data[step, ] = y[self.max_lag + step : self.max_lag + step + n_splits]
-            
+            y_data[step, :] = y[self.window_size + step : self.window_size + step + n_rows]
+        
         return X_data, y_data
 
 
-    def create_train_X_y(
+    def _create_window_features(
+        self, 
+        y: pd.Series,
+        train_index: pd.Index,
+        X_as_pandas: bool = False,
+    ) -> Tuple[list, list]:
+        """
+        
+        Parameters
+        ----------
+        y : pandas Series
+            Training time series.
+        train_index : pandas Index
+            Index of the training data. It is used to create the pandas DataFrame
+            `X_train_window_features` when `X_as_pandas` is `True`.
+        X_as_pandas : bool, default `False`
+            If `True`, the returned matrix `X_train_window_features` is a 
+            pandas DataFrame.
+
+        Returns
+        -------
+        X_train_window_features : list
+            List of numpy ndarrays or pandas DataFrames with the window features.
+        X_train_window_features_names_out_ : list
+            Names of the window features.
+        
+        """
+
+        len_train_index = len(train_index)
+        X_train_window_features = []
+        X_train_window_features_names_out_ = []
+        for wf in self.window_features:
+            X_train_wf = wf.transform_batch(y)
+            if not isinstance(X_train_wf, pd.DataFrame):
+                raise TypeError(
+                    (f"The method `transform_batch` of {type(wf).__name__} "
+                     f"must return a pandas DataFrame.")
+                )
+            X_train_wf = X_train_wf.iloc[-len_train_index:]
+            if not len(X_train_wf) == len_train_index:
+                raise ValueError(
+                    (f"The method `transform_batch` of {type(wf).__name__} "
+                     f"must return a DataFrame with the same number of rows as "
+                     f"the input time series - (`window_size` + (`steps` - 1)): {len_train_index}.")
+                )
+            X_train_wf.index = train_index
+            
+            X_train_window_features_names_out_.extend(X_train_wf.columns)
+            if not X_as_pandas:
+                X_train_wf = X_train_wf.to_numpy()     
+            X_train_window_features.append(X_train_wf)
+
+        return X_train_window_features, X_train_window_features_names_out_
+
+
+    def _create_train_X_y(
         self,
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None
-    ) -> Tuple[pd.DataFrame, dict]:
+    ) -> Tuple[pd.DataFrame, dict, list, list, list, list, dict]:
         """
         Create training matrices from univariate time series and exogenous
-        variables. The resulting matrices contain the target variable and predictors
-        needed to train all the regressors (one per step).
+        variables. The resulting matrices contain the target variable and 
+        predictors needed to train all the regressors (one per step).
         
         Parameters
         ----------
@@ -405,25 +683,41 @@ class ForecasterAutoregDirect(ForecasterBase):
         X_train : pandas DataFrame
             Training values (predictors) for each step. Note that the index 
             corresponds to that of the last step. It is updated for the corresponding 
-            step in the filter_train_X_y_for_step method.
-            Shape: (len(y) - self.max_lag, len(self.lags))
+            step in the `filter_train_X_y_for_step` method.
         y_train : dict
-            Values (target) of the time series related to each row of `X_train` 
-            for each step of the form {step: y_step_[i]}.
-            Shape of each series: (len(y) - self.max_lag, )
+            Values of the time series related to each row of `X_train`.
+        exog_names_in_ : list
+            Names of the exogenous variables used during training.
+        X_train_window_features_names_out_ : list
+            Names of the window features included in the matrix `X_train` created
+            internally for training.
+        X_train_exog_names_out_ : list
+            Names of the exogenous variables included in the matrix `X_train` created
+            internally for training. It can be different from `exog_names_in_` if
+            some exogenous variables are transformed during the training process.
+        X_train_features_names_out_ : list
+            Names of the columns of the matrix created internally for training.
+        exog_dtypes_in_ : dict
+            Type of each exogenous variable/s used in training. If `transformer_exog` 
+            is used, the dtypes are calculated before the transformation.
         
         """
 
-        if len(y) < self.max_lag + self.steps:
-            raise ValueError(
-                (f"Minimum length of `y` for training this forecaster is "
-                 f"{self.max_lag + self.steps}. Got {len(y)}. Reduce the "
-                 f"number of predicted steps, {self.steps}, or the maximum "
-                 f"lag, {self.max_lag}, if no more data is available.")
-            )
-
         check_y(y=y)
         y = input_to_frame(data=y, input_name='y')
+
+        if len(y) < self.window_size + self.steps:
+            raise ValueError(
+                (f"Minimum length of `y` for training this forecaster is "
+                 f"{self.window_size + self.steps}. Reduce the number of "
+                 f"predicted steps, {self.steps}, or the maximum "
+                 f"window_size, {self.window_size}, if no more data is available.\n"
+                 f"    Length `y`: {len(y)}.\n"
+                 f"    Max step : {self.steps}.\n"
+                 f"    Max window size: {self.window_size}.\n"
+                 f"    Lags window size: {self.max_lag}.\n"
+                 f"    Window features window size: {self.max_size_window_features}.")
+            )
 
         fit_transformer = False if self.is_fitted else True
         y = transform_dataframe(
@@ -434,9 +728,22 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
         y_values, y_index = preprocess_y(y=y)
 
+        if self.differentiation is not None:
+            if not self.is_fitted:
+                y_values = self.differentiator.fit_transform(y_values)
+            else:
+                differentiator = clone(self.differentiator)
+                y_values = differentiator.fit_transform(y_values)
+
+        exog_names_in_ = None
+        exog_dtypes_in_ = None
+        categorical_features = False
         if exog is not None:
             check_exog(exog=exog, allow_nan=True)
             exog = input_to_frame(data=exog, input_name='exog')
+            # TODO: Check if this check can be checked vs y_train. As happened
+            # in base on data (more data from y than exog, but can be aligned
+            # because of the window_size.
             if len(exog) != len(y):
                 raise ValueError(
                     (f"`exog` must have same number of samples as `y`. "
@@ -444,6 +751,8 @@ class ForecasterAutoregDirect(ForecasterBase):
                 )
             # Need here for filter_train_X_y_for_step to work without fitting
             self.exog_in_ = True
+            exog_names_in_ = exog.columns.to_list()
+            exog_dtypes_in_ = get_exog_dtypes(exog=exog)
 
             exog = transform_dataframe(
                        df                = exog,
@@ -451,46 +760,133 @@ class ForecasterAutoregDirect(ForecasterBase):
                        fit               = fit_transformer,
                        inverse_transform = False
                    )
-                
+
             check_exog_dtypes(exog, call_check_exog=True)
+            categorical_features = (
+                exog.select_dtypes(include=np.number).shape[1] != exog.shape[1]
+            )
 
             _, exog_index = preprocess_exog(exog=exog, return_values=False)
             if not (exog_index[:len(y_index)] == y_index).all():
                 raise ValueError(
                     ("Different index for `y` and `exog`. They must be equal "
-                     "to ensure the correct alignment of values.")      
+                     "to ensure the correct alignment of values.")
                 )
+            
+        X_train = []
+        X_train_features_names_out_ = []
+        train_index = y_index[self.window_size + (self.steps - 1):]
+        len_train_index = len(train_index)
+        X_as_pandas = True if categorical_features else False
 
-        X_train, y_train = self._create_lags(y=y_values)
-        X_train = pd.DataFrame(
-                      data    = X_train,
-                      columns = [f"lag_{i}" for i in self.lags],
-                      index   = y_index[self.max_lag + (self.steps - 1):]
-                  )
+        X_train_lags, y_train = self._create_lags(
+            y=y_values, X_as_pandas=X_as_pandas, train_index=train_index
+        )
+        if X_train_lags is not None:
+            X_train.append(X_train_lags)
+            X_train_features_names_out_.extend([f"lag_{i}" for i in self.lags])
+        
+        # TODO: Review with Ximo y values pased to create_window_features
+        X_train_window_features_names_out_ = None
+        if self.window_features is not None:
+            n_diff = 0 if self.differentiation is None else self.differentiation
+            end_wf = None if self.steps == 1 else -(self.steps - 1)
+            y_window_features = pd.Series(
+                y_values[n_diff:end_wf], index=y_index[n_diff:end_wf]
+            )
+            X_train_window_features, X_train_window_features_names_out_ = (
+                self._create_window_features(
+                    y           = y_window_features, 
+                    X_as_pandas = X_as_pandas, 
+                    train_index = train_index
+                )
+            )
+            X_train.extend(X_train_window_features)
+            X_train_features_names_out_.extend(X_train_window_features_names_out_)
 
+        X_train_exog_names_out_ = None
         if exog is not None:
-            # Transform exog to match direct format
-            # The first `self.max_lag` positions have to be removed from X_exog
-            # since they are not in X_lags.
+            # The first `self.window_size` positions have to be removed from exog
+            # since they are not in X_train.
+            X_train_exog_names_out_ = exog.columns.to_list()
+            # TODO: See if can return direct cols names with exog_to_direct_numpy
             exog_to_train = exog_to_direct(
                                 exog  = exog,
                                 steps = self.steps
-                            ).iloc[-X_train.shape[0]:, :]
-            exog_to_train.index = exog_index[-X_train.shape[0]:]
-            X_train = pd.concat((X_train, exog_to_train), axis=1)
-            # TODO: move self to fit method and make X_train_exog_names_out_ a return
-            # Maybe Need X_train_direct_exog_names_out_ here for filter_train_X_y_for_step to work without fitting
-            if not self.is_fitted:
-                self.X_train_exog_names_out_ = exog.columns.to_list()
-                self.X_train_direct_exog_names_out_ = exog_to_train.columns.to_list()
+                            )
+            exog_to_train = exog_to_train.iloc[-len_train_index:, :]
+            # Need here for filter_train_X_y_for_step to work without fitting
+            self.X_train_direct_exog_names_out_ = exog_to_train.columns.to_list()
+            if X_as_pandas:
+                exog_to_train.index = train_index
+            else:
+                exog_to_train = exog_to_train.to_numpy()
+
+            X_train_features_names_out_.extend(self.X_train_direct_exog_names_out_)
+            X_train.append(exog_to_train)
+
+        if X_as_pandas:
+            X_train = pd.concat(X_train, axis=1)
+            X_train.index = train_index
+        else:
+            X_train = pd.DataFrame(
+                          data    = np.concatenate(X_train, axis=1),
+                          index   = train_index,
+                          columns = X_train_features_names_out_
+                      )
 
         y_train = {step: pd.Series(
-                             data  = y_train[step - 1], 
-                             index = y_index[self.max_lag + step - 1:][:len(y_train[0])],
+                             data  = y_train[step - 1, :], 
+                             index = y_index[self.window_size + step - 1:][:len_train_index],
                              name  = f"y_step_{step}"
                          )
                    for step in range(1, self.steps + 1)}
         
+        return (
+            X_train,
+            y_train,
+            exog_names_in_,
+            X_train_window_features_names_out_,
+            X_train_exog_names_out_,
+            X_train_features_names_out_,
+            exog_dtypes_in_
+        )
+
+
+    def create_train_X_y(
+        self,
+        y: pd.Series,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
+    ) -> Tuple[pd.DataFrame, dict]:
+        """
+        Create training matrices from univariate time series and exogenous
+        variables. The resulting matrices contain the target variable and 
+        predictors needed to train all the regressors (one per step).
+        
+        Parameters
+        ----------
+        y : pandas Series
+            Training time series.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
+            number of observations as `y` and their indexes must be aligned.
+
+        Returns
+        -------
+        X_train : pandas DataFrame
+            Training values (predictors) for each step. Note that the index 
+            corresponds to that of the last step. It is updated for the corresponding 
+            step in the `filter_train_X_y_for_step` method.
+        y_train : dict
+            Values of the time series related to each row of `X_train`.
+        
+        """
+
+        output = self._create_train_X_y(y=y, exog=exog)
+
+        X_train = output[0]
+        y_train = output[1]
+
         return X_train, y_train
 
 
@@ -541,12 +937,16 @@ class ForecasterAutoregDirect(ForecasterBase):
         if not self.exog_in_:
             X_train_step = X_train
         else:
-            idx_columns_lags = np.arange(len(self.lags))
+            n_lags = len(self.lags) if self.lags is not None else 0
+            n_window_features = (
+                len(self.X_train_window_features_names_out_) if self.window_features is not None else 0
+            )
+            idx_columns_autoreg = np.arange(n_lags + n_window_features)
             n_exog = len(self.X_train_direct_exog_names_out_) / self.steps
             idx_columns_exog = (
-                np.arange((step - 1) * n_exog, (step) * n_exog) + idx_columns_lags[-1] + 1
+                np.arange((step - 1) * n_exog, (step) * n_exog) + idx_columns_autoreg[-1] + 1
             )
-            idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
+            idx_columns = np.concatenate((idx_columns_autoreg, idx_columns_exog))
             X_train_step = X_train.iloc[:, idx_columns]
 
         X_train_step.index = y_train_step.index
@@ -565,7 +965,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         initial_train_size: int,
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None
     ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
-        
         """
         Create matrices needed to train and test the forecaster for one-step-ahead
         predictions.
@@ -584,26 +983,26 @@ class ForecasterAutoregDirect(ForecasterBase):
         Returns
         -------
         X_train : pandas DataFrame
-            Training values (predictors).
+            Predictor values used to train the model.
         y_train : pandas Series
-            Values (target) of the time series related to each row of `X_train`.
+            Target values related to each row of `X_train`.
         X_test : pandas DataFrame
-            Test values (predictors).
+            Predictor values used to test the model.
         y_test : pandas Series
-            Values (target) of the time series related to each row of `X_test`.
+            Target values related to each row of `X_test`.
         
         """
 
         is_fitted = self.is_fitted
         self.is_fitted = False
-        X_train, y_train = self.create_train_X_y(
+        X_train, y_train, *_ = self._create_train_X_y(
             y    = y.iloc[: initial_train_size],
             exog = exog.iloc[: initial_train_size] if exog is not None else None
         )
 
-        test_init = initial_train_size - self.window_size_diff
+        test_init = initial_train_size - self.window_size
         self.is_fitted = True
-        X_test, y_test = self.create_train_X_y(
+        X_test, y_test, *_ = self._create_train_X_y(
             y    = y.iloc[test_init:],
             exog = exog.iloc[test_init:] if exog is not None else None
         )
@@ -624,7 +1023,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         Parameters
         ----------
         X_train : pandas DataFrame
-            Dataframe created with `create_train_X_y` and filter_train_X_y_for_step`
+            Dataframe created with `create_train_X_y` and `filter_train_X_y_for_step`
             methods, first return.
 
         Returns
@@ -691,22 +1090,31 @@ class ForecasterAutoregDirect(ForecasterBase):
         """
 
         # Reset values in case the forecaster has already been fitted.
-        self.last_window_                   = None
-        self.index_type_                    = None
-        self.index_freq_                    = None
-        self.training_range_                = None
-        self.exog_in_                       = False
-        self.exog_names_in_                 = None
-        self.exog_type_in_                  = None
-        self.exog_dtypes_in_                = None
-        self.X_train_exog_names_out_        = None
-        self.X_train_direct_exog_names_out_ = None
-        self.X_train_features_names_out_    = None
-        self.in_sample_residuals_           = {step: None for step in range(1, self.steps + 1)}
-        self.is_fitted                      = False
-        self.fit_date                       = None
+        self.last_window_                       = None
+        self.index_type_                        = None
+        self.index_freq_                        = None
+        self.training_range_                    = None
+        self.exog_in_                           = False
+        self.exog_names_in_                     = None
+        self.exog_type_in_                      = None
+        self.exog_dtypes_in_                    = None
+        self.X_train_window_features_names_out_ = None
+        self.X_train_exog_names_out_            = None
+        self.X_train_direct_exog_names_out_     = None
+        self.X_train_features_names_out_        = None
+        self.in_sample_residuals_               = {step: None for step in range(1, self.steps + 1)}
+        self.is_fitted                          = False
+        self.fit_date                           = None
 
-        X_train, y_train = self.create_train_X_y(y=y, exog=exog)
+        (
+            X_train,
+            y_train,
+            exog_names_in_,
+            X_train_window_features_names_out_,
+            X_train_exog_names_out_,
+            X_train_features_names_out_,
+            exog_dtypes_in_
+        ) = self._create_train_X_y(y=y, exog=exog)
 
         def fit_forecaster(regressor, X_train, y_train, step, store_in_sample_residuals):
             """
@@ -771,6 +1179,9 @@ class ForecasterAutoregDirect(ForecasterBase):
                 residuals = None
 
             return step, regressor, residuals
+        
+        # Here to `filter_train_X_y_for_step` to work
+        self.X_train_window_features_names_out_ = X_train_window_features_names_out_
 
         results_fit = (
             Parallel(n_jobs=self.n_jobs)
@@ -791,8 +1202,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         if store_in_sample_residuals:
             self.in_sample_residuals_ = {step: residuals 
                                          for step, _, residuals in results_fit}
-            
-        self.X_train_features_names_out_ = X_train.columns.to_list()
+        
+        self.X_train_features_names_out_ = X_train_features_names_out_
 
         self.is_fitted = True
         self.fit_date = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
@@ -806,16 +1217,13 @@ class ForecasterAutoregDirect(ForecasterBase):
         if exog is not None:
             self.exog_in_ = True
             self.exog_type_in_ = type(exog)
-            self.exog_dtypes_in_ = get_exog_dtypes(exog=exog)
-            self.exog_names_in_ = (
-                exog.columns.to_list()
-                if isinstance(exog, pd.DataFrame)
-                else [exog.name]
-            )
+            self.exog_names_in_ = exog_names_in_
+            self.exog_dtypes_in_ = exog_dtypes_in_
+            self.X_train_exog_names_out_ = X_train_exog_names_out_
 
         if store_last_window:
             self.last_window_ = (
-                y.iloc[-self.window_size_diff:]
+                y.iloc[-self.window_size:]
                 .copy()
                 .to_frame(name=y.name if y.name is not None else 'y')
             )
@@ -878,22 +1286,22 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         if check_inputs:
             check_predict_input(
-                forecaster_name  = type(self).__name__,
-                steps            = steps,
-                is_fitted        = self.is_fitted,
-                exog_in_         = self.exog_in_,
-                index_type_      = self.index_type_,
-                index_freq_      = self.index_freq_,
-                window_size      = self.window_size_diff,
-                last_window      = last_window,
-                exog             = exog,
-                exog_type_in_    = self.exog_type_in_,
-                exog_names_in_   = self.exog_names_in_,
-                interval         = None,
-                max_steps        = None
+                forecaster_name = type(self).__name__,
+                steps           = steps,
+                is_fitted       = self.is_fitted,
+                exog_in_        = self.exog_in_,
+                index_type_     = self.index_type_,
+                index_freq_     = self.index_freq_,
+                window_size     = self.window_size,
+                last_window     = last_window,
+                exog            = exog,
+                exog_type_in_   = self.exog_type_in_,
+                exog_names_in_  = self.exog_names_in_,
+                interval        = None,
+                max_steps       = self.steps
             )
 
-        last_window = last_window.iloc[-self.window_size_diff:].copy()
+        last_window = last_window.iloc[-self.window_size:].copy()
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
@@ -904,10 +1312,24 @@ class ForecasterAutoregDirect(ForecasterBase):
                                  fit               = False,
                                  inverse_transform = False
                              )
+        if self.differentiation is not None:
+            last_window_values = self.differentiator.fit_transform(last_window_values)
         
-        X_lags = last_window_values[-self.lags].reshape(1, -1)
-        Xs_col_names = [f"lag_{i}" for i in self.lags]
+        X_autoreg = []
+        Xs_col_names = []
+        if self.lags is not None:
+            X_lags = last_window_values[-self.lags]
+            X_autoreg.append(X_lags)
+            Xs_col_names.extend([f"lag_{i}" for i in self.lags])
 
+        if self.window_features is not None:
+            X_window_features = np.concatenate(
+                [wf.transform(last_window_values) for wf in self.window_features]
+            )
+            X_autoreg.append(X_window_features)
+            Xs_col_names.extend(self.X_train_window_features_names_out_)
+
+        X_autoreg = np.concatenate(X_autoreg).reshape(1, -1)
         if exog is not None:
             exog = input_to_frame(data=exog, input_name='exog')
             exog = exog.loc[:, self.exog_names_in_]
@@ -925,15 +1347,16 @@ class ForecasterAutoregDirect(ForecasterBase):
             
             n_exog = exog.shape[1]
             Xs = [
-                np.hstack(
-                    [X_lags, 
-                     exog_values[(step - 1) * n_exog : step * n_exog].reshape(1, -1)]
+                np.concatenate(
+                    [X_autoreg, 
+                     exog_values[(step - 1) * n_exog : step * n_exog].reshape(1, -1)],
+                    axis=1
                 )
                 for step in steps
             ]
             Xs_col_names = Xs_col_names + self.X_train_exog_names_out_
         else:
-            Xs = [X_lags] * len(steps)
+            Xs = [X_autoreg] * len(steps)
 
         prediction_index = expand_index(
                                index = last_window_index,
@@ -1055,6 +1478,9 @@ class ForecasterAutoregDirect(ForecasterBase):
                 regressor.predict(X).ravel()[0] 
                 for regressor, X in zip(regressors, Xs)
             ])
+
+        if self.differentiation is not None:
+            predictions = self.differentiator.inverse_transform_next_window(predictions)
 
         predictions = transform_numpy(
                           array             = predictions,
@@ -1181,20 +1607,26 @@ class ForecasterAutoregDirect(ForecasterBase):
                          f"Check {check_residuals}.")
                     )
 
-        predictions = self.predict(
-                          steps       = steps,
-                          last_window = last_window,
-                          exog        = exog 
-                      )
+        Xs, _, steps, prediction_index = self._create_predict_inputs(
+            steps=steps, last_window=last_window, exog=exog
+        )
 
-        # Predictions must be in the transformed scale before adding residuals
-        boot_predictions = transform_numpy(
-                               array             = predictions.to_numpy().ravel(),
-                               transformer       = self.transformer_y,
-                               fit               = False,
-                               inverse_transform = False
-                           )
-        boot_predictions = np.tile(boot_predictions, (n_boot, 1)).T
+        # Predictions must be transformed and differenced before adding residuals
+        regressors = [self.regressors_[step] for step in steps]
+        with warnings.catch_warnings():
+            # Suppress scikit-learn warning: "X does not have valid feature names,
+            # but NoOpTransformer was fitted with feature names".
+            warnings.filterwarnings(
+                "ignore", 
+                message="X does not have valid feature names", 
+                category=UserWarning
+            )
+            predictions = np.array([
+                regressor.predict(X).ravel()[0] 
+                for regressor, X in zip(regressors, Xs)
+            ])
+
+        boot_predictions = np.tile(predictions, (n_boot, 1)).T
         boot_columns = [f"pred_boot_{i}" for i in range(n_boot)]
 
         rng = np.random.default_rng(seed=random_state)
@@ -1205,6 +1637,11 @@ class ForecasterAutoregDirect(ForecasterBase):
                                    replace = True
                                )
             boot_predictions[i, :] = boot_predictions[i, :] + sample_residuals
+
+        if self.differentiation is not None:
+            boot_predictions = (
+                self.differentiator.inverse_transform_next_window(boot_predictions)
+            )
 
         if self.transformer_y:
             boot_predictions = np.apply_along_axis(
@@ -1218,7 +1655,7 @@ class ForecasterAutoregDirect(ForecasterBase):
     
         boot_predictions = pd.DataFrame(
                                data    = boot_predictions,
-                               index   = predictions.index,
+                               index   = prediction_index,
                                columns = boot_columns
                            )
         
@@ -1485,7 +1922,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         return predictions
 
-    
+
     def set_params(
         self, 
         params: dict
@@ -1505,7 +1942,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         None
         
         """
-        
+
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
         self.regressors_ = {step: clone(self.regressor)
@@ -1536,31 +1973,86 @@ class ForecasterAutoregDirect(ForecasterBase):
 
     def set_lags(
         self, 
-        lags: Union[int, list, np.ndarray, range]
+        lags: Optional[Union[int, np.ndarray, list, range]] = None
     ) -> None:
         """
-        Set new value to the attribute `lags`. Attributes `max_lag`, 
-        `window_size` and  `window_size_diff` are also updated.
+        Set new value to the attribute `lags`. Attributes `max_lag` and 
+        `window_size` are also updated.
         
         Parameters
         ----------
-        lags : int, list, numpy ndarray, range
-            Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-
+        lags : int, list, numpy ndarray, range, default `None`
+            Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1. 
+        
             - `int`: include lags from 1 to `lags` (included).
             - `list`, `1d numpy ndarray` or `range`: include only lags present in 
             `lags`, all elements must be int.
+            - `None`: no lags are included as predictors. 
 
         Returns
         -------
         None
         
         """
+
+        if self.window_features is None and lags is None:
+            raise ValueError(
+                ("At least one of the arguments `lags` or `window_features` "
+                 "must be different from None. This is required to create the "
+                 "predictors used in training the forecaster.")
+            )
         
-        self.lags = initialize_lags(type(self).__name__, lags)
-        self.max_lag = max(self.lags)
-        self.window_size = self.max_lag
-        self.window_size_diff = self.max_lag
+        self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
+        self.window_size = max(
+            [ws for ws in [self.max_lag, self.max_size_window_features] 
+             if ws is not None]
+        )
+        if self.differentiation is not None:
+            self.window_size += self.differentiation
+
+
+    def set_window_features(
+        self, 
+        window_features: Optional[Union[object, list]] = None
+    ) -> None:
+        """
+        Set new value to the attribute `window_features`. Attributes 
+        `max_size_window_features`, `window_features_names`, 
+        `window_features_class_names` and `window_size` are also updated.
+        
+        Parameters
+        ----------
+        window_features : object, list, default `None`
+            Instance or list of instances used to create window features. Window features
+            are created from the original time series and are included as predictors.
+
+        Returns
+        -------
+        None
+        
+        """
+
+        if window_features is None and self.lags is None:
+            raise ValueError(
+                ("At least one of the arguments `lags` or `window_features` "
+                 "must be different from None. This is required to create the "
+                 "predictors used in training the forecaster.")
+            )
+        
+        self.window_features, self.max_size_window_features, self.window_features_names = (
+            initialize_window_features(window_features)
+        )
+        self.window_features_class_names = None
+        if window_features is not None:
+            self.window_features_class_names = [
+                type(wf).__name__ for wf in self.window_features
+            ] 
+        self.window_size = max(
+            [ws for ws in [self.max_lag, self.max_size_window_features] 
+             if ws is not None]
+        )
+        if self.differentiation is not None:
+            self.window_size += self.differentiation   
 
 
     def set_out_sample_residuals(

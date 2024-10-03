@@ -47,7 +47,7 @@ optional_dependencies = {
 def initialize_lags(
     forecaster_name: str,
     lags: Any
-) -> np.ndarray:
+) -> Union[Optional[np.ndarray], Optional[int]]:
     """
     Check lags argument input and generate the corresponding numpy ndarray.
 
@@ -60,41 +60,148 @@ def initialize_lags(
 
     Returns
     -------
-    lags : numpy ndarray
+    lags : numpy ndarray, None
         Lags used as predictors.
+    max_lag : int, None
+        Maximum value of the lags.
     
     """
 
-    if isinstance(lags, int):
-        if lags < 1:
-            raise ValueError("Minimum value of lags allowed is 1.")
-        lags = np.arange(1, lags + 1)
+    max_lag = None
+    if lags is not None:
+        if isinstance(lags, int):
+            if lags < 1:
+                raise ValueError("Minimum value of lags allowed is 1.")
+            lags = np.arange(1, lags + 1)
 
-    if isinstance(lags, (list, tuple, range)):
-        lags = np.array(lags)
-    
-    if isinstance(lags, np.ndarray):
-        if lags.ndim != 1:
-            raise ValueError("`lags` must be a 1-dimensional array.")
-        if lags.size == 0:
-            raise ValueError("Argument `lags` must contain at least one value.")
-        if not np.issubdtype(lags.dtype, np.integer):
-            raise TypeError("All values in `lags` must be integers.")
-        if np.any(lags < 1):
-            raise ValueError("Minimum value of lags allowed is 1.")
-    else:
-        if forecaster_name != 'ForecasterAutoregMultiVariate':
-            raise TypeError(
-                (f"`lags` argument must be an int, 1d numpy ndarray, range, tuple or list. "
-                 f"Got {type(lags)}.")
-            )
+        if isinstance(lags, (list, tuple, range)):
+            lags = np.array(lags)
+        
+        if isinstance(lags, np.ndarray):
+            if lags.ndim != 1:
+                raise ValueError("`lags` must be a 1-dimensional array.")
+            if lags.size == 0:
+                raise ValueError("Argument `lags` must contain at least one value.")
+            if not np.issubdtype(lags.dtype, np.integer):
+                raise TypeError("All values in `lags` must be integers.")
+            if np.any(lags < 1):
+                raise ValueError("Minimum value of lags allowed is 1.")
         else:
-            raise TypeError(
-                ("`lags` argument must be a dict, int, 1d numpy ndarray, range, tuple or list. "
-                 f"Got {type(lags)}.")
+            if forecaster_name != 'ForecasterAutoregMultiVariate':
+                raise TypeError(
+                    (f"`lags` argument must be an int, 1d numpy ndarray, range, "
+                     f"tuple or list. Got {type(lags)}.")
+                )
+            else:
+                raise TypeError(
+                    (f"`lags` argument must be a dict, int, 1d numpy ndarray, range, "
+                     f"tuple or list. Got {type(lags)}.")
+                )
+            
+        max_lag = max(lags)
+
+    return lags, max_lag
+
+
+def initialize_window_features(
+    window_features: Any
+) -> Union[Optional[list], Optional[int], Optional[list]]:
+    """
+    Check window_features argument input and generate the corresponding list.
+
+    Parameters
+    ----------
+    window_features : Any
+        Classes used to create window features.
+
+    Returns
+    -------
+    window_features : list, None
+        List of classes used to create window features.
+    max_size_window_features : int, None
+        Maximum value of the `window_sizes` attribute of all classes.
+    window_features_names : list, None
+        List with all the features names of the window features.
+    
+    """
+
+    needed_atts = ['window_sizes', 'features_names']
+    needed_methods = ['transform_batch', 'transform']
+    max_size_window_features = None
+
+    max_window_sizes = None
+    window_features_names = None
+    if window_features is not None:
+        if isinstance(window_features, list) and len(window_features) < 1:
+            raise ValueError(
+                "Argument `window_features` must contain at least one element."
+            )
+        if not isinstance(window_features, list):
+            window_features = [window_features]
+
+        # TODO: Add link to documentation in the error message: how to create a 
+        # custom window feature class
+        max_window_sizes = []
+        window_features_names = []
+        for wf in window_features:
+            wf_name = type(wf).__name__
+            atts_methods = set([a for a in dir(wf)])
+            if not set(needed_atts).issubset(atts_methods):
+                raise ValueError(
+                    (f"{wf_name} must have the attributes: {needed_atts}.")
+                )
+            if not set(needed_methods).issubset(atts_methods):
+                raise ValueError(
+                    (f"{wf_name} must have the methods: {needed_methods}.")
+                )
+            
+            window_sizes = wf.window_sizes
+            if not isinstance(window_sizes, (int, list)):
+                raise TypeError(
+                    (f"Attribute `window_sizes` of {wf_name} must be an int or a list "
+                     f"of ints. Got {type(window_sizes)}.")
+                )
+            
+            if isinstance(window_sizes, int):
+                if window_sizes < 1:
+                    raise ValueError(
+                        (f"If argument `window_sizes` is an integer, it must be equal "
+                         f"to or greater than 1. Got {window_sizes} from {wf_name}.")
+                    )
+                max_window_sizes.append(window_sizes)
+            else:
+                if not all(isinstance(ws, int) for ws in window_sizes) or not all(
+                    ws >= 1 for ws in window_sizes
+                ):                    
+                    raise ValueError(
+                        (f"If argument `window_sizes` is a list, all elements must be integers "
+                         f"equal to or greater than 1. Got {window_sizes} from {wf_name}.")
+                    )
+                max_window_sizes.append(max(window_sizes))
+
+            features_names = wf.features_names
+            if not isinstance(features_names, (str, list)):
+                raise TypeError(
+                    (f"Attribute `features_names` of {wf_name} must be a str or "
+                     f"a list of strings. Got {type(features_names)}.")
+                )
+            if isinstance(features_names, str):
+                window_features_names.append(features_names)
+            else:
+                if not all(isinstance(fn, str) for fn in features_names):
+                    raise TypeError(
+                        (f"If argument `features_names` is a list, all elements "
+                         f"must be strings. Got {features_names} from {wf_name}.")
+                    )
+                window_features_names.extend(features_names)
+
+        max_size_window_features = max(max_window_sizes)
+        if len(set(window_features_names)) != len(window_features_names):
+            raise ValueError(
+                (f"All window features names must be unique. Got {window_features_names}.")
             )
 
-    return lags
+    return window_features, max_size_window_features, window_features_names
 
 
 def initialize_weights(
@@ -134,8 +241,7 @@ def initialize_weights(
 
     if weight_func is not None:
 
-        if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                               'ForecasterAutoregMultiSeriesCustom']:
+        if forecaster_name in ['ForecasterAutoregMultiSeries']:
             if not isinstance(weight_func, (Callable, dict)):
                 raise TypeError(
                     (f"Argument `weight_func` must be a Callable or a dict of "
@@ -202,8 +308,7 @@ def initialize_transformer_series(
     series_names_in_ : list
         Names of the series (levels) used during training.
     encoding : str, default `None`
-        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiSeriesCustom`).
+        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`).
     transformer_series : object, dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -218,8 +323,7 @@ def initialize_transformer_series(
     """
 
     multiseries_forecasters = [
-        'ForecasterAutoregMultiSeries',
-        'ForecasterAutoregMultiSeriesCustom'
+        'ForecasterAutoregMultiSeries'
     ]
 
     if forecaster_name in multiseries_forecasters:
@@ -264,15 +368,12 @@ def initialize_lags_grid(
     Parameters
     ----------
     forecaster : Forecaster
-        Forecaster model. ForecasterAutoreg, ForecasterAutoregCustom, 
-        ForecasterAutoregDirect, ForecasterAutoregMultiSeries, 
-        ForecasterAutoregMultiSeriesCustom, ForecasterAutoregMultiVariate.
+        Forecaster model. ForecasterAutoreg, ForecasterAutoregDirect, 
+        ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate.
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
-        DataFrame, and the values are used as the lists of lags to try. Ignored 
-        if the forecaster is an instance of `ForecasterAutoregCustom` or 
-        `ForecasterAutoregMultiSeriesCustom`.
+        DataFrame, and the values are used as the lists of lags to try.
 
     Returns
     -------
@@ -289,21 +390,11 @@ def initialize_lags_grid(
              f"Got {type(lags_grid)}.")
         )
 
-    if type(forecaster).__name__ in ['ForecasterAutoregCustom', 
-                                     'ForecasterAutoregMultiSeriesCustom']:
-        if lags_grid is not None:
-            warnings.warn(
-                (f"`lags_grid` ignored if forecaster is an instance of "
-                 f"`{type(forecaster).__name__}`."),
-                IgnoredArgumentWarning
-            )
-        lags_grid = ['custom predictors']
-
     lags_label = 'values'
     if isinstance(lags_grid, list):
         lags_grid = {f'{lags}': lags for lags in lags_grid}
     elif lags_grid is None:
-        lags = [int(lag) for lag in forecaster.lags] # Required since numpy 2.0
+        lags = [int(lag) for lag in forecaster.lags]  # Required since numpy 2.0
         lags_grid = {f'{lags}': lags}
     else:
         lags_label = 'keys'
@@ -685,18 +776,16 @@ def check_predict_input(
         Maximum number of steps allowed (`ForecasterAutoregDirect` and 
         `ForecasterAutoregMultiVariate`).
     levels : str, list, default `None`
-        Time series to be predicted (`ForecasterAutoregMultiSeries`,
-        `ForecasterAutoregMultiSeriesCustom` and `ForecasterRnn).
+        Time series to be predicted (`ForecasterAutoregMultiSeries`
+        and `ForecasterRnn).
     levels_forecaster : str, list, default `None`
         Time series used as output data of a multiseries problem in a RNN problem
         (`ForecasterRnn`).
     series_names_in_ : list, default `None`
         Names of the columns used during fit (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiSeriesCustom`, `ForecasterAutoregMultiVariate`
-        and `ForecasterRnn`).
+        `ForecasterAutoregMultiVariate` and `ForecasterRnn`).
     encoding : str, default `None`
-        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiSeriesCustom`).
+        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`).
 
     Returns
     -------
@@ -733,7 +822,6 @@ def check_predict_input(
         check_interval(interval=interval, alpha=alpha)
 
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                           'ForecasterAutoregMultiSeriesCustom',
                            'ForecasterRnn']:
         if not isinstance(levels, (type(None), str, list)):
             raise TypeError(
@@ -784,7 +872,6 @@ def check_predict_input(
     # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
     if isinstance(last_window, type(None)) and forecaster_name not in [
         'ForecasterAutoregMultiSeries', 
-        'ForecasterAutoregMultiSeriesCustom',
         'ForecasterRnn'
     ]:
         raise ValueError(
@@ -793,7 +880,6 @@ def check_predict_input(
         )
 
     if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                           'ForecasterAutoregMultiSeriesCustom',
                            'ForecasterAutoregMultiVariate',
                            'ForecasterRnn']:
         if not isinstance(last_window, pd.DataFrame):
@@ -804,7 +890,6 @@ def check_predict_input(
         last_window_cols = last_window.columns.to_list()
 
         if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                               'ForecasterAutoregMultiSeriesCustom',
                                'ForecasterRnn'] and \
             len(set(levels) - set(last_window_cols)) != 0:
             raise ValueError(
@@ -861,8 +946,7 @@ def check_predict_input(
     if exog is not None:
 
         # Check type, nulls and expected type
-        if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                               'ForecasterAutoregMultiSeriesCustom']:
+        if forecaster_name in ['ForecasterAutoregMultiSeries']:
             if not isinstance(exog, (pd.Series, pd.DataFrame, dict)):
                 raise TypeError(
                     f"`exog` must be a pandas Series, DataFrame or dict. Got {type(exog)}."
@@ -911,8 +995,7 @@ def check_predict_input(
             # Check exog has many values as distance to max step predicted
             last_step = max(steps) if isinstance(steps, list) else steps
             if len(exog_to_check) < last_step:
-                if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                                       'ForecasterAutoregMultiSeriesCustom']:
+                if forecaster_name in ['ForecasterAutoregMultiSeries']:
                     warnings.warn(
                         (f"{exog_name} doesn't have as many values as steps "
                          f"predicted, {last_step}. Missing values are filled "
@@ -930,8 +1013,7 @@ def check_predict_input(
             if isinstance(exog_to_check, pd.DataFrame):
                 col_missing = set(exog_names_in_).difference(set(exog_to_check.columns))
                 if col_missing:
-                    if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                                           'ForecasterAutoregMultiSeriesCustom']:
+                    if forecaster_name in ['ForecasterAutoregMultiSeries']:
                         warnings.warn(
                             (f"{col_missing} not present in {exog_name}. All "
                              f"values will be NaN."),
@@ -949,8 +1031,7 @@ def check_predict_input(
                     )
 
                 if exog_to_check.name not in exog_names_in_:
-                    if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                                           'ForecasterAutoregMultiSeriesCustom']:
+                    if forecaster_name in ['ForecasterAutoregMultiSeries']:
                         warnings.warn(
                             (f"'{exog_to_check.name}' was not observed during training. "
                              f"{exog_name} is ignored. Exogenous variables must be one "
@@ -973,8 +1054,7 @@ def check_predict_input(
                     (f"Expected index of type {index_type_} for {exog_name}. "
                      f"Got {type(exog_index)}.")
                 )
-            if forecaster_name not in ['ForecasterAutoregMultiSeries', 
-                                       'ForecasterAutoregMultiSeriesCustom']:
+            if forecaster_name not in ['ForecasterAutoregMultiSeries']:
                 if isinstance(exog_index, pd.DatetimeIndex):
                     if not exog_index.freqstr == index_freq_:
                         raise TypeError(
@@ -985,8 +1065,7 @@ def check_predict_input(
             # Check exog starts one step ahead of last_window end.
             expected_index = expand_index(last_window.index, 1)[0]
             if expected_index != exog_to_check.index[0]:
-                if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                                       'ForecasterAutoregMultiSeriesCustom']:
+                if forecaster_name in ['ForecasterAutoregMultiSeries']:
                     warnings.warn(
                         (f"To make predictions {exog_name} must start one step "
                          f"ahead of `last_window`. Missing values are filled "
@@ -1388,7 +1467,7 @@ def exog_to_direct(
     
     return exog_transformed
 
-
+# TODO: See if can return direct cols names
 def exog_to_direct_numpy(
     exog: np.ndarray,
     steps: int
@@ -2045,7 +2124,6 @@ def check_backtesting_input(
 
     forecasters_uni = [
         "ForecasterAutoreg",
-        "ForecasterAutoregCustom",
         "ForecasterAutoregDirect",
         "ForecasterSarimax",
         "ForecasterEquivalentDate",
@@ -2055,8 +2133,7 @@ def check_backtesting_input(
         "ForecasterRnn",
     ]
     forecasters_multi_dict = [
-        "ForecasterAutoregMultiSeries",
-        "ForecasterAutoregMultiSeriesCustom",
+        "ForecasterAutoregMultiSeries"
     ]
 
     forecaster_name = type(forecaster).__name__
@@ -2264,20 +2341,17 @@ def select_n_jobs_backtesting(
 
     - If `refit` is an integer, then `n_jobs = 1`. This is because parallelization doesn't 
     work with intermittent refit.
-    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom' and
-    regressor is a linear regressor, then `n_jobs = 1`.
-    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor is not a linear regressor and `refit = True`, then
-    `n_jobs = cpu_count() - 1`.
-    - If forecaster is 'ForecasterAutoreg' or 'ForecasterAutoregCustom',
-    regressor is not a linear regressor and `refit = False`, then
-    `n_jobs = 1`.
+    - If forecaster is 'ForecasterAutoreg' and regressor is a linear regressor, 
+    then `n_jobs = 1`.
+    - If forecaster is 'ForecasterAutoreg' and regressor is not a linear 
+    regressor and `refit = True`, then `n_jobs = cpu_count() - 1`.
+    - If forecaster is 'ForecasterAutoreg' and regressor is not a linear 
+    regressor and `refit = False`, then `n_jobs = 1`.
     - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and `refit = True`, then `n_jobs = cpu_count() - 1`.
     - If forecaster is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
     and `refit = False`, then `n_jobs = 1`.
-    - If forecaster is 'ForecasterAutoregMultiSeries' or 
-    'ForecasterAutoregMultiSeriesCustom', then `n_jobs = cpu_count() - 1`.
+    - If forecaster is 'ForecasterAutoregMultiSeries', then `n_jobs = cpu_count() - 1`.
     - If forecaster is 'ForecasterSarimax' or 'ForecasterEquivalentDate', 
     then `n_jobs = 1`.
     - If regressor is a `LGBMRegressor`, then `n_jobs = 1`. This is because `lightgbm` 
@@ -2316,14 +2390,14 @@ def select_n_jobs_backtesting(
     if not isinstance(refit, bool) and refit != 1:
         n_jobs = 1
     else:
-        if forecaster_name in ['ForecasterAutoreg', 'ForecasterAutoregCustom']:
+        if forecaster_name in ['ForecasterAutoreg']:
             if regressor_name in linear_regressors or regressor_name == 'LGBMRegressor':
                 n_jobs = 1
             else:
                 n_jobs = joblib.cpu_count() - 1 if refit else 1
         elif forecaster_name in ['ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate']:
             n_jobs = 1
-        elif forecaster_name in ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom']:
+        elif forecaster_name in ['ForecasterAutoregMultiSeries']:
             if regressor_name == 'LGBMRegressor':
                 n_jobs = 1
             else:
@@ -2390,8 +2464,7 @@ def check_preprocess_series(
     series: Union[pd.DataFrame, dict],
 ) -> Tuple[dict, pd.Index]:
     """
-    Check and preprocess `series` argument in `ForecasterAutoregMultiSeries` and
-    `ForecasterAutoregMultiSeriesCustom` classes.
+    Check and preprocess `series` argument in `ForecasterAutoregMultiSeries` class.
 
     - If `series` is a pandas DataFrame, it is converted to a dict of pandas 
     Series and index is overwritten according to the rules of preprocess_y.
@@ -2497,8 +2570,7 @@ def check_preprocess_exog_multiseries(
     exog_dict: dict,
 ) -> Tuple[dict, list]:
     """
-    Check and preprocess `exog` argument in `ForecasterAutoregMultiSeries` and
-    `ForecasterAutoregMultiSeriesCustom` classes.
+    Check and preprocess `exog` argument in `ForecasterAutoregMultiSeries` class.
 
     - If input series is a pandas DataFrame (input_series_is_dict = False),  
     checks that input exog (pandas Series, DataFrame or dict) has the same index 
@@ -2862,8 +2934,7 @@ def prepare_residuals_multiseries(
     use_in_sample_residuals : bool
         Indicates if `forecaster.in_sample_residuals_` are used.
     encoding : str, default `None`
-        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiSeriesCustom`).
+        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`).
     in_sample_residuals_ : dict, default `None`
         Residuals of the model when predicting training data. Only stored up to
         1000 values in the form `{level: residuals}`. If `transformer_series` 

@@ -13,27 +13,17 @@ from sklearn.preprocessing import StandardScaler
 from skforecast.metrics import mean_absolute_scaled_error
 from skforecast.metrics import root_mean_squared_scaled_error
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.model_selection.model_selection import _evaluate_grid_hyperparameters
-
-from tqdm import tqdm
-from functools import partialmethod
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 # Fixtures
 from .fixtures_model_selection import y
 from .fixtures_model_selection import y_feature_selection
 from .fixtures_model_selection import exog_feature_selection
 
-def create_predictors(y):  # pragma: no cover
-    """
-    Create first 4 lags of a time series, used in ForecasterAutoregCustom.
-    """
-
-    lags = y[-1:-5:-1]
-
-    return lags
+from tqdm import tqdm
+from functools import partialmethod
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 
 def test_ValueError_evaluate_grid_hyperparameters_when_return_best_and_len_y_exog_different():
@@ -131,8 +121,8 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_mocked():
             'lags_label' : [[1, 2], [1, 2], [1, 2], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4]],
             'params'     : [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
                             {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            'mean_squared_error':np.array([0.06464646, 0.06502362, 0.06745534, 
-                                           0.06779272, 0.06802481, 0.06948609]),                                                               
+            'mean_squared_error': np.array([0.06464646, 0.06502362, 0.06745534, 
+                                            0.06779272, 0.06802481, 0.06948609]),                                                               
             'alpha'      : np.array([0.01, 0.1 , 1.  , 0.01, 0.1 , 1.  ])
                                      },
             index = pd.RangeIndex(start=0, stop=idx, step=1)
@@ -148,7 +138,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_diferentiat
     """
     forecaster = ForecasterAutoreg(
                      regressor       = Ridge(random_state=123),
-                     lags            = 2, # Placeholder, the value will be overwritten
+                     lags            = 2,
                      differentiation = 1
                  )
 
@@ -157,7 +147,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_diferentiat
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
-    idx = len(lags_grid)*len(param_grid)
+    idx = len(lags_grid) * len(param_grid)
 
     results = _evaluate_grid_hyperparameters(
                   forecaster         = forecaster,
@@ -188,50 +178,6 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_with_diferentiat
     pd.testing.assert_frame_equal(results, expected_results)
 
 
-def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_diferentiation_mocked():
-    """
-    Test output of _evaluate_grid_hyperparameters in ForecasterAutoregCustom with mocked
-    (mocked done in Skforecast v0.10.0) when differentiation is used.
-    """
-    forecaster = ForecasterAutoregCustom(
-                     regressor       = Ridge(random_state=123),
-                     fun_predictors  = create_predictors,
-                     window_size     = 4,
-                     differentiation = 1
-                 )
-
-    steps = 3
-    n_validation = 12
-    y_train = y[:-n_validation]
-    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
-    idx = len(param_grid)
-
-    results = _evaluate_grid_hyperparameters(
-                  forecaster         = forecaster,
-                  y                  = y,
-                  param_grid         = param_grid,
-                  steps              = steps,
-                  refit              = False,
-                  metric             = 'mean_squared_error',
-                  initial_train_size = len(y_train),
-                  fixed_train_size   = False,
-                  return_best        = False,
-                  verbose            = False
-              ).reset_index(drop=True)
-    
-    expected_results = pd.DataFrame({
-        'lags'       : ['custom predictors', 'custom predictors', 'custom predictors'],
-        'lags_label' : ['custom predictors', 'custom predictors', 'custom predictors'],
-        'params'     : [{'alpha': 1}, {'alpha': 0.1}, {'alpha': 0.01}],
-        'mean_squared_error': np.array([0.09168123, 0.09930084, 0.1012931]),                                                               
-        'alpha'      : np.array([1., 0.1, 0.01])
-        },
-        index = pd.RangeIndex(start=0, stop=idx, step=1)
-    )
-
-    pd.testing.assert_frame_equal(results, expected_results)
-
-
 def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_dict_with_mocked():
     """
     Test output of _evaluate_grid_hyperparameters in ForecasterAutoreg when 
@@ -247,7 +193,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_dict_w
     y_train = y[:-n_validation]
     lags_grid = {'lags_1': 2, 'lags_2': 4}
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
-    idx = len(lags_grid)*len(param_grid)
+    idx = len(lags_grid) * len(param_grid)
 
     results = _evaluate_grid_hyperparameters(
                   forecaster         = forecaster,
@@ -327,7 +273,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_metric_list_with
     """
     forecaster = ForecasterAutoreg(
                      regressor = Ridge(random_state=123),
-                     lags      = 2 # Placeholder, the value will be overwritten
+                     lags      = 2
                  )
 
     steps = 3
@@ -335,7 +281,7 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_metric_list_with
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
-    idx = len(lags_grid)*len(param_grid)
+    idx = len(lags_grid) * len(param_grid)
 
     results = _evaluate_grid_hyperparameters(
                   forecaster         = forecaster,
@@ -366,49 +312,6 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_metric_list_with
         index = pd.RangeIndex(start=0, stop=idx, step=1)
     )
 
-    pd.testing.assert_frame_equal(results, expected_results)
-
-
-def test_output_evaluate_grid_hyperparameters_ForecasterAutoregCustom_with_mocked():
-    """
-    Test output of _evaluate_grid_hyperparameters in ForecasterAutoregCustom with mocked
-    (mocked done in Skforecast v0.4.3).
-    """
-    forecaster = ForecasterAutoregCustom(
-                     regressor      = Ridge(random_state=123),
-                     fun_predictors = create_predictors,
-                     window_size    = 4
-                 )
-
-    steps = 3
-    n_validation = 12
-    y_train = y[:-n_validation]
-    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
-    idx = len(param_grid)
-
-    results = _evaluate_grid_hyperparameters(
-                  forecaster         = forecaster,
-                  y                  = y,
-                  param_grid         = param_grid,
-                  steps              = steps,
-                  refit              = False,
-                  metric             = 'mean_squared_error',
-                  initial_train_size = len(y_train),
-                  fixed_train_size   = False,
-                  return_best        = False,
-                  verbose            = False
-              )
-    
-    expected_results = pd.DataFrame({
-        'lags'       : ['custom predictors', 'custom predictors', 'custom predictors'],
-        'lags_label' : ['custom predictors', 'custom predictors', 'custom predictors'],
-        'params'     : [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-        'mean_squared_error': np.array([0.06779272, 0.06802481, 0.06948609]),                                                               
-        'alpha'      : np.array([0.01, 0.1 , 1.])
-        },
-        index = pd.RangeIndex(start=0, stop=idx, step=1)
-     )
-    
     pd.testing.assert_frame_equal(results, expected_results)
 
 
@@ -448,42 +351,6 @@ def test_evaluate_grid_hyperparameters_when_return_best_ForecasterAutoreg(lags_g
     expected_alpha = 0.01
     
     assert (expected_lags == forecaster.lags).all()
-    assert expected_alpha == forecaster.regressor.alpha
-
-
-def test_evaluate_grid_hyperparameters_when_return_best_ForecasterAutoregCustom():
-    """
-    Test forecaster is refitted when return_best=True in 
-    _evaluate_grid_hyperparameters with ForecasterAutoregCustom.
-    """
-    forecaster = ForecasterAutoregCustom(
-                     regressor      = Ridge(random_state=123),
-                     fun_predictors = create_predictors,
-                     window_size    = 4
-                 )
-
-    steps = 3
-    n_validation = 12
-    y_train = y[:-n_validation]
-    param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
-    lags_grid = None # Ignored
-
-    _evaluate_grid_hyperparameters(
-        forecaster         = forecaster,
-        y                  = y,
-        lags_grid          = lags_grid,
-        param_grid         = param_grid,
-        steps              = steps,
-        refit              = False,
-        metric             = 'mean_squared_error',
-        initial_train_size = len(y_train),
-        fixed_train_size   = False,
-        return_best        = True,
-        verbose            = False
-    )
-    
-    expected_alpha = 0.01
-    
     assert expected_alpha == forecaster.regressor.alpha
 
 

@@ -640,7 +640,9 @@ def _np_cv_jit(x):
 
 class RollingFeatures():
     """
-    This class computes rolling features.
+    This class computes rolling features. To avoid data leakage, the last point 
+    in the window is excluded from calculations, ('closed': 'left' and 
+    'center': False).
 
     Parameters
     ----------
@@ -686,10 +688,10 @@ class RollingFeatures():
 
     def __init__(
         self, 
-        stats, 
-        window_sizes, 
+        stats: Union[str, list],
+        window_sizes: Union[int, list],
         min_periods: Optional[Union[int, list]] = None,
-        features_names: Optional[Union[str, list]] = None, 
+        features_names: Optional[list] = None, 
         fillna: Optional[Union[str, float]] = None
     ) -> None:
         
@@ -737,7 +739,12 @@ class RollingFeatures():
             key = f"{params[0]}_{params[1]}"
             if key not in unique_rolling_windows:
                 unique_rolling_windows[key] = {
-                    'params': {'window': params[0], 'min_periods': params[1]},
+                    'params': {
+                        'window': params[0], 
+                        'min_periods': params[1], 
+                        'center': False,
+                        'closed': 'left'
+                    },
                     'stats_idx': [], 
                     'stats_names': [], 
                     'rolling_obj': None
@@ -953,7 +960,7 @@ class RollingFeatures():
 
         rolling_features = pd.concat(rolling_features, axis=1)
         rolling_features.columns = self.features_names
-        rolling_features = rolling_features.iloc[self.max_window_size - 1:]
+        rolling_features = rolling_features.iloc[self.max_window_size:]
 
         if self.fillna is not None:
             if self.fillna == 'mean':
@@ -1016,7 +1023,7 @@ class RollingFeatures():
     ) -> np.ndarray:
         """
         Transform a numpy array using rolling windows and compute the 
-        specified statistics.
+        specified statistics. The input array must be a 1D array.
 
         Parameters
         ----------
@@ -1029,8 +1036,6 @@ class RollingFeatures():
             An array containing the computed statistics.
         
         """
-
-        # TODO: Check shape of X
 
         rolling_features = np.full(shape=self.n_stats, fill_value=np.nan, dtype=float)
         for i, stat in enumerate(self.stats):

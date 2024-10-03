@@ -6,6 +6,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import LinearRegression
 from lightgbm import LGBMRegressor
+from skforecast.preprocessing import RollingFeatures
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 
 # Fixtures
@@ -58,6 +59,61 @@ def test_recursive_predict_output_when_regressor_is_Ridge_StandardScaler():
     
     expected = np.array([1.745476, 1.803196, 1.865844, 1.930923, 1.997202])
 
+    np.testing.assert_array_almost_equal(predictions, expected)
+
+
+def test_recursive_predict_output_with_window_features():
+    """
+    Test _recursive_predict output with window features.
+    """
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=4)
+    forecaster = ForecasterAutoreg(
+        LGBMRegressor(verbose=-1), lags=3, window_features=rolling
+    )
+    forecaster.fit(y=y, exog=exog)
+
+    last_window_values, exog_values, _ = (
+        forecaster._create_predict_inputs(steps=10, exog=exog_predict)
+    )
+    predictions = forecaster._recursive_predict(
+                      steps              = 10,
+                      last_window_values = last_window_values,
+                      exog_values        = exog_values
+                  )
+    
+    expected = np.array(
+                   [0.584584, 0.487441, 0.483098, 0.483098, 0.580241, 
+                    0.584584, 0.584584, 0.487441, 0.483098, 0.483098]
+               )
+    
+    np.testing.assert_array_almost_equal(predictions, expected)
+
+
+def test_recursive_predict_output_with_two_window_features():
+    """
+    Test _recursive_predict output with 2 window features.
+    """
+    rolling = RollingFeatures(stats=['mean'], window_sizes=4)
+    rolling_2 = RollingFeatures(stats=['median'], window_sizes=4)
+    forecaster = ForecasterAutoreg(
+        LGBMRegressor(verbose=-1), lags=3, window_features=[rolling, rolling_2]
+    )
+    forecaster.fit(y=y, exog=exog)
+
+    last_window_values, exog_values, _ = (
+        forecaster._create_predict_inputs(steps=10, exog=exog_predict)
+    )
+    predictions = forecaster._recursive_predict(
+                      steps              = 10,
+                      last_window_values = last_window_values,
+                      exog_values        = exog_values
+                  )
+    
+    expected = np.array(
+                   [0.584584, 0.487441, 0.483098, 0.483098, 0.580241, 
+                    0.584584, 0.584584, 0.487441, 0.483098, 0.483098]
+               )
+    
     np.testing.assert_array_almost_equal(predictions, expected)
 
 

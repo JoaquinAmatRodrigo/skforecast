@@ -57,7 +57,7 @@ When working with time series, it is seldom needed to predict only the next elem
 
 ### Recursive multi-step forecasting
 
-Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown, a recursive process is applied in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting and can be easily generated with the [`ForecasterAutoreg`](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html) and [`ForecasterAutoregCustom`](https://skforecast.org/latest/user_guides/window-features-and-custom-features.html) classes.
+Since the value *t(n-1)* is required to predict *t(n)*, and *t(n-1)* is unknown, a recursive process is applied in which, each new prediction, is based on the previous one. This process is known as recursive forecasting or recursive multi-step forecasting and can be easily generated with the [`ForecasterAutoreg`](https://skforecast.org/latest/user_guides/autoregresive-forecaster.html) class.
 
 <p style="text-align: center">
     <img src="../img/diagram-recursive-mutistep-forecasting.png" style="width: 650px">
@@ -128,7 +128,6 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 | Forecaster                   | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Time series differentiation | Exogenous features | Custom features |
 |:-----------------------------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:---------------------------:|:------------------:|:---------------:|
 |[ForecasterAutoreg]           |✔️||✔️||✔️|✔️|✔️||
-|[ForecasterAutoregCustom]     |✔️||✔️||✔️|✔️|✔️|✔️|✔️|
 |[ForecasterAutoregDirect]     |✔️|||✔️|✔️||✔️||
 |[ForecasterMultiSeries]       ||✔️|✔️||✔️|✔️|✔️||
 |[ForecasterMultiSeriesCustom] ||✔️|✔️||✔️|✔️|✔️|✔️|
@@ -137,7 +136,6 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 |[ForecasterSarimax]           |✔️||✔️||✔️|✔️|✔️||
 
 [ForecasterAutoreg]: https://skforecast.org/latest/user_guides/autoregresive-forecaster.html
-[ForecasterAutoregCustom]: https://skforecast.org/latest/user_guides/window-features-and-custom-features.html
 [ForecasterAutoregDirect]: https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html
 [ForecasterMultiSeries]: https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html
 [ForecasterMultiSeriesCustom]: https://skforecast.org/latest/user_guides/window-features-and-custom-features.html#forecasterautoregmultiseriescustom

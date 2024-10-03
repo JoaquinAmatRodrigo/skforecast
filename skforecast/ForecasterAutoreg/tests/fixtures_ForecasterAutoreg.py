@@ -94,4 +94,3 @@ data = pd.Series(
     name = 'y',
     index = pd.date_range(start='1991-07-01', periods=204, freq='MS')
 )
-

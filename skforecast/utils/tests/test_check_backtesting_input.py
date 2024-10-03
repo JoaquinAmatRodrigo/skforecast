@@ -8,11 +8,9 @@ from sklearn.linear_model import Ridge
 from sklearn.exceptions import NotFittedError
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
-from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.utils import check_backtesting_input
 
@@ -20,20 +18,9 @@ from skforecast.utils import check_backtesting_input
 from skforecast.model_selection.tests.fixtures_model_selection import y
 from skforecast.model_selection_multiseries.tests.fixtures_model_selection_multiseries import series
 
-def create_predictors(y):  # pragma: no cover
-    """
-    Create first 3 lags of a time series.
-    """
-    
-    lags = y[-1:-4:-1]
-    
-    return lags
-
 
 @pytest.mark.parametrize("forecaster", 
                          [ForecasterAutoreg(regressor=Ridge(), lags=2),
-                          ForecasterAutoregCustom(regressor=Ridge(), window_size=3,
-                                                  fun_predictors=create_predictors),
                           ForecasterAutoregDirect(regressor=Ridge(), lags=2, steps=3),
                           ForecasterSarimax(regressor=Sarimax(order=(1, 1, 1)))], 
                          ids = lambda fr: f'forecaster: {type(fr).__name__}')
@@ -103,17 +90,12 @@ def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_m
         )
 
 
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
-                                                             window_size=3,
-                                                             fun_predictors=create_predictors)], 
-                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
-def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_multiseries_dict(forecaster):
+def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_multiseries_dict():
     """
     Test TypeError is raised in check_backtesting_input if `series` is not a 
     pandas DataFrame in forecasters multiseries with dict.
     """
+    forecaster = ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2)
     bad_series = pd.Series(np.arange(50))
 
     err_msg = re.escape(
@@ -143,17 +125,12 @@ def test_check_backtesting_input_TypeError_when_series_is_not_pandas_DataFrame_m
         )
 
 
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
-                                                             window_size=3,
-                                                             fun_predictors=create_predictors)], 
-                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
-def test_check_backtesting_input_TypeError_when_series_is_dict_of_pandas_Series_multiseries_dict(forecaster):
+def test_check_backtesting_input_TypeError_when_series_is_dict_of_pandas_Series_multiseries_dict():
     """
     Test TypeError is raised in check_backtesting_input if `series` is not a 
     dict of pandas Series in forecasters multiseries with dict.
     """
+    forecaster = ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2)
     bad_series = {'l1': np.arange(50)}
 
     err_msg = re.escape(
@@ -184,18 +161,13 @@ def test_check_backtesting_input_TypeError_when_series_is_dict_of_pandas_Series_
         )
 
 
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
-                                                             window_size=3,
-                                                             fun_predictors=create_predictors)], 
-                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
-def test_check_backtesting_input_ValueError_when_series_is_dict_no_DatetimeIndex_multiseries_dict(forecaster):
+def test_check_backtesting_input_ValueError_when_series_is_dict_no_DatetimeIndex_multiseries_dict():
     """
     Test ValueError is raised in check_backtesting_input if `series` is a 
     dict with pandas Series with no DatetimeIndex in forecasters 
     multiseries with dict.
     """
+    forecaster = ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2)
     series_dict = {
         'l1': pd.Series(np.arange(50)),
         'l2': pd.Series(np.arange(50))
@@ -228,18 +200,13 @@ def test_check_backtesting_input_ValueError_when_series_is_dict_no_DatetimeIndex
         )
 
 
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
-                                                             window_size=3,
-                                                             fun_predictors=create_predictors)], 
-                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
-def test_check_backtesting_input_ValueError_when_series_is_dict_diff_freq_multiseries_dict(forecaster):
+def test_check_backtesting_input_ValueError_when_series_is_dict_diff_freq_multiseries_dict():
     """
     Test ValueError is raised in check_backtesting_input if `series` is a 
     dict with pandas Series of difference frequency in forecasters 
     multiseries with dict.
     """
+    forecaster = ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2)
     series_dict = {
         'l1': pd.Series(np.arange(50)),
         'l2': pd.Series(np.arange(50))
@@ -278,17 +245,12 @@ def test_check_backtesting_input_ValueError_when_series_is_dict_diff_freq_multis
         )
 
 
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
-                                                             window_size=3,
-                                                             fun_predictors=create_predictors)], 
-                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
-def test_check_backtesting_input_TypeError_when_not_valid_exog_type_multiseries_dict(forecaster):
+def test_check_backtesting_input_TypeError_when_not_valid_exog_type_multiseries_dict():
     """
     Test TypeError is raised in check_backtesting_input if `exog` is not a
     pandas Series, DataFrame, dictionary of pandas Series/DataFrames or None.
     """
+    forecaster = ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2)
     series_dict = {
         'l1': pd.Series(np.arange(50)),
         'l2': pd.Series(np.arange(50))
@@ -330,17 +292,12 @@ def test_check_backtesting_input_TypeError_when_not_valid_exog_type_multiseries_
         )
 
 
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2),
-                          ForecasterAutoregMultiSeriesCustom(regressor=Ridge(), 
-                                                             window_size=3,
-                                                             fun_predictors=create_predictors)], 
-                         ids = lambda fr: f'forecaster: {type(fr).__name__}')
-def test_check_backtesting_input_TypeError_when_not_valid_exog_dict_type_multiseries_dict(forecaster):
+def test_check_backtesting_input_TypeError_when_not_valid_exog_dict_type_multiseries_dict():
     """
     Test TypeError is raised in check_backtesting_input if `exog` is not a
     dictionary of pandas Series/DataFrames.
     """
+    forecaster = ForecasterAutoregMultiSeries(regressor=Ridge(), lags=2)
     series_dict = {
         'l1': pd.Series(np.arange(50)),
         'l2': pd.Series(np.arange(50))

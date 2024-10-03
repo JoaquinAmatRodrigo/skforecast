@@ -156,7 +156,7 @@ def test_RollingFeatures_init_store_parameters(params):
     assert rolling.fillna == 'ffill'
 
     unique_rolling_windows = {
-        '5_5': {'params': {'window': 5, 'min_periods': 5}, 
+        '5_5': {'params': {'window': 5, 'min_periods': 5, 'center': False, 'closed': 'left'}, 
                 'stats_idx': [0],
                 'stats_names': ['roll_mean_5'],
                 'rolling_obj': None}
@@ -182,11 +182,11 @@ def test_RollingFeatures_init_store_parameters_multiple_stats():
     assert rolling.fillna is None
 
     unique_rolling_windows = {
-        '5_5': {'params': {'window': 5, 'min_periods': 5}, 
+        '5_5': {'params': {'window': 5, 'min_periods': 5, 'center': False, 'closed': 'left'}, 
                 'stats_idx': [0, 1],
                 'stats_names': ['roll_mean_5', 'roll_median_5'],
                 'rolling_obj': None},
-        '6_6': {'params': {'window': 6, 'min_periods': 6}, 
+        '6_6': {'params': {'window': 6, 'min_periods': 6, 'center': False, 'closed': 'left'}, 
                 'stats_idx': [2],
                 'stats_names': ['roll_sum_6'],
                 'rolling_obj': None}
@@ -221,13 +221,14 @@ def test_RollingFeatures_apply_stat_pandas_numpy():
              'ratio_min_max', 'coef_variation']
     
     rolling = RollingFeatures(stats=stats, window_sizes=10)
-    X_window = X.iloc[-10:]
+    X_window_pandas = X.iloc[-11:]
+    X_window_numpy = X.to_numpy()[-11:-1]
 
     for stat in stats:
 
-        rolling_obj = X_window.rolling(**rolling.unique_rolling_windows['10_10']['params'])
+        rolling_obj = X_window_pandas.rolling(**rolling.unique_rolling_windows['10_10']['params'])
         stat_pandas = rolling._apply_stat_pandas(rolling_obj, stat).iat[-1]
-        stat_numpy = rolling._apply_stat_numpy_jit(X_window.to_numpy(), stat)
+        stat_numpy = rolling._apply_stat_numpy_jit(X_window_numpy, stat)
 
         np.testing.assert_almost_equal(stat_pandas, stat_numpy, decimal=7)
 
@@ -268,7 +269,7 @@ def test_RollingFeatures_transform_batch():
         columns = ['roll_mean_4', 'roll_std_4', 'roll_min_4', 'roll_max_4',
                    'roll_sum_4', 'roll_median_4', 'roll_ratio_min_max_4',
                    'roll_coef_variation_4'],
-        index = pd.date_range(start='1990-01-04', periods=10, freq='D')
+        index = pd.date_range(start='1990-01-05', periods=10, freq='D')
     )
 
     pd.testing.assert_frame_equal(rolling_features, expected)
@@ -312,7 +313,7 @@ def test_RollingFeatures_transform_batch_different_rolling_and_fillna():
                    [0.40687257, 0.23934903, 0.3475354 , 0.73799541],
                    [0.35533061, 0.24575419, 0.42622702, 0.53182759]]),
         columns = ['my_mean', 'my_std', 'my_mean_2', 'my_max'],
-        index = pd.date_range(start='1990-01-06', periods=15, freq='D')
+        index = pd.date_range(start='1990-01-07', periods=15, freq='D')
     )
 
     pd.testing.assert_frame_equal(rolling_features, expected)
@@ -322,21 +323,21 @@ def test_RollingFeatures_transform_batch_different_rolling_and_fillna():
         "fillna", 
         ['mean', 'median', 'ffill', 'bfill', None, 5., 0], 
         ids = lambda fillna: f'fillna: {fillna}')
-def test_RollingFeatures_transform_fillna_all_methods(fillna):
+def test_RollingFeatures_transform_batch_fillna_all_methods(fillna):
     """
-    Test RollingFeatures transform_batch method with different all fillna.
+    Test RollingFeatures transform_batch method with all fillna methods.
     """
     X_datetime = X.head(10).copy()
     X_datetime.index = pd.date_range(start='1990-01-01', periods=len(X_datetime), freq='D')
-    X_datetime.iloc[6] = np.nan
+    X_datetime.iloc[5] = np.nan
 
-    base_array = np.array([0.40315332, 0.35476852, 0.49921173, 0.56463007, 
-                           np.nan, np.nan, np.nan, 0.519293])
+    base_array = np.array([0.40315332, 0.35476852, 0.49921173, 
+                           np.nan, np.nan, np.nan, 0.715509])
     expected_dict = {
-        'mean': np.array([0.46821134, 0.46821134, 0.46821134]),
-        'median': np.array([0.49921173, 0.49921173, 0.49921173]),
-        'ffill': np.array([0.56463007, 0.56463007, 0.56463007]),
-        'bfill': np.array([0.519293, 0.519293, 0.519293]),
+        'mean': np.array([0.49316055, 0.49316055, 0.49316055]),
+        'median': np.array([0.45118253, 0.45118253, 0.45118253]),
+        'ffill': np.array([0.49921173, 0.49921173, 0.49921173]),
+        'bfill': np.array([0.71550861, 0.71550861, 0.71550861]),
         5.: np.array([5., 5., 5.]),
         0: np.array([0, 0, 0]),
     } 
@@ -349,7 +350,7 @@ def test_RollingFeatures_transform_fillna_all_methods(fillna):
         expected_array[-4:-1] = expected_dict[fillna]
     expected = pd.DataFrame(
         data=expected_array, columns=['roll_mean_3'], 
-        index=pd.date_range(start='1990-01-03', periods=8, freq='D')
+        index=pd.date_range(start='1990-01-04', periods=7, freq='D')
     )
 
     pd.testing.assert_frame_equal(rolling_features, expected)

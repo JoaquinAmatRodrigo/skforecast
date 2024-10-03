@@ -13,15 +13,16 @@ from sklearn.neighbors import KNeighborsRegressor
 
 
 @pytest.mark.parametrize("forecaster_name", 
-                         ['ForecasterAutoreg', 'ForecasterAutoregCustom',
-                          'ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate'], 
+                         ['ForecasterAutoreg', 'ForecasterAutoregDirect', 'ForecasterAutoregMultiVariate'], 
                          ids=lambda fn: f'forecaster_name: {fn}')
 def test_TypeError_initialize_weights_when_weight_func_is_not_a_Callable(forecaster_name):
     """
     Test TypeError is raised when weight_func is not a Callable.
     """
     weight_func = 'not_Callable'
-    err_msg = re.escape(f"Argument `weight_func` must be a Callable. Got {type(weight_func)}.")
+    err_msg = re.escape(
+        f"Argument `weight_func` must be a Callable. Got {type(weight_func)}."
+    )
     with pytest.raises(TypeError, match = err_msg):
         initialize_weights(
             forecaster_name = forecaster_name, 
@@ -31,28 +32,24 @@ def test_TypeError_initialize_weights_when_weight_func_is_not_a_Callable(forecas
         )
 
 
-@pytest.mark.parametrize("forecaster_name", 
-                         ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom'], 
-                         ids=lambda fn: f'forecaster_name: {fn}')
-def test_TypeError_initialize_weights_when_weight_func_is_not_a_Callable_or_dict(forecaster_name):
+def test_TypeError_initialize_weights_when_weight_func_is_not_a_Callable_or_dict():
     """
     Test TypeError is raised when weight_func is not a Callable or a dict.
     """
     weight_func = 'not_Callable_or_dict'
-    err_msg = re.escape(f"Argument `weight_func` must be a Callable or a dict of Callables. Got {type(weight_func)}.")
+    err_msg = re.escape(
+        f"Argument `weight_func` must be a Callable or a dict of Callables. Got {type(weight_func)}."
+    )
     with pytest.raises(TypeError, match = err_msg):
         initialize_weights(
-            forecaster_name = forecaster_name, 
+            forecaster_name = 'ForecasterAutoregMultiSeries', 
             regressor       = LinearRegression(), 
             weight_func     = weight_func, 
             series_weights  = None
         )
 
 
-@pytest.mark.parametrize("forecaster_name", 
-                         ['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom'], 
-                         ids=lambda fn: f'forecaster_name: {fn}')
-def test_TypeError_initialize_weights_when_series_weights_is_not_a_dict(forecaster_name):
+def test_TypeError_initialize_weights_when_series_weights_is_not_a_dict():
     """
     Test TypeError is raised when series_weights is not a dict.
     """
@@ -63,7 +60,7 @@ def test_TypeError_initialize_weights_when_series_weights_is_not_a_dict(forecast
     )
     with pytest.raises(TypeError, match = err_msg):
         initialize_weights(
-            forecaster_name = forecaster_name, 
+            forecaster_name = 'ForecasterAutoregMultiSeries', 
             regressor       = LinearRegression(), 
             weight_func     = None, 
             series_weights  = series_weights
@@ -75,13 +72,13 @@ def test_IgnoredArgumentWarning_initialize_weights_when_weight_func_is_provided_
     Test IgnoredArgumentWarning is created when weight_func is provided but the regressor 
     has no argument sample_weights in his fit method.
     """
-    def weight_func(): # pragma: no cover
+    def weight_func():  # pragma: no cover
         pass
 
     warn_msg = re.escape(
-                (f"Argument `weight_func` is ignored since regressor KNeighborsRegressor() "
-                 f"does not accept `sample_weight` in its `fit` method.")
-            )
+        ("Argument `weight_func` is ignored since regressor KNeighborsRegressor() "
+         "does not accept `sample_weight` in its `fit` method.")
+    )
     with pytest.warns(IgnoredArgumentWarning, match = warn_msg):
         weight_func, source_code_weight_func, _ = initialize_weights(
             forecaster_name = 'ForecasterAutoreg', 
@@ -124,7 +121,7 @@ def test_initialize_weights_finds_sample_weight_in_different_regressors_when_wei
     Test initialize weights finds `sample_weight` attribute in different
     regressors when `weight_func`.
     """
-    def weight_func(): # pragma: no cover
+    def weight_func():  # pragma: no cover
         pass
 
     weight_func, source_code_weight_func, _ = initialize_weights(
@@ -164,7 +161,7 @@ def test_output_initialize_weights_source_code_weight_func_when_weight_func_not_
     Test source_code_weight_func output of initialize_weights when 
     weight_func is a Callable.
     """
-    def test_weight_func(): # pragma: no cover
+    def test_weight_func():  # pragma: no cover
         """
         test
         """
@@ -185,13 +182,13 @@ def test_output_initialize_weights_source_code_weight_func_when_weight_func_dict
     Test source_code_weight_func output of initialize_weights when 
     weight_func is a dict.
     """
-    def test_weight_func(): # pragma: no cover
+    def test_weight_func():  # pragma: no cover
         """
         test
         """
         pass
 
-    def test_weight_func_2(): # pragma: no cover
+    def test_weight_func_2():  # pragma: no cover
         """
         test2
         """
@@ -200,7 +197,7 @@ def test_output_initialize_weights_source_code_weight_func_when_weight_func_dict
     weight_func = {'series_1': test_weight_func, 'series_2': test_weight_func_2}    
 
     weight_func, source_code_weight_func, series_weights = initialize_weights(
-        forecaster_name = 'ForecasterAutoregMultiSeriesCustom', 
+        forecaster_name = 'ForecasterAutoregMultiSeries', 
         regressor       = LinearRegression(), 
         weight_func     = weight_func, 
         series_weights  = None

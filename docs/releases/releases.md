@@ -14,9 +14,13 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
++ <span class="badge text-bg-feature">Feature</span> WINDOW FEATURES......... <code>[RollingFeatures]</code>
+
 + <span class="badge text-bg-enhancement">Enhancement</span> Refactor the prediction process in <code>[ForecasterAutoregMultiSeries]</code> to improve performance when predicting multiple series.
 
 + <span class="badge text-bg-enhancement">Enhancement</span> The bootstrapping process in the `predict_bootstrapping` method of all forecasters has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
+
++ <span class="badge text-bg-api-change">API Change</span> <code>[ForecasterAutoregCustom]</code> has been deprecated. Window features can be added using the `window_features` argument in the <code>[ForecasterAutoreg]</code>.
 
 + <span class="badge text-bg-api-change">API Change</span> The `pmdarima.ARIMA` regressor is no longer supported by the <code>[ForecasterSarimax]</code>. You can use the `skforecast.Sarimax.Sarimax` model or, to continue using it, use skforecast 0.13.0 or lower.
 
@@ -24,6 +28,10 @@ The main changes in this release are:
 **Added**
 
 + Added `numba>=0.59` as hard dependency.
+
++ Added `window_features` argument to all forecasters. This argument allows the user to add window features to the training matrix. See <code>[RollingFeatures]</code>.
+
++ Differentiation has been extended to all forecasters. The `differentiation` argument has been added to all forecasters to model the n-order differentiated time series.
 
 + Create `transform_numpy` function in the <code>[utils]</code> module to carry out the transformation of the modeled time series and exogenous variables as numpy arrays.
 
@@ -38,15 +46,23 @@ The main changes in this release are:
 
 **Changed**
 
++ <code>[ForecasterAutoregCustom]</code> has been deprecated. Window features can be added using the `window_features` argument in the <code>[ForecasterAutoreg]</code>.
+
 + Refactor `recursive_predict` in <code>[ForecasterAutoregMultiSeries]</code> to predict all series at once and include option of adding residuals. This improves performance when predicting multiple series.
 
 + Refactor `predict_bootstrapping` in all Forecasters. The bootstrapping process has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.
 
 + Change the default value of `encoding` to `ordinal` in <code>[ForecasterAutoregMultiSeries]</code>. This will avoid conflicts if the regressor does not support categorical variables by default.
 
-+ Removed argument `engine` fom <code>[bayesian_search_forecaster]</code> and <code>[bayesian_search_forecaster_multiseries]</code>.
++ Removed argument `engine` from <code>[bayesian_search_forecaster]</code> and <code>[bayesian_search_forecaster_multiseries]</code>.
 
 + The `pmdarima.ARIMA` regressor is no longer supported by the `ForecasterSarimax`. You can use the `skforecast.Sarimax.Sarimax` model or, to continue using it, use skforecast 0.13.0 or lower.
+
++ `initialize_lags` now returns the maximum lag, `max_lag`.
+
++ Removed attribute `window_size_diff` from all Forecasters. The window size extended by the order of differentiation is now calculated on `window_size`.
+
++ `lags` can be None when initializing any Forecaster that includes window features.
 
 + Renamed attributes in all Forecasters:
 
@@ -941,7 +957,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 <!-- Links to API Reference -->
 <!-- Forecasters -->
 [ForecasterAutoreg]: https://skforecast.org/latest/api/forecasterautoreg
-[ForecasterAutoregCustom]: https://skforecast.org/latest/api/forecasterautoregcustom
+[ForecasterAutoregCustom]: https://skforecast.org/0.13.0/api/forecasterautoregcustom
 [ForecasterAutoregDirect]: https://skforecast.org/latest/api/forecasterautoregdirect
 [ForecasterAutoregMultiSeries]: https://skforecast.org/latest/api/forecastermultiseries
 [ForecasterAutoregMultiSeriesCustom]: https://skforecast.org/latest/api/forecastermultiseriescustom
@@ -986,6 +1002,7 @@ Version 0.4 has undergone a huge code refactoring. Main changes are related to i
 [exog_long_to_dict]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.exog_long_to_dict
 [DateTimeFeatureTransformer]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.DateTimeFeatureTransformer
 [create_datetime_features]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.create_datetime_features
+[RollingFeatures]: https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.RollingFeatures
 
 <!-- plot -->
 [plot]: https://skforecast.org/latest/api/plot

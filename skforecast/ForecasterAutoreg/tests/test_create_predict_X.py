@@ -5,7 +5,6 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
@@ -13,11 +12,13 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.compose import make_column_transformer
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import HistGradientBoostingRegressor
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoreg import ForecasterAutoreg
 
 # Fixtures
 from .fixtures_ForecasterAutoreg import y as y_categorical
 from .fixtures_ForecasterAutoreg import exog as exog_categorical
-from .fixtures_ForecasterAutoreg import data # to test results when using differentiation
+from .fixtures_ForecasterAutoreg import data  # to test results when using differentiation
 
 
 def test_create_predict_X_NotFittedError_when_fitted_is_False():
@@ -135,7 +136,7 @@ def test_create_predict_X_when_regressor_is_LinearRegression_with_transform_y_an
     as transformer_y and transformer_exog as transformer_exog.
     """
     y = pd.Series(
-            np.array([-0.59,  0.02, -0.9 ,  1.09, -3.61,  0.72, -0.11, -0.4])
+            np.array([-0.59,  0.02, -0.9,  1.09, -3.61,  0.72, -0.11, -0.4])
         )
     exog = pd.DataFrame({
                'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4],
@@ -185,8 +186,8 @@ def test_create_predict_X_when_categorical_features_native_implementation_HistGr
     """
     df_exog = pd.DataFrame(
         {'exog_1': exog_categorical,
-         'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-         'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)}
+         'exog_2': ['a', 'b', 'c', 'd', 'e'] * 10,
+         'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J'] * 10)}
     )
     
     exog_predict = df_exog.copy()
@@ -282,4 +283,85 @@ def test_create_predict_X_when_regressor_is_LinearRegression_with_exog_different
         index = pd.date_range(start='2003-04-01', periods=steps, freq='MS')
     )
     
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_create_predict_X_when_window_features():
+    """
+    Test the output of create_predict_X when using window_features and exog 
+    with datetime index.
+    """
+    y_datetime = pd.Series(
+        np.arange(15), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='y', dtype=float
+    )
+    exog_datetime = pd.Series(
+        np.arange(100, 115), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='exog', dtype=float
+    )
+    exog_datetime_pred = pd.Series(
+        np.arange(115, 120), index=pd.date_range('2000-01-16', periods=5, freq='D'),
+        name='exog', dtype=float
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoreg(
+        LinearRegression(), lags=5, window_features=[rolling, rolling_2]
+    )
+    forecaster.fit(y=y_datetime, exog=exog_datetime)
+    results = forecaster.create_predict_X(steps=5, exog=exog_datetime_pred)
+
+    expected = pd.DataFrame(
+        data = np.array([
+                    [14., 13., 12., 11., 10., 12., 12., 69., 115.],
+                    [15., 14., 13., 12., 11., 13., 13., 75., 116.],
+                    [16., 15., 14., 13., 12., 14., 14., 81., 117.],
+                    [17., 16., 15., 14., 13., 15., 15., 87., 118.],
+                    [18., 17., 16., 15., 14., 16., 16., 93., 119.]]),
+        index   = pd.date_range('2000-01-16', periods=5, freq='D'),
+        columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 
+                   'roll_mean_5', 'roll_median_5', 'roll_sum_6', 'exog']
+    )
+
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_create_predict_X_when_window_features_and_lags_None():
+    """
+    Test the output of create_predict_X when using window_features and exog 
+    with datetime index and lags=None.
+    """
+    y_datetime = pd.Series(
+        np.arange(15), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='y', dtype=float
+    )
+    exog_datetime = pd.Series(
+        np.arange(100, 115), index=pd.date_range('2000-01-01', periods=15, freq='D'),
+        name='exog', dtype=float
+    )
+    exog_datetime_pred = pd.Series(
+        np.arange(115, 120), index=pd.date_range('2000-01-16', periods=5, freq='D'),
+        name='exog', dtype=float
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoreg(
+        LinearRegression(), lags=None, window_features=[rolling, rolling_2]
+    )
+    forecaster.fit(y=y_datetime, exog=exog_datetime)
+    results = forecaster.create_predict_X(steps=5, exog=exog_datetime_pred)
+
+    expected = pd.DataFrame(
+        data = np.array([
+                    [12., 12., 69., 115.],
+                    [13., 13., 75., 116.],
+                    [14., 14., 81., 117.],
+                    [15., 15., 87., 118.],
+                    [16., 16., 93., 119.]]),
+        index   = pd.date_range('2000-01-16', periods=5, freq='D'),
+        columns = ['roll_mean_5', 'roll_median_5', 'roll_sum_6', 'exog']
+    )
+
     pd.testing.assert_frame_equal(results, expected)

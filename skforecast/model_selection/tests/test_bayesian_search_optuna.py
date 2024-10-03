@@ -10,7 +10,6 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_absolute_error
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.model_selection import backtesting_forecaster
 from skforecast.model_selection.model_selection import _bayesian_search_optuna
@@ -22,17 +21,8 @@ from functools import partialmethod
 # Fixtures
 from .fixtures_model_selection import y
 
-def create_predictors(y): # pragma: no cover
-    """
-    Create first 4 lags of a time series, used in ForecasterAutoregCustom.
-    """
-
-    lags = y[-1:-5:-1]
-
-    return lags
-
 optuna.logging.set_verbosity(optuna.logging.WARNING)
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True) # hide progress bar
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 
 def test_ValueError_bayesian_search_optuna_metric_list_duplicate_names():
@@ -48,10 +38,11 @@ def test_ValueError_bayesian_search_optuna_metric_list_duplicate_names():
     steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
-    def search_space(trial): # pragma: no cover
+
+    def search_space(trial):  # pragma: no cover
         search_space  = {
             'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0),
-            'lags' : trial.suggest_categorical('lags', [2, 4])
+            'lags': trial.suggest_categorical('lags', [2, 4])
         }
 
         return search_space
@@ -87,18 +78,19 @@ def test_ValueError_bayesian_search_optuna_when_search_space_names_do_not_match(
     steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
+
     def search_space(trial):
         search_space  = {
             'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0),
-            'lags' : trial.suggest_categorical('lags', [2, 4])
+            'lags': trial.suggest_categorical('lags', [2, 4])
         }
 
         return search_space
     
     err_msg = re.escape(
-        (f"Some of the key values do not match the search_space key names.\n"
-         f"  Search Space keys  : ['alpha', 'lags']\n"
-         f"  Trial objects keys : ['not_alpha', 'lags'].")
+        ("Some of the key values do not match the search_space key names.\n"
+         "  Search Space keys  : ['alpha', 'lags']\n"
+         "  Trial objects keys : ['not_alpha', 'lags'].")
     )
     with pytest.raises(ValueError, match = err_msg):
         _bayesian_search_optuna(
@@ -218,13 +210,13 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_kwargs_cre
     def search_space(trial):
         search_space  = {
             'alpha': trial.suggest_float('alpha', 1e-2, 1.0),
-            'lags' : trial.suggest_categorical('lags', [4, 2])
+            'lags': trial.suggest_categorical('lags', [4, 2])
         }
         
         return search_space
 
     kwargs_create_study = {
-        'sampler' : TPESampler(seed=123, prior_weight=2.0, consider_magic_clip=False)
+        'sampler': TPESampler(seed=123, prior_weight=2.0, consider_magic_clip=False)
     }
     results = _bayesian_search_optuna(
                   forecaster          = forecaster,
@@ -406,82 +398,6 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_when_lags_not_i
     
     pd.testing.assert_frame_equal(results, expected_results)
 
-def test_results_output_bayesian_search_optuna_ForecasterAutoregCustom():
-    """
-    Test output of _bayesian_search_optuna in ForecasterAutoregCustom with mocked
-    (mocked done in Skforecast v0.4.3).
-    """    
-    forecaster = ForecasterAutoregCustom(
-                     regressor      = Ridge(random_state=123),
-                     fun_predictors = create_predictors,
-                     window_size    = 4
-                 )
-
-    steps = 3
-    n_validation = 12
-    y_train = y[:-n_validation]
-    
-    def search_space(trial):
-        search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
-
-        return search_space
-
-    results = _bayesian_search_optuna(
-                  forecaster         = forecaster,
-                  y                  = y,
-                  search_space       = search_space,
-                  steps              = steps,
-                  metric             = 'mean_absolute_error',
-                  refit              = True,
-                  initial_train_size = len(y_train),
-                  fixed_train_size   = True,
-                  n_trials           = 10,
-                  random_state       = 123,
-                  return_best        = False,
-                  verbose            = False
-              )[0]
-    
-    expected_results = pd.DataFrame(
-        np.array([['custom function: create_predictors',
-            {'alpha': 0.9809565564007693}, 0.21539791166603497,
-            0.9809565564007693],
-        ['custom function: create_predictors',
-            {'alpha': 0.7222742800877074}, 0.21576131952657338,
-            0.7222742800877074],
-        ['custom function: create_predictors',
-            {'alpha': 0.6995044937418831}, 0.21579460210585208,
-            0.6995044937418831],
-        ['custom function: create_predictors',
-            {'alpha': 0.6879814411990146}, 0.21581150916013203,
-            0.6879814411990146],
-        ['custom function: create_predictors',
-            {'alpha': 0.5558016213920624}, 0.21600778429729228,
-            0.5558016213920624],
-        ['custom function: create_predictors',
-            {'alpha': 0.48612258246951734}, 0.21611205459571634,
-            0.48612258246951734],
-        ['custom function: create_predictors',
-            {'alpha': 0.42887539552321635}, 0.2161973389956996,
-            0.42887539552321635],
-        ['custom function: create_predictors',
-            {'alpha': 0.398196343012209}, 0.21624265320052985,
-            0.398196343012209],
-        ['custom function: create_predictors',
-            {'alpha': 0.29327794160087567}, 0.2163933942116072,
-            0.29327794160087567],
-        ['custom function: create_predictors',
-            {'alpha': 0.2345829390285611}, 0.21647289061896782,
-            0.2345829390285611]], dtype=object),
-        columns=['lags', 'params', 'mean_absolute_error', 'alpha'],
-        index=pd.Index([0, 1, 2, 3, 4, 5, 6, 7, 8, 9], dtype='int64')
-    ).astype({
-        'mean_absolute_error': float,
-        'alpha': float
-    })
-
-    pd.testing.assert_frame_equal(results, expected_results)
-
-
 
 def test_evaluate_bayesian_search_optuna_when_return_best_ForecasterAutoreg():
     """
@@ -500,7 +416,7 @@ def test_evaluate_bayesian_search_optuna_when_return_best_ForecasterAutoreg():
     def search_space(trial):
         search_space  = {
             'alpha': trial.suggest_float('alpha', 1e-2, 1.0),
-            'lags' : trial.suggest_categorical('lags', [2, 4])
+            'lags': trial.suggest_categorical('lags', [2, 4])
         }
         
         return search_space
@@ -523,50 +439,6 @@ def test_evaluate_bayesian_search_optuna_when_return_best_ForecasterAutoreg():
     expected_alpha = 0.5558016213920624
 
     np.testing.assert_array_equal(forecaster.lags, expected_lags)
-    assert expected_alpha == forecaster.regressor.alpha
-
-
-def test_evaluate_bayesian_search_optuna_when_return_best_ForecasterAutoregCustom():
-    """
-    Test forecaster is refitted when return_best=True in _bayesian_search_optuna
-    with a ForecasterAutoregCustom.
-    """
-    forecaster = ForecasterAutoregCustom(
-                     regressor      = Ridge(random_state=123),
-                     fun_predictors = create_predictors,
-                     window_size    = 4
-                 )
-
-    steps = 3
-    n_validation = 12
-    y_train = y[:-n_validation]
-    
-    def search_space(trial):
-        search_space  = {
-            'alpha': trial.suggest_float('alpha', 1e-2, 1.0),
-            'lags' : trial.suggest_categorical('lags', [4, 2])
-        }
-        
-        return search_space
-
-    _bayesian_search_optuna(
-        forecaster         = forecaster,
-        y                  = y,
-        search_space       = search_space,
-        steps              = steps,
-        metric             = 'mean_absolute_error',
-        refit              = True,
-        initial_train_size = len(y_train),
-        fixed_train_size   = True,
-        n_trials           = 10,
-        random_state       = 123,
-        return_best        = True,
-        verbose            = False,
-        show_progress      = False
-    )
-    
-    expected_alpha = 0.9809565564007693
-    
     assert expected_alpha == forecaster.regressor.alpha
 
 
@@ -634,8 +506,8 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
 
     def search_space(trial):
         search_space  = {
-            'alpha' : trial.suggest_float('alpha', 1e-2, 1.0),
-            'lags'  : trial.suggest_categorical('lags', [4, 2])
+            'alpha': trial.suggest_float('alpha', 1e-2, 1.0),
+            'lags': trial.suggest_categorical('lags', [4, 2])
         }
         return search_space
     return_best  = False
@@ -661,7 +533,7 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
 
 def test_results_output_bayesian_search_optuna_ForecasterAutoregDirect():
     """
-    Test output of _bayesian_search_optuna in ForecasterAutoregCustom with mocked
+    Test output of _bayesian_search_optuna in ForecasterAutoregDirect with mocked
     (mocked done in Skforecast v0.4.3).
     """    
     forecaster = ForecasterAutoregDirect(

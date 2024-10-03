@@ -13,7 +13,6 @@
 |Affiliation | [![NumFOCUS Affiliated](https://img.shields.io/badge/NumFOCUS-Affiliated%20Project-orange.svg?style=flat&colorA=E1523D&colorB=007D8A)](https://numfocus.org/sponsored-projects/affiliated-projects)
 
 
-
 # Table of Contents
 
 - :information_source: [About The Project](#about-the-project)
@@ -107,7 +106,6 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 | Forecaster | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Time series differentiation | Exogenous features | Custom features |
 |:-----------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:---------------------------:|:------------------:|:---------------:|
 |[ForecasterAutoreg]|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
-|[ForecasterAutoregCustom]|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
 |[ForecasterAutoregDirect]|:heavy_check_mark:|||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:||
 |[ForecasterMultiSeries]||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
 |[ForecasterMultiSeriesCustom]||:heavy_check_mark:|:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:|
@@ -116,7 +114,6 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 |[ForecasterSarimax]|:heavy_check_mark:||:heavy_check_mark:||:heavy_check_mark:|:heavy_check_mark:|:heavy_check_mark:||
 
 [ForecasterAutoreg]: https://skforecast.org/latest/user_guides/autoregresive-forecaster.html
-[ForecasterAutoregCustom]: https://skforecast.org/latest/user_guides/window-features-and-custom-features.html
 [ForecasterAutoregDirect]: https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html
 [ForecasterMultiSeries]: https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html
 [ForecasterMultiSeriesCustom]: https://skforecast.org/latest/user_guides/window-features-and-custom-features.html#forecasterautoregmultiseriescustom
@@ -198,7 +195,6 @@ If you found skforecast useful, you can support us with a donation. Your contrib
 <!-- Links to API Reference -->
 <!-- Forecasters -->
 <!-- [ForecasterAutoreg]: https://skforecast.org/latest/api/forecasterautoreg
-[ForecasterAutoregCustom]: https://skforecast.org/latest/api/forecasterautoregcustom
 [ForecasterAutoregDirect]: https://skforecast.org/latest/api/forecasterautoregdirect
 [ForecasterRNN]: https://skforecast.org/latest/api/forecasterrnn
 [ForecasterSarimax]: https://skforecast.org/latest/api/forecastersarimax

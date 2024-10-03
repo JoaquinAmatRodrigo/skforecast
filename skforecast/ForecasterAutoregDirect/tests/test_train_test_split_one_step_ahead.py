@@ -18,7 +18,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_15_and_exog_is_datafra
     exog = pd.DataFrame(
         {
             "exog_1": np.arange(100, 115, dtype=float),
-            "exog_2": np.arange(1000, 1015, dtype=int),
+            "exog_2": np.arange(1000, 1015, dtype=float),
         },
         index=pd.date_range("2020-01-01", periods=15),
     )
@@ -37,13 +37,13 @@ def test_train_test_split_one_step_ahead_when_y_is_series_15_and_exog_is_datafra
             "lag_4": [1.0, 2.0, 3.0, 4.0, 5.0],
             "lag_5": [0.0, 1.0, 2.0, 3.0, 4.0],
             "exog_1_step_1": [105.0, 106.0, 107.0, 108.0, 109.0],
-            "exog_2_step_1": [1005, 1006, 1007, 1008, 1009],
+            "exog_2_step_1": [1005., 1006., 1007., 1008., 1009.],
         },
         index=pd.DatetimeIndex(
             ["2020-01-06", "2020-01-07", "2020-01-08", "2020-01-09", "2020-01-10"],
             freq="D",
         ),
-    ).astype({"exog_2_step_1": int})
+    )
 
     expected_y_train = {
         1: pd.Series(
@@ -64,13 +64,13 @@ def test_train_test_split_one_step_ahead_when_y_is_series_15_and_exog_is_datafra
             "lag_4": [6.0, 7.0, 8.0, 9.0, 10.0],
             "lag_5": [5.0, 6.0, 7.0, 8.0, 9.0],
             "exog_1_step_1": [110.0, 111.0, 112.0, 113.0, 114.0],
-            "exog_2_step_1": [1010, 1011, 1012, 1013, 1014],
+            "exog_2_step_1": [1010., 1011., 1012., 1013., 1014.],
         },
         index=pd.DatetimeIndex(
             ["2020-01-11", "2020-01-12", "2020-01-13", "2020-01-14", "2020-01-15"],
             freq="D",
         ),
-    ).astype({"exog_2_step_1": int})
+    )
 
     expected_y_test = {
         1: pd.Series(

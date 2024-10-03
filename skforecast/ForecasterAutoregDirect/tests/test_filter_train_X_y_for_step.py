@@ -65,7 +65,7 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_and_exog_for_step_
     lags is 3 and steps is 2 with exog for step 2.
     """
     y = pd.Series(np.arange(10), name='y', dtype=float)
-    exog = pd.Series(np.arange(100, 110), name='exog', dtype=int)
+    exog = pd.Series(np.arange(100, 110), name='exog', dtype=float)
 
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
     X_train, y_train = forecaster.create_train_X_y(y=y, exog=exog)
@@ -73,15 +73,15 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_and_exog_for_step_
 
     expected = (
         pd.DataFrame(
-            data = np.array([[2., 1., 0., 104],
-                             [3., 2., 1., 105],
-                             [4., 3., 2., 106],
-                             [5., 4., 3., 107],
-                             [6., 5., 4., 108],
-                             [7., 6., 5., 109]], dtype=float),
+            data = np.array([[2., 1., 0., 104.],
+                             [3., 2., 1., 105.],
+                             [4., 3., 2., 106.],
+                             [5., 4., 3., 107.],
+                             [6., 5., 4., 108.],
+                             [7., 6., 5., 109.]], dtype=float),
             index   = pd.RangeIndex(start=4, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'exog_step_2']
-        ).astype({'exog_step_2': int}),
+        ),
         pd.Series(
             data  = np.array([4., 5., 6., 7., 8., 9.]),
             index = pd.RangeIndex(start=4, stop=10, step=1),
@@ -100,7 +100,7 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_and_exog_for_step_
     lags is 3 and steps is 2 with exog for step 2 with remove_suffix=True.
     """
     y = pd.Series(np.arange(10), name='y', dtype=float)
-    exog = pd.Series(np.arange(100, 110), name='exog', dtype=int)
+    exog = pd.Series(np.arange(100, 110), name='exog', dtype=float)
 
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
     X_train, y_train = forecaster.create_train_X_y(y=y, exog=exog)
@@ -113,15 +113,15 @@ def test_filter_train_X_y_for_step_output_when_lags_3_steps_2_and_exog_for_step_
 
     expected = (
         pd.DataFrame(
-            data = np.array([[2., 1., 0., 104],
-                             [3., 2., 1., 105],
-                             [4., 3., 2., 106],
-                             [5., 4., 3., 107],
-                             [6., 5., 4., 108],
-                             [7., 6., 5., 109]], dtype=float),
+            data = np.array([[2., 1., 0., 104.],
+                             [3., 2., 1., 105.],
+                             [4., 3., 2., 106.],
+                             [5., 4., 3., 107.],
+                             [6., 5., 4., 108.],
+                             [7., 6., 5., 109.]], dtype=float),
             index   = pd.RangeIndex(start=4, stop=10, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', 'exog']
-        ).astype({'exog': int}),
+        ),
         pd.Series(
             data  = np.array([4., 5., 6., 7., 8., 9.]),
             index = pd.RangeIndex(start=4, stop=10, step=1),

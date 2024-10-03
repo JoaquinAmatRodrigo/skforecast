@@ -41,8 +41,7 @@ def test_init_window_size_is_increased_when_differentiation(dif):
                      differentiation = dif
                  )
     
-    assert forecaster.window_size == len(forecaster.lags)
-    assert forecaster.window_size_diff == len(forecaster.lags) + dif
+    assert forecaster.window_size == 5 + dif
 
 
 def test_init_ValueError_invalid_encoding():

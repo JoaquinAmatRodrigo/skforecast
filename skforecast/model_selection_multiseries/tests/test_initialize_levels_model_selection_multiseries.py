@@ -4,7 +4,6 @@ import re
 import pytest
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
-from skforecast.ForecasterAutoregMultiSeriesCustom import ForecasterAutoregMultiSeriesCustom
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries.model_selection_multiseries import _initialize_levels_model_selection_multiseries
 from skforecast.exceptions import IgnoredArgumentWarning
@@ -12,37 +11,22 @@ from skforecast.exceptions import IgnoredArgumentWarning
 # Fixtures
 from .fixtures_model_selection_multiseries import series
 
-def create_predictors(y): # pragma: no cover
-    """
-    Create first 4 lags of a time series, used in ForecasterAutoregCustom.
-    """
 
-    lags = y[-1:-5:-1]
-
-    return lags
-
-
-@pytest.mark.parametrize("forecaster", 
-                         [ForecasterAutoregMultiSeries(
-                              regressor = Ridge(random_state=123),
-                              lags      = 4),
-                          ForecasterAutoregMultiSeriesCustom(
-                              regressor      = Ridge(random_state=123),
-                              fun_predictors = create_predictors,
-                              window_size    = 4)], 
-                         ids=lambda fn: f'forecaster_name: {type(fn).__name__}')
-def test_initialize_levels_model_selection_multiseries_TypeError_when_levels_not_list_str_None(forecaster):
+def test_initialize_levels_model_selection_multiseries_TypeError_when_levels_not_list_str_None():
     """
     Test TypeError is raised in _initialize_levels_model_selection_multiseries when 
     `levels` is not a `list`, `str` or `None`.
     """
+    forecaster = ForecasterAutoregMultiSeries(
+        regressor = Ridge(random_state=123), lags = 4
+    )
     levels = 5
+
     err_msg = re.escape(
         ("`levels` must be a `list` of column names, a `str` of a column "
          "name or `None` when using a forecaster of type "
-         "['ForecasterAutoregMultiSeries', 'ForecasterAutoregMultiSeriesCustom', "
-         "'ForecasterRnn']. If the forecaster is of type "
-         "`ForecasterAutoregMultiVariate`, this argument is ignored.")
+         "['ForecasterAutoregMultiSeries', 'ForecasterRnn']. If the forecaster "
+         "is of type `ForecasterAutoregMultiVariate`, this argument is ignored.")
     )
     with pytest.raises(TypeError, match = err_msg):
         _initialize_levels_model_selection_multiseries(

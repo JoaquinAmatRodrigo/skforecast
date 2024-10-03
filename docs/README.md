@@ -68,7 +68,6 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 | Forecaster                   | Single series | Multiple series | Recursive strategy | Direct strategy | Probabilistic prediction | Time series differentiation | Exogenous features | Custom features |
 |:-----------------------------|:-------------:|:---------------:|:------------------:|:---------------:|:------------------------:|:---------------------------:|:------------------:|:---------------:|
 |[ForecasterAutoreg]           |✔️||✔️||✔️|✔️|✔️||
-|[ForecasterAutoregCustom]     |✔️||✔️||✔️|✔️|✔️|✔️|✔️|
 |[ForecasterAutoregDirect]     |✔️|||✔️|✔️||✔️||
 |[ForecasterMultiSeries]       ||✔️|✔️||✔️|✔️|✔️||
 |[ForecasterMultiSeriesCustom] ||✔️|✔️||✔️|✔️|✔️|✔️|
@@ -77,7 +76,6 @@ The **skforecast** library offers a variety of forecaster types, each tailored t
 |[ForecasterSarimax]           |✔️||✔️||✔️|✔️|✔️||
 
 [ForecasterAutoreg]: https://skforecast.org/latest/user_guides/autoregresive-forecaster.html
-[ForecasterAutoregCustom]: https://skforecast.org/latest/user_guides/window-features-and-custom-features.html
 [ForecasterAutoregDirect]: https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html
 [ForecasterMultiSeries]: https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html
 [ForecasterMultiSeriesCustom]: https://skforecast.org/latest/user_guides/window-features-and-custom-features.html#forecasterautoregmultiseriescustom
