@@ -9,11 +9,10 @@ import re
 import os
 from copy import deepcopy, copy
 import logging
-from typing import Union, Tuple, Optional, Callable, Any
+from typing import Union, Tuple, Optional, Callable
 import warnings
 import numpy as np
 import pandas as pd
-import itertools
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
 import optuna
@@ -29,612 +28,208 @@ from ..utils import initialize_lags_grid
 from ..utils import initialize_lags
 from ..utils import select_n_jobs_backtesting
 
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
-)
 
-
-class TimeSeriesFold():
+def _create_backtesting_folds(
+    data: Union[pd.Series, pd.DataFrame],
+    window_size: int,
+    initial_train_size: Union[int, None],
+    test_size: int,
+    externally_fitted: bool = False,
+    refit: Union[bool, int] = False,
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
+    return_all_indexes: bool = False,
+    differentiation: Optional[int] = None,
+    verbose: bool = True
+) -> list:
     """
-    Class to split time series data into train and test folds. 
-    When used within a backtesting or hiperparameter search, arguments
-    'initial_train_size', 'window_size' and 'differentiation' are not required
-    since they are set automatically by the backtesting or hyperparameter search
-    functions.
+    This function is designed to work after passing the `check_backtesting_input` 
+    function from `skforecast.utils`.
 
+    Provides train/test indices (position) to split time series data samples that
+    are observed at fixed time intervals, in train/test sets. In each split, test
+    indices must be higher than before.
+
+    Four arrays are returned for each fold with the position of train, window size, 
+    test including the gap, and test excluding the gap. The gap is the number of
+    samples to exclude from the end of each train set before the test set. The
+    test excluding the gap is the one that must be used to make evaluate the
+    model. The test including the gap is provided for convenience.
+
+    Returned indexes are not the indexes of the original time series, but the
+    positional indexes of the samples in the time series. For example, if the 
+    original time series is `y = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]`, the
+    returned indexes for the first fold if `test_size = 4`, `gap = 1` and 
+    `initial_train_size = 2` with `window_size = 2` are: `[[0, 1], [0, 1], 
+    [2, 3, 4, 5], [3, 4, 5]]]`. This means that the first fold is using the samples 
+    with positional indexes 0 and 1 in the time series as training set, the samples 
+    with positional indexes 0 and 1 as last window, and the samples with positional 
+    indexes 2, 3, 4 and 5 as test set, but only the samples with positional indexes 
+    3, 4 and 5 should be used to evaluate the model since `gap = 1`. The second fold 
+    would be `[[0, 1, 2, 3], [2, 3], [4, 5, 6, 7], [5, 6, 7]]`, and so on.
+
+    Each fold also provides information on whether the Forecaster needs to be 
+    trained, `True` or `False`. The first fold flag will be always `False` since 
+    the first fit is done inside _backtesting_forecaster function.
+    
     Parameters
     ----------
-    steps : int
-        Number of observations used to be predicted in each fold. This is also commonly
-        referred to as the forecast horizon or test size.
-    initial_train_size : int, default=None
-        Number of observations used for initial training. If `None` or 0, the initial
-        forecaster is not trained in the first fold.
+    data : pandas Series, pandas DataFrame
+        Time series values.
     window_size : int
-        Number of observations needed to generate the autoregressive predictors.
-    differentiation : int, default=None
-        Number of observations to use for differentiation. This is used to extend the
-        `last_window` as many observations as the differentiation order.
-    refit : bool or int, default=False
-        Whether to refit the forecaster in each fold.
+        Size of the window needed to create the predictors.
+    initial_train_size : int, None
+        Size of the training set in the first fold. If `None` or 0, the initial
+        fold does not include a training set.
+    test_size : int
+        Size of the test set in each fold.
+    externally_fitted : bool, default `False`
+        Flag indicating whether the forecaster is already trained. Only used when 
+        `initial_train_size` is None and `refit` is False.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increase but moves by `steps` in each iteration.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+    skip_folds : int, list, default `None`
+        Folds to skip.
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
+    return_all_indexes : bool, default `False`
+        If `True`, return all the indexes included in each fold. If `False`, return
+        only the first and last index of each partition in each fold.
+    differentiation : int, default `None`
+        Order of differencing applied to the time series before training the forecaster.
+    verbose : bool, default `True`
+        Print information if the folds created.
 
-        - If `True`, the forecaster is refitted in each fold.
-        - If `False`, the forecaster is trained only in the first fold.
-        - If an integer, the forecaster is trained in the first fold and then refitted
-          every `refit` folds.
-    fixed_train_size : bool, default=True
-        Whether the training size is fixed or increases in each fold.
-    gap : int, default=0
-        Number of observations between the end of the training set and the start of the
-        test set.
-    skip_folds : int or list, default=None
-        Number of folds to skip.
-
-        - If an integer, every 'skip_folds'-th is returned.
-        - If a list, the indexes of the folds to skip.
-
-        For example, if `skip_folds=3` and there are 10 folds, the returned folds are
-        0, 3, 6, and 9. If `skip_folds=[1, 2, 3]`, the returned folds are 0, 4, 5, 6, 7,
-        8, and 9.
-    allow_incomplete_fold : bool, default=True
-        Whether to allow the last fold to include fewer observations than `steps`.
-        If `False`, the last fold is excluded if it is incomplete.
-    return_all_indexes : bool, default=False
-        Whether to return all indexes or only the start and end indexes of each fold.
-    verbose : bool, default=True
-        Whether to print information about generated folds.
-
-    Attributes
-    ----------
-    steps : int
-        Number of observations used to be predicted in each fold. This is also commonly
-        referred to as the forecast horizon or test size.
-    initial_train_size : int, default=None
-        Number of observations used for initial training. If `None` or 0, the initial
-        forecaster is not trained in the first fold.
-    window_size : int
-        Number of observations needed to generate the autoregressive predictors.
-    differentiation : int, default=None
-        Number of observations to use for differentiation. This is used to extend the
-        `last_window` as many observations as the differentiation order.
-    refit : bool or int, default=False
-        Whether to refit the forecaster in each fold.
-
-        - If `True`, the forecaster is refitted in each fold.
-        - If `False`, the forecaster is trained only in the first fold.
-        - If an integer, the forecaster is trained in the first fold and then refitted
-          every `refit` folds.
-    fixed_train_size : bool, default=True
-        Whether the training size is fixed or increases in each fold.
-    gap : int, default=0
-        Number of observations between the end of the training set and the start of the
-        test set.
-    skip_folds : int or list, default=None
-        Number of folds to skip.
-
-        - If an integer, every 'skip_folds'-th is returned.
-        - If a list, the indexes of the folds to skip.
-
-        For example, if `skip_folds=3` and there are 10 folds, the returned folds are
-        0, 3, 6, and 9. If `skip_folds=[1, 2, 3]`, the returned folds are 0, 4, 5, 6, 7,
-        8, and 9.
-    allow_incomplete_fold : bool, default=True
-        Whether to allow the last fold to include fewer observations than `steps`.
-        If `False`, the last fold is excluded if it is incomplete.
-    return_all_indexes : bool, default=False
-        Whether to return all indexes or only the start and end indexes of each fold.
-    verbose : bool, default=True
-        Whether to print information about generated folds.
-
-    Notes
-    -----
-    Returned values are the positions of the observations and not the actual values of
-    the index, so they can be used to slice the data directly using iloc. For example,
-    if the input series is `X = [10, 11, 12, 13, 14, 15, 16, 17, 18, 19]`, the 
-    `initial_train_size = 3`, `window_size = 2`, `steps = 4`, and `gap = 1`,
-    the output of the first fold will: [[0, 3], [1, 3], [3, 8], [4, 8], True].
-
-    The first list `[0, 3]` indicates that the training set goes from the first to the
-    third observation. The second list `[1, 3]` indicates that the last window seen by
-    the forecaster during training goes from the second to the third observation. The
-    third list `[3, 8]` indicates that the test set goes from the fourth to the eighth
-    observation. The fourth list `[4, 8]` indicates that the test set including the gap
-    goes from the fifth to the eighth observation. The boolean `False` indicates that the
-    forecaster should not be trained in this fold.
-
-    Following the python convention, the start index is inclusive and the end index is
-    exclusive. This means that the last index is not included in the slice.
-
+    Returns
+    -------
+    folds : list
+        List containing the `y` indices (position) for training, last window, test 
+        including the gap and test excluding the gap for each fold, and whether to
+        fit the Forecaster.
+    
     """
 
-    def __init__(
-            self,
-            steps: int,
-            initial_train_size: Optional[int] = None,
-            window_size: Optional[int] = None,
-            differentiation: Optional[int] = None,
-            refit: Union[bool, int] = False,
-            fixed_train_size: bool = True,
-            gap: int = 0,
-            skip_folds: Optional[Union[int, list]] = None,
-            allow_incomplete_fold: bool = True,
-            return_all_indexes: bool = False,
-            verbose: bool = True
-    ) -> None:
+    if isinstance(data, pd.Index):
+        data = pd.Series(index=data)
+    
+    idx = range(len(data))
+    folds = []
+    i = 0
+    last_fold_excluded = False
 
-        self._validate_params(
-            steps,
-            initial_train_size,
-            window_size,
-            differentiation,
-            refit, 
-            fixed_train_size,
-            gap,
-            skip_folds,
-            allow_incomplete_fold, 
-            return_all_indexes,
-        )
+    while initial_train_size + (i * test_size) + gap < len(data):
 
-        self.initial_train_size = initial_train_size
-        self.steps = steps
-        self.window_size = window_size
-        self.differentiation = differentiation
-        self.refit = refit
-        self.fixed_train_size = fixed_train_size
-        self.gap = gap
-        self.skip_folds = skip_folds
-        self.allow_incomplete_fold = allow_incomplete_fold
-        self.return_all_indexes = return_all_indexes
-        self.verbose = verbose
-
-    def _validate_params(
-        self,
-        steps: int,
-        initial_train_size: Optional[int] = None,
-        window_size: Optional[int] = None,
-        differentiation: Optional[int] = None,
-        refit: Union[bool, int] = False,
-        fixed_train_size: bool = True,
-        gap: int = 0,
-        skip_folds: Optional[Union[int, list]] = None,
-        allow_incomplete_fold: bool = True,
-        return_all_indexes: bool = False,
-        verbose: bool = True
-    ) -> None:
-                
-        """
-        Validate all input parameters to ensure correctness.
-        """
-
-        if (
-            not isinstance(window_size, (int, np.integer, type(None)))
-            or window_size is not None
-            and window_size < 1
-        ):
-            raise ValueError(
-                f"`window_size` must be an integer greater than 0. Got {window_size}."
-            )
-        if not isinstance(initial_train_size, (int, np.integer)) and initial_train_size is not None:
-            raise ValueError(
-                f"`initial_train_size` must be an integer or None. Got {initial_train_size}."
-            )
-        if not isinstance(steps, (int, np.integer)) or steps < 1:
-            raise ValueError(
-                f"`steps` must be an integer greater than 0. Got {steps}."
-            )
-        if not isinstance(refit, (bool, int, np.integer)):
-            raise ValueError(
-                f"`refit` must be a boolean or an integer. Got {refit}."
-            )
-        if not isinstance(fixed_train_size, bool):
-            raise ValueError(
-                f"`fixed_train_size` must be a boolean. Got {fixed_train_size}."
-            )
-        if not isinstance(gap, (int, np.integer)) or gap < 0:
-            raise ValueError(
-                f"`gap` must be an integer greater than or equal to 0. Got {gap}."
-            )
-        if skip_folds is not None:
-            if not isinstance(skip_folds, (int, np.integer, list, type(None))):
-                raise ValueError(
-                    f"`skip_folds` must be an integer, list or None. Got {skip_folds}."
-                )
-            if isinstance(skip_folds, (int, np.integer)) and skip_folds < 1:
-                raise ValueError(
-                    f"`skip_folds` must be an integer greater than 0. Got {skip_folds}."
-                )
-            if isinstance(skip_folds, list) and any([x < 1 for x in skip_folds]):
-                raise ValueError(
-                    f"`skip_folds` list must contain integers greater than or equal to 1. "
-                    f"The first fold is always needed to train the forecaster. "
-                    f"Got {skip_folds}."
-                )
-        if not isinstance(allow_incomplete_fold, bool):
-            raise ValueError(
-                f"`allow_incomplete_fold` must be a boolean. Got {allow_incomplete_fold}."
-            )
-        if not isinstance(return_all_indexes, bool):
-            raise ValueError(
-                f"`return_all_indexes` must be a boolean. Got {return_all_indexes}."
-            )
-        if differentiation is not None:
-            if not isinstance(differentiation, (int, np.integer)) or differentiation < 0:
-                raise ValueError(
-                    f"differentiation must be None or an integer greater than or equal to 0. "
-                    f"Got {differentiation}."
-                )
-        if not isinstance(verbose, bool):
-            raise ValueError(
-                f"`verbose` must be a boolean. Got {verbose}."
-            )
-
-    def __repr__(
-        self
-    ) -> str:
-        """
-        Information displayed when printed.
-        """
-            
-        return (
-            f"TimeSeriesFold(\n"
-            f"    steps={self.steps},\n"
-            f"    initial_train_size={self.initial_train_size},\n"
-            f"    window_size={self.window_size},\n"
-            f"    differentiation={self.differentiation},\n"
-            f"    refit={self.refit},\n"
-            f"    fixed_train_size={self.fixed_train_size},\n"
-            f"    gap={self.gap},\n"
-            f"    skip_folds={self.skip_folds},\n"
-            f"    allow_incomplete_fold={self.allow_incomplete_fold},\n"
-            f"    return_all_indexes={self.return_all_indexes},\n"
-            f"    verbose={self.verbose}\n"
-            f")"
-        )
-
-
-    def split(
-            self,
-            X: Union[pd.Series, pd.DataFrame, pd.Index, dict],
-            externally_fitted: bool = False,
-            as_pandas: bool = False
-    ) -> Union[list, pd.DataFrame]:
-        """
-        Split the time series data into train and test folds.
-
-        Parameters
-        ----------
-        X : pandas Series, DataFrame, Index, or dictionary
-            Time series data or index to split.
-        externally_fitted : bool, default=False
-            If True, the forecaster is assumed to be already fitted so no training is
-            done in the first fold.
-        as_pandas : bool, default=False
-            If True, the folds are returned as a DataFrame. This is useful to visualize
-            the folds in a more interpretable way.
-
-        Returns
-        -------
-        list, pd.DataFrame
-            A list of lists containing the indices (position) for for each fold. Each list
-            contains 4 lists and a boolean with the following information:
-
-            - [train_start, train_end]: list with the start and end positions of the
-            training set.
-            - [last_window_start, last_window_end]: list with the start and end positions
-            of the last window seen by the forecaster during training. The last window
-            is used to generate the lags use as predictors. If `diferentiation` is
-            included, the interval is extended as many observations as the
-            differentiation order. If the arguemnt `window_size` is `None`, this list is
-            empty.
-            - [test_start, test_end]: list with the start and end positions of the test
-            set. These are the observations used to evaluate the forecaster.
-            - [test_start_with_gap, test_end_with_gap]: list with the start and end
-            positions of the test set including the gap. The gap is the number of
-            observations bwetween the end of the training set and the start of the test
-            set.
-            - fit_forecaster: boolean indicating whether the forecaster should be fitted
-            in this fold.
-
-            It is important to note that the returned values are the positions of the
-            observations and not the actual values of the index, so they can be used to
-            slice the data directly using iloc.
-
-            If `as_pandas` is `True`, the folds are returned as a DataFrame with the
-            following columns: 'fold', 'train_start', 'train_end', 'last_window_start',
-            'last_window_end', 'test_start', 'test_end', 'test_start_with_gap',
-            'test_end_with_gap', 'fit_forecaster'.
-
-            Following the python convention, the start index is inclusive and the end
-            index is exclusive. This means that the last index is not included in the
-            slice.
-
-        """
-
-        if not isinstance(X, (pd.Series, pd.DataFrame, pd.Index, dict)):
-            raise ValueError(
-                f"X must be a pandas Series, DataFrame, Index or a dictionary. "
-                f"Got {type(X)}."
-            )
-        
-        if self.window_size is None:
-            warnings.warn(
-                "Last window cannot be calculated because `window_size` is None. "
-            )
-
-        index = self._extract_index(X)
-        idx = range(len(X))
-        folds = []
-        i = 0
-        last_fold_excluded = False
-
-        if self.window_size is not None and self.differentiation is not None:
-            window_size = self.window_size + self.differentiation
+        if refit:
+            # If `fixed_train_size` the train size doesn't increase but moves by 
+            # `test_size` positions in each iteration. If `False`, the train size
+            # increases by `test_size` in each iteration.
+            train_iloc_start = i * (test_size) if fixed_train_size else 0
+            train_iloc_end = initial_train_size + i * (test_size)
+            test_iloc_start = train_iloc_end
         else:
-            window_size = self.window_size
-
-        if len(index) < self.initial_train_size + self.steps:
-            raise ValueError(
-                f"The time series must have at least `initial_train_size + steps` "
-                f"observations. Got {len(index)} observations."
-            )
-
-        while self.initial_train_size + (i * self.steps) + self.gap < len(index):
-
-            if self.refit:
-                # If `fixed_train_size` the train size doesn't increase but moves by 
-                # `steps` positions in each iteration. If `False`, the train size
-                # increases by `steps` in each iteration.
-                train_iloc_start = i * (self.steps) if self.fixed_train_size else 0
-                train_iloc_end = self.initial_train_size + i * (self.steps)
-                test_iloc_start = train_iloc_end
-            else:
-                # The train size doesn't increase and doesn't move.
-                train_iloc_start = 0
-                train_iloc_end = self.initial_train_size
-                test_iloc_start = self.initial_train_size + i * (self.steps)
-            
-            if window_size is not None:
-                last_window_iloc_start = test_iloc_start - window_size
-            test_iloc_end = test_iloc_start + self.gap + self.steps
+            # The train size doesn't increase and doesn't move.
+            train_iloc_start = 0
+            train_iloc_end = initial_train_size
+            test_iloc_start = initial_train_size + i * (test_size)
         
-            partitions = [
-                idx[train_iloc_start : train_iloc_end],
-                idx[last_window_iloc_start : test_iloc_start] if window_size is not None else [],
-                idx[test_iloc_start : test_iloc_end],
-                idx[test_iloc_start + self.gap : test_iloc_end]
-            ]
-            folds.append(partitions)
-            i += 1
+        last_window_iloc_start = test_iloc_start - window_size
+        test_iloc_end = test_iloc_start + gap + test_size
+    
+        partitions = [
+            idx[train_iloc_start : train_iloc_end],
+            idx[last_window_iloc_start : test_iloc_start],
+            idx[test_iloc_start : test_iloc_end],
+            idx[test_iloc_start + gap : test_iloc_end]
+        ]
+        folds.append(partitions)
+        i += 1
 
-        if not self.allow_incomplete_fold and len(folds[-1][3]) < self.steps:
+    if not allow_incomplete_fold:
+        if len(folds[-1][3]) < test_size:
             folds = folds[:-1]
             last_fold_excluded = True
 
-        # Replace partitions inside folds with length 0 with `None`
-        folds = [
-            [partition if len(partition) > 0 else None for partition in fold] 
-            for fold in folds
-        ]
+    # Replace partitions inside folds with length 0 with `None`
+    folds = [[partition if len(partition) > 0 else None 
+              for partition in fold] 
+             for fold in folds]
 
-        # Create a flag to know whether to train the forecaster
-        if self.refit == 0:
-            self.refit = False
-            
-        if isinstance(self.refit, bool):
-            fit_forecaster = [self.refit] * len(folds)
-            fit_forecaster[0] = True
-        else:
-            fit_forecaster = [False] * len(folds)
-            for i in range(0, len(fit_forecaster), self.refit): 
-                fit_forecaster[i] = True
+    # Create a flag to know whether to train the forecaster
+    if refit == 0:
+        refit = False
         
-        for i in range(len(folds)): 
-            folds[i].append(fit_forecaster[i])
-            if fit_forecaster[i] is False:
-                folds[i][0] = folds[i - 1][0]
-
-        index_to_skip = []
-        if self.skip_folds is not None:
-            if isinstance(self.skip_folds, (int, np.integer)) and self.skip_folds > 0:
-                index_to_keep = np.arange(0, len(folds), self.skip_folds)
-                index_to_skip = np.setdiff1d(np.arange(0, len(folds)), index_to_keep, assume_unique=True)
-                index_to_skip = [int(x) for x in index_to_skip] # Required since numpy 2.0
-            if isinstance(self.skip_folds, list):
-                index_to_skip = [i for i in self.skip_folds if i < len(folds)]        
-        
-        if self.verbose:
-            self._print_info(
-                index = index,
-                folds = folds,
-                externally_fitted = externally_fitted,
-                last_fold_excluded = last_fold_excluded,
-                index_to_skip = index_to_skip
-            )
-
-        folds = [fold for i, fold in enumerate(folds) if i not in index_to_skip]
-        if not self.return_all_indexes:
-            # +1 to prevent iloc pandas from deleting the last observation
-            folds = [
-                [[fold[0][0], fold[0][-1] + 1], 
-                [fold[1][0], fold[1][-1] + 1] if window_size is not None else [],
-                [fold[2][0], fold[2][-1] + 1],
-                [fold[3][0], fold[3][-1] + 1],
-                fold[4]] 
-                for fold in folds
-            ]
-
-        if as_pandas:
-            if self.window_size is None:
-                for fold in folds:
-                    fold[1] = [None, None]
-
-            if not self.return_all_indexes:
-                folds = pd.DataFrame(
-                    data = [list(itertools.chain(*fold[:-1])) + [fold[-1]] for fold in folds],
-                    columns = [
-                        'train_start',
-                        'train_end',
-                        'last_window_start',
-                        'last_window_end',
-                        'test_start',
-                        'test_end',
-                        'test_start_with_gap',
-                        'test_end_with_gap',
-                        'fit_forecaster'
-                    ],
-                )
-            else:
-                folds = pd.DataFrame(
-                    data = folds,
-                    columns = [
-                        'train_index',
-                        'last_window_index',
-                        'test_index',
-                        'test_index_with_gap',
-                        'fit_forecaster'
-                    ],
-                )
-            folds.insert(0, 'fold', range(len(folds)))
-            
-
-        return folds
+    if isinstance(refit, bool):
+        fit_forecaster = [refit] * len(folds)
+        fit_forecaster[0] = True
+    else:
+        fit_forecaster = [False] * len(folds)
+        for i in range(0, len(fit_forecaster), refit): 
+            fit_forecaster[i] = True
     
+    for i in range(len(folds)): 
+        folds[i].append(fit_forecaster[i])
+        if fit_forecaster[i] is False:
+            folds[i][0] = folds[i - 1][0]
+
+    # This is done to allow parallelization when `refit` is `False`. The initial 
+    # Forecaster fit is outside the auxiliary function.
+    folds[0][4] = False
+
+    index_to_skip = []
+    if skip_folds is not None:
+        if isinstance(skip_folds, int) and skip_folds > 0:
+            index_to_keep = np.arange(0, len(folds), skip_folds)
+            index_to_skip = np.setdiff1d(np.arange(0, len(folds)), index_to_keep, assume_unique=True)
+            index_to_skip = [int(x) for x in index_to_skip]  # Required since numpy 2.0
+        if isinstance(skip_folds, list):
+            index_to_skip = [i for i in skip_folds if i < len(folds)]        
     
-    def _extract_index(
-        self,
-        X: Union[pd.Series, pd.DataFrame, pd.Index, dict]
-    ) -> pd.Index:
-        """
-        Extracts and returns the index from the input data X.
-
-        Parameters
-        ----------
-        X : pandas Series, DataFrame, Index, or dictionary
-            Time series data or index to split.
-
-        Returns
-        -------
-        pd.Index
-            Index extracted from the input data.
-        """
-
-        if isinstance(X, (pd.Series, pd.DataFrame)):
-            index = X.index
-        elif isinstance(X, dict):
-            freqs = [s.index.freq for s in X.values() if s.index.freq is not None]
-            if not freqs:
-                raise ValueError("At least one series must have a frequency.")
-            if not all(f == freqs[0] for f in freqs):
-                raise ValueError(
-                    "All series with frequency must have the same frequency."
-                )
-            min_index = min([v.index[0] for v in X.values()])
-            max_index = max([v.index[-1] for v in X.values()])
-            index = pd.date_range(start=min_index, end=max_index, freq=freqs[0])
-        else:
-            index = X
-            
-        return index
-    
-
-    def set_params(self, params: dict) -> None:
-        """
-        Set the parameters of the TimeSeriesFold object. Before overwriting the
-        current parameters, the input parameters are validated to ensure correctness.
-
-        Parameters
-        ----------
-        params : dict
-            Dictionary with the parameters to set.
-        """
-
-        if not isinstance(params, dict):
-            raise ValueError(
-                f"`params` must be a dictionary. Got {type(params)}."
-            )
-        
-        current_params = deepcopy(vars(self))
-        unknown_params = set(params.keys()) - set(current_params.keys())
-        if unknown_params:
-            warnings.warn(
-                f"Unknown parameters: {unknown_params}. They have been ignored.",
-                IgnoredArgumentWarning,
-            )
-        updated_params = {**current_params, **params}
-        self._validate_params(**updated_params)
-        for key, value in updated_params.items():
-            setattr(self, key, value)
-    
-
-    def _print_info(
-            self,
-            index: pd.Index,
-            folds: list,
-            externally_fitted: bool,
-            last_fold_excluded: bool,
-            index_to_skip: list,
-    ) -> None:
-        """
-        Print information about folds.
-        """
-
-        print("Information of folds")
-        print("--------------------")
+    if verbose:
+        print("Information of backtesting process")
+        print("----------------------------------")
         if externally_fitted:
-            print(
-                f"An already trained forecaster is to be used. Window size: "
-                f"{self.window_size}"
-            )
+            print(f"An already trained forecaster is to be used. Window size: {window_size}")
         else:
-            if self.differentiation is None:
-                print(
-                    f"Number of observations used for initial training: "
-                    f"{self.initial_train_size}"
-                )
+            if differentiation is None:
+                print(f"Number of observations used for initial training: {initial_train_size}")
             else:
-                print(
-                    f"Number of observations used for initial training: "
-                    f"{self.initial_train_size - self.differentiation}"
-                )
-                print(f"    First {self.differentiation} observation/s in training sets "
-                        f"are used for differentiation"
-                )
-        print(
-            f"Number of observations used for backtesting: "
-            f"{len(index) - self.initial_train_size}"
-        )
+                print(f"Number of observations used for initial training: {initial_train_size - differentiation}")
+                print(f"    First {differentiation} observation/s in training sets are used for differentiation")
+        print(f"Number of observations used for backtesting: {len(data) - initial_train_size}")
         print(f"    Number of folds: {len(folds)}")
-        print(
-            f"    Number skipped folds: "
-            f"{len(index_to_skip)} {index_to_skip if index_to_skip else ''}"
-        )
-        print(f"    Number of steps per fold: {self.steps}")
-        print(
-            f"    Number of steps to exclude from the end of each train set "
-            f"before test (gap): {self.gap}"
-        )
+        print(f"    Number skipped folds: {len(index_to_skip)} {index_to_skip if index_to_skip else ''}")
+        print(f"    Number of steps per fold: {test_size}")
+        print(f"    Number of steps to exclude from the end of each train set before test (gap): {gap}")
         if last_fold_excluded:
             print("    Last fold has been excluded because it was incomplete.")
-        if len(folds[-1][3]) < self.steps:
+        if len(folds[-1][3]) < test_size:
             print(f"    Last fold only includes {len(folds[-1][3])} observations.")
         print("")
 
-        if self.differentiation is None:
-            self.differentiation = 0
+        if differentiation is None:
+            differentiation = 0
         
         for i, fold in enumerate(folds):
             is_fold_skipped   = i in index_to_skip
             has_training      = fold[-1] if i != 0 else True
-            training_start    = (
-                index[fold[0][0] + self.differentiation] if fold[0] is not None else None
-            )
-            training_end      = index[fold[0][-1]] if fold[0] is not None else None
-            training_length   = (
-                len(fold[0]) - self.differentiation if fold[0] is not None else 0
-            )
-            validation_start  = index[fold[3][0]]
-            validation_end    = index[fold[3][-1]]
+            training_start    = data.index[fold[0][0] + differentiation] if fold[0] is not None else None
+            training_end      = data.index[fold[0][-1]] if fold[0] is not None else None
+            training_length   = len(fold[0]) - differentiation if fold[0] is not None else 0
+            validation_start  = data.index[fold[3][0]]
+            validation_end    = data.index[fold[3][-1]]
             validation_length = len(fold[3])
 
             print(f"Fold: {i}")
@@ -642,357 +237,46 @@ class TimeSeriesFold():
                 print("    Fold skipped")
             elif not externally_fitted and has_training:
                 print(
-                    f"    Training:   {training_start} -- {training_end}  "
-                    f"(n={training_length})"
+                    f"    Training:   {training_start} -- {training_end}  (n={training_length})"
                 )
                 print(
-                    f"    Validation: {validation_start} -- {validation_end}  "
-                    f"(n={validation_length})"
+                    f"    Validation: {validation_start} -- {validation_end}  (n={validation_length})"
                 )
             else:
                 print("    Training:   No training in this fold")
                 print(
-                    f"    Validation: {validation_start} -- {validation_end}  "
-                    f"(n={validation_length})"
+                    f"    Validation: {validation_start} -- {validation_end}  (n={validation_length})"
                 )
 
         print("")
 
-
-class OneStepAheadFold():
-    """
-    Class to split time series data into train and test folds for one-step-ahead
-    forecasting.
-
-    Parameters
-    ----------
-    initial_train_size : int, default=None
-        Number of observations used for initial training.
-    window_size : int, default=None
-        Number of observations needed to generate the autoregressive predictors.
-    differentiation : int, default=None
-        Number of observations to use for differentiation. This is used to extend the
-        `last_window` as many observations as the differentiation order.
-    return_all_indexes : bool, default=False
-        Whether to return all indexes or only the start and end indexes of each fold.
-    verbose : bool, default=True
-        Whether to print information about generated folds.
-
-    Attributes
-    ----------
-    initial_train_size : int, default=None
-        Number of observations used for initial training.
-    window_size : int
-        Number of observations needed to generate the autoregressive predictors.
-    differentiation : int, default=None 
-        Number of observations to use for differentiation. This is used to extend the
-        `last_window` as many observations as the differentiation order.
-    return_all_indexes : bool, default=False
-        Whether to return all indexes or only the start and end indexes of each fold.
-    steps : any
-        This attribute is not used in this class. It is included for API consistency.
-    fixed_train_size : any
-        This attribute is not used in this class. It is included for API consistency.
-    gap : any
-        This attribute is not used in this class. It is included for API consistency.
-    skip_folds : any
-        This attribute is not used in this class. It is included for API consistency.
-    allow_incomplete_fold : any
-        This attribute is not used in this class. It is included for API consistency.
-    refit : any
-        This attribute is not used in this class. It is included for API consistency.
-    
-    """
-
-    def __init__(
-            self,
-            initial_train_size: Optional[int] = None,
-            window_size: Optional[int] = None,
-            differentiation: Optional[int] = None,
-            return_all_indexes: bool = False,
-            verbose: bool = True,
-    ) -> None:
-
-        self._validate_params(
-            initial_train_size,
-            window_size,
-            differentiation,
-            return_all_indexes,
-        )
-
-        self.initial_train_size = initial_train_size
-        self.window_size = window_size
-        self.differentiation = differentiation
-        self.return_all_indexes = return_all_indexes
-        self.verbose = verbose
-        # Attributes not used, included for API consistency
-        self.steps = 1 
-        self.fixed_train_size = True
-        self.gap = 0
-        self.skip_folds = None
-        self.allow_incomplete_fold = False
-        self.refit = False
-
-
-    def _validate_params(
-        self,
-        initial_train_size: Optional[int] = None,
-        window_size: Optional[int] = None,
-        differentiation: Optional[int] = None,
-        return_all_indexes: bool = False,
-        verbose: bool = True
-    ) -> None:
-                
-        """
-        Validate all input parameters to ensure correctness.
-        """
-
-        if (
-            not isinstance(window_size, (int, np.integer, type(None)))
-            or window_size is not None
-            and window_size < 1
-        ):
-            raise ValueError(
-                f"`window_size` must be an integer greater than 0. Got {window_size}."
-            )
-        if not isinstance(initial_train_size, (int, np.integer)) and initial_train_size is not None:
-            raise ValueError(
-                f"`initial_train_size` must be an integer or None. Got {initial_train_size}."
-            )
-    
-        if not isinstance(return_all_indexes, bool):
-            raise ValueError(
-                f"`return_all_indexes` must be a boolean. Got {return_all_indexes}."
-            )
-        if differentiation is not None:
-            if not isinstance(differentiation, (int, np.integer)) or differentiation < 0:
-                raise ValueError(
-                    f"differentiation must be None or an integer greater than or equal to 0. "
-                    f"Got {differentiation}."
-                )
-        if not isinstance(verbose, bool):
-            raise ValueError(
-                f"`verbose` must be a boolean. Got {verbose}."
-            )
-
-
-    def __repr__(
-        self
-    ) -> str:
-        """
-        Information displayed when printed.
-        """
-            
-        return (
-            f"OneStepAheadFold(\n"
-            f"    initial_train_size={self.initial_train_size},\n"
-            f"    window_size={self.window_size},\n"
-            f"    differentiation={self.differentiation},\n"
-            f"    return_all_indexes={self.return_all_indexes},\n"
-            f"    verbose={self.verbose}\n"
-            f")"
-        )
-        
-
-    def split(
-            self,
-            X: Union[pd.Series, pd.DataFrame, pd.Index, dict],
-            as_pandas: bool = False,
-            externally_fitted: any = None
-    ) -> Union[list, pd.DataFrame]:
-        """
-        Split the time series data into train and test folds.
-
-        Parameters
-        ----------
-        X : pandas Series, DataFrame, Index, or dictionary
-            Time series data or index to split.
-        as_pandas : bool, default=False
-            If True, the folds are returned as a DataFrame. This is useful to visualize
-            the folds in a more interpretable way.
-        externally_fitted : any
-            This argument is not used in this class. It is included for API consistency.
-        
-        Returns
-        -------
-        list, pd.DataFrame
-            A list of lists containing the indices (position) for for each fold. Each list
-            contains 2 lists the following information:
-
-            - [train_start, train_end]: list with the start and end positions of the
-            training set.
-            - [test_start, test_end]: list with the start and end positions of the test
-            set. These are the observations used to evaluate the forecaster.
-        
-            It is important to note that the returned values are the positions of the
-            observations and not the actual values of the index, so they can be used to
-            slice the data directly using iloc.
-
-            If `as_pandas` is `True`, the folds are returned as a DataFrame with the
-            following columns: 'fold', 'train_start', 'train_end', 'test_start', 'test_end'.
-
-            Following the python convention, the start index is inclusive and the end
-            index is exclusive. This means that the last index is not included in the
-            slice.
-        """
-
-        index = self._extract_index(X)
-        fold = [
-            [0, self.initial_train_size],
-            [self.initial_train_size, len(X)],
-            True
+    folds = [fold for i, fold in enumerate(folds) if i not in index_to_skip]
+    if not return_all_indexes:
+        # +1 to prevent iloc pandas from deleting the last observation
+        folds = [
+            [[fold[0][0], fold[0][-1] + 1], 
+             [fold[1][0], fold[1][-1] + 1], 
+             [fold[2][0], fold[2][-1] + 1],
+             [fold[3][0], fold[3][-1] + 1],
+             fold[4]] 
+            for fold in folds
         ]
 
-        if self.verbose:
-            self._print_info(
-                index = index,
-                fold = fold,
-            )
-
-        if self.return_all_indexes:
-            fold = [
-                [range(fold[0][0], fold[0][1])],
-                [range(fold[1][0], fold[1][1])],
-                fold[2]
-            ]
-
-        if as_pandas:
-            if not self.return_all_indexes:
-                fold = pd.DataFrame(
-                    data = [list(itertools.chain(*fold[:-1])) + [fold[-1]]],
-                    columns = [
-                        'train_start',
-                        'train_end',
-                        'test_start',
-                        'test_end',
-                        'fit_forecaster'
-                    ],
-                )
-            else:
-                fold = pd.DataFrame(
-                    data = [fold],
-                    columns = [
-                        'train_index',
-                        'test_index',
-                        'fit_forecaster'
-                    ],
-                )
-            fold.insert(0, 'fold', range(len(fold)))
-
-        return fold
-    
-
-    def _extract_index(
-        self,
-        X: Union[pd.Series, pd.DataFrame, pd.Index, dict]
-    ) -> pd.Index:
-        """
-        Extracts and returns the index from the input data X.
-
-        Parameters
-        ----------
-        X : pandas Series, DataFrame, Index, or dictionary
-            Time series data or index to split.
-
-        Returns
-        -------
-        pd.Index
-            Index extracted from the input data.
-        """
-
-        if isinstance(X, (pd.Series, pd.DataFrame)):
-            index = X.index
-        elif isinstance(X, dict):
-            freqs = [s.index.freq for s in X.values() if s.index.freq is not None]
-            if not freqs:
-                raise ValueError("At least one series must have a frequency.")
-            if not all(f == freqs[0] for f in freqs):
-                raise ValueError(
-                    "All series with frequency must have the same frequency."
-                )
-            min_index = min([v.index[0] for v in X.values()])
-            max_index = max([v.index[-1] for v in X.values()])
-            index = pd.date_range(start=min_index, end=max_index, freq=freqs[0])
-        else:
-            index = X
-            
-        return index
-    
-
-    def set_params(self, params: dict) -> None:
-        """
-        Set the parameters of the OneStepAheadFold object.
-
-        Parameters
-        ----------
-        params : dict
-            Dictionary with the parameters to set.
-        """
-
-        if not isinstance(params, dict):
-            raise ValueError(
-                f"`params` must be a dictionary. Got {type(params)}."
-            )
-        
-        current_params = deepcopy(vars(self))
-        unknown_params = set(params.keys()) - set(current_params.keys())
-        if unknown_params:
-            warnings.warn(
-                f"Unknown parameters: {unknown_params}. They have been ignored.",
-                IgnoredArgumentWarning,
-            )
-        updated_params = {**current_params, **params}
-        self._validate_params(**updated_params)
-        for key, value in updated_params.items():
-            setattr(self, key, value)
-
-
-    def _print_info(
-            self,
-            index: pd.Index,
-            fold: list,
-    ) -> None:
-        """
-        Print information about folds.
-        """
-
-        print("Information of folds")
-        print("--------------------")
-        print(
-            f"Number of observations used for initial training: "
-            f"{self.initial_train_size}"
-        )
-        print(
-            f"Number of observations in test: "
-            f"{len(index) - self.initial_train_size}"
-        )
- 
-        if self.differentiation is None:
-            self.differentiation = 0
-        
-        training_start = index[fold[0][0] + self.differentiation]
-        training_end = index[fold[0][-1]]
-        training_length = self.initial_train_size
-        test_start  = index[fold[1][0]]
-        test_end    = index[fold[1][-1]-1]
-        test_length = len(index) - self.initial_train_size
-
-        print(
-            f"Training : {training_start} -- {training_end} (n={training_length})"
-        )
-        print(
-            f"Test     : {test_start} -- {test_end} (n={test_length})"
-        )
-        print("")
-
+    return folds
 
 
 def _backtesting_forecaster(
     forecaster: object,
     y: pd.Series,
+    steps: int,
     metric: Union[str, Callable, list],
-    cv: TimeSeriesFold,
+    initial_train_size: Optional[int] = None,
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    refit: Union[bool, int] = False,
     interval: Optional[list] = None,
     n_boot: int = 250,
     random_state: int = 123,
@@ -1003,24 +287,30 @@ def _backtesting_forecaster(
     show_progress: bool = True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Backtesting of forecaster model following the folds generated by the TimeSeriesFold
-    class and using the metric(s) provided.
+    Backtesting of forecaster model.
 
-    If `forecaster` is already trained and `initial_train_size` is set to `None` in the
-    TimeSeriesFold class, no initial train will be done and all data will be used
-    to evaluate the model. However, the first `len(forecaster.last_window)` observations
-    are needed to create the initial predictors, so no predictions are calculated for
-    them.
+    - If `refit` is `False`, the model will be trained only once using the 
+    `initial_train_size` first observations. 
+    - If `refit` is `True`, the model is trained on each iteration, increasing
+    the training set. 
+    - If `refit` is an `integer`, the model will be trained every that number 
+    of iterations.
+    - If `forecaster` is already trained and `initial_train_size` is `None`,
+    no initial train will be done and all data will be used to evaluate the model.
+    However, the first `len(forecaster.last_window)` observations are needed
+    to create the initial predictors, so no predictions are calculated for them.
     
-    A copy of the original forecaster is created so that it is not modified during the
-    process.
+    A copy of the original forecaster is created so that it is not modified during 
+    the process.
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
         Training time series.
+    steps : int
+        Number of steps to predict.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -1030,13 +320,34 @@ def _backtesting_forecaster(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
-    cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data into folds.
-        **New in version 0.14.0**
+    initial_train_size : int, default `None`
+        Number of samples in the initial train split. If `None` and `forecaster` is 
+        already trained, no initial train is done and all data is used to evaluate the 
+        model. However, the first `len(forecaster.last_window)` observations are needed 
+        to create the initial predictors, so no predictions are calculated for them. 
+        This useful to backtest the model on the same data used to train it.
+        `None` is only allowed when `refit` is `False` and `forecaster` is already
+        trained.
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increase but moves by `steps` in each iteration.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
@@ -1080,21 +391,13 @@ def _backtesting_forecaster(
     """
 
     forecaster = deepcopy(forecaster)
-    cv = deepcopy(cv)
-
-    cv.set_params({
-        'window_size': forecaster.window_size,
-        'differentiation': forecaster.differentiation,
-        'return_all_indexes': False,
-        'verbose': verbose
-    })
 
     if n_jobs == 'auto':
         n_jobs = select_n_jobs_backtesting(
                      forecaster = forecaster,
-                     refit      = cv.refit
+                     refit      = refit
                  )
-    elif not isinstance(cv.refit, bool) and cv.refit != 1 and n_jobs != 1:
+    elif not isinstance(refit, bool) and refit != 1 and n_jobs != 1:
         warnings.warn(
             ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
              "is set to 1 to avoid unexpected results during parallelization."),
@@ -1120,12 +423,12 @@ def _backtesting_forecaster(
 
     store_in_sample_residuals = False if interval is None else True
 
-    if cv.initial_train_size is not None:
+    if initial_train_size is not None:
         # First model training, this is done to allow parallelization when `refit`
         # is `False`. The initial Forecaster fit is outside the auxiliary function.
-        exog_train = exog.iloc[:cv.initial_train_size, ] if exog is not None else None
+        exog_train = exog.iloc[:initial_train_size, ] if exog is not None else None
         forecaster.fit(
-            y                         = y.iloc[:cv.initial_train_size, ],
+            y                         = y.iloc[:initial_train_size, ],
             exog                      = exog_train,
             store_in_sample_residuals = store_in_sample_residuals
         )
@@ -1133,19 +436,27 @@ def _backtesting_forecaster(
     else:
         # Although not used for training, first observations are needed to create
         # the initial predictors
-        cv.set_params({'initial_train_size': forecaster.window_size})
+        initial_train_size = forecaster.window_size
         externally_fitted = True
 
-    folds = cv.split(
-                X                  = y,
-                externally_fitted  = externally_fitted,
+    folds = _create_backtesting_folds(
+                data                  = y,
+                window_size           = forecaster.window_size,
+                initial_train_size    = initial_train_size,
+                test_size             = steps,
+                externally_fitted     = externally_fitted,
+                refit                 = refit,
+                fixed_train_size      = fixed_train_size,
+                gap                   = gap,
+                skip_folds            = skip_folds,
+                allow_incomplete_fold = allow_incomplete_fold,
+                return_all_indexes    = False,
+                differentiation       = forecaster.differentiation,
+                verbose               = verbose
             )
-    # This is done to allow parallelization when `refit` is `False`. The initial 
-    # Forecaster fit is outside the auxiliary function.
-    folds[0][4] = False
 
-    if cv.refit:
-        n_of_fits = int(len(folds) / cv.refit)
+    if refit:
+        n_of_fits = int(len(folds) / refit)
         if type(forecaster).__name__ != 'ForecasterAutoregDirect' and n_of_fits > 50:
             warnings.warn(
                 (f"The forecaster will be fit {n_of_fits} times. This can take substantial"
@@ -1163,7 +474,7 @@ def _backtesting_forecaster(
     if show_progress:
         folds = tqdm(folds)
 
-    def _fit_predict_forecaster(y, exog, forecaster, interval, fold, gap):
+    def _fit_predict_forecaster(y, exog, forecaster, interval, fold):
         """
         Fit the forecaster and predict `steps` ahead. This is an auxiliary 
         function used to parallelize the backtesting_forecaster function.
@@ -1234,7 +545,7 @@ def _backtesting_forecaster(
     backtest_predictions = (
         Parallel(n_jobs=n_jobs)
         (delayed(_fit_predict_forecaster)
-        (y=y, exog=exog, forecaster=forecaster, interval=interval, fold=fold, gap=cv.gap)
+        (y=y, exog=exog, forecaster=forecaster, interval=interval, fold=fold)
          for fold in folds)
     )
 
@@ -1246,7 +557,7 @@ def _backtesting_forecaster(
     for i, fold in enumerate(folds):
         fit_fold = fold[-1]
         if i == 0 or fit_fold:
-            train_iloc_start = fold[0][0] + cv.window_size  # Exclude observations used to create predictors
+            train_iloc_start = fold[0][0] + forecaster.window_size  # Exclude observations used to create predictors
             train_iloc_end = fold[0][1]
             train_indexes.append(np.arange(train_iloc_start, train_iloc_end))
     
@@ -1273,9 +584,15 @@ def _backtesting_forecaster(
 def backtesting_forecaster(
     forecaster: object,
     y: pd.Series,
-    cv: TimeSeriesFold,
+    steps: int,
     metric: Union[str, Callable, list],
+    initial_train_size: Optional[int] = None,
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    refit: Union[bool, int] = False,
     interval: Optional[list] = None,
     n_boot: int = 250,
     random_state: int = 123,
@@ -1286,27 +603,30 @@ def backtesting_forecaster(
     show_progress: bool = True
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
-    Backtesting of forecaster model following the folds generated by the TimeSeriesFold
-    class and using the metric(s) provided.
+    Backtesting of forecaster model.
 
-    If `forecaster` is already trained and `initial_train_size` is set to `None` in the
-    TimeSeriesFold class, no initial train will be done and all data will be used
-    to evaluate the model. However, the first `len(forecaster.last_window)` observations
-    are needed to create the initial predictors, so no predictions are calculated for
-    them.
+    - If `refit` is `False`, the model will be trained only once using the 
+    `initial_train_size` first observations. 
+    - If `refit` is `True`, the model is trained on each iteration, increasing
+    the training set. 
+    - If `refit` is an `integer`, the model will be trained every that number 
+    of iterations.
+    - If `forecaster` is already trained and `initial_train_size` is `None`,
+    no initial train will be done and all data will be used to evaluate the model.
+    However, the first `len(forecaster.last_window)` observations are needed
+    to create the initial predictors, so no predictions are calculated for them.
     
-    A copy of the original forecaster is created so that it is not modified during the
-    process.
+    A copy of the original forecaster is created so that it is not modified during 
+    the process.
 
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
         Training time series.
-    cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data into folds.
-        **New in version 0.14.0**
+    steps : int
+        Number of steps to predict.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -1316,10 +636,34 @@ def backtesting_forecaster(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+    initial_train_size : int, default `None`
+        Number of samples in the initial train split. If `None` and `forecaster` is 
+        already trained, no initial train is done and all data is used to evaluate the 
+        model. However, the first `len(forecaster.last_window)` observations are needed 
+        to create the initial predictors, so no predictions are calculated for them. 
+        This useful to backtest the model on the same data used to train it.
+        `None` is only allowed when `refit` is `False` and `forecaster` is already
+        trained.
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increase but moves by `steps` in each iteration.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     interval : list, default `None`
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. For example, 
@@ -1364,7 +708,6 @@ def backtesting_forecaster(
 
     forecaters_allowed = [
         'ForecasterAutoreg', 
-        'ForecasterAutoregCustom', 
         'ForecasterAutoregDirect',
         'ForecasterEquivalentDate'
     ]
@@ -1376,35 +719,47 @@ def backtesting_forecaster(
              f"modules.")
         )
     
-    check_backtesting_input(
-        forecaster              = forecaster,
-        cv                      = cv,
-        y                       = y,
-        metric                  = metric,
-        interval                = interval,
-        n_boot                  = n_boot,
-        random_state            = random_state,
-        use_in_sample_residuals = use_in_sample_residuals,
-        use_binned_residuals    = use_binned_residuals,
-        n_jobs                  = n_jobs,
-        verbose                 = verbose,
-        show_progress           = show_progress
-    )
+    # check_backtesting_input(
+    #     forecaster              = forecaster,
+    #     steps                   = steps,
+    #     metric                  = metric,
+    #     y                       = y,
+    #     initial_train_size      = initial_train_size,
+    #     fixed_train_size        = fixed_train_size,
+    #     gap                     = gap,
+    #     skip_folds              = skip_folds,
+    #     allow_incomplete_fold   = allow_incomplete_fold,
+    #     refit                   = refit,
+    #     interval                = interval,
+    #     n_boot                  = n_boot,
+    #     random_state            = random_state,
+    #     use_in_sample_residuals = use_in_sample_residuals,
+    #     use_binned_residuals    = use_binned_residuals,
+    #     n_jobs                  = n_jobs,
+    #     verbose                 = verbose,
+    #     show_progress           = show_progress
+    # )
     
     if type(forecaster).__name__ == 'ForecasterAutoregDirect' and \
-       forecaster.steps < cv.steps + cv.gap:
+       forecaster.steps < steps + gap:
         raise ValueError(
             (f"When using a ForecasterAutoregDirect, the combination of steps "
-             f"+ gap ({cv.steps + cv.gap}) cannot be greater than the `steps` parameter "
+             f"+ gap ({steps + gap}) cannot be greater than the `steps` parameter "
              f"declared when the forecaster is initialized ({forecaster.steps}).")
         )
     
     metric_values, backtest_predictions = _backtesting_forecaster(
         forecaster              = forecaster,
         y                       = y,
-        cv                      = cv,
+        steps                   = steps,
         metric                  = metric,
+        initial_train_size      = initial_train_size,
+        fixed_train_size        = fixed_train_size,
+        gap                     = gap,
+        skip_folds              = skip_folds,
+        allow_incomplete_fold   = allow_incomplete_fold,
         exog                    = exog,
+        refit                   = refit,
         interval                = interval,
         n_boot                  = n_boot,
         random_state            = random_state,
@@ -1421,11 +776,18 @@ def backtesting_forecaster(
 def grid_search_forecaster(
     forecaster: object,
     y: pd.Series,
-    cv: Union[TimeSeriesFold, OneStepAheadFold],
     param_grid: dict,
     metric: Union[str, Callable, list],
+    initial_train_size: int,
+    steps: Optional[int] = None,
+    method: str = 'backtesting',
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
     lags_grid: Optional[Union[list, dict]] = None,
+    refit: Union[bool, int] = False,
     return_best: bool = True,
     n_jobs: Union[int, str] = 'auto',
     verbose: bool = True,
@@ -1438,14 +800,10 @@ def grid_search_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
-        Training time series.
-    cv : TimeSeriesFold, OneStepAheadFold
-        TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds.
-        **New in version 0.14.0**
+        Training time series. 
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
@@ -1458,6 +816,34 @@ def grid_search_forecaster(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+    initial_train_size : int 
+        Number of samples in the initial train split.
+    steps : int, default `None`
+        Number of steps to predict. 
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+        **New in version 0.14.0**
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increase but moves by `steps` in each iteration.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -1465,9 +851,10 @@ def grid_search_forecaster(
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
-        DataFrame, and the values are used as the lists of lags to try. Ignored 
-        if the forecaster is an instance of `ForecasterAutoregCustom` or 
-        `ForecasterAutoregMultiSeriesCustom`.
+        DataFrame, and the values are used as the lists of lags to try.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -1496,28 +883,34 @@ def grid_search_forecaster(
         - additional n columns with param = value.
     
     """
-    if type(cv).__name__ not in ['TimeSeriesFold', 'OneStepAheadFold']:
+    if method not in ['backtesting', 'one_step_ahead']:
         raise ValueError(
-            f"`cv` must be an instance of TimeSeriesFold or OneStepAheadFold. "
-            f"Got {type(cv)}."
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
         )
 
     param_grid = list(ParameterGrid(param_grid))
 
     results = _evaluate_grid_hyperparameters(
-        forecaster            = forecaster,
-        y                     = y,
-        cv                    = cv,
-        param_grid            = param_grid,
-        metric                = metric,
-        exog                  = exog,
-        lags_grid             = lags_grid,
-        return_best           = return_best,
-        n_jobs                = n_jobs,
-        verbose               = verbose,
-        show_progress         = show_progress,
-        output_file           = output_file
-    )
+                forecaster            = forecaster,
+                y                     = y,
+                param_grid            = param_grid,
+                metric                = metric,
+                initial_train_size    = initial_train_size,
+                steps                 = steps,
+                method                = method,
+                fixed_train_size      = fixed_train_size,
+                gap                   = gap,
+                skip_folds            = skip_folds,
+                allow_incomplete_fold = allow_incomplete_fold,
+                exog                  = exog,
+                lags_grid             = lags_grid,
+                refit                 = refit,
+                return_best           = return_best,
+                n_jobs                = n_jobs,
+                verbose               = verbose,
+                show_progress         = show_progress,
+                output_file           = output_file
+             )
 
     return results
 
@@ -1525,11 +918,18 @@ def grid_search_forecaster(
 def random_search_forecaster(
     forecaster: object,
     y: pd.Series,
-    cv: Union[TimeSeriesFold, OneStepAheadFold],
     param_distributions: dict,
     metric: Union[str, Callable, list],
+    initial_train_size: int,
+    steps: Optional[int] = None,
+    method: str = 'backtesting',
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
     lags_grid: Optional[Union[list, dict]] = None,
+    refit: Union[bool, int] = False,
     n_iter: int = 10,
     random_state: int = 123,
     return_best: bool = True,
@@ -1544,14 +944,10 @@ def random_search_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
-        Training time series.
-    cv : TimeSeriesFold, OneStepAheadFold
-        TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds.
-        **New in version 0.14.0**
+        Training time series. 
     param_distributions : dict
         Dictionary with parameters names (`str`) as keys and 
         distributions or lists of parameters to try.
@@ -1564,6 +960,34 @@ def random_search_forecaster(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+    initial_train_size : int 
+        Number of samples in the initial train split.
+    steps : int, default `None`
+        Number of steps to predict.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+        **New in version 0.14.0**
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increase but moves by `steps` in each iteration.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -1571,9 +995,10 @@ def random_search_forecaster(
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
-        DataFrame, and the values are used as the lists of lags to try. Ignored 
-        if the forecaster is an instance of `ForecasterAutoregCustom` or 
-        `ForecasterAutoregMultiSeriesCustom`.
+        DataFrame, and the values are used as the lists of lags to try.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled per lags configuration. 
         n_iter trades off runtime vs quality of the solution.
@@ -1607,28 +1032,34 @@ def random_search_forecaster(
         - additional n columns with param = value.
     
     """
-    if type(cv).__name__ not in ['TimeSeriesFold', 'OneStepAheadFold']:
+    if method not in ['backtesting', 'one_step_ahead']:
         raise ValueError(
-            f"`cv` must be an instance of TimeSeriesFold or OneStepAheadFold. "
-            f"Got {type(cv)}."
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
         )
 
     param_grid = list(ParameterSampler(param_distributions, n_iter=n_iter, random_state=random_state))
 
     results = _evaluate_grid_hyperparameters(
-        forecaster            = forecaster,
-        y                     = y,
-        cv                    = cv,
-        param_grid            = param_grid,
-        metric                = metric,
-        exog                  = exog,
-        lags_grid             = lags_grid,
-        return_best           = return_best,
-        n_jobs                = n_jobs,
-        verbose               = verbose,
-        show_progress         = show_progress,
-        output_file           = output_file
-    )
+                forecaster            = forecaster,
+                y                     = y,
+                param_grid            = param_grid,
+                metric                = metric,
+                initial_train_size    = initial_train_size,
+                steps                 = steps,
+                method                = method,
+                fixed_train_size      = fixed_train_size,
+                gap                   = gap,
+                skip_folds            = skip_folds,
+                allow_incomplete_fold = allow_incomplete_fold,
+                exog                  = exog,
+                lags_grid             = lags_grid,
+                refit                 = refit,
+                return_best           = return_best,
+                n_jobs                = n_jobs,
+                verbose               = verbose,
+                show_progress         = show_progress,
+                output_file           = output_file
+             )
 
     return results
 
@@ -1720,11 +1151,18 @@ def _calculate_metrics_one_step_ahead(
 def _evaluate_grid_hyperparameters(
     forecaster: object,
     y: pd.Series,
-    cv: Union[TimeSeriesFold, OneStepAheadFold],
     param_grid: dict,
     metric: Union[str, Callable, list],
+    initial_train_size: int,
+    steps: Optional[int] = None,
+    method: str = 'backtesting',
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
     lags_grid: Optional[Union[list, dict]] = None,
+    refit: Union[bool, int] = False,
     return_best: bool = True,
     n_jobs: Union[int, str] = 'auto',
     verbose: bool = True,
@@ -1736,14 +1174,10 @@ def _evaluate_grid_hyperparameters(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
-        Training time series.
-    cv : TimeSeriesFold, OneStepAheadFold
-        TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds.
-        **New in version 0.14.0**
+        Training time series. 
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
@@ -1756,6 +1190,34 @@ def _evaluate_grid_hyperparameters(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+    initial_train_size : int 
+        Number of samples in the initial train split.
+    steps : int
+        Number of steps to predict.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+        **New in version 0.14.0**
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increase but moves by `steps` in each iteration.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -1763,9 +1225,10 @@ def _evaluate_grid_hyperparameters(
     lags_grid : list, dict, default `None`
         Lists of lags to try, containing int, lists, numpy ndarray, or range 
         objects. If `dict`, the keys are used as labels in the `results` 
-        DataFrame, and the values are used as the lists of lags to try. Ignored 
-        if the forecaster is an instance of `ForecasterAutoregCustom` or 
-        `ForecasterAutoregMultiSeriesCustom`.
+        DataFrame, and the values are used as the lists of lags to try.
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
@@ -1795,13 +1258,12 @@ def _evaluate_grid_hyperparameters(
 
     """
 
-    if type(cv).__name__ not in ['TimeSeriesFold', 'OneStepAheadFold']:
+    if method not in ['backtesting', 'one_step_ahead']:
         raise ValueError(
-            f"`cv` must be an instance of TimeSeriesFold or OneStepAheadFold. "
-            f"Got {type(cv)}."
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
         )
     
-    if type(cv).__name__ == 'OneStepAheadFold':
+    if method == 'one_step_ahead':
         warnings.warn(
             ("One-step-ahead predictions are used for faster model comparison, but they "
              "may not fully represent multi-step prediction performance. It is recommended "
@@ -1850,13 +1312,12 @@ def _evaluate_grid_hyperparameters(
     params_list = []
     for lags_k, lags_v in lags_grid_tqdm:
         
-        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-            forecaster.set_lags(lags_v)
-            lags_v = forecaster.lags.copy()
-            if lags_label == 'values':
-                lags_k = lags_v
+        forecaster.set_lags(lags_v)
+        lags_v = forecaster.lags.copy()
+        if lags_label == 'values':
+            lags_k = lags_v
 
-        if type(cv).__name__ == 'OneStepAheadFold':
+        if method == 'one_step_ahead':
 
             (
                 X_train,
@@ -1864,21 +1325,27 @@ def _evaluate_grid_hyperparameters(
                 X_test,
                 y_test
             ) = forecaster._train_test_split_one_step_ahead(
-                y=y, initial_train_size=cv.initial_train_size, exog=exog
+                y=y, initial_train_size=initial_train_size, exog=exog
             )
 
         for params in param_grid:
 
             forecaster.set_params(params)
 
-            if type(cv).__name__ == 'TimeSeriesFold':
+            if method == 'backtesting':
 
                 metric_values = backtesting_forecaster(
                                     forecaster            = forecaster,
                                     y                     = y,
-                                    cv                    = cv,
+                                    steps                 = steps,
                                     metric                = metric,
+                                    initial_train_size    = initial_train_size,
+                                    fixed_train_size      = fixed_train_size,
+                                    gap                   = gap,
+                                    skip_folds            = skip_folds,
+                                    allow_incomplete_fold = allow_incomplete_fold,
                                     exog                  = exog,
+                                    refit                 = refit,
                                     interval              = None,
                                     n_jobs                = n_jobs,
                                     verbose               = verbose,
@@ -1944,8 +1411,7 @@ def _evaluate_grid_hyperparameters(
         best_params = results.loc[0, 'params']
         best_metric = results.loc[0, list(metric_dict.keys())[0]]
         
-        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-            forecaster.set_lags(best_lags)
+        forecaster.set_lags(best_lags)
         forecaster.set_params(best_params)
 
         forecaster.fit(y=y, exog=exog, store_in_sample_residuals=True)
@@ -1955,8 +1421,7 @@ def _evaluate_grid_hyperparameters(
             f"and the whole data set: \n"
             f"  Lags: {best_lags} \n"
             f"  Parameters: {best_params}\n"
-            f"  {'Backtesting' if type(cv).__name__ == 'TimeSeriesFold' else 'One-step-ahead'} "
-            f"metric: {best_metric}"
+            f"  Backtesting metric: {best_metric}\n"
         )
             
     return results
@@ -1965,10 +1430,17 @@ def _evaluate_grid_hyperparameters(
 def bayesian_search_forecaster(
     forecaster: object,
     y: pd.Series,
-    cv: Union[TimeSeriesFold, OneStepAheadFold],
     search_space: Callable,
     metric: Union[str, Callable, list],
+    initial_train_size: int,
+    steps: Optional[int] = None,
+    method: str = 'backtesting',
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    refit: Union[bool, int] = False,
     n_trials: int = 10,
     random_state: int = 123,
     return_best: bool = True,
@@ -1985,14 +1457,10 @@ def bayesian_search_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
-        Training time series.
-    cv : TimeSeriesFold, OneStepAheadFold
-        TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds.
-        **New in version 0.14.0**
+        Training time series. 
     search_space : Callable (optuna)
         Function with argument `trial` which returns a dictionary with parameters names 
         (`str`) as keys and Trial object from optuna (trial.suggest_float, 
@@ -2006,10 +1474,41 @@ def bayesian_search_forecaster(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+    initial_train_size : int 
+        Number of samples in the initial train split.
+    steps : int, default `None`
+        Number of steps to predict.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+        **New in version 0.14.0**
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increase but moves by `steps` in each iteration.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -2058,19 +1557,25 @@ def bayesian_search_forecaster(
              f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
         )
     
-    if type(cv).__name__ not in ['TimeSeriesFold', 'OneStepAheadFold']:
+    if method not in ['backtesting', 'one_step_ahead']:
         raise ValueError(
-            f"`cv` must be an instance of TimeSeriesFold or OneStepAheadFold. "
-            f"Got {type(cv)}."
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
         )
             
     results, best_trial = _bayesian_search_optuna(
                                 forecaster            = forecaster,
                                 y                     = y,
-                                cv                    = cv,
                                 exog                  = exog,
                                 search_space          = search_space,
+                                steps                 = steps,
                                 metric                = metric,
+                                refit                 = refit,
+                                initial_train_size    = initial_train_size,
+                                method                = method,
+                                fixed_train_size      = fixed_train_size,
+                                gap                   = gap,
+                                skip_folds            = skip_folds,
+                                allow_incomplete_fold = allow_incomplete_fold,
                                 n_trials              = n_trials,
                                 random_state          = random_state,
                                 return_best           = return_best,
@@ -2088,10 +1593,17 @@ def bayesian_search_forecaster(
 def _bayesian_search_optuna(
     forecaster: object,
     y: pd.Series,
-    cv: Union[TimeSeriesFold, OneStepAheadFold],
     search_space: Callable,
     metric: Union[str, Callable, list],
+    initial_train_size: int,
+    steps: Optional[int] = None,
+    method: str = 'backtesting',
+    fixed_train_size: bool = True,
+    gap: int = 0,
+    skip_folds: Optional[Union[int, list]] = None,
+    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
+    refit: Union[bool, int] = False,
     n_trials: int = 10,
     random_state: int = 123,
     return_best: bool = True,
@@ -2108,14 +1620,10 @@ def _bayesian_search_optuna(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom, ForecasterAutoregDirect
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
         Forecaster model.
     y : pandas Series
         Training time series. 
-    cv : TimeSeriesFold, OneStepAheadFold
-        TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds.
-        **New in version 0.
     search_space : Callable
         Function with argument `trial` which returns a dictionary with parameters names 
         (`str`) as keys and Trial object from optuna (trial.suggest_float, 
@@ -2129,10 +1637,41 @@ def _bayesian_search_optuna(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+    initial_train_size : int 
+        Number of samples in the initial train split.
+    steps : int, default `None`
+        Number of steps to predict.
+    method : str, default `'backtesting'`
+        Method used to evaluate the model.
+
+        - 'backtesting': the model is evaluated using backtesting process in which
+        the model predicts `steps` ahead in each iteration.
+        - 'one_step_ahead': the model is evaluated using only one step ahead predictions.
+        This is faster than backtesting but the results may not reflect the actual
+        performance of the model when predicting multiple steps ahead. Arguments `steps`,
+        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are 
+        ignored when `method` is 'one_step_ahead'.
+        **New in version 0.14.0**
+    fixed_train_size : bool, default `True`
+        If True, train size doesn't increase but moves by `steps` in each iteration.
+    gap : int, default `0`
+        Number of samples to be excluded after the end of each training set and 
+        before the test set.
+    skip_folds : int, list, default `None`
+        If `skip_folds` is an integer, every 'skip_folds'-th is returned. If `skip_folds`
+        is a list, the folds in the list are skipped. For example, if `skip_folds = 3`,
+        and there are 10 folds, the folds returned will be [0, 3, 6, 9]. If `skip_folds`
+        is a list [1, 2, 3], the folds returned will be [0, 4, 5, 6, 7, 8, 9].
+    allow_incomplete_fold : bool, default `True`
+        Last fold is allowed to have a smaller number of samples than the 
+        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
+    refit : bool, int, default `False`
+        Whether to re-fit the forecaster in each iteration. If `refit` is an integer, 
+        the Forecaster will be trained every that number of iterations.
     n_trials : int, default `10`
         Number of parameter settings that are sampled in each lag configuration.
     random_state : int, default `123`
@@ -2175,13 +1714,12 @@ def _bayesian_search_optuna(
 
     """
 
-    if type(cv).__name__ not in ['TimeSeriesFold', 'OneStepAheadFold']:
+    if method not in ['backtesting', 'one_step_ahead']:
         raise ValueError(
-            f"`cv` must be an instance of TimeSeriesFold or OneStepAheadFold. "
-            f"Got {type(cv)}."
+            f"`method` must be 'backtesting' or 'one_step_ahead'. Got {method}."
         )
     
-    if type(cv).__name__ == 'OneStepAheadFold':
+    if method == 'one_step_ahead':
         warnings.warn(
             ("One-step-ahead predictions are used for faster model comparison, but they "
              "may not fully represent multi-step prediction performance. It is recommended "
@@ -2206,16 +1744,22 @@ def _bayesian_search_optuna(
         )
         
     # Objective function using backtesting_forecaster
-    if type(cv).__name__ == 'TimeSeriesFold':
+    if method == 'backtesting':
 
         def _objective(
             trial,
             search_space          = search_space,
             forecaster            = forecaster,
             y                     = y,
-            cv                    = cv,
             exog                  = exog,
+            steps                 = steps,
             metric                = metric,
+            initial_train_size    = initial_train_size,
+            fixed_train_size      = fixed_train_size,
+            gap                   = gap,
+            skip_folds            = skip_folds,
+            allow_incomplete_fold = allow_incomplete_fold,
+            refit                 = refit,
             n_jobs                = n_jobs,
             verbose               = verbose,
         ) -> float:
@@ -2223,16 +1767,21 @@ def _bayesian_search_optuna(
             sample = search_space(trial)
             sample_params = {k: v for k, v in sample.items() if k != 'lags'}
             forecaster.set_params(sample_params)
-            if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-                if "lags" in sample:
-                    forecaster.set_lags(sample['lags'])
+            if "lags" in sample:
+                forecaster.set_lags(sample['lags'])
             
             metrics, _ = backtesting_forecaster(
                             forecaster            = forecaster,
                             y                     = y,
-                            cv                    = cv,
                             exog                  = exog,
+                            steps                 = steps,
                             metric                = metric,
+                            initial_train_size    = initial_train_size,
+                            fixed_train_size      = fixed_train_size,
+                            skip_folds            = skip_folds,
+                            gap                   = gap,
+                            allow_incomplete_fold = allow_incomplete_fold,
+                            refit                 = refit,
                             n_jobs                = n_jobs,
                             verbose               = verbose,
                             show_progress         = False
@@ -2252,17 +1801,16 @@ def _bayesian_search_optuna(
             search_space          = search_space,
             forecaster            = forecaster,
             y                     = y,
-            cv                    = cv,
             exog                  = exog,
-            metric                = metric
+            metric                = metric,
+            initial_train_size    = initial_train_size,
         ) -> float:
             
             sample = search_space(trial)
             sample_params = {k: v for k, v in sample.items() if k != 'lags'}
             forecaster.set_params(sample_params)
-            if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-                if "lags" in sample:
-                    forecaster.set_lags(sample['lags'])
+            if "lags" in sample:
+                forecaster.set_lags(sample['lags'])
 
             (
                 X_train,
@@ -2270,7 +1818,7 @@ def _bayesian_search_optuna(
                 X_test,
                 y_test
             ) = forecaster._train_test_split_one_step_ahead(
-                y=y, initial_train_size=cv.initial_train_size, exog=exog
+                y=y, initial_train_size=initial_train_size, exog=exog
             )
 
             metrics = _calculate_metrics_one_step_ahead(
@@ -2350,17 +1898,10 @@ def _bayesian_search_optuna(
             m_name = m if isinstance(m, str) else m.__name__
             metric_dict[m_name].append(m_values)
     
-    if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-        lags_list = [
-            initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)
-            for lag in lags_list
-        ]
-    else:
-        lags_list = [
-            f"custom function: {forecaster.fun_predictors.__name__}"
-            for _
-            in lags_list
-        ]
+    lags_list = [
+        initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)[0]
+        for lag in lags_list
+    ]
 
     results = pd.DataFrame({
                   'lags': lags_list,
@@ -2380,8 +1921,7 @@ def _bayesian_search_optuna(
         best_params = results.loc[0, 'params']
         best_metric = results.loc[0, list(metric_dict.keys())[0]]
         
-        if type(forecaster).__name__ != 'ForecasterAutoregCustom':
-            forecaster.set_lags(best_lags)
+        forecaster.set_lags(best_lags)
         forecaster.set_params(best_params)
 
         forecaster.fit(y=y, exog=exog, store_in_sample_residuals=True)
@@ -2391,8 +1931,7 @@ def _bayesian_search_optuna(
             f"and the whole data set: \n"
             f"  Lags: {best_lags} \n"
             f"  Parameters: {best_params}\n"
-            f"  {'Backtesting' if type(cv).__name__ == 'TimeSeriesFold' else 'One-step-ahead'} "
-            f"metric: {best_metric}"
+            f"  Backtesting metric: {best_metric}\n"
         )
             
     return results, best_trial
@@ -2412,19 +1951,20 @@ def select_features(
     """
     Feature selection using any of the sklearn.feature_selection module selectors 
     (such as `RFECV`, `SelectFromModel`, etc.). Two groups of features are
-    evaluated: autoregressive features and exogenous features. By default, the 
-    selection process is performed on both sets of features at the same time, 
-    so that the most relevant autoregressive and exogenous features are selected. 
-    However, using the `select_only` argument, the selection process can focus 
-    only on the autoregressive or exogenous features without taking into account 
-    the other features. Therefore, all other features will remain in the model. 
-    It is also possible to force the inclusion of certain features in the final 
-    list of selected features using the `force_inclusion` parameter.
+    evaluated: autoregressive features (lags and window features) and exogenous
+    features. By default, the selection process is performed on both sets of features
+    at the same time, so that the most relevant autoregressive and exogenous features
+    are selected. However, using the `select_only` argument, the selection process
+    can focus only on the autoregressive or exogenous features without taking into
+    account the other features. Therefore, all other features will remain in the model. 
+    It is also possible to force the inclusion of certain features in the final list
+    of selected features using the `force_inclusion` parameter.
 
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregCustom
-        Forecaster model.
+    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
+        Forecaster model. If forecaster is a ForecasterAutoregDirect, the
+        selector will only be applied to the features of the first step.
     selector : object
         A feature selector from sklearn.feature_selection.
     y : pandas Series, pandas DataFrame
@@ -2436,9 +1976,9 @@ def select_features(
     select_only : str, default `None`
         Decide what type of features to include in the selection process. 
         
-        - If `'autoreg'`, only autoregressive features (lags or custom 
-        predictors) are evaluated by the selector. All exogenous features are 
-        included in the output (`selected_exog`).
+        - If `'autoreg'`, only autoregressive features (lags and window features)
+        are evaluated by the selector. All exogenous features are included in the
+        output (`selected_exog`).
         - If `'exog'`, only exogenous features are evaluated without the presence
         of autoregressive features. All autoregressive features are included 
         in the output (`selected_autoreg`).
@@ -2467,10 +2007,7 @@ def select_features(
 
     """
 
-    valid_forecasters = [
-        'ForecasterAutoreg',
-        'ForecasterAutoregCustom'
-    ]
+    valid_forecasters = ['ForecasterAutoreg', 'ForecasterAutoregDirect']
 
     if type(forecaster).__name__ not in valid_forecasters:
         raise TypeError(
@@ -2488,20 +2025,21 @@ def select_features(
         )
     
     forecaster = deepcopy(forecaster)
-    forecaster.fitted = False
+    forecaster.is_fitted = False
     X_train, y_train = forecaster.create_train_X_y(y=y, exog=exog)
+    if type(forecaster).__name__ == 'ForecasterAutoregDirect':
+        X_train, y_train = forecaster.filter_train_X_y_for_step(
+                                step          = 1,
+                                X_train       = X_train,
+                                y_train       = y_train,
+                                remove_suffix = True
+                            )
+    autoreg_cols = []
+    if forecaster.lags is not None:
+        autoreg_cols.extend([f"lag_{lag}" for lag in forecaster.lags])
+    if forecaster.window_features is not None:
+        autoreg_cols.extend(forecaster.window_features_names)
 
-    if hasattr(forecaster, 'lags'):
-        autoreg_cols = [f"lag_{lag}" for lag in forecaster.lags]
-    else:
-        if forecaster.name_predictors is not None:
-            autoreg_cols = forecaster.name_predictors
-        else:
-            autoreg_cols = [
-                col
-                for col in X_train.columns
-                if re.match(r'^custom_predictor_\d+', col)
-            ]
     exog_cols = [col for col in X_train.columns if col not in autoreg_cols]
 
     forced_autoreg = []
@@ -2564,9 +2102,10 @@ def select_features(
              "using the `force_inclusion` parameter.")
         )
     else:
-        if hasattr(forecaster, 'lags'):
-            selected_autoreg = [int(feature.replace('lag_', '')) 
-                                for feature in selected_autoreg]
+        selected_autoreg = [
+            int(feature.replace('lag_', '')) if feature.startswith('lag_') else feature
+            for feature in selected_autoreg
+        ]
 
     if verbose:
         print(f"Recursive feature elimination ({selector.__class__.__name__})")
