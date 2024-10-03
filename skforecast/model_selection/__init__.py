@@ -1,9 +1,12 @@
-from .model_selection import (
+from ._split import (
     TimeSeriesFold,
-    OneStepAheadFold,
-    backtesting_forecaster,
+    OneStepAheadFold
+)
+from ._validation import (
+    backtesting_forecaster
+)
+from ._search import (
     grid_search_forecaster,
     random_search_forecaster,
-    bayesian_search_forecaster,
-    select_features
+    bayesian_search_forecaster
 )

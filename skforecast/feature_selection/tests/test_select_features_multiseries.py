@@ -2,17 +2,15 @@
 # ==============================================================================
 import re
 import pytest
-import numpy as np
-import pandas as pd
 from sklearn.linear_model import LinearRegression
 from sklearn.feature_selection import RFE
 from sklearn.preprocessing import StandardScaler
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
-from skforecast.model_selection_multiseries import select_features_multiseries
+from skforecast.feature_selection import select_features_multiseries
 
 # Fixtures
-from .fixtures_model_selection_multiseries import series
-from .fixtures_model_selection_multiseries import exog
+from .fixtures_feature_selection import series
+from .fixtures_feature_selection import exog_multiseries as exog
 
 
 def test_TypeError_select_features_raise_when_forecaster_is_not_supported():

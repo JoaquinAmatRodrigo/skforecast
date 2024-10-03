@@ -7,13 +7,7 @@
 
 from abc import ABC, abstractmethod
 from typing import Union, Tuple, Optional
-import logging
 import pandas as pd
-
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
-)
 
 
 class ForecasterBase(ABC):
