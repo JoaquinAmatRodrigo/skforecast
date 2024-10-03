@@ -9,7 +9,7 @@ import re
 import os
 from copy import deepcopy, copy
 import logging
-from typing import Union, Tuple, Optional, Callable
+from typing import Union, Tuple, Optional, Callable, Any
 import warnings
 import numpy as np
 import pandas as pd
@@ -716,6 +716,7 @@ class OneStepAheadFold():
             window_size,
             differentiation,
             return_all_indexes,
+            verbose
         )
 
         self.initial_train_size = initial_train_size
@@ -791,12 +792,12 @@ class OneStepAheadFold():
             f"    verbose            = {self.verbose}\n"
             f")"
         )
-    # TODO: `externally_fitted` no se usa en TimeSeriesFold, se debería quitar?
+    
     def split(
         self,
         X: Union[pd.Series, pd.DataFrame, pd.Index, dict],
         as_pandas: bool = False,
-        #externally_fitted: Any
+        externally_fitted: Any = None
     ) -> Union[list, pd.DataFrame]:
         """
         Split the time series data into train and test folds.
@@ -805,10 +806,10 @@ class OneStepAheadFold():
         ----------
         X : pandas Series, DataFrame, Index, or dictionary
             Time series data or index to split.
-        as_pandas : bool, default=False
+        as_pandas : bool, default `False`
             If True, the folds are returned as a DataFrame. This is useful to visualize
             the folds in a more interpretable way.
-        externally_fitted : any
+        externally_fitted : Any
             This argument is not used in this class. It is included for API consistency.
         
         Returns
