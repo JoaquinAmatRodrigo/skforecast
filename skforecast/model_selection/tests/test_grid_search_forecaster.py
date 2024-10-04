@@ -10,7 +10,7 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
-from skforecast.model_selection import grid_search_forecaster
+from skforecast.model_selection._search import grid_search_forecaster
 
 from tqdm import tqdm
 from functools import partialmethod

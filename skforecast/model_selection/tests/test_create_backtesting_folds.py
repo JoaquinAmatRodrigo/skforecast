@@ -21,7 +21,6 @@ def test_create_backtesting_folds_no_refit_no_gap_no_remainder(capfd, return_all
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
-
     cv = TimeSeriesFold(
             steps                 = 10,
             initial_train_size    = 70,
@@ -34,13 +33,11 @@ def test_create_backtesting_folds_no_refit_no_gap_no_remainder(capfd, return_all
             allow_incomplete_fold = True,
             return_all_indexes    = return_all_indexes,
         )
-
     folds = cv.split(X=y)
-    
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 30\n"
         "    Number of folds: 3\n"
@@ -77,30 +74,24 @@ def test_create_backtesting_folds_no_refit_no_gap_allow_incomplete_fold_False(ca
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
-    window_size = 4
-    initial_train_size = 65
-    test_size = 10
-    refit = 0
-    allow_incomplete_fold = False
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = False,
-                gap                   = 0,
-                allow_incomplete_fold = allow_incomplete_fold,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 10,
+            initial_train_size    = 65,
+            window_size           = 4,
+            differentiation       = None,
+            refit                 = 0,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = False,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 65\n"
         "Number of observations used for backtesting: 35\n"
         "    Number of folds: 3\n"
@@ -163,8 +154,8 @@ def test_create_backtesting_folds_no_refit_gap_allow_incomplete_fold_True(capfd,
                     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 30\n"
         "    Number of folds: 4\n"
@@ -237,8 +228,8 @@ def test_create_backtesting_folds_no_refit_no_initial_train_size_gap(capfd, retu
                     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "An already trained forecaster is to be used. Window size: 15\n"
         "Number of observations used for backtesting: 85\n"
         "    Number of folds: 8\n"
@@ -312,8 +303,8 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder(capfd, retu
     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 30\n"
         "    Number of folds: 3\n"
@@ -372,8 +363,8 @@ def test_create_backtesting_folds_refit_fixed_train_size_no_gap_no_remainder(cap
     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 30\n"
         "    Number of folds: 3\n"
@@ -436,8 +427,8 @@ def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_True(
                     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 30\n"
         "    Number of folds: 4\n"
@@ -503,8 +494,8 @@ def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fo
                     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 30\n"
         "    Number of folds: 4\n"
@@ -569,8 +560,8 @@ def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_False
                     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 30\n"
         "    Number of folds: 3\n"
@@ -631,8 +622,8 @@ def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fo
                     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 30\n"
         "    Number of folds: 3\n"
@@ -694,8 +685,8 @@ def test_create_backtesting_folds_refit_int_no_fixed_no_gap_no_remainder(capfd, 
     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 60\n"
         "Number of observations used for backtesting: 40\n"
         "    Number of folds: 4\n"
@@ -759,8 +750,8 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_no_gap_no_remainder
     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 60\n"
         "Number of observations used for backtesting: 40\n"
         "    Number of folds: 4\n"
@@ -826,8 +817,8 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_T
                     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 30\n"
         "    Number of folds: 4\n"
@@ -893,8 +884,8 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
                     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 30\n"
         "    Number of folds: 4\n"
@@ -959,8 +950,8 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_F
                     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 30\n"
         "    Number of folds: 3\n"
@@ -1021,8 +1012,8 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
                     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 30\n"
         "    Number of folds: 3\n"
@@ -1084,8 +1075,8 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder_differentia
     
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 69\n"
         "    First 1 observation/s in training sets are used for differentiation\n"
         "Number of observations used for backtesting: 30\n"
@@ -1151,8 +1142,8 @@ def test_create_backtesting_folds_refit_fixed_no_gap_no_remainder_skip_folds_3(c
 
     out, _ = capfd.readouterr()
     expected_out = (
-        "Information of backtesting process\n"
-        "----------------------------------\n"
+        "Information of folds\n"
+        "--------------------\n"
         "Number of observations used for initial training: 70\n"
         "Number of observations used for backtesting: 80\n"
         "    Number of folds: 8\n"

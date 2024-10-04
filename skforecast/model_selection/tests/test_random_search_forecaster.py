@@ -2,10 +2,9 @@
 # ==============================================================================
 import numpy as np
 import pandas as pd
-from sklearn.metrics import mean_squared_error
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.model_selection import random_search_forecaster
+from skforecast.model_selection._search import random_search_forecaster
 
 from tqdm import tqdm
 from functools import partialmethod
