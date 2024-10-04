@@ -8,7 +8,7 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
-from skforecast.model_selection.model_selection import _calculate_metrics_one_step_ahead
+from skforecast.model_selection._search import _calculate_metrics_one_step_ahead
 from skforecast.metrics import add_y_train_argument
 
 # Fixtures

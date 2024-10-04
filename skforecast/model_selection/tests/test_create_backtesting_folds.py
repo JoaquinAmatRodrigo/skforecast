@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.model_selection.model_selection import _create_backtesting_folds
+from skforecast.model_selection._split import TimeSeriesFold
 
 
 @pytest.mark.parametrize("return_all_indexes, expected",
@@ -21,24 +21,21 @@ def test_create_backtesting_folds_no_refit_no_gap_no_remainder(capfd, return_all
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
-    window_size = 3
-    initial_train_size = 70
-    test_size = 10
-    refit = False
 
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = False,
-                gap                   = 0,
-                allow_incomplete_fold = True,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 10,
+            initial_train_size    = 70,
+            window_size           = 3,
+            differentiation       = None,
+            refit                 = False,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = return_all_indexes,
+        )
+
+    folds = cv.split(X=y)
     
     out, _ = capfd.readouterr()
     expected_out = (

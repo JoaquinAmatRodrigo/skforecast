@@ -7,7 +7,8 @@ import pandas as pd
 from sklearn.linear_model import Ridge
 # from skopt.space import Real
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.model_selection import bayesian_search_forecaster
+from skforecast.model_selection._search import bayesian_search_forecaster
+from skforecast.model_selection._split import TimeSeriesFold
 
 # Fixtures
 from .fixtures_model_selection import y
@@ -23,7 +24,18 @@ def test_ValueError_bayesian_search_forecaster_when_return_best_and_len_y_exog_d
                     lags      = 2
                  )
     exog = y[:30]
-
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y[:-12]),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     def search_space(trial):  # pragma: no cover
         search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
         return search_space
@@ -37,12 +49,9 @@ def test_ValueError_bayesian_search_forecaster_when_return_best_and_len_y_exog_d
             forecaster         = forecaster,
             y                  = y,
             exog               = exog,
+            cv                 = cv,
             search_space       = search_space,
-            steps              = 3,
             metric             = 'mean_absolute_error',
-            refit              = True,
-            initial_train_size = len(y[:-12]),
-            fixed_train_size   = True,
             n_trials           = 10,
             random_state       = 123,
             return_best        = True,
@@ -60,6 +69,19 @@ def test_results_output_bayesian_search_forecaster_optuna_ForecasterAutoreg_with
                      lags      = 4
                  )
 
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y[:-12]),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
+    
     def search_space(trial):  # pragma: no cover
         search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
         return search_space
@@ -67,12 +89,9 @@ def test_results_output_bayesian_search_forecaster_optuna_ForecasterAutoreg_with
     results = bayesian_search_forecaster(
                   forecaster         = forecaster,
                   y                  = y,
+                  cv                 = cv,
                   search_space       = search_space,
-                  steps              = 3,
                   metric             = 'mean_absolute_error',
-                  refit              = True,
-                  initial_train_size = len(y[:-12]),
-                  fixed_train_size   = True,
                   n_trials           = 10,
                   random_state       = 123,
                   return_best        = False,
