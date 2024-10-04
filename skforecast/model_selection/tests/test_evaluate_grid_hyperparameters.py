@@ -435,24 +435,31 @@ def test_evaluate_grid_hyperparameters_when_return_best_ForecasterAutoreg(lags_g
                      regressor = Ridge(random_state=123),
                      lags      = 2
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = 1,
+            refit                 = False,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False
+         )
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     _evaluate_grid_hyperparameters(
-        forecaster         = forecaster,
-        y                  = y,
-        lags_grid          = lags_grid,
-        param_grid         = param_grid,
-        steps              = steps,
-        refit              = False,
-        metric             = 'mean_squared_error',
-        initial_train_size = len(y_train),
-        fixed_train_size   = False,
-        return_best        = True,
-        verbose            = False
+        forecaster  = forecaster,
+        y           = y,
+        cv          = cv,
+        lags_grid   = lags_grid,
+        param_grid  = param_grid,
+        metric      = 'mean_squared_error',
+        return_best = True,
+        verbose     = False
     )
     
     expected_lags = np.array([1, 2])
@@ -474,25 +481,32 @@ def test_evaluate_grid_hyperparameters_when_return_best_and_list_metrics(lags_gr
                      regressor = Ridge(random_state=123),
                      lags      = 2
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = 1,
+            refit                 = False,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False
+         )
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     _evaluate_grid_hyperparameters(
-        forecaster         = forecaster,
-        y                  = y,
-        lags_grid          = lags_grid,
-        param_grid         = param_grid,
-        steps              = steps,
-        refit              = False,
-        metric             = [mean_absolute_percentage_error, 'mean_squared_error'],
-        initial_train_size = len(y_train),
-        fixed_train_size   = False,
-        return_best        = True,
-        verbose            = False,
-        show_progress      = False
+        forecaster    = forecaster,
+        y             = y,
+        cv            = cv,
+        lags_grid     = lags_grid,
+        param_grid    = param_grid,
+        metric        = [mean_absolute_percentage_error, 'mean_squared_error'],
+        return_best   = True,
+        verbose       = False,
+        show_progress = False
     )
     
     expected_lags = np.array([1, 2])
@@ -511,28 +525,35 @@ def test_evaluate_grid_hyperparameters_output_file_when_single_metric():
                      regressor = Ridge(random_state=123),
                      lags      = 2 
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = 1,
+            refit                 = False,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False
+         )
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
     output_file = 'test_evaluate_grid_hyperparameters_output_file.txt'
 
     results = _evaluate_grid_hyperparameters(
-                  forecaster         = forecaster,
-                  y                  = y,
-                  lags_grid          = lags_grid,
-                  param_grid         = param_grid,
-                  steps              = steps,
-                  refit              = False,
-                  metric             = 'mean_squared_error',
-                  initial_train_size = len(y_train),
-                  fixed_train_size   = False,
-                  return_best        = False,
-                  verbose            = False,
-                  show_progress      = False,
-                  output_file        = output_file
+                  forecaster    = forecaster,
+                  y             = y,
+                  cv            = cv,
+                  lags_grid     = lags_grid,
+                  param_grid    = param_grid,
+                  metric        = 'mean_squared_error',
+                  return_best   = False,
+                  verbose       = False,
+                  show_progress = False,
+                  output_file   = output_file
               )
     results  = results.astype({'lags': str, 'lags_label': str, 'params': str})
 
