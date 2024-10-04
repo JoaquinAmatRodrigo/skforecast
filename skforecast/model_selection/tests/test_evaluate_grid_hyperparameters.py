@@ -310,35 +310,43 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoreg_lags_grid_is_Non
                      regressor = Ridge(random_state=123),
                      lags      = 2
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = 1,
+            refit                 = False,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False
+         )
     lags_grid = None
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters(
-                  forecaster         = forecaster,
-                  y                  = y,
-                  lags_grid          = lags_grid,
-                  param_grid         = param_grid,
-                  steps              = steps,
-                  refit              = False,
-                  metric             = 'mean_squared_error',
-                  initial_train_size = len(y_train),
-                  fixed_train_size   = False,
-                  return_best        = False,
-                  verbose            = False
+                  forecaster  = forecaster,
+                  y           = y,
+                  cv          = cv,
+                  lags_grid   = lags_grid,
+                  param_grid  = param_grid,
+                  metric      = 'mean_squared_error',
+                  return_best = False,
+                  verbose     = False
               )
-    
-    expected_results = pd.DataFrame({
-        'lags'       : [[1, 2], [1, 2], [1, 2]],
-        'lags_label' : [[1, 2], [1, 2], [1, 2]],
-        'params'     : [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-        'mean_squared_error': np.array([0.06464646, 0.06502362, 0.06745534]),                                                               
-        'alpha'      : np.array([0.01, 0.1 , 1.])
+
+    expected_results = pd.DataFrame(
+        {
+            "lags": [[1, 2], [1, 2], [1, 2]],
+            "lags_label": [[1, 2], [1, 2], [1, 2]],
+            "params": [{"alpha": 0.01}, {"alpha": 0.1}, {"alpha": 1}],
+            "mean_squared_error": np.array([0.06464646, 0.06502362, 0.06745534]),
+            "alpha": np.array([0.01, 0.1, 1.0]),
         },
-        index = pd.RangeIndex(start=0, stop=3, step=1)
+        index=pd.RangeIndex(start=0, stop=3, step=1),
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
