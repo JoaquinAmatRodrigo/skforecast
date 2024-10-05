@@ -2098,6 +2098,14 @@ def check_backtesting_input(
     
     """
 
+    forecaster_name = type(forecaster).__name__
+    cv_name = type(cv).__name__
+
+    if cv_name != "TimeSeriesFold":
+        raise TypeError(
+            (f"`cv` must be a TimeSeriesFold object. Got {cv_name}.")
+        )
+
     steps = cv.steps
     initial_train_size = cv.initial_train_size
     gap = cv.gap
@@ -2117,14 +2125,6 @@ def check_backtesting_input(
     forecasters_multi_dict = [
         "ForecasterAutoregMultiSeries"
     ]
-
-    forecaster_name = type(forecaster).__name__
-    cv_name = type(cv).__name__
-
-    if cv_name != "TimeSeriesFold":
-        raise TypeError(
-            (f"`cv` must be a TimeSeriesFold object. Got {cv_name}.")
-        )
 
     if forecaster_name in forecasters_uni:
         if not isinstance(y, pd.Series):

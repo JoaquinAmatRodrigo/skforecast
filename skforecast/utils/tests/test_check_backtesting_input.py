@@ -12,11 +12,42 @@ from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
+from skforecast.model_selection._split import TimeSeriesFold
 from skforecast.utils import check_backtesting_input
 
 # Fixtures
 from skforecast.model_selection.tests.fixtures_model_selection import y
 from skforecast.model_selection_multiseries.tests.fixtures_model_selection_multiseries import series
+
+
+def test_check_backtesting_input_TypeError_when_cv_not_TimeSeries_Fold():
+    """
+    Test TypeError is raised in check_backtesting_input if `cv` is not a
+    TimeSeriesFold object.
+    """
+    forecaster = ForecasterAutoreg(regressor=Ridge(), lags=2)
+    y = pd.Series(np.arange(50))
+    y.index = pd.date_range(start='2000-01-01', periods=len(y), freq='D')
+    
+    class BadCv():
+        pass
+
+    err_msg = re.escape("`cv` must be a TimeSeriesFold object. Got BadCv.")
+    with pytest.raises(TypeError, match = err_msg):
+        check_backtesting_input(
+            forecaster              = forecaster,
+            cv                      = BadCv(),
+            metric                  = 'mean_absolute_error',
+            y                       = y,
+            series                  = None,
+            interval                = None,
+            alpha                   = None,
+            n_boot                  = 500,
+            random_state            = 123,
+            use_in_sample_residuals = True,
+            show_progress           = False,
+            suppress_warnings       = False
+        )
 
 
 @pytest.mark.parametrize("forecaster", 
@@ -30,26 +61,30 @@ def test_check_backtesting_input_TypeError_when_y_is_not_pandas_Series_uniseries
     pandas Series in forecasters uni-series.
     """
     bad_y = np.arange(50)
+    
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(bad_y) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True,
+             verbose               = False
+         )
 
     err_msg = re.escape("`y` must be a pandas Series.")
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
             forecaster              = forecaster,
-            steps                   = 3,
+            cv                      = cv,
             metric                  = 'mean_absolute_error',
             y                       = bad_y,
             series                  = None,
-            initial_train_size      = len(bad_y[:-12]),
-            fixed_train_size        = False,
-            gap                     = 0,
-            allow_incomplete_fold   = False,
-            refit                   = False,
             interval                = None,
             alpha                   = None,
             n_boot                  = 500,
             random_state            = 123,
             use_in_sample_residuals = True,
-            verbose                 = False,
             show_progress           = False,
             suppress_warnings       = False
         )
@@ -925,10 +960,9 @@ def test_check_backtesting_input_TypeError_when_refit_not_bool_or_int(refit):
 
 
 @pytest.mark.parametrize("boolean_argument", 
-                         ['add_aggregated_metric', 'fixed_train_size', 
-                          'allow_incomplete_fold', 'use_in_sample_residuals', 
-                          'use_binned_residuals', 'verbose', 
-                          'show_progress', 'suppress_warnings'], 
+                         ['add_aggregated_metric', 'use_in_sample_residuals', 
+                          'use_binned_residuals', 'show_progress', 
+                          'suppress_warnings', 'suppress_warnings_fit'], 
                          ids = lambda argument: f'{argument}')
 def test_check_backtesting_input_TypeError_when_boolean_arguments_not_bool(boolean_argument):
     """
@@ -942,12 +976,11 @@ def test_check_backtesting_input_TypeError_when_boolean_arguments_not_bool(boole
     
     boolean_arguments = {
         'add_aggregated_metric': False,
-        'fixed_train_size': False,
-        'allow_incomplete_fold': False,
         'use_in_sample_residuals': False,
         'use_binned_residuals': False,
-        'verbose': False,
-        'show_progress': False
+        'show_progress': False,
+        'suppress_warnings': False,
+        'suppress_warnings_fit': False
     }
     boolean_arguments[boolean_argument] = 'not_bool'
     
