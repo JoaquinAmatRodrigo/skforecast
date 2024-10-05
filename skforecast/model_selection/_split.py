@@ -197,9 +197,13 @@ class BaseFold():
                 )
             
         if cv_name == "OneStepAheadFold":
-            if not isinstance(initial_train_size, (int, np.integer)):
+            if (
+                not isinstance(initial_train_size, (int, np.integer))
+                or initial_train_size < 1
+            ):
                 raise ValueError(
-                    f"`initial_train_size` must be an integer. Got {initial_train_size}."
+                    f"`initial_train_size` must be an integer greater than 0. "
+                    f"Got {initial_train_size}."
                 )
         
         if (
@@ -883,6 +887,10 @@ class TimeSeriesFold(BaseFold):
             print(
                 f"An already trained forecaster is to be used. Window size: "
                 f"{self.window_size}"
+            )
+        elif self.initial_train_size == 0:
+            print(
+                f"Initial training size is 0. Window size: {self.window_size}"
             )
         else:
             if self.differentiation is None:
