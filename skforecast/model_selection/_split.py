@@ -671,7 +671,6 @@ class TimeSeriesFold(BaseFold):
     def split(
         self,
         X: Union[pd.Series, pd.DataFrame, pd.Index, dict],
-        externally_fitted: bool = False,
         as_pandas: bool = False
     ) -> Union[list, pd.DataFrame]:
         """
@@ -681,9 +680,6 @@ class TimeSeriesFold(BaseFold):
         ----------
         X : pandas Series, pandas DataFrame, pandas Index, dict
             Time series data or index to split.
-        externally_fitted : bool, default `False`
-            If True, the forecaster is assumed to be already fitted so no training is
-            done in the first fold.
         as_pandas : bool, default `False`
             If True, the folds are returned as a DataFrame. This is useful to visualize
             the folds in a more interpretable way.
@@ -732,10 +728,31 @@ class TimeSeriesFold(BaseFold):
                  f"Got {type(X)}.")
             )
         
-        if self.window_size is None:
-            warnings.warn(
-                "Last window cannot be calculated because `window_size` is None."
-            )
+        if self.initial_train_size is None:
+            # TODO: Check if can be None, this value is filled during the backtesting
+            # If `forecaster` is already trained and `initial_train_size` is set to `None` in the
+            # TimeSeriesFold class, no initial train will be done and all data will be used
+            # to evaluate the model. However, the first `len(forecaster.last_window)` observations
+            # are needed to create the initial predictors, so no predictions are calculated for
+            # them. If `initial_train_size` is set to `None` in the TimeSeriesFold class, the
+            if self.window_size is None:
+                raise ValueError(
+                    ("To use split method when `initial_train_size` is None, "
+                     "`window_size` must be an integer greater than 0.")
+                )
+            if self.refit:
+                raise ValueError(
+                    ("`refit` is only allowed when `initial_train_size` is not `None`. "
+                     "Set `refit` to `False` if you want to use `initial_train_size = None`.")
+                )
+            externally_fitted = True
+            self.initial_train_size = self.window_size  # Reset to None later
+        else:
+            if self.window_size is None:
+                warnings.warn(
+                    "Last window cannot be calculated because `window_size` is None."
+                )
+            externally_fitted = False
 
         index = self._extract_index(X)
         idx = range(len(X))
@@ -784,7 +801,7 @@ class TimeSeriesFold(BaseFold):
         # Replace partitions inside folds with length 0 with `None`
         folds = [
             [partition if len(partition) > 0 else None for partition in fold] 
-            for fold in folds
+             for fold in folds
         ]
 
         # Create a flag to know whether to train the forecaster
@@ -815,11 +832,11 @@ class TimeSeriesFold(BaseFold):
         
         if self.verbose:
             self._print_info(
-                index = index,
-                folds = folds,
-                externally_fitted = externally_fitted,
+                index              = index,
+                folds              = folds,
+                externally_fitted  = externally_fitted,
                 last_fold_excluded = last_fold_excluded,
-                index_to_skip = index_to_skip
+                index_to_skip      = index_to_skip
             )
 
         folds = [fold for i, fold in enumerate(folds) if i not in index_to_skip]
@@ -833,6 +850,10 @@ class TimeSeriesFold(BaseFold):
                  fold[4]] 
                 for fold in folds
             ]
+
+        if externally_fitted:
+            self.initial_train_size = None
+            folds[0][4] = False
 
         if as_pandas:
             if self.window_size is None:

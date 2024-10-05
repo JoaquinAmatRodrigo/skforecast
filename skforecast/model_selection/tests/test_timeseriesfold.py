@@ -1,4 +1,4 @@
-# Unit test _create_backtesting_folds
+# Unit test TimeSeriesFold
 # ==============================================================================
 import pytest
 import numpy as np
@@ -14,9 +14,9 @@ from skforecast.model_selection._split import TimeSeriesFold
                                    [[0, 70], [77, 80], [80, 90], [80, 90], False],
                                    [[0, 70], [87, 90], [90, 100], [90, 100], False]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_no_refit_no_gap_no_remainder(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_no_refit_no_gap_no_remainder(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is False, gap=0 and not 
+    Test TimeSeriesFold split method output when refit is False, gap=0 and not 
     remainder.
     """
     y = pd.Series(np.arange(100))
@@ -67,9 +67,9 @@ def test_create_backtesting_folds_no_refit_no_gap_no_remainder(capfd, return_all
                                    [[0, 65], [71, 75], [75, 85], [75, 85], False],
                                    [[0, 65], [81, 85], [85, 95], [85, 95], False]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_no_refit_no_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
-    """
-    Test _create_backtesting_folds output when refit is 0 (False), gap=0, 
+def test_TimeSeriesFold_split_no_refit_no_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
+    """s
+    Test TimeSeriesFold split method output when refit is 0 (False), gap=0, 
     remainder and allow_incomplete_fold=False.
     """
     y = pd.Series(np.arange(100))
@@ -124,9 +124,9 @@ def test_create_backtesting_folds_no_refit_no_gap_allow_incomplete_fold_False(ca
                                    [[0, 70], [79, 84], [84, 96], [89, 96], False],
                                    [[0, 70], [86, 91], [91, 100], [96, 100], False]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_no_refit_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_no_refit_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is False, gap=5, 
+    Test TimeSeriesFold split method output when refit is False, gap=5, 
     remainder, allow_incomplete_fold=True.
     """
     y = pd.Series(np.arange(100))
@@ -175,7 +175,7 @@ def test_create_backtesting_folds_no_refit_gap_allow_incomplete_fold_True(capfd,
     
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 15), range(0, 15), range(15, 30), range(20, 30), True],
+                         [(True, [[range(0, 15), range(0, 15), range(15, 30), range(20, 30), False],
                                   [range(0, 15), range(10, 25), range(25, 40), range(30, 40), False],
                                   [range(0, 15), range(20, 35), range(35, 50), range(40, 50), False],
                                   [range(0, 15), range(30, 45), range(45, 60), range(50, 60), False],
@@ -183,7 +183,7 @@ def test_create_backtesting_folds_no_refit_gap_allow_incomplete_fold_True(capfd,
                                   [range(0, 15), range(50, 65), range(65, 80), range(70, 80), False],
                                   [range(0, 15), range(60, 75), range(75, 90), range(80, 90), False],
                                   [range(0, 15), range(70, 85), range(85, 100), range(90, 100), False]]),
-                          (False, [[[0, 15], [0, 15], [15, 30], [20, 30], True],
+                          (False, [[[0, 15], [0, 15], [15, 30], [20, 30], False],
                                    [[0, 15], [10, 25], [25, 40], [30, 40], False],
                                    [[0, 15], [20, 35], [35, 50], [40, 50], False],
                                    [[0, 15], [30, 45], [45, 60], [50, 60], False],
@@ -192,25 +192,25 @@ def test_create_backtesting_folds_no_refit_gap_allow_incomplete_fold_True(capfd,
                                    [[0, 15], [60, 75], [75, 90], [80, 90], False],
                                    [[0, 15], [70, 85], [85, 100], [90, 100], False]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_no_refit_no_initial_train_size_gap(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_no_refit_initial_train_size_None_gap(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is False, gap=5, 
-    already trained, no remainder, allow_incomplete_fold=True.
+    Test TimeSeriesFold split method output when refit is False, gap=5, 
+    initial_train_size=None (externally fitted), no remainder, allow_incomplete_fold=True.
     """
     y = pd.Series(np.arange(100))
     cv = TimeSeriesFold(
-            steps                 = 10,
-            initial_train_size    = 15,
-            window_size           = 15,
-            differentiation       = None,
-            refit                 = False,
-            fixed_train_size      = False,
-            gap                   = 5,
-            skip_folds            = None,
-            allow_incomplete_fold = True,
-            return_all_indexes    = return_all_indexes,
-        )
-    folds = cv.split(X=y, externally_fitted=True)            
+             steps                 = 10,
+             initial_train_size    = None,
+             window_size           = 15,
+             differentiation       = None,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 5,
+             skip_folds            = None,
+             allow_incomplete_fold = True,
+             return_all_indexes    = return_all_indexes,
+         )
+    folds = cv.split(X=y)            
     out, _ = capfd.readouterr()
     expected_out = (
         "Information of folds\n"
@@ -259,9 +259,9 @@ def test_create_backtesting_folds_no_refit_no_initial_train_size_gap(capfd, retu
                                    [[0, 80], [78, 80], [80, 90], [80, 90], True],
                                    [[0, 90], [88, 90], [90, 100], [90, 100], True]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_no_fixed_no_gap_no_remainder(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is True, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is True, fixed_train_size is 
     False, gap=0 and not remainder.
     """
     y = pd.Series(np.arange(100))
@@ -314,9 +314,9 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder(capfd, retu
                                    [[10, 80], [74, 80], [80, 90], [80, 90], True],
                                    [[20, 90], [84, 90], [90, 100], [90, 100], True]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_fixed_train_size_no_gap_no_remainder(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_fixed_train_size_no_gap_no_remainder(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is 1 (True), fixed_train_size 
+    Test TimeSeriesFold split method output when refit is 1 (True), fixed_train_size 
     is True, gap=0 and not remainder.
     """
     y = pd.Series(np.arange(100))
@@ -370,9 +370,9 @@ def test_create_backtesting_folds_refit_fixed_train_size_no_gap_no_remainder(cap
                                    [[0, 84], [81, 84], [84, 96], [89, 96], True],
                                    [[0, 91], [88, 91], [91, 100], [96, 100], True]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_no_fixed_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is True, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is True, fixed_train_size is 
     False, gap=5, remainder, allow_incomplete_fold=True.
     """
     y = pd.Series(np.arange(100))
@@ -430,9 +430,9 @@ def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_True(
                                    [[14, 84], [79, 84], [84, 96], [89, 96], True],
                                    [[21, 91], [86, 91], [91, 100], [96, 100], True]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_fixed_train_size_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is True, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is True, fixed_train_size is 
     True, gap=5, remainder, allow_incomplete_fold=True.
     """
     y = pd.Series(np.arange(100))
@@ -487,9 +487,9 @@ def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fo
                                    [[0, 77], [74, 77], [77, 89], [82, 89], True],
                                    [[0, 84], [81, 84], [84, 96], [89, 96], True]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_no_fixed_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is True, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is True, fixed_train_size is 
     False, gap=5, remainder, allow_incomplete_fold=False.
     """
     y = pd.Series(np.arange(100))
@@ -542,9 +542,9 @@ def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_False
                                    [[7, 77], [73, 77], [77, 89], [82, 89], True],
                                    [[14, 84], [80, 84], [84, 96], [89, 96], True]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_fixed_train_size_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is True, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is True, fixed_train_size is 
     True, gap=5, remainder, allow_incomplete_fold=False.
     """
     y = pd.Series(np.arange(100))
@@ -598,9 +598,9 @@ def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fo
                                    [[0, 80], [76, 80], [80, 90], [80, 90], True],
                                    [[0, 80], [86, 90], [90, 100], [90, 100], False]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_int_no_fixed_no_gap_no_remainder(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_int_no_fixed_no_gap_no_remainder(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is 2, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is 2, fixed_train_size is 
     False, gap=0 and not remainder.
     """
     y = pd.Series(np.arange(100))
@@ -657,9 +657,9 @@ def test_create_backtesting_folds_refit_int_no_fixed_no_gap_no_remainder(capfd, 
                                    [[0, 60], [78, 80], [80, 90], [80, 90], False],
                                    [[30, 90], [88, 90], [90, 100], [90, 100], True]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_int_fixed_train_size_no_gap_no_remainder(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_int_fixed_train_size_no_gap_no_remainder(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is 3, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is 3, fixed_train_size is 
     True, gap=0 and not remainder.
     """
     y = pd.Series(np.arange(100))
@@ -716,9 +716,9 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_no_gap_no_remainder
                                    [[0, 84], [74, 84], [84, 96], [89, 96], True],
                                    [[0, 84], [81, 91], [91, 100], [96, 100], False]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_int_no_fixed_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is 2, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is 2, fixed_train_size is 
     False, gap=5, remainder, allow_incomplete_fold=True.
     """
     y = pd.Series(np.arange(100))
@@ -776,9 +776,9 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_T
                                    [[0, 70], [69, 84], [84, 96], [89, 96], False],
                                    [[21, 91], [76, 91], [91, 100], [96, 100], True]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_int_fixed_train_size_gap_allow_incomplete_fold_True(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is 3, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is 3, fixed_train_size is 
     True, gap=5, remainder, allow_incomplete_fold=True.
     """
     y = pd.Series(np.arange(100))
@@ -833,9 +833,9 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
                                    [[0, 70], [57, 77], [77, 89], [82, 89], False],
                                    [[0, 70], [64, 84], [84, 96], [89, 96], False]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_int_no_fixed_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is 3, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is 3, fixed_train_size is 
     False, gap=5, remainder, allow_incomplete_fold=False.
     """
     y = pd.Series(np.arange(100))
@@ -888,9 +888,9 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_F
                                    [[0, 70], [67, 77], [77, 89], [82, 89], False],
                                    [[14, 84], [74, 84], [84, 96], [89, 96], True]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_int_fixed_train_size_gap_allow_incomplete_fold_False(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is True, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is True, fixed_train_size is 
     True, gap=5, remainder, allow_incomplete_fold=False.
     """
     y = pd.Series(np.arange(100))
@@ -942,9 +942,9 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
                                    [[0, 80], [77, 80], [80, 90], [80, 90], True],
                                    [[0, 90], [87, 90], [90, 100], [90, 100], True]])], 
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder_differentiation(capfd, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_no_fixed_no_gap_no_remainder_differentiation(capfd, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is True, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is True, fixed_train_size is 
     False, gap=0, not remainder and differentiation=1.
     """
     y = pd.Series(np.arange(100))
@@ -1001,9 +1001,9 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder_differentia
                                    [[30, 100], [98, 100], [100, 110], [100, 110], True],
                                    [[60, 130], [128, 130], [130, 140], [130, 140], True]])],
                          ids = lambda argument: f'{argument}')
-def test_create_backtesting_folds_refit_fixed_no_gap_no_remainder_skip_folds_3(capfd, skip_folds, return_all_indexes, expected):
+def test_TimeSeriesFold_split_refit_fixed_no_gap_no_remainder_skip_folds_3(capfd, skip_folds, return_all_indexes, expected):
     """
-    Test _create_backtesting_folds output when refit is True, fixed_train_size is 
+    Test TimeSeriesFold split method output when refit is True, fixed_train_size is 
     True, gap=0, not remainder and skip_folds=3.
     """
     y = pd.Series(np.arange(150))

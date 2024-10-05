@@ -168,18 +168,13 @@ def _backtesting_forecaster(
             exog                      = exog_train,
             store_in_sample_residuals = store_in_sample_residuals
         )
-        externally_fitted = False
     else:
         # Although not used for training, first observations are needed to create
         # the initial predictors
         cv.set_params({'initial_train_size': forecaster.window_size})
         initial_train_size = forecaster.window_size
-        externally_fitted = True
 
-    folds = cv.split(
-                X                 = y,
-                externally_fitted = externally_fitted,
-            )
+    folds = cv.split(X=y, as_pandas=False)
     # This is done to allow parallelization when `refit` is `False`. The initial 
     # Forecaster fit is outside the auxiliary function.
     folds[0][4] = False

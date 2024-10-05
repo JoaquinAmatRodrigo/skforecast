@@ -9,8 +9,8 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
-from skforecast.model_selection._validation import _backtesting_forecaster
 from skforecast.model_selection._split import TimeSeriesFold
+from skforecast.model_selection._validation import _backtesting_forecaster
 
 # Fixtures
 from skforecast.exceptions import IgnoredArgumentWarning
