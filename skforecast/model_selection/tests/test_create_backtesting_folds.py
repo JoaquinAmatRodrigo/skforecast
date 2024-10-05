@@ -7,10 +7,10 @@ from skforecast.model_selection._split import TimeSeriesFold
 
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(67, 70), range(70, 80), range(70, 80), False],
+                         [(True, [[range(0, 70), range(67, 70), range(70, 80), range(70, 80), True],
                                   [range(0, 70), range(77, 80), range(80, 90), range(80, 90), False],
                                   [range(0, 70), range(87, 90), range(90, 100), range(90, 100), False]]),
-                          (False, [[[0, 70], [67, 70], [70, 80], [70, 80], False],
+                          (False, [[[0, 70], [67, 70], [70, 80], [70, 80], True],
                                    [[0, 70], [77, 80], [80, 90], [80, 90], False],
                                    [[0, 70], [87, 90], [90, 100], [90, 100], False]])], 
                          ids = lambda argument: f'{argument}')
@@ -60,10 +60,10 @@ def test_create_backtesting_folds_no_refit_no_gap_no_remainder(capfd, return_all
     
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 65), range(61, 65), range(65, 75), range(65, 75), False],
+                         [(True, [[range(0, 65), range(61, 65), range(65, 75), range(65, 75), True],
                                   [range(0, 65), range(71, 75), range(75, 85), range(75, 85), False],
                                   [range(0, 65), range(81, 85), range(85, 95), range(85, 95), False]]),
-                          (False, [[[0, 65], [61, 65], [65, 75], [65, 75], False],
+                          (False, [[[0, 65], [61, 65], [65, 75], [65, 75], True],
                                    [[0, 65], [71, 75], [75, 85], [75, 85], False],
                                    [[0, 65], [81, 85], [85, 95], [85, 95], False]])], 
                          ids = lambda argument: f'{argument}')
@@ -115,11 +115,11 @@ def test_create_backtesting_folds_no_refit_no_gap_allow_incomplete_fold_False(ca
     
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(65, 70), range(70, 82), range(75, 82), False],
+                         [(True, [[range(0, 70), range(65, 70), range(70, 82), range(75, 82), True],
                                   [range(0, 70), range(72, 77), range(77, 89), range(82, 89), False],
                                   [range(0, 70), range(79, 84), range(84, 96), range(89, 96), False],
                                   [range(0, 70), range(86, 91), range(91, 100), range(96, 100), False]]),
-                          (False, [[[0, 70], [65, 70], [70, 82], [75, 82], False],
+                          (False, [[[0, 70], [65, 70], [70, 82], [75, 82], True],
                                    [[0, 70], [72, 77], [77, 89], [82, 89], False],
                                    [[0, 70], [79, 84], [84, 96], [89, 96], False],
                                    [[0, 70], [86, 91], [91, 100], [96, 100], False]])], 
@@ -131,26 +131,19 @@ def test_create_backtesting_folds_no_refit_gap_allow_incomplete_fold_True(capfd,
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
-    window_size = 5
-    initial_train_size = 70
-    gap = 5
-    test_size = 7
-    refit = False
-    allow_incomplete_fold = True
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = False,
-                gap                   = gap,
-                allow_incomplete_fold = allow_incomplete_fold,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 7,
+            initial_train_size    = 70,
+            window_size           = 5,
+            differentiation       = None,
+            refit                 = False,
+            fixed_train_size      = False,
+            gap                   = 5,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
                     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -182,7 +175,7 @@ def test_create_backtesting_folds_no_refit_gap_allow_incomplete_fold_True(capfd,
     
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 15), range(0, 15), range(15, 30), range(20, 30), False],
+                         [(True, [[range(0, 15), range(0, 15), range(15, 30), range(20, 30), True],
                                   [range(0, 15), range(10, 25), range(25, 40), range(30, 40), False],
                                   [range(0, 15), range(20, 35), range(35, 50), range(40, 50), False],
                                   [range(0, 15), range(30, 45), range(45, 60), range(50, 60), False],
@@ -190,7 +183,7 @@ def test_create_backtesting_folds_no_refit_gap_allow_incomplete_fold_True(capfd,
                                   [range(0, 15), range(50, 65), range(65, 80), range(70, 80), False],
                                   [range(0, 15), range(60, 75), range(75, 90), range(80, 90), False],
                                   [range(0, 15), range(70, 85), range(85, 100), range(90, 100), False]]),
-                          (False, [[[0, 15], [0, 15], [15, 30], [20, 30], False],
+                          (False, [[[0, 15], [0, 15], [15, 30], [20, 30], True],
                                    [[0, 15], [10, 25], [25, 40], [30, 40], False],
                                    [[0, 15], [20, 35], [35, 50], [40, 50], False],
                                    [[0, 15], [30, 45], [45, 60], [50, 60], False],
@@ -205,27 +198,19 @@ def test_create_backtesting_folds_no_refit_no_initial_train_size_gap(capfd, retu
     already trained, no remainder, allow_incomplete_fold=True.
     """
     y = pd.Series(np.arange(100))
-    initial_train_size = 15  # window_size
-    window_size = 15
-    gap = 5
-    test_size = 10
-    refit = False
-    externally_fitted = True
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = externally_fitted,
-                refit                 = refit,
-                fixed_train_size      = False,
-                gap                   = gap,
-                allow_incomplete_fold = True,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
-                    
+    cv = TimeSeriesFold(
+            steps                 = 10,
+            initial_train_size    = 15,
+            window_size           = 15,
+            differentiation       = None,
+            refit                 = False,
+            fixed_train_size      = False,
+            gap                   = 5,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y, externally_fitted=True)            
     out, _ = capfd.readouterr()
     expected_out = (
         "Information of folds\n"
@@ -267,10 +252,10 @@ def test_create_backtesting_folds_no_refit_no_initial_train_size_gap(capfd, retu
 
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(68, 70), range(70, 80), range(70, 80), False],
+                         [(True, [[range(0, 70), range(68, 70), range(70, 80), range(70, 80), True],
                                   [range(0, 80), range(78, 80), range(80, 90), range(80, 90), True],
                                   [range(0, 90), range(88, 90), range(90, 100), range(90, 100), True]]),
-                          (False, [[[0, 70], [68, 70], [70, 80], [70, 80], False],
+                          (False, [[[0, 70], [68, 70], [70, 80], [70, 80], True],
                                    [[0, 80], [78, 80], [80, 90], [80, 90], True],
                                    [[0, 90], [88, 90], [90, 100], [90, 100], True]])], 
                          ids = lambda argument: f'{argument}')
@@ -281,25 +266,20 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder(capfd, retu
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
-    window_size = 2
-    initial_train_size = 70
-    test_size = 10
-    refit = True
-    fixed_train_size = False
+    cv = TimeSeriesFold(
+            steps                 = 10,
+            initial_train_size    = 70,
+            window_size           = 2,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = False,
+            return_all_indexes    = return_all_indexes,
+        )
 
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = 0,
-                allow_incomplete_fold = True,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    folds = cv.split(X=y)
     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -327,10 +307,10 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder(capfd, retu
 
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(64, 70), range(70, 80), range(70, 80), False],
+                         [(True, [[range(0, 70), range(64, 70), range(70, 80), range(70, 80), True],
                                   [range(10, 80), range(74, 80), range(80, 90), range(80, 90), True],
                                   [range(20, 90), range(84, 90), range(90, 100), range(90, 100), True]]),
-                          (False, [[[0, 70], [64, 70], [70, 80], [70, 80], False],
+                          (False, [[[0, 70], [64, 70], [70, 80], [70, 80], True],
                                    [[10, 80], [74, 80], [80, 90], [80, 90], True],
                                    [[20, 90], [84, 90], [90, 100], [90, 100], True]])], 
                          ids = lambda argument: f'{argument}')
@@ -341,25 +321,19 @@ def test_create_backtesting_folds_refit_fixed_train_size_no_gap_no_remainder(cap
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
-    window_size = 6
-    initial_train_size = 70
-    test_size = 10
-    refit = 1
-    fixed_train_size = True
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = 0,
-                allow_incomplete_fold = True,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 10,
+            initial_train_size    = 70,
+            window_size           = 6,
+            differentiation       = None,
+            refit                 = 1,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -387,11 +361,11 @@ def test_create_backtesting_folds_refit_fixed_train_size_no_gap_no_remainder(cap
     
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(67, 70), range(70, 82), range(75, 82), False],
+                         [(True, [[range(0, 70), range(67, 70), range(70, 82), range(75, 82), True],
                                   [range(0, 77), range(74, 77), range(77, 89), range(82, 89), True],
                                   [range(0, 84), range(81, 84), range(84, 96), range(89, 96), True],
                                   [range(0, 91), range(88, 91), range(91, 100), range(96, 100), True]]),
-                          (False, [[[0, 70], [67, 70], [70, 82], [75, 82], False],
+                          (False, [[[0, 70], [67, 70], [70, 82], [75, 82], True],
                                    [[0, 77], [74, 77], [77, 89], [82, 89], True],
                                    [[0, 84], [81, 84], [84, 96], [89, 96], True],
                                    [[0, 91], [88, 91], [91, 100], [96, 100], True]])], 
@@ -403,27 +377,19 @@ def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_True(
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
-    window_size = 3
-    initial_train_size = 70
-    gap = 5
-    test_size = 7
-    refit = True
-    fixed_train_size = False
-    allow_incomplete_fold = True
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = gap,
-                allow_incomplete_fold = allow_incomplete_fold,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 7,
+            initial_train_size    = 70,
+            window_size           = 3,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 5,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
                     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -455,11 +421,11 @@ def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_True(
     
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(65, 70), range(70, 82), range(75, 82), False],
+                         [(True, [[range(0, 70), range(65, 70), range(70, 82), range(75, 82), True],
                                   [range(7, 77), range(72, 77), range(77, 89), range(82, 89), True],
                                   [range(14, 84), range(79, 84), range(84, 96), range(89, 96), True],
                                   [range(21, 91), range(86, 91), range(91, 100), range(96, 100), True]]),
-                          (False, [[[0, 70], [65, 70], [70, 82], [75, 82], False],
+                          (False, [[[0, 70], [65, 70], [70, 82], [75, 82], True],
                                    [[7, 77], [72, 77], [77, 89], [82, 89], True],
                                    [[14, 84], [79, 84], [84, 96], [89, 96], True],
                                    [[21, 91], [86, 91], [91, 100], [96, 100], True]])], 
@@ -470,27 +436,19 @@ def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fo
     True, gap=5, remainder, allow_incomplete_fold=True.
     """
     y = pd.Series(np.arange(100))
-    window_size = 5
-    initial_train_size = 70
-    gap = 5
-    test_size = 7
-    refit = True
-    fixed_train_size = True
-    allow_incomplete_fold = True
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = gap,
-                allow_incomplete_fold = allow_incomplete_fold,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 7,
+            initial_train_size    = 70,
+            window_size           = 5,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 5,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
                     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -522,10 +480,10 @@ def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fo
     
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(67, 70), range(70, 82), range(75, 82), False],
+                         [(True, [[range(0, 70), range(67, 70), range(70, 82), range(75, 82), True],
                                   [range(0, 77), range(74, 77), range(77, 89), range(82, 89), True],
                                   [range(0, 84), range(81, 84), range(84, 96), range(89, 96), True]]),
-                          (False, [[[0, 70], [67, 70], [70, 82], [75, 82], False],
+                          (False, [[[0, 70], [67, 70], [70, 82], [75, 82], True],
                                    [[0, 77], [74, 77], [77, 89], [82, 89], True],
                                    [[0, 84], [81, 84], [84, 96], [89, 96], True]])], 
                          ids = lambda argument: f'{argument}')
@@ -536,27 +494,19 @@ def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_False
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
-    window_size = 3
-    initial_train_size = 70
-    gap = 5
-    test_size = 7
-    refit = True
-    fixed_train_size = False
-    allow_incomplete_fold = False
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = gap,
-                allow_incomplete_fold = allow_incomplete_fold,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 7,
+            initial_train_size    = 70,
+            window_size           = 3,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 5,
+            skip_folds            = None,
+            allow_incomplete_fold = False,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
                     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -585,10 +535,10 @@ def test_create_backtesting_folds_refit_no_fixed_gap_allow_incomplete_fold_False
     
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(66, 70), range(70, 82), range(75, 82), False],
+                         [(True, [[range(0, 70), range(66, 70), range(70, 82), range(75, 82), True],
                                   [range(7, 77), range(73, 77), range(77, 89), range(82, 89), True],
                                   [range(14, 84), range(80, 84), range(84, 96), range(89, 96), True]]),
-                          (False, [[[0, 70], [66, 70], [70, 82], [75, 82], False],
+                          (False, [[[0, 70], [66, 70], [70, 82], [75, 82], True],
                                    [[7, 77], [73, 77], [77, 89], [82, 89], True],
                                    [[14, 84], [80, 84], [84, 96], [89, 96], True]])], 
                          ids = lambda argument: f'{argument}')
@@ -598,27 +548,19 @@ def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fo
     True, gap=5, remainder, allow_incomplete_fold=False.
     """
     y = pd.Series(np.arange(100))
-    window_size = 4
-    initial_train_size = 70
-    gap = 5
-    test_size = 7
-    refit = True
-    fixed_train_size = True
-    allow_incomplete_fold = False
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = gap,
-                allow_incomplete_fold = allow_incomplete_fold,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 7,
+            initial_train_size    = 70,
+            window_size           = 4,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 5,
+            skip_folds            = None,
+            allow_incomplete_fold = False,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
                     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -647,11 +589,11 @@ def test_create_backtesting_folds_refit_fixed_train_size_gap_allow_incomplete_fo
 
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 60), range(56, 60), range(60, 70), range(60, 70), False],
+                         [(True, [[range(0, 60), range(56, 60), range(60, 70), range(60, 70), True],
                                   [range(0, 60), range(66, 70), range(70, 80), range(70, 80), False],
                                   [range(0, 80), range(76, 80), range(80, 90), range(80, 90), True],
                                   [range(0, 80), range(86, 90), range(90, 100), range(90, 100), False]]),
-                          (False, [[[0, 60], [56, 60], [60, 70], [60, 70], False],
+                          (False, [[[0, 60], [56, 60], [60, 70], [60, 70], True],
                                    [[0, 60], [66, 70], [70, 80], [70, 80], False],
                                    [[0, 80], [76, 80], [80, 90], [80, 90], True],
                                    [[0, 80], [86, 90], [90, 100], [90, 100], False]])], 
@@ -663,25 +605,19 @@ def test_create_backtesting_folds_refit_int_no_fixed_no_gap_no_remainder(capfd, 
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
-    window_size = 4
-    initial_train_size = 60
-    test_size = 10
-    refit = 2
-    fixed_train_size = False
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = 0,
-                allow_incomplete_fold = True,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 10,
+            initial_train_size    = 60,
+            window_size           = 4,
+            differentiation       = None,
+            refit                 = 2,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = False,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -712,11 +648,11 @@ def test_create_backtesting_folds_refit_int_no_fixed_no_gap_no_remainder(capfd, 
 
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 60), range(58, 60), range(60, 70), range(60, 70), False],
+                         [(True, [[range(0, 60), range(58, 60), range(60, 70), range(60, 70), True],
                                   [range(0, 60), range(68, 70), range(70, 80), range(70, 80), False],
                                   [range(0, 60), range(78, 80), range(80, 90), range(80, 90), False],
                                   [range(30, 90), range(88, 90), range(90, 100), range(90, 100), True]]),
-                          (False, [[[0, 60], [58, 60], [60, 70], [60, 70], False],
+                          (False, [[[0, 60], [58, 60], [60, 70], [60, 70], True],
                                    [[0, 60], [68, 70], [70, 80], [70, 80], False],
                                    [[0, 60], [78, 80], [80, 90], [80, 90], False],
                                    [[30, 90], [88, 90], [90, 100], [90, 100], True]])], 
@@ -728,25 +664,19 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_no_gap_no_remainder
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
-    window_size = 2
-    initial_train_size = 60
-    test_size = 10
-    refit = 3
-    fixed_train_size = True
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = 0,
-                allow_incomplete_fold = True,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 10,
+            initial_train_size    = 60,
+            window_size           = 2,
+            differentiation       = None,
+            refit                 = 3,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = False,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -777,11 +707,11 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_no_gap_no_remainder
     
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(60, 70), range(70, 82), range(75, 82), False],
+                         [(True, [[range(0, 70), range(60, 70), range(70, 82), range(75, 82), True],
                                   [range(0, 70), range(67, 77), range(77, 89), range(82, 89), False],
                                   [range(0, 84), range(74, 84), range(84, 96), range(89, 96), True],
                                   [range(0, 84), range(81, 91), range(91, 100), range(96, 100), False]]),
-                          (False, [[[0, 70], [60, 70], [70, 82], [75, 82], False],
+                          (False, [[[0, 70], [60, 70], [70, 82], [75, 82], True],
                                    [[0, 70], [67, 77], [77, 89], [82, 89], False],
                                    [[0, 84], [74, 84], [84, 96], [89, 96], True],
                                    [[0, 84], [81, 91], [91, 100], [96, 100], False]])], 
@@ -793,27 +723,19 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_T
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
-    window_size = 10
-    initial_train_size = 70
-    gap = 5
-    test_size = 7
-    refit = 2
-    fixed_train_size = False
-    allow_incomplete_fold = True
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = gap,
-                allow_incomplete_fold = allow_incomplete_fold,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 7,
+            initial_train_size    = 70,
+            window_size           = 10,
+            differentiation       = None,
+            refit                 = 2,
+            fixed_train_size      = False,
+            gap                   = 5,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
                     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -845,11 +767,11 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_T
     
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(55, 70), range(70, 82), range(75, 82), False],
+                         [(True, [[range(0, 70), range(55, 70), range(70, 82), range(75, 82), True],
                                   [range(0, 70), range(62, 77), range(77, 89), range(82, 89), False],
                                   [range(0, 70), range(69, 84), range(84, 96), range(89, 96), False],
                                   [range(21, 91), range(76, 91), range(91, 100), range(96, 100), True]]),
-                          (False, [[[0, 70], [55, 70], [70, 82], [75, 82], False],
+                          (False, [[[0, 70], [55, 70], [70, 82], [75, 82], True],
                                    [[0, 70], [62, 77], [77, 89], [82, 89], False],
                                    [[0, 70], [69, 84], [84, 96], [89, 96], False],
                                    [[21, 91], [76, 91], [91, 100], [96, 100], True]])], 
@@ -860,27 +782,19 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
     True, gap=5, remainder, allow_incomplete_fold=True.
     """
     y = pd.Series(np.arange(100))
-    window_size = 15
-    initial_train_size = 70
-    gap = 5
-    test_size = 7
-    refit = 3
-    fixed_train_size = True
-    allow_incomplete_fold = True
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = gap,
-                allow_incomplete_fold = allow_incomplete_fold,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 7,
+            initial_train_size    = 70,
+            window_size           = 15,
+            differentiation       = None,
+            refit                 = 3,
+            fixed_train_size      = True,
+            gap                   = 5,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
                     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -912,10 +826,10 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
     
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(50, 70), range(70, 82), range(75, 82), False],
+                         [(True, [[range(0, 70), range(50, 70), range(70, 82), range(75, 82), True],
                                   [range(0, 70), range(57, 77), range(77, 89), range(82, 89), False],
                                   [range(0, 70), range(64, 84), range(84, 96), range(89, 96), False]]),
-                          (False, [[[0, 70], [50, 70], [70, 82], [75, 82], False],
+                          (False, [[[0, 70], [50, 70], [70, 82], [75, 82], True],
                                    [[0, 70], [57, 77], [77, 89], [82, 89], False],
                                    [[0, 70], [64, 84], [84, 96], [89, 96], False]])], 
                          ids = lambda argument: f'{argument}')
@@ -926,27 +840,19 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_F
     """
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
-    window_size = 20
-    initial_train_size = 70
-    gap = 5
-    test_size = 7
-    refit = 3
-    fixed_train_size = False
-    allow_incomplete_fold = False
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = gap,
-                allow_incomplete_fold = allow_incomplete_fold,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 7,
+            initial_train_size    = 70,
+            window_size           = 20,
+            differentiation       = None,
+            refit                 = 3,
+            fixed_train_size      = False,
+            gap                   = 5,
+            skip_folds            = None,
+            allow_incomplete_fold = False,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
                     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -975,10 +881,10 @@ def test_create_backtesting_folds_refit_int_no_fixed_gap_allow_incomplete_fold_F
 
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(60, 70), range(70, 82), range(75, 82), False],
+                         [(True, [[range(0, 70), range(60, 70), range(70, 82), range(75, 82), True],
                                   [range(0, 70), range(67, 77), range(77, 89), range(82, 89), False],
                                   [range(14, 84), range(74, 84), range(84, 96), range(89, 96), True]]),
-                          (False, [[[0, 70], [60, 70], [70, 82], [75, 82], False],
+                          (False, [[[0, 70], [60, 70], [70, 82], [75, 82], True],
                                    [[0, 70], [67, 77], [77, 89], [82, 89], False],
                                    [[14, 84], [74, 84], [84, 96], [89, 96], True]])], 
                          ids = lambda argument: f'{argument}')
@@ -988,27 +894,19 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
     True, gap=5, remainder, allow_incomplete_fold=False.
     """
     y = pd.Series(np.arange(100))
-    window_size = 10
-    initial_train_size = 70
-    gap = 5
-    test_size = 7
-    refit = 2
-    fixed_train_size = True
-    allow_incomplete_fold = False
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = gap,
-                allow_incomplete_fold = allow_incomplete_fold,
-                return_all_indexes    = return_all_indexes,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 7,
+            initial_train_size    = 70,
+            window_size           = 10,
+            differentiation       = None,
+            refit                 = 2,
+            fixed_train_size      = True,
+            gap                   = 5,
+            skip_folds            = None,
+            allow_incomplete_fold = False,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
                     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -1037,10 +935,10 @@ def test_create_backtesting_folds_refit_int_fixed_train_size_gap_allow_incomplet
 
 
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(67, 70), range(70, 80), range(70, 80), False],
+                         [(True, [[range(0, 70), range(67, 70), range(70, 80), range(70, 80), True],
                                   [range(0, 80), range(77, 80), range(80, 90), range(80, 90), True],
                                   [range(0, 90), range(87, 90), range(90, 100), range(90, 100), True]]),
-                          (False, [[[0, 70], [67, 70], [70, 80], [70, 80], False],
+                          (False, [[[0, 70], [67, 70], [70, 80], [70, 80], True],
                                    [[0, 80], [77, 80], [80, 90], [80, 90], True],
                                    [[0, 90], [87, 90], [90, 100], [90, 100], True]])], 
                          ids = lambda argument: f'{argument}')
@@ -1052,26 +950,19 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder_differentia
     y = pd.Series(np.arange(100))
     y.index = pd.date_range(start='2022-01-01', periods=100, freq='D')
     differentiation = 1
-    window_size = 2 + differentiation
-    initial_train_size = 70
-    test_size = 10
-    refit = True
-    fixed_train_size = False
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = 0,
-                allow_incomplete_fold = True,
-                return_all_indexes    = return_all_indexes,
-                differentiation       = differentiation,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 10,
+            initial_train_size    = 70,
+            window_size           = 2 + differentiation,
+            differentiation       = differentiation,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
     
     out, _ = capfd.readouterr()
     expected_out = (
@@ -1103,10 +994,10 @@ def test_create_backtesting_folds_refit_no_fixed_no_gap_no_remainder_differentia
                          [3, [1, 2, 4, 5, 7]],
                          ids = lambda skip_folds: f'{skip_folds}')
 @pytest.mark.parametrize("return_all_indexes, expected",
-                         [(True, [[range(0, 70), range(68, 70), range(70, 80), range(70, 80), False],
+                         [(True, [[range(0, 70), range(68, 70), range(70, 80), range(70, 80), True],
                                   [range(30, 100), range(98, 100), range(100, 110), range(100, 110), True],
                                   [range(60, 130), range(128, 130), range(130, 140), range(130, 140), True]]),
-                          (False, [[[0, 70], [68, 70], [70, 80], [70, 80], False],
+                          (False, [[[0, 70], [68, 70], [70, 80], [70, 80], True],
                                    [[30, 100], [98, 100], [100, 110], [100, 110], True],
                                    [[60, 130], [128, 130], [130, 140], [130, 140], True]])],
                          ids = lambda argument: f'{argument}')
@@ -1117,28 +1008,19 @@ def test_create_backtesting_folds_refit_fixed_no_gap_no_remainder_skip_folds_3(c
     """
     y = pd.Series(np.arange(150))
     y.index = pd.date_range(start='2022-01-01', periods=150, freq='D')
-    window_size = 2
-    initial_train_size = 70
-    test_size = 10
-    refit = True
-    fixed_train_size = True
-    gap = 0
-
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = test_size,
-                externally_fitted     = False,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = gap,
-                skip_folds            = skip_folds,
-                allow_incomplete_fold = True,
-                return_all_indexes    = return_all_indexes,
-                differentiation       = None,
-                verbose               = True
-            )
+    cv = TimeSeriesFold(
+            steps                 = 10,
+            initial_train_size    = 70,
+            window_size           = 2,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = skip_folds,
+            allow_incomplete_fold = True,
+            return_all_indexes    = return_all_indexes,
+        )
+    folds = cv.split(X=y)
 
     out, _ = capfd.readouterr()
     expected_out = (

@@ -15,7 +15,7 @@ from skforecast.metrics import root_mean_squared_scaled_error
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.model_selection._search import _evaluate_grid_hyperparameters
-from skforecast.model_selection._split import TimeSeriesFold
+from skforecast.model_selection._split import TimeSeriesFold, OneStepAheadFold
 
 # Fixtures
 from .fixtures_model_selection import y
@@ -575,23 +575,31 @@ def test_evaluate_grid_hyperparameters_output_file_when_single_metric_as_list():
                      lags      = 2 
                  )
 
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
     output_file = 'test_evaluate_grid_hyperparameters_output_file.txt'
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = False,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
 
     results = _evaluate_grid_hyperparameters(
                   forecaster         = forecaster,
                   y                  = y,
+                  cv                 = cv,
                   lags_grid          = lags_grid,
                   param_grid         = param_grid,
-                  steps              = steps,
-                  refit              = False,
                   metric             = ['mean_squared_error'],
-                  initial_train_size = len(y_train),
-                  fixed_train_size   = False,
                   return_best        = False,
                   verbose            = False,
                   show_progress      = False,
@@ -617,23 +625,32 @@ def test_evaluate_grid_hyperparameters_output_file_when_2_metrics_as_list():
                      lags      = 2 
                  )
 
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
     output_file = 'test_evaluate_grid_hyperparameters_output_file.txt'
 
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = False,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
+
     results = _evaluate_grid_hyperparameters(
                   forecaster         = forecaster,
                   y                  = y,
+                  cv                 = cv,
                   lags_grid          = lags_grid,
                   param_grid         = param_grid,
-                  steps              = steps,
-                  refit              = False,
                   metric             = ['mean_squared_error', 'mean_absolute_error'],
-                  initial_train_size = len(y_train),
-                  fixed_train_size   = False,
                   return_best        = False,
                   verbose            = False,
                   show_progress      = False,
@@ -678,25 +695,35 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_one_step_a
         mean_absolute_scaled_error,
         root_mean_squared_scaled_error,
     ]
-    steps = 1
-    initial_train_size = 100
     param_grid = {
         "alpha": np.logspace(-3, 3, 2),
     }
     lags_grid = [3, 5, 7]
     param_grid = list(ParameterGrid(param_grid))
+    cv_backtesnting = TimeSeriesFold(
+            steps                 = 1,
+            initial_train_size    = 100,
+            window_size           = None,
+            differentiation       = None,
+            refit                 = False,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
+    cv_one_step_ahead = OneStepAheadFold(
+            initial_train_size    = 100,
+            return_all_indexes    = False,
+        )
     results_backtesting = _evaluate_grid_hyperparameters(
         forecaster         = forecaster,
         y                  = y_feature_selection,
         exog               = exog_feature_selection,
+        cv                 = cv_backtesnting,
         param_grid         = param_grid,
         lags_grid          = lags_grid,
-        steps              = steps,
-        refit              = False,
         metric             = metrics,
-        initial_train_size = initial_train_size,
-        method             = 'backtesting',
-        fixed_train_size   = False,
         return_best        = False,
         n_jobs             = 'auto',
         verbose            = False,
@@ -706,11 +733,10 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_one_step_a
         forecaster         = forecaster,
         y                  = y_feature_selection,
         exog               = exog_feature_selection,
+        cv                 = cv_one_step_ahead,
         param_grid         = param_grid,
         lags_grid          = lags_grid,
         metric             = metrics,
-        initial_train_size = initial_train_size,
-        method             = 'one_step_ahead',
         return_best        = False,
         verbose            = False,
         show_progress      = False
