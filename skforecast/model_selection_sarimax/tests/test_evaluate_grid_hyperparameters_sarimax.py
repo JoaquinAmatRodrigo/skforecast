@@ -8,15 +8,16 @@ import pandas as pd
 from sklearn.metrics import mean_absolute_error
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
+from skforecast.model_selection._split import TimeSeriesFold
 from skforecast.model_selection_sarimax.model_selection_sarimax import _evaluate_grid_hyperparameters_sarimax
-
-from tqdm import tqdm
-from functools import partialmethod
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 # Fixtures
 from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import y_datetime
 from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import exog_datetime
+
+from tqdm import tqdm
+from functools import partialmethod
+tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 
 def test_ValueError_evaluate_grid_hyperparameters_sarimax_when_return_best_and_len_y_exog_different():
@@ -28,24 +29,30 @@ def test_ValueError_evaluate_grid_hyperparameters_sarimax_when_return_best_and_l
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     exog_test = exog_datetime[:30].copy()
+    
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
 
     err_msg = re.escape(
-            (f'`exog` must have same number of samples as `y`. '
-             f'length `exog`: ({len(exog_test)}), length `y`: ({len(y_datetime)})')
-        )
+        (f'`exog` must have same number of samples as `y`. '
+         f'length `exog`: ({len(exog_test)}), length `y`: ({len(y_datetime)})')
+    )
     with pytest.raises(ValueError, match = err_msg):
         _evaluate_grid_hyperparameters_sarimax(
-            forecaster         = forecaster,
-            y                  = y_datetime,
-            exog               = exog_test,
-            param_grid         = [{'order': (1, 1, 1)}, {'order': (1, 2, 2)}, {'order': (1, 2, 3)}],
-            steps              = 3,
-            metric             = 'mean_absolute_error',
-            initial_train_size = len(y_datetime) - 12,
-            fixed_train_size   = False,
-            refit              = False,
-            return_best        = True,
-            verbose            = False
+            forecaster  = forecaster,
+            y           = y_datetime,
+            cv          = cv,
+            exog        = exog_test,
+            param_grid  = [{'order': (1, 1, 1)}, {'order': (1, 2, 2)}, {'order': (1, 2, 3)}],
+            metric      = 'mean_absolute_error',
+            return_best = True,
+            verbose     = False
         )
 
 
@@ -58,20 +65,26 @@ def test_exception_evaluate_grid_hyperparameters_sarimax_metric_list_duplicate_n
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     err_msg = re.escape('When `metric` is a `list`, each metric name must be unique.')
     with pytest.raises(ValueError, match = err_msg):
         _evaluate_grid_hyperparameters_sarimax(
-            forecaster         = forecaster,
-            y                  = y_datetime,
-            exog               = exog_datetime,
-            param_grid         = [{'order': (1, 1, 1)}, {'order': (1, 2, 2)}, {'order': (1, 2, 3)}],
-            steps              = 3,
-            metric             = ['mean_absolute_error', mean_absolute_error],
-            initial_train_size = len(y_datetime) - 12,
-            fixed_train_size   = False,
-            refit              = False,
-            return_best        = True,
-            verbose            = False
+            forecaster  = forecaster,
+            y           = y_datetime,
+            cv          = cv,
+            exog        = exog_datetime,
+            param_grid  = [{'order': (1, 1, 1)}, {'order': (1, 2, 2)}, {'order': (1, 2, 3)}],
+            metric      = ['mean_absolute_error', mean_absolute_error],
+            return_best = True,
+            verbose     = False
         )
 
 
@@ -84,20 +97,26 @@ def test_output_evaluate_grid_hyperparameters_sarimax_with_mocked():
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     param_grid = [{'order': (3, 2, 0), 'trend': None}, 
                   {'order': (3, 2, 0), 'trend': 'c'}]
 
     results = _evaluate_grid_hyperparameters_sarimax(
-                  forecaster         = forecaster,
-                  y                  = y_datetime,
-                  param_grid         = param_grid,
-                  steps              = 3,
-                  refit              = False,
-                  metric             = 'mean_squared_error',
-                  initial_train_size = len(y_datetime) - 12,
-                  fixed_train_size   = False,
-                  return_best        = False,
-                  verbose            = False
+                  forecaster  = forecaster,
+                  y           = y_datetime,
+                  cv          = cv,
+                  param_grid  = param_grid,
+                  metric      = 'mean_squared_error',
+                  return_best = False,
+                  verbose     = False
               )
     
     expected_results = pd.DataFrame(
@@ -121,21 +140,27 @@ def test_output_evaluate_grid_hyperparameters_sarimax_exog_with_mocked():
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     param_grid = [{'order': (3, 2, 0), 'trend': None}, 
                   {'order': (3, 2, 0), 'trend': 'c'}]
 
     results = _evaluate_grid_hyperparameters_sarimax(
-                  forecaster         = forecaster,
-                  y                  = y_datetime,
-                  exog               = exog_datetime,
-                  param_grid         = param_grid,
-                  steps              = 3,
-                  refit              = False,
-                  metric             = 'mean_squared_error',
-                  initial_train_size = len(y_datetime) - 12,
-                  fixed_train_size   = False,
-                  return_best        = False,
-                  verbose            = False
+                  forecaster  = forecaster,
+                  y           = y_datetime,
+                  cv          = cv,
+                  exog        = exog_datetime,
+                  param_grid  = param_grid,
+                  metric      = 'mean_squared_error',
+                  return_best = False,
+                  verbose     = False
               )
     
     expected_results = pd.DataFrame(
@@ -159,20 +184,26 @@ def test_output_evaluate_grid_hyperparameters_sarimax_metric_list_with_mocked():
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     param_grid = [{'order': (3, 2, 0), 'trend': None}, 
                   {'order': (3, 2, 0), 'trend': 'c'}]
 
     results = _evaluate_grid_hyperparameters_sarimax(
-                  forecaster         = forecaster,
-                  y                  = y_datetime,
-                  param_grid         = param_grid,
-                  steps              = 3,
-                  refit              = True,
-                  metric             = [mean_absolute_error, 'mean_squared_error'],
-                  initial_train_size = len(y_datetime) - 12,
-                  fixed_train_size   = False,
-                  return_best        = False,
-                  verbose            = False
+                  forecaster  = forecaster,
+                  y           = y_datetime,
+                  cv          = cv,
+                  param_grid  = param_grid,
+                  metric      = [mean_absolute_error, 'mean_squared_error'],
+                  return_best = False,
+                  verbose     = False
               )
     
     expected_results = pd.DataFrame(
@@ -197,18 +228,24 @@ def test_evaluate_grid_hyperparameters_sarimax_when_return_best():
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = True,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     param_grid = [{'order': (3, 2, 0), 'trend': None}, 
                   {'order': (3, 2, 0), 'trend': 'c'}]
 
     _evaluate_grid_hyperparameters_sarimax(
         forecaster            = forecaster,
         y                     = y_datetime,
+        cv                    = cv,
         param_grid            = param_grid,
-        steps                 = 3,
-        refit                 = True,
         metric                = mean_absolute_error,
-        initial_train_size    = len(y_datetime) - 12,
-        fixed_train_size      = True,
         return_best           = True,
         suppress_warnings_fit = False,
         verbose               = False
@@ -253,22 +290,28 @@ def test_evaluate_grid_hyperparameters_sarimax_output_file_when_single_metric():
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     param_grid = [{'order': (3, 2, 0), 'trend': None}, 
                   {'order': (1, 1, 0), 'trend': 'c'}]
     output_file = 'test_evaluate_grid_hyperparameters_sarimax_output_file.txt'
 
     results = _evaluate_grid_hyperparameters_sarimax(
-                  forecaster         = forecaster,
-                  y                  = y_datetime,
-                  param_grid         = param_grid,
-                  steps              = 3,
-                  refit              = False,
-                  metric             = 'mean_squared_error',
-                  initial_train_size = len(y_datetime) - 12,
-                  fixed_train_size   = False,
-                  return_best        = False,
-                  verbose            = False,
-                  output_file        = output_file
+                  forecaster  = forecaster,
+                  y           = y_datetime,
+                  cv          = cv,
+                  param_grid  = param_grid,
+                  metric      = 'mean_squared_error',
+                  return_best = False,
+                  verbose     = False,
+                  output_file = output_file
               )
     results  = results.astype({'params': str, 'order': str})
 
@@ -294,22 +337,28 @@ def test_evaluate_grid_hyperparameters_sarimax_output_file_when_metric_list():
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     param_grid = [{'order': (3, 2, 0), 'trend': None}, 
                   {'order': (1, 1, 0), 'trend': 'c'}]
     output_file = 'test_evaluate_grid_hyperparameters_sarimax_output_file.txt'
 
     results = _evaluate_grid_hyperparameters_sarimax(
-                  forecaster         = forecaster,
-                  y                  = y_datetime,
-                  param_grid         = param_grid,
-                  steps              = 3,
-                  refit              = True,
-                  metric             = [mean_absolute_error, 'mean_squared_error'],
-                  initial_train_size = len(y_datetime) - 12,
-                  fixed_train_size   = False,
-                  return_best        = False,
-                  verbose            = False,
-                  output_file        = output_file
+                  forecaster  = forecaster,
+                  y           = y_datetime,
+                  cv          = cv,
+                  param_grid  = param_grid,
+                  metric      = [mean_absolute_error, 'mean_squared_error'],
+                  return_best = False,
+                  verbose     = False,
+                  output_file = output_file
               )
     results  = results.astype({'params': str, 'order': str})
 

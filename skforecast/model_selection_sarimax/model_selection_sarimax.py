@@ -10,37 +10,26 @@ from typing import Union, Tuple, Optional, Callable
 import numpy as np
 import pandas as pd
 import warnings
-import logging
 from copy import deepcopy
 from joblib import Parallel, delayed, cpu_count
 from tqdm.auto import tqdm
-from sklearn.model_selection import ParameterGrid
-from sklearn.model_selection import ParameterSampler
+from sklearn.model_selection import ParameterGrid, ParameterSampler
 
-from ..exceptions import LongTrainingWarning
-from ..exceptions import IgnoredArgumentWarning
+from ..model_selection._split import TimeSeriesFold
 from ..metrics import add_y_train_argument, _get_metric
-from ..model_selection.model_selection import _create_backtesting_folds
-from ..utils import check_backtesting_input
-from ..utils import select_n_jobs_backtesting
-
-logging.basicConfig(
-    format = '%(name)-10s %(levelname)-5s %(message)s', 
-    level  = logging.INFO,
+from ..exceptions import LongTrainingWarning, IgnoredArgumentWarning
+from ..utils import (
+    check_backtesting_input,
+    select_n_jobs_backtesting
 )
 
 
 def _backtesting_sarimax(
     forecaster: object,
     y: pd.Series,
-    steps: int,
     metric: Union[str, Callable, list],
-    initial_train_size: int,
-    fixed_train_size: bool = True,
-    gap: int = 0,
-    allow_incomplete_fold: bool = True,
+    cv: TimeSeriesFold,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    refit: Union[bool, int] = False,
     alpha: Optional[float] = None,
     interval: Optional[list] = None,
     n_jobs: Union[int, str] = 'auto',
@@ -50,13 +39,6 @@ def _backtesting_sarimax(
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting of ForecasterSarimax.
-
-    - If `refit` is `False`, the model will be trained only once using the 
-    `initial_train_size` first observations. 
-    - If `refit` is `True`, the model is trained on each iteration, increasing
-    the training set. 
-    - If `refit` is an `integer`, the model will be trained every that number 
-    of iterations.
     
     A copy of the original forecaster is created so that it is not modified during 
     the process.
@@ -67,8 +49,6 @@ def _backtesting_sarimax(
         Forecaster model.
     y : pandas Series
         Training time series.
-    steps : int
-        Number of steps to predict.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -78,24 +58,13 @@ def _backtesting_sarimax(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
-    initial_train_size : int
-        Number of samples in the initial train split. The backtest forecaster is
-        trained using the first `initial_train_size` observations.
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
-    gap : int, default `0`
-        Number of samples to be excluded after the end of each training set and 
-        before the test set.
-    allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to have a smaller number of samples than the 
-        `test_size`. If `False`, the last fold is excluded.
+    cv : TimeSeriesFold
+        TimeSeriesFold object with the information needed to split the data into folds.
+        **New in version 0.14.0**
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an 
-        integer, the Forecaster will be trained every that number of iterations.
     alpha : float, default `0.05`
         The confidence intervals for the forecasts are (1 - alpha) %.
         If both, `alpha` and `interval` are provided, `alpha` will be used.
@@ -109,13 +78,11 @@ def _backtesting_sarimax(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
-        **New in version 0.10.0**
     show_progress : bool, default `True`
         Whether to show a progress bar.
 
@@ -133,13 +100,25 @@ def _backtesting_sarimax(
     """
 
     forecaster = deepcopy(forecaster)
+    cv = deepcopy(cv)
+
+    cv.set_params({
+        'window_size': forecaster.window_size,
+        'return_all_indexes': False,
+        'verbose': verbose
+    })
+
+    steps = cv.steps
+    initial_train_size = cv.initial_train_size
+    refit = cv.refit
+    gap = cv.gap
     
     if refit == False:
         if n_jobs != 'auto' and n_jobs != 1:
             warnings.warn(
                 ("If `refit = False`, `n_jobs` is set to 1 to avoid unexpected "
-                "results during parallelization."),
-                IgnoredArgumentWarning
+                 "results during parallelization."),
+                 IgnoredArgumentWarning
             )
         n_jobs = 1
     else:
@@ -181,35 +160,24 @@ def _backtesting_sarimax(
         exog              = exog_train,
         suppress_warnings = suppress_warnings_fit
     )
-    window_size = forecaster.window_size
-    externally_fitted = False
     
-    folds = _create_backtesting_folds(
-                data                  = y,
-                window_size           = window_size,
-                initial_train_size    = initial_train_size,
-                test_size             = steps,
-                externally_fitted     = externally_fitted,
-                refit                 = refit,
-                fixed_train_size      = fixed_train_size,
-                gap                   = gap,
-                allow_incomplete_fold = allow_incomplete_fold,
-                return_all_indexes    = False,
-                verbose               = verbose  
-            )
+    folds = cv.split(X=y, as_pandas=False)
+    # This is done to allow parallelization when `refit` is `False`. The initial 
+    # Forecaster fit is outside the auxiliary function.
+    folds[0][4] = False
     
     if refit:
         n_of_fits = int(len(folds) / refit)
         if n_of_fits > 50:
             warnings.warn(
                 (f"The forecaster will be fit {n_of_fits} times. This can take substantial "
-                f"amounts of time. If not feasible, try with `refit = False`.\n"),
-                LongTrainingWarning
+                 f"amounts of time. If not feasible, try with `refit = False`.\n"),
+                 LongTrainingWarning
             )
        
     folds_tqdm = tqdm(folds) if show_progress else folds
 
-    def _fit_predict_forecaster(y, exog, forecaster, alpha, interval, fold, steps):
+    def _fit_predict_forecaster(y, exog, forecaster, alpha, interval, fold, steps, gap):
         """
         Fit the forecaster and predict `steps` ahead. This is an auxiliary 
         function used to parallelize the backtesting_forecaster function.
@@ -287,7 +255,8 @@ def _backtesting_sarimax(
             alpha=alpha, 
             interval=interval, 
             fold=fold, 
-            steps=steps
+            steps=steps,
+            gap=gap
         )
         for fold in folds_tqdm)
     )
@@ -327,14 +296,9 @@ def _backtesting_sarimax(
 def backtesting_sarimax(
     forecaster: object,
     y: pd.Series,
-    steps: int,
+    cv: TimeSeriesFold,
     metric: Union[str, Callable, list],
-    initial_train_size: int,
-    fixed_train_size: bool = True,
-    gap: int = 0,
-    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    refit: Union[bool, int] = False,
     alpha: Optional[float] = None,
     interval: Optional[list] = None,
     n_jobs: Union[int, str] = 'auto',
@@ -344,13 +308,6 @@ def backtesting_sarimax(
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
     """
     Backtesting of ForecasterSarimax.
-
-    - If `refit` is `False`, the model will be trained only once using the 
-    `initial_train_size` first observations. 
-    - If `refit` is `True`, the model is trained on each iteration, increasing
-    the training set. 
-    - If `refit` is an `integer`, the model will be trained every that number 
-    of iterations.
     
     A copy of the original forecaster is created so that it is not modified during 
     the process.
@@ -361,8 +318,9 @@ def backtesting_sarimax(
         Forecaster model.
     y : pandas Series
         Training time series.
-    steps : int
-        Number of steps to predict.
+    cv : TimeSeriesFold
+        TimeSeriesFold object with the information needed to split the data into folds.
+        **New in version 0.14.0**
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -372,24 +330,10 @@ def backtesting_sarimax(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
-    initial_train_size : int
-        Number of samples in the initial train split. The backtest forecaster is
-        trained using the first `initial_train_size` observations.
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
-    gap : int, default `0`
-        Number of samples to be excluded after the end of each training set and 
-        before the test set.
-    allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to have a smaller number of samples than the 
-        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an 
-        integer, the Forecaster will be trained every that number of iterations.
     alpha : float, default `0.05`
         The confidence intervals for the forecasts are (1 - alpha) %.
         If both, `alpha` and `interval` are provided, `alpha` will be used.
@@ -402,14 +346,12 @@ def backtesting_sarimax(
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
-        skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**     
+        skforecast.utils.select_n_jobs_backtesting. 
     verbose : bool, default `False`
         Print number of folds and index of training and validation sets used 
         for backtesting.
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
-        **New in version 0.10.0**
     show_progress : bool, default `True`
         Whether to show a progress bar.
 
@@ -435,32 +377,22 @@ def backtesting_sarimax(
     
     check_backtesting_input(
         forecaster            = forecaster,
-        steps                 = steps,
-        metric                = metric,
+        cv                    = cv,
         y                     = y,
-        initial_train_size    = initial_train_size,
-        fixed_train_size      = fixed_train_size,
-        gap                   = gap,
-        allow_incomplete_fold = allow_incomplete_fold,
-        refit                 = refit,
+        metric                = metric,
         interval              = interval,
         alpha                 = alpha,
         n_jobs                = n_jobs,
-        verbose               = verbose,
-        show_progress         = show_progress
+        show_progress         = show_progress,
+        suppress_warnings_fit = suppress_warnings_fit
     )
     
     metric_values, backtest_predictions = _backtesting_sarimax(
         forecaster            = forecaster,
         y                     = y,
-        steps                 = steps,
+        cv                    = cv,
         metric                = metric,
-        initial_train_size    = initial_train_size,
-        fixed_train_size      = fixed_train_size,
-        gap                   = gap,
-        allow_incomplete_fold = allow_incomplete_fold,
         exog                  = exog,
-        refit                 = refit,
         alpha                 = alpha,
         interval              = interval,
         n_jobs                = n_jobs,
@@ -475,15 +407,10 @@ def backtesting_sarimax(
 def grid_search_sarimax(
     forecaster: object,
     y: pd.Series,
+    cv: TimeSeriesFold,
     param_grid: dict,
-    steps: int,
     metric: Union[str, Callable, list],
-    initial_train_size: int,
-    fixed_train_size: bool = True,
-    gap: int = 0,
-    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    refit: Union[bool, int] = False,
     return_best: bool = True,
     n_jobs: Union[int, str] = 'auto',
     verbose: bool = True,
@@ -501,11 +428,12 @@ def grid_search_sarimax(
         Forecaster model.
     y : pandas Series
         Training time series. 
+    cv : TimeSeriesFold
+        TimeSeriesFold object with the information needed to split the data into folds.
+        **New in version 0.14.0**
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
-    steps : int
-        Number of steps to predict.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -515,36 +443,20 @@ def grid_search_sarimax(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
-    initial_train_size : int 
-        Number of samples in the initial train split. The backtest forecaster is
-        trained using the first `initial_train_size` observations.
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
-    gap : int, default `0`
-        Number of samples to be excluded after the end of each training set and 
-        before the test set.
-    allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to have a smaller number of samples than the 
-        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an 
-        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
-        **New in version 0.10.0**
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
@@ -569,15 +481,10 @@ def grid_search_sarimax(
     results = _evaluate_grid_hyperparameters_sarimax(
         forecaster            = forecaster,
         y                     = y,
+        cv                    = cv,
         param_grid            = param_grid,
-        steps                 = steps,
         metric                = metric,
-        initial_train_size    = initial_train_size,
-        fixed_train_size      = fixed_train_size,
-        gap                   = gap,
-        allow_incomplete_fold = allow_incomplete_fold,
         exog                  = exog,
-        refit                 = refit,
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
@@ -592,15 +499,10 @@ def grid_search_sarimax(
 def random_search_sarimax(
     forecaster: object,
     y: pd.Series,
+    cv: TimeSeriesFold,
     param_distributions: dict,
-    steps: int,
     metric: Union[str, Callable, list],
-    initial_train_size: int,
-    fixed_train_size: bool = True,
-    gap: int = 0,
-    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    refit: Union[bool, int] = False,
     n_iter: int = 10,
     random_state: int = 123,
     return_best: bool = True,
@@ -620,11 +522,12 @@ def random_search_sarimax(
         Forecaster model.
     y : pandas Series
         Training time series. 
+    cv : TimeSeriesFold
+        TimeSeriesFold object with the information needed to split the data into folds.
+        **New in version 0.14.0**
     param_distributions : dict
         Dictionary with parameters names (`str`) as keys and 
         distributions or lists of parameters to try.
-    steps : int
-        Number of steps to predict.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -634,24 +537,10 @@ def random_search_sarimax(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
-    initial_train_size : int 
-        Number of samples in the initial train split. The backtest forecaster is
-        trained using the first `initial_train_size` observations.
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
-    gap : int, default `0`
-        Number of samples to be excluded after the end of each training set and 
-        before the test set.
-    allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to have a smaller number of samples than the 
-        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an 
-        integer, the Forecaster will be trained every that number of iterations.
     n_iter : int, default `10`
         Number of parameter settings that are sampled. 
         n_iter trades off runtime vs quality of the solution.
@@ -663,12 +552,10 @@ def random_search_sarimax(
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     suppress_warnings_fit : bool, default `False`
         If `True`, warnings generated during fitting will be ignored.
-        **New in version 0.10.0**
     show_progress : bool, default `True`
         Whether to show a progress bar.
     output_file : str, default `None`
@@ -693,15 +580,10 @@ def random_search_sarimax(
     results = _evaluate_grid_hyperparameters_sarimax(
         forecaster            = forecaster,
         y                     = y,
+        cv                    = cv,
         param_grid            = param_grid,
-        steps                 = steps,
         metric                = metric,
-        initial_train_size    = initial_train_size,
-        fixed_train_size      = fixed_train_size,
-        gap                   = gap,
-        allow_incomplete_fold = allow_incomplete_fold,
         exog                  = exog,
-        refit                 = refit,
         return_best           = return_best,
         n_jobs                = n_jobs,
         verbose               = verbose,
@@ -716,15 +598,10 @@ def random_search_sarimax(
 def _evaluate_grid_hyperparameters_sarimax(
     forecaster: object,
     y: pd.Series,
+    cv: TimeSeriesFold,
     param_grid: dict,
-    steps: int,
     metric: Union[str, Callable, list],
-    initial_train_size: int,
-    fixed_train_size: bool = True,
-    gap: int = 0,
-    allow_incomplete_fold: bool = True,
     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    refit: Union[bool, int] = False,
     return_best: bool = True,
     n_jobs: Union[int, str] = 'auto',
     verbose: bool = True,
@@ -741,11 +618,12 @@ def _evaluate_grid_hyperparameters_sarimax(
         Forecaster model.
     y : pandas Series
         Training time series. 
+    cv : TimeSeriesFold
+        TimeSeriesFold object with the information needed to split the data into folds.
+        **New in version 0.14.0**
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
-    steps : int
-        Number of steps to predict.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -755,31 +633,16 @@ def _evaluate_grid_hyperparameters_sarimax(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
-    initial_train_size : int 
-        Number of samples in the initial train split. The backtest forecaster is
-        trained using the first `initial_train_size` observations.
-    fixed_train_size : bool, default `True`
-        If True, train size doesn't increase but moves by `steps` in each iteration.
-    gap : int, default `0`
-        Number of samples to be excluded after the end of each training set and 
-        before the test set.
-    allow_incomplete_fold : bool, default `True`
-        Last fold is allowed to have a smaller number of samples than the 
-        `test_size`. If `False`, the last fold is excluded.
     exog : pandas Series, pandas DataFrame, default `None`
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    refit : bool, int, default `False`
-        Whether to re-fit the forecaster in each iteration. If `refit` is an 
-        integer, the Forecaster will be trained every that number of iterations.
     return_best : bool, default `True`
         Refit the `forecaster` using the best found parameters on the whole data.
     n_jobs : int, 'auto', default `'auto'`
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_backtesting.
-        **New in version 0.9.0**
     verbose : bool, default `True`
         Print number of folds used for cv or backtesting.
     suppress_warnings_fit : bool, default `False`
@@ -832,22 +695,17 @@ def _evaluate_grid_hyperparameters_sarimax(
 
         forecaster.set_params(params)
         metric_values = backtesting_sarimax(
-                           forecaster            = forecaster,
-                           y                     = y,
-                           steps                 = steps,
-                           metric                = metric,
-                           initial_train_size    = initial_train_size,
-                           fixed_train_size      = fixed_train_size,
-                           gap                   = gap,
-                           allow_incomplete_fold = allow_incomplete_fold,
-                           exog                  = exog,
-                           refit                 = refit,
-                           alpha                 = None,
-                           interval              = None,
-                           n_jobs                = n_jobs,
-                           verbose               = verbose,
-                           suppress_warnings_fit = suppress_warnings_fit,
-                           show_progress         = False
+                            forecaster            = forecaster,
+                            y                     = y,
+                            cv                    = cv,
+                            metric                = metric,
+                            exog                  = exog,
+                            alpha                 = None,
+                            interval              = None,
+                            n_jobs                = n_jobs,
+                            verbose               = verbose,
+                            suppress_warnings_fit = suppress_warnings_fit,
+                            show_progress         = False
                         )[0]
         metric_values = metric_values.iloc[0, :].to_list()
         warnings.filterwarnings('ignore', category=RuntimeWarning, 

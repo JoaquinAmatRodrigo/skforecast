@@ -2031,7 +2031,8 @@ def check_backtesting_input(
     use_binned_residuals: bool = False,
     n_jobs: Union[int, str] = 'auto',
     show_progress: bool = True,
-    suppress_warnings: bool = False
+    suppress_warnings: bool = False,
+    suppress_warnings_fit: bool = False
 ) -> None:
     """
     This is a helper function to check most inputs of backtesting functions in 
@@ -2087,6 +2088,9 @@ def check_backtesting_input(
         If `True`, skforecast warnings will be suppressed during the backtesting 
         process. See skforecast.exceptions.warn_skforecast_categories for more
         information.
+    suppress_warnings_fit : bool, default `False`
+        If `True`, warnings generated during fitting will be ignored. Only 
+        `ForecasterSarimax`.
 
     Returns
     -------
@@ -2260,6 +2264,11 @@ def check_backtesting_input(
                     "`refit` is only allowed when `initial_train_size` is not `None`."
                 )
 
+    if forecaster_name == 'ForecasterSarimax' and cv.skip_folds is not None:
+        raise ValueError(
+            "`skip_folds` is not allowed for ForecasterSarimax. Set it to `None`."
+        )
+
     if not isinstance(add_aggregated_metric, bool):
         raise TypeError("`add_aggregated_metric` must be a boolean: `True`, `False`.")
     if not isinstance(n_boot, (int, np.integer)) or n_boot < 0:
@@ -2276,6 +2285,8 @@ def check_backtesting_input(
         raise TypeError("`show_progress` must be a boolean: `True`, `False`.")
     if not isinstance(suppress_warnings, bool):
         raise TypeError("`suppress_warnings` must be a boolean: `True`, `False`.")
+    if not isinstance(suppress_warnings_fit, bool):
+        raise TypeError("`suppress_warnings_fit` must be a boolean: `True`, `False`.")
 
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)

@@ -4,14 +4,15 @@ import numpy as np
 import pandas as pd
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
+from skforecast.model_selection._split import TimeSeriesFold
 from skforecast.model_selection_sarimax import grid_search_sarimax
+
+# Fixtures
+from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import y_datetime
 
 from tqdm import tqdm
 from functools import partialmethod
 tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
-
-# Fixtures
-from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import y_datetime
 
 
 def test_output_grid_search_sarimax_sarimax_with_mocked():
@@ -23,20 +24,26 @@ def test_output_grid_search_sarimax_sarimax_with_mocked():
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     param_grid = [{'order': [(2, 2, 0), (3, 2, 0)],
                    'trend': [None, 'c']}]
 
     results = grid_search_sarimax(
-                  forecaster         = forecaster,
-                  y                  = y_datetime,
-                  param_grid         = param_grid,
-                  steps              = 3,
-                  refit              = False,
-                  metric             = 'mean_absolute_error',
-                  initial_train_size = len(y_datetime) - 12,
-                  fixed_train_size   = False,
-                  return_best        = False,
-                  verbose            = False
+                  forecaster  = forecaster,
+                  y           = y_datetime,
+                  cv          = cv,
+                  param_grid  = param_grid,
+                  metric      = 'mean_absolute_error',
+                  return_best = False,
+                  verbose     = False
               )
     
     expected_results = pd.DataFrame(
