@@ -158,11 +158,23 @@ class BaseFold():
                 )
             if not isinstance(initial_train_size, (int, np.integer, type(None))):
                 raise ValueError(
-                    f"`initial_train_size` must be an integer or None. Got {initial_train_size}."
+                    f"`initial_train_size` must be an integer greater than 0 or None. "
+                    f"Got {initial_train_size}."
+                )
+            if initial_train_size is not None and initial_train_size < 0:
+                raise ValueError(
+                    f"`initial_train_size` must be an integer greater than 0 or None. "
+                    f"Got {initial_train_size}."
                 )
             if not isinstance(refit, (bool, int, np.integer)):
                 raise TypeError(
-                    f"`refit` must be a boolean or an integer greater than 0. Got {refit}."
+                    f"`refit` must be a boolean or an integer equal or greater than 0. "
+                    f"Got {refit}."
+                )
+            if isinstance(refit, (int, np.integer)) and not isinstance(refit, bool) and refit < 0:
+                raise TypeError(
+                    f"`refit` must be a boolean or an integer equal or greater than 0. "
+                    f"Got {refit}."
                 )
             if not isinstance(fixed_train_size, bool):
                 raise TypeError(
@@ -177,7 +189,7 @@ class BaseFold():
                 if not isinstance(skip_folds, (int, np.integer, list, type(None))):
                     raise TypeError(
                         (f"`skip_folds` must be an integer greater than 0, a list of "
-                         f"integers or `None`. Got {type(skip_folds)}.")
+                         f"integers or `None`. Got {skip_folds}.")
                     )
                 if isinstance(skip_folds, (int, np.integer)) and skip_folds < 1:
                     raise ValueError(
@@ -430,6 +442,12 @@ class OneStepAheadFold(BaseFold):
         
         """
 
+        if not isinstance(X, (pd.Series, pd.DataFrame, pd.Index, dict)):
+            raise TypeError(
+                (f"X must be a pandas Series, DataFrame, Index or a dictionary. "
+                 f"Got {type(X)}.")
+            )
+
         index = self._extract_index(X)
         fold = [
             [0, self.initial_train_size],
@@ -484,31 +502,35 @@ class OneStepAheadFold(BaseFold):
         Print information about folds.
         """
 
-        print("Information of folds")
-        print("--------------------")
-        print(
-            f"Number of observations used for initial training: "
-            f"{self.initial_train_size}"
-        )
-        print(
-            f"Number of observations in test: "
-            f"{len(index) - self.initial_train_size}"
-        )
-
         if self.differentiation is None:
             differentiation = 0
         else:
             differentiation = self.differentiation
+
+        initial_train_size = self.initial_train_size - differentiation
+        test_length = len(index) - (initial_train_size + differentiation)
+
+        print("Information of folds")
+        print("--------------------")
+        print(
+            f"Number of observations in train: {initial_train_size}"
+        )
+        if self.differentiation is not None:
+            print(
+                f"    First {differentiation} observation/s in training set "
+                f"are used for differentiation"
+            )
+        print(
+            f"Number of observations in test: {test_length}"
+        )
         
         training_start = index[fold[0][0] + differentiation]
         training_end = index[fold[0][-1]]
-        training_length = self.initial_train_size
         test_start  = index[fold[1][0]]
         test_end    = index[fold[1][-1] - 1]
-        test_length = len(index) - self.initial_train_size
-
+        
         print(
-            f"Training : {training_start} -- {training_end} (n={training_length})"
+            f"Training : {training_start} -- {training_end} (n={initial_train_size})"
         )
         print(
             f"Test     : {test_start} -- {test_end} (n={test_length})"

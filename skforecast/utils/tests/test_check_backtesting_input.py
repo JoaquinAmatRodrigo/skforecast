@@ -941,7 +941,7 @@ def test_check_backtesting_input_TypeError_when_refit_not_bool_or_int(refit):
                     lags      = 2
                  )
     
-    err_msg = re.escape(f"`refit` must be a boolean or an integer greater than 0. Got {refit}.")
+    err_msg = re.escape(f"`refit` must be a boolean or an integer equal or greater than 0. Got {refit}.")
     with pytest.raises(TypeError, match = err_msg):
         check_backtesting_input(
             forecaster         = forecaster,

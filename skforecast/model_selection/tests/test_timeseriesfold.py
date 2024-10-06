@@ -1055,3 +1055,15 @@ def test_TimeSeriesFold_split_refit_fixed_no_gap_no_remainder_skip_folds_3(capfd
 
     assert out == expected_out
     assert folds == expected
+
+
+def test_timeseriesfold_split_raise_error_when_X_is_not_series_dataframe_or_dict():
+    """
+    Test that ValueError is raised when X is not a pd.Series, pd.DataFrame or dict.
+    """
+    X = np.arange(100)
+    cv = TimeSeriesFold(steps=10, initial_train_size=70)
+    msg = (
+        f"X must be a pandas Series, DataFrame, Index or a dictionary. Got {type(X)}.")
+    with pytest.raises(TypeError, match=msg):
+        cv.split(X=X)
