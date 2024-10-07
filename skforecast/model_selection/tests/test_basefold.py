@@ -321,29 +321,11 @@ def test_basefold_extract_index_raise_error_when_X_is_dict_with_series_non_with_
     """
     cv = BaseFold()
     X = {
-        "a": pd.Series(np.arange(10), index=pd.date_range(start="2022-01-01", periods=10, freq=None)),
-        "b": pd.Series(np.arange(10), index=pd.date_range(start="2022-01-10", periods=10, freq=None)),
-    }
-    msg = 'At least one series must have a frequency.'
-    with pytest.raises(ValueError, match=msg):
-        cv._extract_index(X)
-
-
-def test_basefold_extract_index_raise_error_when_X_is_dict_with_series_non_with_freq():
-    """
-    Test that ValueError is raised when X is a dict with series with different frequencies.
-    """
-    cv = BaseFold()
-    X = {
-        "a": pd.Series(np.arange(10), index=pd.date_range(start="2022-01-01", periods=10, freq=None)),
-        "b": pd.Series(np.arange(10), index=pd.date_range(start="2022-01-10", periods=10, freq=None)),
+        "a": pd.Series(np.arange(10), index=pd.date_range(start="2022-01-01", periods=10)),
+        "b": pd.Series(np.arange(10), index=pd.date_range(start="2022-01-10", periods=10)),
     }
     X["a"].index.freq = None
     X["b"].index.freq = None
     msg = 'At least one series must have a frequency.'
     with pytest.raises(ValueError, match=msg):
         cv._extract_index(X)
-
-
-
-    

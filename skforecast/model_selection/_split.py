@@ -759,17 +759,12 @@ class TimeSeriesFold(BaseFold):
                 window_size_idx_start = X.index.get_loc(first_valid_index)
                 window_size_idx_end = X.index.get_loc(X.index[-1])
                 self.window_size = window_size_idx_end - window_size_idx_start
-            # TODO: review warning
             except KeyError:
                 raise ValueError(
-                    (
-                        f"The length of `X` ({len(X)}), must be greater than or equal "
-                        f"to the window size ({self.window_size}). This is because  "
-                        f"the offset ({self.offset}) is larger than the available "
-                        f"data. Try to decrease the size of the offset ({self.offset}), "
-                        f"the number of n_offsets ({self.window_size}) or increase the "
-                        f"size of `y`."
-                    )
+                    f"The length of `X` ({len(X)}), must be greater than or equal "
+                    f"to the window size ({self.window_size}). Try to decrease the "
+                    f"size of the offset (forecaster.offset), or increase the "
+                    f"size of `y`."
                 )
         
         if self.initial_train_size is None:
@@ -783,8 +778,8 @@ class TimeSeriesFold(BaseFold):
                 )
             if self.refit:
                 raise ValueError(
-                    ("`refit` is only allowed when `initial_train_size` is not `None`. "
-                     "Set `refit` to `False` if you want to use `initial_train_size = None`.")
+                    "`refit` is only allowed when `initial_train_size` is not `None`. "
+                    "Set `refit` to `False` if you want to use `initial_train_size = None`."
                 )
             externally_fitted = True
             self.initial_train_size = self.window_size  # Reset to None later

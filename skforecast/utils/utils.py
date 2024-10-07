@@ -2206,12 +2206,12 @@ def check_backtesting_input(
                     (f"`exog` must be a pandas Series, DataFrame or None. Got {type(exog)}.")
                 )
 
-    if hasattr(forecaster, 'differentiaion'):
+    if hasattr(forecaster, 'differentiation'):
         if forecaster.differentiation != cv.differentiation:
             raise ValueError(
                 (f"The differentiation included in the forecaster "
                  f"({forecaster.differentiation}) differs from the differentiation "
-                 f" included in the cv ({cv.differentiation}). Set the same value "
+                 f"included in the cv ({cv.differentiation}). Set the same value "
                  f"for both.")
             )
 
@@ -2224,22 +2224,18 @@ def check_backtesting_input(
     if forecaster_name == "ForecasterEquivalentDate" and isinstance(
         forecaster.offset, pd.tseries.offsets.DateOffset
     ):
-        pass
-    elif initial_train_size is not None:
-        if not isinstance(initial_train_size, (int, np.integer)):
-            raise TypeError(
-                (f"If used, `initial_train_size` must be an integer greater than the "
-                 f"window_size of the forecaster. Got type {type(initial_train_size)}.")
-            )
-        if initial_train_size >= data_length:
+        if initial_train_size is None:
             raise ValueError(
-                (f"If used, `initial_train_size` must be an integer smaller "
-                 f"than the length of `{data_name}` ({data_length}).")
-            )    
-        if initial_train_size < forecaster.window_size:
+                (f"`initial_train_size` must be an integer greater than "
+                 f"the `window_size` of the forecaster ({forecaster.window_size}) "
+                 f"and smaller than the length of `{data_name}` ({data_length}).")
+            )
+    elif initial_train_size is not None:
+        if initial_train_size < forecaster.window_size or initial_train_size >= data_length:
             raise ValueError(
                 (f"If used, `initial_train_size` must be an integer greater than "
-                 f"the window_size of the forecaster ({forecaster.window_size}).")
+                 f"the `window_size` of the forecaster ({forecaster.window_size}) "
+                 f"and smaller than the length of `{data_name}` ({data_length}).")
             )
         if initial_train_size + gap >= data_length:
             raise ValueError(
@@ -2248,7 +2244,7 @@ def check_backtesting_input(
                  f"({data_length}).")
             )
     else:
-        if forecaster_name == 'ForecasterSarimax':
+        if forecaster_name in ['ForecasterSarimax', 'ForecasterEquivalentDate']:
             raise ValueError(
                 (f"`initial_train_size` must be an integer smaller than the "
                  f"length of `{data_name}` ({data_length}).")

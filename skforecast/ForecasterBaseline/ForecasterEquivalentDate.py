@@ -152,7 +152,6 @@ class ForecasterEquivalentDate():
         
         self.window_size = self.offset * self.n_offsets
 
-
     def __repr__(
         self
     ) -> str:
@@ -179,7 +178,6 @@ class ForecasterEquivalentDate():
         )
 
         return info
-
 
     def fit(
         self,
@@ -270,7 +268,6 @@ class ForecasterEquivalentDate():
         # Store the whole series to avoid errors when the offset is larger 
         # than the data available.
         self.last_window_ = y.copy()
-
 
     def predict(
         self,
@@ -410,28 +407,3 @@ class ForecasterEquivalentDate():
             predictions = aggregate_values.rename('pred')
         
         return predictions
-    
-    def _extract_window_size_from_offset(self, y: pd.Series) -> int:
-        """
-        Calculate the window size from the offset and the number of offsets.
-        
-        Parameters
-        ----------
-        y : pandas Series
-            Training time series.
-        
-        Returns
-        -------
-        window_size : int
-            Number of past values needed to include the last equivalent dates according
-            to the `offset` and `n_offsets`.
-        
-        """
-        
-        if isinstance(self.offset, pd.tseries.offsets.DateOffset):
-            first_valid_index = (y.index[-1] - self.offset * self.n_offsets)
-            window_size = y.index.get_loc(first_valid_index)
-        else:
-            window_size = self.offset * self.n_offsets
-        
-        return window_size
