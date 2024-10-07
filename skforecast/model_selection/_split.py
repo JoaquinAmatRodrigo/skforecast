@@ -219,8 +219,8 @@ class BaseFold():
                 )
         
         if (
-            not isinstance(window_size, (int, np.integer, type(None)))
-            or window_size is not None
+            not isinstance(window_size, (int, np.integer, pd.DateOffset, type(None)))
+            or isinstance(window_size, (int, np.integer))
             and window_size < 1
         ):
             raise ValueError(
@@ -750,13 +750,29 @@ class TimeSeriesFold(BaseFold):
                  f"Got {type(X)}.")
             )
         
+        if isinstance(self.window_size, pd.tseries.offsets.DateOffset):
+            # Calculate the window_size in steps. This is not a exact calculation
+            # because the offset follows the calendar rules and the distance between
+            # two dates may not be constant.
+            first_valid_index = X.index[-1] - self.window_size
+            try:
+                window_size_idx_start = X.index.get_loc(first_valid_index)
+                window_size_idx_end = X.index.get_loc(X.index[-1])
+                self.window_size = window_size_idx_end - window_size_idx_start
+            # TODO: review warning
+            except KeyError:
+                raise ValueError(
+                    (
+                        f"The length of `X` ({len(X)}), must be greater than or equal "
+                        f"to the window size ({self.window_size}). This is because  "
+                        f"the offset ({self.offset}) is larger than the available "
+                        f"data. Try to decrease the size of the offset ({self.offset}), "
+                        f"the number of n_offsets ({self.window_size}) or increase the "
+                        f"size of `y`."
+                    )
+                )
+        
         if self.initial_train_size is None:
-            # TODO: Check if can be None, this value is filled during the backtesting
-            # If `forecaster` is already trained and `initial_train_size` is set to `None` in the
-            # TimeSeriesFold class, no initial train will be done and all data will be used
-            # to evaluate the model. However, the first `len(forecaster.last_window)` observations
-            # are needed to create the initial predictors, so no predictions are calculated for
-            # them. If `initial_train_size` is set to `None` in the TimeSeriesFold class, the
             if self.window_size is None:
                 raise ValueError(
                     "To use split method when `initial_train_size` is None, "
