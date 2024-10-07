@@ -20,23 +20,25 @@ from sklearn.base import clone
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
-from ..utils import initialize_lags
-from ..utils import initialize_window_features
-from ..utils import initialize_weights
-from ..utils import check_select_fit_kwargs
-from ..utils import check_y
-from ..utils import check_exog
-from ..utils import get_exog_dtypes
-from ..utils import check_exog_dtypes
-from ..utils import check_predict_input
-from ..utils import check_interval
-from ..utils import preprocess_y
-from ..utils import preprocess_last_window
-from ..utils import preprocess_exog
-from ..utils import input_to_frame
-from ..utils import expand_index
-from ..utils import transform_numpy
-from ..utils import transform_dataframe
+from ..utils import (
+    initialize_lags,
+    initialize_window_features,
+    initialize_weights,
+    check_select_fit_kwargs,
+    check_y,
+    check_exog,
+    get_exog_dtypes,
+    check_exog_dtypes,
+    check_predict_input,
+    check_interval,
+    preprocess_y,
+    preprocess_last_window,
+    preprocess_exog,
+    input_to_frame,
+    expand_index,
+    transform_numpy,
+    transform_dataframe,
+)
 from ..preprocessing import TimeSeriesDifferentiator
 
 
