@@ -159,6 +159,8 @@ def _backtesting_forecaster(
 
     store_in_sample_residuals = False if interval is None else True
 
+    folds = cv.split(X=y, as_pandas=False)
+
     if initial_train_size is not None:
         # First model training, this is done to allow parallelization when `refit`
         # is `False`. The initial Forecaster fit is outside the auxiliary function.
@@ -168,16 +170,9 @@ def _backtesting_forecaster(
             exog                      = exog_train,
             store_in_sample_residuals = store_in_sample_residuals
         )
-    else:
-        # Although not used for training, first observations are needed to create
-        # the initial predictors
-        cv.set_params({'initial_train_size': forecaster.window_size})
-        initial_train_size = forecaster.window_size
-
-    folds = cv.split(X=y, as_pandas=False)
-    # This is done to allow parallelization when `refit` is `False`. The initial 
-    # Forecaster fit is outside the auxiliary function.
-    folds[0][4] = False
+        # This is done to allow parallelization when `refit` is `False`. The initial 
+        # Forecaster fit is outside the auxiliary function.
+        folds[0][4] = False
 
     if refit:
         n_of_fits = int(len(folds) / refit)

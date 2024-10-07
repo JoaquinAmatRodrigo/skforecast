@@ -161,7 +161,7 @@ class BaseFold():
                     f"`initial_train_size` must be an integer greater than 0 or None. "
                     f"Got {initial_train_size}."
                 )
-            if initial_train_size is not None and initial_train_size < 0:
+            if initial_train_size is not None and initial_train_size < 1:
                 raise ValueError(
                     f"`initial_train_size` must be an integer greater than 0 or None. "
                     f"Got {initial_train_size}."
@@ -759,8 +759,11 @@ class TimeSeriesFold(BaseFold):
             # them. If `initial_train_size` is set to `None` in the TimeSeriesFold class, the
             if self.window_size is None:
                 raise ValueError(
-                    ("To use split method when `initial_train_size` is None, "
-                     "`window_size` must be an integer greater than 0.")
+                    "To use split method when `initial_train_size` is None, "
+                    "`window_size` must be an integer greater than 0. "
+                    "Although no initial training is done and all data is used to "
+                    "evaluate the model, the first `window_size` observations are "
+                    "needed to create the initial predictors. Got `window_size` = None."
                 )
             if self.refit:
                 raise ValueError(

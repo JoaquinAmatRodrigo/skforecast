@@ -3,7 +3,8 @@
 import numpy as np
 import pandas as pd
 from skforecast.ForecasterBaseline import ForecasterEquivalentDate
-from skforecast.model_selection import backtesting_forecaster
+from skforecast.model_selection._validation import backtesting_forecaster
+from skforecast.model_selection._split import TimeSeriesFold
 
 # Fixtures
 from .fixtures_ForecasterEquivalentDate import y
@@ -17,16 +18,19 @@ def test_backtesting_with_ForecasterEquivalentDate():
                      offset    = pd.DateOffset(days=10),
                      n_offsets = 2 
                  )
-
-    metric, predictions = backtesting_forecaster(
-        forecaster         = forecaster,
-        y                  = y,
+    cv = TimeSeriesFold(
         initial_train_size = 30,
         steps              = 5,
-        metric             = 'mean_absolute_error',
         refit              = True,
-        verbose            = False,
-        n_jobs             = 'auto'
+    )
+
+    metric, predictions = backtesting_forecaster(
+        forecaster = forecaster,
+        y          = y,
+        cv         = cv,
+        metric     = 'mean_absolute_error',
+        verbose    = False,
+        n_jobs     = 'auto'
     )
     expected_metric = pd.DataFrame({'mean_absolute_error': [0.2537094475]})
     expected = pd.DataFrame(
