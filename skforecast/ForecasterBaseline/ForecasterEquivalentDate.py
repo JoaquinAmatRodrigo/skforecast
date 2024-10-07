@@ -152,7 +152,6 @@ class ForecasterEquivalentDate():
         
         self.window_size = self.offset * self.n_offsets
 
-
     def __repr__(
         self
     ) -> str:
@@ -179,7 +178,6 @@ class ForecasterEquivalentDate():
         )
 
         return info
-
 
     def fit(
         self,
@@ -270,7 +268,6 @@ class ForecasterEquivalentDate():
         # Store the whole series to avoid errors when the offset is larger 
         # than the data available.
         self.last_window_ = y.copy()
-
 
     def predict(
         self,

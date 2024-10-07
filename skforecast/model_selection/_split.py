@@ -158,11 +158,23 @@ class BaseFold():
                 )
             if not isinstance(initial_train_size, (int, np.integer, type(None))):
                 raise ValueError(
-                    f"`initial_train_size` must be an integer or None. Got {initial_train_size}."
+                    f"`initial_train_size` must be an integer greater than 0 or None. "
+                    f"Got {initial_train_size}."
+                )
+            if initial_train_size is not None and initial_train_size < 1:
+                raise ValueError(
+                    f"`initial_train_size` must be an integer greater than 0 or None. "
+                    f"Got {initial_train_size}."
                 )
             if not isinstance(refit, (bool, int, np.integer)):
                 raise TypeError(
-                    f"`refit` must be a boolean or an integer greater than 0. Got {refit}."
+                    f"`refit` must be a boolean or an integer equal or greater than 0. "
+                    f"Got {refit}."
+                )
+            if isinstance(refit, (int, np.integer)) and not isinstance(refit, bool) and refit < 0:
+                raise TypeError(
+                    f"`refit` must be a boolean or an integer equal or greater than 0. "
+                    f"Got {refit}."
                 )
             if not isinstance(fixed_train_size, bool):
                 raise TypeError(
@@ -177,7 +189,7 @@ class BaseFold():
                 if not isinstance(skip_folds, (int, np.integer, list, type(None))):
                     raise TypeError(
                         (f"`skip_folds` must be an integer greater than 0, a list of "
-                         f"integers or `None`. Got {type(skip_folds)}.")
+                         f"integers or `None`. Got {skip_folds}.")
                     )
                 if isinstance(skip_folds, (int, np.integer)) and skip_folds < 1:
                     raise ValueError(
@@ -197,14 +209,18 @@ class BaseFold():
                 )
             
         if cv_name == "OneStepAheadFold":
-            if not isinstance(initial_train_size, (int, np.integer)):
+            if (
+                not isinstance(initial_train_size, (int, np.integer))
+                or initial_train_size < 1
+            ):
                 raise ValueError(
-                    f"`initial_train_size` must be an integer. Got {initial_train_size}."
+                    f"`initial_train_size` must be an integer greater than 0. "
+                    f"Got {initial_train_size}."
                 )
         
         if (
-            not isinstance(window_size, (int, np.integer, type(None)))
-            or window_size is not None
+            not isinstance(window_size, (int, np.integer, pd.DateOffset, type(None)))
+            or isinstance(window_size, (int, np.integer))
             and window_size < 1
         ):
             raise ValueError(
@@ -426,6 +442,12 @@ class OneStepAheadFold(BaseFold):
         
         """
 
+        if not isinstance(X, (pd.Series, pd.DataFrame, pd.Index, dict)):
+            raise TypeError(
+                (f"X must be a pandas Series, DataFrame, Index or a dictionary. "
+                 f"Got {type(X)}.")
+            )
+
         index = self._extract_index(X)
         fold = [
             [0, self.initial_train_size],
@@ -480,31 +502,35 @@ class OneStepAheadFold(BaseFold):
         Print information about folds.
         """
 
-        print("Information of folds")
-        print("--------------------")
-        print(
-            f"Number of observations used for initial training: "
-            f"{self.initial_train_size}"
-        )
-        print(
-            f"Number of observations in test: "
-            f"{len(index) - self.initial_train_size}"
-        )
-
         if self.differentiation is None:
             differentiation = 0
         else:
             differentiation = self.differentiation
+
+        initial_train_size = self.initial_train_size - differentiation
+        test_length = len(index) - (initial_train_size + differentiation)
+
+        print("Information of folds")
+        print("--------------------")
+        print(
+            f"Number of observations in train: {initial_train_size}"
+        )
+        if self.differentiation is not None:
+            print(
+                f"    First {differentiation} observation/s in training set "
+                f"are used for differentiation"
+            )
+        print(
+            f"Number of observations in test: {test_length}"
+        )
         
         training_start = index[fold[0][0] + differentiation]
         training_end = index[fold[0][-1]]
-        training_length = self.initial_train_size
         test_start  = index[fold[1][0]]
         test_end    = index[fold[1][-1] - 1]
-        test_length = len(index) - self.initial_train_size
-
+        
         print(
-            f"Training : {training_start} -- {training_end} (n={training_length})"
+            f"Training : {training_start} -- {training_end} (n={initial_train_size})"
         )
         print(
             f"Test     : {test_start} -- {test_end} (n={test_length})"
@@ -667,7 +693,6 @@ class TimeSeriesFold(BaseFold):
     def split(
         self,
         X: Union[pd.Series, pd.DataFrame, pd.Index, dict],
-        externally_fitted: bool = False,
         as_pandas: bool = False
     ) -> Union[list, pd.DataFrame]:
         """
@@ -677,9 +702,6 @@ class TimeSeriesFold(BaseFold):
         ----------
         X : pandas Series, pandas DataFrame, pandas Index, dict
             Time series data or index to split.
-        externally_fitted : bool, default `False`
-            If True, the forecaster is assumed to be already fitted so no training is
-            done in the first fold.
         as_pandas : bool, default `False`
             If True, the folds are returned as a DataFrame. This is useful to visualize
             the folds in a more interpretable way.
@@ -728,10 +750,45 @@ class TimeSeriesFold(BaseFold):
                  f"Got {type(X)}.")
             )
         
-        if self.window_size is None:
-            warnings.warn(
-                "Last window cannot be calculated because `window_size` is None."
-            )
+        if isinstance(self.window_size, pd.tseries.offsets.DateOffset):
+            # Calculate the window_size in steps. This is not a exact calculation
+            # because the offset follows the calendar rules and the distance between
+            # two dates may not be constant.
+            first_valid_index = X.index[-1] - self.window_size
+            try:
+                window_size_idx_start = X.index.get_loc(first_valid_index)
+                window_size_idx_end = X.index.get_loc(X.index[-1])
+                self.window_size = window_size_idx_end - window_size_idx_start
+            except KeyError:
+                raise ValueError(
+                    f"The length of `X` ({len(X)}), must be greater than or equal "
+                    f"to the window size ({self.window_size}). Try to decrease the "
+                    f"size of the offset (forecaster.offset), or increase the "
+                    f"size of `y`."
+                )
+        
+        if self.initial_train_size is None:
+            if self.window_size is None:
+                raise ValueError(
+                    "To use split method when `initial_train_size` is None, "
+                    "`window_size` must be an integer greater than 0. "
+                    "Although no initial training is done and all data is used to "
+                    "evaluate the model, the first `window_size` observations are "
+                    "needed to create the initial predictors. Got `window_size` = None."
+                )
+            if self.refit:
+                raise ValueError(
+                    "`refit` is only allowed when `initial_train_size` is not `None`. "
+                    "Set `refit` to `False` if you want to use `initial_train_size = None`."
+                )
+            externally_fitted = True
+            self.initial_train_size = self.window_size  # Reset to None later
+        else:
+            if self.window_size is None:
+                warnings.warn(
+                    "Last window cannot be calculated because `window_size` is None."
+                )
+            externally_fitted = False
 
         index = self._extract_index(X)
         idx = range(len(X))
@@ -780,7 +837,7 @@ class TimeSeriesFold(BaseFold):
         # Replace partitions inside folds with length 0 with `None`
         folds = [
             [partition if len(partition) > 0 else None for partition in fold] 
-            for fold in folds
+             for fold in folds
         ]
 
         # Create a flag to know whether to train the forecaster
@@ -811,11 +868,11 @@ class TimeSeriesFold(BaseFold):
         
         if self.verbose:
             self._print_info(
-                index = index,
-                folds = folds,
-                externally_fitted = externally_fitted,
+                index              = index,
+                folds              = folds,
+                externally_fitted  = externally_fitted,
                 last_fold_excluded = last_fold_excluded,
-                index_to_skip = index_to_skip
+                index_to_skip      = index_to_skip
             )
 
         folds = [fold for i, fold in enumerate(folds) if i not in index_to_skip]
@@ -829,6 +886,10 @@ class TimeSeriesFold(BaseFold):
                  fold[4]] 
                 for fold in folds
             ]
+
+        if externally_fitted:
+            self.initial_train_size = None
+            folds[0][4] = False
 
         if as_pandas:
             if self.window_size is None:
@@ -883,6 +944,10 @@ class TimeSeriesFold(BaseFold):
             print(
                 f"An already trained forecaster is to be used. Window size: "
                 f"{self.window_size}"
+            )
+        elif self.initial_train_size == 0:
+            print(
+                f"Initial training size is 0. Window size: {self.window_size}"
             )
         else:
             if self.differentiation is None:

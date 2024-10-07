@@ -10,7 +10,9 @@ from sklearn.linear_model import Ridge
 from sklearn.preprocessing import StandardScaler
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
-from skforecast.model_selection import grid_search_forecaster
+from skforecast.model_selection._search import grid_search_forecaster
+from skforecast.model_selection._split import TimeSeriesFold
+from skforecast.model_selection._split import OneStepAheadFold
 
 from tqdm import tqdm
 from functools import partialmethod
@@ -20,7 +22,7 @@ tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 # Fixtures
 from .fixtures_model_selection import y
 
-
+ 
 def test_output_grid_search_forecaster_ForecasterAutoreg_with_mocked():
     """
     Test output of grid_search_forecaster in ForecasterAutoreg with mocked
@@ -30,24 +32,31 @@ def test_output_grid_search_forecaster_ForecasterAutoreg_with_mocked():
         regressor=Ridge(random_state=123),
         lags=2,  # Placeholder, the value will be overwritten
     )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     param_grid = {"alpha": [0.01, 0.1, 1]}
     idx = len(lags_grid) * len(param_grid["alpha"])
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = False,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False
+         )
 
     results = grid_search_forecaster(
         forecaster=forecaster,
         y=y,
+        cv=cv,
         lags_grid=lags_grid,
         param_grid=param_grid,
-        steps=steps,
-        refit=False,
         metric="mean_squared_error",
-        initial_train_size=len(y_train),
-        fixed_train_size=False,
         return_best=False,
         verbose=False,
     )
@@ -115,23 +124,34 @@ def test_output_grid_search_forecaster_equivalence_backtesting_one_step_ahead(
         mean_absolute_scaled_error,
         root_mean_squared_scaled_error,
     ]
-    steps = 1
     n_validation = 12
     y_train = y[:-n_validation]
     lags_grid = [2, 4]
     param_grid = {"alpha": [0.01, 0.1, 1]}
+    cv_backtesting = TimeSeriesFold(
+            steps                 = 1,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = False,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
+    cv_one_step_ahead = OneStepAheadFold(
+            initial_train_size    = len(y_train),
+            return_all_indexes    = False,
+        )
 
     results_backtesting = grid_search_forecaster(
         forecaster=forecaster,
         y=y,
+        cv=cv_backtesting,
         lags_grid=lags_grid,
         param_grid=param_grid,
-        steps=steps,
-        refit=False,
         metric=metrics,
-        method="backtesting",
-        initial_train_size=len(y_train),
-        fixed_train_size=False,
         return_best=False,
         verbose=False,
     )
@@ -139,12 +159,10 @@ def test_output_grid_search_forecaster_equivalence_backtesting_one_step_ahead(
     results_one_step_ahead = grid_search_forecaster(
         forecaster=forecaster,
         y=y,
+        cv=cv_one_step_ahead,
         lags_grid=lags_grid,
         param_grid=param_grid,
-        steps=steps,
         metric=metrics,
-        method="one_step_ahead",
-        initial_train_size=len(y_train),
         return_best=False,
         verbose=False,
     )

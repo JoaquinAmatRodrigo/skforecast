@@ -412,13 +412,15 @@ def _evaluate_grid_hyperparameters(
     if not isinstance(metric, list):
         metric = [metric] 
     metric = [
-            _get_metric(metric=m)
-            if isinstance(m, str)
-            else add_y_train_argument(m) 
-            for m in metric
-        ]
-    metric_dict = {(m if isinstance(m, str) else m.__name__): [] 
-                   for m in metric}
+        _get_metric(metric=m)
+        if isinstance(m, str)
+        else add_y_train_argument(m) 
+        for m in metric
+    ]
+    metric_dict = {
+        (m if isinstance(m, str) else m.__name__): [] 
+        for m in metric
+    }
     
     if len(metric_dict) != len(metric):
         raise ValueError(
@@ -465,15 +467,15 @@ def _evaluate_grid_hyperparameters(
             if cv_name == 'TimeSeriesFold':
 
                 metric_values = backtesting_forecaster(
-                                    forecaster            = forecaster,
-                                    y                     = y,
-                                    cv                    = cv,
-                                    metric                = metric,
-                                    exog                  = exog,
-                                    interval              = None,
-                                    n_jobs                = n_jobs,
-                                    verbose               = verbose,
-                                    show_progress         = False
+                                    forecaster    = forecaster,
+                                    y             = y,
+                                    cv            = cv,
+                                    metric        = metric,
+                                    exog          = exog,
+                                    interval      = None,
+                                    n_jobs        = n_jobs,
+                                    verbose       = verbose,
+                                    show_progress = False
                                 )[0]
                 metric_values = metric_values.iloc[0, :].to_list()
 

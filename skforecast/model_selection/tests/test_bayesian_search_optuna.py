@@ -12,7 +12,8 @@ from sklearn.metrics import mean_absolute_error
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.model_selection import backtesting_forecaster
-from skforecast.model_selection.model_selection import _bayesian_search_optuna
+from skforecast.model_selection._search import _bayesian_search_optuna
+from skforecast.model_selection._split import TimeSeriesFold
 import optuna
 from optuna.samplers import TPESampler
 from tqdm import tqdm
@@ -34,11 +35,21 @@ def test_ValueError_bayesian_search_optuna_metric_list_duplicate_names():
                      regressor = Ridge(random_state=123),
                      lags      = 2
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
-
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
+    
     def search_space(trial):  # pragma: no cover
         search_space  = {
             'alpha': trial.suggest_float('not_alpha', 1e-2, 1.0),
@@ -52,12 +63,9 @@ def test_ValueError_bayesian_search_optuna_metric_list_duplicate_names():
         _bayesian_search_optuna(
             forecaster         = forecaster,
             y                  = y,
+            cv                 = cv,
             search_space       = search_space,
-            steps              = steps,
             metric             = ['mean_absolute_error', mean_absolute_error],
-            refit              = True,
-            initial_train_size = len(y_train),
-            fixed_train_size   = True,
             n_trials           = 10,
             random_state       = 123,
             return_best        = False,
@@ -74,10 +82,20 @@ def test_ValueError_bayesian_search_optuna_when_search_space_names_do_not_match(
                      regressor = Ridge(random_state=123),
                      lags      = 2 
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
 
     def search_space(trial):
         search_space  = {
@@ -96,12 +114,9 @@ def test_ValueError_bayesian_search_optuna_when_search_space_names_do_not_match(
         _bayesian_search_optuna(
             forecaster         = forecaster,
             y                  = y,
+            cv                 = cv, 
             search_space       = search_space,
-            steps              = steps,
             metric             = 'mean_absolute_error',
-            refit              = True,
-            initial_train_size = len(y_train),
-            fixed_train_size   = True,
             n_trials           = 10,
             random_state       = 123,
             return_best        = False,
@@ -124,10 +139,20 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg():
                      regressor = RandomForestRegressor(random_state=123),
                      lags      = 2
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
 
     def search_space(trial):
         search_space  = {
@@ -142,12 +167,9 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg():
     results = _bayesian_search_optuna(
                   forecaster         = forecaster,
                   y                  = y,
+                  cv                 = cv,
                   search_space       = search_space,
-                  steps              = steps,
                   metric             = 'mean_absolute_error',
-                  refit              = True,
-                  initial_train_size = len(y_train),
-                  fixed_train_size   = True,
                   n_trials           = 10,
                   random_state       = 123,
                   return_best        = False,
@@ -202,10 +224,20 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_kwargs_cre
                      regressor = Ridge(random_state=123),
                      lags      = 2
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
 
     def search_space(trial):
         search_space  = {
@@ -221,12 +253,9 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_kwargs_cre
     results = _bayesian_search_optuna(
                   forecaster          = forecaster,
                   y                   = y,
+                  cv                  = cv, 
                   search_space        = search_space,
-                  steps               = steps,
                   metric              = 'mean_absolute_error',
-                  refit               = True,
-                  initial_train_size  = len(y_train),
-                  fixed_train_size    = True,
                   n_trials            = 10,
                   random_state        = 123,
                   return_best         = False,
@@ -274,10 +303,20 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_kwargs_stu
                      regressor = RandomForestRegressor(random_state=123),
                      lags      = 2 
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
 
     def search_space(trial):
         search_space  = {
@@ -293,12 +332,9 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_with_kwargs_stu
     results = _bayesian_search_optuna(
                     forecaster            = forecaster,
                     y                     = y,
+                    cv                    = cv,
                     search_space          = search_space,
-                    steps                 = steps,
                     metric                = 'mean_absolute_error',
-                    refit                 = True,
-                    initial_train_size    = len(y_train),
-                    fixed_train_size      = True,
                     n_trials              = 5,
                     random_state          = 123,
                     n_jobs                = 1,
@@ -343,10 +379,20 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_when_lags_not_i
                      regressor = Ridge(random_state=123),
                      lags      = 4
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     
     def search_space(trial):
         search_space  = {'alpha': trial.suggest_float('alpha', 1e-2, 1.0)}
@@ -357,11 +403,8 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoreg_when_lags_not_i
                   forecaster         = forecaster,
                   y                  = y,
                   search_space       = search_space,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = 'mean_absolute_error',
-                  refit              = True,
-                  initial_train_size = len(y_train),
-                  fixed_train_size   = True,
                   n_trials           = 10,
                   random_state       = 123,
                   return_best        = False,
@@ -408,10 +451,20 @@ def test_evaluate_bayesian_search_optuna_when_return_best_ForecasterAutoreg():
                      regressor = Ridge(random_state=123),
                      lags      = 2
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     
     def search_space(trial):
         search_space  = {
@@ -424,12 +477,9 @@ def test_evaluate_bayesian_search_optuna_when_return_best_ForecasterAutoreg():
     _bayesian_search_optuna(
         forecaster         = forecaster,
         y                  = y,
+        cv                 = cv,
         search_space       = search_space,
-        steps              = steps,
         metric             = 'mean_absolute_error',
-        refit              = True,
-        initial_train_size = len(y_train),
-        fixed_train_size   = True,
         n_trials           = 10,
         return_best        = True,
         verbose            = False
@@ -452,15 +502,22 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
                      lags      = 2
                  )
 
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
     metric = 'mean_absolute_error'
-    initial_train_size = len(y_train)
-    fixed_train_size = True
-    refit = True
     verbose = False
-    
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     n_trials = 10
     random_state = 123
 
@@ -468,11 +525,8 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
         trial,
         forecaster         = forecaster,
         y                  = y,
-        steps              = steps,
+        cv                 = cv,
         metric             = metric,
-        initial_train_size = initial_train_size,
-        fixed_train_size   = fixed_train_size,
-        refit              = refit,
         verbose            = verbose,
     ) -> float:
         
@@ -488,11 +542,8 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
         metric, _ = backtesting_forecaster(
                         forecaster         = forecaster,
                         y                  = y,
-                        steps              = steps,
+                        cv                 = cv,
                         metric             = metric,
-                        initial_train_size = initial_train_size,
-                        fixed_train_size   = fixed_train_size,
-                        refit              = refit,
                         verbose            = verbose       
                     )
         metric = metric.iat[0, 0]
@@ -515,12 +566,9 @@ def test_results_opt_best_output_bayesian_search_optuna_with_output_study_best_t
     results_opt_best = _bayesian_search_optuna(
                            forecaster         = forecaster,
                            y                  = y,
+                           cv                 = cv,
                            search_space       = search_space,
-                           steps              = steps,
                            metric             = metric,
-                           refit              = refit,
-                           initial_train_size = initial_train_size,
-                           fixed_train_size   = fixed_train_size,
                            n_trials           = n_trials,
                            return_best        = return_best,
                            verbose            = verbose
@@ -541,11 +589,21 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregDirect():
                      steps     = 3,
                      lags      = 4
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
-
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
+    
     def search_space(trial):
         search_space  = {
             'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
@@ -557,18 +615,15 @@ def test_results_output_bayesian_search_optuna_ForecasterAutoregDirect():
         return search_space
 
     results = _bayesian_search_optuna(
-                  forecaster         = forecaster,
-                  y                  = y,
-                  search_space       = search_space,
-                  steps              = steps,
-                  metric             = 'mean_absolute_error',
-                  refit              = True,
-                  initial_train_size = len(y_train),
-                  fixed_train_size   = True,
-                  n_trials           = 10,
-                  random_state       = 123,
-                  return_best        = False,
-                  verbose            = False
+                  forecaster   = forecaster,
+                  y            = y,
+                  cv           = cv,
+                  search_space = search_space,
+                  metric       = 'mean_absolute_error',
+                  n_trials     = 10,
+                  random_state = 123,
+                  return_best  = False,
+                  verbose      = False
               )[0]
     
     expected_results = pd.DataFrame(
@@ -628,10 +683,20 @@ def test_bayesian_search_optuna_output_file():
                      regressor = RandomForestRegressor(random_state=123),
                      lags      = 2 
                  )
-
-    steps = 3
     n_validation = 12
     y_train = y[:-n_validation]
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
 
     def search_space(trial):
         search_space  = {
@@ -645,19 +710,16 @@ def test_bayesian_search_optuna_output_file():
 
     output_file = 'test_bayesian_search_optuna_output_file.txt'
     _ = _bayesian_search_optuna(
-            forecaster         = forecaster,
-            y                  = y,
-            search_space       = search_space,
-            steps              = steps,
-            metric             = 'mean_absolute_error',
-            refit              = True,
-            initial_train_size = len(y_train),
-            fixed_train_size   = True,
-            n_trials           = 10,
-            random_state       = 123,
-            return_best        = False,
-            verbose            = False,
-            output_file        = output_file
+            forecaster   = forecaster,
+            y            = y,
+            cv           = cv,
+            search_space = search_space,
+            metric       = 'mean_absolute_error',
+            n_trials     = 10,
+            random_state = 123,
+            return_best  = False,
+            verbose      = False,
+            output_file  = output_file
         )[0]
 
     assert os.path.isfile(output_file)

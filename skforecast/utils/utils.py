@@ -2031,7 +2031,8 @@ def check_backtesting_input(
     use_binned_residuals: bool = False,
     n_jobs: Union[int, str] = 'auto',
     show_progress: bool = True,
-    suppress_warnings: bool = False
+    suppress_warnings: bool = False,
+    suppress_warnings_fit: bool = False
 ) -> None:
     """
     This is a helper function to check most inputs of backtesting functions in 
@@ -2087,12 +2088,23 @@ def check_backtesting_input(
         If `True`, skforecast warnings will be suppressed during the backtesting 
         process. See skforecast.exceptions.warn_skforecast_categories for more
         information.
+    suppress_warnings_fit : bool, default `False`
+        If `True`, warnings generated during fitting will be ignored. Only 
+        `ForecasterSarimax`.
 
     Returns
     -------
     None
     
     """
+
+    forecaster_name = type(forecaster).__name__
+    cv_name = type(cv).__name__
+
+    if cv_name != "TimeSeriesFold":
+        raise TypeError(
+            (f"`cv` must be a TimeSeriesFold object. Got {cv_name}.")
+        )
 
     steps = cv.steps
     initial_train_size = cv.initial_train_size
@@ -2113,14 +2125,6 @@ def check_backtesting_input(
     forecasters_multi_dict = [
         "ForecasterAutoregMultiSeries"
     ]
-
-    forecaster_name = type(forecaster).__name__
-    cv_name = type(cv).__name__
-
-    if cv_name != "TimeSeriesFold":
-        raise TypeError(
-            (f"`cv` must be a TimeSeriesFold object. Got {cv_name}.")
-        )
 
     if forecaster_name in forecasters_uni:
         if not isinstance(y, pd.Series):
@@ -2202,12 +2206,12 @@ def check_backtesting_input(
                     (f"`exog` must be a pandas Series, DataFrame or None. Got {type(exog)}.")
                 )
 
-    if hasattr(forecaster, 'differentiaion'):
+    if hasattr(forecaster, 'differentiation'):
         if forecaster.differentiation != cv.differentiation:
             raise ValueError(
                 (f"The differentiation included in the forecaster "
                  f"({forecaster.differentiation}) differs from the differentiation "
-                 f" included in the cv ({cv.differentiation}). Set the same value "
+                 f"included in the cv ({cv.differentiation}). Set the same value "
                  f"for both.")
             )
 
@@ -2220,22 +2224,18 @@ def check_backtesting_input(
     if forecaster_name == "ForecasterEquivalentDate" and isinstance(
         forecaster.offset, pd.tseries.offsets.DateOffset
     ):
-        pass
-    elif initial_train_size is not None:
-        if not isinstance(initial_train_size, (int, np.integer)):
-            raise TypeError(
-                (f"If used, `initial_train_size` must be an integer greater than the "
-                 f"window_size of the forecaster. Got type {type(initial_train_size)}.")
-            )
-        if initial_train_size >= data_length:
+        if initial_train_size is None:
             raise ValueError(
-                (f"If used, `initial_train_size` must be an integer smaller "
-                 f"than the length of `{data_name}` ({data_length}).")
-            )    
-        if initial_train_size < forecaster.window_size:
+                (f"`initial_train_size` must be an integer greater than "
+                 f"the `window_size` of the forecaster ({forecaster.window_size}) "
+                 f"and smaller than the length of `{data_name}` ({data_length}).")
+            )
+    elif initial_train_size is not None:
+        if initial_train_size < forecaster.window_size or initial_train_size >= data_length:
             raise ValueError(
                 (f"If used, `initial_train_size` must be an integer greater than "
-                 f"the window_size of the forecaster ({forecaster.window_size}).")
+                 f"the `window_size` of the forecaster ({forecaster.window_size}) "
+                 f"and smaller than the length of `{data_name}` ({data_length}).")
             )
         if initial_train_size + gap >= data_length:
             raise ValueError(
@@ -2244,7 +2244,7 @@ def check_backtesting_input(
                  f"({data_length}).")
             )
     else:
-        if forecaster_name == 'ForecasterSarimax':
+        if forecaster_name in ['ForecasterSarimax', 'ForecasterEquivalentDate']:
             raise ValueError(
                 (f"`initial_train_size` must be an integer smaller than the "
                  f"length of `{data_name}` ({data_length}).")
@@ -2259,6 +2259,11 @@ def check_backtesting_input(
                 raise ValueError(
                     "`refit` is only allowed when `initial_train_size` is not `None`."
                 )
+
+    if forecaster_name == 'ForecasterSarimax' and cv.skip_folds is not None:
+        raise ValueError(
+            "`skip_folds` is not allowed for ForecasterSarimax. Set it to `None`."
+        )
 
     if not isinstance(add_aggregated_metric, bool):
         raise TypeError("`add_aggregated_metric` must be a boolean: `True`, `False`.")
@@ -2276,6 +2281,8 @@ def check_backtesting_input(
         raise TypeError("`show_progress` must be a boolean: `True`, `False`.")
     if not isinstance(suppress_warnings, bool):
         raise TypeError("`suppress_warnings` must be a boolean: `True`, `False`.")
+    if not isinstance(suppress_warnings_fit, bool):
+        raise TypeError("`suppress_warnings_fit` must be a boolean: `True`, `False`.")
 
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)

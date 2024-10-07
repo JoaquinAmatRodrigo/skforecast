@@ -123,7 +123,6 @@ def _backtesting_forecaster(
         'verbose': verbose
     })
 
-    window_size = cv.window_size
     initial_train_size = cv.initial_train_size
     refit = cv.refit
     gap = cv.gap
@@ -159,6 +158,9 @@ def _backtesting_forecaster(
 
     store_in_sample_residuals = False if interval is None else True
 
+    folds = cv.split(X=y, as_pandas=False)
+    window_size = cv.window_size
+
     if initial_train_size is not None:
         # First model training, this is done to allow parallelization when `refit`
         # is `False`. The initial Forecaster fit is outside the auxiliary function.
@@ -168,21 +170,9 @@ def _backtesting_forecaster(
             exog                      = exog_train,
             store_in_sample_residuals = store_in_sample_residuals
         )
-        externally_fitted = False
-    else:
-        # Although not used for training, first observations are needed to create
-        # the initial predictors
-        cv.set_params({'initial_train_size': forecaster.window_size})
-        initial_train_size = forecaster.window_size
-        externally_fitted = True
-
-    folds = cv.split(
-                X                 = y,
-                externally_fitted = externally_fitted,
-            )
-    # This is done to allow parallelization when `refit` is `False`. The initial 
-    # Forecaster fit is outside the auxiliary function.
-    folds[0][4] = False
+        # This is done to allow parallelization when `refit` is `False`. The initial 
+        # Forecaster fit is outside the auxiliary function.
+        folds[0][4] = False
 
     if refit:
         n_of_fits = int(len(folds) / refit)

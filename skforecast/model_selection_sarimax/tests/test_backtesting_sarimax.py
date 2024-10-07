@@ -8,6 +8,7 @@ from sklearn.linear_model import Ridge
 from skforecast.Sarimax import Sarimax
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterSarimax import ForecasterSarimax
+from skforecast.model_selection._split import TimeSeriesFold
 from skforecast.model_selection_sarimax import backtesting_sarimax
 
 # Fixtures
@@ -24,6 +25,15 @@ def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
                     regressor = Ridge(random_state=123),
                     lags      = 2
                  )
+    
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
 
     err_msg = re.escape(
         ("`forecaster` must be of type `ForecasterSarimax`, for all other "
@@ -32,20 +42,15 @@ def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
     )
     with pytest.raises(TypeError, match = err_msg):
         backtesting_sarimax(
-            forecaster            = forecaster,
-            y                     = y_datetime,
-            steps                 = 3,
-            metric                = 'mean_absolute_error',
-            initial_train_size    = len(y_datetime[:-12]),
-            fixed_train_size      = False,
-            gap                   = 0,
-            allow_incomplete_fold = False,
-            exog                  = None,
-            refit                 = False,
-            alpha                 = None,
-            interval              = None,
-            verbose               = False,
-            show_progress         = False
+            forecaster    = forecaster,
+            y             = y_datetime,
+            cv            = cv,
+            metric        = 'mean_absolute_error',
+            exog          = None,
+            alpha         = None,
+            interval      = None,
+            verbose       = False,
+            show_progress = False
         )
 
 
@@ -61,18 +66,24 @@ def test_output_backtesting_sarimax_no_refit_no_exog_no_remainder_with_mocked(n_
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                       forecaster         = forecaster,
-                                       y                  = y_datetime,
-                                       steps              = 3,
-                                       metric             = 'mean_squared_error',
-                                       initial_train_size = len(y_datetime) - 12,
-                                       fixed_train_size   = False,
-                                       refit              = False,
-                                       alpha              = None,
-                                       interval           = None,
-                                       n_jobs             = n_jobs,
-                                       verbose            = True
+                                       forecaster = forecaster,
+                                       y          = y_datetime,
+                                       cv         = cv,
+                                       metric     = 'mean_squared_error',
+                                       alpha      = None,
+                                       interval   = None,
+                                       n_jobs     = n_jobs,
+                                       verbose    = True
                                    )
     
     expected_metric = pd.DataFrame({"mean_squared_error": [0.03683793335495359]})
@@ -98,17 +109,23 @@ def test_output_backtesting_sarimax_no_refit_no_exog_remainder_with_mocked():
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 5,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                       forecaster         = forecaster,
-                                       y                  = y_datetime,
-                                       steps              = 5,
-                                       metric             = 'mean_squared_error',
-                                       initial_train_size = len(y_datetime) - 12,
-                                       fixed_train_size   = False,
-                                       refit              = False,
-                                       alpha              = None,
-                                       interval           = None,
-                                       verbose            = False
+                                       forecaster = forecaster,
+                                       y          = y_datetime,
+                                       cv         = cv,
+                                       metric     = 'mean_squared_error',
+                                       alpha      = None,
+                                       interval   = None,
+                                       verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"mean_squared_error": [0.07396344749165738]})
@@ -136,18 +153,24 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_no_remainder_with_mocked(n
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                       forecaster         = forecaster,
-                                       y                  = y_datetime,
-                                       steps              = 3,
-                                       metric             = 'mean_squared_error',
-                                       initial_train_size = len(y_datetime) - 12,
-                                       fixed_train_size   = False,
-                                       refit              = True,
-                                       alpha              = None,
-                                       interval           = None,
-                                       n_jobs             = n_jobs,
-                                       verbose            = False
+                                       forecaster = forecaster,
+                                       y          = y_datetime,
+                                       cv         = cv,
+                                       metric     = 'mean_squared_error',
+                                       alpha      = None,
+                                       interval   = None,
+                                       n_jobs     = n_jobs,
+                                       verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"mean_squared_error": [0.038704200731126036]})
@@ -175,18 +198,24 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_remainder_with_mocked(n_jo
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 5,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        steps              = 5,
-                                        metric             = 'mean_squared_error',
-                                        initial_train_size = len(y_datetime) - 12,
-                                        fixed_train_size   = False,
-                                        refit              = True,
-                                        alpha              = None,
-                                        interval           = None,
-                                        n_jobs             = n_jobs,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        metric     = 'mean_squared_error',
+                                        alpha      = None,
+                                        interval   = None,
+                                        n_jobs     = n_jobs,
+                                        verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"mean_squared_error": [0.0754085450012623]})
@@ -212,17 +241,23 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_no_remain
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = True,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        steps              = 3,
-                                        metric             = 'mean_squared_error',
-                                        initial_train_size = len(y_datetime) - 12,
-                                        fixed_train_size   = True,
-                                        refit              = True,
-                                        alpha              = None,
-                                        interval           = None,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        metric     = 'mean_squared_error',
+                                        alpha      = None,
+                                        interval   = None,
+                                        verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"mean_squared_error": [0.04116499283290456]})
@@ -248,17 +283,23 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_no_exog_remainder
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 5,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = True,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        steps              = 5,
-                                        metric             = 'mean_squared_error',
-                                        initial_train_size = len(y_datetime) - 12,
-                                        fixed_train_size   = True,
-                                        refit              = True,
-                                        alpha              = None,
-                                        interval           = None,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        metric     = 'mean_squared_error',
+                                        alpha      = None,
+                                        interval   = None,
+                                        verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"mean_squared_error": [0.07571810495568278]})
@@ -284,18 +325,24 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_with_mocked():
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        exog               = exog_datetime,
-                                        steps              = 3,
-                                        metric             = 'mean_squared_error',
-                                        initial_train_size = len(y_datetime) - 12,
-                                        fixed_train_size   = False,
-                                        refit              = False,
-                                        alpha              = None,
-                                        interval           = None,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        exog       = exog_datetime,
+                                        metric     = 'mean_squared_error',
+                                        alpha      = None,
+                                        interval   = None,
+                                        verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"mean_squared_error": [0.18551856781581755]})
@@ -321,18 +368,24 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_with_mocked():
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        exog               = exog_datetime,
-                                        steps              = 3,
-                                        metric             = 'mean_squared_error',
-                                        initial_train_size = len(y_datetime) - 12,
-                                        fixed_train_size   = False,
-                                        refit              = True,
-                                        alpha              = None,
-                                        interval           = None,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        exog       = exog_datetime,
+                                        metric     = 'mean_squared_error',
+                                        alpha      = None,
+                                        interval   = None,
+                                        verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"mean_squared_error": [0.198652574804823]})
@@ -358,18 +411,24 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_with_moc
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 5,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = True,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        exog               = exog_datetime,
-                                        steps              = 5,
-                                        metric             = 'mean_squared_error',
-                                        initial_train_size = len(y_datetime) - 12,
-                                        fixed_train_size   = True,
-                                        refit              = True,
-                                        alpha              = None,
-                                        interval           = None,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        exog       = exog_datetime,
+                                        metric     = 'mean_squared_error',
+                                        alpha      = None,
+                                        interval   = None,
+                                        verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"mean_squared_error": [0.0917642049564646]})
@@ -404,18 +463,24 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_callable_metric_with_mocke
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        exog               = exog_datetime,
-                                        steps              = 3,
-                                        metric             = my_metric,
-                                        initial_train_size = len(y_datetime) - 12,
-                                        fixed_train_size   = False,
-                                        refit              = False,
-                                        alpha              = None,
-                                        interval           = None,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        exog       = exog_datetime,
+                                        metric     = my_metric,
+                                        alpha      = None,
+                                        interval   = None,
+                                        verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"my_metric": [0.007364452865679387]})
@@ -441,17 +506,23 @@ def test_output_backtesting_sarimax_no_refit_no_exog_list_of_metrics_with_mocked
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        steps              = 3,
-                                        metric             = [my_metric, 'mean_absolute_error'],
-                                        initial_train_size = len(y_datetime) - 12,
-                                        fixed_train_size   = False,
-                                        refit              = False,
-                                        alpha              = None,
-                                        interval           = None,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        metric     = [my_metric, 'mean_absolute_error'],
+                                        alpha      = None,
+                                        interval   = None,
+                                        verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"my_metric": [0.004423392707787538], 
@@ -478,17 +549,23 @@ def test_output_backtesting_sarimax_yes_refit_no_exog_callable_metric_with_mocke
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        steps              = 3,
-                                        metric             = my_metric,
-                                        initial_train_size = len(y_datetime) - 12,
-                                        fixed_train_size   = False,
-                                        refit              = True,
-                                        alpha              = None,
-                                        interval           = None,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        metric     = my_metric,
+                                        alpha      = None,
+                                        interval   = None,
+                                        verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"my_metric": [0.004644148042633733]})
@@ -514,18 +591,24 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_list_of_
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = True,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        exog               = exog_datetime,
-                                        steps              = 3,
-                                        metric             = [my_metric, 'mean_absolute_scaled_error'],
-                                        initial_train_size = len(y_datetime) - 12,
-                                        fixed_train_size   = True,
-                                        refit              = True,
-                                        alpha              = None,
-                                        interval           = None,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        exog       = exog_datetime,
+                                        metric     = [my_metric, 'mean_absolute_scaled_error'],
+                                        alpha      = None,
+                                        interval   = None,
+                                        verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"my_metric": [0.007877420102652216], 
@@ -556,18 +639,24 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_interval_with_mocked(alpha
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = False,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        exog               = exog_datetime,
-                                        steps              = 3,
-                                        metric             = ['mean_absolute_error'],
-                                        initial_train_size = len(y_datetime) - 12,
-                                        fixed_train_size   = False,
-                                        refit              = False,
-                                        alpha              = alpha,
-                                        interval           = interval,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        exog       = exog_datetime,
+                                        metric     = ['mean_absolute_error'],
+                                        alpha      = alpha,
+                                        interval   = interval,
+                                        verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"mean_absolute_error": [0.3040748056175932]})
@@ -597,7 +686,7 @@ def test_output_backtesting_sarimax_no_refit_yes_exog_interval_with_mocked(alpha
 @pytest.mark.parametrize("alpha, interval", 
                          [(0.05, [1, 99]), 
                           (None, [2.5, 97.5])], 
-                         ids = lambda values : f'alpha, interval: {values}')
+                         ids = lambda values: f'alpha, interval: {values}')
 def test_output_backtesting_sarimax_yes_refit_yes_exog_interval_with_mocked(alpha, interval):
     """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, yes exog, 
@@ -608,18 +697,24 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_interval_with_mocked(alph
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                        forecaster         = forecaster,
-                                        y                  = y_datetime,
-                                        exog               = exog_datetime,
-                                        steps              = 3,
-                                        metric             = 'mean_absolute_error',
-                                        initial_train_size = len(y_datetime) - 12,
-                                        fixed_train_size   = False,
-                                        refit              = True,
-                                        alpha              = alpha,
-                                        interval           = interval,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        exog       = exog_datetime,
+                                        metric     = 'mean_absolute_error',
+                                        alpha      = alpha,
+                                        interval   = interval,
+                                        verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"mean_absolute_error": [0.31145145397674484]})
@@ -649,7 +744,7 @@ def test_output_backtesting_sarimax_yes_refit_yes_exog_interval_with_mocked(alph
 @pytest.mark.parametrize("alpha, interval", 
                          [(0.05, [1, 99]), 
                           (None, [2.5, 97.5])], 
-                         ids = lambda values : f'alpha, interval: {values}')
+                         ids = lambda values: f'alpha, interval: {values}')
 def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_interval_with_mocked(alpha, interval):
     """
     Test output of backtesting_sarimax with backtesting mocked, Series y is mocked, yes exog, 
@@ -660,18 +755,24 @@ def test_output_backtesting_sarimax_yes_refit_fixed_train_size_yes_exog_interval
                      regressor = Sarimax(order=(3, 2, 0), maxiter=1000, method='cg', disp=False)
                  )
     
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = True,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    
     metric, backtest_predictions = backtesting_sarimax(
-                                       forecaster         = forecaster,
-                                       y                  = y_datetime,
-                                       exog               = exog_datetime,
-                                       steps              = 3,
-                                       metric             = ['mean_absolute_error'],
-                                       initial_train_size = len(y_datetime) - 12,
-                                       fixed_train_size   = True,
-                                       refit              = True,
-                                       alpha              = alpha,
-                                       interval           = interval,
-                                       verbose            = False
+                                       forecaster = forecaster,
+                                       y          = y_datetime,
+                                       cv         = cv,
+                                       exog       = exog_datetime,
+                                       metric     = ['mean_absolute_error'],
+                                       alpha      = alpha,
+                                       interval   = interval,
+                                       verbose    = False
                                    )
     
     expected_metric = pd.DataFrame({"mean_absolute_error": [0.31329767191681507]})

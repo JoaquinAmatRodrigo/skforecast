@@ -9,7 +9,8 @@ from sklearn.linear_model import Ridge
 from sklearn.metrics import mean_squared_error
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
-from skforecast.model_selection.model_selection import _backtesting_forecaster
+from skforecast.model_selection._split import TimeSeriesFold
+from skforecast.model_selection._validation import _backtesting_forecaster
 
 # Fixtures
 from skforecast.exceptions import IgnoredArgumentWarning
@@ -40,21 +41,29 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoreg_wi
     )
 
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
-
     n_backtest = 12
     y_train = y[:-n_backtest]
+    cv = TimeSeriesFold(
+            steps                 = 4,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
 
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster         = forecaster,
-                                        y                  = y,
-                                        exog               = None,
-                                        refit              = True,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = False,
-                                        steps              = 4,
-                                        metric             = 'mean_squared_error',
-                                        n_jobs             = n_jobs,
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y,
+                                        exog       = None,
+                                        cv         = cv,
+                                        metric     = 'mean_squared_error',
+                                        n_jobs     = n_jobs,
+                                        verbose    = False
                                    )
                                    
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -68,33 +77,57 @@ def test_output_backtesting_forecaster_no_exog_no_remainder_ForecasterAutoregDir
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     ForecasterAutoregDirect.
     """
-    expected_metric = pd.DataFrame({'mean_squared_error': [0.07076203468824617]})
-    expected_predictions = pd.DataFrame({
-    'pred': np.array([0.5468482, 0.44670961, 0.57651222, 0.52511275, 0.3686309, 0.56234835, 
-                     0.44276032, 0.52260065, 0.37665741, 0.5382938, 0.48755548, 0.44534071])
-                                                                }, index=pd.RangeIndex(start=38, stop=50, step=1))
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.07076203468824617]})
+    expected_predictions = pd.DataFrame(
+        {
+            "pred": np.array(
+                [
+                    0.5468482,
+                    0.44670961,
+                    0.57651222,
+                    0.52511275,
+                    0.3686309,
+                    0.56234835,
+                    0.44276032,
+                    0.52260065,
+                    0.37665741,
+                    0.5382938,
+                    0.48755548,
+                    0.44534071,
+                ]
+            )
+        },
+        index=pd.RangeIndex(start=38, stop=50, step=1),
+    )
 
     forecaster = ForecasterAutoregDirect(
                      regressor = LinearRegression(), 
                      lags      = 3,
                      steps     = 4
                  )
-
     n_backtest = 12
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 4,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster         = forecaster,
-                                        y                  = y,
-                                        exog               = None,
-                                        refit              = True,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = False,
-                                        steps              = 4,
-                                        metric             = 'mean_squared_error',
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y,
+                                        cv         = cv,
+                                        exog       = None,
+                                        metric     = 'mean_squared_error',
+                                        verbose    = False
                                    )
-                                   
+
     pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
@@ -106,28 +139,53 @@ def test_output_backtesting_forecaster_no_exog_yes_remainder_with_mocked():
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error'
     """
 
-    expected_metric = pd.DataFrame({'mean_squared_error': [0.06916732087926723]})
-    expected_predictions = pd.DataFrame({
-    'pred': np.array([0.55717779, 0.43355138, 0.54969767, 0.52945466, 0.48308861, 0.5096801 ,
-                     0.49519677, 0.47997916, 0.49177914, 0.495797 , 0.57738724, 0.44370472])
-                                                                 }, index=pd.RangeIndex(start=38, stop=50, step=1))
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.06916732087926723]})
+    expected_predictions = pd.DataFrame(
+        {
+            "pred": np.array(
+                [
+                    0.55717779,
+                    0.43355138,
+                    0.54969767,
+                    0.52945466,
+                    0.48308861,
+                    0.5096801,
+                    0.49519677,
+                    0.47997916,
+                    0.49177914,
+                    0.495797,
+                    0.57738724,
+                    0.44370472,
+                ]
+            )
+        },
+        index=pd.RangeIndex(start=38, stop=50, step=1),
+    )
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 5,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster         = forecaster,
-                                        y                  = y,
-                                        exog               = None,
-                                        refit              = True,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = False,
-                                        steps              = 5,
-                                        metric             = 'mean_squared_error',
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y,
+                                        exog       = None,
+                                        cv         = cv,
+                                        metric     = 'mean_squared_error',
+                                        verbose    = False
                                    )
-                                   
+
     pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
@@ -139,26 +197,51 @@ def test_output_backtesting_forecaster_yes_exog_no_remainder_with_mocked():
     12 observations to backtest, steps=4 (no remainder), metric='mean_squared_error'
     """
 
-    expected_metric = pd.DataFrame({'mean_squared_error': [0.05663345135204598]})
-    expected_predictions = pd.DataFrame({
-        'pred': np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.42295275, 0.46286083,
-                        0.43618422, 0.43552906, 0.48687517, 0.55455072, 0.55577332, 0.53943402])
-    }, index=pd.RangeIndex(start=38, stop=50, step=1))
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.05663345135204598]})
+    expected_predictions = pd.DataFrame(
+        {
+            "pred": np.array(
+                [
+                    0.59059622,
+                    0.47257504,
+                    0.53024098,
+                    0.46163343,
+                    0.42295275,
+                    0.46286083,
+                    0.43618422,
+                    0.43552906,
+                    0.48687517,
+                    0.55455072,
+                    0.55577332,
+                    0.53943402,
+                ]
+            )
+        },
+        index=pd.RangeIndex(start=38, stop=50, step=1),
+    )
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 4,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster         = forecaster,
-                                        y                  = y,
-                                        exog               = exog,
-                                        refit              = True,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = False,
-                                        steps              = 4,
-                                        metric             = 'mean_squared_error',
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y,
+                                        exog       = exog,
+                                        cv         = cv,
+                                        metric     = 'mean_squared_error',
+                                        verbose    = False
                                    )
 
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -171,28 +254,53 @@ def test_output_backtesting_forecaster_yes_exog_yes_remainder_with_mocked():
     Regressor is LinearRegression with lags=3, Series y is mocked, exog is mocked, 
     12 observations to backtest, steps=5 (2 remainder), metric='mean_squared_error'
     """
-    expected_metric = pd.DataFrame({'mean_squared_error': [0.061723961096013524]})
-    expected_predictions = pd.DataFrame({
-    'pred': np.array([0.59059622, 0.47257504, 0.53024098, 0.46163343, 0.50035119, 0.43595809,
-                     0.4349167, 0.42381237, 0.55165332, 0.53442833, 0.65361802, 0.51297419])
-                                                                 }, index=pd.RangeIndex(start=38, stop=50, step=1))
+    expected_metric = pd.DataFrame({"mean_squared_error": [0.061723961096013524]})
+    expected_predictions = pd.DataFrame(
+        {
+            "pred": np.array(
+                [
+                    0.59059622,
+                    0.47257504,
+                    0.53024098,
+                    0.46163343,
+                    0.50035119,
+                    0.43595809,
+                    0.4349167,
+                    0.42381237,
+                    0.55165332,
+                    0.53442833,
+                    0.65361802,
+                    0.51297419,
+                ]
+            )
+        },
+        index=pd.RangeIndex(start=38, stop=50, step=1),
+    )
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
 
     n_backtest = 12
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 5,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
                                         forecaster         = forecaster,
                                         y                  = y,
                                         exog               = exog,
-                                        refit              = True,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = False,
-                                        steps              = 5,
+                                        cv                 = cv,
                                         metric             = 'mean_squared_error',
                                         verbose            = False
                                    )
-    
+
     pd.testing.assert_frame_equal(expected_metric, metric)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
@@ -225,18 +333,25 @@ def test_output_backtesting_forecaster_yes_exog_yes_remainder_skip_folds_with_mo
 
     n_backtest = 12
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 5,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = 2,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster         = forecaster,
-                                        y                  = y,
-                                        exog               = exog,
-                                        refit              = True,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = False,
-                                        steps              = 5,
-                                        skip_folds         = 2,
-                                        metric             = 'mean_squared_error',
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y,
+                                        exog       = exog,
+                                        cv         = cv,
+                                        metric     = 'mean_squared_error',
+                                        verbose    = False
                                    )
 
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -264,16 +379,23 @@ def test_output_backtesting_forecaster_yes_exog_yes_remainder_skip_folds_intermi
 
     n_backtest = 24
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 3,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = 3,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = 2,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
                                         forecaster         = forecaster,
                                         y                  = y,
+                                        cv                 = cv,
                                         exog               = exog,
-                                        refit              = 3,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = False,
-                                        steps              = 3,
-                                        skip_folds         = 2,
                                         metric             = 'mean_squared_error',
                                         verbose            = False
                                    )
@@ -315,14 +437,23 @@ def test_output_backtesting_forecaster_interval_no_exog_no_remainder_with_mocked
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     n_backtest = 12
     y_train = y[:-n_backtest]
+    cv = TimeSeriesFold(
+            steps                 = 4,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
                                         forecaster              = forecaster,
                                         y                       = y,
                                         exog                    = None,
-                                        refit                   = True,
-                                        initial_train_size      = len(y_train),
-                                        fixed_train_size        = False,
-                                        steps                   = 4,
+                                        cv                      = cv,
                                         metric                  = 'mean_squared_error',
                                         interval                = [5, 95],
                                         n_boot                  = 500,
@@ -364,14 +495,23 @@ def test_output_backtesting_forecaster_interval_no_exog_yes_remainder_with_mocke
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     n_backtest = 12
     y_train = y[:-n_backtest]
+    cv = TimeSeriesFold(
+            steps                 = 5,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
                                         forecaster              = forecaster,
                                         y                       = y,
                                         exog                    = None,
-                                        refit                   = True,
-                                        initial_train_size      = len(y_train),
-                                        fixed_train_size        = False,
-                                        steps                   = 5,
+                                        cv                      = cv,
                                         metric                  = 'mean_squared_error',
                                         interval                = [5, 95],
                                         n_boot                  = 500,
@@ -413,14 +553,23 @@ def test_output_backtesting_forecaster_interval_yes_exog_no_remainder_with_mocke
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     n_backtest = 12
     y_train = y[:-n_backtest]
+    cv = TimeSeriesFold(
+            steps                 = 4,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
                                         forecaster              = forecaster,
                                         y                       = y,
                                         exog                    = exog,
-                                        refit                   = True,
-                                        initial_train_size      = len(y_train),
-                                        fixed_train_size        = False,
-                                        steps                   = 4,
+                                        cv                      = cv,
                                         metric                  = 'mean_squared_error',
                                         interval                = [5, 95],
                                         n_boot                  = 500,
@@ -462,14 +611,23 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_with_mock
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3, binner_kwargs={'n_bins': 15})
     n_backtest = 12
     y_train = y[:-n_backtest]
+    cv = TimeSeriesFold(
+            steps                 = 5,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
                                         forecaster              = forecaster,
                                         y                       = y,
                                         exog                    = exog,
-                                        refit                   = True,
-                                        initial_train_size      = len(y_train),
-                                        fixed_train_size        = False,
-                                        steps                   = 5,
+                                        cv                      = cv,
                                         metric                  = 'mean_squared_error',
                                         interval                = [5, 95],
                                         n_boot                  = 500,
@@ -514,18 +672,26 @@ def test_output_backtesting_forecaster_interval_out_sample_residuals_no_exog_no_
 
     forecaster = ForecasterAutoreg(regressor=LinearRegression(), lags=3)
     forecaster.set_out_sample_residuals(residuals=out_sample_residuals, append=False)
-
     n_backtest = 12
     y_train = y[:-n_backtest]
+    cv = TimeSeriesFold(
+            steps                 = 4,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
 
     metric, backtest_predictions = _backtesting_forecaster(
                                         forecaster              = forecaster,
                                         y                       = y,
                                         exog                    = None,
-                                        refit                   = True,
-                                        initial_train_size      = len(y_train),
-                                        fixed_train_size        = False,
-                                        steps                   = 4,
+                                        cv                      = cv,
                                         metric                  = 'mean_squared_error',
                                         interval                = [5, 95],
                                         n_boot                  = 500,
@@ -583,15 +749,23 @@ def test_callable_metric_backtesting_forecaster_no_exog_no_remainder_with_mocked
 
     n_backtest = 12
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 4,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
                                         forecaster         = forecaster,
                                         y                  = y,
                                         exog               = None,
-                                        refit              = True,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = False,
-                                        steps              = 4,
+                                        cv                 = cv,
                                         metric             = my_metric,
                                         verbose            = False
                                    )
@@ -636,15 +810,23 @@ def test_list_metrics_backtesting_forecaster_no_exog_no_remainder_with_mocked():
 
     n_backtest = 12
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 4,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metrics, backtest_predictions = _backtesting_forecaster(
                                         forecaster         = forecaster,
                                         y                  = y,
                                         exog               = None,
-                                        refit              = True,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = False,
-                                        steps              = 4,
+                                        cv                 = cv,
                                         metric             = ['mean_squared_error', mean_squared_error],
                                         verbose            = False
                                    )
@@ -691,15 +873,23 @@ def test_output_backtesting_forecaster_fixed_train_size_no_exog_no_remainder_wit
 
     n_backtest = 12
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 4,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
                                         forecaster         = forecaster,
                                         y                  = y,
                                         exog               = None,
-                                        refit              = True,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = True,
-                                        steps              = 4,
+                                        cv                 = cv,
                                         metric             = 'mean_squared_error',
                                         verbose            = False
                                    )
@@ -741,15 +931,23 @@ def test_output_backtesting_forecaster_fixed_train_size_no_exog_yes_remainder_wi
 
     n_backtest = 12
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 5,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
                                         forecaster         = forecaster,
                                         y                  = y,
                                         exog               = None,
-                                        refit              = True,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = True,
-                                        steps              = 5,
+                                        cv                 = cv,
                                         metric             = 'mean_squared_error',
                                         verbose            = False
                                    )
@@ -791,17 +989,25 @@ def test_output_backtesting_forecaster_fixed_train_size_yes_exog_no_remainder_wi
 
     n_backtest = 12
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 4,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster         = forecaster,
-                                        y                  = y,
-                                        exog               = exog,
-                                        refit              = True,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = True,
-                                        steps              = 4,
-                                        metric             = 'mean_squared_error',
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y,
+                                        exog       = exog,
+                                        cv         = cv,
+                                        metric     = 'mean_squared_error',
+                                        verbose    = False
                                    )
 
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -841,17 +1047,25 @@ def test_output_backtesting_forecaster_fixed_train_size_yes_exog_yes_remainder_w
 
     n_backtest = 12
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 5,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
-                                        forecaster         = forecaster,
-                                        y                  = y,
-                                        exog               = exog,
-                                        refit              = True,
-                                        initial_train_size = len(y_train),
-                                        fixed_train_size   = True,
-                                        steps              = 5,
-                                        metric             = 'mean_squared_error',
-                                        verbose            = False
+                                        forecaster = forecaster,
+                                        y          = y,
+                                        exog       = exog,
+                                        cv         = cv,
+                                        metric     = 'mean_squared_error',
+                                        verbose    = False
                                    )
 
     pd.testing.assert_frame_equal(expected_metric, metric)
@@ -898,20 +1112,25 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_gap_with_
                      lags      = 3,
                      steps     = 8
                  )
-
     n_backtest = 20
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 5,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = False,
+            gap                   = 3,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
                                         forecaster              = forecaster,
                                         y                       = y,
                                         exog                    = exog,
-                                        refit                   = True,
-                                        initial_train_size      = len(y_train),
-                                        fixed_train_size        = False,
-                                        gap                     = 3,
-                                        allow_incomplete_fold   = True,
-                                        steps                   = 5,
+                                        cv                      = cv,
                                         metric                  = 'mean_squared_error',
                                         interval                = [5, 95],
                                         n_boot                  = 500,
@@ -962,17 +1181,23 @@ def test_output_backtesting_forecaster_interval_yes_exog_not_allow_remainder_gap
                      lags      = 3,
                      steps     = 8
                  )
-
+    cv = TimeSeriesFold(
+            steps                 = 5,
+            initial_train_size    = len(y_with_index) - 20,
+            window_size           = None,
+            differentiation       = None,
+            refit                 = True,
+            fixed_train_size      = True,
+            gap                   = 3,
+            skip_folds            = None,
+            allow_incomplete_fold = False,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
                                         forecaster              = forecaster,
                                         y                       = y_with_index,
                                         exog                    = exog_with_index,
-                                        refit                   = True,
-                                        initial_train_size      = len(y_with_index) - 20,
-                                        fixed_train_size        = True,
-                                        gap                     = 3,
-                                        allow_incomplete_fold   = False,
-                                        steps                   = 5,
+                                        cv                      = cv,
                                         metric                  = 'mean_squared_error',
                                         interval                = [5, 95],
                                         n_boot                  = 500,
@@ -988,7 +1213,6 @@ def test_output_backtesting_forecaster_interval_yes_exog_not_allow_remainder_gap
 # ******************************************************************************
 # * Refit int                                                                  *
 # ******************************************************************************
-
 
 def test_output_backtesting_forecaster_refit_int_interval_yes_exog_yes_remainder_with_mocked():
     """
@@ -1034,17 +1258,23 @@ def test_output_backtesting_forecaster_refit_int_interval_yes_exog_yes_remainder
 
     n_backtest = 20
     y_train = y[:-n_backtest]
-
+    cv = TimeSeriesFold(
+            steps                 = 2,
+            initial_train_size    = len(y_train),
+            window_size           = None,
+            differentiation       = None,
+            refit                 = 2,
+            fixed_train_size      = False,
+            gap                   = 0,
+            skip_folds            = None,
+            allow_incomplete_fold = True,
+            return_all_indexes    = False,
+        )
     metric, backtest_predictions = _backtesting_forecaster(
                                        forecaster              = forecaster,
                                        y                       = y,
                                        exog                    = exog,
-                                       refit                   = 2,
-                                       initial_train_size      = len(y_train),
-                                       fixed_train_size        = False,
-                                       gap                     = 0,
-                                       allow_incomplete_fold   = True,
-                                       steps                   = 2,
+                                       cv                      = cv,
                                        metric                  = ['mean_squared_error', 'mean_absolute_scaled_error'],
                                        interval                = [5, 95],
                                        n_boot                  = 500,
@@ -1095,6 +1325,18 @@ def test_output_backtesting_forecaster_refit_int_interval_yes_exog_not_allow_rem
 
     forecaster = ForecasterAutoreg(regressor=Ridge(random_state=123), 
                                    lags=3, binner_kwargs={'n_bins': 15})
+    cv = TimeSeriesFold(
+            steps                 = 4,
+            initial_train_size    = len(y_with_index) - 20,
+            window_size           = None,
+            differentiation       = None,
+            refit                 = 3,
+            fixed_train_size      = True,
+            gap                   = 3,
+            skip_folds            = None,
+            allow_incomplete_fold = False,
+            return_all_indexes    = False,
+        )
 
     warn_msg = re.escape(
         ("If `refit` is an integer other than 1 (intermittent refit). `n_jobs` "
@@ -1105,12 +1347,7 @@ def test_output_backtesting_forecaster_refit_int_interval_yes_exog_not_allow_rem
                                            forecaster              = forecaster,
                                            y                       = y_with_index,
                                            exog                    = exog_with_index,
-                                           refit                   = 3,
-                                           initial_train_size      = len(y_with_index) - 20,
-                                           fixed_train_size        = True,
-                                           gap                     = 3,
-                                           allow_incomplete_fold   = False,
-                                           steps                   = 4,
+                                           cv                      = cv,
                                            metric                  = 'mean_squared_error',
                                            interval                = [5, 95],
                                            n_boot                  = 500,
