@@ -118,25 +118,27 @@ def test_TypeError_initialize_lags_when_lags_is_not_valid_type_ForecasterAutoreg
 
 
 @pytest.mark.parametrize("lags             , expected", 
-                         [(None            , (None, None)),
-                          (10              , (np.arange(10) + 1, 10)), 
-                          ([1, 2, 3]       , (np.array([1, 2, 3]), 3)),
-                          ((4, 5, 6)       , (np.array((4, 5, 6)), 6)),  
-                          (range(1, 4)     , (np.array([1, 2, 3]), 3)), 
-                          (np.arange(1, 10), (np.arange(1, 10), 9))], 
+                         [(None            , (None, None, None)),
+                          (10              , (np.arange(10) + 1, [f'lag_{i}' for i in range(1, 11)], 10)), 
+                          ([1, 2, 3]       , (np.array([1, 2, 3]), ['lag_1', 'lag_2', 'lag_3'], 3)),
+                          ((4, 5, 6)       , (np.array((4, 5, 6)), ['lag_4', 'lag_5', 'lag_6'], 6)),  
+                          (range(1, 4)     , (np.array([1, 2, 3]), ['lag_1', 'lag_2', 'lag_3'], 3)), 
+                          (np.arange(1, 10), (np.arange(1, 10), [f'lag_{i}' for i in range(1, 10)], 9))], 
                          ids = lambda values: f'values: {values}')
 def test_initialize_lags_input_lags_parameter(lags, expected):
     """
     Test creation of attribute lags with different arguments.
     """
-    lags, max_lag = initialize_lags(
-                        forecaster_name = 'ForecasterAutoreg',
-                        lags            = lags
-                    )
+    lags, lags_names, max_lag = initialize_lags(
+                                    forecaster_name = 'ForecasterAutoreg',
+                                    lags            = lags
+                                )
 
     if lags is None:
         assert lags is expected[0]
-        assert max_lag is expected[1]
+        assert lags_names is expected[1]
+        assert max_lag is expected[2]
     else:
         np.testing.assert_array_almost_equal(lags, expected[0])
-        assert max_lag == expected[1]
+        assert lags_names == expected[1]
+        assert max_lag == expected[2]

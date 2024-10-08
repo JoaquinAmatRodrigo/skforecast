@@ -115,6 +115,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         should be defined before training.
     lags : numpy ndarray
         Lags used as predictors.
+    lags_names : list
+        Names of the lags used as predictors.
     max_lag : int
         Maximum lag included in `lags`.
     window_features : list
@@ -299,8 +301,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             )
 
         self.regressors_ = {step: clone(self.regressor) for step in range(1, steps + 1)}
-        self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
-        self.window_features, self.max_size_window_features, self.window_features_names = (
+        self.lags, self.lags_names, self.max_lag = initialize_lags(type(self).__name__, lags)
+        self.window_features, self.window_features_names, self.max_size_window_features = (
             initialize_window_features(window_features)
         )
         if self.window_features is None and self.lags is None:
@@ -592,7 +594,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             if X_as_pandas:
                 X_data = pd.DataFrame(
                              data    = X_data,
-                             columns = [f"lag_{i}" for i in self.lags],
+                             columns = self.lags_names,
                              index   = train_index
                          )
 
@@ -784,7 +786,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         )
         if X_train_lags is not None:
             X_train.append(X_train_lags)
-            X_train_features_names_out_.extend([f"lag_{i}" for i in self.lags])
+            X_train_features_names_out_.extend(self.lags_names)
         
         X_train_window_features_names_out_ = None
         if self.window_features is not None:
@@ -1319,7 +1321,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         if self.lags is not None:
             X_lags = last_window_values[-self.lags]
             X_autoreg.append(X_lags)
-            Xs_col_names.extend([f"lag_{i}" for i in self.lags])
+            Xs_col_names.extend(self.lags_names)
 
         if self.window_features is not None:
             X_window_features = np.concatenate(
@@ -1975,8 +1977,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         lags: Optional[Union[int, np.ndarray, list, range]] = None
     ) -> None:
         """
-        Set new value to the attribute `lags`. Attributes `max_lag` and 
-        `window_size` are also updated.
+        Set new value to the attribute `lags`. Attributes `lags_names`, 
+        `max_lag` and `window_size` are also updated.
         
         Parameters
         ----------
@@ -2001,7 +2003,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                  "predictors used in training the forecaster.")
             )
         
-        self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
+        self.lags, self.lags_names, self.max_lag = initialize_lags(type(self).__name__, lags)
         self.window_size = max(
             [ws for ws in [self.max_lag, self.max_size_window_features] 
              if ws is not None]
@@ -2038,7 +2040,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                  "predictors used in training the forecaster.")
             )
         
-        self.window_features, self.max_size_window_features, self.window_features_names = (
+        self.window_features, self.window_features_names, self.max_size_window_features = (
             initialize_window_features(window_features)
         )
         self.window_features_class_names = None

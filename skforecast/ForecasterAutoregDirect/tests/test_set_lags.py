@@ -20,6 +20,7 @@ def test_set_lags_with_different_inputs(lags):
     forecaster.set_lags(lags=lags)
 
     np.testing.assert_array_almost_equal(forecaster.lags, np.array([1, 2, 3]))
+    assert forecaster.lags_names == ['lag_1', 'lag_2', 'lag_3']
     assert forecaster.max_lag == 3
     assert forecaster.window_size == 3
 
@@ -39,6 +40,7 @@ def test_set_lags_when_differentiation_is_not_None():
     forecaster.set_lags(lags=5)
 
     np.testing.assert_array_almost_equal(forecaster.lags, np.array([1, 2, 3, 4, 5]))
+    assert forecaster.lags_names == ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
     assert forecaster.max_lag == 5
     assert forecaster.window_size == 5 + 1
 
@@ -59,6 +61,7 @@ def test_set_lags_when_window_features():
     forecaster.set_lags(lags=5)
 
     np.testing.assert_array_almost_equal(forecaster.lags, np.array([1, 2, 3, 4, 5]))
+    assert forecaster.lags_names == ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
     assert forecaster.max_lag == 5
     assert forecaster.max_size_window_features == 6
     assert forecaster.window_size == 6
@@ -79,6 +82,7 @@ def test_set_lags_to_None():
     forecaster.set_lags(lags=None)
 
     assert forecaster.lags is None
+    assert forecaster.lags_names is None
     assert forecaster.max_lag is None
     assert forecaster.max_size_window_features == 3
     assert forecaster.window_size == 3

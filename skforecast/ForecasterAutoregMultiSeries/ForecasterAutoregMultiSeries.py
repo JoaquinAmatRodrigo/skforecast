@@ -142,6 +142,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
     lags : numpy ndarray
         Lags used as predictors.
+    lags_names : list
+        Names of the lags used as predictors.
     max_lag : int
         Maximum lag included in `lags`.
     window_features : list
@@ -358,8 +360,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.python_version                     = sys.version.split(" ")[0]
         self.forecaster_id                      = forecaster_id
 
-        self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
-        self.window_features, self.max_size_window_features, self.window_features_names = (
+        self.lags, self.lags_names, self.max_lag = initialize_lags(type(self).__name__, lags)
+        self.window_features, self.window_features_names, self.max_size_window_features = (
             initialize_window_features(window_features)
         )
         if self.window_features is None and self.lags is None:
@@ -578,7 +580,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if X_as_pandas:
                 X_data = pd.DataFrame(
                              data    = X_data,
-                             columns = [f"lag_{i}" for i in self.lags],
+                             columns = self.lags_names,
                              index   = train_index
                          )
 
@@ -646,7 +648,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             )
 
         y_values = y.to_numpy()
-        train_index = y.index[self.window_size:]
 
         if self.differentiation is not None:
             if not self.is_fitted:
@@ -655,13 +656,22 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 differentiator = clone(self.differentiator_[series_name])
                 y_values = differentiator.fit_transform(y_values)
 
+        X_train_autoreg = []
+        train_index = y.index[self.window_size:]
+
+        # TODO: See if we can use numpy arrays instead of pandas DataFrames
         X_train_lags, y_train = self._create_lags(
             y=y_values, X_as_pandas=True, train_index=train_index
         )
-        X_train_lags['_level_skforecast'] = series_name
+        if X_train_lags is not None:
+            
 
         # TODO: Continue from here, include window_features
-        # TODO: Create a self.lags_columns_names attribute (initialize_lags)
+
+
+
+        X_train_autoreg = pd.concat(X_train_autoreg, axis=1)
+        X_train_autoreg['_level_skforecast'] = series_name
 
         if ignore_exog:
             X_train_exog = None
@@ -689,7 +699,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if X_train_exog is not None:
                 X_train_exog = X_train_exog.iloc[self.differentiation:]
 
-        return X_train_lags, X_train_exog, y_train
+        return X_train_autoreg, X_train_exog, y_train
 
 
     def _create_train_X_y(
@@ -831,12 +841,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
              for k in series_dict.keys()
         ]
 
-        X_train_lags_buffer = []
+        X_train_autoreg_buffer = []
         X_train_exog_buffer = []
         y_train_buffer = []
         for matrices in input_matrices:
 
-            X_train_lags, X_train_exog, y_train = (
+            X_train_autoreg, X_train_exog, y_train = (
                 self._create_train_X_y_single_series(
                     y           = matrices[0],
                     exog        = matrices[1],
@@ -844,11 +854,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 )
             )
 
-            X_train_lags_buffer.append(X_train_lags)
+            X_train_autoreg_buffer.append(X_train_autoreg)
             X_train_exog_buffer.append(X_train_exog)
             y_train_buffer.append(y_train)
 
-        X_train = pd.concat(X_train_lags_buffer, axis=0)
+        X_train = pd.concat(X_train_autoreg_buffer, axis=0)
         y_train = pd.concat(y_train_buffer, axis=0)
 
         if self.is_fitted:

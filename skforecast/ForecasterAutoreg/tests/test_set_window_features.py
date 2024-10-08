@@ -20,6 +20,7 @@ def test_set_window_features_with_different_inputs(wf):
     forecaster = ForecasterAutoreg(LinearRegression(), lags=5)
     forecaster.set_window_features(window_features=wf)
 
+    assert forecaster.lags_names == ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
     assert forecaster.max_lag == 5
     assert forecaster.max_size_window_features == 6
     assert forecaster.window_features_names == ['roll_mean_6']
@@ -42,6 +43,7 @@ def test_set_window_features_when_differentiation_is_not_None():
     rolling = RollingFeatures(stats='mean', window_sizes=6)
     forecaster.set_window_features(window_features=rolling)
 
+    assert forecaster.lags_names == ['lag_1', 'lag_2', 'lag_3']
     assert forecaster.max_lag == 3
     assert forecaster.max_size_window_features == 6
     assert forecaster.window_features_names == ['roll_mean_6']
@@ -64,6 +66,8 @@ def test_set_window_features_when_lags():
     rolling = RollingFeatures(stats='median', window_sizes=5)
     forecaster.set_window_features(window_features=rolling)
 
+    assert forecaster.lags_names == ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5',
+                                     'lag_6', 'lag_7', 'lag_8', 'lag_9']
     assert forecaster.max_lag == 9
     assert forecaster.max_size_window_features == 5
     assert forecaster.window_features_names == ['roll_median_5']
@@ -83,7 +87,8 @@ def test_set_window_features_to_None():
                  )
     
     forecaster.set_window_features(window_features=None)
-
+    
+    assert forecaster.lags_names == ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
     assert forecaster.max_lag == 5
     assert forecaster.max_size_window_features is None
     assert forecaster.window_features_names is None

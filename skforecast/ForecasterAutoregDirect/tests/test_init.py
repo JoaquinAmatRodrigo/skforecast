@@ -72,9 +72,19 @@ def test_init_window_size_correctly_stored(lags, window_features, expected):
                  )
     
     assert forecaster.window_size == expected
+    if lags:
+        np.testing.assert_array_almost_equal(forecaster.lags, np.array([1, 2, 3, 4, 5]))
+        assert forecaster.lags_names == [f'lag_{i}' for i in range(1, lags + 1)]
+        assert forecaster.max_lag == lags
+    else:
+        assert forecaster.lags is None
+        assert forecaster.lags_names is None
+        assert forecaster.max_lag is None
     if window_features:
+        assert forecaster.window_features_names == ['roll_ratio_min_max_5', 'roll_median_6']
         assert forecaster.window_features_class_names == ['RollingFeatures']
     else:
+        assert forecaster.window_features_names is None
         assert forecaster.window_features_class_names is None
 
 

@@ -100,6 +100,8 @@ class ForecasterAutoreg(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
     lags : numpy ndarray
         Lags used as predictors.
+    lags_names : list
+        Names of the lags used as predictors.
     max_lag : int
         Maximum lag included in `lags`.
     window_features : list
@@ -271,8 +273,8 @@ class ForecasterAutoreg(ForecasterBase):
         self.python_version                     = sys.version.split(" ")[0]
         self.forecaster_id                      = forecaster_id
 
-        self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
-        self.window_features, self.max_size_window_features, self.window_features_names = (
+        self.lags, self.lags_names, self.max_lag = initialize_lags(type(self).__name__, lags)
+        self.window_features, self.window_features_names, self.max_size_window_features = (
             initialize_window_features(window_features)
         )
         if self.window_features is None and self.lags is None:
@@ -560,7 +562,7 @@ class ForecasterAutoreg(ForecasterBase):
             if X_as_pandas:
                 X_data = pd.DataFrame(
                              data    = X_data,
-                             columns = [f"lag_{i}" for i in self.lags],
+                             columns = self.lags_names,
                              index   = train_index
                          )
 
@@ -745,7 +747,7 @@ class ForecasterAutoreg(ForecasterBase):
         )
         if X_train_lags is not None:
             X_train.append(X_train_lags)
-            X_train_features_names_out_.extend([f"lag_{i}" for i in self.lags])
+            X_train_features_names_out_.extend(self.lags_names)
         
         X_train_window_features_names_out_ = None
         if self.window_features is not None:
@@ -772,17 +774,24 @@ class ForecasterAutoreg(ForecasterBase):
             
             X_train_features_names_out_.extend(X_train_exog_names_out_)
             X_train.append(exog_to_train)
-
+        
+        if len(X_train) == 1:
+            X_train = X_train[0]
+        else:
+            if X_as_pandas:
+                X_train = pd.concat(X_train, axis=1)
+            else:
+                X_train = np.concatenate(X_train, axis=1)
+                
         if X_as_pandas:
-            X_train = pd.concat(X_train, axis=1)
             X_train.index = train_index
         else:
             X_train = pd.DataFrame(
-                          data    = np.concatenate(X_train, axis=1),
+                          data    = X_train,
                           index   = train_index,
                           columns = X_train_features_names_out_
                       )
-
+        
         y_train = pd.Series(
                       data  = y_train,
                       index = train_index,
@@ -1908,8 +1917,8 @@ class ForecasterAutoreg(ForecasterBase):
         lags: Optional[Union[int, np.ndarray, list, range]] = None
     ) -> None:
         """
-        Set new value to the attribute `lags`. Attributes `max_lag` and 
-        `window_size` are also updated.
+        Set new value to the attribute `lags`. Attributes `lags_names`, 
+        `max_lag` and `window_size` are also updated.
         
         Parameters
         ----------
@@ -1934,7 +1943,7 @@ class ForecasterAutoreg(ForecasterBase):
                  "predictors used in training the forecaster.")
             )
         
-        self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
+        self.lags, self.lags_names, self.max_lag = initialize_lags(type(self).__name__, lags)
         self.window_size = max(
             [ws for ws in [self.max_lag, self.max_size_window_features] 
              if ws is not None]
@@ -1971,7 +1980,7 @@ class ForecasterAutoreg(ForecasterBase):
                  "predictors used in training the forecaster.")
             )
         
-        self.window_features, self.max_size_window_features, self.window_features_names = (
+        self.window_features, self.window_features_names, self.max_size_window_features = (
             initialize_window_features(window_features)
         )
         self.window_features_class_names = None

@@ -47,7 +47,7 @@ optional_dependencies = {
 def initialize_lags(
     forecaster_name: str,
     lags: Any
-) -> Union[Optional[np.ndarray], Optional[int]]:
+) -> Union[Optional[np.ndarray], Optional[list], Optional[int]]:
     """
     Check lags argument input and generate the corresponding numpy ndarray.
 
@@ -62,11 +62,14 @@ def initialize_lags(
     -------
     lags : numpy ndarray, None
         Lags used as predictors.
+    lags_names : list, None
+        Names of the lags used as predictors.
     max_lag : int, None
         Maximum value of the lags.
     
     """
 
+    lags_names = None
     max_lag = None
     if lags is not None:
         if isinstance(lags, int):
@@ -97,15 +100,16 @@ def initialize_lags(
                     (f"`lags` argument must be a dict, int, 1d numpy ndarray, range, "
                      f"tuple or list. Got {type(lags)}.")
                 )
-            
+        
+        lags_names = [f'lag_{i}' for i in lags]
         max_lag = max(lags)
 
-    return lags, max_lag
+    return lags, lags_names, max_lag
 
 
 def initialize_window_features(
     window_features: Any
-) -> Union[Optional[list], Optional[int], Optional[list]]:
+) -> Union[Optional[list], Optional[list], Optional[int]]:
     """
     Check window_features argument input and generate the corresponding list.
 
@@ -118,19 +122,19 @@ def initialize_window_features(
     -------
     window_features : list, None
         List of classes used to create window features.
-    max_size_window_features : int, None
-        Maximum value of the `window_sizes` attribute of all classes.
     window_features_names : list, None
         List with all the features names of the window features.
+    max_size_window_features : int, None
+        Maximum value of the `window_sizes` attribute of all classes.
     
     """
 
     needed_atts = ['window_sizes', 'features_names']
     needed_methods = ['transform_batch', 'transform']
-    max_size_window_features = None
 
     max_window_sizes = None
     window_features_names = None
+    max_size_window_features = None
     if window_features is not None:
         if isinstance(window_features, list) and len(window_features) < 1:
             raise ValueError(
@@ -201,7 +205,7 @@ def initialize_window_features(
                 (f"All window features names must be unique. Got {window_features_names}.")
             )
 
-    return window_features, max_size_window_features, window_features_names
+    return window_features, window_features_names, max_size_window_features
 
 
 def initialize_weights(
