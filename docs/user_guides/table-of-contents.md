@@ -5,7 +5,6 @@ Welcome to the skforecast user guides! This comprehensive collection of guides i
 ## Single series Forecasters
 - [Recursive multi-step forecasting](https://skforecast.org/latest/user_guides/autoregresive-forecaster)
 - [Direct multi-step forecasting](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting)
-- [Forecasting with window and custom features](https://skforecast.org/latest/user_guides/window-features-and-custom-features)
 - [ARIMA and SARIMAX forecasting](https://skforecast.org/latest/user_guides/forecasting-sarimax-arima)
 - [Foreasting baseline](https://skforecast.org/latest/user_guides/forecasting-baseline)
 
@@ -17,31 +16,48 @@ Welcome to the skforecast user guides! This comprehensive collection of guides i
 
 ## Feature Engineering
 - [Exogenous variables](https://skforecast.org/latest/user_guides/exogenous-variables)
-- [Feature selection](https://skforecast.org/latest/user_guides/feature-selection)
+- [Window and custom features](https://skforecast.org/latest/user_guides/window-features-and-custom-features)
 - [Categorical features](https://skforecast.org/latest/user_guides/categorical-features)
 - [Calendars features](https://skforecast.org/latest/user_guides/calendar-features)
+- [Data transformations](https://skforecast.org/latest/user_guides/sklearn-transformers-and-pipeline)
+- [Differentiation](user_guides/time-series-differentiation.ipynb)
+- [Feature selection](https://skforecast.org/latest/user_guides/feature-selection)
 
 ## Model Evaluation and Tuning
+- [Metrics](user_guides/metrics.ipynb)
 - [Backtesting forecaster](https://skforecast.org/latest/user_guides/backtesting)
 - [Hyperparameter tuning and lags selection](https://skforecast.org/latest/user_guides/hyperparameter-tuning-and-lags-selection)
-- [Time Series Forecasting Metrics](https://skforecast.org/latest/user_guides/metrics)
+- [Feature selection](https://skforecast.org/latest/user_guides/feature-selection)
 
 ## Probabilistic Forecasting
 - [Probabilistic forecasting](https://skforecast.org/latest/user_guides/probabilistic-forecasting)
 
-## Advanced Topics
-- [Data transformations](https://skforecast.org/latest/user_guides/sklearn-transformers-and-pipeline)
-- [Forecaster in production](https://skforecast.org/latest/user_guides/forecaster-in-production)
-- [Save and load forecaster](https://skforecast.org/latest/user_guides/save-load-forecaster)
-- [Explainability](https://skforecast.org/latest/user_guides/explainability)
-- [Forecasting with XGBoost and LightGBM](https://skforecast.org/latest/user_guides/forecasting-xgboost-lightgbm)
-- [Skforecast in GPU](https://skforecast.org/latest/user_guides/skforecast-in-GPU)
-- [Plotting](https://skforecast.org/latest/user_guides/plotting)
+## Model deployment:
+- [Save and load forecaster](user_guides/save-load-forecaster.ipynb)
+- [Forecaster in production](user_guides/forecaster-in-production.ipynb)
 
-## Additional Resources
-- [Input data](https://skforecast.org/latest/user_guides/input-data)
-- [Datasets](https://skforecast.org/latest/user_guides/datasets)
-- [FAQ and forecasting tips](https://skforecast.org/latest/faq/faq)
+## Plotting:
+- [Plotting](user_guides/plotting.ipynb)
+
+## Datasets:
+- [Datasets](user_guides/datasets.ipynb)
+
+## Additional Resources:
+- [Migration guide](user_guides/migration-guide.ipynb)
+- [Weighted time series forecasting](user_guides/weighted-time-series-forecasting.ipynb)
+- [Stacking multiple models](user_guides/stacking-ensemble-models-forecasting.ipynb)
+- [Forecasting with XGBoost and LightGBM](user_guides/forecasting-xgboost-lightgbm.ipynb)
+- [Skforecast in GPU](user_guides/skforecast-in-GPU.ipynb)
+
+## FAQ and forecasting tips:
+- [Time series with missing values](faq/forecasting-time-series-with-missing-values.ipynb)
+- [Non negative predictions](faq/non-negative-predictions.ipynb)
+- [Forecasting with delayed data](faq/forecasting-with-delayed-historical-data.ipynb)
+- [Parallelization](faq/parallelization-skforecast.ipynb)
+- [Time series aggregation](faq/time-series-aggregation.ipynb)
+- [Profiling skforecast](faq/profiling-skforecast.ipynb)
+- [Backtesting vs One-step-ahead](faq/parameters-search-backetesting-vs-one-step-ahead.ipynb)
+
 
 
 We hope you find these guides helpful. If you have any questions or need further assistance, please don't hesitate to reach out to the skforecast community. Remember to visit the [FAQ and forecasting tips](https://skforecast.org/latest/faq/faq.html) page for answers to frequently asked questions and forecasting tips.

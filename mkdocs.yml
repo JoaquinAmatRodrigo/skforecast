@@ -13,7 +13,7 @@ nav:
   - Home: 
     - Welcome to skforecast: README.md
   
-  - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
+  - Intro to Forecasting: introduction-forecasting/introduction-forecasting.md
   
   - Quick start:
     - Quick start: quick-start/quick-start-skforecast.ipynb
@@ -23,6 +23,7 @@ nav:
 
   - User Guides:
     - Table of contents: user_guides/table-of-contents.md
+    - Migration guide: user_guides/migration-guide.md
     - Input data: user_guides/input-data.ipynb
     - Single series Forecasters:
       - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
