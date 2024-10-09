@@ -43,7 +43,7 @@ Welcome to the skforecast user guides! This comprehensive collection of guides i
 - [Datasets](user_guides/datasets.ipynb)
 
 ## Additional Resources:
-- [Migration guide](user_guides/migration-guide.ipynb)
+- [Skforecast 0.14 Migration guide](user_guides/migration-guide.ipynb)
 - [Weighted time series forecasting](user_guides/weighted-time-series-forecasting.ipynb)
 - [Stacking multiple models](user_guides/stacking-ensemble-models-forecasting.ipynb)
 - [Forecasting with XGBoost and LightGBM](user_guides/forecasting-xgboost-lightgbm.ipynb)
