@@ -748,7 +748,7 @@ def _backtesting_forecaster_multiseries(
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
     refit: Union[bool, int] = False,
     interval: Optional[list] = None,
-    n_boot: int = 500,
+    n_boot: int = 250,
     random_state: int = 123,
     use_in_sample_residuals: bool = True,
     n_jobs: Union[int, str] = 'auto',
@@ -829,7 +829,7 @@ def _backtesting_forecaster_multiseries(
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
         intervals are estimated.
-    n_boot : int, default `500`
+    n_boot : int, default `250`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
     random_state : int, default `123`
@@ -1118,7 +1118,7 @@ def backtesting_forecaster_multiseries(
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
     refit: Union[bool, int] = False,
     interval: Optional[list] = None,
-    n_boot: int = 500,
+    n_boot: int = 250,
     random_state: int = 123,
     use_in_sample_residuals: bool = True,
     n_jobs: Union[int, str] = 'auto',
@@ -1201,7 +1201,7 @@ def backtesting_forecaster_multiseries(
         Confidence of the prediction interval estimated. Sequence of percentiles
         to compute, which must be between 0 and 100 inclusive. If `None`, no
         intervals are estimated.
-    n_boot : int, default `500`
+    n_boot : int, default `250`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
     random_state : int, default `123`

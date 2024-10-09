@@ -353,7 +353,7 @@ def _backtesting_forecaster(
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`. If `None`, no
         intervals are estimated.
-    n_boot : int, default `500`
+    n_boot : int, default `250`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
     random_state : int, default `123`
@@ -669,7 +669,7 @@ def backtesting_forecaster(
         to compute, which must be between 0 and 100 inclusive. For example, 
         interval of 95% should be as `interval = [2.5, 97.5]`. If `None`, no
         intervals are estimated.
-    n_boot : int, default `500`
+    n_boot : int, default `250`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
     random_state : int, default `123`

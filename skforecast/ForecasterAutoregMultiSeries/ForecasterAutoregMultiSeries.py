@@ -1993,7 +1993,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         levels: Optional[Union[str, list]] = None,
         last_window: Optional[pd.DataFrame] = None,
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
-        n_boot: int = 500,
+        n_boot: int = 250,
         random_state: int = 123,
         use_in_sample_residuals: bool = True,
         suppress_warnings: bool = False
@@ -2020,7 +2020,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             right after training data.
         exog : pandas Series, pandas DataFrame, dict, default `None`
             Exogenous variable/s included as predictor/s.
-        n_boot : int, default `500`
+        n_boot : int, default `250`
             Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot predictions are always 
@@ -2135,7 +2135,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         last_window: Optional[pd.DataFrame] = None,
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
         interval: list = [5, 95],
-        n_boot: int = 500,
+        n_boot: int = 250,
         random_state: int = 123,
         use_in_sample_residuals: bool = True,
         suppress_warnings: bool = False
@@ -2164,7 +2164,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Confidence of the prediction interval estimated. Sequence of 
             percentiles to compute, which must be between 0 and 100 inclusive. 
             For example, interval of 95% should be as `interval = [2.5, 97.5]`.
-        n_boot : int, default `500`
+        n_boot : int, default `250`
             Number of bootstrapping iterations used to estimate prediction 
             intervals.
         random_state : int, default `123`
@@ -2246,7 +2246,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         last_window: Optional[pd.DataFrame] = None,
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
         quantiles: list = [0.05, 0.5, 0.95],
-        n_boot: int = 500,
+        n_boot: int = 250,
         random_state: int = 123,
         use_in_sample_residuals: bool = True,
         suppress_warnings: bool = False
@@ -2275,7 +2275,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             Sequence of quantiles to compute, which must be between 0 and 1 
             inclusive. For example, quantiles of 0.05, 0.5 and 0.95 should be as 
             `quantiles = [0.05, 0.5, 0.95]`.
-        n_boot : int, default `500`
+        n_boot : int, default `250`
             Number of bootstrapping iterations used to estimate quantiles.
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot quantiles are always 
@@ -2341,7 +2341,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         levels: Optional[Union[str, list]] = None,
         last_window: Optional[pd.DataFrame] = None,
         exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
-        n_boot: int = 500,
+        n_boot: int = 250,
         random_state: int = 123,
         use_in_sample_residuals: bool = True,
         suppress_warnings: bool = False
@@ -2368,7 +2368,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             right after training data.
         exog : pandas Series, pandas DataFrame, dict, default `None`
             Exogenous variable/s included as predictor/s.
-        n_boot : int, default `500`
+        n_boot : int, default `250`
             Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot predictions are always 

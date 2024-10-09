@@ -2029,7 +2029,7 @@ def check_backtesting_input(
     exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None,
     interval: Optional[list] = None,
     alpha: Optional[float] = None,
-    n_boot: int = 500,
+    n_boot: int = 250,
     random_state: int = 123,
     use_in_sample_residuals: bool = True,
     use_binned_residuals: bool = False,
@@ -2067,7 +2067,7 @@ def check_backtesting_input(
         to compute, which must be between 0 and 100 inclusive.
     alpha : float, default `None`
         The confidence intervals used in ForecasterSarimax are (1 - alpha) %. 
-    n_boot : int, default `500`
+    n_boot : int, default `250`
         Number of bootstrapping iterations used to estimate prediction
         intervals.
     random_state : int, default `123`
