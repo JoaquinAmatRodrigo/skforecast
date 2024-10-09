@@ -2210,16 +2210,21 @@ class ForecasterAutoregDirect(ForecasterBase):
         else:
             estimator = self.regressors_[step]
 
-        idx_columns_lags = np.arange(len(self.lags))
-        if self.exog_in_:
-            idx_columns_exog = np.flatnonzero(
-                                   [name.endswith(f"step_{step}") 
-                                    for name in self.X_train_features_names_out_]
-                               )
+        n_lags = len(self.lags) if self.lags is not None else 0
+        n_window_features = (
+            len(self.window_features_names) if self.window_features is not None else 0
+        )
+        idx_columns_autoreg = np.arange(n_lags + n_window_features)
+        if not self.exog_in_:
+            idx_columns = idx_columns_autoreg
         else:
-            idx_columns_exog = np.array([], dtype=int)
-
-        idx_columns = np.hstack((idx_columns_lags, idx_columns_exog))
+            n_exog = len(self.X_train_direct_exog_names_out_) / self.steps
+            idx_columns_exog = (
+                np.arange((step - 1) * n_exog, (step) * n_exog) + idx_columns_autoreg[-1] + 1
+            )
+            idx_columns = np.concatenate((idx_columns_autoreg, idx_columns_exog))
+        
+        idx_columns = [int(x) for x in idx_columns]  # Required since numpy 2.0
         feature_names = [self.X_train_features_names_out_[i].replace(f"_step_{step}", "") 
                          for i in idx_columns]
 

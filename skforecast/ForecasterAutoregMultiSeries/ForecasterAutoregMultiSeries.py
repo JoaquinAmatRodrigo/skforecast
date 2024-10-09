@@ -664,6 +664,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             y=y_values, X_as_pandas=True, train_index=train_index
         )
         if X_train_lags is not None:
+            X_train_autoreg.append(X_train_lags)
             
 
         # TODO: Continue from here, include window_features

@@ -2,17 +2,22 @@
 # ==============================================================================
 import re
 import pytest
-from pytest import approx
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
-from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import RandomForestRegressor
+from lightgbm import LGBMRegressor
+
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
+
+# Fixtures
+from .fixtures_ForecasterAutoregDirect import y
+from .fixtures_ForecasterAutoregDirect import exog
 
 
 def test_TypeError_is_raised_when_step_is_not_int():
@@ -223,5 +228,34 @@ def test_output_get_feature_importances_when_pipeline_RandomForestRegressor():
                    'feature': ['lag_1', 'lag_2', 'lag_3'],
                    'importance': np.array([0.5, 0.5, 0.0])
                })
+    
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_output_get_feature_importances_when_window_features():
+    """
+    Test output of get_feature_importances when regressor is LGMBRegressor with 
+    lags=3 and window features.
+    """
+    y_datetime = y.copy()
+    y_datetime.index = pd.date_range(start='2001-01-01', periods=len(y_datetime), freq='D')
+    exog_datetime = exog.copy()
+    exog_datetime.index = pd.date_range(start='2001-01-01', periods=len(exog_datetime), freq='D')
+    
+    rolling = RollingFeatures(stats=['mean', 'sum'], window_sizes=[3, 5])
+    forecaster = ForecasterAutoregDirect(
+                     regressor       = LGBMRegressor(verbose=-1, random_state=123),
+                     steps           = 3,
+                     lags            = 3,
+                     window_features = rolling
+                 )
+    forecaster.fit(y=y_datetime, exog=exog_datetime)
+
+    results = forecaster.get_feature_importances(step=2, sort_importance=False)
+    results = results.astype({'importance': float})
+    expected = pd.DataFrame({
+                   'feature': ['lag_1', 'lag_2', 'lag_3', 'roll_mean_3', 'roll_sum_5', 'exog'],
+                   'importance': np.array([13., 23., 1., 17., 33., 13.])
+               }).astype({'importance': float})
     
     pd.testing.assert_frame_equal(results, expected)
