@@ -13,7 +13,7 @@ nav:
   - Home: 
     - Welcome to skforecast: README.md
   
-  - Introduction to forecasting: introduction-forecasting/introduction-forecasting.md
+  - Intro to Forecasting: introduction-forecasting/introduction-forecasting.md
   
   - Quick start:
     - Quick start: quick-start/quick-start-skforecast.ipynb
@@ -23,6 +23,7 @@ nav:
 
   - User Guides:
     - Table of contents: user_guides/table-of-contents.md
+    - Skforecast 0.14 Migration guide: user_guides/migration-guide.md
     - Input data: user_guides/input-data.ipynb
     - Single series Forecasters:
       - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
@@ -30,9 +31,9 @@ nav:
       - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
       - Foreasting baseline: user_guides/forecasting-baseline.ipynb
     - Global Forecasters (multiple series):
-      - Independent multi-time series forecasting": user_guides/independent-multi-time-series-forecasting.ipynb
-      - Series with different lengths and different exogenous variables": user_guides/multi-series-with-different-length-and-different_exog.ipynb
-      - Dependent multivariate series forecasting": user_guides/dependent-multi-series-multivariate-forecasting.ipynb
+      - Independent multi-time series forecasting: user_guides/independent-multi-time-series-forecasting.ipynb
+      - Series with different lengths and different exogenous variables: user_guides/multi-series-with-different-length-and-different_exog.ipynb
+      - Dependent multivariate series forecasting: user_guides/dependent-multi-series-multivariate-forecasting.ipynb
       - Deep learning Recurrent Neural Networks: user_guides/forecasting-with-deep-learning-rnn-lstm.ipynb
     - Feature Engineering:
       - Exogenous variables: user_guides/exogenous-variables.ipynb
