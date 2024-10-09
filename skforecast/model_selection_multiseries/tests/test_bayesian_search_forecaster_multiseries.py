@@ -458,7 +458,6 @@ def test_results_output_bayesian_search_forecaster_multivariate_ForecasterAutore
                      lags      = 2,
                      steps     = 3
                  )
-
     cv = TimeSeriesFold(
             initial_train_size = len(series) - 12,
             steps              = 3,
@@ -536,8 +535,9 @@ def test_output_bayesian_search_forecaster_multiseries_ForecasterAutoregMultiVar
                     transformer_series = StandardScaler(),
                     transformer_exog   = StandardScaler(),
                 )
-
-    initial_train_size = 1000
+    cv = OneStepAheadFold(
+            initial_train_size = 1000,
+    )
 
     def search_space(trial):
         search_space  = {
@@ -551,11 +551,10 @@ def test_output_bayesian_search_forecaster_multiseries_ForecasterAutoregMultiVar
         forecaster         = forecaster,
         series             = series_item_sales,
         exog               = exog_item_sales,
+        cv                 = cv,
         search_space       = search_space,
         n_trials           = 5,
         metric             = metrics,
-        initial_train_size = initial_train_size,
-        method             = 'one_step_ahead',
         aggregate_metric   = ["average", "weighted_average", "pooling"],
         return_best        = False,
         n_jobs             = 'auto',
@@ -632,7 +631,9 @@ def test_output_bayesian_search_forecaster_multiseries_ForecasterAutoregMultiSer
             dropna_from_series = False,
         )
 
-    initial_train_size = 1000
+    cv = OneStepAheadFold(
+            initial_train_size = 1000,
+    )
     levels = ["item_1", "item_2", "item_3"]
 
     def search_space(trial):
@@ -648,11 +649,10 @@ def test_output_bayesian_search_forecaster_multiseries_ForecasterAutoregMultiSer
         series             = series_item_sales,
         exog               = exog_item_sales,
         search_space       = search_space,
+        cv                 = cv,
         n_trials           = 5,
         metric             = metrics,
         levels             = levels,
-        initial_train_size = initial_train_size,
-        method             = 'one_step_ahead',
         aggregate_metric   = ["average", "weighted_average", "pooling"],
         return_best        = False,
         n_jobs             = 'auto',
