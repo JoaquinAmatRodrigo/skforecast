@@ -324,7 +324,7 @@ def _evaluate_grid_hyperparameters(
     output_file: Optional[str] = None
 ) -> pd.DataFrame:
     """
-    Evaluate parameter values for a Forecaster object using time series backtesting.
+    Evaluate parameter values for a Forecaster object.
     
     Parameters
     ----------
@@ -572,8 +572,7 @@ def bayesian_search_forecaster(
     kwargs_study_optimize: dict = {}
 ) -> Tuple[pd.DataFrame, object]:
     """
-    Bayesian optimization for a Forecaster object using time series backtesting and 
-    optuna library.
+    Bayesian search for hyperparameters of a Forecaster object.
     
     Parameters
     ----------
@@ -689,8 +688,7 @@ def _bayesian_search_optuna(
     kwargs_study_optimize: dict = {}
 ) -> Tuple[pd.DataFrame, object]:
     """
-    Bayesian optimization for a Forecaster object using time series backtesting 
-    and optuna library.
+    Bayesian search for hyperparameters of a Forecaster object using optuna library.
     
     Parameters
     ----------
