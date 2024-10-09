@@ -1938,9 +1938,9 @@ class ForecasterAutoreg(ForecasterBase):
 
         if self.window_features is None and lags is None:
             raise ValueError(
-                ("At least one of the arguments `lags` or `window_features` "
-                 "must be different from None. This is required to create the "
-                 "predictors used in training the forecaster.")
+                "At least one of the arguments `lags` or `window_features` "
+                "must be different from None. This is required to create the "
+                "predictors used in training the forecaster."
             )
         
         self.lags, self.lags_names, self.max_lag = initialize_lags(type(self).__name__, lags)
@@ -1975,9 +1975,9 @@ class ForecasterAutoreg(ForecasterBase):
 
         if window_features is None and self.lags is None:
             raise ValueError(
-                ("At least one of the arguments `lags` or `window_features` "
-                 "must be different from None. This is required to create the "
-                 "predictors used in training the forecaster.")
+                "At least one of the arguments `lags` or `window_features` "
+                "must be different from None. This is required to create the "
+                "predictors used in training the forecaster."
             )
         
         self.window_features, self.window_features_names, self.max_size_window_features = (
@@ -1993,7 +1993,7 @@ class ForecasterAutoreg(ForecasterBase):
              if ws is not None]
         )
         if self.differentiation is not None:
-            self.window_size += self.differentiation   
+            self.window_size += self.differentiation
 
     # TODO: See what happen when forecaster has diff
     def set_out_sample_residuals(

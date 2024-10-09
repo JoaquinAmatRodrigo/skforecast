@@ -2477,20 +2477,21 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     def set_lags(
         self, 
-        lags: Union[int, list, np.ndarray, range]
+        lags: Optional[Union[int, np.ndarray, list, range]] = None
     ) -> None:
         """
-        Set new value to the attribute `lags`. Attributes `max_lag` and 
-        `window_size` are also updated.
+        Set new value to the attribute `lags`. Attributes `lags_names`, 
+        `max_lag` and `window_size` are also updated.
         
         Parameters
         ----------
-        lags : int, list, numpy ndarray, range
-            Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
-
+        lags : int, list, numpy ndarray, range, default `None`
+            Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1. 
+        
             - `int`: include lags from 1 to `lags` (included).
             - `list`, `1d numpy ndarray` or `range`: include only lags present in 
             `lags`, all elements must be int.
+            - `None`: no lags are included as predictors. 
 
         Returns
         -------
@@ -2498,8 +2499,62 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         
         """
 
-        self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
-        self.window_size = max(self.lags)
+        if self.window_features is None and lags is None:
+            raise ValueError(
+                "At least one of the arguments `lags` or `window_features` "
+                "must be different from None. This is required to create the "
+                "predictors used in training the forecaster."
+            )
+        
+        self.lags, self.lags_names, self.max_lag = initialize_lags(type(self).__name__, lags)
+        self.window_size = max(
+            [ws for ws in [self.max_lag, self.max_size_window_features] 
+             if ws is not None]
+        )
+        if self.differentiation is not None:
+            self.window_size += self.differentiation
+
+
+    def set_window_features(
+        self, 
+        window_features: Optional[Union[object, list]] = None
+    ) -> None:
+        """
+        Set new value to the attribute `window_features`. Attributes 
+        `max_size_window_features`, `window_features_names`, 
+        `window_features_class_names` and `window_size` are also updated.
+        
+        Parameters
+        ----------
+        window_features : object, list, default `None`
+            Instance or list of instances used to create window features. Window features
+            are created from the original time series and are included as predictors.
+
+        Returns
+        -------
+        None
+        
+        """
+
+        if window_features is None and self.lags is None:
+            raise ValueError(
+                "At least one of the arguments `lags` or `window_features` "
+                "must be different from None. This is required to create the "
+                "predictors used in training the forecaster."
+            )
+        
+        self.window_features, self.window_features_names, self.max_size_window_features = (
+            initialize_window_features(window_features)
+        )
+        self.window_features_class_names = None
+        if window_features is not None:
+            self.window_features_class_names = [
+                type(wf).__name__ for wf in self.window_features
+            ] 
+        self.window_size = max(
+            [ws for ws in [self.max_lag, self.max_size_window_features] 
+             if ws is not None]
+        )
         if self.differentiation is not None:
             self.window_size += self.differentiation
 

@@ -2,11 +2,27 @@
 # ==============================================================================
 import re
 import pytest
-import numpy as np
-import pandas as pd
 from sklearn.linear_model import LinearRegression 
 from skforecast.preprocessing import RollingFeatures
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
+
+
+def test_set_window_features_ValueError_when_window_features_set_to_None_and_lags_is_None():
+    """
+    Test ValueError is raised when window_features is set to None and lags is None.
+    """
+    rolling = RollingFeatures(stats='mean', window_sizes=6)
+    forecaster = ForecasterAutoreg(
+        LinearRegression(), lags=None, window_features=rolling
+    )
+
+    err_msg = re.escape(
+        "At least one of the arguments `lags` or `window_features` "
+        "must be different from None. This is required to create the "
+        "predictors used in training the forecaster."
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.set_window_features(window_features=None)
 
 
 @pytest.mark.parametrize("wf", 

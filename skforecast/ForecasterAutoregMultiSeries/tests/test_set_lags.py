@@ -3,46 +3,40 @@
 import re
 import pytest
 import numpy as np
-import pandas as pd
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 
-def test_set_lags_when_lags_argument_is_int():
+def test_set_lags_ValueError_when_lags_set_to_None_and_window_features_is_None():
     """
-    Test how lags and max_lag attributes change when lags argument is integer
-    positive (5).
+    Test ValueError is raised when lags is set to None and window_features is None.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3)
-    forecaster.set_lags(lags=5)
+    forecaster = ForecasterAutoregMultiSeries(
+        LinearRegression(), lags=3, window_features=None
+    )
 
-    assert (forecaster.lags == np.array([1, 2, 3, 4, 5])).all()
-    assert forecaster.max_lag == 5
-    assert forecaster.window_size == 5
+    err_msg = re.escape(
+        "At least one of the arguments `lags` or `window_features` "
+        "must be different from None. This is required to create the "
+        "predictors used in training the forecaster."
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster.set_lags(lags=None)
 
 
-def test_set_lags_when_lags_argument_is_list():
+@pytest.mark.parametrize("lags", 
+                         [3, [1, 2, 3], np.array([1, 2, 3]), range(1, 4)],
+                         ids = lambda lags: f'lags: {lags}')
+def test_set_lags_with_different_inputs(lags):
     """
-    Test how lags and max_lag attributes change when lags argument is a list
-    of positive integers.
+    Test how lags and max_lag attributes change with lags argument of different types.
     """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=2)
-    forecaster.set_lags(lags=[1, 2, 3])
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+    forecaster.set_lags(lags=lags)
 
-    assert (forecaster.lags == np.array([1, 2, 3])).all()
-    assert forecaster.max_lag == 3
-    assert forecaster.window_size == 3
-
-
-def test_set_lags_when_lags_argument_is_1d_numpy_array():
-    """
-    Test how lags and max_lag attributes change when lags argument is 1d numpy
-    array of positive integers.
-    """
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=2)
-    forecaster.set_lags(lags=np.array([1, 2, 3]))
-    
-    assert (forecaster.lags == np.array([1, 2, 3])).all()
+    np.testing.assert_array_almost_equal(forecaster.lags, np.array([1, 2, 3]))
+    assert forecaster.lags_names == ['lag_1', 'lag_2', 'lag_3']
     assert forecaster.max_lag == 3
     assert forecaster.window_size == 3
 
@@ -59,6 +53,27 @@ def test_set_lags_when_differentiation_is_not_None():
     
     forecaster.set_lags(lags=5)
 
-    assert (forecaster.lags == np.array([1, 2, 3, 4, 5])).all()
+    np.testing.assert_array_almost_equal(forecaster.lags, np.array([1, 2, 3, 4, 5]))
+    assert forecaster.lags_names == ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
     assert forecaster.max_lag == 5
     assert forecaster.window_size == 5 + 1
+
+
+def test_set_lags_to_None():
+    """
+    Test how lags and max_lag attributes change when lags is set to None.
+    """
+    rolling = RollingFeatures(stats='mean', window_sizes=3)
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor       = LinearRegression(),
+                     lags            = 5,
+                     window_features = rolling
+                 )
+    
+    forecaster.set_lags(lags=None)
+
+    assert forecaster.lags is None
+    assert forecaster.lags_names is None
+    assert forecaster.max_lag is None
+    assert forecaster.max_size_window_features == 3
+    assert forecaster.window_size == 3
