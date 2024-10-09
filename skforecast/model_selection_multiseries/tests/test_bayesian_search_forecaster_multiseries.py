@@ -13,6 +13,7 @@ from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import bayesian_search_forecaster_multiseries
+from skforecast.model_selection._split import TimeSeriesFold, OneStepAheadFold
 from sklearn.metrics import mean_absolute_percentage_error
 from skforecast.metrics import mean_absolute_scaled_error
 
@@ -41,6 +42,12 @@ def test_ValueError_bayesian_search_forecaster_multiseries_when_return_best_and_
                      lags      = 2,
                      encoding  = 'onehot'
                  )
+    cv = TimeSeriesFold(
+            initial_train_size = len(series[:-12]),
+            steps              = 3,
+            refit              = True,
+            fixed_train_size   = True
+    )
     exog = series[:30].copy()
 
     def search_space(trial):  # pragma: no cover
@@ -57,13 +64,10 @@ def test_ValueError_bayesian_search_forecaster_multiseries_when_return_best_and_
             forecaster         = forecaster,
             series             = series,
             exog               = exog,
+            cv                 = cv,
             search_space       = search_space,
-            steps              = 3,
             metric             = 'mean_absolute_error',
             aggregate_metric   = 'weighted_average',
-            refit              = True,
-            initial_train_size = len(series[:-12]),
-            fixed_train_size   = True,
             n_trials           = 10,
             random_state       = 123,
             return_best        = True,
@@ -82,8 +86,12 @@ def test_results_output_bayesian_search_forecaster_multiseries_ForecasterAutoreg
                      encoding  = 'onehot',
                      transformer_series = StandardScaler()
                  )
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series[:-12]),
+            steps              = 3,
+            refit              = False,
+            fixed_train_size   = True
+    )
 
     def search_space(trial):
         search_space  = {
@@ -96,12 +104,10 @@ def test_results_output_bayesian_search_forecaster_multiseries_ForecasterAutoreg
     results = bayesian_search_forecaster_multiseries(
                   forecaster         = forecaster,
                   series             = series,
-                  steps              = steps,
+                  cv                 = cv,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
                   aggregate_metric   = 'weighted_average',
-                  refit              = False,
-                  initial_train_size = len(series) - n_validation,
                   n_trials           = 10,
                   random_state       = 123,
                   return_best        = False,
@@ -160,7 +166,12 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
         transformer_series=StandardScaler(),
         transformer_exog=StandardScaler(),
     )
-
+    cv = TimeSeriesFold(
+            initial_train_size = len(series_dict_train["id_1000"]),
+            steps              = 24,
+            refit              = False,
+            fixed_train_size   = True
+    )
     lags_grid = [[5], [1, 7, 14]]
 
     def search_space(trial):
@@ -175,16 +186,14 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning, module="optuna")
 
-        results_search, best_trial = bayesian_search_forecaster_multiseries(
+        results_search, _ = bayesian_search_forecaster_multiseries(
             forecaster         = forecaster,
             series             = series_dict,
             exog               = exog_dict,
+            cv                 = cv,
             search_space       = search_space,
             metric             = "mean_absolute_error",
             aggregate_metric   = "weighted_average",
-            initial_train_size = len(series_dict_train["id_1000"]),
-            steps              = 24,
-            refit              = False,
             n_trials           = 3,
             return_best        = False,
             show_progress      = False,
@@ -268,6 +277,11 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_mult
         transformer_exog=StandardScaler(),
     )
 
+    cv = TimeSeriesFold(
+            initial_train_size = len(series_dict_train["id_1000"]),
+            steps              = 24,
+            refit              = False,
+    )
     lags_grid = [[5], [1, 7, 14]]
 
     def search_space(trial):
@@ -285,13 +299,11 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_mult
         results_search, _ = bayesian_search_forecaster_multiseries(
             forecaster         = forecaster,
             series             = series_dict,
+            cv                 = cv,
             exog               = exog_dict,
             search_space       = search_space,
             metric             = ['mean_absolute_error', 'mean_absolute_scaled_error'],
             aggregate_metric   = ['weighted_average', 'average', 'pooling'],
-            initial_train_size = len(series_dict_train["id_1000"]),
-            steps              = 24,
-            refit              = False,
             n_trials           = 3,
             return_best        = False,
             show_progress      = False,
@@ -366,7 +378,12 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
         transformer_series=StandardScaler(),
         transformer_exog=StandardScaler(),
     )
-
+    cv = TimeSeriesFold(
+            initial_train_size = len(series_dict_train["id_1000"]),
+            steps              = 24,
+            refit              = False,
+            skip_folds         = 2,
+    )
     lags_grid = [[5], [1, 7, 14]]
 
     def search_space(trial):
@@ -381,16 +398,13 @@ def test_output_bayesian_search_forecaster_multiseries_series_and_exog_dict_with
     with warnings.catch_warnings():
         warnings.filterwarnings("ignore", category=UserWarning, module="optuna")
         
-        results_search, best_trial = bayesian_search_forecaster_multiseries(
+        results_search, _ = bayesian_search_forecaster_multiseries(
             forecaster         = forecaster,
             series             = series_dict,
             exog               = exog_dict,
+            cv                 = cv,
             search_space       = search_space,
-            metric             = 'mean_absolute_error',
-            initial_train_size = len(series_dict_train['id_1000']),
-            steps              = 24,
-            refit              = False,
-            skip_folds         = 2,
+            metric             = 'mean_absolute_error',          
             n_trials           = 3,
             return_best        = False,
             show_progress      = False,
@@ -445,8 +459,11 @@ def test_results_output_bayesian_search_forecaster_multivariate_ForecasterAutore
                      steps     = 3
                  )
 
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            refit              = False,
+    )
 
     def search_space(trial):
         search_space  = {
@@ -459,12 +476,10 @@ def test_results_output_bayesian_search_forecaster_multivariate_ForecasterAutore
     results = bayesian_search_forecaster_multiseries(
                   forecaster         = forecaster,
                   series             = series,
-                  steps              = steps,
+                  cv                 = cv,
                   search_space       = search_space,
                   metric             = 'mean_absolute_error',
                   aggregate_metric   = 'weighted_average',
-                  refit              = False,
-                  initial_train_size = len(series) - n_validation,
                   n_trials           = 10,
                   random_state       = 123,
                   return_best        = False,
