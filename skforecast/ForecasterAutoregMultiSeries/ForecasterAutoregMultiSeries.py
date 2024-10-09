@@ -670,8 +670,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         # TODO: Continue from here, include window_features
 
 
-
-        X_train_autoreg = pd.concat(X_train_autoreg, axis=1)
+        if len(X_train_autoreg) == 1:
+            X_train_autoreg = X_train_autoreg[0]
+        else:
+            # if X_as_pandas:
+            X_train_autoreg = pd.concat(X_train_autoreg, axis=1)
+            # else:
+            #     X_train_autoreg = np.concatenate(X_train_autoreg, axis=1)
+        
         X_train_autoreg['_level_skforecast'] = series_name
 
         if ignore_exog:
