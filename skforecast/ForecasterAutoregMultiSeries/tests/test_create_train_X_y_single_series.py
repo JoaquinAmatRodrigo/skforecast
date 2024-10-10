@@ -37,6 +37,7 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_None(igno
             index   = pd.RangeIndex(start=3, stop=7, step=1),
             columns = ['lag_1', 'lag_2', 'lag_3', '_level_skforecast']
         ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float}),
+        None,
         pd.DataFrame(
             data    = np.nan,
             columns = ['_dummy_exog_col_to_keep_shape'],
@@ -51,11 +52,12 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_None(igno
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], type(None))
     if ignore_exog:
-        assert isinstance(results[1], type(None))
+        assert isinstance(results[2], type(None))
     else:
-        pd.testing.assert_frame_equal(results[1], expected[1])
-    pd.testing.assert_series_equal(results[2], expected[2])
+        pd.testing.assert_frame_equal(results[2], expected[2])
+    pd.testing.assert_series_equal(results[3], expected[3])
 
 
 def test_create_train_X_y_single_series_output_when_series_and_exog():
@@ -87,6 +89,7 @@ def test_create_train_X_y_single_series_output_when_series_and_exog():
                        '_level_skforecast']
         ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float,
                   'lag_4': float, 'lag_5': float}),
+        None,
         pd.DataFrame(
             data  = np.array([105., 106., 107., 108., 109.], dtype=float),
             index = pd.RangeIndex(start=5, stop=10, step=1),
@@ -100,8 +103,9 @@ def test_create_train_X_y_single_series_output_when_series_and_exog():
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
-    pd.testing.assert_series_equal(results[2], expected[2])
+    assert isinstance(results[1], type(None))
+    pd.testing.assert_frame_equal(results[2], expected[2])
+    pd.testing.assert_series_equal(results[3], expected[3])
 
 
 def test_create_train_X_y_single_series_output_when_series_10_and_exog_is_dataframe_of_category():
@@ -134,6 +138,7 @@ def test_create_train_X_y_single_series_output_when_series_10_and_exog_is_datafr
                        '_level_skforecast']
         ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float,
                   'lag_4': float, 'lag_5': float}),
+        None,
         pd.DataFrame(
             data  = np.array([15., 16., 17., 18., 19.], dtype=float),
             index = pd.RangeIndex(start=5, stop=10, step=1),
@@ -147,8 +152,9 @@ def test_create_train_X_y_single_series_output_when_series_10_and_exog_is_datafr
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
-    pd.testing.assert_series_equal(results[2], expected[2])
+    assert isinstance(results[1], type(None))
+    pd.testing.assert_frame_equal(results[2], expected[2])
+    pd.testing.assert_series_equal(results[3], expected[3])
 
 
 def test_create_train_X_y_single_series_output_when_series_and_exog_is_DataFrame_datetime_index():
@@ -182,6 +188,7 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_DataFrame
             index   = pd.date_range("1990-01-04", periods=4, freq='D'),
             columns = ['lag_1', 'lag_2', 'lag_3', '_level_skforecast']
         ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float}),
+        None,
         pd.DataFrame(
             data = np.array([[103., 1003.],
                              [104., 1004.],
@@ -198,8 +205,9 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_DataFrame
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
-    pd.testing.assert_series_equal(results[2], expected[2])
+    assert isinstance(results[1], type(None))
+    pd.testing.assert_frame_equal(results[2], expected[2])
+    pd.testing.assert_series_equal(results[3], expected[3])
 
 
 def test_create_train_X_y_single_series_output_when_series_and_exog_is_DataFrame_with_NaNs():
@@ -236,6 +244,7 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_DataFrame
                        '_level_skforecast']
         ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float,
                   'lag_4': float, 'lag_5': float}),
+        None,
         pd.DataFrame(
             data = np.array([[np.nan, 1005.],
                              [np.nan, 1006.],
@@ -253,8 +262,9 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_is_DataFrame
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
-    pd.testing.assert_series_equal(results[2], expected[2])
+    assert isinstance(results[1], type(None))
+    pd.testing.assert_frame_equal(results[2], expected[2])
+    pd.testing.assert_series_equal(results[3], expected[3])
 
 
 def test_create_train_X_y_single_series_output_when_transformer_and_fitted():
@@ -287,6 +297,7 @@ def test_create_train_X_y_single_series_output_when_transformer_and_fitted():
             columns = ['lag_1', 'lag_2', 'lag_3', '_level_skforecast']
         ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float}),
         None,
+        None,
         pd.Series(
             data  = np.array([1.625, 1.75, 1.875, 2., 2.125, 2.25]),
             index = pd.RangeIndex(start=3, stop=9, step=1),
@@ -297,12 +308,13 @@ def test_create_train_X_y_single_series_output_when_transformer_and_fitted():
 
     pd.testing.assert_frame_equal(results[0], expected[0])
     assert isinstance(results[1], type(None))
-    pd.testing.assert_series_equal(results[2], expected[2])
+    assert isinstance(results[2], type(None))
+    pd.testing.assert_series_equal(results[3], expected[3])
 
 
 @pytest.mark.parametrize("is_fitted", 
                          [True, False], 
-                         ids = lambda is_fitted : f'is_fitted: {is_fitted}')
+                         ids = lambda is_fitted: f'is_fitted: {is_fitted}')
 def test_create_train_X_y_single_series_output_when_series_and_exog_and_differentitation_1(is_fitted):
     """
     Test the output of _create_train_X_y_single_series when exog is a 
@@ -335,6 +347,7 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_and_differen
                        '_level_skforecast']
         ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float,
                   'lag_4': float, 'lag_5': float}),
+        None,
         pd.DataFrame(
             data  = np.array([106., 107., 108., 109.], dtype=float),
             index = pd.RangeIndex(start=6, stop=10, step=1),
@@ -348,8 +361,9 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_and_differen
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
-    pd.testing.assert_series_equal(results[2], expected[2])
+    assert isinstance(results[1], type(None))
+    pd.testing.assert_frame_equal(results[2], expected[2])
+    pd.testing.assert_series_equal(results[3], expected[3])
 
 
 @pytest.mark.parametrize("is_fitted", 
@@ -386,6 +400,7 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_and_differen
                        '_level_skforecast']
         ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float,
                   'lag_4': float, 'lag_5': float}),
+        None,
         pd.DataFrame(
             data  = np.array([107., 108., 109.], dtype=float),
             index = pd.RangeIndex(start=7, stop=10, step=1),
@@ -399,5 +414,6 @@ def test_create_train_X_y_single_series_output_when_series_and_exog_and_differen
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])
-    pd.testing.assert_frame_equal(results[1], expected[1])
-    pd.testing.assert_series_equal(results[2], expected[2])
+    assert isinstance(results[1], type(None))
+    pd.testing.assert_frame_equal(results[2], expected[2])
+    pd.testing.assert_series_equal(results[3], expected[3])

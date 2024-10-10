@@ -1677,13 +1677,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 index_freq_      = self.index_freq_,
                 window_size      = self.window_size,
                 last_window      = last_window,
-                last_window_exog = None,
                 exog             = exog,
                 exog_type_in_    = self.exog_type_in_,
                 exog_names_in_   = self.exog_names_in_,
                 interval         = None,
-                alpha            = None,
-                max_steps        = None,
                 levels           = levels,
                 series_names_in_ = self.series_names_in_,
                 encoding         = self.encoding
@@ -1817,8 +1814,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
 
         n_levels = len(levels)
-        lags_shape = len(self.lags)
-        exog_shape = len(self.X_train_exog_names_out_) if exog_values_dict is not None else 0
+        n_lags = len(self.lags) if self.lags is not None else 0
+        n_window_features = (
+            len(self.X_train_window_features_names_out_) if self.window_features is not None else 0
+        )
+        n_autoreg = n_lags + n_window_features
+        n_exog = len(self.X_train_exog_names_out_) if exog_values_dict is not None else 0
 
         if self.encoding is not None:
             if self.encoding == "onehot":
@@ -1837,20 +1838,30 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         else:
             levels_encoded_shape = 0
 
-        features_shape = lags_shape + levels_encoded_shape + exog_shape
-        features = np.full(shape=(n_levels, features_shape), fill_value=np.nan, dtype=float)
+        features_shape = n_autoreg + levels_encoded_shape + n_exog
+        features = np.full(
+            shape=(n_levels, features_shape), fill_value=np.nan, order='F', dtype=float
+        )
         if self.encoding is not None:
-            features[:, lags_shape : lags_shape + levels_encoded_shape] = levels_encoded
+            features[:, n_autoreg: n_autoreg + levels_encoded_shape] = levels_encoded
 
-        predictions = np.full(shape=(steps, n_levels), fill_value=np.nan, dtype=float)
+        predictions = np.full(
+            shape=(steps, n_levels), fill_value=np.nan, order='C', dtype=float
+        )
         last_window = np.concatenate((last_window.to_numpy(), predictions), axis=0)
 
         for i in range(steps):
-
-            step = i + 1
-            features[:, :lags_shape] = last_window[-self.lags - (steps - i), :].transpose()
+            
+            if self.lags is not None:
+                features[:, :n_lags] = last_window[-self.lags - (steps - i), :].transpose()
+            if self.window_features is not None:
+                print(last_window[i:-(steps - i), :])
+                features[:, n_lags:n_autoreg] = np.concatenate(
+                    [wf.transform(last_window[i:-(steps - i), :]) for wf in self.window_features]
+                )
+            print(features)
             if exog_values_dict is not None:
-                features[:, -exog_shape:] = exog_values_dict[step]
+                features[:, -n_exog:] = exog_values_dict[i + 1]
 
             with warnings.catch_warnings():
                 # Suppress scikit-learn warning: "X does not have valid feature names,

@@ -1185,8 +1185,7 @@ class ForecasterAutoreg(ForecasterBase):
                 exog             = exog,
                 exog_type_in_    = self.exog_type_in_,
                 exog_names_in_   = self.exog_names_in_,
-                interval         = None,
-                max_steps        = None
+                interval         = None
             )
         
             if predict_boot and not use_in_sample_residuals:
