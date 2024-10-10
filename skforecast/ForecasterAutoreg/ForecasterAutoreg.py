@@ -1334,7 +1334,7 @@ class ForecasterAutoreg(ForecasterBase):
         return predictions
 
 
-    def create_predict_X(
+    def create_predict_X_old(
         self,
         steps: int,
         last_window: Optional[Union[pd.Series, pd.DataFrame]] = None,
@@ -1375,6 +1375,82 @@ class ForecasterAutoreg(ForecasterBase):
         last_window_values, exog_values, prediction_index = self._create_predict_inputs(
             steps=steps, last_window=last_window, exog=exog, check_inputs=False
         )
+
+        X_predict = []
+        full_predictors = np.concatenate((last_window_values, predictions))
+
+        if self.lags is not None:
+            idx = np.arange(-steps, 0)[:, None] - self.lags
+            X_lags = full_predictors[idx + len(full_predictors)]
+            X_predict.append(X_lags)
+
+        if self.window_features is not None:
+            X_window_features = np.full(
+                shape      = (steps, len(self.X_train_window_features_names_out_)), 
+                fill_value = np.nan, 
+                order      = 'C',
+                dtype      = float
+            )
+            for i in range(steps):
+                X_window_features[i, :] = np.concatenate(
+                    [wf.transform(full_predictors[i:-(steps - i)]) 
+                     for wf in self.window_features]
+                )
+            X_predict.append(X_window_features)
+
+        if exog is not None:
+            X_predict.append(exog_values)
+
+        X_predict = pd.DataFrame(
+                        data    = np.concatenate(X_predict, axis=1),
+                        columns = self.X_train_features_names_out_,
+                        index   = prediction_index
+                    )
+
+        return X_predict
+
+
+    def create_predict_X(
+        self,
+        steps: int,
+        last_window: Optional[Union[pd.Series, pd.DataFrame]] = None,
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
+    ) -> pd.DataFrame:
+        """
+        Create the predictors needed to predict `steps` ahead. As it is a recursive
+        process, the predictors are created at each iteration of the prediction 
+        process.
+        
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        last_window : pandas Series, pandas DataFrame, default `None`
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
+            If `last_window = None`, the values stored in `self.last_window_` are
+            used to calculate the initial predictors, and the predictions start
+            right after training data.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s.
+
+        Returns
+        -------
+        X_predict : pandas DataFrame
+            Pandas DataFrame with the predictors for each step. The index 
+            is the same as the prediction index.
+        
+        """
+
+        last_window_values, exog_values, prediction_index = self._create_predict_inputs(
+            steps=steps, last_window=last_window, exog=exog
+        )
+        
+        predictions = self._recursive_predict(
+                          steps              = steps,
+                          last_window_values = last_window_values,
+                          exog_values        = exog_values
+                      )
 
         X_predict = []
         full_predictors = np.concatenate((last_window_values, predictions))

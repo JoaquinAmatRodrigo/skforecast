@@ -24,6 +24,8 @@ The main changes in this release are:
 
 + <span class="badge text-bg-api-change">API Change</span> The `pmdarima.ARIMA` regressor is no longer supported by the <code>[ForecasterSarimax]</code>. You can use the `skforecast.Sarimax.Sarimax` model or, to continue using it, use skforecast 0.13.0 or lower.
 
++ <span class="badge text-bg-danger">Fix</span> Fixed a bug where the `create_predict_X` method in recursive Forecasters did not correctly generate the matrix correctly when using transformations and/or differentiations
+
 
 **Added**
 
@@ -141,7 +143,7 @@ The main changes in this release are:
 
 **Fixed**
 
-+ ...
++ Fixed a bug where the `create_predict_X` method in recursive Forecasters did not correctly generate the matrix correctly when using transformations and/or differentiations.
 
 
 ## 0.13.0 <small>Aug 01, 2024</small> { id="0.13.0" }

@@ -1847,7 +1847,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if self.window_features is not None:
                 features[:, n_lags:n_autoreg] = np.concatenate(
                     [wf.transform(last_window[i:-(steps - i), :]) 
-                     for wf in self.window_features]
+                     for wf in self.window_features],
+                    axis=1
                 )
             if exog_values_dict is not None:
                 features[:, -n_exog:] = exog_values_dict[i + 1]
@@ -1917,14 +1918,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
         set_skforecast_warnings(suppress_warnings, action='ignore')
 
-        predictions = self.predict(
-                          steps             = steps,
-                          levels            = levels,
-                          last_window       = last_window,
-                          exog              = exog,
-                          suppress_warnings = suppress_warnings
-                      )
-
         (
             last_window,
             exog_values_dict,
@@ -1935,9 +1928,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             steps        = steps,
             levels       = levels,
             last_window  = last_window,
-            exog         = exog,
-            check_inputs = False
+            exog         = exog
         )
+  
+        predictions = self._recursive_predict(
+                          steps            = steps,
+                          levels           = levels,
+                          last_window      = last_window,
+                          exog_values_dict = exog_values_dict
+                      )
         
         X_predict_dict = {}
         if self.lags is not None:
@@ -1949,7 +1948,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
             X_predict_level = []
             full_predictors = np.concatenate(
-                (last_window[level].to_numpy(), predictions[level].to_numpy())
+                (last_window[level].to_numpy(), predictions[:, i])
             )
 
             if self.lags is not None:
