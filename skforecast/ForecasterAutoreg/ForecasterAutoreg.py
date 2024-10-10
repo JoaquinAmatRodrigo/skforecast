@@ -1298,7 +1298,8 @@ class ForecasterAutoreg(ForecasterBase):
                 X[:n_lags] = last_window[-self.lags - (steps - i)]
             if self.window_features is not None:
                 X[n_lags:n_lags + n_window_features] = np.concatenate(
-                    [wf.transform(last_window[i:-(steps - i)]) for wf in self.window_features]
+                    [wf.transform(last_window[i:-(steps - i)]) 
+                     for wf in self.window_features]
                 )
             if exog_values is not None:
                 X[n_lags + n_window_features:] = exog_values[i]

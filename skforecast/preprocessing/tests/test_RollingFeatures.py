@@ -372,25 +372,29 @@ def test_RollingFeatures_transform():
     np.testing.assert_array_almost_equal(rolling_features, expected)
 
 
+def test_RollingFeatures_transform_2d():
+    """
+    Test RollingFeatures transform method with 2 dimensions.
+    """
+
+    X_2d = np.tile(X.to_numpy(), (2, 1)).T
+
+    stats = ['mean', 'std', 'min', 'max', 'sum', 'median', 
+             'ratio_min_max', 'coef_variation']
+    rolling = RollingFeatures(stats=stats, window_sizes=4)
+    rolling_features = rolling.transform(X_2d)
+    
+    expected = np.array([0.65024343, 0.23013666, 0.48303426, 0.98555979, 
+                         2.6009737 , 0.56618983, 0.49011157, 0.35392385])
+    expected = np.array([expected, expected])
+
+    np.testing.assert_array_almost_equal(rolling_features, expected)
+
+
 def test_RollingFeatures_transform_with_nans():
     """
     Test RollingFeatures transform method with nans.
     """
-    X = pd.Series(
-    data = np.array(
-                [0.69646919, 0.28613933, 0.22685145, 0.55131477, 0.71946897,
-                 0.42310646, 0.9807642 , 0.68482974, 0.4809319 , 0.39211752,
-                 0.34317802, 0.72904971, 0.43857224, 0.0596779 , 0.39804426,
-                 0.73799541, 0.18249173, 0.17545176, 0.53155137, 0.53182759,
-                 0.63440096, 0.84943179, 0.72445532, 0.61102351, 0.72244338,
-                 0.32295891, 0.36178866, 0.22826323, 0.29371405, 0.63097612,
-                 0.09210494, 0.43370117, 0.43086276, 0.4936851 , 0.42583029,
-                 0.31226122, 0.42635131, 0.89338916, 0.94416002, 0.50183668,
-                 0.62395295, 0.1156184 , 0.31728548, 0.41482621, 0.86630916,
-                 0.25045537, 0.48303426, 0.98555979, 0.51948512, 0.61289453
-           ]),
-    name = 'X'
-    )
     
     X_nans = X.to_numpy()
     X_nans[-7] = np.nan
@@ -403,5 +407,29 @@ def test_RollingFeatures_transform_with_nans():
     
     expected = np.array([0.53051056, 0.28145959, 0.11561840, 0.98555979, 
                          7.85259345, 0.56618983, 0.49011157, 0.35392385])
+
+    np.testing.assert_array_almost_equal(rolling_features, expected)
+
+
+def test_RollingFeatures_transform_with_nans_2d():
+    """
+    Test RollingFeatures transform method with nans and 2 dimensions.
+    """
+    
+    X_2d_nans = np.tile(X.to_numpy(), (2, 1)).T
+    X_2d_nans[-7, 0] = np.nan
+    X_2d_nans[-5, 1] = np.nan
+
+    stats = ['mean', 'std', 'min', 'max', 'sum', 'median', 
+             'ratio_min_max', 'coef_variation']
+    window_sizes = [10, 10, 15, 4, 15, 4, 4, 4]
+    rolling = RollingFeatures(stats=stats, window_sizes=window_sizes)
+    rolling_features = rolling.transform(X_2d_nans)
+    
+    expected_0 = np.array([0.53051056, 0.28145959, 0.11561840, 0.98555979, 
+                           7.85259345, 0.56618983, 0.49011157, 0.35392385])
+    expected_1 = np.array([0.548774, 0.26592 , 0.115618, 0.98556, 
+                           8.016964, 0.56618983, 0.49011157, 0.35392385])
+    expected = np.array([expected_0, expected_1])
 
     np.testing.assert_array_almost_equal(rolling_features, expected)

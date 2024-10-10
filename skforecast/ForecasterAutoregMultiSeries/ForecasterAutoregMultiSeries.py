@@ -673,11 +673,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         X_train_lags : pandas DataFrame
             Training values of lags.
             Shape: (len(y) - self.max_lag, len(self.lags))
+        X_train_window_features_names_out_ : list
+            Names of the window features.
         X_train_exog : pandas DataFrame
             Training values of exogenous variables.
             Shape: (len(y) - self.max_lag, len(exog.columns))
-        X_train_window_features_names_out_ : list
-            Names of the window features.
         y_train : pandas Series
             Values (target) of the time series related to each row of `X_train`.
             Shape: (len(y) - self.max_lag, )
@@ -722,7 +722,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         X_train_autoreg = []
         train_index = y_index[self.window_size:]
 
-        # TODO: See if we can use numpy arrays instead of pandas DataFrames
         X_train_lags, y_train = self._create_lags(
             y=y_values, X_as_pandas=True, train_index=train_index
         )
@@ -743,10 +742,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         if len(X_train_autoreg) == 1:
             X_train_autoreg = X_train_autoreg[0]
         else:
-            # if X_as_pandas:
             X_train_autoreg = pd.concat(X_train_autoreg, axis=1)
-            # else:
-            #     X_train_autoreg = np.concatenate(X_train_autoreg, axis=1)
         
         X_train_autoreg['_level_skforecast'] = series_name
 
@@ -769,13 +765,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                       index = train_index,
                       name  = 'y'
                   )
-
-        # TODO: See if needed
-        # if self.differentiation is not None:
-        #     X_train_lags = X_train_lags.iloc[self.differentiation:]
-        #     y_train = y_train.iloc[self.differentiation:]
-        #     if X_train_exog is not None:
-        #         X_train_exog = X_train_exog.iloc[self.differentiation:]
 
         return X_train_autoreg, X_train_window_features_names_out_, X_train_exog, y_train
 
@@ -931,7 +920,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 X_train_autoreg,
                 X_train_window_features_names_out_,
                 X_train_exog,
-                y_train,
+                y_train
             ) = self._create_train_X_y_single_series(
                 y           = matrices[0],
                 exog        = matrices[1],
@@ -1259,6 +1248,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.series_names_in_ = _series_names_in_
         self.exog_names_in_ = _exog_names_in_
 
+        # TODO: Check pd.Series.ravel(), deprecated
         if self.encoding in ["ordinal", "ordinal_category"]:
             X_train_encoding = self.encoder.inverse_transform(
                 X_train[["_level_skforecast"]]
@@ -1855,11 +1845,10 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             if self.lags is not None:
                 features[:, :n_lags] = last_window[-self.lags - (steps - i), :].transpose()
             if self.window_features is not None:
-                print(last_window[i:-(steps - i), :])
                 features[:, n_lags:n_autoreg] = np.concatenate(
-                    [wf.transform(last_window[i:-(steps - i), :]) for wf in self.window_features]
+                    [wf.transform(last_window[i:-(steps - i), :]) 
+                     for wf in self.window_features]
                 )
-            print(features)
             if exog_values_dict is not None:
                 features[:, -n_exog:] = exog_values_dict[i + 1]
 
@@ -1951,17 +1940,34 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         )
         
         X_predict_dict = {}
-        idx_lags = np.arange(-steps, 0)[:, None] - self.lags
+        if self.lags is not None:
+            idx_lags = np.arange(-steps, 0)[:, None] - self.lags
         len_X_train_series_names_in_ = len(self.X_train_series_names_in_)
         exog_shape = len(self.X_train_exog_names_out_) if exog is not None else 0
+
         for i, level in enumerate(levels):
             
-            X_predict_list = []
-
+            X_predict_level = []
             full_predictors = np.concatenate(
                 (last_window[level].to_numpy(), predictions[level].to_numpy())
             )
-            X_predict_list.append(full_predictors[idx_lags + len(full_predictors)])
+
+            if self.lags is not None:
+                X_predict_level.append(full_predictors[idx_lags + len(full_predictors)])
+
+            if self.window_features is not None:
+                X_window_features = np.full(
+                    shape      = (steps, len(self.X_train_window_features_names_out_)), 
+                    fill_value = np.nan, 
+                    order      = 'C',
+                    dtype      = float
+                )
+                for i in range(steps):
+                    X_window_features[i, :] = np.concatenate(
+                        [wf.transform(full_predictors[i:-(steps - i)]) 
+                         for wf in self.window_features]
+                    )
+                X_predict_level.append(X_window_features)
 
             if self.encoding is not None:
                 if self.encoding == 'onehot':
@@ -1971,17 +1977,18 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     level_encoded = np.array([self.encoding_mapping_.get(level, None)], dtype='float64')
 
                 level_encoded = np.tile(level_encoded, (steps, 1))
-                X_predict_list.append(level_encoded)
+                X_predict_level.append(level_encoded)
             
             if exog is not None:
-                exog_cols = np.full(shape=(steps, exog_shape), fill_value=np.nan, dtype=float)
+                exog_cols = np.full(
+                    shape=(steps, exog_shape), fill_value=np.nan, order='C', dtype=float
+                )
                 for j in range(steps):
-                    step = j + 1
-                    exog_cols[j, :] = exog_values_dict[step][i, :]
-                X_predict_list.append(exog_cols)
+                    exog_cols[j, :] = exog_values_dict[j + 1][i, :]
+                X_predict_level.append(exog_cols)
 
             X_predict_dict[level] = pd.DataFrame(
-                                        data    = np.concatenate(X_predict_list, axis=1),
+                                        data    = np.concatenate(X_predict_level, axis=1),
                                         columns = self.X_train_features_names_out_,
                                         index   = prediction_index
                                     )
