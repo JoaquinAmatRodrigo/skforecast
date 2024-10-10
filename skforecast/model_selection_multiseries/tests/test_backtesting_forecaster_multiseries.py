@@ -1575,12 +1575,11 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                      steps              = 3,
                      transformer_series = None
                  )
-
     cv = TimeSeriesFold(
             initial_train_size = len(series) - 12,
             steps              = 3,
             refit              = True,
-            fixed_train_size   = True,
+            fixed_train_size   = False,
         )
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
@@ -1590,9 +1589,6 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                levels                = 'l1',
                                                metric                = 'mean_absolute_error',
                                                add_aggregated_metric = False,
-                                               initial_train_size    = len(series) - n_validation,
-                                               refit                 = True,
-                                               fixed_train_size      = False,
                                                exog                  = None,
                                                n_jobs                = n_jobs,
                                                verbose               = False
@@ -1626,9 +1622,12 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                      steps              = 3,
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            refit              = True,
+            fixed_train_size   = False,
+        )
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
                                                forecaster            = forecaster,
@@ -1637,9 +1636,6 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                                                levels                = 'l1',
                                                metric                = ['mean_absolute_error', mean_absolute_error],
                                                add_aggregated_metric = False,
-                                               initial_train_size    = len(series) - n_validation,
-                                               refit                 = True,
-                                               fixed_train_size      = False,
                                                exog                  = None,
                                                verbose               = False
                                            )
@@ -1675,19 +1671,20 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                      transformer_series = None
                  )
 
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            refit              = False,
+            fixed_train_size   = False,
+        )
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
                                                forecaster              = forecaster,
                                                series                  = series,
-                                               steps                   = steps,
+                                               cv                      = cv,
                                                levels                  = ['l1'],
                                                metric                  = 'mean_absolute_error',
                                                add_aggregated_metric   = False,
-                                               initial_train_size      = len(series) - n_validation,
-                                               refit                   = False,
-                                               fixed_train_size        = False,
                                                exog                    = series['l1'].rename('exog_1'),
                                                interval                = [5, 95],
                                                n_boot                  = 500,
@@ -1733,20 +1730,20 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                      steps              = 3,
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            refit              = True,
+            fixed_train_size   = True,
+        )
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
                                                forecaster              = forecaster,
                                                series                  = series,
-                                               steps                   = steps,
+                                               cv                      = cv,
                                                levels                  = 'l1',
                                                metric                  = 'mean_absolute_error',
                                                add_aggregated_metric   = False,
-                                               initial_train_size      = len(series) - n_validation,
-                                               refit                   = True,
-                                               fixed_train_size        = True,
                                                exog                    = series['l1'].rename('exog_1'),
                                                interval                = [5, 95],
                                                n_boot                  = 500,
@@ -1792,22 +1789,21 @@ def test_output_backtesting_forecaster_multiseries_ForecasterAutoregMultiVariate
                      transformer_series = None
                  )
     
-    n_validation = 20
-    steps = 5
-    gap = 3
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 20,
+            steps              = 5,
+            gap                = 3,
+            refit              = False,
+            fixed_train_size   = False,
+        )
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
                                                forecaster              = forecaster,
                                                series                  = series,
-                                               steps                   = steps,
+                                               cv                      = cv,
                                                levels                  = 'l1',
                                                metric                  = 'mean_absolute_error',
                                                add_aggregated_metric   = False,
-                                               initial_train_size      = len(series) - n_validation,
-                                               gap                     = gap,
-                                               allow_incomplete_fold   = True,
-                                               refit                   = False,
-                                               fixed_train_size        = False,
                                                exog                    = series['l1'].rename('exog_1'),
                                                interval                = [5, 95],
                                                n_boot                  = 150,
