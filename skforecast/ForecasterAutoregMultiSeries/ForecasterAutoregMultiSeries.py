@@ -2057,7 +2057,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             exog         = exog,
             check_inputs = check_inputs
         )
-  
+
         predictions = self._recursive_predict(
                           steps            = steps,
                           levels           = levels,

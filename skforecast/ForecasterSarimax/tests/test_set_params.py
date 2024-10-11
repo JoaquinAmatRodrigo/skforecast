@@ -1,6 +1,6 @@
 # Unit test set_params ForecasterSarimax
 # ==============================================================================
-from skforecast.Sarimax import Sarimax
+from skforecast.sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 
 

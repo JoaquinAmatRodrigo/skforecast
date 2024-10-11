@@ -4,7 +4,8 @@ from ._split import (
 )
 from ._validation import (
     backtesting_forecaster,
-    backtesting_forecaster_multiseries
+    backtesting_forecaster_multiseries,
+    backtesting_sarimax
 )
 from ._search import (
     grid_search_forecaster,
@@ -12,5 +13,7 @@ from ._search import (
     bayesian_search_forecaster,
     grid_search_forecaster_multiseries,
     random_search_forecaster_multiseries,
-    bayesian_search_forecaster_multiseries
+    bayesian_search_forecaster_multiseries,
+    grid_search_sarimax,
+    random_search_sarimax
 )

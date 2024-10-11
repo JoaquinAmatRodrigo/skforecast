@@ -4,13 +4,14 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.exceptions import MissingValuesWarning
 from skforecast.exceptions import IgnoredArgumentWarning
 from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 
 def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
@@ -2655,5 +2656,126 @@ def test_create_train_X_y_output_when_series_and_exog_and_differentitation_1_and
     assert results[6] == expected[6]
     assert results[7] == expected[7]
     assert results[8] == expected[8]
+    for k in results[9].keys():
+        pd.testing.assert_series_equal(results[9][k], expected[9][k])
+
+
+def test_create_train_X_y_output_series_dict_and_exog_dict_window_features():
+    """
+    Test the output of _create_train_X_y when series is a dict and exog is a
+    dict with window features.
+    """
+    series = {
+        'l1': pd.Series(np.arange(10, dtype=float)), 
+        'l2': pd.Series(np.arange(15, 20, dtype=float)),
+        'l3': pd.Series(np.arange(20, 25, dtype=float))
+    }
+    series['l1'].loc[3] = np.nan
+    series['l2'].loc[2] = np.nan
+    series['l1'].index = pd.date_range("1990-01-01", periods=10, freq='D')
+    series['l2'].index = pd.date_range("1990-01-05", periods=5, freq='D')
+    series['l3'].index = pd.date_range("1990-01-03", periods=5, freq='D')
+
+    exog = {
+        'l1': pd.Series(np.arange(100, 110), name='exog_1', dtype=float),
+        'l2': None,
+        'l3': pd.DataFrame({'exog_1': np.arange(203, 209, dtype=float),
+                            'exog_2': ['a', 'b', 'a', 'b', 'a', 'b']})
+    }
+    exog['l1'].index = pd.date_range("1990-01-01", periods=10, freq='D')
+    exog['l3'].index = pd.date_range("1990-01-03", periods=6, freq='D')
+
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[3, 3])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[4])
+
+    forecaster = ForecasterAutoregMultiSeries(
+        LinearRegression(), lags=3,
+        encoding='onehot',
+        window_features=[rolling, rolling_2],
+        transformer_series=None,
+        dropna_from_series=False
+    )
+    results = forecaster._create_train_X_y(series=series, exog=exog)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[np.nan, 2., 1., np.nan, np.nan, np.nan, 1., 0., 0., 104., np.nan],
+                             [4., np.nan, 2., np.nan, np.nan, np.nan, 1., 0., 0., 105., np.nan],
+                             [5., 4., np.nan, np.nan, np.nan, np.nan, 1., 0., 0., 106., np.nan],
+                             [6., 5., 4., 5.0, 5.0, np.nan, 1., 0., 0., 107., np.nan],
+                             [7., 6., 5., 6.0, 6.0, 22.0, 1., 0., 0., 108., np.nan],
+                             [8., 7., 6., 7.0, 7.0, 26.0, 1., 0., 0., 109., np.nan],
+                             [18., np.nan, 16., np.nan, np.nan, np.nan, 0., 1., 0., np.nan, np.nan],
+                             [23., 22., 21., 22.0, 22.0, 86.0, 0., 0., 1., 207., 'a']]),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-05', '1990-01-06', '1990-01-07', '1990-01-08',
+                               '1990-01-09', '1990-01-10',
+                               '1990-01-09', '1990-01-07']
+                          )
+                      ),
+            columns = ['lag_1', 'lag_2', 'lag_3', 'roll_mean_3', 'roll_median_3', 'roll_sum_4',
+                       'l1', 'l2', 'l3', 'exog_1', 'exog_2']
+        ).astype({'lag_1': float, 'lag_2': float, 'lag_3': float, 
+                  'roll_mean_3': float, 'roll_median_3': float, 'roll_sum_4': float, 
+                  'l1': float, 'l2': float, 'l3': float, 'exog_1': float, 'exog_2': object}
+        ).astype({'l1': int, 'l2': int, 'l3': int}
+        ),
+        pd.Series(
+            data  = np.array([4., 5., 6., 7., 8., 9., 19., 24.]),
+            index = pd.Index(
+                        pd.DatetimeIndex(
+                            ['1990-01-05', '1990-01-06',
+                             '1990-01-07', '1990-01-08',
+                             '1990-01-09', '1990-01-10',
+                             '1990-01-09', '1990-01-07']
+                        )
+                    ),
+            name  = 'y',
+            dtype = float
+        ),
+        {'l1': pd.date_range("1990-01-01", periods=10, freq='D'),
+         'l2': pd.date_range("1990-01-05", periods=5, freq='D'),
+         'l3': pd.date_range("1990-01-03", periods=5, freq='D')},
+        ['l1', 'l2', 'l3'],
+        ['l1', 'l2', 'l3'],
+        ['exog_1', 'exog_2'],
+        ['roll_mean_3', 'roll_median_3', 'roll_sum_4'],
+        ['exog_1', 'exog_2'],
+        {'exog_1': exog['l1'].dtypes,
+         'exog_2': exog['l3'].dtypes},
+        {'l1': pd.Series(
+                   data  = np.array([6., 7., 8., 9.]),
+                   index = pd.date_range("1990-01-07", periods=4, freq='D'),
+                   name  = 'l1',
+                   dtype = float
+               ),
+         'l2': pd.Series(
+                   data  = np.array([16., np.nan, 18., 19.]),
+                   index = pd.date_range("1990-01-06", periods=4, freq='D'),
+                   name  = 'l2',
+                   dtype = float
+               ),
+         'l3': pd.Series(
+                   data  = np.array([21., 22., 23., 24.]),
+                   index = pd.date_range("1990-01-04", periods=4, freq='D'),
+                   name  = 'l3',
+                   dtype = float
+               )
+        }
+    )
+    expected[0].iloc[[0, 1, 2, 3, 4, 5, 6], -1] = np.nan
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    assert results[7] == expected[7]
+    for k in results[8].keys():
+        assert results[8][k] == expected[8][k]
     for k in results[9].keys():
         pd.testing.assert_series_equal(results[9][k], expected[9][k])
