@@ -364,7 +364,7 @@ def test_RollingFeatures_transform():
     stats = ['mean', 'std', 'min', 'max', 'sum', 'median', 
              'ratio_min_max', 'coef_variation']
     rolling = RollingFeatures(stats=stats, window_sizes=4)
-    rolling_features = rolling.transform(X.to_numpy())
+    rolling_features = rolling.transform(X.to_numpy(copy=True))
     
     expected = np.array([0.65024343, 0.23013666, 0.48303426, 0.98555979, 
                          2.6009737 , 0.56618983, 0.49011157, 0.35392385])
@@ -377,7 +377,8 @@ def test_RollingFeatures_transform_2d():
     Test RollingFeatures transform method with 2 dimensions.
     """
 
-    X_2d = np.tile(X.to_numpy(), (2, 1)).T
+    X_2d = X.to_numpy(copy=True)
+    X_2d = np.tile(X_2d, (2, 1)).T
 
     stats = ['mean', 'std', 'min', 'max', 'sum', 'median', 
              'ratio_min_max', 'coef_variation']
@@ -396,7 +397,7 @@ def test_RollingFeatures_transform_with_nans():
     Test RollingFeatures transform method with nans.
     """
     
-    X_nans = X.to_numpy()
+    X_nans = X.to_numpy(copy=True)
     X_nans[-7] = np.nan
 
     stats = ['mean', 'std', 'min', 'max', 'sum', 'median', 
@@ -416,7 +417,8 @@ def test_RollingFeatures_transform_with_nans_2d():
     Test RollingFeatures transform method with nans and 2 dimensions.
     """
     
-    X_2d_nans = np.tile(X.to_numpy(), (2, 1)).T
+    X_2d_nans = X.to_numpy(copy=True)
+    X_2d_nans = np.tile(X_2d_nans, (2, 1)).T
     X_2d_nans[-7, 0] = np.nan
     X_2d_nans[-5, 1] = np.nan
 
