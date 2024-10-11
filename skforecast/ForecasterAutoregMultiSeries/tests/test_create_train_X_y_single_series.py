@@ -1,5 +1,6 @@
 # Unit test _create_train_X_y_single_series ForecasterAutoregMultiSeries
 # ==============================================================================
+import re
 import pytest
 import numpy as np
 import pandas as pd
@@ -11,6 +12,38 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.preprocessing import MinMaxScaler
 from skforecast.preprocessing import RollingFeatures
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
+
+
+def test_create_train_X_y_single_series_ValueError_when_len_y_less_than_window_size():
+    """
+    Test ValueError is raised when len(y) <= window_size.
+    """
+    y = pd.Series(np.arange(5), name='l1')
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=5)
+
+    err_msg = re.escape(
+        "Length of 'l1' must be greater than the maximum window size "
+        "needed by the forecaster.\n"
+        "    Length 'l1': 5.\n"
+        "    Max window size: 5.\n"
+        "    Lags window size: 5.\n"
+        "    Window features window size: None."
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster._create_train_X_y_single_series(y=y, ignore_exog=True)
+
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=6)
+    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=2, window_features=rolling)
+    err_msg = re.escape(
+        ("Length of 'l1' must be greater than the maximum window size "
+         "needed by the forecaster.\n"
+         "    Length 'l1': 5.\n"
+         "    Max window size: 6.\n"
+         "    Lags window size: 2.\n"
+         "    Window features window size: 6.")
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        forecaster._create_train_X_y_single_series(y=y, ignore_exog=True)
 
 
 @pytest.mark.parametrize("ignore_exog", 

@@ -687,9 +687,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         series_name = y.name
         if len(y) <= self.window_size:
             raise ValueError(
-                f"Length of {series_name} must be greater than the maximum window size "
+                f"Length of '{series_name}' must be greater than the maximum window size "
                 f"needed by the forecaster.\n"
-                f"    Length {series_name}: {len(y)}.\n"
+                f"    Length '{series_name}': {len(y)}.\n"
                 f"    Max window size: {self.window_size}.\n"
                 f"    Lags window size: {self.max_lag}.\n"
                 f"    Window features window size: {self.max_size_window_features}."

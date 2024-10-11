@@ -87,8 +87,9 @@ def test_create_lags_output_lags_None():
     """
     Test matrix of lags when lags=None.
     """
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=None,
-                                   window_features=rolling)
+    forecaster = ForecasterAutoreg(
+        LinearRegression(), lags=None, window_features=rolling
+    )
     results = forecaster._create_lags(y=np.arange(10))
     expected = (
         None,

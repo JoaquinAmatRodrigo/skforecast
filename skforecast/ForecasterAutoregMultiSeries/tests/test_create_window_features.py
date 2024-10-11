@@ -1,4 +1,4 @@
-# Unit test _create_window_features ForecasterAutoreg
+# Unit test _create_window_features ForecasterAutoregMultiSeries
 # ==============================================================================
 import re
 import pytest
@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
 from skforecast.preprocessing import RollingFeatures
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 
 class WindowFeatureNoPandas:
@@ -57,7 +57,7 @@ def test_create_window_features_TypeError_when_transform_batch_not_pandas():
     y = pd.Series(np.arange(10))
     train_index = pd.RangeIndex(start=5, stop=10, step=1)
 
-    forecaster = ForecasterAutoreg(
+    forecaster = ForecasterAutoregMultiSeries(
         LinearRegression(), lags=5, window_features=wf
     )
     err_msg = re.escape(
@@ -77,7 +77,7 @@ def test_create_window_features_ValueError_when_transform_batch_not_correct_leng
     y = pd.Series(np.arange(10))
     train_index = pd.RangeIndex(start=5, stop=10, step=1)
 
-    forecaster = ForecasterAutoreg(
+    forecaster = ForecasterAutoregMultiSeries(
         LinearRegression(), lags=5, window_features=wf
     )
     err_msg = re.escape(
@@ -100,7 +100,7 @@ def test_create_window_features_ValueError_when_transform_batch_not_correct_inde
     )
     train_index = pd.date_range(start='2020-01-06', periods=5)
 
-    forecaster = ForecasterAutoreg(
+    forecaster = ForecasterAutoregMultiSeries(
         LinearRegression(), lags=5, window_features=wf
     )
     err_msg = re.escape(
@@ -122,7 +122,7 @@ def test_create_window_features_output():
         stats=['mean', 'median', 'sum'], window_sizes=[5, 5, 6]
     )
     
-    forecaster = ForecasterAutoreg(
+    forecaster = ForecasterAutoregMultiSeries(
         LinearRegression(), lags=3, window_features=rolling
     )
     results = forecaster._create_window_features(
@@ -155,7 +155,7 @@ def test_create_window_features_output_as_pandas():
         stats=['mean', 'median', 'sum'], window_sizes=[5, 5, 6]
     )
     
-    forecaster = ForecasterAutoreg(
+    forecaster = ForecasterAutoregMultiSeries(
         LinearRegression(), lags=3, window_features=rolling
     )
     results = forecaster._create_window_features(
@@ -193,8 +193,8 @@ def test_create_window_features_output_list():
     rolling_2 = RollingFeatures(
         stats='sum', window_sizes=6, features_names=['feature_2']
     )
-    
-    forecaster = ForecasterAutoreg(
+
+    forecaster = ForecasterAutoregMultiSeries(
         LinearRegression(), lags=3, window_features=[rolling_1, rolling_2]
     )
     results = forecaster._create_window_features(y=y, train_index=train_index)
