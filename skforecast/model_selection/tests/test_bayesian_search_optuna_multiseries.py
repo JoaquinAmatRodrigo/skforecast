@@ -13,8 +13,8 @@ from sklearn.metrics import mean_absolute_error
 from sklearn.preprocessing import StandardScaler
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
-from skforecast.model_selection_multiseries import backtesting_forecaster_multiseries
-from skforecast.model_selection_multiseries.model_selection_multiseries import _bayesian_search_optuna_multiseries
+from skforecast.model_selection import backtesting_forecaster_multiseries
+from skforecast.model_selection._search import _bayesian_search_optuna_multiseries
 from skforecast.model_selection._split import TimeSeriesFold
 import optuna
 from optuna.samplers import TPESampler

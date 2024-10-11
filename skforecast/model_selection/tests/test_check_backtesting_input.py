@@ -14,11 +14,11 @@ from skforecast.ForecasterBaseline import ForecasterEquivalentDate
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection._split import TimeSeriesFold
-from skforecast.utils import check_backtesting_input
+from skforecast.model_selection._utils import check_backtesting_input
 
 # Fixtures
 from skforecast.model_selection.tests.fixtures_model_selection import y
-from skforecast.model_selection_multiseries.tests.fixtures_model_selection_multiseries import series
+from skforecast.model_selection.tests.fixtures_model_selection_multiseries import series
 
 
 def test_check_backtesting_input_TypeError_when_cv_not_TimeSeries_Fold():

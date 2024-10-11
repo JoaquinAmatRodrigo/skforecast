@@ -1,5 +1,5 @@
 ################################################################################
-#                             skforecast._split                                #
+#                     skforecast.model_selection._split                        #
 #                                                                              #
 # This work by skforecast team is licensed under the BSD 3-Clause License.     #
 ################################################################################

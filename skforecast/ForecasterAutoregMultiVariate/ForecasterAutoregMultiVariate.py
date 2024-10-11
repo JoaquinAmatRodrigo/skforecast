@@ -23,30 +23,33 @@ import textwrap
 import skforecast
 from ..ForecasterBase import ForecasterBase
 from ..exceptions import IgnoredArgumentWarning
-from ..utils import initialize_lags
-from ..utils import initialize_weights
-from ..utils import initialize_transformer_series
-from ..utils import check_select_fit_kwargs
-from ..utils import check_y
-from ..utils import check_exog
-from ..utils import get_exog_dtypes
-from ..utils import check_exog_dtypes
-from ..utils import prepare_steps_direct
-from ..utils import check_predict_input
-from ..utils import check_interval
-from ..utils import preprocess_y
-from ..utils import preprocess_last_window
-from ..utils import preprocess_exog
-from ..utils import input_to_frame
-from ..utils import exog_to_direct
-from ..utils import exog_to_direct_numpy
-from ..utils import expand_index
-from ..utils import transform_numpy
-from ..utils import transform_series
-from ..utils import transform_dataframe
-from ..utils import select_n_jobs_fit_forecaster
-from ..utils import set_skforecast_warnings
-from ..model_selection_multiseries.model_selection_multiseries import _extract_data_folds_multiseries
+from ..utils import (
+    initialize_lags,
+    initialize_window_features,
+    initialize_weights,
+    initialize_transformer_series,
+    check_select_fit_kwargs,
+    check_y,
+    check_exog,
+    prepare_steps_direct,
+    get_exog_dtypes,
+    check_exog_dtypes,
+    check_predict_input,
+    check_interval,
+    preprocess_y,
+    preprocess_last_window,
+    preprocess_exog,
+    input_to_frame,
+    exog_to_direct,
+    exog_to_direct_numpy,
+    expand_index,
+    transform_numpy,
+    transform_series,
+    transform_dataframe,
+    select_n_jobs_fit_forecaster,
+    set_skforecast_warnings
+)
+from ..model_selection._utils import _extract_data_folds_multiseries
 
 
 class ForecasterAutoregMultiVariate(ForecasterBase):
@@ -118,6 +121,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     lags_ : dict
         Dictionary containing the lags of each series. Created from `lags` and 
         used internally.
+    lags_names : list, dict
+        Names of the lags of each series. If list, it is the same for all series.
     transformer_series : transformer (preprocessor), dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -285,19 +290,20 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         if isinstance(lags, dict):
             self.lags = {}
+            self.lags_names = {}
             list_max_lags = []
             for key in lags:
                 if lags[key] is None:
                     self.lags[key] = None
                 else:
-                    self.lags[key], max_lag = initialize_lags(
+                    self.lags[key], self.lags_names[key], max_lag = initialize_lags(
                         forecaster_name = type(self).__name__,
                         lags            = lags[key]
                     )
                     list_max_lags.append(max_lag)
             self.max_lag = max(list_max_lags)
         else:
-            self.lags, self.max_lag = initialize_lags(
+            self.lags, self.lags_names, self.max_lag = initialize_lags(
                 forecaster_name = type(self).__name__, 
                 lags            = lags
             )
@@ -1939,19 +1945,20 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         if isinstance(lags, dict):
             self.lags = {}
+            self.lags_names = {}
             list_max_lags = []
             for key in lags:
                 if lags[key] is None:
                     self.lags[key] = None
                 else:
-                    self.lags[key], max_lag = initialize_lags(
+                    self.lags[key], self.lags_names[key], max_lag = initialize_lags(
                         forecaster_name = type(self).__name__,
                         lags            = lags[key]
                     )
                     list_max_lags.append(max_lag)
             self.max_lag = max(list_max_lags)
         else:
-            self.lags, self.max_lag = initialize_lags(
+            self.lags, self.lags_names, self.max_lag = initialize_lags(
                 forecaster_name = type(self).__name__, 
                 lags            = lags
             )

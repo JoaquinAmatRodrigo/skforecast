@@ -5,7 +5,7 @@ import pytest
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
-from skforecast.model_selection_multiseries.model_selection_multiseries import _initialize_levels_model_selection_multiseries
+from skforecast.model_selection._utils import _initialize_levels_model_selection_multiseries
 from skforecast.exceptions import IgnoredArgumentWarning
 
 # Fixtures

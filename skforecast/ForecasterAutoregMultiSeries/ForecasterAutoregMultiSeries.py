@@ -50,7 +50,7 @@ from ..utils import (
     set_skforecast_warnings
 )
 from ..preprocessing import TimeSeriesDifferentiator
-from ..model_selection_multiseries.model_selection_multiseries import _extract_data_folds_multiseries
+from ..model_selection._utils import _extract_data_folds_multiseries
 
 
 class ForecasterAutoregMultiSeries(ForecasterBase):

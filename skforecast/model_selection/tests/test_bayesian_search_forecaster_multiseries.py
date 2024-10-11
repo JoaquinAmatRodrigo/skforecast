@@ -12,7 +12,7 @@ from lightgbm import LGBMRegressor
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
-from skforecast.model_selection_multiseries import bayesian_search_forecaster_multiseries
+from skforecast.model_selection import bayesian_search_forecaster_multiseries
 from skforecast.model_selection._split import TimeSeriesFold, OneStepAheadFold
 from sklearn.metrics import mean_absolute_percentage_error
 from skforecast.metrics import mean_absolute_scaled_error

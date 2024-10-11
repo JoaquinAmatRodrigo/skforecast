@@ -15,7 +15,7 @@ from skforecast.exceptions import IgnoredArgumentWarning
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
-from skforecast.model_selection_multiseries import backtesting_forecaster_multiseries
+from skforecast.model_selection import backtesting_forecaster_multiseries
 from skforecast.model_selection._split import TimeSeriesFold
 
 # Fixtures

@@ -5,7 +5,7 @@ import pandas as pd
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
-from skforecast.model_selection_multiseries import random_search_forecaster_multiseries
+from skforecast.model_selection import random_search_forecaster_multiseries
 from skforecast.model_selection._split import TimeSeriesFold
 
 # Fixtures

@@ -7,7 +7,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import HistGradientBoostingRegressor
 from lightgbm import LGBMRegressor
-from skforecast.utils.utils import select_n_jobs_backtesting
+from skforecast.model_selection._utils import select_n_jobs_backtesting
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries

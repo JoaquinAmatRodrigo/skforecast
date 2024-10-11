@@ -18,7 +18,7 @@ from skforecast.metrics import mean_absolute_scaled_error
 from skforecast.metrics import root_mean_squared_scaled_error
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
-from skforecast.model_selection_multiseries.model_selection_multiseries import _evaluate_grid_hyperparameters_multiseries
+from skforecast.model_selection._search import _evaluate_grid_hyperparameters_multiseries
 from skforecast.model_selection._split import TimeSeriesFold, OneStepAheadFold
 
 # Fixtures
