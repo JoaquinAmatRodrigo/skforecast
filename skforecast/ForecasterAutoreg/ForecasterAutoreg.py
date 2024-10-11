@@ -1984,21 +1984,27 @@ class ForecasterAutoreg(ForecasterBase):
         if self.differentiation is not None:
             self.window_size += self.differentiation   
 
-    # TODO: See what happen when forecaster has diff
     def set_out_sample_residuals(
         self, 
-        residuals: Union[pd.Series, np.ndarray],
         y_pred: Optional[Union[pd.Series, np.ndarray]] = None,
+        y_true: Optional[Union[pd.Series, np.ndarray]] = None,
+        residuals: Optional[Union[pd.Series, np.ndarray]] = None,
         append: bool = True,
-        transform: bool = True,
         random_state: int = 123
     ) -> None:
         """
         Set new values to the attribute `out_sample_residuals_`. Out of sample
         residuals are meant to be calculated using observations that did not
-        participate in the training process. If `y_pred` is provided, residuals
-        are binned according to the predicted value they are associated with. If
-        `y_pred` is `None`, residuals are stored without binning. Only up to 200
+        participate in the training process.
+
+        If `y_pred` and `y_true` are provided, residuals are calculated internally
+        as `y_true` - `y_pred`, after applying the necessary transformations (
+        `transformer_y` and `differentiation`). If `residuals` are provided, they
+        are assumed to be already transformed and are stored directly.
+         
+        If `y_pred` is provided, residuals are binned according to the predicted
+        value they are associated with. If `y_pred` is `None`, residuals are
+        stored without binning. Only up to 200
         residuals are stored per bin.
         
         Parameters
@@ -2008,35 +2014,49 @@ class ForecasterAutoreg(ForecasterBase):
             stored. If `y_pred` is not `None`, at most 200 * n_bins values are
             stored, where `n_bins` is the number of bins used in `self.binner`.
         y_pred : pandas Series, numpy ndarray, default `None`
-            Predicted values of the time series from which the residuals have been
-            calculated. This argument is used to bin residuals according to the
-            predicted values. `y_pred` and `residuals` must be of the same class
-            (both pandas Series or both numpy ndarray) must have the same length
-            and, if they are pandas Series, the same index. 
-            
-            - If `y_pred` is `None`, residuals are not binned.
-            - If affter binning, a bin has more than 200 residuals, only a random
-                sample of 200 residuals is stored.
-            - If affter binning, a bin binning is empty, it is filled with a
-            random sample of residuals from other bins. This is done to ensure
-            that all bins have at least one residual and can be used in the
-            prediction process.
-            **New in version 0.12.0**
+            Predicted values of the time series.
+        y_true : pandas Series, numpy ndarray, default `None`
+            True values of the time series from which the residuals have been
+            calculated. This argument is used calculate residuals if `residuals`
+            is `None`. If `residuals` is not `None`, `y_true` is not used.
         append : bool, default `True`
             If `True`, new residuals are added to the once already stored in the
             forecaster. Once the limit of 200 values per bin is reached, no more values
             are appended. If False, stored residuals are overwritten with the new
             residuals.
-        transform : bool, default `True`
-            If `True`, new residuals are transformed using self.transformer_y.
         random_state : int, default `123`
             Sets a seed to the random sampling for reproducible output.
+
+        Notes
+        -----
+        Argument `y_pred` is used with two purposes:
+
+            - Calculate residuals if `residuals` is `None` and `y_true` is provided.
+
+            - Bin residuals according to the predicted values. If affter binning,
+            a bin has more than 200 residuals, only a random sample of 200 residuals
+            is stored. If a bin binning is empty, it is filled with a random sample
+            of residuals from other bins. This is done to ensure that all bins have
+            at least one residual and can be used in the prediction process.
+            **New in version 0.12.0**
+
 
         Returns
         -------
         None
 
         """
+
+        if (
+            residuals is not None
+            and (self.transformer_y is not None or self.differentiation is not None)
+        ):
+            warnings.warn(
+                "Residuals are being set directly in a Forecaster with a transformation "
+                "or differentiation applied. Ensure residuals are pre-transformed or "
+                "pre-differentiated. Otherwise, pass `y_true` and `y_pred` instead of "
+                "`residuals` to apply transformations automatically."
+            )
 
         if not isinstance(residuals, (np.ndarray, pd.Series)):
             raise TypeError(
@@ -2049,6 +2069,24 @@ class ForecasterAutoreg(ForecasterBase):
                 (f"`y_pred` argument must be `numpy ndarray`, `pandas Series` or `None`, "
                  f"but found {type(y_pred)}.")
             )
+        
+        if not isinstance(y_true, (np.ndarray, pd.Series, type(None))):
+            raise TypeError(
+                (f"`y_true` argument must be `numpy ndarray`, `pandas Series` or `None`, "
+                 f"but found {type(y_true)}.")
+            )
+        
+        if residuals is None and (y_true is None or y_pred is None):
+            raise ValueError(
+                "If `residuals` argument is None then, `y_true` and `y_pred` must be provided."
+            )
+        
+        if y_pred is not None and y_true is not None:
+            if len(y_true) != len(y_pred):
+                raise ValueError(
+                    (f"`y_true` and `y_pred` must have the same length, but found "
+                     f"{len(y_true)} and {len(y_pred)}.")
+                )
 
         if y_pred is not None and len(residuals) != len(y_pred):
             raise ValueError(
@@ -2069,31 +2107,33 @@ class ForecasterAutoreg(ForecasterBase):
                  "arguments before using `set_out_sample_residuals()`.")
             )
 
-        if not isinstance(residuals, np.ndarray):
-            residuals = residuals.to_numpy()
-
         if y_pred is not None and not isinstance(y_pred, np.ndarray):
             y_pred = y_pred.to_numpy()
 
-        if not transform and self.transformer_y is not None:
-            warnings.warn(
-                (f"Argument `transform` is set to `False` but forecaster was trained "
-                 f"using a transformer {self.transformer_y}. Ensure that the new residuals "
-                 f"are already transformed or set `transform=True`.")
-            )
+        if y_true is not None and not isinstance(y_true, np.ndarray):
+            y_true = y_true.to_numpy()
 
-        if transform and self.transformer_y is not None:
-            warnings.warn(
-                (f"Residuals will be transformed using the same transformer used "
-                 f"when training the forecaster ({self.transformer_y}). Ensure that the "
-                 f"new residuals are on the same scale as the original time series.")
-            )
-            residuals = transform_numpy(
-                            array             = residuals,
+        if residuals is not None and not isinstance(residuals, np.ndarray):
+            residuals = residuals.to_numpy()
+
+        if residuals is None:
+            if self.differentiation is not None:
+                y_true = self.differentiator.transform(y_true)
+                y_pred = self.differentiator.transform(y_pred)
+            if self.transformer_y:
+                y_true = transform_numpy(
+                            array             = y_true,
                             transformer       = self.transformer_y,
                             fit               = False,
                             inverse_transform = False
                         )
+                y_pred = transform_numpy(
+                            array             = y_pred,
+                            transformer       = self.transformer_y,
+                            fit               = False,
+                            inverse_transform = False
+                        )
+            residuals = y_true - y_pred
 
         if y_pred is None:
             # Residuals are not binned.
@@ -2170,7 +2210,6 @@ class ForecasterAutoreg(ForecasterBase):
                                                                size    = 200,
                                                                replace = True
                                                            )
-
 
     def get_feature_importances(
         self,
