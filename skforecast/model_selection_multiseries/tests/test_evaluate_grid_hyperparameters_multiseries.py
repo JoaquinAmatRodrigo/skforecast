@@ -19,6 +19,7 @@ from skforecast.metrics import root_mean_squared_scaled_error
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries.model_selection_multiseries import _evaluate_grid_hyperparameters_multiseries
+from skforecast.model_selection._split import TimeSeriesFold, OneStepAheadFold
 
 # Fixtures
 from .fixtures_model_selection_multiseries import series
@@ -44,6 +45,13 @@ def test_ValueError_evaluate_grid_hyperparameters_multiseries_when_return_best_a
                      encoding  = 'onehot'
                  )
     exog = series.iloc[:30, 0]
+    cv = TimeSeriesFold(
+            initial_train_size = 12,
+            steps              = 4,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
 
     err_msg = re.escape(
         (f"`exog` must have same number of samples as `series`. "
@@ -54,14 +62,11 @@ def test_ValueError_evaluate_grid_hyperparameters_multiseries_when_return_best_a
             forecaster         = forecaster,
             series             = series,
             exog               = exog,
+            cv                 = cv,
             param_grid         = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            steps              = 4,
             metric             = 'mean_absolute_error',
-            initial_train_size = 12,
-            fixed_train_size   = False,
             levels             = None,
             lags_grid          = [2, 4],
-            refit              = False,
             return_best        = True,
             verbose            = False
         )
@@ -77,6 +82,13 @@ def test_ValueError_evaluate_grid_hyperparameters_multiseries_when_not_allowed_a
                      lags      = 3,
                      encoding  = 'onehot'
                  )
+    cv = TimeSeriesFold(
+            initial_train_size = 12,
+            steps              = 4,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
 
     err_msg = re.escape(
         ("Allowed `aggregate_metric` are: ['average', 'weighted_average', 'pooling']. "
@@ -86,15 +98,12 @@ def test_ValueError_evaluate_grid_hyperparameters_multiseries_when_not_allowed_a
         _evaluate_grid_hyperparameters_multiseries(
             forecaster         = forecaster,
             series             = series,
+            cv                 = cv,
             param_grid         = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            steps              = 4,
             metric             = 'mean_absolute_error',
             aggregate_metric   = 'not_valid',
-            initial_train_size = 12,
-            fixed_train_size   = False,
             levels             = None,
             lags_grid          = [2, 4],
-            refit              = False,
             return_best        = True,
             verbose            = False
         )
@@ -110,21 +119,25 @@ def test_evaluate_grid_hyperparameters_multiseries_exception_when_metric_list_du
                      lags      = 3,
                      encoding  = 'onehot'
                  )
+    cv = TimeSeriesFold(
+            initial_train_size = 12,
+            steps              = 4,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     
     err_msg = re.escape("When `metric` is a `list`, each metric name must be unique.")
     with pytest.raises(ValueError, match = err_msg):
         _evaluate_grid_hyperparameters_multiseries(
             forecaster         = forecaster,
             series             = series,
+            cv                 = cv,
             param_grid         = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-            steps              = 4,
             metric             = ['mean_absolute_error', mean_absolute_error],
-            initial_train_size = 12,
-            fixed_train_size   = False,
             levels             = ['l1'],
             exog               = None,
             lags_grid          = [2, 4],
-            refit              = False,
             return_best        = False,
             verbose            = False
         )
@@ -143,9 +156,13 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                      encoding           = 'onehot',
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
@@ -153,15 +170,12 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = 'mean_absolute_error',
                   aggregate_metric   = 'weighted_average',
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = None,
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = False
               )
@@ -215,25 +229,26 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
                      encoding           = 'onehot', 
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = {'lags_1': 2, 'lags_2': 4}
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
                   forecaster         = forecaster,
                   series             = series,
+                  cv                 = cv,
                   param_grid         = param_grid,
-                  steps              = steps,
                   metric             = 'mean_absolute_error',
                   aggregate_metric   = 'weighted_average',
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = None,
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = False
               )
@@ -281,25 +296,27 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiSeries_lags_
                      encoding           = 'onehot',
                      transformer_series = None
                  )
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
 
     lags_grid = None
-    steps = 3
-    n_validation = 12
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = mean_absolute_error,
                   aggregate_metric   = 'weighted_average',
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = ['l1', 'l2'],
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = False
               )
@@ -335,9 +352,13 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                      encoding           = 'onehot',
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
@@ -345,15 +366,12 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = 'mean_absolute_error',
                   aggregate_metric   = 'weighted_average',
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = levels,
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = False
               )
@@ -407,9 +425,13 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                      encoding           = 'onehot',
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
@@ -417,38 +439,59 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = [mean_squared_error, 'mean_absolute_error'],
                   aggregate_metric   = 'weighted_average',
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = None,
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = False
               )
     
-    expected_results = pd.DataFrame({
-        'levels': [['l1', 'l2']] * 6,
-        'lags': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
-                   [1, 2], [1, 2], [1, 2]],
-        'lags_label': [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], 
-                        [1, 2], [1, 2], [1, 2]],
-        'params': [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}, 
-                   {'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}],
-        'mean_squared_error__weighted_average': np.array([
-            0.06365397633008085, 0.06367614582294409, 0.06385378127252679, 
-            0.06389613553855186, 0.06391570591810977, 0.06407787633532819]
-        ),
-        'mean_absolute_error__weighted_average': np.array(
-            [0.20968100463227382, 0.20969259779858337, 0.20977945312386406, 
-             0.21078779824759553, 0.21078653113227208, 0.21077344827205086]
-        ),
-        'alpha': np.array([0.01, 0.1, 1., 0.01, 0.1, 1.])
+    expected_results = pd.DataFrame(
+        {
+            "levels": [["l1", "l2"]] * 6,
+            "lags": [[1, 2, 3, 4], [1, 2, 3, 4], [1, 2, 3, 4], [1, 2], [1, 2], [1, 2]],
+            "lags_label": [
+                [1, 2, 3, 4],
+                [1, 2, 3, 4],
+                [1, 2, 3, 4],
+                [1, 2],
+                [1, 2],
+                [1, 2],
+            ],
+            "params": [
+                {"alpha": 0.01},
+                {"alpha": 0.1},
+                {"alpha": 1},
+                {"alpha": 0.01},
+                {"alpha": 0.1},
+                {"alpha": 1},
+            ],
+            "mean_squared_error__weighted_average": np.array(
+                [
+                    0.06365397633008085,
+                    0.06367614582294409,
+                    0.06385378127252679,
+                    0.06389613553855186,
+                    0.06391570591810977,
+                    0.06407787633532819,
+                ]
+            ),
+            "mean_absolute_error__weighted_average": np.array(
+                [
+                    0.20968100463227382,
+                    0.20969259779858337,
+                    0.20977945312386406,
+                    0.21078779824759553,
+                    0.21078653113227208,
+                    0.21077344827205086,
+                ]
+            ),
+            "alpha": np.array([0.01, 0.1, 1.0, 0.01, 0.1, 1.0]),
         },
-        index = pd.Index([0, 1, 2, 3, 4, 5], dtype='int64')
+        index=pd.Index([0, 1, 2, 3, 4, 5], dtype="int64"),
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
@@ -468,24 +511,25 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
                      encoding           = 'onehot',
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     _evaluate_grid_hyperparameters_multiseries(
         forecaster         = forecaster,
         series             = series,
         param_grid         = param_grid,
-        steps              = steps,
+        cv                 = cv,
         metric             = 'mean_absolute_error',
         aggregate_metric   = 'weighted_average',
-                  initial_train_size = len(series) - n_validation,
-        fixed_train_size   = False,
         levels             = None,
         exog               = None,
         lags_grid          = lags_grid,
-        refit              = False,
         return_best        = True,
         verbose            = False
     )
@@ -505,9 +549,13 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_
     _evaluate_grid_hyperparameters_multiseries and single level.
     """
     forecaster = ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), lags=2)
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = {"lags_1": 2, "lags_2": 4}
     param_grid = [{"alpha": 0.01}, {"alpha": 0.1}, {"alpha": 1}]
     output_file = "test_evaluate_grid_hyperparameters_multiseries_output_file.txt"
@@ -516,15 +564,12 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_
         forecaster=forecaster,
         series=series,
         param_grid=param_grid,
-        steps=steps,
+        cv=cv,
         metric="mean_absolute_error",
         aggregate_metric="weighted_average",
-        initial_train_size=len(series) - n_validation,
-        fixed_train_size=False,
         levels="l1",
         exog=None,
         lags_grid=lags_grid,
-        refit=False,
         return_best=False,
         verbose=False,
         show_progress=False,
@@ -550,9 +595,13 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_
     _evaluate_grid_hyperparameters_multiseries and list of metrics.
     """
     forecaster = ForecasterAutoregMultiSeries(regressor=Ridge(random_state=123), lags=2)
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = [2, 4]
     param_grid = [{"alpha": 0.01}, {"alpha": 0.1}, {"alpha": 1}]
     output_file = "test_evaluate_grid_hyperparameters_multiseries_output_file.txt"
@@ -561,15 +610,12 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiSeries_
         forecaster=forecaster,
         series=series,
         param_grid=param_grid,
-        steps=steps,
+        cv=cv,
         metric=[mean_squared_error, "mean_absolute_error"],
         aggregate_metric="weighted_average",
-        initial_train_size=len(series) - n_validation,
-        fixed_train_size=False,
         levels=None,
         exog=None,
         lags_grid=lags_grid,
-        refit=False,
         return_best=False,
         verbose=False,
         show_progress=False,
@@ -602,9 +648,13 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                      encoding           = 'onehot',
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
@@ -612,18 +662,15 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = ['mean_absolute_error', 'mean_absolute_scaled_error'],
                   aggregate_metric   = ['weighted_average', 'average', 'pooling'],
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = None,
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = False,
-                  show_progress     = False,
+                  show_progress      = False,
               )
     
     expected_results = pd.DataFrame({
@@ -725,9 +772,13 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                      steps              = 3,
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
@@ -735,14 +786,11 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = 'mean_absolute_error',
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = None,
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = True
               )
@@ -777,9 +825,13 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                      steps              = 3,
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = {'lags_1': 2, 'lags_2': 4}
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
@@ -787,14 +839,11 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = 'mean_absolute_error',
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = None,
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = True
               )
@@ -830,24 +879,25 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                      steps              = 3,
                      transformer_series = None
                  )
-
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = None
-    steps = 3
-    n_validation = 12
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = mean_absolute_error,
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = None,
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = False
               )
@@ -878,24 +928,25 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                      steps              = 3,
                      transformer_series = None
                  )
-
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = [{'l1': 2, 'l2': 3}, {'l1': [1, 3], 'l2': 3}, {'l1': 2, 'l2': [1, 4]}]
-    steps = 3
-    n_validation = 12
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = mean_absolute_error,
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = None,
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = False
               )
@@ -948,7 +999,13 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
                      steps              = 3,
                      transformer_series = None
                  )
-
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = {
         'lags_1': {'l1': 2, 'l2': 3},
         'lags_2': {'l1': [1, 3], 'l2': 3},
@@ -957,22 +1014,17 @@ def test_output_evaluate_grid_hyperparameters_ForecasterAutoregMultiVariate_lags
         'lags_5': {'l1': None, 'l2': 2},
         'lags_6': 3
     }
-    steps = 3
-    n_validation = 12
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     results = _evaluate_grid_hyperparameters_multiseries(
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = mean_absolute_error,
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = None,
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = False
               )
@@ -1035,9 +1087,13 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                      steps              = 3,
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
@@ -1045,14 +1101,11 @@ def test_output_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMulti
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = [mean_squared_error, 'mean_absolute_error'],
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = None,
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = False
               )
@@ -1090,24 +1143,25 @@ def test_evaluate_grid_hyperparameters_multiseries_when_return_best_ForecasterAu
                      steps              = 3,
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
 
     _evaluate_grid_hyperparameters_multiseries(
         forecaster         = forecaster,
         series             = series,
         param_grid         = param_grid,
-        steps              = steps,
+        cv                 = cv,
         metric             = 'mean_absolute_error',
         aggregate_metric   = 'weighted_average',
-        initial_train_size = len(series) - n_validation,
-        fixed_train_size   = False,
         levels             = None,
         exog               = None,
         lags_grid          = lags_grid,
-        refit              = False,
         return_best        = True,
         verbose            = False,
         show_progress      = False
@@ -1134,9 +1188,13 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate
                      lags      = 2,
                      steps     = 3
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = {'lags_1': 2, 'lags_2': 4}
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
     output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
@@ -1145,15 +1203,12 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = 'mean_absolute_error',
                   aggregate_metric   = 'weighted_average',
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = 'l1',
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = False,
                   show_progress      = False,
@@ -1180,9 +1235,13 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate
                      lags      = 2,
                      steps     = 3
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            gap                = 0,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = [2, 4]
     param_grid = [{'alpha': 0.01}, {'alpha': 0.1}, {'alpha': 1}]
     output_file = 'test_evaluate_grid_hyperparameters_multiseries_output_file.txt'
@@ -1191,14 +1250,11 @@ def test_evaluate_grid_hyperparameters_multiseries_ForecasterAutoregMultiVariate
                   forecaster         = forecaster,
                   series             = series,
                   param_grid         = param_grid,
-                  steps              = steps,
+                  cv                 = cv,
                   metric             = [mean_squared_error, 'mean_absolute_error'],
-                  initial_train_size = len(series) - n_validation,
-                  fixed_train_size   = False,
                   levels             = None,
                   exog               = None,
                   lags_grid          = lags_grid,
-                  refit              = False,
                   return_best        = False,
                   verbose            = False,
                   show_progress      = False,
@@ -1263,8 +1319,12 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_st
         mean_absolute_scaled_error,
         root_mean_squared_scaled_error,
     ]
-    steps = 1
-    initial_train_size = 20
+    cv_backtesting = TimeSeriesFold(
+            initial_train_size = 20,
+            steps              = 1,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     param_grid = {
         "alpha": np.logspace(-1, 1, 3),
     }
@@ -1274,29 +1334,27 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_st
         forecaster         = forecaster,
         series             = series_datetime,
         exog               = exog_datetime,
+        cv                 = cv_backtesting,
         param_grid         = param_grid,
         lags_grid          = lags_grid,
-        steps              = steps,
-        refit              = False,
         metric             = metrics,
-        initial_train_size = initial_train_size,
-        method             = 'backtesting',
         aggregate_metric   = ["average", "weighted_average", "pooling"],
-        fixed_train_size   = False,
         return_best        = False,
         n_jobs             = 'auto',
         verbose            = False,
         show_progress      = False
     )
+    cv_one_step_ahead = OneStepAheadFold(
+            initial_train_size = 20,
+         )
     results_one_step_ahead = _evaluate_grid_hyperparameters_multiseries(
         forecaster         = forecaster,
         series             = series_datetime,
         exog               = exog_datetime,
+        cv                 = cv_one_step_ahead,
         param_grid         = param_grid,
         lags_grid          = lags_grid,
         metric             = metrics,
-        initial_train_size = initial_train_size,
-        method             = 'one_step_ahead',
         aggregate_metric   = ["average", "weighted_average", "pooling"],
         return_best        = False,
         verbose            = False,
@@ -1342,43 +1400,43 @@ def test_evaluate_grid_hyperparameters_equivalent_outputs_backtesting_and_one_st
         mean_absolute_scaled_error,
         root_mean_squared_scaled_error,
     ]
-    steps = 1
-    initial_train_size = 213
     param_grid = {
         "n_estimators": [5, 10],
         "max_depth": [2, 3]
     }
     lags_grid = [3, 5]
     param_grid = list(ParameterGrid(param_grid))
+
+    cv_backtesting = TimeSeriesFold(
+            initial_train_size = 213,
+            steps              = 1,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     results_backtesting = _evaluate_grid_hyperparameters_multiseries(
         forecaster         = forecaster,
         series             = series_dict,
         exog               = exog_dict,
+        cv                 = cv_backtesting,
         param_grid         = param_grid,
         lags_grid          = lags_grid,
-        steps              = steps,
-        refit              = False,
         metric             = metrics,
-        initial_train_size = initial_train_size,
-        method             = 'backtesting',
         aggregate_metric   = ["average", "weighted_average", "pooling"],
-        fixed_train_size   = False,
         return_best        = False,
         n_jobs             = 'auto',
     )
+    cv_one_step_ahead = OneStepAheadFold(
+            initial_train_size = 213,
+         )
     results_one_step_ahead = _evaluate_grid_hyperparameters_multiseries(
         forecaster         = forecaster,
         series             = series_dict,
         exog               = exog_dict,
+        cv                 = cv_one_step_ahead,
         param_grid         = param_grid,
         lags_grid          = lags_grid,
-        steps              = steps,
-        refit              = False,
         metric             = metrics,
-        initial_train_size = initial_train_size,
-        method             = 'one_step_ahead',
         aggregate_metric   = ["average", "weighted_average", "pooling"],
-        fixed_train_size   = False,
         return_best        = False,
         n_jobs             = 'auto',
     )

@@ -9,6 +9,7 @@ from lightgbm import LGBMRegressor
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.model_selection_multiseries import grid_search_forecaster_multiseries
+from skforecast.model_selection._split import TimeSeriesFold, OneStepAheadFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_percentage_error
 from skforecast.metrics import mean_absolute_scaled_error
@@ -39,9 +40,12 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
                      encoding           = 'onehot',
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = [2, 4]
     param_grid = {'alpha': [0.01, 0.1, 1]}
 
@@ -49,15 +53,12 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
                   forecaster          = forecaster,
                   series              = series,
                   param_grid          = param_grid,
-                  steps               = steps,
+                  cv                  = cv,
                   metric              = 'mean_absolute_error',
                   aggregate_metric    = 'weighted_average',
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
                   levels              = None,
                   exog                = None,
                   lags_grid           = lags_grid,
-                  refit               = False,
                   return_best         = False,
                   verbose             = True
               )
@@ -90,9 +91,12 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
                      encoding           = 'onehot',
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            refit              = False,
+            fixed_train_size   = False,
+         )
     lags_grid = [2, 4]
     param_grid = {'alpha': [0.01, 0.1, 1]}
 
@@ -100,15 +104,12 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
                   forecaster          = forecaster,
                   series              = series,
                   param_grid          = param_grid,
-                  steps               = steps,
+                  cv                  = cv,
                   metric              = ['mean_absolute_error', 'mean_absolute_scaled_error'],
-                  aggregate_metric   = ['weighted_average', 'average', 'pooling'],
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
+                  aggregate_metric    = ['weighted_average', 'average', 'pooling'],
                   levels              = None,
                   exog                = None,
                   lags_grid           = lags_grid,
-                  refit               = False,
                   return_best         = False,
                   verbose             = False,
                   show_progress       = False,
@@ -193,9 +194,13 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate
                      steps              = 3, 
                      transformer_series = None
                  )
-
-    steps = 3
-    n_validation = 12
+    cv = TimeSeriesFold(
+            initial_train_size = len(series) - 12,
+            steps              = 3,
+            refit              = False,
+            fixed_train_size   = False
+         )
+         
     lags_grid = [2, 4]
     param_grid = {'alpha': [0.01, 0.1, 1]}
 
@@ -203,15 +208,12 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate
                   forecaster          = forecaster,
                   series              = series,
                   param_grid          = param_grid,
-                  steps               = steps,
+                  cv                  = cv,
                   metric              = 'mean_absolute_error',
                   aggregate_metric    = 'weighted_average',
-                  initial_train_size  = len(series) - n_validation,
-                  fixed_train_size    = False,
                   levels              = None,
                   exog                = None,
                   lags_grid           = lags_grid,
-                  refit               = False,
                   return_best         = False,
                   verbose             = True
               )
@@ -249,9 +251,9 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
             differentiation    = None,
             dropna_from_series = False,
         )
-
-    steps = 10
-    initial_train_size = 1000
+    cv = OneStepAheadFold(
+            initial_train_size = 1000,
+         )
     levels = ["item_1", "item_2", "item_3"]
     param_grid = {
         "alpha": np.logspace(-1, 1, 3),
@@ -264,14 +266,10 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
         exog               = exog_item_sales,
         param_grid         = param_grid,
         lags_grid          = lags_grid,
-        steps              = steps,
-        refit              = False,
+        cv                 = cv,
         metric             = metrics,
-        initial_train_size = initial_train_size,
-        method             = 'one_step_ahead',
         aggregate_metric   = ["average", "weighted_average", "pooling"],
-        levels            = levels,
-        fixed_train_size   = False,
+        levels             = levels,
         return_best        = False,
         n_jobs             = 'auto',
         verbose            = False,
@@ -406,7 +404,9 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate
                     transformer_exog   = StandardScaler(),
                 )
 
-    initial_train_size = 1000
+    cv = OneStepAheadFold(
+            initial_train_size = 1000,
+        )
     levels = ["item_1", "item_2", "item_3"]
     param_grid = {
         "alpha": np.logspace(-1, 1, 3),
@@ -417,11 +417,10 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiVariate
         forecaster         = forecaster,
         series             = series_item_sales,
         exog               = exog_item_sales,
+        cv                 = cv,
         param_grid         = param_grid,
         lags_grid          = lags_grid,
         metric             = metrics,
-        initial_train_size = initial_train_size,
-        method             = 'one_step_ahead',
         aggregate_metric   = ["average", "weighted_average", "pooling"],
         levels             = levels,
         return_best        = False,
@@ -512,7 +511,9 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
             differentiation    = None,
             dropna_from_series = False,
         )
-    initial_train_size = 213
+    cv = OneStepAheadFold(
+            initial_train_size = 213
+         )
     levels = ["id_1000", "id_1001", "id_1002", "id_1003", "id_1004"]
     param_grid = {
             "n_estimators": [5, 10],
@@ -524,11 +525,10 @@ def test_output_grid_search_forecaster_multiseries_ForecasterAutoregMultiSeries_
         forecaster         = forecaster,
         series             = series_dict,
         exog               = exog_dict,
+        cv                 = cv,
         param_grid         = param_grid,
         lags_grid          = lags_grid,
         metric             = metrics,
-        initial_train_size = initial_train_size,
-        method             = 'one_step_ahead',
         aggregate_metric   = ["average", "weighted_average", "pooling"],
         levels             = levels,
         return_best        = False,
