@@ -1984,10 +1984,11 @@ class ForecasterAutoreg(ForecasterBase):
         if self.differentiation is not None:
             self.window_size += self.differentiation   
 
+
     def set_out_sample_residuals(
-        self, 
-        y_pred: Optional[Union[pd.Series, np.ndarray]] = None,
+        self,
         y_true: Optional[Union[pd.Series, np.ndarray]] = None,
+        y_pred: Optional[Union[pd.Series, np.ndarray]] = None,
         residuals: Optional[Union[pd.Series, np.ndarray]] = None,
         append: bool = True,
         random_state: int = 123
@@ -1999,8 +2000,12 @@ class ForecasterAutoreg(ForecasterBase):
 
         If `y_pred` and `y_true` are provided, residuals are calculated internally
         as `y_true` - `y_pred`, after applying the necessary transformations (
-        `transformer_y` and `differentiation`). If `residuals` are provided, they
-        are assumed to be already transformed and are stored directly.
+        `transformer_y` and `differentiation`) to `y_true` and `y_pred`. If `residuals`
+        are provided, they are assumed to be already transformed and are stored directly.
+
+        It is highly recommended to provide `y_true` and `y_pred` to ensure that
+        residuals are calculated correctly. If residuals are provided directly,
+        ensure that they are pre-transformed or pre-differentiated.
          
         If `y_pred` is provided, residuals are binned according to the predicted
         value they are associated with. If `y_pred` is `None`, residuals are
@@ -2009,16 +2014,16 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        residuals : pandas Series, numpy ndarray
-            Values of residuals. If `y_pred` is `None`, at most 1000 values are
-            stored. If `y_pred` is not `None`, at most 200 * n_bins values are
-            stored, where `n_bins` is the number of bins used in `self.binner`.
-        y_pred : pandas Series, numpy ndarray, default `None`
-            Predicted values of the time series.
         y_true : pandas Series, numpy ndarray, default `None`
             True values of the time series from which the residuals have been
             calculated. This argument is used calculate residuals if `residuals`
             is `None`. If `residuals` is not `None`, `y_true` is not used.
+        y_pred : pandas Series, numpy ndarray, default `None`
+            Predicted values of the time series.
+        residuals : pandas Series, numpy ndarray
+            Values of residuals. If `y_pred` is `None`, at most 1000 values are
+            stored. If `y_pred` is not `None`, at most 200 * n_bins values are
+            stored, where `n_bins` is the number of bins used in `self.binner`.
         append : bool, default `True`
             If `True`, new residuals are added to the once already stored in the
             forecaster. Once the limit of 200 values per bin is reached, no more values
@@ -2058,7 +2063,7 @@ class ForecasterAutoreg(ForecasterBase):
                 "`residuals` to apply transformations automatically."
             )
 
-        if not isinstance(residuals, (np.ndarray, pd.Series)):
+        if not isinstance(residuals, (np.ndarray, pd.Series, type(None))):
             raise TypeError(
                 (f"`residuals` argument must be `numpy ndarray` or `pandas Series`, "
                  f"but found {type(residuals)}.")
@@ -2087,19 +2092,24 @@ class ForecasterAutoreg(ForecasterBase):
                     (f"`y_true` and `y_pred` must have the same length, but found "
                      f"{len(y_true)} and {len(y_pred)}.")
                 )
-
-        if y_pred is not None and len(residuals) != len(y_pred):
-            raise ValueError(
-                (f"`residuals` and `y_pred` must have the same length, but found "
-                 f"{len(residuals)} and {len(y_pred)}.")
-            )
-
-        if isinstance(residuals, pd.Series) and isinstance(y_pred, pd.Series):
-            if not residuals.index.equals(y_pred.index):
+            if isinstance(y_true, pd.Series) and isinstance(y_pred, pd.Series):
+                if not y_true.index.equals(y_pred.index):
+                    raise ValueError(
+                        (f"`y_true` and `y_pred` must have the same index, but found "
+                         f"{y_true.index} and {y_pred.index}.")
+                    )
+        if residuals is not None and y_pred is not None:
+            if len(residuals) != len(y_pred):
                 raise ValueError(
-                    (f"`residuals` and `y_pred` must have the same index, but found "
-                     f"{residuals.index} and {y_pred.index}.")
+                    (f"`residuals` and `y_pred` must have the same length, but found "
+                     f"{len(residuals)} and {len(y_pred)}.")
                 )
+            if isinstance(residuals, pd.Series) and isinstance(y_pred, pd.Series):
+                if not residuals.index.equals(y_pred.index):
+                    raise ValueError(
+                        (f"`residuals` and `y_pred` must have the same index, but found "
+                         f"{residuals.index} and {y_pred.index}.")
+                    )
 
         if y_pred is not None and not self.is_fitted:
             raise NotFittedError(
@@ -2117,9 +2127,6 @@ class ForecasterAutoreg(ForecasterBase):
             residuals = residuals.to_numpy()
 
         if residuals is None:
-            if self.differentiation is not None:
-                y_true = self.differentiator.transform(y_true)
-                y_pred = self.differentiator.transform(y_pred)
             if self.transformer_y:
                 y_true = transform_numpy(
                             array             = y_true,
@@ -2133,6 +2140,9 @@ class ForecasterAutoreg(ForecasterBase):
                             fit               = False,
                             inverse_transform = False
                         )
+            if self.differentiation is not None:
+                y_true = self.differentiator.transform(y_true)[self.differentiation:]
+                y_pred = self.differentiator.transform(y_pred)[self.differentiation:]
             residuals = y_true - y_pred
 
         if y_pred is None:

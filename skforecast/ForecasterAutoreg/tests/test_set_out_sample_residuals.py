@@ -80,37 +80,21 @@ def test_set_out_sample_residuals_ValueError_when_residuals_and_y_pred_have_diff
         forecaster.set_out_sample_residuals(residuals=residuals, y_pred=y_pred)
 
 
-def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_transform_False():
+def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_or_differentiation():
     """
-    Test Warning is raised when forecaster has a transformer_y and transform=False.
+    Test Warning is raised when forecaster has a transformer_y or differentiation.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3, transformer_y=StandardScaler())
     residuals = np.arange(10)
 
     warn_msg = re.escape(
-        (f"Argument `transform` is set to `False` but forecaster was trained "
-         f"using a transformer {forecaster.transformer_y}. Ensure that the new residuals "
-         f"are already transformed or set `transform=True`.")
-    )
+                "Residuals are being set directly in a Forecaster with a transformation "
+                "or differentiation applied. Ensure residuals are pre-transformed or "
+                "pre-differentiated. Otherwise, pass `y_true` and `y_pred` instead of "
+                "`residuals` to apply transformations automatically."
+              )
     with pytest.warns(UserWarning, match = warn_msg):
-        forecaster.set_out_sample_residuals(residuals=residuals, transform=False)
-
-
-def test_set_out_sample_residuals_warning_when_forecaster_has_transformer_and_transform_True():
-    """
-    Test Warning is raised when forecaster has a transformer_y and transform=True.
-    """
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3, transformer_y=StandardScaler())
-    forecaster.fit(y=pd.Series(np.arange(10)))
-    residuals = np.arange(10)
-
-    warn_msg = re.escape(
-        (f"Residuals will be transformed using the same transformer used "
-         f"when training the forecaster ({forecaster.transformer_y}). Ensure that the "
-         f"new residuals are on the same scale as the original time series.")
-    )
-    with pytest.warns(UserWarning, match = warn_msg):
-        forecaster.set_out_sample_residuals(residuals=residuals, transform=True)
+        forecaster.set_out_sample_residuals(residuals=residuals)
 
 
 def test_set_out_sample_residuals_when_residuals_length_is_greater_than_1000():
@@ -175,26 +159,6 @@ def test_set_out_sample_residuals_when_residuals_length_is_more_than_1000_and_ap
     results = forecaster.out_sample_residuals_
 
     np.testing.assert_almost_equal(results, expected)
-
-
-def test_set_out_sample_residuals_when_transform_is_True():
-    """
-    Test residuals stored when using a StandardScaler() as transformer.
-    """
-
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3, transformer_y=StandardScaler())
-    y = pd.Series(
-            np.array([
-                12.5, 10.3,  9.9, 10.4,  9.9,  8.5, 10.6, 11.4, 10.,  9.5, 10.1,
-                11.5, 11.4, 11.3, 10.5,  9.6, 10.4, 11.7,  8.7, 10.6])
-        )
-    forecaster.fit(y=y)
-    new_residuals = np.random.normal(size=100)
-    new_residuals_transformed = forecaster.transformer_y.transform(new_residuals.reshape(-1, 1))
-    new_residuals_transformed = new_residuals_transformed.ravel()
-    forecaster.set_out_sample_residuals(residuals=new_residuals, transform=True)
-
-    np.testing.assert_array_equal(new_residuals_transformed, forecaster.out_sample_residuals_)
 
 
 def test_same_out_sample_residuals_by_bin_stored_when_y_pred_is_provided():
@@ -317,3 +281,38 @@ def test_set_out_sample_residuals_when_there_are_no_residuals_for_some_bins():
         )
 
     assert len(forecaster.out_sample_residuals_by_bin_[0]) == 200
+
+
+def test_forecaster_set_outsample_residuals_when_transformer_y_and_diferentiation():
+    """
+    Test set_out_sample_residuals when forecaster has transformer_y and differentiation
+    applied when `y_true` and `y_pred` are passed. Stored should equivalent to residuals
+    calculated manually if transformer_y and differentiation are applied to `y_true` and `y_pred`
+    before calculating residuals.
+    """
+    rng = np.random.default_rng(12345)
+    data_train = pd.Series(rng.normal(loc=0, scale=1, size=100), index=range(100))
+    data_test  = pd.Series(rng.normal(loc=0, scale=1, size=36), index=range(100, 136))
+    forecaster = ForecasterAutoreg(
+                     regressor       = LinearRegression(),
+                     lags            = 5,
+                     differentiation = 1,
+                     transformer_y   = StandardScaler()
+                 )
+
+    forecaster.fit(y=data_train)
+    predictions = forecaster.predict(steps=36)
+    forecaster.set_out_sample_residuals(
+        y_true = data_test,
+        y_pred = predictions
+    )
+
+    y_test = forecaster.transformer_y.transform(data_test.to_numpy().reshape(-1, 1)).flatten()
+    y_true = forecaster.transformer_y.transform(predictions.to_numpy().reshape(-1, 1)).flatten()
+    y_test = forecaster.differentiator.transform(y_test)[forecaster.differentiation:]
+    y_true = forecaster.differentiator.transform(y_true)[forecaster.differentiation:]
+    residuals = y_test - y_true
+    residuals = np.sort(residuals)
+    out_sample_residuals_ = np.sort(forecaster.out_sample_residuals_)
+
+    np.testing.assert_array_almost_equal(residuals, out_sample_residuals_)
