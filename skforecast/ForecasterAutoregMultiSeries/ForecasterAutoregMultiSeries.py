@@ -555,6 +555,18 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             params = self.regressor.get_params(deep=True)
         params = str(params)
 
+        training_range_ = (
+            [f"'{k}': {v.astype(str).to_list()}" for k, v in self.training_range_.items()]
+            if self.is_fitted
+            else None
+        )
+        if isinstance(self.transformer_series, dict):
+            transformer_series = (
+                [f"'{k}': {v}" for k, v in self.transformer_series.items()]
+            )
+        else:
+            transformer_series = self.transformer_series
+
         style = """
         <style>
             .container {
@@ -588,7 +600,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 border-radius: 5px;
             }
             .container summary:hover {
-            background-color: #e0e0e0;
+                background-color: #e0e0e0;
             }
             .container ul {
                 font-family: 'Courier New', monospace;
@@ -621,6 +633,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     <li><strong>Lags:</strong> {self.lags}</li>
                     <li><strong>Window features:</strong> {self.window_features_names}</li>
                     <li><strong>Window size:</strong> {self.window_size}</li>
+                    <li><strong>Series encoding:</strong> {self.encoding}</li>
                     <li><strong>Exogenous included:</strong> {self.exog_in_}</li>
                     <li><strong>Weight function included:</strong> {self.weight_func is not None}</li>
                     <li><strong>Differentiation order:</strong> {self.differentiation}</li>
@@ -640,14 +653,15 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             <details>
                 <summary>Data Transformations</summary>
                 <ul>
-                    <li><strong>Transformer for y:</strong> {self.transformer_y}</li>
+                    <li><strong>Transformer for series:</strong> {transformer_series}</li>
                     <li><strong>Transformer for exog:</strong> {self.transformer_exog}</li>
                 </ul>
             </details>
             <details>
                 <summary>Training Information</summary>
                 <ul>
-                    <li><strong>Training range:</strong> {self.training_range_.to_list() if self.is_fitted else 'Not fitted'}</li>
+                    <li><strong>Series names (levels):</strong> {self.series_names_in_}</li>
+                    <li><strong>Training range:</strong> {training_range_}</li>
                     <li><strong>Training index type:</strong> {str(self.index_type_).split('.')[-1][:-2] if self.is_fitted else 'Not fitted'}</li>
                     <li><strong>Training index frequency:</strong> {self.index_freq_ if self.is_fitted else 'Not fitted'}</li>
                 </ul>
@@ -665,9 +679,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 </ul>
             </details>
             <p>
-                <a href="https://skforecast.org/{skforecast.__version__}/api/forecasterautoreg#forecasterautoreg.html">&#128712 <strong>API Reference</strong></a>
+                <a href="https://skforecast.org/{skforecast.__version__}/api/forecastermultiseries#forecasterautoregmultiseries.html">&#128712 <strong>API Reference</strong></a>
                 &nbsp;&nbsp;
-                <a href="https://skforecast.org/{skforecast.__version__}/user_guides/autoregresive-forecaster.html">&#128462 <strong>User Guide</strong></a>
+                <a href="https://skforecast.org/{skforecast.__version__}/user_guides/independent-multi-time-series-forecasting.html">&#128462 <strong>User Guide</strong></a>
             </p>
         </div>
         """
