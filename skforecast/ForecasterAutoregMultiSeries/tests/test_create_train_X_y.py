@@ -2779,3 +2779,92 @@ def test_create_train_X_y_output_series_dict_and_exog_dict_window_features():
         assert results[8][k] == expected[8][k]
     for k in results[9].keys():
         pd.testing.assert_series_equal(results[9][k], expected[9][k])
+
+
+def test_create_train_X_y_output_when_series_and_exog_with_window_features_no_lags():
+    """
+    Test the output of _create_train_X_y when series and exog with window
+    features but no lags.
+    """
+    series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
+                           'l2': pd.Series(np.arange(10, 20, dtype=float))})
+    series.index = pd.date_range("1990-01-01", periods=10, freq='D')
+    exog = pd.Series(np.arange(100, 110), name='exog', dtype=float)
+    exog.index = pd.date_range("1990-01-01", periods=10, freq='D')
+
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[3, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[4])
+    forecaster = ForecasterAutoregMultiSeries(
+        LinearRegression(), lags=None, window_features=[rolling, rolling_2]
+    )
+    
+    results = forecaster._create_train_X_y(series=series, exog=exog)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[3., 2., 10., 0., 105.],
+                             [4., 3., 14., 0., 106.],
+                             [5., 4., 18., 0., 107.],
+                             [6., 5., 22., 0., 108.],
+                             [7., 6., 26., 0., 109.],
+                             [13., 12., 50., 1., 105.],
+                             [14., 13., 54., 1., 106.],
+                             [15., 14., 58., 1., 107.],
+                             [16., 15., 62., 1., 108.],
+                             [17., 16., 66., 1., 109.]]),
+            index   = pd.Index(
+                          pd.DatetimeIndex(
+                              ['1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
+                               '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10']
+                          )
+                      ),
+            columns = ['roll_mean_3', 'roll_median_5', 'roll_sum_4', 
+                       '_level_skforecast', 'exog']
+        ).astype({'_level_skforecast': int}),
+        pd.Series(
+            data  = np.array([5., 6., 7., 8., 9., 15., 16., 17., 18., 19.]),
+            index = pd.Index(
+                        pd.DatetimeIndex(
+                            ['1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10',
+                             '1990-01-06', '1990-01-07', '1990-01-08', '1990-01-09', '1990-01-10']
+                        )
+                    ),
+            name  = 'y',
+            dtype = float
+        ),
+        {'l1': pd.date_range("1990-01-01", periods=10, freq='D'),
+         'l2': pd.date_range("1990-01-01", periods=10, freq='D')},
+        ['l1', 'l2'],
+        ['l1', 'l2'],
+        ['exog'],
+        ['roll_mean_3', 'roll_median_5', 'roll_sum_4'],
+        ['exog'],
+        {'exog': exog.dtypes},
+        {'l1': pd.Series(
+                   data  = np.array([5., 6., 7., 8., 9.]),
+                   index = pd.date_range("1990-01-06", periods=5, freq='D'),
+                   name  = 'l1',
+                   dtype = float
+               ),
+         'l2': pd.Series(
+                   data  = np.array([15., 16., 17., 18., 19.]),
+                   index = pd.date_range("1990-01-06", periods=5, freq='D'),
+                   name  = 'l2',
+                   dtype = float
+               )
+        }
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    assert results[7] == expected[7]
+    for k in results[8].keys():
+        assert results[8][k] == expected[8][k]
+    for k in results[9].keys():
+        pd.testing.assert_series_equal(results[9][k], expected[9][k])

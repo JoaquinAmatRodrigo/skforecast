@@ -13,6 +13,7 @@ from lightgbm import LGBMRegressor
 
 from skforecast.exceptions import IgnoredArgumentWarning
 from skforecast.exceptions import UnknownLevelWarning
+from skforecast.preprocessing import RollingFeatures
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 # Fixtures
@@ -621,6 +622,76 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                                          [0.06876068, 0.23752454, 0.11044965, 0.10202009]]),
                      columns = [f"pred_boot_{i}" for i in range(4)],
                      index   = pd.RangeIndex(start=50, stop=52)
+                 )
+
+    expected = {'1': expected_1, '2': expected_2}
+
+    for key in results.keys():
+        pd.testing.assert_frame_equal(results[key], expected[key])
+
+
+def test_predict_bootstrapping_output_when_window_features():
+    """
+    Test output of predict_bootstrapping when regressor is LGBMRegressor 
+    and window features.
+    """
+
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=4)
+    transformer_exog = ColumnTransformer(
+                           [('scale', StandardScaler(), ['exog_1']),
+                            ('onehot', OneHotEncoder(), ['exog_2'])],
+                           remainder = 'passthrough',
+                           verbose_feature_names_out = False
+                       )
+    
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor          = LGBMRegressor(verbose=-1),
+                     lags               = 5,
+                     window_features    = rolling,
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = transformer_exog
+                 )
+    forecaster.fit(series=series, exog=exog)
+    results = forecaster.predict_bootstrapping(
+                  steps                   = 6, 
+                  n_boot                  = 10, 
+                  exog                    = exog_predict, 
+                  use_in_sample_residuals = True
+              )
+
+    expected_1 = pd.DataFrame(
+                     data = np.array([
+                                [0.70414275, 0.33846487, 0.51525768, 0.78238922, 0.53358641,
+                                 0.55496755, 0.49698665, 0.3156552 , 0.70164044, 0.51987002],
+                                [0.5093462 , 0.10945852, 0.50986314, 0.53323641, 0.50986314,
+                                 0.31517078, 0.54867791, 0.09113636, 0.46379211, 0.41342218],
+                                [0.86504059, 0.56932758, 0.45218404, 0.44580085, 0.83119047,
+                                 0.43019077, 0.68569118, 0.51340363, 0.61452721, 0.84957527],
+                                [0.65524631, 0.84194486, 0.93082861, 0.7155279 , 0.83658981,
+                                 1.02306043, 0.6582736 , 0.86211073, 0.56189833, 0.70564327],
+                                [0.54647555, 0.75265845, 0.43334796, 0.36702491, 0.56762363,
+                                 0.43184972, 0.66142918, 0.47738529, 0.57800408, 0.17483813],
+                                [0.53343541, 0.56488173, 0.78929977, 0.44786181, 0.49626976,
+                                 0.6850046 , 0.36524591, 0.70909355, 0.34761764, 0.39494035]]),
+                     index   = pd.RangeIndex(start=50, stop=56, step=1),
+                     columns = [f"pred_boot_{i}" for i in range(10)]
+                 )
+    expected_2 = pd.DataFrame(
+                     data = np.array([
+                                [0.4703539 , 0.61121897, 0.7456648 , 1.05767197, 0.85702976,
+                                 0.84549833, 0.90211559, 1.05767197, 0.84549833, 0.43576797],
+                                [0.17638536, 0.36323208, 0.28360047, 0.39694573, 0.42021445,
+                                 0.62085666, 0.21910573, 0.1686658 , 0.03353859, 0.17638536],
+                                [0.63706768, 0.95491448, 0.84158046, 0.88270255, 0.63313527,
+                                 0.56008641, 0.4801817 , 0.64017749, 0.48757368, 0.70482518],
+                                [0.88520648, 0.81333217, 0.27723066, 0.44112079, 0.45918293,
+                                 0.57023604, 0.96036122, 0.63876782, 0.81917714, 0.82440159],
+                                [0.45118834, 0.55605023, 0.84244033, 0.9414499 , 0.55014026,
+                                 0.50114166, 0.25916732, 0.52348578, 0.64211623, 0.49025447],
+                                [0.49198322, 0.10785838, 0.12577904, 0.12725819, 0.79780591,
+                                 0.54327887, 0.78210044, 0.78482102, 0.19724282, 0.7278225 ]]),
+                     index   = pd.RangeIndex(start=50, stop=56, step=1),
+                     columns = [f"pred_boot_{i}" for i in range(10)]
                  )
 
     expected = {'1': expected_1, '2': expected_2}

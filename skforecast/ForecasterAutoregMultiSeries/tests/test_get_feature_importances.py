@@ -290,8 +290,10 @@ def test_output_get_feature_importances_when_window_features():
     results = forecaster.get_feature_importances(sort_importance=False)
     results = results.astype({'importance': float})
     expected = pd.DataFrame({
-                   'feature': ['lag_1', 'lag_2', 'lag_3', 'roll_mean_3', 'roll_sum_5', 'exog_1', 'exog_2'],
-                   'importance': np.array([0., 16., 7., 27., 45., 5., 6.])
+                   'feature': ['lag_1', 'lag_2', 'lag_3', 'roll_mean_3', 'roll_sum_5', '_level_skforecast', 
+                               'sin_day_of_week', 'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                   'importance': np.array([480.0, 361.0, 323.0, 251.0, 430.0, 
+                                           41.0, 175.0, 105.0, 468.0, 366.0])
                }).astype({'importance': float})
     
     pd.testing.assert_frame_equal(results, expected)

@@ -1240,15 +1240,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         self.is_fitted = True
 
         X_test, y_test, *_ = self._create_train_X_y(
-                                series            = series_test,
-                                exog              = exog_test,
-                                store_last_window = False
+                                 series            = series_test,
+                                 exog              = exog_test,
+                                 store_last_window = False
                              )
         self.is_fitted = _is_fitted
         self.series_names_in_ = _series_names_in_
         self.exog_names_in_ = _exog_names_in_
 
-        # TODO: Check pd.Series.ravel(), deprecated
         if self.encoding in ["ordinal", "ordinal_category"]:
             X_train_encoding = self.encoder.inverse_transform(
                 X_train[["_level_skforecast"]]
@@ -1273,12 +1272,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             X_train = X_train.drop(columns="_level_skforecast")
             X_test = X_test.drop(columns="_level_skforecast")
         
-        X_train_encoding = pd.Series(data=X_train_encoding, index=X_train.index).fillna(
-            "_unknown_level"
-        )
-        X_test_encoding = pd.Series(data=X_test_encoding, index=X_test.index).fillna(
-            "_unknown_level"
-        )
+        X_train_encoding = pd.Series(
+            data=X_train_encoding, index=X_train.index
+        ).fillna("_unknown_level")
+        X_test_encoding = pd.Series(
+            data=X_test_encoding, index=X_test.index
+        ).fillna("_unknown_level")
         
         return X_train, y_train, X_test, y_test, X_train_encoding, X_test_encoding
 
