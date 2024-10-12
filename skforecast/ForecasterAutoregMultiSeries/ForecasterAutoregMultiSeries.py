@@ -124,7 +124,6 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Differentiation is reversed in the output of `predict()` and `predict_interval()`.
         **WARNING: This argument is newly introduced and requires special attention. It
         is still experimental and may undergo changes.**
-        **New in version 0.12.0**
     dropna_from_series : bool, default `False`
         Determine whether NaN detected in the training matrices will be dropped.
 
@@ -135,7 +134,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Additional arguments to be passed to the `fit` method of the regressor.
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
-
+    
     Attributes
     ----------
     regressor : regressor or pipeline compatible with the scikit-learn API
@@ -231,7 +230,12 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Determine whether NaN detected in the training matrices will be dropped.
     last_window_ : dict
         Last window of training data for each series. It stores the values 
-        needed to predict the next `step` immediately after the training data.
+        needed to predict the next `step` immediately after the training data. 
+        These values are stored in the original scale of the time series before 
+        undergoing any transformations or differentiation. When `differentiation` 
+        parameter is specified, the dimensions of the `last_window_` are expanded 
+        as many values as the order of differentiation. For example, if 
+        `lags` = 7 and `differentiation` = 1, `last_window_` will have 8 values.
     index_type_ : type
         Type of index of the input used in training.
     index_freq_ : str
@@ -246,7 +250,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     exog_names_in_ : list
         Names of the exogenous variables used during training.
     exog_type_in_ : type
-        Type of exogenous variable/s used in training.
+        Type of exogenous data (pandas Series, DataFrame or dict) used in training.
     exog_dtypes_in_ : dict
         Type of each exogenous variable/s used in training. If `transformer_exog` 
         is used, the dtypes are calculated before the transformation.
@@ -537,6 +541,141 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         return info
 
 
+    def _repr_html_(self):
+        """
+        HTML representation of the object.
+        The "General Information" section is expanded by default.
+        """
+        
+        if isinstance(self.regressor, Pipeline):
+            name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
+            params = {key: value for key, value in self.regressor.get_params().items()
+                    if key.startswith(name_pipe_steps)}
+        else:
+            params = self.regressor.get_params(deep=True)
+        params = str(params)
+
+        style = """
+        <style>
+            .container {
+                font-family: 'Arial', sans-serif;
+                font-size: 0.9em;
+                color: #333;
+                border: 1px solid #ddd;
+                background-color: #fafafa;
+                padding: 5px 15px;
+                border-radius: 8px;
+                max-width: 600px;
+                #margin: auto;
+            }
+            .container h2 {
+                font-size: 1.2em;
+                color: #222;
+                border-bottom: 2px solid #ddd;
+                padding-bottom: 5px;
+                margin-bottom: 15px;
+            }
+            .container details {
+                margin: 10px 0;
+            }
+            .container summary {
+                font-weight: bold;
+                font-size: 1.1em;
+                cursor: pointer;
+                margin-bottom: 5px;
+                background-color: #f0f0f0;
+                padding: 5px;
+                border-radius: 5px;
+            }
+            .container summary:hover {
+            background-color: #e0e0e0;
+            }
+            .container ul {
+                font-family: 'Courier New', monospace;
+                list-style-type: none;
+                padding-left: 20px;
+                margin: 10px 0;
+            }
+            .container li {
+                margin: 5px 0;
+                font-family: 'Courier New', monospace;
+            }
+            .container li strong {
+                font-weight: bold;
+                color: #444;
+            }
+            .container li::before {
+                content: "- ";
+                color: #666;
+            }
+        </style>
+        """
+        
+        content = f"""
+        <div class="container">
+            <h2>{type(self).__name__}</h2>
+            <details open>
+                <summary>General Information</summary>
+                <ul>
+                    <li><strong>Regressor:</strong> {self.regressor}</li>
+                    <li><strong>Lags:</strong> {self.lags}</li>
+                    <li><strong>Window features:</strong> {self.window_features_names}</li>
+                    <li><strong>Window size:</strong> {self.window_size}</li>
+                    <li><strong>Exogenous included:</strong> {self.exog_in_}</li>
+                    <li><strong>Weight function included:</strong> {self.weight_func is not None}</li>
+                    <li><strong>Differentiation order:</strong> {self.differentiation}</li>
+                    <li><strong>Creation date:</strong> {self.creation_date}</li>
+                    <li><strong>Last fit date:</strong> {self.fit_date}</li>
+                    <li><strong>Skforecast version:</strong> {self.skforecast_version}</li>
+                    <li><strong>Python version:</strong> {self.python_version}</li>
+                    <li><strong>Forecaster id:</strong> {self.forecaster_id}</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Exogenous Variables</summary>
+                <ul>
+                     {self.exog_names_in_}
+                </ul>
+            </details>
+            <details>
+                <summary>Data Transformations</summary>
+                <ul>
+                    <li><strong>Transformer for y:</strong> {self.transformer_y}</li>
+                    <li><strong>Transformer for exog:</strong> {self.transformer_exog}</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Training Information</summary>
+                <ul>
+                    <li><strong>Training range:</strong> {self.training_range_.to_list() if self.is_fitted else 'Not fitted'}</li>
+                    <li><strong>Training index type:</strong> {str(self.index_type_).split('.')[-1][:-2] if self.is_fitted else 'Not fitted'}</li>
+                    <li><strong>Training index frequency:</strong> {self.index_freq_ if self.is_fitted else 'Not fitted'}</li>
+                </ul>
+            </details>
+            <details>
+                <summary>Regressor Parameters</summary>
+                <ul>
+                    {params}
+                </ul>
+            </details>
+            <details>
+                <summary>Fit Kwargs</summary>
+                <ul>
+                    {self.fit_kwargs}
+                </ul>
+            </details>
+            <p>
+                <a href="https://skforecast.org/{skforecast.__version__}/api/forecasterautoreg#forecasterautoreg.html">&#128712 <strong>API Reference</strong></a>
+                &nbsp;&nbsp;
+                <a href="https://skforecast.org/{skforecast.__version__}/user_guides/autoregresive-forecaster.html">&#128462 <strong>User Guide</strong></a>
+            </p>
+        </div>
+        """
+
+        # Return the combined style and content
+        return style + content
+
+
     def _create_lags(
         self,
         y: np.ndarray,
@@ -798,7 +937,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         X_train : pandas DataFrame
             Training values (predictors).
         y_train : pandas Series
-            Values (target) of the time series related to each row of `X_train`.
+            Values of the time series related to each row of `X_train`.
         series_indexes : dict
             Dictionary with the index of each series.
         series_names_in_ : list
@@ -1580,11 +1719,11 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         predict_boot: bool = False,
         use_in_sample_residuals: bool = True,
         check_inputs: bool = True
-    ) -> Tuple[pd.DataFrame, dict, list, pd.Index, Optional[dict]]:
+    ) -> Tuple[pd.DataFrame, Optional[dict], list, pd.Index, Optional[dict]]:
         """
-        Create inputs needed for the first iteration of the prediction process. 
-        Since it is a recursive process, last window is updated at each 
-        iteration of the prediction process.
+        Create the inputs needed for the first iteration of the prediction 
+        process. As this is a recursive process, the last window is updated at 
+        each iteration of the prediction process.
         
         Parameters
         ----------
@@ -1617,9 +1756,9 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Returns
         -------
         last_window : pandas DataFrame
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
-        exog_values_dict : dict
+            Series values used to create the predictors needed in the first 
+            iteration of the prediction (t + 1).
+        exog_values_dict : dict, None
             Exogenous variable/s included as predictor/s for each series in 
             each step. The keys are the steps and the values are numpy arrays
             where each column is an exog and each row a series (level).
@@ -1785,8 +1924,8 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         levels : list
             Time series to be predicted.
         last_window : pandas DataFrame
-            Series values used to create the features (lags) needed in the
-            first iteration of the prediction (t + 1).
+            Series values used to create the predictors needed in the first 
+            iteration of the prediction (t + 1).
         exog_values_dict : dict, default `None`
             Exogenous variable/s included as predictor/s for each series in 
             each step. The keys are the steps and the values are numpy arrays
@@ -1867,7 +2006,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             
             predictions[i, :] = pred 
 
-            # Update `last_window` values. The first position is discarded and
+            # Update `last_window` values. The first position is discarded and 
             # the new prediction is added at the end.
             last_window[-(steps - i), :] = pred
 
