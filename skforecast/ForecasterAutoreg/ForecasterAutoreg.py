@@ -294,7 +294,7 @@ class ForecasterAutoreg(ForecasterBase):
         if binner_kwargs is None:
             self.binner_kwargs = {
                 'n_bins': 10, 'encode': 'ordinal', 'strategy': 'quantile',
-                'subsample': 10000, 'random_state': 789654, 'dtype': np.float64
+                'subsample': 20000, 'random_state': 789654, 'dtype': np.float64
             }
         else:
             self.binner_kwargs = binner_kwargs
@@ -1076,11 +1076,12 @@ class ForecasterAutoreg(ForecasterBase):
             data.groupby('bin')['residuals'].apply(np.array).to_dict()
         )
 
+        rng = np.random.default_rng(seed=random_state)
         # Only up to 200 residuals are stored per bin
         for k, v in self.in_sample_residuals_by_bin_.items():
-            rng = np.random.default_rng(seed=random_state)
+            
             if len(v) > 200:
-                sample = rng.choice(a=v, size=200, replace=False)
+                sample = v[rng.integers(low=0, high=len(v), size=200)]
                 self.in_sample_residuals_by_bin_[k] = sample
 
         self.in_sample_residuals_ = np.concatenate(list(
@@ -1226,14 +1227,13 @@ class ForecasterAutoreg(ForecasterBase):
                            )
 
         return last_window_values, exog_values, prediction_index
-
-
+    
     def _recursive_predict(
         self,
         steps: int,
         last_window_values: np.ndarray,
         exog_values: Optional[np.ndarray] = None,
-        residuals: Optional[np.ndarray] = None,
+        residuals: Optional[Union[np.ndarray, dict]] = None,
         use_binned_residuals: bool = False,
         rng: Optional[np.random.Generator] = None
     ) -> np.ndarray:
@@ -1250,7 +1250,118 @@ class ForecasterAutoreg(ForecasterBase):
             first iteration of the prediction (t + 1).
         exog_values : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
-        residuals : numpy ndarray, default `None`
+        residuals : numpy ndarray, dict, default `None`
+            Residuals used to generate bootstrapping predictions.
+        use_binned_residuals : bool, default `False`
+            If `True`, residuals used in each bootstrapping iteration are selected
+            conditioning on the predicted values. If `False`, residuals are selected
+            randomly without conditioning on the predicted values.
+            **WARNING: This argument is newly introduced and requires special attention.
+            It is still experimental and may undergo changes.
+            **New in version 0.12.0**
+        rng : numpy Generator, default `None`
+            Random number generator used to select residuals in bootstrapping
+            predictions when using binned residuals. 
+
+        Returns
+        -------
+        predictions : numpy ndarray
+            Predicted values.
+        
+        """
+
+        n_lags = len(self.lags) if self.lags is not None else 0
+        n_window_features = (
+            len(self.X_train_window_features_names_out_)
+            if self.window_features is not None
+            else 0
+        )
+        n_exog = exog_values.shape[1] if exog_values is not None else 0
+
+        X = np.full(
+            shape=(n_lags + n_window_features + n_exog), fill_value=np.nan, dtype=float
+        )
+        predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
+        last_window = np.concatenate((last_window_values, predictions))
+
+        if residuals is not None:
+            if use_binned_residuals:
+                sample_residual = {
+                    k: v[rng.integers(low=0, high=len(v), size=steps)]
+                    for k, v in self.in_sample_residuals_by_bin_.items()
+                }
+            else:
+                sample_residual = residuals[
+                    rng.integers(low=0, high=len(residuals), size=steps)
+                ]
+
+        for i in range(steps):
+
+            if self.lags is not None:
+                X[:n_lags] = last_window[-self.lags - (steps - i)]
+            if self.window_features is not None:
+                X[n_lags : n_lags + n_window_features] = np.concatenate(
+                    [
+                        wf.transform(last_window[i : -(steps - i)])
+                        for wf in self.window_features
+                    ]
+                )
+            if exog_values is not None:
+                X[n_lags + n_window_features:] = exog_values[i]
+        
+            with warnings.catch_warnings():
+                # Suppress scikit-learn warning: "X does not have valid feature names,
+                # but NoOpTransformer was fitted with feature names".
+                warnings.filterwarnings(
+                    "ignore", 
+                    message="X does not have valid feature names", 
+                    category=UserWarning
+                )
+                pred = self.regressor.predict(X.reshape(1, -1)).ravel()
+            
+            if residuals is not None:
+                if use_binned_residuals:
+                    predicted_bin = (
+                        int(self.binner.transform(pred.reshape(1, -1))[0, 0])
+                    )
+                    step_residual = sample_residual[predicted_bin][i]
+                else:
+                    step_residual = sample_residual[i]
+                
+                pred += step_residual
+            
+            predictions[i] = pred[0]
+
+            # Update `last_window` values. The first position is discarded and 
+            # the new prediction is added at the end.
+            last_window[-(steps - i)] = pred[0]
+
+        return predictions
+
+
+    def _recursive_predict_13(
+        self,
+        steps: int,
+        last_window_values: np.ndarray,
+        exog_values: Optional[np.ndarray] = None,
+        residuals: Optional[Union[np.ndarray, dict]] = None,
+        use_binned_residuals: bool = False,
+        rng: Optional[np.random.Generator] = None
+    ) -> np.ndarray:
+        """
+        Predict n steps ahead. It is an iterative process in which, each prediction,
+        is used as a predictor for the next step.
+        
+        Parameters
+        ----------
+        steps : int
+            Number of future steps predicted.
+        last_window_values : numpy ndarray
+            Series values used to create the predictors (lags) needed in the 
+            first iteration of the prediction (t + 1).
+        exog_values : numpy ndarray, default `None`
+            Exogenous variable/s included as predictor/s.
+        residuals : numpy ndarray, dict, default `None`
             Residuals used to generate bootstrapping predictions.
         use_binned_residuals : bool, default `False`
             If `True`, residuals used in each bootstrapping iteration are selected
@@ -2089,26 +2200,17 @@ class ForecasterAutoreg(ForecasterBase):
         data = pd.DataFrame({'prediction': y_pred, 'residuals': residuals})
         data['bin'] = self.binner.transform(y_pred.reshape(-1, 1)).astype(int)
         residuals_by_bin = data.groupby('bin')['residuals'].apply(np.array).to_dict()
-
-        if self.binner.n_bins_[0] >= 10:
-            max_samples = 200
-        else:
-            max_samples = int(2000 // self.binner.n_bins_[0])
+        max_samples = max(
+            500,
+            int(5000 // self.binner.n_bins_[0])
+        )
 
         if append and self.out_sample_residuals_by_bin_ is not None:
             for k, v in residuals_by_bin.items():
                 if k in self.out_sample_residuals_by_bin_:
-                    free_space = max(0, max_samples - len(self.out_sample_residuals_by_bin_[k]))
-                    if len(v) < free_space:
-                        self.out_sample_residuals_by_bin_[k] = np.concatenate((
-                            self.out_sample_residuals_by_bin_[k],
-                            v
-                        ))
-                    else:
-                        self.out_sample_residuals_by_bin_[k] = np.concatenate((
-                            self.out_sample_residuals_by_bin_[k],
-                            v[:free_space]
-                        ))
+                    self.out_sample_residuals_by_bin_[k] = np.concatenate((
+                        self.out_sample_residuals_by_bin_[k], v)
+                    )
                 else:
                     self.out_sample_residuals_by_bin_[k] = v
         else:
@@ -2141,10 +2243,10 @@ class ForecasterAutoreg(ForecasterBase):
             for k in empty_bins:
                 rng = np.random.default_rng(seed=123)
                 self.out_sample_residuals_by_bin_[k] = rng.choice(
-                                                            a       = self.out_sample_residuals_,
-                                                            size    = max_samples,
-                                                            replace = True
-                                                        )
+                    a       = self.out_sample_residuals_,
+                    size    = max_samples,
+                    replace = True
+                )
 
 
     def get_feature_importances(
