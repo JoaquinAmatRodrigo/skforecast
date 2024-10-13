@@ -567,66 +567,69 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         else:
             transformer_series = self.transformer_series
 
-        style = """
+        background_color = "#f0f8ff" if self.is_fitted else "#f9f1e2"
+        section_color = "#b3dbfd" if self.is_fitted else "#fae3b3"
+
+        style = f"""
         <style>
-            .container {
+            .container {{
                 font-family: 'Arial', sans-serif;
                 font-size: 0.9em;
                 color: #333;
                 border: 1px solid #ddd;
-                background-color: #f9f1e2;
+                background-color: {background_color};
                 padding: 5px 15px;
                 border-radius: 8px;
                 max-width: 600px;
                 #margin: auto;
-            }
-            .container h2 {
+            }}
+            .container h2 {{
                 font-size: 1.5em;
                 color: #222;
                 border-bottom: 2px solid #ddd;
                 padding-bottom: 5px;
                 margin-bottom: 15px;
-            }
-            .container details {
+            }}
+            .container details {{
                 margin: 10px 0;
-            }
-            .container summary {
+            }}
+            .container summary {{
                 font-weight: bold;
                 font-size: 1.1em;
                 cursor: pointer;
                 margin-bottom: 5px;
-                background-color: #fae3b3;
+                background-color: {section_color};
                 padding: 5px;
                 border-radius: 5px;
-            }
-            .container summary:hover {
+            }}
+            .container summary:hover {{
                 background-color: #e0e0e0;
-            }
-            .container ul {
+            }}
+            .container ul {{
                 font-family: 'Courier New', monospace;
                 list-style-type: none;
                 padding-left: 20px;
                 margin: 10px 0;
-            }
-            .container li {
+            }}
+            .container li {{
                 margin: 5px 0;
                 font-family: 'Courier New', monospace;
-            }
-            .container li strong {
+            }}
+            .container li strong {{
                 font-weight: bold;
                 color: #444;
-            }
-            .container li::before {
+            }}
+            .container li::before {{
                 content: "- ";
                 color: #666;
-            }
-            a {
+            }}
+            a {{
                 color: #001633;
                 text-decoration: none;
-            }
-            a:hover {
+            }}
+            a:hover {{
                 color: #359ccb; 
-            }
+            }}
         </style>
         """
         
