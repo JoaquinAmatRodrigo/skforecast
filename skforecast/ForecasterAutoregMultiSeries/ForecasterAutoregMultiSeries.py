@@ -8,6 +8,7 @@
 from typing import Union, Tuple, Optional, Callable
 import warnings
 import sys
+import uuid
 import numpy as np
 import pandas as pd
 from copy import copy
@@ -567,12 +568,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         else:
             transformer_series = self.transformer_series
 
+        unique_id = str(uuid.uuid4()).replace('-', '')
         background_color = "#f0f8ff" if self.is_fitted else "#f9f1e2"
         section_color = "#b3dbfd" if self.is_fitted else "#fae3b3"
 
         style = f"""
         <style>
-            .container {{
+            .container-{unique_id} {{
                 font-family: 'Arial', sans-serif;
                 font-size: 0.9em;
                 color: #333;
@@ -583,17 +585,17 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 max-width: 600px;
                 #margin: auto;
             }}
-            .container h2 {{
+            .container-{unique_id} h2 {{
                 font-size: 1.5em;
                 color: #222;
                 border-bottom: 2px solid #ddd;
                 padding-bottom: 5px;
                 margin-bottom: 15px;
             }}
-            .container details {{
+            .container-{unique_id} details {{
                 margin: 10px 0;
             }}
-            .container summary {{
+            .container-{unique_id} summary {{
                 font-weight: bold;
                 font-size: 1.1em;
                 cursor: pointer;
@@ -602,24 +604,24 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 padding: 5px;
                 border-radius: 5px;
             }}
-            .container summary:hover {{
+            .container-{unique_id} summary:hover {{
                 background-color: #e0e0e0;
             }}
-            .container ul {{
+            .container-{unique_id} ul {{
                 font-family: 'Courier New', monospace;
                 list-style-type: none;
                 padding-left: 20px;
                 margin: 10px 0;
             }}
-            .container li {{
+            .container-{unique_id} li {{
                 margin: 5px 0;
                 font-family: 'Courier New', monospace;
             }}
-            .container li strong {{
+            .container-{unique_id} li strong {{
                 font-weight: bold;
                 color: #444;
             }}
-            .container li::before {{
+            .container-{unique_id} li::before {{
                 content: "- ";
                 color: #666;
             }}
@@ -634,7 +636,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
         
         content = f"""
-        <div class="container">
+        <div class="container-{unique_id}">
             <h2>{type(self).__name__}</h2>
             <details open>
                 <summary>General Information</summary>
