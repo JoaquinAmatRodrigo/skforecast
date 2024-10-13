@@ -8,6 +8,7 @@
 from typing import Union, Tuple, Any, Optional, Callable
 import warnings
 import sys
+import uuid
 import numpy as np
 import pandas as pd
 import inspect
@@ -49,6 +50,7 @@ from ..utils import (
     select_n_jobs_fit_forecaster,
     set_skforecast_warnings
 )
+from ..preprocessing import TimeSeriesDifferentiator
 from ..model_selection._utils import _extract_data_folds_multiseries
 
 
@@ -68,13 +70,17 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Maximum number of future steps the forecaster will predict when using
         method `predict()`. Since a different model is created for each step,
         this value must be defined before training.
-    lags : int, list, numpy ndarray, range, dict
+    lags : int, list, numpy ndarray, range, dict, default `None`
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
 
         - `int`: include lags from 1 to `lags` (included).
         - `list`, `1d numpy ndarray` or `range`: include only lags present in 
         `lags`, all elements must be int.
         - `dict`: create different lags for each series. {'series_column_name': lags}.
+        - `None`: no lags are included as predictors. 
+    window_features : object, list, default `None`
+        Instance or list of instances used to create window features. Window features
+        are created from the original time series and are included as predictors.
     transformer_series : transformer (preprocessor), dict, default `sklearn.preprocessing.StandardScaler`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -99,7 +105,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_fit_forecaster.
-        **New in version 0.9.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
 
@@ -119,10 +124,25 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     lags : numpy ndarray, dict
         Lags used as predictors.
     lags_ : dict
-        Dictionary containing the lags of each series. Created from `lags` and 
-        used internally.
+        Dictionary containing the lags of each series. Created from `lags` when 
+        creating the training matrices and used internally to avoid overwriting.
     lags_names : list, dict
         Names of the lags of each series. If list, it is the same for all series.
+    max_lag : int
+        Maximum lag included in `lags`.
+    window_features : list
+        Class or list of classes used to create window features.
+    window_features_names : list
+        Names of the window features to be included in the `X_train` matrix.
+    window_features_class_names : list
+        Names of the classes used to create the window features.
+    max_size_window_features : int
+        Maximum window size required by the window features.
+    window_size : int
+        The window size needed to create the predictors. It is calculated as the 
+        maximum value between `max_lag` and `max_size_window_features`. If 
+        differentiation is used, `window_size` is increased by n units equal to 
+        the order of differentiation so that predictors can be generated correctly.
     transformer_series : transformer (preprocessor), dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -146,15 +166,23 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         `fit` method. The resulting `sample_weight` cannot have negative values.
     source_code_weight_func : str
         Source code of the custom function used to create weights.
-    max_lag : int
-        Maximum lag included in `lags`.
-    window_size : int
-        Size of the window needed to create the predictors. When using
-        differentiation, the `window_size` is increased by the order of 
-        differentiation so that the predictors can be created correctly.
+    differentiation : int
+        Order of differencing applied to the time series before training the 
+        forecaster.
+    differentiator : TimeSeriesDifferentiator
+        Skforecast object used to differentiate the time series.
+    differentiator_ : dict
+        Dictionary with the `differentiator` for each series. It is created cloning the
+        objects in `differentiator` and is used internally to avoid overwriting.
     last_window_ : pandas DataFrame
-        Last window the forecaster has seen during training. It stores the
-        values needed to predict `steps` immediately after the training data.
+        This window represents the most recent data observed by the predictor
+        during its training phase. It contains the values needed to predict the
+        next step immediately after the training data. These values are stored
+        in the original scale of the time series before undergoing any transformations
+        or differentiation. When `differentiation` parameter is specified, the
+        dimensions of the `last_window_` are expanded as many values as the order
+        of differentiation. For example, if `lags` = 7 and `differentiation` = 1,
+        `last_window_` will have 8 values.
     index_type_ : type
         Type of index of the input used in training.
     index_freq_ : str
@@ -176,6 +204,16 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Names of the series added to `X_train` when creating the training
         matrices with `_create_train_X_y` method. It is a subset of 
         `series_names_in_`.
+    X_train_window_features_names_out_ : list
+        Names of the window features included in the matrix `X_train` created
+        internally for training.
+    X_train_exog_names_out_ : list
+        Names of the exogenous variables included in the matrix `X_train` created
+        internally for training. It can be different from `exog_names_in_` if
+        some exogenous variables are transformed during the training process.
+    X_train_direct_exog_names_out_ : list
+        Same as `X_train_exog_names_out_` but using the direct format. The same 
+        exogenous variable is repeated for each step.
     X_train_features_names_out_ : list
         Names of columns of the matrix created internally for training.
     fit_kwargs : dict
@@ -199,20 +237,15 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
-    n_jobs : int, 'auto', default `'auto'`
+    n_jobs : int, 'auto'
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the fuction
         skforecast.utils.select_n_jobs_fit_forecaster.
-        **New in version 0.9.0**
     forecaster_id : str, int
         Name used as an identifier of the forecaster.
     dropna_from_series : Ignored
         Not used, present here for API consistency by convention.
     encoding : Ignored
-        Not used, present here for API consistency by convention.
-    differentiation : Ignored
-        Not used, present here for API consistency by convention.
-    differentiator : Ignored
         Not used, present here for API consistency by convention.
 
     Notes
@@ -227,48 +260,50 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         regressor: object,
         level: str,
         steps: int,
-        lags: Union[int, np.ndarray, list, dict],
+        lags: Optional[Union[int, np.ndarray, list, range, dict]] = None,
+        window_features: Optional[Union[object, list]] = None,
         transformer_series: Optional[Union[object, dict]] = StandardScaler(),
         transformer_exog: Optional[object] = None,
         weight_func: Optional[Callable] = None,
+        differentiation: Optional[int] = None,
         fit_kwargs: Optional[dict] = None,
         n_jobs: Union[int, str] = 'auto',
         forecaster_id: Optional[Union[str, int]] = None
     ) -> None:
         
-        self.regressor                      = copy(regressor)
-        self.level                          = level
-        self.steps                          = steps
-        self.transformer_series             = transformer_series
-        self.transformer_series_            = None
-        self.transformer_exog               = transformer_exog
-        self.weight_func                    = weight_func
-        self.source_code_weight_func        = None
-        self.max_lag                        = None
-        self.window_size                    = None
-        self.last_window_                   = None
-        self.index_type_                    = None
-        self.index_freq_                    = None
-        self.training_range_                = None
-        self.series_names_in_               = None
-        self.exog_in_                       = False
-        self.exog_names_in_                 = None
-        self.exog_type_in_                  = None
-        self.exog_dtypes_in_                = None
-        self.X_train_series_names_in_       = None
-        self.X_train_exog_names_out_        = None
-        self.X_train_direct_exog_names_out_ = None
-        self.X_train_features_names_out_    = None
-        self.creation_date                  = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
-        self.is_fitted                      = False
-        self.fit_date                       = None
-        self.skforecast_version             = skforecast.__version__
-        self.python_version                 = sys.version.split(" ")[0]
-        self.forecaster_id                  = forecaster_id
-        self.dropna_from_series             = False  # Ignored in this forecaster
-        self.encoding                       = None   # Ignored in this forecaster
-        self.differentiation                = None   # Ignored in this forecaster
-        self.differentiator                 = None   # Ignored in this forecaster
+        self.regressor                          = copy(regressor)
+        self.level                              = level
+        self.steps                              = steps
+        self.lags_                              = None
+        self.transformer_series                 = transformer_series
+        self.transformer_series_                = None
+        self.transformer_exog                   = transformer_exog
+        self.weight_func                        = weight_func
+        self.source_code_weight_func            = None
+        self.differentiation                    = differentiation
+        self.differentiator                     = None
+        self.last_window_                       = None
+        self.index_type_                        = None
+        self.index_freq_                        = None
+        self.training_range_                    = None
+        self.series_names_in_                   = None
+        self.exog_in_                           = False
+        self.exog_names_in_                     = None
+        self.exog_type_in_                      = None
+        self.exog_dtypes_in_                    = None
+        self.X_train_series_names_in_           = None
+        self.X_train_window_features_names_out_ = None
+        self.X_train_exog_names_out_            = None
+        self.X_train_direct_exog_names_out_     = None
+        self.X_train_features_names_out_        = None
+        self.creation_date                      = pd.Timestamp.today().strftime('%Y-%m-%d %H:%M:%S')
+        self.is_fitted                          = False
+        self.fit_date                           = None
+        self.skforecast_version                 = skforecast.__version__
+        self.python_version                     = sys.version.split(" ")[0]
+        self.forecaster_id                      = forecaster_id
+        self.dropna_from_series                 = False  # Ignored in this forecaster
+        self.encoding                           = None   # Ignored in this forecaster
 
         if not isinstance(level, str):
             raise TypeError(
@@ -308,8 +343,34 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 lags            = lags
             )
 
-        self.lags_ = self.lags
-        self.window_size = self.max_lag
+        self.window_features, self.window_features_names, self.max_size_window_features = (
+            initialize_window_features(window_features)
+        )
+        if self.window_features is None and self.lags is None:
+            raise ValueError(
+                ("At least one of the arguments `lags` or `window_features` "
+                 "must be different from None. This is required to create the "
+                 "predictors used in training the forecaster.")
+            )
+        
+        self.window_size = max(
+            [ws for ws in [self.max_lag, self.max_size_window_features] 
+             if ws is not None]
+        )
+        self.window_features_class_names = None
+        if window_features is not None:
+            self.window_features_class_names = [
+                type(wf).__name__ for wf in self.window_features
+            ]
+
+        if self.differentiation is not None:
+            if not isinstance(differentiation, int) or differentiation < 1:
+                raise ValueError(
+                    f"Argument `differentiation` must be an integer equal to or "
+                    f"greater than 1. Got {differentiation}."
+                )
+            self.window_size += self.differentiation
+            self.differentiator = TimeSeriesDifferentiator(order=self.differentiation)
             
         self.weight_func, self.source_code_weight_func, _ = initialize_weights(
             forecaster_name = type(self).__name__, 
@@ -391,6 +452,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             f"{'=' * len(type(self).__name__)} \n"
             f"Regressor: {self.regressor} \n"
             f"Lags: {self.lags} \n"
+            f"Window features: {self.window_features_names} \n"
             f"Window size: {self.window_size} \n"
             f"Target series (level): {self.level} \n"
             f"Multivariate series (levels): {series_names_in_} \n"
@@ -399,7 +461,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             f"Exogenous names: {exog_names_in_} \n"
             f"Transformer for series: {transformer_series} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
-            f"Weight function included: {True if self.weight_func is not None else False} \n"        
+            f"Weight function included: {True if self.weight_func is not None else False} \n"
+            f"Differentiation order: {self.differentiation} \n"
             f"Training range: {self.training_range_.to_list() if self.is_fitted else None} \n"
             f"Training index type: {str(self.index_type_).split('.')[-1][:-2] if self.is_fitted else None} \n"
             f"Training index frequency: {self.index_freq_ if self.is_fitted else None} \n"
@@ -536,8 +599,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             )
 
         if isinstance(self.lags, dict):
-            self.lags_ = self.lags
-            lags_keys = list(self.lags_.keys())
+            lags_keys = list(self.lags.keys())
             if lags_keys != series_names_in_:
                 raise ValueError(
                     (f"When `lags` parameter is a `dict`, its keys must be the "
@@ -545,6 +607,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                      f"  Lags keys        : {lags_keys}.\n"
                      f"  `series` columns : {series_names_in_}.")
                 )
+            self.lags_ = copy(self.lags)
         else:
             self.lags_ = {serie: self.lags for serie in series_names_in_}
 
@@ -996,6 +1059,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         set_skforecast_warnings(suppress_warnings, action='ignore')
         
         # Reset values in case the forecaster has already been fitted.
+        self.lags_                       = None
         self.last_window_                = None
         self.index_type_                 = None
         self.index_freq_                 = None

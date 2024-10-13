@@ -8,6 +8,7 @@
 from typing import Union, Tuple, Optional, Callable
 import warnings
 import sys
+import uuid
 import numpy as np
 import pandas as pd
 import inspect
@@ -398,59 +399,70 @@ class ForecasterAutoreg(ForecasterBase):
             params = self.regressor.get_params(deep=True)
         params = str(params)
 
-        style = """
+        unique_id = str(uuid.uuid4()).replace('-', '')
+        background_color = "#f0f8ff" if self.is_fitted else "#f9f1e2"
+        section_color = "#b3dbfd" if self.is_fitted else "#fae3b3"
+
+        style = f"""
         <style>
-            .container {
+            .container-{unique_id} {{
                 font-family: 'Arial', sans-serif;
                 font-size: 0.9em;
                 color: #333;
                 border: 1px solid #ddd;
-                background-color: #fafafa;
+                background-color: {background_color};
                 padding: 5px 15px;
                 border-radius: 8px;
                 max-width: 600px;
                 #margin: auto;
-            }
-            .container h2 {
-                font-size: 1.2em;
+            }}
+            .container-{unique_id} h2 {{
+                font-size: 1.5em;
                 color: #222;
                 border-bottom: 2px solid #ddd;
                 padding-bottom: 5px;
                 margin-bottom: 15px;
-            }
-            .container details {
+            }}
+            .container-{unique_id} details {{
                 margin: 10px 0;
-            }
-            .container summary {
+            }}
+            .container-{unique_id} summary {{
                 font-weight: bold;
                 font-size: 1.1em;
                 cursor: pointer;
                 margin-bottom: 5px;
-                background-color: #f0f0f0;
+                background-color: {section_color};
                 padding: 5px;
                 border-radius: 5px;
-            }
-            .container summary:hover {
+            }}
+            .container-{unique_id} summary:hover {{
                 background-color: #e0e0e0;
-            }
-            .container ul {
+            }}
+            .container-{unique_id} ul {{
                 font-family: 'Courier New', monospace;
                 list-style-type: none;
                 padding-left: 20px;
                 margin: 10px 0;
-            }
-            .container li {
+            }}
+            .container-{unique_id} li {{
                 margin: 5px 0;
                 font-family: 'Courier New', monospace;
-            }
-            .container li strong {
+            }}
+            .container-{unique_id} li strong {{
                 font-weight: bold;
                 color: #444;
-            }
-            .container li::before {
+            }}
+            .container-{unique_id} li::before {{
                 content: "- ";
                 color: #666;
-            }
+            }}
+            a {{
+                color: #001633;
+                text-decoration: none;
+            }}
+            a:hover {{
+                color: #359ccb; 
+            }}
         </style>
         """
         

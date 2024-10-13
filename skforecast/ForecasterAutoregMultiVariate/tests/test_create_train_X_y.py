@@ -59,7 +59,7 @@ def test_create_train_X_y_ValueError_when_lags_keys_not_in_series():
     err_msg = re.escape(
         (f"When `lags` parameter is a `dict`, its keys must be the "
          f"same as `series` column names.\n"
-         f"  Lags keys        : {list(forecaster.lags_.keys())}.\n"
+         f"  Lags keys        : {list(forecaster.lags.keys())}.\n"
          f"  `series` columns : {series_col_names}.")
     )
     with pytest.raises(ValueError, match = err_msg):

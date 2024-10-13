@@ -8,6 +8,7 @@
 from typing import Union, Tuple, Optional, Callable, Any
 import warnings
 import sys
+import uuid
 import numpy as np
 import pandas as pd
 import inspect
@@ -20,27 +21,29 @@ from joblib import Parallel, delayed, cpu_count
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
-from ..utils import initialize_lags
-from ..utils import initialize_window_features
-from ..utils import initialize_weights
-from ..utils import check_select_fit_kwargs
-from ..utils import check_y
-from ..utils import check_exog
-from ..utils import get_exog_dtypes
-from ..utils import check_exog_dtypes
-from ..utils import prepare_steps_direct
-from ..utils import check_predict_input
-from ..utils import check_interval
-from ..utils import preprocess_y
-from ..utils import preprocess_last_window
-from ..utils import preprocess_exog
-from ..utils import input_to_frame
-from ..utils import exog_to_direct
-from ..utils import exog_to_direct_numpy
-from ..utils import expand_index
-from ..utils import transform_numpy
-from ..utils import transform_dataframe
-from ..utils import select_n_jobs_fit_forecaster
+from ..utils import (
+    initialize_lags,
+    initialize_window_features,
+    initialize_weights,
+    check_select_fit_kwargs,
+    check_y,
+    check_exog,
+    get_exog_dtypes,
+    check_exog_dtypes,
+    prepare_steps_direct,
+    check_predict_input,
+    check_interval,
+    preprocess_y,
+    preprocess_last_window,
+    preprocess_exog,
+    input_to_frame,
+    exog_to_direct,
+    exog_to_direct_numpy,
+    expand_index,
+    transform_numpy,
+    transform_dataframe,
+    select_n_jobs_fit_forecaster
+)
 from ..preprocessing import TimeSeriesDifferentiator
 
 
@@ -96,7 +99,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_fit_forecaster.
-        **New in version 0.9.0**
     forecaster_id : str, int, default `None`
         Name used as an identifier of the forecaster.
     
@@ -146,14 +148,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
-    differentiation : int, default `None`
-        Order of differencing applied to the time series before training the forecaster.
-        If `None`, no differencing is applied. The order of differentiation is the number
-        of times the differencing operation is applied to a time series. Differencing
-        involves computing the differences between consecutive data points in the series.
-        Differentiation is reversed in the output of `predict()` and `predict_interval()`.
-        **WARNING: This argument is newly introduced and requires special attention. It
-        is still experimental and may undergo changes.**
     source_code_weight_func : str
         Source code of the custom function used to create weights.
     differentiation : int
@@ -218,7 +212,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         Version of skforecast library used to create the forecaster.
     python_version : str
         Version of python used to create the forecaster.
-    n_jobs : int, 'auto', default `'auto'`
+    n_jobs : int, 'auto'
         The number of jobs to run in parallel. If `-1`, then the number of jobs is 
         set to the number of cores. If 'auto', `n_jobs` is set using the function
         skforecast.utils.select_n_jobs_fit_forecaster.
@@ -320,7 +314,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         if window_features is not None:
             self.window_features_class_names = [
                 type(wf).__name__ for wf in self.window_features
-            ] 
+            ]
 
         if self.differentiation is not None:
             if not isinstance(differentiation, int) or differentiation < 1:
@@ -429,64 +423,75 @@ class ForecasterAutoregDirect(ForecasterBase):
             params = self.regressor.get_params(deep=True)
         params = str(params)
 
-        style = """
+        unique_id = str(uuid.uuid4()).replace('-', '')
+        background_color = "#f0f8ff" if self.is_fitted else "#f9f1e2"
+        section_color = "#b3dbfd" if self.is_fitted else "#fae3b3"
+
+        style = f"""
         <style>
-            .container {
+            .container-{unique_id} {{
                 font-family: 'Arial', sans-serif;
                 font-size: 0.9em;
                 color: #333;
                 border: 1px solid #ddd;
-                background-color: #fafafa;
+                background-color: {background_color};
                 padding: 5px 15px;
                 border-radius: 8px;
                 max-width: 600px;
                 #margin: auto;
-            }
-            .container h2 {
-                font-size: 1.2em;
+            }}
+            .container-{unique_id} h2 {{
+                font-size: 1.5em;
                 color: #222;
                 border-bottom: 2px solid #ddd;
                 padding-bottom: 5px;
                 margin-bottom: 15px;
-            }
-            .container details {
+            }}
+            .container-{unique_id} details {{
                 margin: 10px 0;
-            }
-            .container summary {
+            }}
+            .container-{unique_id} summary {{
                 font-weight: bold;
                 font-size: 1.1em;
                 cursor: pointer;
                 margin-bottom: 5px;
-                background-color: #f0f0f0;
+                background-color: {section_color};
                 padding: 5px;
                 border-radius: 5px;
-            }
-            .container summary:hover {
+            }}
+            .container-{unique_id} summary:hover {{
                 background-color: #e0e0e0;
-            }
-            .container ul {
+            }}
+            .container-{unique_id} ul {{
                 font-family: 'Courier New', monospace;
                 list-style-type: none;
                 padding-left: 20px;
                 margin: 10px 0;
-            }
-            .container li {
+            }}
+            .container-{unique_id} li {{
                 margin: 5px 0;
                 font-family: 'Courier New', monospace;
-            }
-            .container li strong {
+            }}
+            .container-{unique_id} li strong {{
                 font-weight: bold;
                 color: #444;
-            }
-            .container li::before {
+            }}
+            .container-{unique_id} li::before {{
                 content: "- ";
                 color: #666;
-            }
+            }}
+            a {{
+                color: #001633;
+                text-decoration: none;
+            }}
+            a:hover {{
+                color: #359ccb; 
+            }}
         </style>
         """
         
         content = f"""
-        <div class="container">
+        <div class="container-{unique_id}">
             <h2>{type(self).__name__}</h2>
             <details open>
                 <summary>General Information</summary>
