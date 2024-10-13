@@ -462,7 +462,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 border-radius: 5px;
             }
             .container summary:hover {
-            background-color: #e0e0e0;
+                background-color: #e0e0e0;
             }
             .container ul {
                 font-family: 'Courier New', monospace;

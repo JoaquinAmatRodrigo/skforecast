@@ -574,14 +574,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 font-size: 0.9em;
                 color: #333;
                 border: 1px solid #ddd;
-                background-color: #fafafa;
+                background-color: #f9f1e2;
                 padding: 5px 15px;
                 border-radius: 8px;
                 max-width: 600px;
                 #margin: auto;
             }
             .container h2 {
-                font-size: 1.2em;
+                font-size: 1.5em;
                 color: #222;
                 border-bottom: 2px solid #ddd;
                 padding-bottom: 5px;
@@ -595,7 +595,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                 font-size: 1.1em;
                 cursor: pointer;
                 margin-bottom: 5px;
-                background-color: #f0f0f0;
+                background-color: #fae3b3;
                 padding: 5px;
                 border-radius: 5px;
             }
@@ -619,6 +619,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             .container li::before {
                 content: "- ";
                 color: #666;
+            }
+            a {
+                color: #001633;
+                text-decoration: none;
+            }
+            a:hover {
+                color: #359ccb; 
             }
         </style>
         """
