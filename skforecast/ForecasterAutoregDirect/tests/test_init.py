@@ -3,7 +3,6 @@
 import re
 import pytest
 import numpy as np
-import pandas as pd
 from sklearn.linear_model import LinearRegression
 from skforecast.preprocessing import RollingFeatures
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
@@ -44,8 +43,8 @@ def test_init_ValueError_when_no_lags_or_window_features():
     with pytest.raises(ValueError, match = err_msg):
         ForecasterAutoregDirect(
             regressor       = LinearRegression(),
-            lags            = None,
             steps           = 3,
+            lags            = None,
             window_features = None
         )
 
@@ -66,8 +65,8 @@ def test_init_window_size_correctly_stored(lags, window_features, expected):
 
     forecaster = ForecasterAutoregDirect(
                      regressor       = LinearRegression(),
-                     lags            = lags,
                      steps           = 3,
+                     lags            = lags,
                      window_features = window_features
                  )
     
@@ -102,8 +101,8 @@ def test_init_ValueError_when_differentiation_argument_is_not_int_or_greater_tha
     with pytest.raises(ValueError, match = err_msg):
         ForecasterAutoregDirect(
             regressor       = LinearRegression(),
-            lags            = 5,
             steps           = 3,
+            lags            = 5,
             differentiation = dif
         )
 
@@ -117,12 +116,12 @@ def test_init_window_size_is_increased_when_differentiation(dif):
     """
     forecaster = ForecasterAutoregDirect(
                      regressor       = LinearRegression(),
+                     steps           = 3,
                      lags            = 5,
-            steps           = 3,
                      differentiation = dif
                  )
     
-    assert forecaster.window_size == len(forecaster.lags) + dif
+    assert forecaster.window_size == 5 + dif
 
 
 @pytest.mark.parametrize("n_jobs", 
@@ -134,4 +133,4 @@ def test_init_TypeError_when_n_jobs_not_int_or_auto(n_jobs):
     """
     err_msg = re.escape(f"`n_jobs` must be an integer or `'auto'`. Got {type(n_jobs)}.")
     with pytest.raises(TypeError, match = err_msg):
-        ForecasterAutoregDirect(LinearRegression(), lags=2, steps=2, n_jobs=n_jobs)
+        ForecasterAutoregDirect(LinearRegression(), steps=2, lags=2, n_jobs=n_jobs)

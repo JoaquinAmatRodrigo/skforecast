@@ -8,12 +8,10 @@
 from typing import Union, Tuple, Optional, Callable
 import warnings
 import sys
-import uuid
 import numpy as np
 import pandas as pd
 import inspect
 from copy import copy
-import textwrap
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import KBinsDiscretizer
@@ -337,24 +335,19 @@ class ForecasterAutoreg(ForecasterBase):
         Information displayed when a ForecasterAutoreg object is printed.
         """
 
-        if isinstance(self.regressor, Pipeline):
-            name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
-            params = {key: value for key, value in self.regressor.get_params().items()
-                      if key.startswith(name_pipe_steps)}
-        else:
-            params = self.regressor.get_params(deep=True)
-        params = "\n    " + textwrap.fill(str(params), width=80, subsequent_indent="    ")
-
-        exog_names_in_ = None
-        if self.exog_names_in_ is not None:
-            exog_names_in_ = copy(self.exog_names_in_)
-            if len(exog_names_in_) > 50:
-                exog_names_in_ = exog_names_in_[:50] + ["..."]
-            exog_names_in_ = ", ".join(exog_names_in_)
-            if len(exog_names_in_) > 58:
-                exog_names_in_ = "\n    " + textwrap.fill(
-                    exog_names_in_, width=80, subsequent_indent="    "
-                )
+        (
+            params,
+            _,
+            _,
+            exog_names_in_,
+            _,
+        ) = self._preprocess_repr(
+                regressor      = self.regressor,
+                exog_names_in_ = self.exog_names_in_
+            )
+        
+        params = self._format_text_repr(params)
+        exog_names_in_ = self._format_text_repr(exog_names_in_)
 
         info = (
             f"{'=' * len(type(self).__name__)} \n"
@@ -390,84 +383,22 @@ class ForecasterAutoreg(ForecasterBase):
         HTML representation of the object.
         The "General Information" section is expanded by default.
         """
-        
-        if isinstance(self.regressor, Pipeline):
-            name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
-            params = {key: value for key, value in self.regressor.get_params().items()
-                    if key.startswith(name_pipe_steps)}
-        else:
-            params = self.regressor.get_params(deep=True)
-        params = str(params)
 
-        unique_id = str(uuid.uuid4()).replace('-', '')
-        background_color = "#f0f8ff" if self.is_fitted else "#f9f1e2"
-        section_color = "#b3dbfd" if self.is_fitted else "#fae3b3"
+        (
+            params,
+            _,
+            _,
+            exog_names_in_,
+            _,
+        ) = self._preprocess_repr(
+                regressor      = self.regressor,
+                exog_names_in_ = self.exog_names_in_
+            )
 
-        style = f"""
-        <style>
-            .container-{unique_id} {{
-                font-family: 'Arial', sans-serif;
-                font-size: 0.9em;
-                color: #333;
-                border: 1px solid #ddd;
-                background-color: {background_color};
-                padding: 5px 15px;
-                border-radius: 8px;
-                max-width: 600px;
-                #margin: auto;
-            }}
-            .container-{unique_id} h2 {{
-                font-size: 1.5em;
-                color: #222;
-                border-bottom: 2px solid #ddd;
-                padding-bottom: 5px;
-                margin-bottom: 15px;
-            }}
-            .container-{unique_id} details {{
-                margin: 10px 0;
-            }}
-            .container-{unique_id} summary {{
-                font-weight: bold;
-                font-size: 1.1em;
-                cursor: pointer;
-                margin-bottom: 5px;
-                background-color: {section_color};
-                padding: 5px;
-                border-radius: 5px;
-            }}
-            .container-{unique_id} summary:hover {{
-                background-color: #e0e0e0;
-            }}
-            .container-{unique_id} ul {{
-                font-family: 'Courier New', monospace;
-                list-style-type: none;
-                padding-left: 20px;
-                margin: 10px 0;
-            }}
-            .container-{unique_id} li {{
-                margin: 5px 0;
-                font-family: 'Courier New', monospace;
-            }}
-            .container-{unique_id} li strong {{
-                font-weight: bold;
-                color: #444;
-            }}
-            .container-{unique_id} li::before {{
-                content: "- ";
-                color: #666;
-            }}
-            a {{
-                color: #001633;
-                text-decoration: none;
-            }}
-            a:hover {{
-                color: #359ccb; 
-            }}
-        </style>
-        """
+        style, unique_id = self._get_style_repr_html(self.is_fitted)
         
         content = f"""
-        <div class="container">
+        <div class="container-{unique_id}">
             <h2>{type(self).__name__}</h2>
             <details open>
                 <summary>General Information</summary>
@@ -489,7 +420,7 @@ class ForecasterAutoreg(ForecasterBase):
             <details>
                 <summary>Exogenous Variables</summary>
                 <ul>
-                     {self.exog_names_in_}
+                    {exog_names_in_}
                 </ul>
             </details>
             <details>

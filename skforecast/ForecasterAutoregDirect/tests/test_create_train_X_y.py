@@ -51,10 +51,10 @@ def test_create_train_X_y_MissingValuesWarning_when_exog_has_missing_values():
         forecaster._create_train_X_y(y=y, exog=exog)
 
 
-def test_create_train_X_y_ValueError_when_len_y_is_lower_than_maximum_lag_plus_steps():
+def test_create_train_X_y_ValueError_when_len_y_is_lower_than_maximum_window_size_plus_steps():
     """
-    Test ValueError is raised when length of y is lower than maximum lag plus
-    number of steps included in the forecaster.
+    Test ValueError is raised when length of y is lower than maximum window_size 
+    plus number of steps included in the forecaster.
     """
     y = pd.Series(np.arange(5), name='y')
     forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=3)

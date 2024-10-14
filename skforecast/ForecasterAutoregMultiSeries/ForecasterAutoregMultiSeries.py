@@ -8,11 +8,9 @@
 from typing import Union, Tuple, Optional, Callable
 import warnings
 import sys
-import uuid
 import numpy as np
 import pandas as pd
 from copy import copy
-import textwrap
 import inspect
 import sklearn
 from sklearn.exceptions import NotFittedError
@@ -460,56 +458,24 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         """
         Information displayed when a ForecasterAutoregMultiSeries object is printed.
         """
-
-        if isinstance(self.regressor, Pipeline):
-            name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
-            params = {key: value for key, value in self.regressor.get_params().items() 
-                      if key.startswith(name_pipe_steps)}
-        else:
-            params = self.regressor.get_params()
-        params = "\n    " + textwrap.fill(str(params), width=80, subsequent_indent="    ")
-
-        training_range_ = (
-            [f"'{k}': {v.astype(str).to_list()}" for k, v in self.training_range_.items()]
-            if self.is_fitted
-            else None
-        )
-        if training_range_ is not None:
-            if len(training_range_) > 10:
-                training_range_ = training_range_[:10] + ['...']
-            training_range_ = "\n    " + "\n    ".join(training_range_)
-
-        series_names_in_ = None
-        if self.series_names_in_ is not None:
-            series_names_in_ = copy(self.series_names_in_)
-            if len(series_names_in_) > 50:
-                series_names_in_ = series_names_in_[:50] + ["..."]
-            series_names_in_ = ", ".join(series_names_in_)
-            if len(series_names_in_) > 58:
-                series_names_in_ = "\n    " + textwrap.fill(
-                    str(series_names_in_), width=80, subsequent_indent="    "
-                )
-
-        exog_names_in_ = None
-        if self.exog_names_in_ is not None:
-            exog_names_in_ = copy(self.exog_names_in_)
-            if len(exog_names_in_) > 50:
-                exog_names_in_ = exog_names_in_[:50] + ["..."]
-            exog_names_in_ = ", ".join(exog_names_in_)
-            if len(exog_names_in_) > 58:
-                exog_names_in_ = "\n    " + textwrap.fill(
-                    str(exog_names_in_), width=80, subsequent_indent="    "
-                )
         
-        if isinstance(self.transformer_series, dict):
-            transformer_series = (
-                [f"'{k}': {v}" for k, v in self.transformer_series.items()]
+        (
+            params,
+            training_range_,
+            series_names_in_,
+            exog_names_in_,
+            transformer_series,
+        ) = [
+            self._format_text_repr(value) 
+            for value in self._preprocess_repr(
+                regressor          = self.regressor,
+                training_range_    = self.training_range_,
+                series_names_in_   = self.series_names_in_,
+                exog_names_in_     = self.exog_names_in_,
+                transformer_series = self.transformer_series,
             )
-            if transformer_series is not None:
-                transformer_series = "\n    " + "\n    ".join(transformer_series)
-        else:
-            transformer_series = self.transformer_series
-                
+        ]
+
         info = (
             f"{'=' * len(type(self).__name__)} \n"
             f"{type(self).__name__} \n"
@@ -518,14 +484,14 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             f"Lags: {self.lags} \n"
             f"Window features: {self.window_features_names} \n"
             f"Window size: {self.window_size} \n"
-            f"Series names (levels): {series_names_in_} \n"
             f"Series encoding: {self.encoding} \n"
-            f"Series weights: {self.series_weights} \n"
+            f"Series names (levels): {series_names_in_} \n"
             f"Exogenous included: {self.exog_in_} \n"
             f"Exogenous names: {exog_names_in_} \n"
             f"Transformer for series: {transformer_series} \n"
             f"Transformer for exog: {self.transformer_exog} \n"
             f"Weight function included: {True if self.weight_func is not None else False} \n"
+            f"Series weights: {self.series_weights} \n"
             f"Differentiation order: {self.differentiation} \n"
             f"Training range: {training_range_} \n"
             f"Training index type: {str(self.index_type_).split('.')[-1][:-2] if self.is_fitted else None} \n"
@@ -547,93 +513,22 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         HTML representation of the object.
         The "General Information" section is expanded by default.
         """
-        
-        if isinstance(self.regressor, Pipeline):
-            name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
-            params = {key: value for key, value in self.regressor.get_params().items()
-                    if key.startswith(name_pipe_steps)}
-        else:
-            params = self.regressor.get_params(deep=True)
-        params = str(params)
 
-        training_range_ = (
-            [f"'{k}': {v.astype(str).to_list()}" for k, v in self.training_range_.items()]
-            if self.is_fitted
-            else None
-        )
-        if isinstance(self.transformer_series, dict):
-            transformer_series = (
-                [f"'{k}': {v}" for k, v in self.transformer_series.items()]
+        (
+            params,
+            training_range_,
+            series_names_in_,
+            exog_names_in_,
+            transformer_series,
+        ) = self._preprocess_repr(
+                regressor          = self.regressor,
+                training_range_    = self.training_range_,
+                series_names_in_   = self.series_names_in_,
+                exog_names_in_     = self.exog_names_in_,
+                transformer_series = self.transformer_series,
             )
-        else:
-            transformer_series = self.transformer_series
 
-        unique_id = str(uuid.uuid4()).replace('-', '')
-        background_color = "#f0f8ff" if self.is_fitted else "#f9f1e2"
-        section_color = "#b3dbfd" if self.is_fitted else "#fae3b3"
-
-        style = f"""
-        <style>
-            .container-{unique_id} {{
-                font-family: 'Arial', sans-serif;
-                font-size: 0.9em;
-                color: #333;
-                border: 1px solid #ddd;
-                background-color: {background_color};
-                padding: 5px 15px;
-                border-radius: 8px;
-                max-width: 600px;
-                #margin: auto;
-            }}
-            .container-{unique_id} h2 {{
-                font-size: 1.5em;
-                color: #222;
-                border-bottom: 2px solid #ddd;
-                padding-bottom: 5px;
-                margin-bottom: 15px;
-            }}
-            .container-{unique_id} details {{
-                margin: 10px 0;
-            }}
-            .container-{unique_id} summary {{
-                font-weight: bold;
-                font-size: 1.1em;
-                cursor: pointer;
-                margin-bottom: 5px;
-                background-color: {section_color};
-                padding: 5px;
-                border-radius: 5px;
-            }}
-            .container-{unique_id} summary:hover {{
-                background-color: #e0e0e0;
-            }}
-            .container-{unique_id} ul {{
-                font-family: 'Courier New', monospace;
-                list-style-type: none;
-                padding-left: 20px;
-                margin: 10px 0;
-            }}
-            .container-{unique_id} li {{
-                margin: 5px 0;
-                font-family: 'Courier New', monospace;
-            }}
-            .container-{unique_id} li strong {{
-                font-weight: bold;
-                color: #444;
-            }}
-            .container-{unique_id} li::before {{
-                content: "- ";
-                color: #666;
-            }}
-            a {{
-                color: #001633;
-                text-decoration: none;
-            }}
-            a:hover {{
-                color: #359ccb; 
-            }}
-        </style>
-        """
+        style, unique_id = self._get_style_repr_html(self.is_fitted)
         
         content = f"""
         <div class="container-{unique_id}">
@@ -648,6 +543,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
                     <li><strong>Series encoding:</strong> {self.encoding}</li>
                     <li><strong>Exogenous included:</strong> {self.exog_in_}</li>
                     <li><strong>Weight function included:</strong> {self.weight_func is not None}</li>
+                    <li><strong>Series weights:</strong> {self.series_weights}</li>
                     <li><strong>Differentiation order:</strong> {self.differentiation}</li>
                     <li><strong>Creation date:</strong> {self.creation_date}</li>
                     <li><strong>Last fit date:</strong> {self.fit_date}</li>
@@ -659,7 +555,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             <details>
                 <summary>Exogenous Variables</summary>
                 <ul>
-                     {self.exog_names_in_}
+                    {exog_names_in_}
                 </ul>
             </details>
             <details>
@@ -672,7 +568,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             <details>
                 <summary>Training Information</summary>
                 <ul>
-                    <li><strong>Series names (levels):</strong> {self.series_names_in_}</li>
+                    <li><strong>Series names (levels):</strong> {series_names_in_}</li>
                     <li><strong>Training range:</strong> {training_range_}</li>
                     <li><strong>Training index type:</strong> {str(self.index_type_).split('.')[-1][:-2] if self.is_fitted else 'Not fitted'}</li>
                     <li><strong>Training index frequency:</strong> {self.index_freq_ if self.is_fitted else 'Not fitted'}</li>
@@ -1652,7 +1548,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
             last_window_
         ) = self._create_train_X_y(
                 series=series, exog=exog, store_last_window=store_last_window
-        )
+            )
 
         sample_weight = self.create_sample_weights(
                             series_names_in_ = series_names_in_,

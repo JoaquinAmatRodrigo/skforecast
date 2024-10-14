@@ -8,12 +8,10 @@
 from typing import Union, Tuple, Optional, Callable, Any
 import warnings
 import sys
-import uuid
 import numpy as np
 import pandas as pd
 import inspect
 from copy import copy
-import textwrap
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
@@ -360,24 +358,19 @@ class ForecasterAutoregDirect(ForecasterBase):
         Information displayed when a ForecasterAutoregDirect object is printed.
         """
 
-        if isinstance(self.regressor, Pipeline):
-            name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
-            params = {key: value for key, value in self.regressor.get_params().items()
-                      if key.startswith(name_pipe_steps)}
-        else:
-            params = self.regressor.get_params(deep=True)
-        params = "\n    " + textwrap.fill(str(params), width=80, subsequent_indent="    ")
-
-        exog_names_in_ = None
-        if self.exog_names_in_ is not None:
-            exog_names_in_ = copy(self.exog_names_in_)
-            if len(exog_names_in_) > 50:
-                exog_names_in_ = exog_names_in_[:50] + ["..."]
-            exog_names_in_ = ", ".join(exog_names_in_)
-            if len(exog_names_in_) > 58:
-                exog_names_in_ = "\n    " + textwrap.fill(
-                    exog_names_in_, width=80, subsequent_indent="    "
-                )
+        (
+            params,
+            _,
+            _,
+            exog_names_in_,
+            _,
+        ) = self._preprocess_repr(
+                regressor      = self.regressor,
+                exog_names_in_ = self.exog_names_in_
+            )
+        
+        params = self._format_text_repr(params)
+        exog_names_in_ = self._format_text_repr(exog_names_in_)
 
         info = (
             f"{'=' * len(type(self).__name__)} \n"
@@ -414,81 +407,19 @@ class ForecasterAutoregDirect(ForecasterBase):
         HTML representation of the object.
         The "General Information" section is expanded by default.
         """
-        
-        if isinstance(self.regressor, Pipeline):
-            name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
-            params = {key: value for key, value in self.regressor.get_params().items()
-                    if key.startswith(name_pipe_steps)}
-        else:
-            params = self.regressor.get_params(deep=True)
-        params = str(params)
 
-        unique_id = str(uuid.uuid4()).replace('-', '')
-        background_color = "#f0f8ff" if self.is_fitted else "#f9f1e2"
-        section_color = "#b3dbfd" if self.is_fitted else "#fae3b3"
+        (
+            params,
+            _,
+            _,
+            exog_names_in_,
+            _,
+        ) = self._preprocess_repr(
+                regressor      = self.regressor,
+                exog_names_in_ = self.exog_names_in_
+            )
 
-        style = f"""
-        <style>
-            .container-{unique_id} {{
-                font-family: 'Arial', sans-serif;
-                font-size: 0.9em;
-                color: #333;
-                border: 1px solid #ddd;
-                background-color: {background_color};
-                padding: 5px 15px;
-                border-radius: 8px;
-                max-width: 600px;
-                #margin: auto;
-            }}
-            .container-{unique_id} h2 {{
-                font-size: 1.5em;
-                color: #222;
-                border-bottom: 2px solid #ddd;
-                padding-bottom: 5px;
-                margin-bottom: 15px;
-            }}
-            .container-{unique_id} details {{
-                margin: 10px 0;
-            }}
-            .container-{unique_id} summary {{
-                font-weight: bold;
-                font-size: 1.1em;
-                cursor: pointer;
-                margin-bottom: 5px;
-                background-color: {section_color};
-                padding: 5px;
-                border-radius: 5px;
-            }}
-            .container-{unique_id} summary:hover {{
-                background-color: #e0e0e0;
-            }}
-            .container-{unique_id} ul {{
-                font-family: 'Courier New', monospace;
-                list-style-type: none;
-                padding-left: 20px;
-                margin: 10px 0;
-            }}
-            .container-{unique_id} li {{
-                margin: 5px 0;
-                font-family: 'Courier New', monospace;
-            }}
-            .container-{unique_id} li strong {{
-                font-weight: bold;
-                color: #444;
-            }}
-            .container-{unique_id} li::before {{
-                content: "- ";
-                color: #666;
-            }}
-            a {{
-                color: #001633;
-                text-decoration: none;
-            }}
-            a:hover {{
-                color: #359ccb; 
-            }}
-        </style>
-        """
+        style, unique_id = self._get_style_repr_html(self.is_fitted)
         
         content = f"""
         <div class="container-{unique_id}">
@@ -514,7 +445,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             <details>
                 <summary>Exogenous Variables</summary>
                 <ul>
-                     {self.exog_names_in_}
+                    {exog_names_in_}
                 </ul>
             </details>
             <details>
@@ -587,9 +518,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         """
         
-        X_data = None
         n_rows = len(y) - self.window_size - (self.steps - 1)
-        if self.lags is not None:         
+        
+        X_data = None
+        if self.lags is not None:
             X_data = np.full(
                 shape=(n_rows, len(self.lags)), fill_value=np.nan, order='F', dtype=float
             )
@@ -604,10 +536,10 @@ class ForecasterAutoregDirect(ForecasterBase):
                          )
 
         y_data = np.full(
-            shape=(self.steps, n_rows), fill_value=np.nan, order='C', dtype=float
+            shape=(n_rows, self.steps), fill_value=np.nan, order='F', dtype=float
         )
         for step in range(self.steps):
-            y_data[step, :] = y[self.window_size + step : self.window_size + step + n_rows]
+            y_data[:, step] = y[self.window_size + step : self.window_size + step + n_rows]
         
         return X_data, y_data
 
@@ -715,15 +647,15 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         if len(y) < self.window_size + self.steps:
             raise ValueError(
-                (f"Minimum length of `y` for training this forecaster is "
-                 f"{self.window_size + self.steps}. Reduce the number of "
-                 f"predicted steps, {self.steps}, or the maximum "
-                 f"window_size, {self.window_size}, if no more data is available.\n"
-                 f"    Length `y`: {len(y)}.\n"
-                 f"    Max step : {self.steps}.\n"
-                 f"    Max window size: {self.window_size}.\n"
-                 f"    Lags window size: {self.max_lag}.\n"
-                 f"    Window features window size: {self.max_size_window_features}.")
+                f"Minimum length of `y` for training this forecaster is "
+                f"{self.window_size + self.steps}. Reduce the number of "
+                f"predicted steps, {self.steps}, or the maximum "
+                f"window_size, {self.window_size}, if no more data is available.\n"
+                f"    Length `y`: {len(y)}.\n"
+                f"    Max step : {self.steps}.\n"
+                f"    Max window size: {self.window_size}.\n"
+                f"    Lags window size: {self.max_lag}.\n"
+                f"    Window features window size: {self.max_size_window_features}."
             )
 
         fit_transformer = False if self.is_fitted else True
@@ -830,23 +762,32 @@ class ForecasterAutoregDirect(ForecasterBase):
 
             X_train_features_names_out_.extend(self.X_train_direct_exog_names_out_)
             X_train.append(exog_to_train)
-
+        
+        if len(X_train) == 1:
+            X_train = X_train[0]
+        else:
+            if X_as_pandas:
+                X_train = pd.concat(X_train, axis=1)
+            else:
+                X_train = np.concatenate(X_train, axis=1)
+                
         if X_as_pandas:
-            X_train = pd.concat(X_train, axis=1)
             X_train.index = train_index
         else:
             X_train = pd.DataFrame(
-                          data    = np.concatenate(X_train, axis=1),
+                          data    = X_train,
                           index   = train_index,
                           columns = X_train_features_names_out_
                       )
 
-        y_train = {step: pd.Series(
-                             data  = y_train[step - 1, :], 
-                             index = y_index[self.window_size + step - 1:][:len_train_index],
-                             name  = f"y_step_{step}"
-                         )
-                   for step in range(1, self.steps + 1)}
+        y_train = {
+            step: pd.Series(
+                      data  = y_train[:, step - 1], 
+                      index = y_index[self.window_size + step - 1:][:len_train_index],
+                      name  = f"y_step_{step}"
+                  )
+            for step in range(1, self.steps + 1)
+        }
         
         return (
             X_train,
@@ -963,7 +904,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             y_train_step.name = y_train_step.name.replace(f"_step_{step}", "")
 
         return X_train_step, y_train_step
-    
+
 
     def _train_test_split_one_step_ahead(
         self,
@@ -1185,9 +1126,6 @@ class ForecasterAutoregDirect(ForecasterBase):
                 residuals = None
 
             return step, regressor, residuals
-        
-        # Here to `filter_train_X_y_for_step` to work
-        self.X_train_window_features_names_out_ = X_train_window_features_names_out_
 
         results_fit = (
             Parallel(n_jobs=self.n_jobs)
@@ -1209,6 +1147,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             self.in_sample_residuals_ = {step: residuals 
                                          for step, _, residuals in results_fit}
         
+        self.X_train_window_features_names_out_ = X_train_window_features_names_out_
         self.X_train_features_names_out_ = X_train_features_names_out_
 
         self.is_fitted = True

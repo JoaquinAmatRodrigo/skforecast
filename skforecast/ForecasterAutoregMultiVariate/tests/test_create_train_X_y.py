@@ -66,21 +66,27 @@ def test_create_train_X_y_ValueError_when_lags_keys_not_in_series():
         forecaster._create_train_X_y(series=series)
 
 
-def test_create_train_X_y_ValueError_when_len_series_is_lower_than_maximum_lag_plus_steps():
+def test_create_train_X_y_ValueError_when_len_series_is_lower_than_maximum_window_size_plus_steps():
     """
-    Test ValueError is raised when length of y is lower than maximum lag plus
-    number of steps included in the forecaster.
+    Test ValueError is raised when length of series is lower than maximum window_size 
+    plus number of steps included in the forecaster.
     """
     series = pd.DataFrame({'l1': pd.Series(np.arange(5)),  
                            'l2': pd.Series(np.arange(5))})
-    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1',
-                                               lags=3, steps=3)
+    forecaster = ForecasterAutoregMultiVariate(
+        LinearRegression(), level='l1', lags=3, steps=3
+    )
 
     err_msg = re.escape(
-        (f"Minimum length of `series` for training this forecaster is "
-         f"{forecaster.max_lag + forecaster.steps}. Got {len(series)}. Reduce the "
-         f"number of predicted steps, {forecaster.steps}, or the maximum "
-         f"lag, {forecaster.max_lag}, if no more data is available.")
+        ("Minimum length of `series` for training this forecaster is "
+         "6. Reduce the number of "
+         "predicted steps, 3, or the maximum "
+         "window_size, 3, if no more data is available.\n"
+         "    Length `series`: 5.\n"
+         "    Max step : 3.\n"
+         "    Max window size: 3.\n"
+         "    Lags window size: 3.\n"
+         "    Window features window size: None.")
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster._create_train_X_y(series=series)

@@ -3,6 +3,7 @@
 from skforecast.utils import optional_dependencies
 import tomli
 
+
 def test_skforecast_utils_optional_dependencies_match_dependences_in_toml():
     """
     Test that optional_dependencies in skforecast/utils/optional_dependencies.py
