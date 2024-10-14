@@ -3071,21 +3071,3 @@ def set_skforecast_warnings(
     if suppress_warnings:
         for category in warn_skforecast_categories:
             warnings.filterwarnings(action, category=category)
-
-
-def preprocess_steps_as_date(last_window: pd.Series, steps: Union[int, str, pd.Timestamp]) -> int:
-    if not isinstance(last_window.index, pd.DatetimeIndex):
-        if isinstance(steps, int):
-            return steps
-        raise TypeError("If the Forecaster was not fitted using a pd.DatetimeIndex, steps must be an integer.")
-    
-    if isinstance(steps, (str, pd.Timestamp)):
-        target_date = pd.to_datetime(steps)
-        last_date = last_window.index[-1]
-        if target_date <= last_date:
-            raise ValueError("The provided date is earlier than or equal to the last observation date.")
-        
-        steps_diff = pd.date_range(start=last_date, end=target_date, freq=last_window.index.freq)
-        return len(steps_diff) - 1
-    
-    return steps 

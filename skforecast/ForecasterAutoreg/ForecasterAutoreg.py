@@ -33,7 +33,6 @@ from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
-from ..utils import preprocess_steps_as_date
 from ..utils import input_to_frame
 from ..utils import expand_index
 from ..utils import transform_numpy
