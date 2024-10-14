@@ -61,14 +61,15 @@ def test_binning_in_sample_residuals_output():
     assert forecaster.binner_intervals_ == expected_3
 
 
-def test_binning_in_sample_residuals_stores_maximum_200_residuals_per_bin():
+def test_binning_in_sample_residuals_stores_maximum_10000_residuals():
     """
-    Test that _binning_in_sample_residuals stores a maximum of 200 residuals per bin.
+    Test that maximum 10000 residuals are stored.
     """
 
+    n = 15000
     y = pd.Series(
-            data = np.random.normal(loc=10, scale=1, size=1000),
-            index = pd.date_range(start='01-01-2000', periods=1000, freq='h')
+            data = np.random.normal(loc=10, scale=1, size=n),
+            index = pd.date_range(start='01-01-2000', periods=n, freq='h')
         )
     forecaster = ForecasterAutoreg(
                     regressor=LinearRegression(),
@@ -76,11 +77,15 @@ def test_binning_in_sample_residuals_stores_maximum_200_residuals_per_bin():
                     binner_kwargs={'n_bins': 2}
                 )
     forecaster.fit(y)
+    max_residuals_per_bin = int(10_000 // forecaster.binner.n_bins_[0])
 
     for v in forecaster.in_sample_residuals_by_bin_.values():
-        assert len(v) == 200
+        assert len(v) == max_residuals_per_bin
         assert len(v) > 0
+
     np.testing.assert_array_almost_equal(
         forecaster.in_sample_residuals_,
         np.concatenate(list(forecaster.in_sample_residuals_by_bin_.values()))
     )
+
+    assert len(forecaster.in_sample_residuals_) == 10_000

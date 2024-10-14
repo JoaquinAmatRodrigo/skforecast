@@ -158,7 +158,8 @@ def test_recursive_predict_output_with_residuals_last_step():
                       last_window_values   = last_window_values,
                       exog_values          = exog_values,
                       residuals            = residuals,
-                      use_binned_residuals = False
+                      use_binned_residuals = False,
+                      rng                  = np.random.default_rng(seed=123)
                   )
     
     expected = np.array([50., 51., 52., 53., 154.])
@@ -182,10 +183,11 @@ def test_recursive_predict_output_with_residuals():
                       last_window_values   = last_window_values,
                       exog_values          = exog_values,
                       residuals            = residuals,
-                      use_binned_residuals = False
+                      use_binned_residuals = False,
+                      rng                  = np.random.default_rng(seed=123)
                   )
     
-    expected = np.array([60., 74.333333, 93.111111, 117.814815, 147.08642])
+    expected = np.array([60., 94.333333, 99.777778, 96.703704, 148.938272])
     
     np.testing.assert_array_almost_equal(predictions, expected)
 
@@ -209,9 +211,9 @@ def test_recursive_predict_output_with_binned_residuals():
                       rng                  = np.random.default_rng(seed=123)
                   )
     
-    expected = np.array(
-                   [0.526382, 0.623953, 0.322959, 0.181225, 0.618064, 
-                    0.719469, 0.634401, 0.724455, 0.611024, 0.640175]
-               )
+    expected = np.array([
+                0.916067, 0.724455, 0.724455, 0.525259, 0.916067, 0.526382,
+                0.223093, 0.873833, 0.68483 , 0.881568
+               ])
     
     np.testing.assert_array_almost_equal(predictions, expected)
