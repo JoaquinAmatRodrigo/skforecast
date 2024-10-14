@@ -13,11 +13,11 @@ def test_QuantileBinner_validate_params():
     """
 
     params = {
-        0: {'n_bins': 1, 'method': 'linear', 'dtype': np.float16, 'subsample': 20000, 'random_state': 123},
-        1: {'n_bins': 5, 'method': 'not_valid_method', 'dtype': np.float16, 'subsample': 20000, 'random_state': 123},
+        0: {'n_bins': 1, 'method': 'linear', 'dtype': np.float64, 'subsample': 20000, 'random_state': 123},
+        1: {'n_bins': 5, 'method': 'not_valid_method', 'dtype': np.float64, 'subsample': 20000, 'random_state': 123},
         2: {'n_bins': 5, 'method': 'linear', 'dtype': 'not_valid_dtype', 'subsample': 20000, 'random_state': 123},
-        3: {'n_bins': 5, 'method': 'linear', 'dtype': np.float16, 'subsample': 'not_int', 'random_state': 123},
-        4: {'n_bins': 5, 'method': 'linear', 'dtype': np.float16, 'subsample': 20000, 'random_state': 'not_int'},
+        3: {'n_bins': 5, 'method': 'linear', 'dtype': np.float64, 'subsample': 'not_int', 'random_state': 123},
+        4: {'n_bins': 5, 'method': 'linear', 'dtype': np.float64, 'subsample': 20000, 'random_state': 'not_int'},
     }
         
     err_msg = re.escape(
@@ -83,7 +83,7 @@ def test_QuantileBinner_is_equivalent_to_KBinsDiscretizer():
         binner_2 = QuantileBinner(
             n_bins=n_bins,
             method='linear',
-            dtype=np.float16,
+            dtype=np.float64,
             random_state=789654,
         )
 

@@ -77,7 +77,7 @@ def test_binning_in_sample_residuals_stores_maximum_10000_residuals():
                     binner_kwargs={'n_bins': 2}
                 )
     forecaster.fit(y)
-    max_residuals_per_bin = int(10_000 // forecaster.binner.n_bins_[0])
+    max_residuals_per_bin = int(10_000 // forecaster.binner.n_bins_)
 
     for v in forecaster.in_sample_residuals_by_bin_.values():
         assert len(v) == max_residuals_per_bin

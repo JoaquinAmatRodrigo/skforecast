@@ -158,8 +158,7 @@ def test_recursive_predict_output_with_residuals_last_step():
                       last_window_values   = last_window_values,
                       exog_values          = exog_values,
                       residuals            = residuals,
-                      use_binned_residuals = False,
-                      rng                  = np.random.default_rng(seed=123)
+                      use_binned_residuals = False
                   )
     
     expected = np.array([50., 51., 52., 53., 154.])
@@ -184,7 +183,6 @@ def test_recursive_predict_output_with_residuals():
                       exog_values          = exog_values,
                       residuals            = residuals,
                       use_binned_residuals = False,
-                      rng                  = np.random.default_rng(seed=123)
                   )
     
     expected = np.array([60., 94.333333, 99.777778, 96.703704, 148.938272])
@@ -208,7 +206,6 @@ def test_recursive_predict_output_with_binned_residuals():
                       exog_values          = exog_values,
                       residuals            = forecaster.in_sample_residuals_by_bin_,
                       use_binned_residuals = True,
-                      rng                  = np.random.default_rng(seed=123)
                   )
     
     expected = np.array([

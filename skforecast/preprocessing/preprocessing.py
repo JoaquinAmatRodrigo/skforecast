@@ -1069,8 +1069,8 @@ class QuantileBinner:
         has more samples than `subsample`, a random subset will be used.
     random_state : int, default=789654
         The random seed to use for generating a random subset of the data.
-    dtype : data type, default=numpy.float16
-        The data type to use for the bin indices. Default is `numpy.float16`.
+    dtype : data type, default=numpy.float64
+        The data type to use for the bin indices. Default is `numpy.float64`.
     
     Attributes
     ----------
@@ -1085,8 +1085,8 @@ class QuantileBinner:
         has more samples than `subsample`, a random subset will be used.
     random_state : int, default=789654
         The random seed to use for generating a random subset of the data.
-    dtype : data type, default=numpy.float16
-        The data type to use for the bin indices. Default is `numpy.float16`.
+    dtype : data type, default=numpy.float64
+        The data type to use for the bin indices. Default is `numpy.float64`.
      n_bins_ : int
         The number of bins learned during fitting.
     bin_edges_ : numpy ndarray
@@ -1098,7 +1098,7 @@ class QuantileBinner:
         n_bins: int,
         method: Optional[str] = "linear",
         subsample: int = 200000,
-        dtype: Optional[type] = np.float16,
+        dtype: Optional[type] = np.float64,
         random_state: Optional[int] = 789654
     ):
         
@@ -1196,7 +1196,7 @@ class QuantileBinner:
 
         self.n_bins_ = len(self.bin_edges_) - 1
         self.intervals_ = {
-            i: (float(self.bin_edges_[i]), float(self.bin_edges_[i + 1]))
+            float(i): (float(self.bin_edges_[i]), float(self.bin_edges_[i + 1]))
             for i in range(self.n_bins_)
         }
 
@@ -1263,7 +1263,8 @@ class QuantileBinner:
             "n_bins": self.n_bins,
             "method": self.method,
             "subsample": self.subsample,
-            "dtype": self.dtype
+            "dtype": self.dtype,
+            "random_state": self.random_state,
         }
 
     def set_params(self, **params):

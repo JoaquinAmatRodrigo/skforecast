@@ -297,7 +297,7 @@ class ForecasterAutoreg(ForecasterBase):
         if binner_kwargs is None:
             self.binner_kwargs = {
                 'n_bins': 10, 'method': 'linear', 'subsample': 200000,
-                'random_state': 789654, 'dtype': np.uint8
+                'random_state': 789654, 'dtype': np.float64
             }
         self.binner = QuantileBinner(**self.binner_kwargs)
         self.binner_intervals_ = None

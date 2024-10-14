@@ -98,8 +98,8 @@ def test_init_binner_is_created_when_binner_kwargs_is_None():
                  )
     
     expected = {
-        'n_bins': 10, 'encode': 'ordinal', 'strategy': 'quantile',
-        'subsample': 200000, 'random_state': 789654, 'dtype': np.float64
+        'n_bins': 10, 'method': 'linear', 'subsample': 200000,
+        'random_state': 789654, 'dtype': np.float64
     }
 
     assert forecaster.binner.get_params() == expected
@@ -110,8 +110,8 @@ def test_init_binner_is_created_when_binner_kwargs_is_not_None():
     Test binner is initialized with kwargs
     """
     binner_kwargs = {
-        'n_bins': 10, 'encode': 'onehot', 'strategy': 'quantile',
-        'subsample': 100, 'random_state': 1234, 'dtype': np.float64
+        'n_bins': 10, 'method': 'linear', 'subsample': 500,
+        'random_state': 1234, 'dtype': np.float64
     }
     forecaster = ForecasterAutoreg(
                      regressor     = object(),
@@ -120,8 +120,8 @@ def test_init_binner_is_created_when_binner_kwargs_is_not_None():
                  )
     
     expected = {
-        'n_bins': 10, 'encode': 'ordinal', 'strategy': 'quantile',
-        'subsample': 100, 'random_state': 1234, 'dtype': np.float64
+        'n_bins': 10, 'method': 'linear', 'subsample': 500,
+        'random_state': 1234, 'dtype': np.float64
     }
 
     assert forecaster.binner.get_params() == expected
