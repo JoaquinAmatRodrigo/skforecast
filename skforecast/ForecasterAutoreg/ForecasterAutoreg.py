@@ -33,6 +33,7 @@ from ..utils import check_interval
 from ..utils import preprocess_y
 from ..utils import preprocess_last_window
 from ..utils import preprocess_exog
+from ..utils import preprocess_steps_as_date
 from ..utils import input_to_frame
 from ..utils import expand_index
 from ..utils import transform_numpy
@@ -1102,14 +1103,15 @@ class ForecasterAutoreg(ForecasterBase):
 
     def _create_predict_inputs(
         self,
-        steps: int,
+        steps: Union[int, str, pd.Timestamp], 
         last_window: Optional[Union[pd.Series, pd.DataFrame]] = None,
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
         predict_boot: bool = False,
         use_in_sample_residuals: bool = True,
         use_binned_residuals: bool = False,
-        check_inputs: bool = True
-    ) -> Tuple[np.ndarray, Optional[np.ndarray], pd.Index]:
+        check_inputs: bool = True,
+        **kwargs
+    ) -> Tuple[np.ndarray, Optional[np.ndarray], pd.Index, int]:
         """
         Create the inputs needed for the first iteration of the prediction 
         process. As this is a recursive process, the last window is updated at 
@@ -1117,8 +1119,11 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        steps : int
-            Number of future steps predicted.
+        steps : Union[int, str, pd.Timestamp]
+            Number of steps to expand (if type is int) or
+            Datetime until the index is expanded (str formatted as YYYY-MM-DD or pd.Timestamp)
+            If datetime is a string formatted different to YYYY-MM-DD, pass the additional keyword 
+            arguments to pass to `pd.to_datetime()`. 
         last_window : pandas Series, pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1146,6 +1151,8 @@ class ForecasterAutoreg(ForecasterBase):
             If `True`, the input is checked for possible warnings and errors 
             with the `check_predict_input` function. This argument is created 
             for internal use and is not recommended to be changed.
+        **kwargs
+            Additional keyword arguments to pass to `pd.to_datetime()`.
 
         Returns
         -------
@@ -1155,6 +1162,8 @@ class ForecasterAutoreg(ForecasterBase):
             Exogenous variable/s included as predictor/s.
         prediction_index : pandas Index
             Index of the predictions.
+        steps: int
+            Number of future steps predicted.
         
         """
 
@@ -1220,12 +1229,13 @@ class ForecasterAutoreg(ForecasterBase):
         else:
             exog_values = None
 
-        prediction_index = expand_index(
-                               index = last_window_index,
-                               steps = steps
-                           )
+        prediction_index, steps = expand_index(
+                                      index = last_window_index,
+                                      steps = steps,
+                                      **kwargs
+                                  )
 
-        return last_window_values, exog_values, prediction_index
+        return last_window_values, exog_values, prediction_index, steps
 
 
     def _recursive_predict(
@@ -1361,7 +1371,7 @@ class ForecasterAutoreg(ForecasterBase):
                           exog        = exog
                       )
 
-        last_window_values, exog_values, prediction_index = self._create_predict_inputs(
+        last_window_values, exog_values, prediction_index, steps = self._create_predict_inputs(
             steps=steps, last_window=last_window, exog=exog, check_inputs=False
         )
 
@@ -1401,7 +1411,7 @@ class ForecasterAutoreg(ForecasterBase):
 
     def predict(
         self,
-        steps: int,
+        steps: Union[int, str, pd.Timestamp],
         last_window: Optional[Union[pd.Series, pd.DataFrame]] = None,
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
         check_inputs: bool = True
@@ -1434,10 +1444,10 @@ class ForecasterAutoreg(ForecasterBase):
         
         """
 
-        last_window_values, exog_values, prediction_index  = self._create_predict_inputs(
+        last_window_values, exog_values, prediction_index, steps = self._create_predict_inputs(
             steps=steps, last_window=last_window, exog=exog, check_inputs=check_inputs
         )
-        
+
         predictions = self._recursive_predict(
                           steps              = steps,
                           last_window_values = last_window_values,
@@ -1527,7 +1537,8 @@ class ForecasterAutoreg(ForecasterBase):
         (
             last_window_values,
             exog_values,
-            prediction_index
+            prediction_index,
+            steps
         ) = self._create_predict_inputs(
             steps                   = steps, 
             last_window             = last_window, 

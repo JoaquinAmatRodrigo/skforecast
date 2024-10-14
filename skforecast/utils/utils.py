@@ -1513,8 +1513,9 @@ def exog_to_direct_numpy(
 
 def expand_index(
     index: Union[pd.Index, None], 
-    steps: int
-) -> pd.Index:
+    steps: Union[int, str, pd.Timestamp],
+    **kwargs
+) -> Tuple[pd.Index, int]:
     """
     Create a new index of length `steps` starting at the end of the index.
     
@@ -1522,8 +1523,11 @@ def expand_index(
     ----------
     index : pandas Index, None
         Original index.
-    steps : int
-        Number of steps to expand.
+    steps : Union[int, str, pd.Timestamp]
+        Number of steps to expand (if type is int) or
+        Datetime until the index is expanded (str formatted as YYYY-MM-DD or pd.Timestamp)
+    **kwargs
+        Additional keyword arguments to pass to `pd.to_datetime()`.
 
     Returns
     -------
@@ -1531,7 +1535,24 @@ def expand_index(
         New index.
 
     """
-    
+
+    if isinstance(steps, (str, pd.Timestamp)):
+        # Changes `steps` to integer based on datetime expansion
+        if not isinstance(index, pd.DatetimeIndex):
+            raise ValueError( "Argument `index` must be a pandas DatetimeIndex when `steps` is a datetime.")
+        
+        else:
+            target_date = pd.to_datetime(steps, **kwargs)
+            last_date = pd.to_datetime(index[-1])
+            if target_date <= last_date:
+                raise ValueError("The provided date is earlier than or equal to the last observation date.")
+        
+            steps_diff = pd.date_range(start=last_date, end=target_date, freq=index.freq)
+            steps = len(steps_diff) - 1
+
+    elif not isinstance(steps, int):
+        raise TypeError("Argument `steps` must be an integer, string or pandas Timestamp.")
+
     if isinstance(index, pd.Index):
         
         if isinstance(index, pd.DatetimeIndex):
@@ -1555,7 +1576,7 @@ def expand_index(
                         stop  = steps
                     )
     
-    return new_index
+    return new_index, steps
 
 
 def transform_numpy(
@@ -3050,3 +3071,21 @@ def set_skforecast_warnings(
     if suppress_warnings:
         for category in warn_skforecast_categories:
             warnings.filterwarnings(action, category=category)
+
+
+def preprocess_steps_as_date(last_window: pd.Series, steps: Union[int, str, pd.Timestamp]) -> int:
+    if not isinstance(last_window.index, pd.DatetimeIndex):
+        if isinstance(steps, int):
+            return steps
+        raise TypeError("If the Forecaster was not fitted using a pd.DatetimeIndex, steps must be an integer.")
+    
+    if isinstance(steps, (str, pd.Timestamp)):
+        target_date = pd.to_datetime(steps)
+        last_date = last_window.index[-1]
+        if target_date <= last_date:
+            raise ValueError("The provided date is earlier than or equal to the last observation date.")
+        
+        steps_diff = pd.date_range(start=last_date, end=target_date, freq=last_window.index.freq)
+        return len(steps_diff) - 1
+    
+    return steps 
