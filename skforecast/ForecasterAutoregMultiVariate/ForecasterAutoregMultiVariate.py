@@ -653,8 +653,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
             X_train_wf.index = train_index
             
-            X_train_wf_columns = [f'{y.name}_{col}' for col in X_train_wf.columns]
-            X_train_window_features_names_out_.extend(X_train_wf_columns)
+            X_train_wf.columns = [f'{y.name}_{col}' for col in X_train_wf.columns]
+            X_train_window_features_names_out_.extend(X_train_wf.columns)
             if not X_as_pandas:
                 X_train_wf = X_train_wf.to_numpy()     
             X_train_window_features.append(X_train_wf)
