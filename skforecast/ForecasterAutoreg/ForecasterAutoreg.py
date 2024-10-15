@@ -1109,7 +1109,6 @@ class ForecasterAutoreg(ForecasterBase):
         use_in_sample_residuals: bool = True,
         use_binned_residuals: bool = False,
         check_inputs: bool = True,
-        **kwargs
     ) -> Tuple[np.ndarray, Optional[np.ndarray], pd.Index, int]:
         """
         Create the inputs needed for the first iteration of the prediction 
@@ -1150,8 +1149,6 @@ class ForecasterAutoreg(ForecasterBase):
             If `True`, the input is checked for possible warnings and errors 
             with the `check_predict_input` function. This argument is created 
             for internal use and is not recommended to be changed.
-        **kwargs
-            Additional keyword arguments to pass to `pd.to_datetime()`.
 
         Returns
         -------
@@ -1231,7 +1228,6 @@ class ForecasterAutoreg(ForecasterBase):
         prediction_index, steps = expand_index(
                                       index = last_window_index,
                                       steps = steps,
-                                      **kwargs
                                   )
 
         return last_window_values, exog_values, prediction_index, steps
@@ -1421,8 +1417,9 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        steps : int
-            Number of future steps predicted.
+        steps : Union[int, str, pd.Timestamp]
+            Number of steps to expand (if type is int) or
+            Datetime until the index is expanded (str formatted as YYYY-MM-DD or pd.Timestamp)
         last_window : pandas Series, pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
