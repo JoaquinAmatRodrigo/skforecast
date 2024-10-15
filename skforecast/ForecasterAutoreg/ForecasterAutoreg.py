@@ -1119,9 +1119,7 @@ class ForecasterAutoreg(ForecasterBase):
         ----------
         steps : Union[int, str, pd.Timestamp]
             Number of steps to expand (if type is int) or
-            Datetime until the index is expanded (str formatted as YYYY-MM-DD or pd.Timestamp)
-            If datetime is a string formatted different to YYYY-MM-DD, pass the additional keyword 
-            arguments to pass to `pd.to_datetime()`. 
+            Datetime until the index is expanded (str formatted as YYYY-MM-DD or pd.Timestamp). 
         last_window : pandas Series, pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
