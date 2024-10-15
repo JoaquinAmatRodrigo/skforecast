@@ -118,15 +118,15 @@ def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10():
     np.testing.assert_array_almost_equal(results[1], expected[1])
 
 
-def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10_return_data_X():
+def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10_data_to_return_X():
     """
     Test matrix of lags created properly when lags is 3, steps is 5 and y is
-    np.arange(10) and `return_data` is 'X'.
+    np.arange(10) and `data_to_return` is 'X'.
     """
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', 
                                                lags=3, steps=5)
     results = forecaster._create_lags(y=np.arange(10), lags=np.array([1, 2, 3]),
-                                      return_data='X')
+                                      data_to_return='X')
     expected = (
         np.array([[2., 1., 0.],
                   [3., 2., 1.],
@@ -138,15 +138,15 @@ def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10_return_data
     assert results[1] == expected[1]
 
 
-def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10_return_data_y():
+def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10_data_to_return_y():
     """
     Test matrix of lags created properly when lags is 3, steps is 5 and y is
-    np.arange(10) and `return_data` is 'y'.
+    np.arange(10) and `data_to_return` is 'y'.
     """
     forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', 
                                                lags=3, steps=5)
     results = forecaster._create_lags(y=np.arange(10), lags=np.array([1, 2, 3]),
-                                      return_data='y')
+                                      data_to_return='y')
     expected = (
         None,
         np.array([[3., 4., 5., 6., 7.],
@@ -166,7 +166,7 @@ def test_create_lags_output_lags_None():
         LinearRegression(), level='l1', lags=None, steps=2, window_features=rolling
     )
     results = forecaster._create_lags(
-        y=np.arange(10), lags=None, return_data=None
+        y=np.arange(10), lags=None, data_to_return=None
     )
     expected = (
         None,
@@ -186,7 +186,7 @@ def test_create_lags_when_window_size_window_features_greater_than_max_lag():
         LinearRegression(), level='l1', lags=3, steps=2, window_features=rolling
     )
     results = forecaster._create_lags(
-        y=np.arange(10), lags=np.array([1, 2, 3]), return_data='both'
+        y=np.arange(10), lags=np.array([1, 2, 3]), data_to_return='both'
     )
     expected = (
         np.array([[5., 4., 3.],

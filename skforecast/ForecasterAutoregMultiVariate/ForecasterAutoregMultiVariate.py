@@ -336,13 +336,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                     )
                     self.lags_names[key] = [f'{key}_{lag}' for lag in lags_names]
                     list_max_lags.append(max_lag)
-            if len(list_max_lags) == 0:
-                raise ValueError(
-                    "When `lags` is a `dict`, at least one of its values must be "
-                    "different from None. If don't want to include lags, use `None`."
-                )
-            else:
-                self.max_lag = max(list_max_lags)
+            
+            self.max_lag = max(list_max_lags) if len(list_max_lags) != 0 else None
         else:
             self.lags, self.lags_names, self.max_lag = initialize_lags(
                 forecaster_name = type(self).__name__, 
@@ -551,11 +546,84 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         return style + content
 
     
+    def _create_data_to_return_dict(
+        self, 
+        series_names_in_: list
+    ) -> Tuple[dict, list]:
+        """
+        Create `data_to_return_dict` based on series names and lags configuration.
+        The dictionary contains the information to decide what data to return in 
+        the `_create_lags` method.
+        
+        Parameters
+        ----------
+        series_names_in_ : list
+            Names of the series used during training.
+
+        Returns
+        -------
+        data_to_return_dict : dict
+            Dictionary with the information to decide what data to return in the
+            `_create_lags` method.
+        X_train_series_names_in_ : list
+            Names of the series added to `X_train` when creating the training
+            matrices with `_create_train_X_y` method. It is a subset of 
+            `series_names_in_`.
+        
+        """
+
+        if isinstance(self.lags, dict):
+            lags_keys = list(self.lags.keys())
+            if lags_keys != series_names_in_:
+                raise ValueError(
+                    (f"When `lags` parameter is a `dict`, its keys must be the "
+                     f"same as `series` column names. If don't want to include lags, "
+                      "add '{column: None}' to the lags dict." 
+                     f"  Lags keys        : {lags_keys}.\n"
+                     f"  `series` columns : {series_names_in_}.")
+                )
+            self.lags_ = copy(self.lags)
+        else:
+            self.lags_ = {serie: self.lags for serie in series_names_in_}
+            if self.lags is not None:
+                self.lags_names = {
+                    serie: [f'{serie}_{lag}' for lag in self.lags_names]
+                    for serie in series_names_in_
+                }
+            else:
+                self.lags_names = {serie: None for serie in series_names_in_}
+
+        X_train_series_names_in_ = series_names_in_
+        if self.lags is None:
+            data_to_return_dict = {self.level: 'y'}
+        else:
+            # If col is not level and has lags, create 'X' if no lags don't include
+            # If col is level, create 'both' (`X` and `y`)
+            data_to_return_dict = {
+                col: ('both' if col == self.level else 'X')
+                for col in series_names_in_
+                if col == self.level or self.lags_.get(col) is not None
+            }
+
+            # Adjust 'level' in case self.lags_[level] is None
+            if self.lags_.get(self.level) is None:
+                data_to_return_dict[self.level] = 'y'
+
+            if self.window_features is None:
+                # X_train_series_names_in_ include series that will be added to X_train
+                X_train_series_names_in_ = [
+                    col for col in series_names_in_ 
+                    if data_to_return_dict[col] in ['X', 'both']
+                ]
+
+        return data_to_return_dict, X_train_series_names_in_
+
+
     def _create_lags(
         self, 
         y: np.ndarray,
         lags: np.ndarray,
-        return_data: Optional[str] = 'both'
+        data_to_return: Optional[str] = 'both'
     ) -> Tuple[Optional[np.ndarray], Optional[np.ndarray]]:
         """
         Create the lagged values and their target variable from a time series.
@@ -569,7 +637,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             Training time series values.
         lags : numpy ndarray
             lags to create.
-        return_data : str, default 'both'
+        data_to_return : str, default 'both'
             Specifies which data to return. Options are 'X', 'y', 'both' or None.
 
         Returns
@@ -583,20 +651,20 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
         X_data = None
         y_data = None
-        if return_data is not None:
+        if data_to_return is not None:
 
             n_rows = len(y) - self.window_size - (self.steps - 1)
 
-            if return_data != 'y':
-                # If `return_data` is not 'y', it means is 'X' or 'both', X_data is created
+            if data_to_return != 'y':
+                # If `data_to_return` is not 'y', it means is 'X' or 'both', X_data is created
                 X_data = np.full(
                     shape=(n_rows, len(lags)), fill_value=np.nan, order='F', dtype=float
                 )
                 for i, lag in enumerate(lags):
                     X_data[:, i] = y[self.window_size - lag : -(lag + self.steps - 1)]
 
-            if return_data != 'X':
-                # If `return_data` is not 'X', it means is 'y' or 'both', y_data is created
+            if data_to_return != 'X':
+                # If `data_to_return` is not 'X', it means is 'y' or 'both', y_data is created
                 y_data = np.full(
                     shape=(n_rows, self.steps), fill_value=np.nan, order='F', dtype=float
                 )
@@ -692,7 +760,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             for each step of the form {step: y_step_[i]}.
             Shape of each series: (len(y) - self.max_lag, )
         series_names_in_ : list
-            Names of the series (levels) provided by the user during training.
+            Names of the series used during training.
         X_train_series_names_in_ : list
             Names of the series added to `X_train` when creating the training
             matrices with `_create_train_X_y` method. It is a subset of 
@@ -741,57 +809,21 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                  f"  `series` columns   : {series_names_in_}.")
             )
 
-        # TODO: Create a private method to reduce code
-        # ======================================================================
-        if isinstance(self.lags, dict):
-            lags_keys = list(self.lags.keys())
-            if lags_keys != series_names_in_:
-                raise ValueError(
-                    (f"When `lags` parameter is a `dict`, its keys must be the "
-                     f"same as `series` column names.\n"
-                     f"  Lags keys        : {lags_keys}.\n"
-                     f"  `series` columns : {series_names_in_}.")
-                )
-            self.lags_ = copy(self.lags)
-        else:
-            self.lags_ = {serie: self.lags for serie in series_names_in_}
-            self.lags_names = {
-                serie: [f'{serie}_{lag}' for lag in self.lags_names]
-                for serie in series_names_in_
-            }
+        data_to_return_dict, X_train_series_names_in_ = (
+            self._create_data_to_return_dict(series_names_in_=series_names_in_)
+        )
 
-        X_train_series_names_in_ = series_names_in_
-        if self.lags is None:
-            cols_to_create_lags = {self.level: 'y'}
-        else:
-            # If col is not level and has lags, create 'X' if no lags don't include
-            # If col is level, create 'both' (`X` and `y`)
-            cols_to_create_lags = {
-                col: ('both' if col == self.level else 'X')
-                for col in series_names_in_
-                if col == self.level or self.lags_.get(col) is not None
-            }
-
-            # Adjust 'level' in case self.lags_[level] is None
-            if self.lags_.get(self.level) is None:
-                cols_to_create_lags[self.level] = 'y'
-
-            if self.window_features is None:
-                # Update series_names_in_ with the columns that will be used during training
-                series_names_in_ = list(cols_to_create_lags.keys())
-                # X_train_series_names_in_ include series that will be added to X_train
-                X_train_series_names_in_ = [
-                    col for col in series_names_in_ 
-                    if cols_to_create_lags[col] in ['X', 'both']
-                ]
-        # ======================================================================
+        series_to_create_autoreg_features_and_y = [
+            col for col in series_names_in_ 
+            if col in X_train_series_names_in_ + [self.level]
+        ]
 
         fit_transformer = False
         if not self.is_fitted:
             fit_transformer = True
             self.transformer_series_ = initialize_transformer_series(
                                            forecaster_name    = type(self).__name__,
-                                           series_names_in_   = series_names_in_,
+                                           series_names_in_   = series_to_create_autoreg_features_and_y,
                                            transformer_series = self.transformer_series
                                        )
 
@@ -832,8 +864,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 exog.select_dtypes(include=np.number).shape[1] != exog.shape[1]
             )
 
-            _, exog_index = preprocess_exog(exog=exog, return_values=False)
-            if not (exog_index[:len(series)] == series.index).all():
+            # Use .index as series.index is not yet preprocessed
+            if not (exog.index[:len(series)] == series.index).all():
                 raise ValueError(
                     ("Different index for `series` and `exog`. They must be equal "
                      "to ensure the correct alignment of values.") 
@@ -842,7 +874,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         X_train_autoreg = []
         X_train_window_features_names_out_ = [] if self.window_features is not None else None
         X_train_features_names_out_ = []
-        for col in series_names_in_:
+        for col in series_to_create_autoreg_features_and_y:
             y = series[col]
             check_y(y=y, series_id=f"Column '{col}'")
             y = transform_series(
@@ -853,11 +885,13 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
             y_values, y_index = preprocess_y(y=y)
 
+            # TODO: Add differentiation
+
             X_train_autoreg_col = []
             train_index = y_index[self.window_size + (self.steps - 1):]
 
             X_train_lags, y_train_values = self._create_lags(
-                y=y_values, lags=self.lags_[col], return_data=cols_to_create_lags.get(col, None)
+                y=y_values, lags=self.lags_[col], data_to_return=data_to_return_dict.get(col, None)
             )
             if X_train_lags is not None:
                 X_train_autoreg_col.append(X_train_lags)
@@ -901,7 +935,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                   columns = X_train_features_names_out_,
                                   index   = train_index
                               )
-        X_train.append(X_train_autoreg)
+        X_train.extend(X_train_autoreg)
 
         X_train_exog_names_out_ = None
         if exog is not None:
