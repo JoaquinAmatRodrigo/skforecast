@@ -148,16 +148,16 @@ def test_fit_in_sample_residuals_by_bin_stored():
         assert forecaster.binner_intervals_[k][1] == approx(expected_3[k][1])
 
 
-def test_fit_same_residuals_when_residuals_greater_than_1000():
+def test_fit_same_residuals_when_residuals_greater_than_10000():
     """
-    Test fit return same residuals when residuals len is greater than 1000.
+    Test fit return same residuals when residuals len is greater than 10_000.
     Testing with two different forecaster.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=pd.Series(np.arange(1200)))
+    forecaster.fit(y=pd.Series(np.arange(12000)))
     results_1 = forecaster.in_sample_residuals_
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=pd.Series(np.arange(1200)))
+    forecaster.fit(y=pd.Series(np.arange(12000)))
     results_2 = forecaster.in_sample_residuals_
     
     assert isinstance(results_1, np.ndarray)

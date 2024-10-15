@@ -80,16 +80,16 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_5_
     )
 
     expected = pd.DataFrame(
-                   data    = np.array(
+                    data    = np.array(
                                 [[0.56842545, 0.25304752, 0.98664822],
-                                 [0.50873285, 0.05687183, 0.95641577],
-                                 [0.51189344, 0.23219067, 0.9780938 ],
-                                 [0.51559104, 0.17266757, 0.98236802],
-                                 [0.51060927, 0.1593315 , 0.95014552]]
+                                [0.50873285, 0.05687183, 0.95641577],
+                                [0.51189344, 0.23219067, 0.9780938 ],
+                                [0.51559104, 0.16866501, 0.97647946],
+                                [0.51060927, 0.12764843, 0.9697876 ]]
                             ),
-                   columns = ['pred', 'lower_bound', 'upper_bound'],
-                   index   = pd.RangeIndex(start=50, stop=55, step=1)
-               )
+                    columns = ['pred', 'lower_bound', 'upper_bound'],
+                    index   = pd.RangeIndex(start=50, stop=55, step=1)
+                )
 
     pd.testing.assert_frame_equal(results, expected)
     
@@ -205,9 +205,9 @@ def test_predict_interval_output_when_forecaster_is_LinearRegression_steps_is_5_
                    data    = np.array(
                                 [[0.56842545, 0.25304752, 0.98664822],
                                  [0.50873285, 0.05687183, 0.95641577],
-                                 [0.51189344, 0.23219067, 0.9780938 ],
-                                 [0.51559104, 0.17266757, 0.98236802],
-                                 [0.51060927, 0.1593315 , 0.95014552]]
+                                 [0.51189344, 0.23219067, 0.9780938],
+                                 [0.51559104, 0.16866501, 0.97647946],
+                                 [0.51060927, 0.12764843, 0.9697876]]
                             ),
                    columns = ['pred', 'lower_bound', 'upper_bound'],
                    index   = pd.RangeIndex(start=50, stop=55, step=1)

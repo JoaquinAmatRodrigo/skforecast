@@ -1047,7 +1047,7 @@ class ForecasterAutoreg(ForecasterBase):
     ) -> None:
         """
         Binning residuals according to the predicted value each residual is
-        associated with. First a sklearn.preprocessing.KBinsDiscretizer
+        associated with. First a skforecast.preprocessing.QuantileBinner object
         is fitted to the predicted values. Then, residuals are binned according
         to the predicted value each residual is associated with. Residuals are
         stored in the forecaster object as `in_sample_residuals_` and
@@ -1993,7 +1993,7 @@ class ForecasterAutoreg(ForecasterBase):
         self,
         y_true: Union[pd.Series, np.ndarray],
         y_pred: Union[pd.Series, np.ndarray],
-        append: bool = True,
+        append: bool = False,
         random_state: int = 123
     ) -> None:
         """
@@ -2026,11 +2026,11 @@ class ForecasterAutoreg(ForecasterBase):
             calculated.
         y_pred : pandas Series, numpy ndarray, default `None`
             Predicted values of the time series.
-        append : bool, default `True`
+        append : bool, default `False`
             If `True`, new residuals are added to the once already stored in the
-            forecaster. Once the limit of 200 values per bin is reached, no more values
-            are appended. If False, stored residuals are overwritten with the new
-            residuals.
+            forecaster.  If after appending the new residuals the limit of
+            10_000 // self.binner.n_bins_ values per bin is reached, a random sample
+            of residuals is stored.
         random_state : int, default `123`
             Sets a seed to the random sampling for reproducible output.
 

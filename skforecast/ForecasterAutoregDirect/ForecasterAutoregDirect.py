@@ -2055,10 +2055,10 @@ class ForecasterAutoregDirect(ForecasterBase):
 
 
     def set_out_sample_residuals(
-        self, 
-        residuals: dict, 
-        append: bool = True,
-        transform: bool = True,
+        self,
+        y_true: dict,
+        y_pred: dict,
+        append: bool = False,
         random_state: int = 123
     ) -> None:
         """
@@ -2068,17 +2068,17 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         Parameters
         ----------
-        residuals : dict
-            Dictionary of numpy ndarrays with the residuals of each model in the
-            form {step: residuals}. If len(residuals) > 1000, only a random 
-            sample of 1000 values are stored.
-        append : bool, default `True`
+        y_true : dict
+            Dictionary of numpy ndarrays or pandas series with the true values of
+            the time series for each model in the form {step: y_true}.
+        y_pred : dict
+            Dictionary of numpy ndarrays or pandas series with the predicted values
+            of the time series for each model in the form {step: y_pred}.
+        append : bool, default `False`
             If `True`, new residuals are added to the once already stored in the
-            attribute `out_sample_residuals_`. Once the limit of 1000 values is
-            reached, no more values are appended. If False, `out_sample_residuals_`
-            is overwritten with the new residuals.
-        transform : bool, default `True`
-            If `True`, new residuals are transformed using self.transformer_y.
+            attribute `out_sample_residuals_`. If after appending the new residuals,
+            the limit of 10000 samples is exceeded, a random sample of 10000 is
+            kept.
         random_state : int, default `123`
             Sets a seed to the random sampling for reproducible output.
 
@@ -2088,73 +2088,101 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         """
 
-        if not isinstance(residuals, dict) or not all(isinstance(x, np.ndarray) for x in residuals.values()):
-            raise TypeError(
-                (f"`residuals` argument must be a dict of numpy ndarrays in the form "
-                 "`{step: residuals}`. " 
-                 f"Got {type(residuals)}.")
-            )
-
         if not self.is_fitted:
             raise NotFittedError(
                 ("This forecaster is not fitted yet. Call `fit` with appropriate "
                  "arguments before using `set_out_sample_residuals()`.")
             )
+
+        if not isinstance(y_true, dict):
+            raise TypeError(
+                f"`y_true` must be a dictionary of numpy ndarrays or pandas series. "
+                f"Got {type(y_true)}."
+            )
+
+        if not isinstance(y_pred, dict):
+            raise TypeError(
+                f"`y_pred` must be a dictionary of numpy ndarrays or pandas series. "
+                f"Got {type(y_pred)}."
+            )
+        
+        if not set(y_true.keys()) == set(y_pred.keys()):
+            raise ValueError(
+                ("`y_true` and `y_pred` must have the same keys. "
+                 f"Got {set(y_true.keys())} and {set(y_pred.keys())}.")
+            )
+        
+        for k in y_true.keys():
+            if not isinstance(y_true[k], (np.ndarray, pd.Series)):
+                raise TypeError(
+                    (f"Values of `y_true` must be numpy ndarrays or pandas series. "
+                     f"Got {type(y_true[k])}.")
+                )
+            if not isinstance(y_pred[k], (np.ndarray, pd.Series)):
+                raise TypeError(
+                    (f"Values of `y_pred` must be numpy ndarrays or pandas series. "
+                     f"Got {type(y_pred[k])}.")
+                )
+            if len(y_true[k]) != len(y_pred[k]):
+                raise ValueError(
+                    ("`y_true` and `y_pred` must have the same length. "
+                     f"Got {len(y_true[k])} and {len(y_pred[k])}.")
+                )
+            if isinstance(y_true[k], pd.Series) and isinstance(y_pred[k], pd.Series):
+                if not y_true[k].index.equals(y_pred[k].index):
+                    raise ValueError(
+                       "When `y_true` and `y_pred` are pandas series, they must have "
+                       "the same index."
+                    )
         
         if self.out_sample_residuals_ is None:
-            self.out_sample_residuals_ = {step: None 
-                                          for step in range(1, self.steps + 1)}
+            self.out_sample_residuals_ = {
+                step: None for step in range(1, self.steps + 1)
+            }
         
-        if not set(self.out_sample_residuals_.keys()).issubset(set(residuals.keys())):
+        # TODO: check if steps is a range
+        if not set(self.steps).issubset(set(y_pred.keys())):
             warnings.warn(
-                (f"Only residuals of models (steps) "
-                 f"{set(self.out_sample_residuals_.keys()).intersection(set(residuals.keys()))} "
-                 f"are updated.")
+                f"Only residuals of models (steps) "
+                f"{set(self.out_sample_residuals_.keys()).intersection(set(y_pred.keys()))} "
+                f"are updated."
             )
 
-        residuals = {key: value 
-                     for key, value in residuals.items() 
-                     if key in self.out_sample_residuals_.keys()}
+        residuals = {}
+        rng = np.random.default_rng(seed=random_state)
 
-        if not transform and self.transformer_y is not None:
-            warnings.warn(
-                (f"Argument `transform` is set to `False` but forecaster was trained "
-                 f"using a transformer {self.transformer_y}. Ensure that the new "
-                 f"residuals are already transformed or set `transform=True`.")
-            )
+        for k in y_true.keys():
+            if isinstance(y_true[k], pd.Series):
+                y_true[k] = y_true[k].to_numpy()
+            if isinstance(y_pred[k], pd.Series):
+                y_pred[k] = y_pred[k].to_numpy()
+            if self.transformer_y:
+                y_true[k] = transform_numpy(
+                            array             = y_true[k],
+                            transformer       = self.transformer_y,
+                            fit               = False,
+                            inverse_transform = False
+                        )
+                y_pred[k] = transform_numpy(
+                            array             = y_pred[k],
+                            transformer       = self.transformer_y,
+                            fit               = False,
+                            inverse_transform = False
+                        )
+            if self.differentiation is not None:
+                y_true[k] = self.differentiator.transform(y_true[k])[self.differentiation:]
+                y_pred[k] = self.differentiator.transform(y_pred[k])[self.differentiation:]
 
-        if transform and self.transformer_y is not None:
-            warnings.warn(
-                (f"Residuals will be transformed using the same transformer used "
-                 f"when training the forecaster ({self.transformer_y}). Ensure the "
-                 f"new residuals are on the same scale as the original time series.")
-            )
-            for key, value in residuals.items():
-                residuals[key] = transform_numpy(
-                                     array             = value,
-                                     transformer       = self.transformer_y,
-                                     fit               = False,
-                                     inverse_transform = False
-                                 )
-    
+            residuals[k] = y_true[k] - y_pred[k]
+
         for key, value in residuals.items():
-            if len(value) > 1000:
-                rng = np.random.default_rng(seed=random_state)
-                value = rng.choice(a=value, size=1000, replace=False)
-
             if append and self.out_sample_residuals_[key] is not None:
-                free_space = max(0, 1000 - len(self.out_sample_residuals_[key]))
-                if len(value) < free_space:
-                    value = np.concatenate((
-                                self.out_sample_residuals_[key],
-                                value
-                            ))
-                else:
-                    value = np.concatenate((
-                                self.out_sample_residuals_[key],
-                                value[:free_space]
-                            ))
-            
+                value = np.concatenate((
+                            self.out_sample_residuals_[key],
+                            value
+                        ))
+            if len(value) > 10000:
+                value = rng.choice(value, size=10000, replace=False)
             self.out_sample_residuals_[key] = value
 
  

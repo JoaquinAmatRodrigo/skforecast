@@ -185,7 +185,7 @@ def test_recursive_predict_output_with_residuals():
                       use_binned_residuals = False,
                   )
     
-    expected = np.array([60., 94.333333, 99.777778, 96.703704, 148.938272])
+    expected = np.array([60., 74.333333, 93.111111, 117.814815, 147.08642])
     
     np.testing.assert_array_almost_equal(predictions, expected)
 
@@ -194,23 +194,30 @@ def test_recursive_predict_output_with_binned_residuals():
     """
     Test _recursive_predict output with binned residuals.
     """
+    rng = np.random.default_rng(12345)
+    steps = 10
     forecaster = ForecasterAutoreg(LGBMRegressor(verbose=-1), lags=3)
     forecaster.fit(y=y, exog=exog)
-
     last_window_values, exog_values, _ = (
-        forecaster._create_predict_inputs(steps=10, exog=exog_predict)
+        forecaster._create_predict_inputs(steps=steps, exog=exog_predict)
     )
+
+    sampled_residuals = {
+                    k: v[rng.integers(low=0, high=len(v), size=steps)]
+                    for k, v in forecaster.in_sample_residuals_by_bin_.items()
+                }
+
     predictions = forecaster._recursive_predict(
-                      steps                = 10,
-                      last_window_values   = last_window_values,
-                      exog_values          = exog_values,
-                      residuals            = forecaster.in_sample_residuals_by_bin_,
-                      use_binned_residuals = True,
-                  )
-    
+                        steps                = steps,
+                        last_window_values   = last_window_values,
+                        exog_values          = exog_values,
+                        residuals            = sampled_residuals,
+                        use_binned_residuals = True,
+                    )
+
     expected = np.array([
-                0.916067, 0.724455, 0.724455, 0.525259, 0.916067, 0.526382,
-                0.223093, 0.873833, 0.68483 , 0.881568
-               ])
-    
+                0.951684, 0.115618, 0.160797, 0.551315, 0.747326, 0.634401,
+                0.099628, 0.47903, 0.387516, 0.581912
+            ])
+
     np.testing.assert_array_almost_equal(predictions, expected)
