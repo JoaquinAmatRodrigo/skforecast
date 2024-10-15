@@ -280,6 +280,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.source_code_weight_func            = None
         self.differentiation                    = differentiation
         self.differentiator                     = None
+        self.differentiator_                    = None
         self.last_window_                       = None
         self.index_type_                        = None
         self.index_freq_                        = None
@@ -612,7 +613,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             if self.window_features is None:
                 # X_train_series_names_in_ include series that will be added to X_train
                 X_train_series_names_in_ = [
-                    col for col in series_names_in_ 
+                    col for col in data_to_return_dict.keys()
                     if data_to_return_dict[col] in ['X', 'both']
                 ]
 
@@ -827,6 +828,17 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                            transformer_series = self.transformer_series
                                        )
 
+        if self.differentiation is None:
+            self.differentiator_ = {
+                serie: None for serie in series_to_create_autoreg_features_and_y
+                }
+        else:
+            if not self.is_fitted:
+                self.differentiator_ = {
+                    serie: clone(self.differentiator)
+                    for serie in series_to_create_autoreg_features_and_y
+                }
+
         exog_names_in_ = None
         exog_dtypes_in_ = None
         categorical_features = False
@@ -885,7 +897,12 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 )
             y_values, y_index = preprocess_y(y=y)
 
-            # TODO: Add differentiation
+            if self.differentiation is not None:
+                if not self.is_fitted:
+                    y_values = self.differentiator_[col].fit_transform(y_values)
+                else:
+                    differentiator = clone(self.differentiator_[col])
+                    y_values = differentiator.fit_transform(y_values)
 
             X_train_autoreg_col = []
             train_index = y_index[self.window_size + (self.steps - 1):]
@@ -923,6 +940,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
 
                 X_train_autoreg.append(X_train_autoreg_col)
 
+        print(X_train_autoreg)
+
         X_train = []
         len_train_index = len(train_index)
         if categorical_features:
@@ -935,7 +954,9 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                                   columns = X_train_features_names_out_,
                                   index   = train_index
                               )
-        X_train.extend(X_train_autoreg)
+            X_train.append(X_train_autoreg)
+        else:
+            X_train.extend(X_train_autoreg)
 
         X_train_exog_names_out_ = None
         if exog is not None:

@@ -448,7 +448,7 @@ def test_create_train_X_y_output_when_lags_dict_with_None_steps_2_and_exog_is_No
                 name  = f'{level}_step_2'
             )
         },
-        ['l1'] if forecaster.level == 'l1' else ['l1', 'l2'],
+        ['l1', 'l2'],
         ['l1'],
         None,
         None,
