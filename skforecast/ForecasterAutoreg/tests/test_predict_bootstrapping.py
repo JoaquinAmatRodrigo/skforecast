@@ -264,12 +264,14 @@ def test_predict_bootstrapping_output_when_window_features():
     4 steps ahead are predicted with exog and window features using in-sample residuals.
     """
     y_datetime = y.copy()
-    y_datetime.index = pd.date_range(start='2001-01-01', periods=len(y), freq='D')
+    y_datetime.index = pd.date_range(start="2001-01-01", periods=len(y), freq="D")
     exog_datetime = exog.copy()
-    exog_datetime.index = pd.date_range(start='2001-01-01', periods=len(exog), freq='D')
+    exog_datetime.index = pd.date_range(start="2001-01-01", periods=len(exog), freq="D")
     exog_predict_datetime = exog_predict.copy()
-    exog_predict_datetime.index = pd.date_range(start='2001-02-20', periods=len(exog_predict), freq='D')
-    rolling = RollingFeatures(stats=['mean', 'sum'], window_sizes=[3, 5])
+    exog_predict_datetime.index = pd.date_range(
+        start="2001-02-20", periods=len(exog_predict), freq="D"
+    )
+    rolling = RollingFeatures(stats=["mean", "sum"], window_sizes=[3, 5])
     forecaster = ForecasterAutoreg(
         LGBMRegressor(verbose=-1, random_state=123), lags=3, window_features=rolling
     )
@@ -279,18 +281,69 @@ def test_predict_bootstrapping_output_when_window_features():
     )
 
     expected = pd.DataFrame(
-                   data    = np.array(
-                                 [[0.61866004, 0.89697256, 0.14325579, 0.18128852, 0.86846565,
-                                   0.55020849, 0.25870679, 0.51670634, 0.29239436, 0.42315364],
-                                  [0.26475697, 0.67230222, 0.18926364, 0.45124373, 0.34317802,
-                                   0.6900186 , 0.43134277, 0.67230222, 0.20674374, 0.84082826],
-                                  [0.40053981, 0.32295891, 0.61577585, 0.15682665, 0.43966009,
-                                   0.46585818, 0.5110144 , 0.5225711 , 0.56031677, 0.47247859],
-                                  [0.39037942, 0.06805095, 0.86630916, 0.52190308, 0.47247859,
-                                   0.43966009, 0.46227478, 0.58525714, 0.5189877 , 0.28131971]]
-                             ),
-                   columns = [f"pred_boot_{i}" for i in range(10)],
-                   index   = pd.date_range(start='2001-02-20', periods=4, freq='D')
-               )
+        {
+            "pred_boot_0": [
+                0.6186600380569245,
+                0.6345595192689645,
+                0.5544541881163022,
+                0.5169561992095868,
+            ],
+            "pred_boot_1": [
+                0.8969725592689648,
+                0.6723022197318752,
+                0.32295891,
+                0.0680509514238431,
+            ],
+            "pred_boot_2": [
+                0.14325578784512172,
+                0.18926364363504294,
+                0.6157758549401303,
+                0.5299035345778812,
+            ],
+            "pred_boot_3": [
+                0.18128852194384876,
+                0.4512437336944209,
+                0.15682665494013032,
+                0.5219030808497911,
+            ],
+            "pred_boot_4": [
+                0.868465651152662,
+                0.34317802,
+                0.43966008751761915,
+                0.4724785875176192,
+            ],
+            "pred_boot_5": [
+                0.5502084895370893,
+                0.6900186013644649,
+                0.46585817973187515,
+                0.43966008751761915,
+            ],
+            "pred_boot_6": [
+                0.2587067892095866,
+                0.4313427657899213,
+                0.5110143957305437,
+                0.4622747804629107,
+            ],
+            "pred_boot_7": [
+                0.5167063442694563,
+                0.6723022197318752,
+                0.5225711016919676,
+                0.5852571421548783,
+            ],
+            "pred_boot_8": [
+                0.6621969071140862,
+                0.36065811973187517,
+                0.2647569741581052,
+                0.3959943228608735,
+            ],
+            "pred_boot_9": [
+                0.42315363705470854,
+                0.8408282633075403,
+                0.4724785875176192,
+                0.28131970830803243,
+            ],
+        },
+        index=pd.date_range(start="2001-02-20", periods=4, freq="D"),
+    )
 
     pd.testing.assert_frame_equal(expected, results)
