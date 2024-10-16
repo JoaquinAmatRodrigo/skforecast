@@ -1223,13 +1223,13 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
         Returns
         -------
         X_train : pandas DataFrame
-            Training values (predictors).
+            Predictor values used to train the model.
         y_train : pandas Series
-            Values (target) of the time series related to each row of `X_train`.
+            Target values related to each row of `X_train`.
         X_test : pandas DataFrame
-            Test values (predictors).
+            Predictor values used to test the model.
         y_test : pandas Series
-            Values (target) of the time series related to each row of `X_test`.
+            Target values related to each row of `X_test`.
         X_train_encoding : pandas Series
             Series identifiers for each row of `X_train`.
         X_test_encoding : pandas Series

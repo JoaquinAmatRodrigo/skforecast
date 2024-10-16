@@ -790,7 +790,7 @@ class ForecasterAutoreg(ForecasterBase):
         self,
         y: pd.Series,
         initial_train_size: int,
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
         """
         Create matrices needed to train and test the forecaster for one-step-ahead
@@ -803,9 +803,9 @@ class ForecasterAutoreg(ForecasterBase):
         initial_train_size : int
             Initial size of the training set. It is the number of observations used
             to train the forecaster before making the first prediction.
-        exog : pandas Series, pandas DataFrame, dict, default `None`
-            Exogenous variable/s included as predictor/s. Must have the same number
-            of observations as `series` and their indexes must be aligned.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
+            number of observations as `y` and their indexes must be aligned.
         
         Returns
         -------

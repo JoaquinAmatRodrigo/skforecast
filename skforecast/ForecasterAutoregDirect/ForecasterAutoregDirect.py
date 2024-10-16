@@ -603,7 +603,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         self,
         y: pd.Series,
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None
-    ) -> Tuple[pd.DataFrame, dict, list, list, list, list, dict]:
+    ) -> Tuple[pd.DataFrame, dict, list, list, list, dict]:
         """
         Create training matrices from univariate time series and exogenous
         variables. The resulting matrices contain the target variable and 
@@ -628,9 +628,6 @@ class ForecasterAutoregDirect(ForecasterBase):
             step in the form {step: y_step_[i]}.
         exog_names_in_ : list
             Names of the exogenous variables used during training.
-        X_train_window_features_names_out_ : list
-            Names of the window features included in the matrix `X_train` created
-            internally for training.
         X_train_exog_names_out_ : list
             Names of the exogenous variables included in the matrix `X_train` created
             internally for training. It can be different from `exog_names_in_` if
@@ -689,7 +686,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                     (f"`exog` must have same number of samples as `y`. "
                      f"length `exog`: ({len(exog)}), length `y`: ({len(y)})")
                 )
-            # Need here for filter_train_X_y_for_step to work without fitting
+            # NOTE: Need here for filter_train_X_y_for_step to work without fitting
             self.exog_in_ = True
             exog_names_in_ = exog.columns.to_list()
             exog_dtypes_in_ = get_exog_dtypes(exog=exog)
@@ -743,6 +740,9 @@ class ForecasterAutoregDirect(ForecasterBase):
             X_train.extend(X_train_window_features)
             X_train_features_names_out_.extend(X_train_window_features_names_out_)
 
+        # NOTE: Need here for filter_train_X_y_for_step to work without fitting
+        self.X_train_window_features_names_out_ = X_train_window_features_names_out_
+
         X_train_exog_names_out_ = None
         if exog is not None:
             # The first `self.window_size` positions have to be removed from exog
@@ -754,7 +754,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                                 steps = self.steps
                             )
             exog_to_train = exog_to_train.iloc[-len_train_index:, :]
-            # Need here for filter_train_X_y_for_step to work without fitting
+            # NOTE: Need here for filter_train_X_y_for_step to work without fitting
             self.X_train_direct_exog_names_out_ = exog_to_train.columns.to_list()
             if X_as_pandas:
                 exog_to_train.index = train_index
@@ -794,7 +794,6 @@ class ForecasterAutoregDirect(ForecasterBase):
             X_train,
             y_train,
             exog_names_in_,
-            X_train_window_features_names_out_,
             X_train_exog_names_out_,
             X_train_features_names_out_,
             exog_dtypes_in_
@@ -887,7 +886,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         else:
             n_lags = len(self.lags) if self.lags is not None else 0
             n_window_features = (
-                len(self.window_features_names) if self.window_features is not None else 0
+                len(self.X_train_window_features_names_out_) if self.window_features is not None else 0
             )
             idx_columns_autoreg = np.arange(n_lags + n_window_features)
             n_exog = len(self.X_train_direct_exog_names_out_) / self.steps
@@ -900,8 +899,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         X_train_step.index = y_train_step.index
 
         if remove_suffix:
-            X_train_step.columns = [col_name.replace(f"_step_{step}", "")
-                                    for col_name in X_train_step.columns]
+            X_train_step.columns = [
+                col_name.replace(f"_step_{step}", "")
+                for col_name in X_train_step.columns
+            ]
             y_train_step.name = y_train_step.name.replace(f"_step_{step}", "")
 
         return X_train_step, y_train_step
@@ -911,8 +912,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         self,
         y: pd.Series,
         initial_train_size: int,
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None
-    ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
+    ) -> Tuple[pd.DataFrame, dict, pd.DataFrame, dict]:
         """
         Create matrices needed to train and test the forecaster for one-step-ahead
         predictions.
@@ -924,20 +925,22 @@ class ForecasterAutoregDirect(ForecasterBase):
         initial_train_size : int
             Initial size of the training set. It is the number of observations used
             to train the forecaster before making the first prediction.
-        exog : pandas Series, pandas DataFrame, dict, default `None`
-            Exogenous variable/s included as predictor/s. Must have the same number
-            of observations as `series` and their indexes must be aligned.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
+            number of observations as `y` and their indexes must be aligned.
         
         Returns
         -------
         X_train : pandas DataFrame
             Predictor values used to train the model.
-        y_train : pandas Series
-            Target values related to each row of `X_train`.
+        y_train : dict
+            Values of the time series related to each row of `X_train` for each 
+            step in the form {step: y_step_[i]}.
         X_test : pandas DataFrame
             Predictor values used to test the model.
-        y_test : pandas Series
-            Target values related to each row of `X_test`.
+        y_test : dict
+            Values of the time series related to each row of `X_test` for each 
+            step in the form {step: y_step_[i]}.
         
         """
 
@@ -1058,7 +1061,6 @@ class ForecasterAutoregDirect(ForecasterBase):
             X_train,
             y_train,
             exog_names_in_,
-            X_train_window_features_names_out_,
             X_train_exog_names_out_,
             X_train_features_names_out_,
             exog_dtypes_in_
@@ -1148,7 +1150,6 @@ class ForecasterAutoregDirect(ForecasterBase):
             self.in_sample_residuals_ = {step: residuals 
                                          for step, _, residuals in results_fit}
         
-        self.X_train_window_features_names_out_ = X_train_window_features_names_out_
         self.X_train_features_names_out_ = X_train_features_names_out_
 
         self.is_fitted = True
@@ -1260,7 +1261,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                              )
         if self.differentiation is not None:
             last_window_values = self.differentiator.fit_transform(last_window_values)
-        
+
         X_autoreg = []
         Xs_col_names = []
         if self.lags is not None:
@@ -1269,8 +1270,10 @@ class ForecasterAutoregDirect(ForecasterBase):
             Xs_col_names.extend(self.lags_names)
 
         if self.window_features is not None:
+            n_diff = 0 if self.differentiation is None else self.differentiation
             X_window_features = np.concatenate(
-                [wf.transform(last_window_values) for wf in self.window_features]
+                [wf.transform(last_window_values[n_diff:]) 
+                 for wf in self.window_features]
             )
             X_autoreg.append(X_window_features)
             Xs_col_names.extend(self.X_train_window_features_names_out_)
