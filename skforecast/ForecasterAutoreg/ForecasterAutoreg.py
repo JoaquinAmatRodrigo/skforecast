@@ -200,22 +200,26 @@ class ForecasterAutoreg(ForecasterBase):
     in_sample_residuals_ : numpy ndarray
         Residuals of the model when predicting training data. Only stored up to
         10_000 values. If `transformer_y` is not `None`, residuals are stored in
-        the transformed scale.
+        the transformed scale. If `differentiation` is not `None`, residuals are
+        stored after differentiation.
     in_sample_residuals_by_bin_ : dict
         In sample residuals binned according to the predicted value each residual
         is associated with. If `transformer_y` is not `None`, residuals are stored
-        in the transformed scale. The number of residuals stored per bin is
+        in the transformed scale. If `differentiation` is not `None`, residuals are
+        stored after differentiation. The number of residuals stored per bin is
         limited to 10_000 // self.binner.n_bins_.
         **New in version 0.14.0**
     out_sample_residuals_ : numpy ndarray
-        Residuals of the model when predicting non training data. Only stored
-        up to 1000 values. If `transformer_y` is not `None`, residuals
-        are assumed to be in the transformed scale. Use `set_out_sample_residuals` 
-        method to set values.
+        Residuals of the model when predicting non training data. Only stored up to
+        10_000 values. If `transformer_y` is not `None`, residuals are stored in
+        the transformed scale. If `differentiation` is not `None`, residuals are
+        stored after differentiation.
     out_sample_residuals_by_bin_ : dict
         Out of sample residuals binned according to the predicted value each residual
-        is associated with. Only stored up to 200 values per bin. If `transformer_y`
-        is not `None`, residuals are assumed to be in the transformed scale.
+        is associated with. If `transformer_y` is not `None`, residuals are stored
+        in the transformed scale. If `differentiation` is not `None`, residuals are
+        stored after differentiation. The number of residuals stored per bin is
+        limited to 10_000 // self.binner.n_bins_.
         **New in version 0.12.0**
     creation_date : str
         Date of creation.
@@ -1960,7 +1964,6 @@ class ForecasterAutoreg(ForecasterBase):
         fitted with these transformations. Two internal attributes are updated:
 
         + `out_sample_residuals_`: residuals stored in a numpy ndarray.
-
         + `out_sample_residuals_by_bin_`: residuals are binned according to the predicted
         value they are associated with and stored in a dictionary, where the keys are the
         intervals of the predicted values and the values are the residuals associated with
@@ -1968,10 +1971,10 @@ class ForecasterAutoreg(ForecasterBase):
         residuals from other bins. This is done to ensure that all bins have at least
         one residual and can be used in the prediction process.
 
-        A total of 10,000 residuals are stored in the attribute `out_sample_residuals_`.
-        If the number of residuals is greater than 10,000, a random sample of 10,000
+        A total of 10_000 residuals are stored in the attribute `out_sample_residuals_`.
+        If the number of residuals is greater than 10_000, a random sample of 10_000
         residuals is stored. The number of residuals stored per bin is limited to
-        10_000 // self.binner.n_bins_.
+        `10_000 // self.binner.n_bins_`.
         
         Parameters
         ----------
@@ -1982,8 +1985,8 @@ class ForecasterAutoreg(ForecasterBase):
             Predicted values of the time series.
         append : bool, default `False`
             If `True`, new residuals are added to the once already stored in the
-            forecaster.  If after appending the new residuals the limit of
-            10_000 // self.binner.n_bins_ values per bin is reached, a random sample
+            forecaster. If after appending the new residuals the limit of
+            `10_000 // self.binner.n_bins_` values per bin is reached, a random sample
             of residuals is stored.
         random_state : int, default `123`
             Sets a seed to the random sampling for reproducible output.
