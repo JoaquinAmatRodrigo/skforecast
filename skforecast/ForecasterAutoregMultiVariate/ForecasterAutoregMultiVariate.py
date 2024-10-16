@@ -1540,24 +1540,6 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             -self.window_size:, last_window.columns.get_indexer(self.X_train_series_names_in_)
         ].copy()
         
-        # Xs_col_names = []
-        # X_lags = np.array([[]], dtype=float)
-        # for serie in self.X_train_series_names_in_:
-        #     last_window_serie = transform_numpy(
-        #                             array             = last_window[serie].to_numpy(),
-        #                             transformer       = self.transformer_series_[serie],
-        #                             fit               = False,
-        #                             inverse_transform = False
-        #                         )
-            
-        #     if self.differentiation is not None:
-        #         last_window_serie = self.differentiator_[serie].fit_transform(last_window_serie)
-            
-        #     Xs_col_names.extend([f"{serie}_lag_{lag}" for lag in self.lags_[serie]])
-        #     X_lags = np.hstack(
-        #                  [X_lags, last_window_serie[-self.lags_[serie]].reshape(1, -1)]
-        #              )
-        
         X_autoreg = []
         Xs_col_names = []
         for serie in self.X_train_series_names_in_:
@@ -1574,22 +1556,26 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             if self.lags is not None:
                 X_lags = last_window_serie[-self.lags_[serie]]
                 X_autoreg.append(X_lags)
-                Xs_col_names.extend(self.lags_names)
+                Xs_col_names.extend(self.lags_names[serie])
 
             if self.window_features is not None:
+                n_diff = 0 if self.differentiation is None else self.differentiation
                 X_window_features = np.concatenate(
-                    [wf.transform(last_window_serie) for wf in self.window_features]
+                    [
+                        wf.transform(last_window_serie[n_diff:]) 
+                        for wf in self.window_features
+                    ]
                 )
                 X_autoreg.append(X_window_features)
-                Xs_col_names.extend(self.X_train_window_features_names_out_)
-            
-            Xs_col_names.extend([f"{serie}_lag_{lag}" for lag in self.lags_[serie]])
+                # HACK: This is not the best way to do it. Can have any problem
+                # if the window_features are not in the same order as the
+                # self.window_features_names.
+                Xs_col_names.extend([f"{serie}_{wf}" for wf in self.window_features_names])
             
         X_autoreg = np.concatenate(X_autoreg).reshape(1, -1)
         _, last_window_index = preprocess_last_window(
             last_window=last_window, return_values=False
         )
-        
         if exog is not None:
             exog = input_to_frame(data=exog, input_name='exog')
             exog = exog.loc[:, self.exog_names_in_]
@@ -1607,15 +1593,21 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             
             n_exog = exog.shape[1]
             Xs = [
-                np.hstack(
-                    [X_lags, 
-                     exog_values[(step - 1) * n_exog : step * n_exog].reshape(1, -1)]
+                np.concatenate(
+                    [
+                        X_autoreg, 
+                        exog_values[(step - 1) * n_exog : step * n_exog].reshape(1, -1)
+                    ],
+                    axis=1
                 )
                 for step in steps
             ]
+            # HACK: This is not the best way to do it. Can have any problem
+            # if the exog_columns are not in the same order as the
+            # self.window_features_names.
             Xs_col_names = Xs_col_names + exog.columns.to_list()
         else:
-            Xs = [X_lags] * len(steps)
+            Xs = [X_autoreg] * len(steps)
 
         prediction_index = expand_index(
                                index = last_window_index,
@@ -1625,7 +1617,8 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             steps, np.arange(min(steps), max(steps) + 1)
         ):
             prediction_index.freq = last_window_index.freq
-
+        
+        # HACK: Why no use self.X_train_features_names_out_ as Xs_col_names?
         return Xs, Xs_col_names, steps, prediction_index
 
 

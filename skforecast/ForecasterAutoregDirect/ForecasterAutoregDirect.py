@@ -1262,8 +1262,10 @@ class ForecasterAutoregDirect(ForecasterBase):
         if self.window_features is not None:
             n_diff = 0 if self.differentiation is None else self.differentiation
             X_window_features = np.concatenate(
-                [wf.transform(last_window_values[n_diff:]) 
-                 for wf in self.window_features]
+                [
+                    wf.transform(last_window_values[n_diff:])
+                    for wf in self.window_features
+                ]
             )
             X_autoreg.append(X_window_features)
             Xs_col_names.extend(self.X_train_window_features_names_out_)
@@ -1287,13 +1289,18 @@ class ForecasterAutoregDirect(ForecasterBase):
             n_exog = exog.shape[1]
             Xs = [
                 np.concatenate(
-                    [X_autoreg, 
-                     exog_values[(step - 1) * n_exog : step * n_exog].reshape(1, -1)],
+                    [
+                        X_autoreg,
+                        exog_values[(step - 1) * n_exog : step * n_exog].reshape(1, -1),
+                    ],
                     axis=1
                 )
                 for step in steps
             ]
-            Xs_col_names = Xs_col_names + self.X_train_exog_names_out_
+            # HACK: This is not the best way to do it. Can have any problem
+            # if the exog_columns are not in the same order as the
+            # self.window_features_names.
+            Xs_col_names = Xs_col_names + exog.columns.to_list()
         else:
             Xs = [X_autoreg] * len(steps)
 
@@ -1305,7 +1312,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             steps, np.arange(min(steps), max(steps) + 1)
         ):
             prediction_index.freq = last_window_index.freq
-
+        
+        # HACK: Why no use self.X_train_features_names_out_ as Xs_col_names?
         return Xs, Xs_col_names, steps, prediction_index
 
     def create_predict_X(

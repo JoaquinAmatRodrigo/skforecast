@@ -5,7 +5,6 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
@@ -14,11 +13,14 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.compose import make_column_transformer
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import HistGradientBoostingRegressor
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 
 # Fixtures
 from .fixtures_ForecasterAutoregMultiVariate import series
 from .fixtures_ForecasterAutoregMultiVariate import exog
 from .fixtures_ForecasterAutoregMultiVariate import exog_predict
+from .fixtures_ForecasterAutoregMultiVariate import data  # to test results when using differentiation
 
 transformer_exog = ColumnTransformer(
                        [('scale', StandardScaler(), ['exog_1']),
@@ -480,6 +482,70 @@ def test_create_predict_inputs_output_when_categorical_features_native_implement
     )
     
     for step in range(len(expected[0])):
+        np.testing.assert_almost_equal(results[0][step], expected[0][step])
+    assert results[1] == expected[1]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
+
+
+def test_create_predict_inputs_when_regressor_is_LinearRegression_with_exog_differentiation_is_1():
+    """
+    Test _create_predict_inputs when using LinearRegression as regressor 
+    and differentiation=1.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+    arr = data.to_numpy(copy=True)
+    series = pd.DataFrame(
+        {'l1': arr,
+         'l2': arr},
+        index=data.index
+    )
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor       = LinearRegression(),
+                     level           = 'l1',
+                     steps           = 5,
+                     lags            = 15,
+                     differentiation = 1
+                )
+    forecaster.fit(series=series.loc[:end_train], exog=exog.loc[:end_train])
+    results = forecaster._create_predict_inputs(exog=exog.loc[end_train:])
+    
+    expected = (
+        [np.array([[ 0.07503713, -0.48984868, -0.01463081,  0.10597971, -0.01018012,
+                0.02377842,  0.09883014,  0.01630394,  0.17596768, -0.00584249,
+                0.09807633,  0.04869748,  0.07558021, -0.56028323,  0.14355438,
+                1.16172882]]),
+        np.array([[ 0.07503713, -0.48984868, -0.01463081,  0.10597971, -0.01018012,
+                0.02377842,  0.09883014,  0.01630394,  0.17596768, -0.00584249,
+                0.09807633,  0.04869748,  0.07558021, -0.56028323,  0.14355438,
+                0.29468848]]),
+        np.array([[ 0.07503713, -0.48984868, -0.01463081,  0.10597971, -0.01018012,
+                0.02377842,  0.09883014,  0.01630394,  0.17596768, -0.00584249,
+                0.09807633,  0.04869748,  0.07558021, -0.56028323,  0.14355438,
+                -0.4399757 ]]),
+        np.array([[ 0.07503713, -0.48984868, -0.01463081,  0.10597971, -0.01018012,
+                0.02377842,  0.09883014,  0.01630394,  0.17596768, -0.00584249,
+                0.09807633,  0.04869748,  0.07558021, -0.56028323,  0.14355438,
+                1.25008389]]),
+        np.array([[ 0.07503713, -0.48984868, -0.01463081,  0.10597971, -0.01018012,
+                0.02377842,  0.09883014,  0.01630394,  0.17596768, -0.00584249,
+                0.09807633,  0.04869748,  0.07558021, -0.56028323,  0.14355438,
+                1.37496887]])],
+        ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'lag_6', 'lag_7', 'lag_8',
+         'lag_9', 'lag_10', 'lag_11', 'lag_12', 'lag_13', 'lag_14', 'lag_15', 'exog'],
+        [1, 2, 3, 4, 5],
+        pd.date_range(start='2003-04-01', periods=5, freq='MS')
+    )
+    
+    for step in range(len(results[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
     assert results[2] == expected[2]
