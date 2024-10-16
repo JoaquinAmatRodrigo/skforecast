@@ -624,7 +624,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             corresponds to that of the last step. It is updated for the corresponding 
             step in the `filter_train_X_y_for_step` method.
         y_train : dict
-            Values of the time series related to each row of `X_train`.
+            Values of the time series related to each row of `X_train` for each 
+            step in the form {step: y_step_[i]}.
         exog_names_in_ : list
             Names of the exogenous variables used during training.
         X_train_window_features_names_out_ : list
@@ -825,7 +826,8 @@ class ForecasterAutoregDirect(ForecasterBase):
             corresponds to that of the last step. It is updated for the corresponding 
             step in the `filter_train_X_y_for_step` method.
         y_train : dict
-            Values of the time series related to each row of `X_train`.
+            Values of the time series related to each row of `X_train` for each 
+            step in the form {step: y_step_[i]}.
         
         """
 
@@ -867,8 +869,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         X_train_step : pandas DataFrame
             Training values (predictors) for the selected step.
         y_train_step : pandas Series
-            Values (target) of the time series related to each row of `X_train`.
-            Shape: (len(y) - self.max_lag)
+            Values of the time series related to each row of `X_train`.
 
         """
 

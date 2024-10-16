@@ -4,12 +4,17 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from skforecast.exceptions import MissingValuesWarning
 from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
+from skforecast.preprocessing import TimeSeriesDifferentiator
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
+
+# Fixtures
+from .fixtures_ForecasterAutoregMultiVariate import data  # to test results when using differentiation
 
 
 def test_create_train_X_y_TypeError_when_series_not_DataFrame():
@@ -1686,6 +1691,638 @@ def test_create_train_X_y_output_when_transformer_series_and_transformer_exog_st
          'col_1_step_1', 'col_2_a_step_1', 'col_2_b_step_1',
          'col_1_step_2', 'col_2_a_step_2', 'col_2_b_step_2'],
         {'col_1': exog['col_1'].dtype, 'col_2': exog['col_2'].dtype}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    assert results[7] == expected[7]
+    for k in results[8].keys():
+        assert results[8][k] == expected[8][k]
+
+
+@pytest.mark.parametrize("fit_forecaster", 
+                         [True, False], 
+                         ids = lambda fitted: f'fit_forecaster: {fitted}')
+def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_1_steps_3(fit_forecaster):
+    """
+    Test the output of _create_train_X_y when using differentiation=1. Comparing 
+    the matrix created with and without differentiating the series with steps=3.
+    """
+    # Data differentiated
+    arr = data.to_numpy(copy=True)
+    diferenciator = TimeSeriesDifferentiator(order=1)
+    arr_diff = diferenciator.fit_transform(arr)
+
+    series = pd.DataFrame(
+        {'l1': arr,
+         'l2': arr},
+        index=data.index
+    )
+
+    series_diff = pd.DataFrame(
+        {'l1': arr_diff,
+         'l2': arr_diff},
+        index=data.index
+    ).dropna()
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff = exog.iloc[1:]
+    end_train = '2003-03-01 23:59:00'
+
+    forecaster_1 = ForecasterAutoregMultiVariate(
+        LinearRegression(), level='l1', steps=3, lags=5, transformer_series=None
+    )
+    forecaster_2 = ForecasterAutoregMultiVariate(
+        LinearRegression(), level='l1', steps=3, lags=5, transformer_series=None, differentiation=1
+    )
+    
+    if fit_forecaster:
+        forecaster_2.fit(series=series.loc[:end_train], exog=exog.loc[:end_train])
+
+    output_1 = forecaster_1._create_train_X_y(
+                   series = series_diff.loc[:end_train],
+                   exog   = exog_diff.loc[:end_train]
+               )
+    output_2 = forecaster_2._create_train_X_y(
+                   series = series.loc[:end_train],
+                   exog   = exog.loc[:end_train]
+               )
+
+    pd.testing.assert_frame_equal(output_1[0], output_2[0])
+    assert output_1[1].keys() == output_2[1].keys()
+    for key in output_1[1]: 
+        pd.testing.assert_series_equal(output_1[1][key], output_2[1][key]) 
+    assert output_1[2] == output_2[2]
+    assert output_1[3] == output_2[3]
+    assert output_1[4] == output_2[4]
+    assert output_1[5] == output_2[5]
+    assert output_1[6] == output_2[6]
+    assert output_1[7] == output_2[7]
+    for k in output_1[8].keys():
+        assert output_1[8][k] == output_2[8][k]
+
+
+def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentiation_is_2():
+    """
+    Test the output of _create_train_X_y when using differentiation=2. Comparing 
+    the matrix created with and without differentiating the series.
+    """
+    # Data differentiated
+    arr = data.to_numpy(copy=True)
+    diferenciator = TimeSeriesDifferentiator(order=2)
+    data_diff_2 = diferenciator.fit_transform(arr)
+
+    series = pd.DataFrame(
+        {'l1': arr,
+         'l2': arr},
+        index=data.index
+    )
+
+    series_diff_2 = pd.DataFrame(
+        {'l1': data_diff_2,
+         'l2': data_diff_2},
+        index=data.index
+    ).dropna()
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff_2 = exog.iloc[2:]
+    end_train = '2003-03-01 23:59:00'
+
+    forecaster_1 = ForecasterAutoregMultiVariate(
+        LinearRegression(), level='l1', steps=2, lags=5, transformer_series=None
+    )
+    forecaster_2 = ForecasterAutoregMultiVariate(
+        LinearRegression(), level='l1', steps=2, lags=5, transformer_series=None, differentiation=2
+    )
+
+    output_1 = forecaster_1._create_train_X_y(
+                   series = series_diff_2.loc[:end_train],
+                   exog   = exog_diff_2.loc[:end_train]
+               )
+    output_2 = forecaster_2._create_train_X_y(
+                   series = series.loc[:end_train],
+                   exog   = exog.loc[:end_train]
+               )
+
+    pd.testing.assert_frame_equal(output_1[0], output_2[0])
+    assert output_1[1].keys() == output_2[1].keys()
+    for key in output_1[1]: 
+        pd.testing.assert_series_equal(output_1[1][key], output_2[1][key]) 
+    assert output_1[2] == output_2[2]
+    assert output_1[3] == output_2[3]
+    assert output_1[4] == output_2[4]
+    assert output_1[5] == output_2[5]
+    assert output_1[6] == output_2[6]
+    assert output_1[7] == output_2[7]
+    for k in output_1[8].keys():
+        assert output_1[8][k] == output_2[8][k]
+
+
+def test_create_train_X_y_output_when_window_features_and_exog_steps_1():
+    """
+    Test the output of _create_train_X_y when using window_features and exog 
+    with datetime index and steps=1.
+    """
+    series = pd.DataFrame(
+        {'l1': np.arange(15, dtype=float), 
+         'l2': np.arange(50, 65, dtype=float)},
+        index=pd.date_range('2000-01-01', periods=15, freq='D')
+    )
+    exog = pd.Series(
+        np.arange(100, 115), name='exog', 
+        index=pd.date_range('2000-01-01', periods=15, freq='D')
+    )
+    rolling = RollingFeatures(
+        stats=['mean', 'median', 'sum'], window_sizes=[5, 5, 6]
+    )
+
+    forecaster = ForecasterAutoregMultiVariate(
+        LinearRegression(), steps=1, level='l1', lags=5, window_features=rolling, transformer_series=None
+    )
+    results = forecaster._create_train_X_y(series=series, exog=exog)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[5., 4., 3., 2., 1., 3., 3., 15., 55., 54., 53., 52., 51., 53., 53., 315., 106.],
+                             [6., 5., 4., 3., 2., 4., 4., 21., 56., 55., 54., 53., 52., 54., 54., 321., 107.],
+                             [7., 6., 5., 4., 3., 5., 5., 27., 57., 56., 55., 54., 53., 55., 55., 327., 108.],
+                             [8., 7., 6., 5., 4., 6., 6., 33., 58., 57., 56., 55., 54., 56., 56., 333., 109.],
+                             [9., 8., 7., 6., 5., 7., 7., 39., 59., 58., 57., 56., 55., 57., 57., 339., 110.],
+                             [10., 9., 8., 7., 6., 8., 8., 45., 60., 59., 58., 57., 56., 58., 58., 345., 111.],
+                             [11., 10., 9., 8., 7., 9., 9., 51., 61., 60., 59., 58., 57., 59., 59., 351., 112.],
+                             [12., 11., 10., 9., 8., 10., 10., 57., 62., 61., 60., 59., 58., 60., 60., 357., 113.],
+                             [13., 12., 11., 10., 9., 11., 11., 63., 63., 62., 61., 60., 59., 61., 61., 363., 114.]],
+                             dtype=float),
+            index = pd.date_range('2000-01-07', periods=9, freq='D'),
+            columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
+                       'l1_roll_mean_5', 'l1_roll_median_5', 'l1_roll_sum_6',
+                       'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
+                       'l2_roll_mean_5', 'l2_roll_median_5', 'l2_roll_sum_6',
+                       'exog_step_1']
+        ),
+        {1: pd.Series(
+                data  = np.array([6., 7., 8., 9., 10., 11., 12., 13., 14.], dtype=float), 
+                index = pd.date_range('2000-01-07', periods=9, freq='D'),
+                name  = "l1_step_1"
+            )
+        },
+        ['l1', 'l2'],
+        ['l1', 'l2'],
+        ['exog'],
+        ['l1_roll_mean_5', 'l1_roll_median_5', 'l1_roll_sum_6',
+         'l2_roll_mean_5', 'l2_roll_median_5', 'l2_roll_sum_6'],
+        ['exog'],
+        ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
+         'l1_roll_mean_5', 'l1_roll_median_5', 'l1_roll_sum_6',
+         'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
+         'l2_roll_mean_5', 'l2_roll_median_5', 'l2_roll_sum_6',
+         'exog_step_1'],
+        {'exog': exog.dtype}
+    )
+
+    forecaster.window_features_names == ['roll_mean_5', 'roll_median_5', 'roll_sum_6']
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    assert results[7] == expected[7]
+    for k in results[8].keys():
+        assert results[8][k] == expected[8][k]
+
+
+def test_create_train_X_y_output_when_window_features_and_exog_steps_2():
+    """
+    Test the output of _create_train_X_y when using window_features and exog 
+    with datetime index and steps=2.
+    """
+    series = pd.DataFrame(
+        {'l1': np.arange(15, dtype=float), 
+         'l2': np.arange(50, 65, dtype=float)},
+        index=pd.date_range('2000-01-01', periods=15, freq='D')
+    )
+    exog = pd.Series(
+        np.arange(100, 115), name='exog', 
+        index=pd.date_range('2000-01-01', periods=15, freq='D')
+    )
+    rolling = RollingFeatures(
+        stats=['mean', 'median', 'sum'], window_sizes=[5, 5, 6]
+    )
+
+    forecaster = ForecasterAutoregMultiVariate(
+        LinearRegression(), steps=2, level='l1', lags=5, 
+        window_features=rolling, transformer_series=None
+    )
+    results = forecaster._create_train_X_y(series=series, exog=exog)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[5., 4., 3., 2., 1., 3., 3., 15., 55., 54., 53., 52., 51., 53., 53., 315., 106., 107.],
+                             [6., 5., 4., 3., 2., 4., 4., 21., 56., 55., 54., 53., 52., 54., 54., 321., 107., 108.],
+                             [7., 6., 5., 4., 3., 5., 5., 27., 57., 56., 55., 54., 53., 55., 55., 327., 108., 109.],
+                             [8., 7., 6., 5., 4., 6., 6., 33., 58., 57., 56., 55., 54., 56., 56., 333., 109., 110.],
+                             [9., 8., 7., 6., 5., 7., 7., 39., 59., 58., 57., 56., 55., 57., 57., 339., 110., 111.],
+                             [10., 9., 8., 7., 6., 8., 8., 45., 60., 59., 58., 57., 56., 58., 58., 345., 111., 112.],
+                             [11., 10., 9., 8., 7., 9., 9., 51., 61., 60., 59., 58., 57., 59., 59., 351., 112., 113.],
+                             [12., 11., 10., 9., 8., 10., 10., 57., 62., 61., 60., 59., 58., 60., 60., 357., 113., 114.]],
+                             dtype=float),
+            index = pd.date_range('2000-01-08', periods=8, freq='D'),
+            columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
+                       'l1_roll_mean_5', 'l1_roll_median_5', 'l1_roll_sum_6',
+                       'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
+                       'l2_roll_mean_5', 'l2_roll_median_5', 'l2_roll_sum_6',
+                       'exog_step_1', 'exog_step_2']
+        ),
+        {1: pd.Series(
+                data  = np.array([6., 7., 8., 9., 10., 11., 12., 13.], dtype=float), 
+                index = pd.date_range('2000-01-07', periods=8, freq='D'),
+                name  = "l1_step_1"
+            ),
+         2: pd.Series(
+                data  = np.array([7., 8., 9., 10., 11., 12., 13., 14.], dtype=float), 
+                index = pd.date_range('2000-01-08', periods=8, freq='D'),
+                name  = "l1_step_2"
+            )
+        },
+        ['l1', 'l2'],
+        ['l1', 'l2'],
+        ['exog'],
+        ['l1_roll_mean_5', 'l1_roll_median_5', 'l1_roll_sum_6',
+         'l2_roll_mean_5', 'l2_roll_median_5', 'l2_roll_sum_6'],
+        ['exog'],
+        ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
+         'l1_roll_mean_5', 'l1_roll_median_5', 'l1_roll_sum_6',
+         'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
+         'l2_roll_mean_5', 'l2_roll_median_5', 'l2_roll_sum_6',
+         'exog_step_1', 'exog_step_2'],
+        {'exog': exog.dtype}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    assert results[7] == expected[7]
+    for k in results[8].keys():
+        assert results[8][k] == expected[8][k]
+
+
+def test_create_train_X_y_output_when_two_window_features_and_exog_steps_2():
+    """
+    Test the output of _create_train_X_y when using 2 window_features and exog 
+    with datetime index and steps=2.
+    """
+    series = pd.DataFrame(
+        {'l1': np.arange(15, dtype=float), 
+         'l2': np.arange(50, 65, dtype=float)},
+        index=pd.date_range('2000-01-01', periods=15, freq='D')
+    )
+    exog = pd.Series(
+        np.arange(100, 115), name='exog', 
+        index=pd.date_range('2000-01-01', periods=15, freq='D')
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoregMultiVariate(
+        LinearRegression(), steps=2, level='l1', lags=5, 
+        window_features=[rolling, rolling_2], transformer_series=None
+    )
+    results = forecaster._create_train_X_y(series=series, exog=exog)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[5., 4., 3., 2., 1., 3., 3., 15., 55., 54., 53., 52., 51., 53., 53., 315., 106., 107.],
+                             [6., 5., 4., 3., 2., 4., 4., 21., 56., 55., 54., 53., 52., 54., 54., 321., 107., 108.],
+                             [7., 6., 5., 4., 3., 5., 5., 27., 57., 56., 55., 54., 53., 55., 55., 327., 108., 109.],
+                             [8., 7., 6., 5., 4., 6., 6., 33., 58., 57., 56., 55., 54., 56., 56., 333., 109., 110.],
+                             [9., 8., 7., 6., 5., 7., 7., 39., 59., 58., 57., 56., 55., 57., 57., 339., 110., 111.],
+                             [10., 9., 8., 7., 6., 8., 8., 45., 60., 59., 58., 57., 56., 58., 58., 345., 111., 112.],
+                             [11., 10., 9., 8., 7., 9., 9., 51., 61., 60., 59., 58., 57., 59., 59., 351., 112., 113.],
+                             [12., 11., 10., 9., 8., 10., 10., 57., 62., 61., 60., 59., 58., 60., 60., 357., 113., 114.]],
+                             dtype=float),
+            index = pd.date_range('2000-01-08', periods=8, freq='D'),
+            columns = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
+                       'l1_roll_mean_5', 'l1_roll_median_5', 'l1_roll_sum_6',
+                       'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
+                       'l2_roll_mean_5', 'l2_roll_median_5', 'l2_roll_sum_6',
+                       'exog_step_1', 'exog_step_2']
+        ),
+        {1: pd.Series(
+                data  = np.array([6., 7., 8., 9., 10., 11., 12., 13.], dtype=float), 
+                index = pd.date_range('2000-01-07', periods=8, freq='D'),
+                name  = "l1_step_1"
+            ),
+         2: pd.Series(
+                data  = np.array([7., 8., 9., 10., 11., 12., 13., 14.], dtype=float), 
+                index = pd.date_range('2000-01-08', periods=8, freq='D'),
+                name  = "l1_step_2"
+            )
+        },
+        ['l1', 'l2'],
+        ['l1', 'l2'],
+        ['exog'],
+        ['l1_roll_mean_5', 'l1_roll_median_5', 'l1_roll_sum_6',
+         'l2_roll_mean_5', 'l2_roll_median_5', 'l2_roll_sum_6'],
+        ['exog'],
+        ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5', 
+         'l1_roll_mean_5', 'l1_roll_median_5', 'l1_roll_sum_6',
+         'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
+         'l2_roll_mean_5', 'l2_roll_median_5', 'l2_roll_sum_6',
+         'exog_step_1', 'exog_step_2'],
+        {'exog': exog.dtype}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    assert results[7] == expected[7]
+    for k in results[8].keys():
+        assert results[8][k] == expected[8][k]
+
+
+def test_create_train_X_y_output_when_window_features_lags_None_and_exog():
+    """
+    Test the output of _create_train_X_y when using window_features and exog 
+    with datetime index and lags=None and steps=1.
+    """
+    series = pd.DataFrame(
+        {'l1': np.arange(15, dtype=float), 
+         'l2': np.arange(50, 65, dtype=float)},
+        index=pd.date_range('2000-01-01', periods=15, freq='D')
+    )
+    exog = pd.Series(
+        np.arange(100, 115), name='exog', 
+        index=pd.date_range('2000-01-01', periods=15, freq='D')
+    )
+    rolling = RollingFeatures(
+        stats=['mean', 'median', 'sum'], window_sizes=[5, 5, 6]
+    )
+
+    forecaster = ForecasterAutoregMultiVariate(
+        LinearRegression(), steps=1, level='l1', lags=None, window_features=rolling, transformer_series=None
+    )
+    results = forecaster._create_train_X_y(series=series, exog=exog)
+
+    expected = (
+        pd.DataFrame(
+            data = np.array([[3., 3., 15., 53., 53., 315., 106.],
+                             [4., 4., 21., 54., 54., 321., 107.],
+                             [5., 5., 27., 55., 55., 327., 108.],
+                             [6., 6., 33., 56., 56., 333., 109.],
+                             [7., 7., 39., 57., 57., 339., 110.],
+                             [8., 8., 45., 58., 58., 345., 111.],
+                             [9., 9., 51., 59., 59., 351., 112.],
+                             [10., 10., 57., 60., 60., 357., 113.],
+                             [11., 11., 63., 61., 61., 363., 114.]],
+                             dtype=float),
+            index = pd.date_range('2000-01-07', periods=9, freq='D'),
+            columns = ['l1_roll_mean_5', 'l1_roll_median_5', 'l1_roll_sum_6',
+                       'l2_roll_mean_5', 'l2_roll_median_5', 'l2_roll_sum_6',
+                       'exog_step_1']
+        ),
+        {1: pd.Series(
+                data  = np.array([6., 7., 8., 9., 10., 11., 12., 13., 14.], dtype=float), 
+                index = pd.date_range('2000-01-07', periods=9, freq='D'),
+                name  = "l1_step_1"
+            )
+        },
+        ['l1', 'l2'],
+        ['l1', 'l2'],
+        ['exog'],
+        ['l1_roll_mean_5', 'l1_roll_median_5', 'l1_roll_sum_6',
+         'l2_roll_mean_5', 'l2_roll_median_5', 'l2_roll_sum_6'],
+        ['exog'],
+        ['l1_roll_mean_5', 'l1_roll_median_5', 'l1_roll_sum_6',
+         'l2_roll_mean_5', 'l2_roll_median_5', 'l2_roll_sum_6',
+         'exog_step_1'],
+        {'exog': exog.dtype}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    assert results[7] == expected[7]
+    for k in results[8].keys():
+        assert results[8][k] == expected[8][k]
+
+
+def test_create_train_X_y_output_when_window_features_and_exog_transformers_diff():
+    """
+    Test the output of _create_train_X_y when using window_features, exog, 
+    transformers and differentiation with steps=1.
+    """
+
+    series = pd.DataFrame(
+        {'l1': [25.3, 29.1, 27.5, 24.3, 2.1, 46.5, 31.3, 87.1, 133.5, 4.3],
+         'l2': [25.3, 29.1, 27.5, 24.3, 2.1, 46.5, 31.3, 87.1, 133.5, 4.3]},
+        index = pd.date_range('2000-01-01', periods=10, freq='D')
+    )
+    exog = pd.DataFrame({
+        'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4, 14.6, 73.5],
+        'col_2': ['a', 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'b']},
+        index = pd.date_range('2000-01-01', periods=10, freq='D')
+    )
+
+    transformer_series = StandardScaler()
+    transformer_exog = ColumnTransformer(
+                            [('scale', StandardScaler(), ['col_1']),
+                             ('onehot', OneHotEncoder(), ['col_2'])],
+                            remainder = 'passthrough',
+                            verbose_feature_names_out = False
+                        )
+    rolling = RollingFeatures(
+        stats=['ratio_min_max', 'median'], window_sizes=4
+    )
+
+    forecaster = ForecasterAutoregMultiVariate(
+                     LinearRegression(), 
+                     level              = 'l1',
+                     steps              = 1,
+                     lags               = [1, 5], 
+                     window_features    = rolling,
+                     transformer_series = transformer_series,
+                     transformer_exog   = transformer_exog,
+                     differentiation    = 2
+                 )
+    results = forecaster._create_train_X_y(series=series, exog=exog)
+    
+    expected = (
+        pd.DataFrame(
+            data = np.array([[-1.56436158, -0.14173746, -0.89489489, -0.27035108,  
+                              -1.56436158, -0.14173746, -0.89489489, -0.27035108,
+                               0.04040264,  0.        ,  1.        ],
+                             [ 1.8635851 , -0.04199628, -0.83943662,  0.62469472, 
+                               1.8635851 , -0.04199628, -0.83943662,  0.62469472, 
+                              -1.32578962,  0.        ,  1.        ],
+                             [-0.24672817, -0.49870587, -0.83943662,  0.75068358,  
+                              -0.24672817, -0.49870587, -0.83943662,  0.75068358,
+                               1.12752513,  0.        ,  1.        ]]),
+            index   = pd.date_range('2000-01-08', periods=3, freq='D'),
+            columns = ['l1_lag_1', 'l1_lag_5', 'l1_roll_ratio_min_max_4', 'l1_roll_median_4',
+                       'l2_lag_1', 'l2_lag_5', 'l2_roll_ratio_min_max_4', 'l2_roll_median_4',
+                       'col_1_step_1', 'col_2_a_step_1', 'col_2_b_step_1']
+        ),
+        {1: pd.Series(
+                data  = np.array([1.8635851, -0.24672817, -4.60909217]),
+                index = pd.date_range('2000-01-08', periods=3, freq='D'),
+                name  = 'l1_step_1',
+                dtype = float
+            )
+        },
+        ['l1', 'l2'],
+        ['l1', 'l2'],
+        ['col_1', 'col_2'],
+        ['l1_roll_ratio_min_max_4', 'l1_roll_median_4', 'l2_roll_ratio_min_max_4', 'l2_roll_median_4'],
+        ['col_1', 'col_2_a', 'col_2_b'],
+        ['l1_lag_1', 'l1_lag_5', 'l1_roll_ratio_min_max_4', 'l1_roll_median_4',
+         'l2_lag_1', 'l2_lag_5', 'l2_roll_ratio_min_max_4', 'l2_roll_median_4',
+         'col_1_step_1', 'col_2_a_step_1', 'col_2_b_step_1'],
+        {'col_1': exog['col_1'].dtypes, 'col_2': exog['col_2'].dtypes}
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    assert isinstance(results[1], dict)
+    assert all(isinstance(x, pd.Series) for x in results[1].values())
+    assert results[1].keys() == expected[1].keys()
+    for key in expected[1]: 
+        pd.testing.assert_series_equal(results[1][key], expected[1][key]) 
+    assert results[2] == expected[2]
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert results[5] == expected[5]
+    assert results[6] == expected[6]
+    assert results[7] == expected[7]
+    for k in results[8].keys():
+        assert results[8][k] == expected[8][k]
+
+
+def test_create_train_X_y_output_when_window_features_and_exog_transformers_diff_steps_2():
+    """
+    Test the output of _create_train_X_y when using window_features, exog, 
+    transformers and differentiation with steps=2.
+    """
+
+    series = pd.DataFrame(
+        {'l1': [25.3, 29.1, 27.5, 24.3, 2.1, 46.5, 31.3, 87.1, 133.5, 4.3],
+         'l2': [25.3, 29.1, 27.5, 24.3, 2.1, 46.5, 31.3, 87.1, 133.5, 4.3]},
+        index = pd.date_range('2000-01-01', periods=10, freq='D')
+    )
+    exog = pd.DataFrame({
+        'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4, 14.6, 73.5],
+        'col_2': ['a', 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'b']},
+        index = pd.date_range('2000-01-01', periods=10, freq='D')
+    )
+
+    transformer_series = StandardScaler()
+    transformer_exog = ColumnTransformer(
+                            [('scale', StandardScaler(), ['col_1']),
+                             ('onehot', OneHotEncoder(), ['col_2'])],
+                            remainder = 'passthrough',
+                            verbose_feature_names_out = False
+                        )
+    rolling = RollingFeatures(
+        stats=['ratio_min_max', 'median'], window_sizes=4
+    )
+
+    forecaster = ForecasterAutoregMultiVariate(
+                     LinearRegression(), 
+                     level              = 'l1',
+                     steps              = 2,
+                     lags               = [1, 5], 
+                     window_features    = rolling,
+                     transformer_series = transformer_series,
+                     transformer_exog   = transformer_exog,
+                     differentiation    = 1
+                 )
+    results = forecaster._create_train_X_y(series=series, exog=exog)
+    
+    expected = (
+        pd.DataFrame(
+            data = np.array([[ 1.16539688,  0.09974117, -0.5       , -0.06299443,  
+                               1.16539688,  0.09974117, -0.5       , -0.06299443,
+                               1.69816032,  0.        ,  1.        ,  0.04040264,  0.        ,  1.        ],
+                             [-0.3989647 , -0.04199628, -0.5       , -0.24147863, 
+                              -0.3989647 , -0.04199628, -0.5       , -0.24147863, 
+                               0.04040264,  0.        ,  1.        , -1.32578962,  0.        ,  1.        ],
+                             [ 1.46462041, -0.08399257, -0.39784946,  0.38321609,  
+                               1.46462041, -0.08399257, -0.39784946,  0.38321609,
+                              -1.32578962,  0.        ,  1.        ,  1.12752513,  0.        ,  1.        ]]),
+            index   = pd.date_range('2000-01-08', periods=3, freq='D'),
+            columns = ['l1_lag_1', 'l1_lag_5', 'l1_roll_ratio_min_max_4', 'l1_roll_median_4',
+                       'l2_lag_1', 'l2_lag_5', 'l2_roll_ratio_min_max_4', 'l2_roll_median_4',
+                       'col_1_step_1', 'col_2_a_step_1', 'col_2_b_step_1', 
+                       'col_1_step_2', 'col_2_a_step_2', 'col_2_b_step_2']
+        ),
+        {1: pd.Series(
+                data  = np.array([-0.3989647, 1.46462041, 1.21789224]),
+                index = pd.date_range('2000-01-07', periods=3, freq='D'),
+                name  = 'l1_step_1',
+                dtype = float
+            ),
+         2: pd.Series(
+                data  = np.array([1.46462041, 1.21789224, -3.39119993]),
+                index = pd.date_range('2000-01-08', periods=3, freq='D'),
+                name  = 'l1_step_2',
+                dtype = float
+            )
+        },
+        ['l1', 'l2'],
+        ['l1', 'l2'],
+        ['col_1', 'col_2'],
+        ['l1_roll_ratio_min_max_4', 'l1_roll_median_4', 'l2_roll_ratio_min_max_4', 'l2_roll_median_4'],
+        ['col_1', 'col_2_a', 'col_2_b'],
+        ['l1_lag_1', 'l1_lag_5', 'l1_roll_ratio_min_max_4', 'l1_roll_median_4',
+         'l2_lag_1', 'l2_lag_5', 'l2_roll_ratio_min_max_4', 'l2_roll_median_4',
+         'col_1_step_1', 'col_2_a_step_1', 'col_2_b_step_1', 
+         'col_1_step_2', 'col_2_a_step_2', 'col_2_b_step_2'],
+        {'col_1': exog['col_1'].dtypes, 'col_2': exog['col_2'].dtypes}
     )
 
     pd.testing.assert_frame_equal(results[0], expected[0])

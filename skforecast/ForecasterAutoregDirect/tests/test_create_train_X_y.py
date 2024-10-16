@@ -35,22 +35,6 @@ def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():
         forecaster._create_train_X_y(y=y, exog=exog)
 
 
-def test_create_train_X_y_MissingValuesWarning_when_exog_has_missing_values():
-    """
-    Test _create_train_X_y is issues a MissingValuesWarning when exog has missing values.
-    """
-    y = pd.Series(np.arange(6))
-    exog = pd.Series([1, 2, 3, np.nan, 5, 6], name='exog')
-    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=2, steps=2)
-
-    warn_msg = re.escape(
-        ("`exog` has missing values. Most machine learning models do "
-         "not allow missing values. Fitting the forecaster may fail.")  
-    )
-    with pytest.warns(MissingValuesWarning, match = warn_msg):
-        forecaster._create_train_X_y(y=y, exog=exog)
-
-
 def test_create_train_X_y_ValueError_when_len_y_is_lower_than_maximum_window_size_plus_steps():
     """
     Test ValueError is raised when length of y is lower than maximum window_size 
@@ -72,6 +56,22 @@ def test_create_train_X_y_ValueError_when_len_y_is_lower_than_maximum_window_siz
     )
     with pytest.raises(ValueError, match = err_msg):
         forecaster._create_train_X_y(y=y)
+
+
+def test_create_train_X_y_MissingValuesWarning_when_exog_has_missing_values():
+    """
+    Test _create_train_X_y is issues a MissingValuesWarning when exog has missing values.
+    """
+    y = pd.Series(np.arange(6))
+    exog = pd.Series([1, 2, 3, np.nan, 5, 6], name='exog')
+    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=2, steps=2)
+
+    warn_msg = re.escape(
+        ("`exog` has missing values. Most machine learning models do "
+         "not allow missing values. Fitting the forecaster may fail.")  
+    )
+    with pytest.warns(MissingValuesWarning, match = warn_msg):
+        forecaster._create_train_X_y(y=y, exog=exog)
 
 
 @pytest.mark.parametrize("y                        , exog", 
@@ -1400,7 +1400,7 @@ def test_create_train_X_y_output_when_y_is_series_exog_is_series_and_differentia
         assert output_1[6][k] == output_2[6][k]
 
 
-def test_create_train_X_y_output_when_window_features_and_exog():
+def test_create_train_X_y_output_when_window_features_and_exog_steps_1():
     """
     Test the output of _create_train_X_y when using window_features and exog 
     with datetime index and steps=1.
@@ -1687,10 +1687,10 @@ def test_create_train_X_y_output_when_window_features_and_exog_transformers_diff
         name='y', dtype=float
     )
     exog = pd.DataFrame({
-               'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4, 14.6, 73.5],
-               'col_2': ['a', 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'b']},
-               index = pd.date_range('2000-01-01', periods=10, freq='D')
-           )
+        'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4, 14.6, 73.5],
+        'col_2': ['a', 'a', 'a', 'a', 'a', 'b', 'b', 'b', 'b', 'b']},
+        index = pd.date_range('2000-01-01', periods=10, freq='D')
+    )
 
     transformer_y = StandardScaler()
     transformer_exog = ColumnTransformer(
