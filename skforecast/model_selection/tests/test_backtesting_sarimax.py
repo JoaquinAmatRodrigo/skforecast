@@ -5,11 +5,11 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
-from skforecast.Sarimax import Sarimax
+from skforecast.sarimax import Sarimax
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.model_selection._split import TimeSeriesFold
-from skforecast.model_selection_sarimax import backtesting_sarimax
+from skforecast.model_selection import backtesting_sarimax
 
 # Fixtures
 from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import y_datetime

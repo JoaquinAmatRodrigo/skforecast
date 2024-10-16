@@ -61,16 +61,16 @@ def test_basefold_validate_params_raise_invalid_initial_train_size():
     params = dict(valid_params)
     params["initial_train_size"] = "invalid"
     msg = (
-        f"`initial_train_size` must be an integer greater than 0 or None. "
-        f"Got {params["initial_train_size"]}."
+        "`initial_train_size` must be an integer greater than 0 or None. "
+        "Got invalid."
     )
     with pytest.raises(ValueError, match=msg):
         cv._validate_params(cv_name="TimeSeriesFold", **params)
     
     params["initial_train_size"] = -1
     msg = (
-        f"`initial_train_size` must be an integer greater than 0 or None. "
-        f"Got {params["initial_train_size"]}."
+        "`initial_train_size` must be an integer greater than 0 or None. "
+        "Got -1."
     )
     with pytest.raises(ValueError, match=msg):
         cv._validate_params(cv_name="TimeSeriesFold", **params)
@@ -83,12 +83,12 @@ def test_basefold_validate_params_raise_invalid_refit():
     cv = BaseFold()
     params = dict(valid_params)
     params["refit"] = "invalid"
-    msg = f"`refit` must be a boolean or an integer equal or greater than 0. Got {params["refit"]}."
+    msg = "`refit` must be a boolean or an integer equal or greater than 0. Got invalid."
     with pytest.raises(TypeError, match=msg):
         cv._validate_params(cv_name="TimeSeriesFold", **params)
 
     params["refit"] = -1
-    msg = f"`refit` must be a boolean or an integer equal or greater than 0. Got {params["refit"]}."
+    msg = "`refit` must be a boolean or an integer equal or greater than 0. Got -1."
     with pytest.raises(TypeError, match=msg):
         cv._validate_params(cv_name="TimeSeriesFold", **params)
 
@@ -100,7 +100,7 @@ def test_basefold_validate_params_raise_invalid_fixed_train_size():
     cv = BaseFold()
     params = dict(valid_params)
     params["fixed_train_size"] = "invalid"
-    msg = f"`fixed_train_size` must be a boolean: `True`, `False`. Got {params["fixed_train_size"]}."
+    msg = "`fixed_train_size` must be a boolean: `True`, `False`. Got invalid."
     with pytest.raises(TypeError, match=msg):
         cv._validate_params(cv_name="TimeSeriesFold", **params)
 
@@ -112,17 +112,17 @@ def test_basefold_validate_params_raise_invalid_gap():
     cv = BaseFold()
     params = dict(valid_params)
     params["gap"] = -1
-    msg = f"`gap` must be an integer greater than or equal to 0. Got {params["gap"]}."
+    msg = "`gap` must be an integer greater than or equal to 0. Got -1."
     with pytest.raises(ValueError, match=msg):
         cv._validate_params(cv_name="TimeSeriesFold", **params)
 
     params["gap"] = "invalid"
-    msg = f"`gap` must be an integer greater than or equal to 0. Got {params["gap"]}."
+    msg = "`gap` must be an integer greater than or equal to 0. Got invalid."
     with pytest.raises(ValueError, match=msg):
         cv._validate_params(cv_name="TimeSeriesFold", **params)
 
     params["gap"] = 1.0
-    msg = f"`gap` must be an integer greater than or equal to 0. Got {params["gap"]}."
+    msg = "`gap` must be an integer greater than or equal to 0. Got 1.0."
     with pytest.raises(ValueError, match=msg):
         cv._validate_params(cv_name="TimeSeriesFold", **params)
 
@@ -135,8 +135,8 @@ def test_basefold_validate_params_raise_invalid_skip_folds():
     params = dict(valid_params)
     params["skip_folds"] = 'invalid'
     msg = (
-        f"`skip_folds` must be an integer greater than 0, a list of "
-        f"integers or `None`. Got {params['skip_folds']}."
+        "`skip_folds` must be an integer greater than 0, a list of "
+        "integers or `None`. Got invalid."
     )
     with pytest.raises(TypeError, match=msg):
         cv._validate_params(cv_name="TimeSeriesFold", **params)

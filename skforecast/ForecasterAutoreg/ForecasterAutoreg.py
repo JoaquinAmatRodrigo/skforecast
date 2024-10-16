@@ -12,30 +12,31 @@ import numpy as np
 import pandas as pd
 import inspect
 from copy import copy
-import textwrap
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import Pipeline
 from sklearn.base import clone
 
 import skforecast
 from ..ForecasterBase import ForecasterBase
-from ..utils import initialize_lags
-from ..utils import initialize_window_features
-from ..utils import initialize_weights
-from ..utils import check_select_fit_kwargs
-from ..utils import check_y
-from ..utils import check_exog
-from ..utils import get_exog_dtypes
-from ..utils import check_exog_dtypes
-from ..utils import check_predict_input
-from ..utils import check_interval
-from ..utils import preprocess_y
-from ..utils import preprocess_last_window
-from ..utils import preprocess_exog
-from ..utils import input_to_frame
-from ..utils import expand_index
-from ..utils import transform_numpy
-from ..utils import transform_dataframe
+from ..utils import (
+    initialize_lags,
+    initialize_window_features,
+    initialize_weights,
+    check_select_fit_kwargs,
+    check_y,
+    check_exog,
+    get_exog_dtypes,
+    check_exog_dtypes,
+    check_predict_input,
+    check_interval,
+    preprocess_y,
+    preprocess_last_window,
+    preprocess_exog,
+    input_to_frame,
+    expand_index,
+    transform_numpy,
+    transform_dataframe,
+)
 from ..preprocessing import TimeSeriesDifferentiator
 from ..preprocessing import QuantileBinner
 
@@ -48,7 +49,7 @@ class ForecasterAutoreg(ForecasterBase):
     Parameters
     ----------
     regressor : regressor or pipeline compatible with the scikit-learn API
-        An instance of a regressor or pipeline compatible with the scikit-learn API
+        An instance of a regressor or pipeline compatible with the scikit-learn API.
     lags : int, list, numpy ndarray, range, default `None`
         Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
     
@@ -99,6 +100,8 @@ class ForecasterAutoreg(ForecasterBase):
         An instance of a regressor or pipeline compatible with the scikit-learn API.
     lags : numpy ndarray
         Lags used as predictors.
+    lags_names : list
+        Names of the lags used as predictors.
     max_lag : int
         Maximum lag included in `lags`.
     window_features : list
@@ -182,7 +185,7 @@ class ForecasterAutoreg(ForecasterBase):
         Type of exogenous data (pandas Series or DataFrame) used in training.
     exog_dtypes_in_ : dict
         Type of each exogenous variable/s used in training. If `transformer_exog` 
-        is used, the dtypes are calculated after the transformation.
+        is used, the dtypes are calculated before the transformation.
     X_train_window_features_names_out_ : list
         Names of the window features included in the matrix `X_train` created
         internally for training.
@@ -272,8 +275,8 @@ class ForecasterAutoreg(ForecasterBase):
         self.python_version                     = sys.version.split(" ")[0]
         self.forecaster_id                      = forecaster_id
 
-        self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
-        self.window_features, self.max_size_window_features, self.window_features_names = (
+        self.lags, self.lags_names, self.max_lag = initialize_lags(type(self).__name__, lags)
+        self.window_features, self.window_features_names, self.max_size_window_features = (
             initialize_window_features(window_features)
         )
         if self.window_features is None and self.lags is None:
@@ -331,24 +334,19 @@ class ForecasterAutoreg(ForecasterBase):
         Information displayed when a ForecasterAutoreg object is printed.
         """
 
-        if isinstance(self.regressor, Pipeline):
-            name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
-            params = {key: value for key, value in self.regressor.get_params().items()
-                      if key.startswith(name_pipe_steps)}
-        else:
-            params = self.regressor.get_params(deep=True)
-        params = "\n    " + textwrap.fill(str(params), width=80, subsequent_indent="    ")
-
-        exog_names_in_ = None
-        if self.exog_names_in_ is not None:
-            exog_names_in_ = copy(self.exog_names_in_)
-            if len(exog_names_in_) > 50:
-                exog_names_in_ = exog_names_in_[:50] + ["..."]
-            exog_names_in_ = ", ".join(exog_names_in_)
-            if len(exog_names_in_) > 58:
-                exog_names_in_ = "\n    " + textwrap.fill(
-                    exog_names_in_, width=80, subsequent_indent="    "
-                )
+        (
+            params,
+            _,
+            _,
+            exog_names_in_,
+            _,
+        ) = self._preprocess_repr(
+                regressor      = self.regressor,
+                exog_names_in_ = self.exog_names_in_
+            )
+        
+        params = self._format_text_repr(params)
+        exog_names_in_ = self._format_text_repr(exog_names_in_)
 
         info = (
             f"{'=' * len(type(self).__name__)} \n"
@@ -384,73 +382,22 @@ class ForecasterAutoreg(ForecasterBase):
         HTML representation of the object.
         The "General Information" section is expanded by default.
         """
-        
-        if isinstance(self.regressor, Pipeline):
-            name_pipe_steps = tuple(name + "__" for name in self.regressor.named_steps.keys())
-            params = {key: value for key, value in self.regressor.get_params().items()
-                    if key.startswith(name_pipe_steps)}
-        else:
-            params = self.regressor.get_params(deep=True)
-        params = str(params)
 
-        style = """
-        <style>
-            .container {
-                font-family: 'Arial', sans-serif;
-                font-size: 0.9em;
-                color: #333;
-                border: 1px solid #ddd;
-                background-color: #fafafa;
-                padding: 5px 15px;
-                border-radius: 8px;
-                max-width: 600px;
-                #margin: auto;
-            }
-            .container h2 {
-                font-size: 1.2em;
-                color: #222;
-                border-bottom: 2px solid #ddd;
-                padding-bottom: 5px;
-                margin-bottom: 15px;
-            }
-            .container details {
-                margin: 10px 0;
-            }
-            .container summary {
-                font-weight: bold;
-                font-size: 1.1em;
-                cursor: pointer;
-                margin-bottom: 5px;
-                background-color: #f0f0f0;
-                padding: 5px;
-                border-radius: 5px;
-            }
-            .container summary:hover {
-            background-color: #e0e0e0;
-            }
-            .container ul {
-                font-family: 'Courier New', monospace;
-                list-style-type: none;
-                padding-left: 20px;
-                margin: 10px 0;
-            }
-            .container li {
-                margin: 5px 0;
-                font-family: 'Courier New', monospace;
-            }
-            .container li strong {
-                font-weight: bold;
-                color: #444;
-            }
-            .container li::before {
-                content: "- ";
-                color: #666;
-            }
-        </style>
-        """
+        (
+            params,
+            _,
+            _,
+            exog_names_in_,
+            _,
+        ) = self._preprocess_repr(
+                regressor      = self.regressor,
+                exog_names_in_ = self.exog_names_in_
+            )
+
+        style, unique_id = self._get_style_repr_html(self.is_fitted)
         
         content = f"""
-        <div class="container">
+        <div class="container-{unique_id}">
             <h2>{type(self).__name__}</h2>
             <details open>
                 <summary>General Information</summary>
@@ -472,7 +419,7 @@ class ForecasterAutoreg(ForecasterBase):
             <details>
                 <summary>Exogenous Variables</summary>
                 <ul>
-                     {self.exog_names_in_}
+                    {exog_names_in_}
                 </ul>
             </details>
             <details>
@@ -515,7 +462,7 @@ class ForecasterAutoreg(ForecasterBase):
 
 
     def _create_lags(
-        self, 
+        self,
         y: np.ndarray,
         X_as_pandas: bool = False,
         train_index: Optional[pd.Index] = None
@@ -557,7 +504,7 @@ class ForecasterAutoreg(ForecasterBase):
             if X_as_pandas:
                 X_data = pd.DataFrame(
                              data    = X_data,
-                             columns = [f"lag_{i}" for i in self.lags],
+                             columns = self.lags_names,
                              index   = train_index
                          )
 
@@ -742,7 +689,7 @@ class ForecasterAutoreg(ForecasterBase):
         )
         if X_train_lags is not None:
             X_train.append(X_train_lags)
-            X_train_features_names_out_.extend([f"lag_{i}" for i in self.lags])
+            X_train_features_names_out_.extend(self.lags_names)
         
         X_train_window_features_names_out_ = None
         if self.window_features is not None:
@@ -769,17 +716,24 @@ class ForecasterAutoreg(ForecasterBase):
             
             X_train_features_names_out_.extend(X_train_exog_names_out_)
             X_train.append(exog_to_train)
-
+        
+        if len(X_train) == 1:
+            X_train = X_train[0]
+        else:
+            if X_as_pandas:
+                X_train = pd.concat(X_train, axis=1)
+            else:
+                X_train = np.concatenate(X_train, axis=1)
+                
         if X_as_pandas:
-            X_train = pd.concat(X_train, axis=1)
             X_train.index = train_index
         else:
             X_train = pd.DataFrame(
-                          data    = np.concatenate(X_train, axis=1),
+                          data    = X_train,
                           index   = train_index,
                           columns = X_train_features_names_out_
                       )
-
+        
         y_train = pd.Series(
                       data  = y_train,
                       index = train_index,
@@ -835,7 +789,7 @@ class ForecasterAutoreg(ForecasterBase):
         self,
         y: pd.Series,
         initial_train_size: int,
-        exog: Optional[Union[pd.Series, pd.DataFrame, dict]] = None
+        exog: Optional[Union[pd.Series, pd.DataFrame]] = None
     ) -> Tuple[pd.DataFrame, pd.Series, pd.DataFrame, pd.Series]:
         """
         Create matrices needed to train and test the forecaster for one-step-ahead
@@ -848,9 +802,9 @@ class ForecasterAutoreg(ForecasterBase):
         initial_train_size : int
             Initial size of the training set. It is the number of observations used
             to train the forecaster before making the first prediction.
-        exog : pandas Series, pandas DataFrame, dict, default `None`
-            Exogenous variable/s included as predictor/s. Must have the same number
-            of observations as `series` and their indexes must be aligned.
+        exog : pandas Series, pandas DataFrame, default `None`
+            Exogenous variable/s included as predictor/s. Must have the same
+            number of observations as `y` and their indexes must be aligned.
         
         Returns
         -------
@@ -1144,8 +1098,9 @@ class ForecasterAutoreg(ForecasterBase):
         Returns
         -------
         last_window_values : numpy ndarray
-            Series predictors.
-        exog_values : numpy ndarray, default `None`
+            Series values used to create the predictors needed in the first 
+            iteration of the prediction (t + 1).
+        exog_values : numpy ndarray, None
             Exogenous variable/s included as predictor/s.
         prediction_index : pandas Index
             Index of the predictions.
@@ -1168,8 +1123,7 @@ class ForecasterAutoreg(ForecasterBase):
                 exog             = exog,
                 exog_type_in_    = self.exog_type_in_,
                 exog_names_in_   = self.exog_names_in_,
-                interval         = None,
-                max_steps        = None
+                interval         = None
             )
         
             if predict_boot and not use_in_sample_residuals:
@@ -1238,8 +1192,8 @@ class ForecasterAutoreg(ForecasterBase):
         steps : int
             Number of future steps predicted.
         last_window_values : numpy ndarray
-            Series values used to create the predictors (lags) needed in the 
-            first iteration of the prediction (t + 1).
+            Series values used to create the predictors needed in the first 
+            iteration of the prediction (t + 1).
         exog_values : numpy ndarray, default `None`
             Exogenous variable/s included as predictor/s.
         residuals : numpy ndarray, dict, default `None`
@@ -1348,16 +1302,16 @@ class ForecasterAutoreg(ForecasterBase):
             is the same as the prediction index.
         
         """
-        
-        predictions = self.predict(
-                          steps       = steps,
-                          last_window = last_window,
-                          exog        = exog
-                      )
 
         last_window_values, exog_values, prediction_index = self._create_predict_inputs(
-            steps=steps, last_window=last_window, exog=exog, check_inputs=False
+            steps=steps, last_window=last_window, exog=exog
         )
+        
+        predictions = self._recursive_predict(
+                          steps              = steps,
+                          last_window_values = last_window_values,
+                          exog_values        = exog_values
+                      )
 
         X_predict = []
         full_predictors = np.concatenate((last_window_values, predictions))
@@ -1485,7 +1439,7 @@ class ForecasterAutoreg(ForecasterBase):
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
-        n_boot : int, default `500`
+        n_boot : int, default `250`
             Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot predictions are always 
@@ -1631,7 +1585,7 @@ class ForecasterAutoreg(ForecasterBase):
             Confidence of the prediction interval estimated. Sequence of 
             percentiles to compute, which must be between 0 and 100 inclusive. 
             For example, interval of 95% should be as `interval = [2.5, 97.5]`.
-        n_boot : int, default `500`
+        n_boot : int, default `250`
             Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot predictions are always 
@@ -1727,7 +1681,7 @@ class ForecasterAutoreg(ForecasterBase):
             Sequence of quantiles to compute, which must be between 0 and 1 
             inclusive. For example, quantiles of 0.05, 0.5 and 0.95 should be as 
             `quantiles = [0.05, 0.5, 0.95]`.
-        n_boot : int, default `500`
+        n_boot : int, default `250`
             Number of bootstrapping iterations used to estimate quantiles.
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot quantiles are always 
@@ -1808,7 +1762,7 @@ class ForecasterAutoreg(ForecasterBase):
             right after training data.
         exog : pandas Series, pandas DataFrame, default `None`
             Exogenous variable/s included as predictor/s.
-        n_boot : int, default `500`
+        n_boot : int, default `250`
             Number of bootstrapping iterations used to estimate predictions.
         random_state : int, default `123`
             Sets a seed to the random generator, so that boot predictions are always 
@@ -1910,8 +1864,8 @@ class ForecasterAutoreg(ForecasterBase):
         lags: Optional[Union[int, np.ndarray, list, range]] = None
     ) -> None:
         """
-        Set new value to the attribute `lags`. Attributes `max_lag` and 
-        `window_size` are also updated.
+        Set new value to the attribute `lags`. Attributes `lags_names`, 
+        `max_lag` and `window_size` are also updated.
         
         Parameters
         ----------
@@ -1931,12 +1885,12 @@ class ForecasterAutoreg(ForecasterBase):
 
         if self.window_features is None and lags is None:
             raise ValueError(
-                ("At least one of the arguments `lags` or `window_features` "
-                 "must be different from None. This is required to create the "
-                 "predictors used in training the forecaster.")
+                "At least one of the arguments `lags` or `window_features` "
+                "must be different from None. This is required to create the "
+                "predictors used in training the forecaster."
             )
         
-        self.lags, self.max_lag = initialize_lags(type(self).__name__, lags)
+        self.lags, self.lags_names, self.max_lag = initialize_lags(type(self).__name__, lags)
         self.window_size = max(
             [ws for ws in [self.max_lag, self.max_size_window_features] 
              if ws is not None]
@@ -1968,12 +1922,12 @@ class ForecasterAutoreg(ForecasterBase):
 
         if window_features is None and self.lags is None:
             raise ValueError(
-                ("At least one of the arguments `lags` or `window_features` "
-                 "must be different from None. This is required to create the "
-                 "predictors used in training the forecaster.")
+                "At least one of the arguments `lags` or `window_features` "
+                "must be different from None. This is required to create the "
+                "predictors used in training the forecaster."
             )
         
-        self.window_features, self.max_size_window_features, self.window_features_names = (
+        self.window_features, self.window_features_names, self.max_size_window_features = (
             initialize_window_features(window_features)
         )
         self.window_features_class_names = None
@@ -1986,7 +1940,7 @@ class ForecasterAutoreg(ForecasterBase):
              if ws is not None]
         )
         if self.differentiation is not None:
-            self.window_size += self.differentiation   
+            self.window_size += self.differentiation
 
 
     def set_out_sample_residuals(

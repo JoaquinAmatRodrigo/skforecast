@@ -83,12 +83,34 @@ def test_create_lags_output_pandas():
     np.testing.assert_array_almost_equal(results[1], expected[1])
 
 
+def test_create_lags_when_window_size_window_features_greater_than_max_lag():
+    """
+    Test matrix of lags created properly when window_size of 
+    window_features is greater than max lag.
+    """
+    forecaster = ForecasterAutoreg(
+        LinearRegression(), lags=3, window_features=rolling
+    )
+    results = forecaster._create_lags(y=np.arange(10))
+    expected = (
+        np.array([[5., 4., 3.],
+                  [6., 5., 4.],
+                  [7., 6., 5.],
+                  [8., 7., 6.]]),
+        np.array([6., 7., 8., 9.])
+    )
+
+    np.testing.assert_array_almost_equal(results[0], expected[0])
+    np.testing.assert_array_almost_equal(results[1], expected[1])
+
+
 def test_create_lags_output_lags_None():
     """
     Test matrix of lags when lags=None.
     """
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=None,
-                                   window_features=rolling)
+    forecaster = ForecasterAutoreg(
+        LinearRegression(), lags=None, window_features=rolling
+    )
     results = forecaster._create_lags(y=np.arange(10))
     expected = (
         None,

@@ -1,1 +1,1 @@
-from .Sarimax import Sarimax
+from .sarimax import Sarimax

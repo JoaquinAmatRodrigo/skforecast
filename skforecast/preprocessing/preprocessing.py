@@ -226,7 +226,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         
         array_ndim = X.ndim
         if array_ndim == 1:
-            X = X.reshape(-1, 1)
+            X = X[:, np.newaxis]
 
         # Remove initial rows with nan values if present
         X = X[~np.isnan(X).any(axis=1)]
@@ -1024,7 +1024,10 @@ class RollingFeatures():
     ) -> np.ndarray:
         """
         Transform a numpy array using rolling windows and compute the 
-        specified statistics. The input array must be a 1D array.
+        specified statistics. The returned array will have the shape 
+        (X.shape[1] if exists, n_stats). For example, if X is a flat
+        array, the output will have shape (n_stats,). If X is a 2D array,
+        the output will have shape (X.shape[1], n_stats).
 
         Parameters
         ----------
@@ -1038,13 +1041,22 @@ class RollingFeatures():
         
         """
 
-        rolling_features = np.full(shape=self.n_stats, fill_value=np.nan, dtype=float)
-        for i, stat in enumerate(self.stats):
+        array_ndim = X.ndim
+        if array_ndim == 1:
+            X = X[:, np.newaxis]
+            
+        rolling_features = np.full(
+            shape=(X.shape[1], self.n_stats), fill_value=np.nan, dtype=float
+        )
 
-            X_window = X[-self.window_sizes[i]:]
-            X_window = X_window[~np.isnan(X_window)]
+        for i in range(X.shape[1]):
+            for j, stat in enumerate(self.stats):
+                X_window = X[-self.window_sizes[j]:, i]
+                X_window = X_window[~np.isnan(X_window)]
+                rolling_features[i, j] = self._apply_stat_numpy_jit(X_window, stat)
 
-            rolling_features[i] = self._apply_stat_numpy_jit(X_window, stat)
+        if array_ndim == 1:
+            rolling_features = rolling_features.ravel()
         
         return rolling_features
     

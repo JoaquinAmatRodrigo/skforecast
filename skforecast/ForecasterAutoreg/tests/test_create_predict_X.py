@@ -12,6 +12,7 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.compose import make_column_transformer
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import HistGradientBoostingRegressor
+from skforecast.utils import transform_numpy
 from skforecast.preprocessing import RollingFeatures
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
 
@@ -63,6 +64,32 @@ def test_create_predict_X_when_regressor_is_LinearRegression():
     pd.testing.assert_frame_equal(results, expected)
 
 
+def test_create_predict_X_when_regressor_is_LinearRegression_and_StandardScaler():
+    """
+    Test create_predict_X when using LinearRegression as regressor and StandardScaler.
+    """
+    forecaster = ForecasterAutoreg(
+                     regressor     = LinearRegression(),
+                     lags          = 5,
+                     transformer_y = StandardScaler()
+                 )
+    forecaster.fit(y=pd.Series(np.arange(50, dtype=float), name='y'))
+    results = forecaster.create_predict_X(steps=5)
+
+    expected = pd.DataFrame(
+        data = np.array([
+            [1.69774938, 1.62845348, 1.55915759, 1.4898617 , 1.4205658],
+            [1.76704527, 1.69774938, 1.62845348, 1.55915759, 1.4898617],
+            [1.83634116, 1.76704527, 1.69774938, 1.62845348, 1.55915759],
+            [1.90563705, 1.83634116, 1.76704527, 1.69774938, 1.62845348],
+            [1.97493295, 1.90563705, 1.83634116, 1.76704527, 1.69774938]]),
+        columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
+        index = pd.RangeIndex(start=50, stop=55, step=1)
+    )
+    
+    pd.testing.assert_frame_equal(results, expected)
+
+
 def test_create_predict_X_when_regressor_is_LinearRegression_with_transform_y():
     """
     Test create_predict_X when using LinearRegression as regressor and StandardScaler.
@@ -85,10 +112,10 @@ def test_create_predict_X_when_regressor_is_LinearRegression_with_transform_y():
     expected = pd.DataFrame(
         data = np.array([
             [-0.52297655, -0.28324197, -0.45194408, -0.30987914, -0.1056608 ],
-            [-0.1578203 , -0.52297655, -0.28324197, -0.45194408, -0.30987914],
-            [-0.18459942, -0.1578203 , -0.52297655, -0.28324197, -0.45194408],
-            [-0.13711051, -0.18459942, -0.1578203 , -0.52297655, -0.28324197],
-            [-0.01966358, -0.13711051, -0.18459942, -0.1578203 , -0.52297655]]),
+            [ 0.11825103, -0.52297655, -0.28324197, -0.45194408, -0.30987914],
+            [ 0.0944737 ,  0.11825103, -0.52297655, -0.28324197, -0.45194408],
+            [ 0.13663937,  0.0944737 ,  0.11825103, -0.52297655, -0.28324197],
+            [ 0.2409212 ,  0.13663937,  0.0944737 ,  0.11825103, -0.52297655]]),
         columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5'],
         index = pd.RangeIndex(start=20, stop=25, step=1)
     )
@@ -118,10 +145,10 @@ def test_create_predict_X_when_regressor_is_LinearRegression_with_transform_y_an
     expected = pd.DataFrame(
         data = np.array([
             [ 0.0542589 ,  0.27129451,  0.89246539, -2.34810076,  1.16937289, -1.76425513],
-            [ 0.50619336,  0.0542589 ,  0.27129451,  0.89246539, -2.34810076, -1.00989936],
-            [-0.09630298,  0.50619336,  0.0542589 ,  0.27129451,  0.89246539,  0.59254869],
-            [ 0.05254973, -0.09630298,  0.50619336,  0.0542589 ,  0.27129451,  0.45863938],
-            [ 0.12281153,  0.05254973, -0.09630298,  0.50619336,  0.0542589 ,  0.1640389 ]]
+            [ 0.73245279,  0.0542589 ,  0.27129451,  0.89246539, -2.34810076, -1.00989936],
+            [ 0.28154534,  0.73245279,  0.0542589 ,  0.27129451,  0.89246539,  0.59254869],
+            [ 0.39294651,  0.28154534,  0.73245279,  0.0542589 ,  0.27129451,  0.45863938],
+            [ 0.44553035,  0.39294651,  0.28154534,  0.73245279,  0.0542589 ,  0.1640389 ]]
         ),
         columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'exog'],
         index = pd.RangeIndex(start=8, stop=13, step=1)
@@ -164,14 +191,14 @@ def test_create_predict_X_when_regressor_is_LinearRegression_with_transform_y_an
 
     expected = pd.DataFrame(
         data = np.array([[ 0.0542589 ,  0.27129451,  0.89246539, -2.34810076,  1.16937289,
-                           -1.76425513,  1.        ,  0.        ],
-                         [ 0.50619336,  0.0542589 ,  0.27129451,  0.89246539, -2.34810076,
-                           -1.00989936,  1.        ,  0.        ],
-                         [-0.09630298,  0.50619336,  0.0542589 ,  0.27129451,  0.89246539,
+                          -1.76425513,  1.        ,  0.        ],
+                         [ 0.73245279,  0.0542589 ,  0.27129451,  0.89246539, -2.34810076,
+                          -1.00989936,  1.        ,  0.        ],
+                         [ 0.28154534,  0.73245279,  0.0542589 ,  0.27129451,  0.89246539,
                            0.59254869,  1.        ,  0.        ],
-                         [ 0.05254973, -0.09630298,  0.50619336,  0.0542589 ,  0.27129451,
+                         [ 0.39294651,  0.28154534,  0.73245279,  0.0542589 ,  0.27129451,
                            0.45863938,  1.        ,  0.        ],
-                         [ 0.12281153,  0.05254973, -0.09630298,  0.50619336,  0.0542589 ,
+                         [ 0.44553035,  0.39294651,  0.28154534,  0.73245279,  0.0542589 ,
                            0.1640389 ,  0.        ,  1.        ]]),
         columns = ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'col_1', 'col_2_a', 'col_2_b'],
         index = pd.RangeIndex(start=8, stop=13, step=1)
@@ -275,9 +302,9 @@ def test_create_predict_X_when_regressor_is_LinearRegression_with_exog_different
     expected = pd.DataFrame(
         data = np.array([
             [ 0.07503713, -0.01018012,  1.16172882],
-            [ 2.04678814,  0.10597971,  0.29468848],
-            [ 2.0438193 , -0.01463081, -0.4399757 ],
-            [ 2.06140742, -0.48984868,  1.25008389]]
+            [ 0.00345482,  0.10597971,  0.29468848],
+            [-0.00296884, -0.01463081, -0.4399757 ],
+            [ 0.01758812, -0.48984868,  1.25008389]]
         ),
         columns = ['lag_1', 'lag_5', 'exog'],
         index = pd.date_range(start='2003-04-01', periods=steps, freq='MS')
@@ -365,3 +392,120 @@ def test_create_predict_X_when_window_features_and_lags_None():
     )
 
     pd.testing.assert_frame_equal(results, expected)
+
+
+def test_create_predict_X_same_predictions_as_predict():
+    """
+    Test create_predict_X matrix returns the same predictions as predict method
+    when passing to the regressor predict method.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+    steps = 4
+
+    forecaster = ForecasterAutoreg(
+                     regressor        = LinearRegression(),
+                     lags             = [1, 5],
+                     window_features  = [rolling, rolling_2],
+                     transformer_y    = None,
+                     transformer_exog = None,
+                     differentiation  = None
+                 )
+    forecaster.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    X_predict = forecaster.create_predict_X(steps=steps, exog=exog.loc[end_train:])
+    results = forecaster.regressor.predict(X_predict)
+
+    expected = forecaster.predict(steps=steps, exog=exog.loc[end_train:]).to_numpy()
+    
+    np.testing.assert_array_almost_equal(results, expected, decimal=7)
+
+
+def test_create_predict_X_same_predictions_as_predict_transformers():
+    """
+    Test create_predict_X matrix returns the same predictions as predict method
+    when passing to the regressor predict method with transformation.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+    steps = 4
+
+    forecaster = ForecasterAutoreg(
+                     regressor        = LinearRegression(),
+                     lags             = [1, 5],
+                     window_features  = [rolling, rolling_2],
+                     transformer_y    = StandardScaler(),
+                     transformer_exog = StandardScaler(),
+                     differentiation  = None
+                 )
+    forecaster.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    X_predict = forecaster.create_predict_X(steps=steps, exog=exog.loc[end_train:])
+    results = forecaster.regressor.predict(X_predict)
+
+    results = transform_numpy(
+                  array             = results,
+                  transformer       = forecaster.transformer_y,
+                  fit               = False,
+                  inverse_transform = True
+              )
+
+    expected = forecaster.predict(steps=steps, exog=exog.loc[end_train:]).to_numpy()
+    
+    np.testing.assert_array_almost_equal(results, expected, decimal=7)
+
+
+def test_create_predict_X_same_predictions_as_predict_transformers_diff():
+    """
+    Test create_predict_X matrix returns the same predictions as predict method
+    when passing to the regressor predict method with transformation and differentiation.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+    steps = 4
+
+    forecaster = ForecasterAutoreg(
+                     regressor        = LinearRegression(),
+                     lags             = [1, 5],
+                     window_features  = [rolling, rolling_2],
+                     transformer_y    = StandardScaler(),
+                     transformer_exog = StandardScaler(),
+                     differentiation  = 1
+                 )
+    forecaster.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    X_predict = forecaster.create_predict_X(steps=steps, exog=exog.loc[end_train:])
+    results = forecaster.regressor.predict(X_predict)
+
+    results = forecaster.differentiator.inverse_transform_next_window(results)
+    results = transform_numpy(
+                  array             = results,
+                  transformer       = forecaster.transformer_y,
+                  fit               = False,
+                  inverse_transform = True
+              )
+
+    expected = forecaster.predict(steps=steps, exog=exog.loc[end_train:]).to_numpy()
+    
+    np.testing.assert_array_almost_equal(results, expected, decimal=7)

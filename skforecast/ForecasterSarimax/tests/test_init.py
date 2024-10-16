@@ -2,7 +2,7 @@
 # ==============================================================================
 import re
 import pytest
-from skforecast.Sarimax import Sarimax
+from skforecast.sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.exceptions import IgnoredArgumentWarning
 from sklearn.linear_model import LinearRegression
@@ -11,13 +11,13 @@ from sklearn.linear_model import LinearRegression
 def test_TypeError_when_regressor_is_not_Sarimax_when_initialization():
     """
     Raise TypeError if regressor is not of type 
-    skforecast.Sarimax.Sarimax when initializing the forecaster.
+    skforecast.sarimax.Sarimax when initializing the forecaster.
     """
     regressor = LinearRegression()
 
     err_msg = re.escape(
         (f"`regressor` must be an instance of type "
-         f"`skforecast.Sarimax.Sarimax`. Got '{type(regressor)}'.")
+         f"`skforecast.sarimax.Sarimax`. Got '{type(regressor)}'.")
     )
     with pytest.raises(TypeError, match = err_msg):
         ForecasterSarimax(regressor = regressor)
