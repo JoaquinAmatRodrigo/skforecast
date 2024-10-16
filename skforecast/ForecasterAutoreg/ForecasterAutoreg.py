@@ -131,7 +131,7 @@ class ForecasterAutoreg(ForecasterBase):
         index. For example, a function that assigns a lower weight to certain dates.
         Ignored if `regressor` does not have the argument `sample_weight` in its `fit`
         method. The resulting `sample_weight` cannot have negative values.
-    differentiation : int, default `None`
+    differentiation : int
         Order of differencing applied to the time series before training the forecaster.
         If `None`, no differencing is applied. The order of differentiation is the number
         of times the differencing operation is applied to a time series. Differencing
@@ -148,7 +148,7 @@ class ForecasterAutoreg(ForecasterBase):
         Intervals used to discretize residuals into k bins according to the predicted
         values associated with each residual.
         **New in version 0.12.0**
-    binner_kwargs : dict, default `None`
+    binner_kwargs : dict
         Additional arguments to pass to the `QuantileBinner` used to discretize 
         the residuals into k bins according to the predicted values associated 
         with each residual. Available arguments are: `n_bins`, `method`, `subsample`,
