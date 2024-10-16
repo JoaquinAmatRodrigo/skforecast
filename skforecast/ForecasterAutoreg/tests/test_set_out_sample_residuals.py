@@ -124,7 +124,7 @@ def test_set_out_sample_residuals_when_residuals_length_is_less_than_10000_and_a
     forecaster.set_out_sample_residuals(y_true=y_true, y_pred=y_pred)
     forecaster.set_out_sample_residuals(y_true=y_true, y_pred=y_pred, append=True)
     residuals = (y_true - y_pred)
-    expected = np.sort(np.concat((residuals, residuals)))
+    expected = np.sort(np.concatenate((residuals, residuals)))
     results = np.sort(forecaster.out_sample_residuals_)
 
     np.testing.assert_almost_equal(results, expected)

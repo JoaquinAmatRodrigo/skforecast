@@ -356,7 +356,6 @@ class ForecasterAutoregDirect(ForecasterBase):
                 )
             self.n_jobs = n_jobs if n_jobs > 0 else cpu_count()
 
-
     def __repr__(
         self
     ) -> str:
@@ -411,7 +410,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         )
 
         return info
-
 
     def _repr_html_(self):
         """
@@ -548,7 +546,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         # Return the combined style and content
         return style + content
 
-
     def _create_lags(
         self, 
         y: np.ndarray,
@@ -604,7 +601,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         return X_data, y_data
 
-
     def _create_window_features(
         self, 
         y: pd.Series,
@@ -658,7 +654,6 @@ class ForecasterAutoregDirect(ForecasterBase):
             X_train_window_features.append(X_train_wf)
 
         return X_train_window_features, X_train_window_features_names_out_
-
 
     def _create_train_X_y(
         self,
@@ -851,7 +846,6 @@ class ForecasterAutoregDirect(ForecasterBase):
             exog_dtypes_in_
         )
 
-
     def create_train_X_y(
         self,
         y: pd.Series,
@@ -887,7 +881,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         y_train = output[1]
 
         return X_train, y_train
-
 
     def filter_train_X_y_for_step(
         self,
@@ -957,7 +950,6 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         return X_train_step, y_train_step
     
-
     def _train_test_split_one_step_ahead(
         self,
         y: pd.Series,
@@ -1010,7 +1002,6 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         return X_train, y_train, X_test, y_test
 
-
     def create_sample_weights(
         self,
         X_train: pd.DataFrame,
@@ -1053,7 +1044,6 @@ class ForecasterAutoregDirect(ForecasterBase):
                 )
 
         return sample_weight
-
 
     def fit(
         self,
@@ -1227,7 +1217,6 @@ class ForecasterAutoregDirect(ForecasterBase):
                 .to_frame(name=y.name if y.name is not None else 'y')
             )
 
-
     def _create_predict_inputs(
         self,
         steps: Optional[Union[int, list]] = None,
@@ -1368,7 +1357,6 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         return Xs, Xs_col_names, steps, prediction_index
 
-
     def create_predict_X(
         self,
         steps: Optional[Union[int, list]] = None,
@@ -1417,7 +1405,6 @@ class ForecasterAutoregDirect(ForecasterBase):
                     )
 
         return X_predict
-
 
     def predict(
         self,
@@ -1495,7 +1482,6 @@ class ForecasterAutoregDirect(ForecasterBase):
                       )
 
         return predictions
-
 
     def predict_bootstrapping(
         self,
@@ -1584,7 +1570,7 @@ class ForecasterAutoregDirect(ForecasterBase):
                 else:
                     if not set(steps).issubset(set(self.out_sample_residuals_.keys())):
                         raise ValueError(
-                            (f"Not `forecaster.out_sample_residuals_` for steps: "
+                            (f"No `forecaster.out_sample_residuals_` for steps: "
                              f"{set(steps) - set(self.out_sample_residuals_.keys())}. "
                              f"Use method `set_out_sample_residuals()`.")
                         )
@@ -1595,12 +1581,13 @@ class ForecasterAutoregDirect(ForecasterBase):
                 else "forecaster.out_sample_residuals_"
             )
             for step in steps:
+                print(step)
                 if residuals[step] is None:
                     raise ValueError(
                         (f"forecaster residuals for step {step} are `None`. "
                          f"Check {check_residuals}.")
                     )
-                elif (residuals[step] == None).any():
+                elif any(x is None or np.isnan(x) for x in residuals[step]):
                     raise ValueError(
                         (f"forecaster residuals for step {step} contains `None` values. "
                          f"Check {check_residuals}.")
@@ -1659,7 +1646,6 @@ class ForecasterAutoregDirect(ForecasterBase):
                            )
         
         return boot_predictions
-
 
     def predict_interval(
         self,
@@ -1756,7 +1742,6 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         return predictions
 
-
     def predict_quantiles(
         self,
         steps: Optional[Union[int, list]] = None,
@@ -1838,7 +1823,6 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         return predictions
     
-
     def predict_dist(
         self,
         distribution: object,
@@ -1921,7 +1905,6 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         return predictions
 
-
     def set_params(
         self, 
         params: dict
@@ -1944,9 +1927,10 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         self.regressor = clone(self.regressor)
         self.regressor.set_params(**params)
-        self.regressors_ = {step: clone(self.regressor)
-                            for step in range(1, self.steps + 1)}
-
+        self.regressors_ = {
+            step: clone(self.regressor)
+            for step in range(1, self.steps + 1)
+        }
 
     def set_fit_kwargs(
         self, 
@@ -1968,7 +1952,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         """
 
         self.fit_kwargs = check_select_fit_kwargs(self.regressor, fit_kwargs=fit_kwargs)
-
 
     def set_lags(
         self, 
@@ -2008,7 +1991,6 @@ class ForecasterAutoregDirect(ForecasterBase):
         )
         if self.differentiation is not None:
             self.window_size += self.differentiation
-
 
     def set_window_features(
         self, 
@@ -2053,13 +2035,12 @@ class ForecasterAutoregDirect(ForecasterBase):
         if self.differentiation is not None:
             self.window_size += self.differentiation   
 
-
     def set_out_sample_residuals(
         self,
         y_true: dict,
         y_pred: dict,
         append: bool = False,
-        random_state: int = 123
+        random_state: int = 36987
     ) -> None:
         """
         Set new values to the attribute `out_sample_residuals_`. Out of sample
@@ -2090,8 +2071,8 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         if not self.is_fitted:
             raise NotFittedError(
-                ("This forecaster is not fitted yet. Call `fit` with appropriate "
-                 "arguments before using `set_out_sample_residuals()`.")
+                "This forecaster is not fitted yet. Call `fit` with appropriate "
+                "arguments before using `set_out_sample_residuals()`."
             )
 
         if not isinstance(y_true, dict):
@@ -2108,31 +2089,31 @@ class ForecasterAutoregDirect(ForecasterBase):
         
         if not set(y_true.keys()) == set(y_pred.keys()):
             raise ValueError(
-                ("`y_true` and `y_pred` must have the same keys. "
-                 f"Got {set(y_true.keys())} and {set(y_pred.keys())}.")
+                f"`y_true` and `y_pred` must have the same keys. "
+                f"Got {set(y_true.keys())} and {set(y_pred.keys())}."
             )
         
         for k in y_true.keys():
             if not isinstance(y_true[k], (np.ndarray, pd.Series)):
                 raise TypeError(
-                    (f"Values of `y_true` must be numpy ndarrays or pandas series. "
-                     f"Got {type(y_true[k])}.")
+                    f"Values of `y_true` must be numpy ndarrays or pandas series. "
+                    f"Got {type(y_true[k])}."
                 )
             if not isinstance(y_pred[k], (np.ndarray, pd.Series)):
                 raise TypeError(
-                    (f"Values of `y_pred` must be numpy ndarrays or pandas series. "
-                     f"Got {type(y_pred[k])}.")
+                    f"Values of `y_pred` must be numpy ndarrays or pandas series. "
+                    f"Got {type(y_pred[k])}."
                 )
             if len(y_true[k]) != len(y_pred[k]):
                 raise ValueError(
-                    ("`y_true` and `y_pred` must have the same length. "
-                     f"Got {len(y_true[k])} and {len(y_pred[k])}.")
+                    f"{k} must have the same length in `y_true` and `y_pred`. "
+                    f"Got {len(y_true[k])} and {len(y_pred[k])}."
                 )
             if isinstance(y_true[k], pd.Series) and isinstance(y_pred[k], pd.Series):
                 if not y_true[k].index.equals(y_pred[k].index):
                     raise ValueError(
-                       "When `y_true` and `y_pred` are pandas series, they must have "
-                       "the same index."
+                       "When containing pandas series, elements in `y_true` and "
+                        "must have the same index."
                     )
         
         if self.out_sample_residuals_ is None:
@@ -2140,18 +2121,18 @@ class ForecasterAutoregDirect(ForecasterBase):
                 step: None for step in range(1, self.steps + 1)
             }
         
-        # TODO: check if steps is a range
-        if not set(self.steps).issubset(set(y_pred.keys())):
+        steps_to_update = set(range(1, self.steps + 1)).intersection(set(y_pred.keys()))
+        if not steps_to_update:
             warnings.warn(
-                f"Only residuals of models (steps) "
-                f"{set(self.out_sample_residuals_.keys()).intersection(set(y_pred.keys()))} "
-                f"are updated."
+                "Provided keys in `y_pred` and `y_true` do not match any step. "
+                "Residuals are not updated."
             )
 
         residuals = {}
         rng = np.random.default_rng(seed=random_state)
-
-        for k in y_true.keys():
+        y_true = y_true.copy()
+        y_pred = y_pred.copy()
+        for k in steps_to_update:
             if isinstance(y_true[k], pd.Series):
                 y_true[k] = y_true[k].to_numpy()
             if isinstance(y_pred[k], pd.Series):
@@ -2185,7 +2166,6 @@ class ForecasterAutoregDirect(ForecasterBase):
                 value = rng.choice(value, size=10000, replace=False)
             self.out_sample_residuals_[key] = value
 
- 
     def get_feature_importances(
         self, 
         step: int,
