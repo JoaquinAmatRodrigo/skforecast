@@ -207,7 +207,7 @@ class ForecasterAutoreg(ForecasterBase):
         is associated with. If `transformer_y` is not `None`, residuals are stored
         in the transformed scale. If `differentiation` is not `None`, residuals are
         stored after differentiation. The number of residuals stored per bin is
-        limited to 10_000 // self.binner.n_bins_.
+        limited to `10_000 // self.binner.n_bins_`.
         **New in version 0.14.0**
     out_sample_residuals_ : numpy ndarray
         Residuals of the model when predicting non training data. Only stored up to
@@ -219,7 +219,7 @@ class ForecasterAutoreg(ForecasterBase):
         is associated with. If `transformer_y` is not `None`, residuals are stored
         in the transformed scale. If `differentiation` is not `None`, residuals are
         stored after differentiation. The number of residuals stored per bin is
-        limited to 10_000 // self.binner.n_bins_.
+        limited to `10_000 // self.binner.n_bins_`.
         **New in version 0.12.0**
     creation_date : str
         Date of creation.
@@ -1011,8 +1011,9 @@ class ForecasterAutoreg(ForecasterBase):
         stored in the forecaster object as `in_sample_residuals_` and
         `in_sample_residuals_by_bin_`. Only stored up to 10_000 values. If
         `transformer_y` is not `None`, residuals are stored in the transformed
-        scale. The number of residuals stored per bin is limited to
-        10_000 // self.binner.n_bins_.
+        scale. If `differentiation` is not `None`, residuals are stored after 
+        differentiation. The number of residuals stored per bin is limited to
+        `10_000 // self.binner.n_bins_`.
         **New in version 0.14.0**
 
         Parameters
@@ -1517,19 +1518,19 @@ class ForecasterAutoreg(ForecasterBase):
         for i in range(n_boot):
 
             if use_binned_residuals:
-                sampled_residuals_boot = {
+                boot_sampled_residuals = {
                     k: v[:, i]
                     for k, v in sampled_residuals.items()
                 }
             else:
-                sampled_residuals_boot = sampled_residuals[:, i]
+                boot_sampled_residuals = sampled_residuals[:, i]
 
             boot_columns.append(f"pred_boot_{i}")
             boot_predictions[:, i] = self._recursive_predict(
                 steps                = steps,
                 last_window_values   = last_window_values,
                 exog_values          = exog_values,
-                residuals            = sampled_residuals_boot,
+                residuals            = boot_sampled_residuals,
                 use_binned_residuals = use_binned_residuals,
             )
 
@@ -2047,8 +2048,8 @@ class ForecasterAutoreg(ForecasterBase):
                         inverse_transform = False
                     )
         if self.differentiation is not None:
-            y_true = self.differentiator.transform(y_true)[self.differentiation:]
-            y_pred = self.differentiator.transform(y_pred)[self.differentiation:]
+            y_true = self.differentiator.fit_transform(y_true)[self.differentiation:]
+            y_pred = self.differentiator.fit_transform(y_pred)[self.differentiation:]
         
         residuals = y_true - y_pred
         data = pd.DataFrame({'prediction': y_pred, 'residuals': residuals})
@@ -2066,6 +2067,7 @@ class ForecasterAutoreg(ForecasterBase):
         else:
             self.out_sample_residuals_by_bin_ = residuals_by_bin
 
+        # TODO: Review rng.choice
         max_samples = 10_000 // self.binner.n_bins_
         rng = np.random.default_rng(seed=random_state)
         for k, v in self.out_sample_residuals_by_bin_.items():
@@ -2077,8 +2079,11 @@ class ForecasterAutoreg(ForecasterBase):
             if k not in self.out_sample_residuals_by_bin_:
                 self.out_sample_residuals_by_bin_[k] = np.array([])
 
-        empty_bins = [k for k, v in self.out_sample_residuals_by_bin_.items() 
-                        if len(v) == 0]
+        # TODO: Review rng.choice, better have seed outside for if possible
+        empty_bins = [
+            k for k, v in self.out_sample_residuals_by_bin_.items() 
+            if len(v) == 0
+        ]
         if empty_bins:
             warnings.warn(
                 f"The following bins have no out of sample residuals: {empty_bins}. "
