@@ -1523,9 +1523,9 @@ def expand_index(
     ----------
     index : pandas Index, None
         Original index.
-    steps : Union[int, str, pd.Timestamp]
-        Number of steps to expand (if type is int) or
-        Datetime until the index is expanded (str formatted as YYYY-MM-DD or pd.Timestamp)
+    steps : int, str, pandas Timestamp]
+        If steps is int, number of steps to expand. If str or pandas Datetime, 
+        expand index to this date (str must be convertible to pandas Datetime format).
     **kwargs
         Additional keyword arguments to pass to `pd.to_datetime()`.
 

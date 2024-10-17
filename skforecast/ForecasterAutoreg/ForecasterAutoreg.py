@@ -1117,9 +1117,9 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        steps : Union[int, str, pd.Timestamp]
-            Number of steps to expand (if type is int) or
-            Datetime until the index is expanded (str formatted as YYYY-MM-DD or pd.Timestamp). 
+        steps : int, str, pandas Timestamp
+            If steps is int, number of steps to predict. 
+            If str or pandas Datetime, the prediction will be up to that date.
         last_window : pandas Series, pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1415,9 +1415,9 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        steps : Union[int, str, pd.Timestamp]
-            Number of steps to expand (if type is int) or
-            Datetime until the index is expanded (str formatted as YYYY-MM-DD or pd.Timestamp)
+        steps : int, str, pandas Timestamp
+            If steps is int, number of steps to predict. 
+            If str or pandas Datetime, the prediction will be up to that date.
         last_window : pandas Series, pandas DataFrame, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1469,7 +1469,7 @@ class ForecasterAutoreg(ForecasterBase):
 
     def predict_bootstrapping(
         self,
-        steps: int,
+        steps: Union[int, str, pd.Timestamp],
         last_window: Optional[pd.Series] = None,
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
         n_boot: int = 250,
@@ -1485,8 +1485,9 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        steps : int
-            Number of future steps predicted.
+        steps : int, str, pandas Timestamp
+            If steps is int, number of steps to predict. 
+            If str or pandas Datetime, the prediction will be up to that date.
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1602,7 +1603,7 @@ class ForecasterAutoreg(ForecasterBase):
 
     def predict_interval(
         self,
-        steps: int,
+        steps: Union[int, str, pd.Timestamp],
         last_window: Optional[pd.Series] = None,
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
         interval: list = [5, 95],
@@ -1618,8 +1619,9 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        steps : int
-            Number of future steps predicted.
+        steps : int, str, pandas Timestamp
+            If steps is int, number of steps to predict. 
+            If str or pandas Datetime, the prediction will be up to that date.
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1698,7 +1700,7 @@ class ForecasterAutoreg(ForecasterBase):
 
     def predict_quantiles(
         self,
-        steps: int,
+        steps: Union[int, str, pd.Timestamp],
         last_window: Optional[pd.Series] = None,
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
         quantiles: list = [0.05, 0.5, 0.95],
@@ -1714,8 +1716,9 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        steps : int
-            Number of future steps predicted.
+        steps : int, str, pandas Timestamp
+            If steps is int, number of steps to predict. 
+            If str or pandas Datetime, the prediction will be up to that date.
         last_window : pandas Series, default `None`
             Series values used to create the predictors (lags) needed in the 
             first iteration of the prediction (t + 1).
@@ -1781,7 +1784,7 @@ class ForecasterAutoreg(ForecasterBase):
 
     def predict_dist(
         self,
-        steps: int,
+        steps: Union[int, str, pd.Timestamp],
         distribution: object,
         last_window: Optional[pd.Series] = None,
         exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
@@ -1797,8 +1800,9 @@ class ForecasterAutoreg(ForecasterBase):
         
         Parameters
         ----------
-        steps : int
-            Number of future steps predicted.
+        steps : int, str, pandas Timestamp
+            If steps is int, number of steps to predict. 
+            If str or pandas Datetime, the prediction will be up to that date.
         distribution : Object
             A distribution object from scipy.stats.
         last_window : pandas Series, default `None`
