@@ -239,7 +239,7 @@ class ForecasterAutoreg(ForecasterBase):
     def __init__(
         self,
         regressor: object,
-        lags: Optional[Union[int, np.ndarray, list, range]] = None,
+        lags: Optional[Union[int, list, np.ndarray, range]] = None,
         window_features: Optional[Union[object, list]] = None,
         transformer_y: Optional[object] = None,
         transformer_exog: Optional[object] = None,
@@ -1866,7 +1866,7 @@ class ForecasterAutoreg(ForecasterBase):
 
     def set_lags(
         self, 
-        lags: Optional[Union[int, np.ndarray, list, range]] = None
+        lags: Optional[Union[int, list, np.ndarray, range]] = None
     ) -> None:
         """
         Set new value to the attribute `lags`. Attributes `lags_names`, 
@@ -2036,17 +2036,17 @@ class ForecasterAutoreg(ForecasterBase):
 
         if self.transformer_y:
             y_true = transform_numpy(
-                        array             = y_true,
-                        transformer       = self.transformer_y,
-                        fit               = False,
-                        inverse_transform = False
-                    )
+                         array             = y_true,
+                         transformer       = self.transformer_y,
+                         fit               = False,
+                         inverse_transform = False
+                     )
             y_pred = transform_numpy(
-                        array             = y_pred,
-                        transformer       = self.transformer_y,
-                        fit               = False,
-                        inverse_transform = False
-                    )
+                         array             = y_pred,
+                         transformer       = self.transformer_y,
+                         fit               = False,
+                         inverse_transform = False
+                     )
         if self.differentiation is not None:
             y_true = self.differentiator.fit_transform(y_true)[self.differentiation:]
             y_pred = self.differentiator.fit_transform(y_pred)[self.differentiation:]
@@ -2100,7 +2100,7 @@ class ForecasterAutoreg(ForecasterBase):
                 )
 
         self.out_sample_residuals_ = np.concatenate(list(
-                                        self.out_sample_residuals_by_bin_.values()
+                                         self.out_sample_residuals_by_bin_.values()
                                      ))
 
 

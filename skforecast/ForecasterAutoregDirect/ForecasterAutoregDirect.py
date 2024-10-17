@@ -238,7 +238,7 @@ class ForecasterAutoregDirect(ForecasterBase):
         self,
         regressor: object,
         steps: int,
-        lags: Optional[Union[int, np.ndarray, list, range]] = None,
+        lags: Optional[Union[int, list, np.ndarray, range]] = None,
         window_features: Optional[Union[object, list]] = None,
         transformer_y: Optional[object] = None,
         transformer_exog: Optional[object] = None,
@@ -1556,7 +1556,7 @@ class ForecasterAutoregDirect(ForecasterBase):
             steps=steps, last_window=last_window, exog=exog
         )
 
-        # Predictions must be transformed and differenced before adding residuals
+        # NOTE: Predictions must be transformed and differenced before adding residuals
         regressors = [self.regressors_[step] for step in steps]
         with warnings.catch_warnings():
             # Suppress scikit-learn warning: "X does not have valid feature names,
@@ -1576,12 +1576,10 @@ class ForecasterAutoregDirect(ForecasterBase):
 
         rng = np.random.default_rng(seed=random_state)
         for i, step in enumerate(steps):
-            sample_residuals = rng.choice(
-                                   a       = residuals[step],
-                                   size    = n_boot,
-                                   replace = True
-                               )
-            boot_predictions[i, :] = boot_predictions[i, :] + sample_residuals
+            sampled_residuals = residuals[step][
+                rng.integers(low=0, high=len(residuals[step]), size=n_boot)
+            ]
+            boot_predictions[i, :] = boot_predictions[i, :] + sampled_residuals
 
         if self.differentiation is not None:
             boot_predictions = (
@@ -1914,7 +1912,7 @@ class ForecasterAutoregDirect(ForecasterBase):
 
     def set_lags(
         self, 
-        lags: Optional[Union[int, np.ndarray, list, range]] = None
+        lags: Optional[Union[int, list, np.ndarray, range]] = None
     ) -> None:
         """
         Set new value to the attribute `lags`. Attributes `lags_names`, 
@@ -2098,20 +2096,20 @@ class ForecasterAutoregDirect(ForecasterBase):
                 y_pred[k] = y_pred[k].to_numpy()
             if self.transformer_y:
                 y_true[k] = transform_numpy(
-                            array             = y_true[k],
-                            transformer       = self.transformer_y,
-                            fit               = False,
-                            inverse_transform = False
-                        )
+                                array             = y_true[k],
+                                transformer       = self.transformer_y,
+                                fit               = False,
+                                inverse_transform = False
+                            )
                 y_pred[k] = transform_numpy(
-                            array             = y_pred[k],
-                            transformer       = self.transformer_y,
-                            fit               = False,
-                            inverse_transform = False
-                        )
+                                array             = y_pred[k],
+                                transformer       = self.transformer_y,
+                                fit               = False,
+                                inverse_transform = False
+                            )
             if self.differentiation is not None:
-                y_true[k] = self.differentiator.transform(y_true[k])[self.differentiation:]
-                y_pred[k] = self.differentiator.transform(y_pred[k])[self.differentiation:]
+                y_true[k] = self.differentiator.fit_transform(y_true[k])[self.differentiation:]
+                y_pred[k] = self.differentiator.fit_transform(y_pred[k])[self.differentiation:]
 
             residuals[k] = y_true[k] - y_pred[k]
 

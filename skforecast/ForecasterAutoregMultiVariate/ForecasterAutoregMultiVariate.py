@@ -258,7 +258,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         regressor: object,
         level: str,
         steps: int,
-        lags: Optional[Union[int, np.ndarray, list, range, dict]] = None,
+        lags: Optional[Union[int, list, np.ndarray, range, dict]] = None,
         window_features: Optional[Union[object, list]] = None,
         transformer_series: Optional[Union[object, dict]] = StandardScaler(),
         transformer_exog: Optional[object] = None,
@@ -348,7 +348,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         self.window_features, self.window_features_names, self.max_size_window_features = (
             initialize_window_features(window_features)
         )
-        if self.window_features is None and self.lags is None:
+        if self.window_features is None and (self.lags is None or self.max_lag is None):
             raise ValueError(
                 ("At least one of the arguments `lags` or `window_features` "
                  "must be different from None. This is required to create the "
@@ -1750,6 +1750,11 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 for regressor, X in zip(regressors, Xs)
             ])
 
+        if self.differentiation is not None:
+            predictions = self.differentiator_[
+                self.level
+            ].inverse_transform_next_window(predictions)
+        
         predictions = transform_numpy(
                           array             = predictions,
                           transformer       = self.transformer_series_[self.level],
@@ -1885,30 +1890,39 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                          f"or `NaNs` values. Check {check_residuals}.")
                     )
 
-        predictions = self.predict(
-                          steps       = steps,
-                          last_window = last_window,
-                          exog        = exog 
-                      )
+        Xs, _, steps, prediction_index = self._create_predict_inputs(
+            steps=steps, last_window=last_window, exog=exog
+        )
 
-        # Predictions must be in the transformed scale before adding residuals
-        boot_predictions = transform_numpy(
-                               array             = predictions.to_numpy().ravel(),
-                               transformer       = self.transformer_series_[self.level],
-                               fit               = False,
-                               inverse_transform = False
-                           )
-        boot_predictions = np.tile(boot_predictions, (n_boot, 1)).T
+        # NOTE: Predictions must be transformed and differenced before adding residuals
+        regressors = [self.regressors_[step] for step in steps]
+        with warnings.catch_warnings():
+            # Suppress scikit-learn warning: "X does not have valid feature names,
+            # but NoOpTransformer was fitted with feature names".
+            warnings.filterwarnings(
+                "ignore", 
+                message="X does not have valid feature names", 
+                category=UserWarning
+            )
+            predictions = np.array([
+                regressor.predict(X).ravel()[0] 
+                for regressor, X in zip(regressors, Xs)
+            ])
+        
+        boot_predictions = np.tile(predictions, (n_boot, 1)).T
         boot_columns = [f"pred_boot_{i}" for i in range(n_boot)]
 
         rng = np.random.default_rng(seed=random_state)
         for i, step in enumerate(steps):
-            sample_residuals = rng.choice(
-                                   a       = residuals[step],
-                                   size    = n_boot,
-                                   replace = True
-                               )
-            boot_predictions[i, :] = boot_predictions[i, :] + sample_residuals
+            sampled_residuals = residuals[step][
+                rng.integers(low=0, high=len(residuals[step]), size=n_boot)
+            ]
+            boot_predictions[i, :] = boot_predictions[i, :] + sampled_residuals
+
+        if self.differentiation is not None:
+            boot_predictions = self.differentiator_[
+                self.level
+            ].inverse_transform_next_window(boot_predictions)
 
         if self.transformer_series_[self.level]:
             boot_predictions = np.apply_along_axis(
@@ -1922,7 +1936,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
     
         boot_predictions = pd.DataFrame(
                                data    = boot_predictions,
-                               index   = predictions.index,
+                               index   = prediction_index,
                                columns = boot_columns
                            )
 
@@ -2271,28 +2285,35 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         
     def set_lags(
         self, 
-        lags: Union[int, np.ndarray, list, dict]
+        lags: Optional[Union[int, list, np.ndarray, range, dict]] = None
     ) -> None:
         """
-        Set new value to the attribute `lags`. Attributes `max_lag` and 
-        `window_size` are also updated.
+        Set new value to the attribute `lags`. Attributes `lags_names`, 
+        `max_lag` and `window_size` are also updated.
         
         Parameters
         ----------
-        lags : int, list, numpy ndarray, range, dict
+        lags : int, list, numpy ndarray, range, dict, default `None`
             Lags used as predictors. Index starts at 1, so lag 1 is equal to t-1.
 
             - `int`: include lags from 1 to `lags` (included).
             - `list`, `1d numpy ndarray` or `range`: include only lags present in 
             `lags`, all elements must be int.
-            - `dict`: create different lags for each series. 
-            {'series_column_name': lags}.
+            - `dict`: create different lags for each series. {'series_column_name': lags}.
+            - `None`: no lags are included as predictors. 
 
         Returns
         -------
         None
         
         """
+
+        if self.window_features is None and lags is None:
+            raise ValueError(
+                ("At least one of the arguments `lags` or `window_features` "
+                 "must be different from None. This is required to create the "
+                 "predictors used in training the forecaster.")
+            )
 
         if isinstance(lags, dict):
             self.lags = {}
@@ -2316,9 +2337,64 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
                 forecaster_name = type(self).__name__, 
                 lags            = lags
             )
+
+        # Repeated here in case of lags is a dict with all values as None
+        if self.window_features is None and (lags is None or self.max_lag is None):
+            raise ValueError(
+                ("At least one of the arguments `lags` or `window_features` "
+                 "must be different from None. This is required to create the "
+                 "predictors used in training the forecaster.")
+            )
         
-        self.lags_ = self.lags
-        self.window_size = self.max_lag
+        self.window_size = max(
+            [ws for ws in [self.max_lag, self.max_size_window_features] 
+             if ws is not None]
+        )
+        if self.differentiation is not None:
+            self.window_size += self.differentiation
+
+    def set_window_features(
+        self, 
+        window_features: Optional[Union[object, list]] = None
+    ) -> None:
+        """
+        Set new value to the attribute `window_features`. Attributes 
+        `max_size_window_features`, `window_features_names`, 
+        `window_features_class_names` and `window_size` are also updated.
+        
+        Parameters
+        ----------
+        window_features : object, list, default `None`
+            Instance or list of instances used to create window features. Window features
+            are created from the original time series and are included as predictors.
+
+        Returns
+        -------
+        None
+        
+        """
+
+        if window_features is None and self.max_lag is None:
+            raise ValueError(
+                ("At least one of the arguments `lags` or `window_features` "
+                 "must be different from None. This is required to create the "
+                 "predictors used in training the forecaster.")
+            )
+        
+        self.window_features, self.window_features_names, self.max_size_window_features = (
+            initialize_window_features(window_features)
+        )
+        self.window_features_class_names = None
+        if window_features is not None:
+            self.window_features_class_names = [
+                type(wf).__name__ for wf in self.window_features
+            ] 
+        self.window_size = max(
+            [ws for ws in [self.max_lag, self.max_size_window_features] 
+             if ws is not None]
+        )
+        if self.differentiation is not None:
+            self.window_size += self.differentiation   
 
 
     def set_out_sample_residuals(
@@ -2477,7 +2553,10 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
         n_lags = len(list(
             chain(*[v for v in self.lags_.values() if v is not None])
         ))
-        idx_columns_autoreg = np.arange(n_lags)
+        n_window_features = (
+            len(self.X_train_window_features_names_out_) if self.window_features is not None else 0
+        )
+        idx_columns_autoreg = np.arange(n_lags + n_window_features)
         if self.exog_in_:
             idx_columns_exog = np.flatnonzero(
                                    [name.endswith(f"step_{step}")
@@ -2487,6 +2566,7 @@ class ForecasterAutoregMultiVariate(ForecasterBase):
             idx_columns_exog = np.array([], dtype=int)
         
         idx_columns = np.concatenate((idx_columns_autoreg, idx_columns_exog))
+        idx_columns = [int(x) for x in idx_columns]  # Required since numpy 2.0
         feature_names = [self.X_train_features_names_out_[i].replace(f"_step_{step}", "") 
                          for i in idx_columns]
 

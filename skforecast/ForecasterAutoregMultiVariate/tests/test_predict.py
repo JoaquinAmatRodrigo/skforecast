@@ -5,7 +5,6 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
@@ -18,6 +17,10 @@ from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import HistGradientBoostingRegressor
 from lightgbm import LGBMRegressor
+
+from skforecast.preprocessing import RollingFeatures
+from skforecast.preprocessing import TimeSeriesDifferentiator
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 
 # Fixtures
 from .fixtures_ForecasterAutoregMultiVariate import series

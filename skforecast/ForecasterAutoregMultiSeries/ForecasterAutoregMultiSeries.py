@@ -312,7 +312,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
     def __init__(
         self,
         regressor: object,
-        lags: Optional[Union[int, np.ndarray, list, range]] = None,
+        lags: Optional[Union[int, list, np.ndarray, range]] = None,
         window_features: Optional[Union[object, list]] = None,
         encoding: Optional[str] = 'ordinal',
         transformer_series: Optional[Union[object, dict]] = None,
@@ -2641,7 +2641,7 @@ class ForecasterAutoregMultiSeries(ForecasterBase):
 
     def set_lags(
         self, 
-        lags: Optional[Union[int, np.ndarray, list, range]] = None
+        lags: Optional[Union[int, list, np.ndarray, range]] = None
     ) -> None:
         """
         Set new value to the attribute `lags`. Attributes `lags_names`, 

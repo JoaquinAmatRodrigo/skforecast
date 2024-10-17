@@ -2,10 +2,8 @@
 # ==============================================================================
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregMultiVariate import (
-    ForecasterAutoregMultiVariate,
-)
 from sklearn.linear_model import LinearRegression
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 
 
 def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe():
@@ -24,7 +22,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
     exog = pd.DataFrame(
         {
             "exog_1": np.arange(100, 115, dtype=float),
-            "exog_2": np.arange(1000, 1015, dtype=int),
+            "exog_2": np.arange(1000, 1015, dtype=float),
         },
         index=pd.date_range("2020-01-01", periods=15),
     )
@@ -52,7 +50,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
             "series_2_lag_4": [51.0, 52.0, 53.0, 54.0, 55.0],
             "series_2_lag_5": [50.0, 51.0, 52.0, 53.0, 54.0],
             "exog_1_step_1": [105.0, 106.0, 107.0, 108.0, 109.0],
-            "exog_2_step_1": [1005, 1006, 1007, 1008, 1009],
+            "exog_2_step_1": [1005.0, 1006.0, 1007.0, 1008.0, 1009.0],
         },
         index=pd.DatetimeIndex(
             [
@@ -64,7 +62,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
             ],
             freq="D",
         ),
-    ).astype({"exog_2_step_1": int})
+    )
 
     expected_y_train = {
         1: pd.Series(
@@ -96,7 +94,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
             "series_2_lag_4": [56.0, 57.0, 58.0, 59.0, 60.0],
             "series_2_lag_5": [55.0, 56.0, 57.0, 58.0, 59.0],
             "exog_1_step_1": [110.0, 111.0, 112.0, 113.0, 114.0],
-            "exog_2_step_1": [1010, 1011, 1012, 1013, 1014],
+            "exog_2_step_1": [1010.0, 1011.0, 1012.0, 1013.0, 1014.0],
         },
         index=pd.DatetimeIndex(
             [
@@ -108,7 +106,7 @@ def test_train_test_split_one_step_ahead_when_y_is_series_and_exog_are_dataframe
             ],
             freq="D",
         ),
-    ).astype({"exog_2_step_1": int})
+    )
 
     expected_y_test = {
         1: pd.Series(

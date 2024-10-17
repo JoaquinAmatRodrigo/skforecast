@@ -199,7 +199,7 @@ def test_create_predict_X_output_with_transform_y_and_transform_exog(n_jobs):
     exog = pd.DataFrame({
                 'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4, 60.3, 87.2,
                           7.5, 60.4, 50.3, 57.3, 24.7, 87.4, 87.2, 60.4, 50.7, 7.5],
-                'col_2': ['a']*10 + ['b']*10}
+                'col_2': ['a'] * 10 + ['b'] * 10}
            )
     exog_predict = exog.copy()
     exog_predict.index = pd.RangeIndex(start=20, stop=40)

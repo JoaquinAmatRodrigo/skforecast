@@ -41,7 +41,10 @@ def test_init_ValueError_when_steps_is_less_than_1():
         ForecasterAutoregMultiVariate(LinearRegression(), level='l1', lags=2, steps=steps)
 
 
-def test_init_ValueError_when_no_lags_or_window_features():
+@pytest.mark.parametrize("lags", 
+                         [None, {'l1': None, 'l2': None}], 
+                         ids = lambda lags: f'lags: {lags}')
+def test_init_ValueError_when_no_lags_or_window_features(lags):
     """
     Test ValueError is raised when no lags or window_features are passed.
     """
@@ -55,7 +58,7 @@ def test_init_ValueError_when_no_lags_or_window_features():
             regressor       = LinearRegression(),
             level           = 'l1',
             steps           = 3,
-            lags            = None,
+            lags            = lags,
             window_features = None
         )
 

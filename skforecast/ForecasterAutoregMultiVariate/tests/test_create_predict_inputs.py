@@ -509,43 +509,193 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_exog_diff
     )
 
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor       = LinearRegression(),
-                     level           = 'l1',
-                     steps           = 5,
-                     lags            = 15,
-                     differentiation = 1
+                     regressor          = LinearRegression(),
+                     level              = 'l1',
+                     steps              = 5,
+                     lags               = 15,
+                     differentiation    = 1,
+                     transformer_series = StandardScaler()
                 )
     forecaster.fit(series=series.loc[:end_train], exog=exog.loc[:end_train])
     results = forecaster._create_predict_inputs(exog=exog.loc[end_train:])
     
-    expected = (
-        [np.array([[ 0.07503713, -0.48984868, -0.01463081,  0.10597971, -0.01018012,
-                0.02377842,  0.09883014,  0.01630394,  0.17596768, -0.00584249,
-                0.09807633,  0.04869748,  0.07558021, -0.56028323,  0.14355438,
-                1.16172882]]),
-        np.array([[ 0.07503713, -0.48984868, -0.01463081,  0.10597971, -0.01018012,
-                0.02377842,  0.09883014,  0.01630394,  0.17596768, -0.00584249,
-                0.09807633,  0.04869748,  0.07558021, -0.56028323,  0.14355438,
-                0.29468848]]),
-        np.array([[ 0.07503713, -0.48984868, -0.01463081,  0.10597971, -0.01018012,
-                0.02377842,  0.09883014,  0.01630394,  0.17596768, -0.00584249,
-                0.09807633,  0.04869748,  0.07558021, -0.56028323,  0.14355438,
-                -0.4399757 ]]),
-        np.array([[ 0.07503713, -0.48984868, -0.01463081,  0.10597971, -0.01018012,
-                0.02377842,  0.09883014,  0.01630394,  0.17596768, -0.00584249,
-                0.09807633,  0.04869748,  0.07558021, -0.56028323,  0.14355438,
-                1.25008389]]),
-        np.array([[ 0.07503713, -0.48984868, -0.01463081,  0.10597971, -0.01018012,
-                0.02377842,  0.09883014,  0.01630394,  0.17596768, -0.00584249,
-                0.09807633,  0.04869748,  0.07558021, -0.56028323,  0.14355438,
-                1.37496887]])],
-        ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5', 'lag_6', 'lag_7', 'lag_8',
-         'lag_9', 'lag_10', 'lag_11', 'lag_12', 'lag_13', 'lag_14', 'lag_15', 'exog'],
+    expected = ([
+        np.array([[ 0.1371526 , -0.89534369, -0.02674214,  0.19370934, -0.01860719,
+                    0.04346211,  0.18064138,  0.02980028,  0.3216331 , -0.01067888,
+                    0.17926357,  0.08900908,  0.13814524, -1.02408371,  0.26238819,
+                    0.1371526 , -0.89534369, -0.02674214,  0.19370934, -0.01860719,
+                    0.04346211,  0.18064138,  0.02980028,  0.3216331 , -0.01067888,
+                    0.17926357,  0.08900908,  0.13814524, -1.02408371,  0.26238819,
+                    1.16172882]]),
+        np.array([[ 0.1371526 , -0.89534369, -0.02674214,  0.19370934, -0.01860719,
+                    0.04346211,  0.18064138,  0.02980028,  0.3216331 , -0.01067888,
+                    0.17926357,  0.08900908,  0.13814524, -1.02408371,  0.26238819,
+                    0.1371526 , -0.89534369, -0.02674214,  0.19370934, -0.01860719,
+                    0.04346211,  0.18064138,  0.02980028,  0.3216331 , -0.01067888,
+                    0.17926357,  0.08900908,  0.13814524, -1.02408371,  0.26238819,
+                    0.29468848]]),
+        np.array([[ 0.1371526 , -0.89534369, -0.02674214,  0.19370934, -0.01860719,
+                    0.04346211,  0.18064138,  0.02980028,  0.3216331 , -0.01067888,
+                    0.17926357,  0.08900908,  0.13814524, -1.02408371,  0.26238819,
+                    0.1371526 , -0.89534369, -0.02674214,  0.19370934, -0.01860719,
+                    0.04346211,  0.18064138,  0.02980028,  0.3216331 , -0.01067888,
+                    0.17926357,  0.08900908,  0.13814524, -1.02408371,  0.26238819,
+                    -0.4399757 ]]),
+        np.array([[ 0.1371526 , -0.89534369, -0.02674214,  0.19370934, -0.01860719,
+                    0.04346211,  0.18064138,  0.02980028,  0.3216331 , -0.01067888,
+                    0.17926357,  0.08900908,  0.13814524, -1.02408371,  0.26238819,
+                    0.1371526 , -0.89534369, -0.02674214,  0.19370934, -0.01860719,
+                    0.04346211,  0.18064138,  0.02980028,  0.3216331 , -0.01067888,
+                    0.17926357,  0.08900908,  0.13814524, -1.02408371,  0.26238819,
+                    1.25008389]]),
+        np.array([[ 0.1371526 , -0.89534369, -0.02674214,  0.19370934, -0.01860719,
+                    0.04346211,  0.18064138,  0.02980028,  0.3216331 , -0.01067888,
+                    0.17926357,  0.08900908,  0.13814524, -1.02408371,  0.26238819,
+                    0.1371526 , -0.89534369, -0.02674214,  0.19370934, -0.01860719,
+                    0.04346211,  0.18064138,  0.02980028,  0.3216331 , -0.01067888,
+                    0.17926357,  0.08900908,  0.13814524, -1.02408371,  0.26238819,
+                    1.37496887]])],
+        ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_lag_4', 'l1_lag_5',
+         'l1_lag_6', 'l1_lag_7', 'l1_lag_8', 'l1_lag_9', 'l1_lag_10',
+         'l1_lag_11', 'l1_lag_12', 'l1_lag_13', 'l1_lag_14', 'l1_lag_15',
+         'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_lag_4', 'l2_lag_5',
+         'l2_lag_6', 'l2_lag_7', 'l2_lag_8', 'l2_lag_9', 'l2_lag_10',
+         'l2_lag_11', 'l2_lag_12', 'l2_lag_13', 'l2_lag_14', 'l2_lag_15',
+         'exog'],
         [1, 2, 3, 4, 5],
         pd.date_range(start='2003-04-01', periods=5, freq='MS')
     )
     
     for step in range(len(results[0])):
+        np.testing.assert_almost_equal(results[0][step], expected[0][step])
+    assert results[1] == expected[1]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
+
+
+def test_create_predict_inputs_output_window_features():
+    """
+    Test _create_predict_inputs output with window_features.
+    """
+    series = pd.DataFrame(
+        {'l1': np.arange(50),
+         'l2': np.arange(50, 100)},
+        index = pd.date_range('2020-01-01', periods=50, freq='D')
+    )
+    
+    rolling = RollingFeatures(
+        stats=['mean', 'median', 'sum'], window_sizes=[4, 5, 6]
+    )
+
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(),
+                     level              = 'l1',
+                     steps              = 3,
+                     lags               = 3,
+                     window_features    = rolling,
+                     transformer_series = None
+                 )
+    forecaster.fit(series=series)
+    results = forecaster._create_predict_inputs()
+
+    expected = (
+        [np.array([[49., 48., 47., 47.5, 47., 279., 99., 98., 97., 97.5, 97., 579.]]),
+         np.array([[49., 48., 47., 47.5, 47., 279., 99., 98., 97., 97.5, 97., 579.]]),
+         np.array([[49., 48., 47., 47.5, 47., 279., 99., 98., 97., 97.5, 97., 579.]])],
+        ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
+         'l1_roll_mean_4', 'l1_roll_median_5', 'l1_roll_sum_6',
+         'l2_lag_1', 'l2_lag_2', 'l2_lag_3',
+         'l2_roll_mean_4', 'l2_roll_median_5', 'l2_roll_sum_6'],
+        [1, 2, 3],
+        pd.date_range(start='2020-02-20', periods=3, freq='D')
+    )
+    
+    for step in range(len(expected[0])):
+        np.testing.assert_almost_equal(results[0][step], expected[0][step])
+    assert results[1] == expected[1]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
+
+
+def test_create_predict_inputs_output_with_2_window_features():
+    """
+    Test _create_predict_inputs output with 2 window_features.
+    """
+    series = pd.DataFrame(
+        {'l1': np.arange(50),
+         'l2': np.arange(50, 100)},
+        index = pd.date_range('2020-01-01', periods=50, freq='D')
+    )
+    
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[4, 5])
+    rolling_2 = RollingFeatures(stats=['sum'], window_sizes=6)
+
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(),
+                     level              = 'l1',
+                     steps              = 3,
+                     lags               = 3,
+                     window_features    = [rolling, rolling_2],
+                     transformer_series = None
+                 )
+    forecaster.fit(series=series)
+    results = forecaster._create_predict_inputs()
+
+    expected = (
+        [np.array([[49., 48., 47., 47.5, 47., 279., 99., 98., 97., 97.5, 97., 579.]]),
+         np.array([[49., 48., 47., 47.5, 47., 279., 99., 98., 97., 97.5, 97., 579.]]),
+         np.array([[49., 48., 47., 47.5, 47., 279., 99., 98., 97., 97.5, 97., 579.]])],
+        ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
+         'l1_roll_mean_4', 'l1_roll_median_5', 'l1_roll_sum_6',
+         'l2_lag_1', 'l2_lag_2', 'l2_lag_3',
+         'l2_roll_mean_4', 'l2_roll_median_5', 'l2_roll_sum_6'],
+        [1, 2, 3],
+        pd.date_range(start='2020-02-20', periods=3, freq='D')
+    )
+    
+    for step in range(len(expected[0])):
+        np.testing.assert_almost_equal(results[0][step], expected[0][step])
+    assert results[1] == expected[1]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
+
+
+def test_create_predict_inputs_output_window_features_and_no_lags():
+    """
+    Test _create_predict_inputs output with window_features and no lags.
+    """
+    series = pd.DataFrame(
+        {'l1': np.arange(50),
+         'l2': np.arange(50, 100)},
+        index = pd.date_range('2020-01-01', periods=50, freq='D')
+    )
+    
+    rolling = RollingFeatures(
+        stats=['mean', 'median', 'sum'], window_sizes=[4, 5, 6]
+    )
+
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(),
+                     level              = 'l1',
+                     steps              = 3,
+                     lags               = None,
+                     window_features    = rolling,
+                     transformer_series = None
+                 )
+    forecaster.fit(series=series)
+    results = forecaster._create_predict_inputs()
+
+    expected = (
+        [np.array([[47.5, 47., 279., 97.5, 97., 579.]]),
+         np.array([[47.5, 47., 279., 97.5, 97., 579.]]),
+         np.array([[47.5, 47., 279., 97.5, 97., 579.]])],
+        ['l1_roll_mean_4', 'l1_roll_median_5', 'l1_roll_sum_6',
+         'l2_roll_mean_4', 'l2_roll_median_5', 'l2_roll_sum_6'],
+        [1, 2, 3],
+        pd.date_range(start='2020-02-20', periods=3, freq='D')
+    )
+    
+    for step in range(len(expected[0])):
         np.testing.assert_almost_equal(results[0][step], expected[0][step])
     assert results[1] == expected[1]
     assert results[2] == expected[2]

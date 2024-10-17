@@ -461,3 +461,36 @@ def test_create_predict_inputs_output_with_2_window_features():
     assert results[1] == expected[1]
     assert results[2] == expected[2]
     pd.testing.assert_index_equal(results[3], expected[3])
+
+
+def test_create_predict_inputs_output_window_features_and_no_lags():
+    """
+    Test _create_predict_inputs output with window_features and no lags.
+    """
+    y_datetime = pd.Series(
+        np.arange(50), index=pd.date_range('2020-01-01', periods=50, freq='D'),
+        name='y', dtype=float
+    )
+    rolling = RollingFeatures(
+        stats=['mean', 'median', 'sum'], window_sizes=[4, 5, 6]
+    )
+    forecaster = ForecasterAutoregDirect(
+        LinearRegression(), steps=3, lags=None, window_features=rolling
+    )
+    forecaster.fit(y=y_datetime)
+    results = forecaster._create_predict_inputs()
+
+    expected = (
+        [np.array([[47.5, 47., 279.]]),
+         np.array([[47.5, 47., 279.]]),
+         np.array([[47.5, 47., 279.]])],
+        ['roll_mean_4', 'roll_median_5', 'roll_sum_6'],
+        [1, 2, 3],
+        pd.date_range(start='2020-02-20', periods=3, freq='D')
+    )
+    
+    for step in range(len(expected[0])):
+        np.testing.assert_almost_equal(results[0][step], expected[0][step])
+    assert results[1] == expected[1]
+    assert results[2] == expected[2]
+    pd.testing.assert_index_equal(results[3], expected[3])
