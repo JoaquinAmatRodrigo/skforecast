@@ -64,8 +64,8 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
     Test _create_predict_inputs when using LinearRegression as regressor and StandardScaler.
     """
     y = pd.Series(
-            np.array([-0.59,  0.02, -0.9 ,  1.09, -3.61,  0.72, -0.11, -0.4 ,  0.49,
-                       0.67,  0.54, -0.17,  0.54,  1.49, -2.26, -0.41, -0.64, -0.8 ,
+            np.array([-0.59,  0.02, -0.9,  1.09, -3.61,  0.72, -0.11, -0.4,  0.49,
+                       0.67,  0.54, -0.17,  0.54,  1.49, -2.26, -0.41, -0.64, -0.8,
                       -0.61, -0.88]),
             name = 'y'
         )
@@ -94,7 +94,7 @@ def test_create_predict_inputs_when_regressor_is_LinearRegression_with_transform
     Test _create_predict_inputs when using LinearRegression as regressor, StandardScaler
     as transformer_y and StandardScaler as transformer_exog.
     """
-    y = pd.Series(np.array([-0.59,  0.02, -0.9 ,  1.09, -3.61,  0.72, -0.11, -0.4]))
+    y = pd.Series(np.array([-0.59,  0.02, -0.9,  1.09, -3.61,  0.72, -0.11, -0.4]))
     exog = pd.Series(np.array([7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4]), name='exog')
     exog_predict = exog.copy()
     exog_predict.index = pd.RangeIndex(start=8, stop=16)
@@ -172,8 +172,8 @@ def test_create_predict_inputs_when_categorical_features_native_implementation_H
     """
     df_exog = pd.DataFrame(
         {'exog_1': exog_categorical,
-         'exog_2': ['a', 'b', 'c', 'd', 'e']*10,
-         'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J']*10)}
+         'exog_2': ['a', 'b', 'c', 'd', 'e'] * 10,
+         'exog_3': pd.Categorical(['F', 'G', 'H', 'I', 'J'] * 10)}
     )
     
     exog_predict = df_exog.copy()
@@ -226,10 +226,10 @@ def test_create_predict_inputs_when_categorical_features_native_implementation_H
     pd.testing.assert_index_equal(results[2], expected[2])
 
 
-def test_create_predict_inputs_when_regressor_is_LinearRegression_with_exog_differentiation_is_1_and_transformer_y():
+def test_create_predict_inputs_when_regressor_is_LinearRegression_with_exog_differentiation_is_1():
     """
-    Test _create_predict_inputs when using LinearRegression as regressor and differentiation=1,
-    and transformer_y is StandardScaler.
+    Test _create_predict_inputs when using LinearRegression as regressor 
+    and differentiation=1.
     """
 
     end_train = '2003-03-01 23:59:00'

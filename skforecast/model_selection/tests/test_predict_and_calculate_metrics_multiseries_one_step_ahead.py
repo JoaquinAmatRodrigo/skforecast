@@ -1,9 +1,6 @@
 # Unit test _predict_and_calculate_metrics_multiseries_one_step_ahead
 # ==============================================================================
-import re
-import os
 import pytest
-import numpy as np
 import pandas as pd
 import joblib
 from pathlib import Path
@@ -11,8 +8,9 @@ from lightgbm import LGBMRegressor
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
-from skforecast.model_selection_multiseries.model_selection_multiseries import backtesting_forecaster_multiseries
-from skforecast.model_selection_multiseries.model_selection_multiseries import _predict_and_calculate_metrics_multiseries_one_step_ahead
+from skforecast.model_selection import backtesting_forecaster_multiseries
+from skforecast.model_selection._utils import _predict_and_calculate_metrics_multiseries_one_step_ahead
+from skforecast.model_selection._split import TimeSeriesFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_percentage_error
 from skforecast.metrics import mean_absolute_scaled_error
@@ -67,14 +65,18 @@ def test_predict_and_calculate_metrics_multiseries_one_step_ahead_output_equival
     else:
         levels = ['item_1']
 
+    cv = TimeSeriesFold(
+            initial_train_size = initial_train_size,
+            steps              = 1,
+            refit              = False,
+         )
+
     metrics_backtesting, pred_backtesting = backtesting_forecaster_multiseries(
         series=series,
         exog=exog,
         forecaster=forecaster,
-        steps=1,
+        cv=cv,
         metric=metrics,
-        initial_train_size = initial_train_size,
-        refit=False,
         levels=levels,
         add_aggregated_metric=True,
         show_progress=False
@@ -145,14 +147,18 @@ def test_predict_and_calculate_metrics_multiseries_one_step_ahead_output_equival
     else:
         levels = ['id_1000']
 
+    cv = TimeSeriesFold(
+            initial_train_size = initial_train_size,
+            steps              = 1,
+            refit              = False,
+        )
+
     metrics_backtesting, pred_backtesting = backtesting_forecaster_multiseries(
         series=series_dict,
         exog=exog_dict,
         forecaster=forecaster,
-        steps=1,
+        cv=cv,
         metric=metrics,
-        initial_train_size = initial_train_size,
-        refit=False,
         levels=levels,
         add_aggregated_metric=True,
         show_progress=False

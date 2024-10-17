@@ -158,13 +158,13 @@ def test_initialize_window_features_when_None():
     Test initialize_window_features with None.
     """
 
-    window_features, max_size_window_features, window_features_names = (
+    window_features, window_features_names, max_size_window_features = (
         initialize_window_features(None)
     )
 
     assert window_features is None
-    assert max_size_window_features is None
     assert window_features_names is None
+    assert max_size_window_features is None
 
 
 def test_initialize_window_features_valid():
@@ -174,10 +174,10 @@ def test_initialize_window_features_valid():
 
     wf1 = WindowFeature(5, "feature1")
     wf2 = WindowFeature([3, 4], ["feature2", "feature3"])
-    window_features, max_size_window_features, window_features_names = (
+    window_features, window_features_names, max_size_window_features = (
         initialize_window_features([wf1, wf2])
     )
 
     assert window_features == [wf1, wf2]
-    assert max_size_window_features == 5
     assert window_features_names == ["feature1", "feature2", "feature3"]
+    assert max_size_window_features == 5

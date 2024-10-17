@@ -4,15 +4,21 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import RandomForestRegressor
+from lightgbm import LGBMRegressor
+
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 
 # Fixtures
+from .fixtures_ForecasterAutoregMultiVariate import series as series_2
+from .fixtures_ForecasterAutoregMultiVariate import exog as exog_2
+
 series = pd.DataFrame({'l1': pd.Series(np.arange(10, dtype=float)), 
                        'l2': pd.Series(np.arange(10, dtype=float))})
 exog = pd.DataFrame({'exog_1': np.arange(10, dtype=float),
@@ -303,5 +309,35 @@ def test_output_get_feature_importances_when_regressor_is_LinearRegression_lags_
         'importance': np.array([0.05128205128205132, 0.05128205128205135, 0.05128205128205134,
                                 0.14729647811635985, 0.14729647811635985])
     })
+    
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_output_get_feature_importances_when_window_features():
+    """
+    Test output of get_feature_importances when regressor is LGMBRegressor with 
+    lags=3 and window features.
+    """
+
+    rolling = RollingFeatures(stats=['mean', 'sum'], window_sizes=[3, 5])
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor       = LGBMRegressor(verbose=-1, random_state=123),
+                     level           = 'l1',
+                     steps           = 2,
+                     lags            = 3,
+                     window_features = rolling
+                 )
+    forecaster.fit(series=series_2, exog=exog_2['exog_1'])
+
+    results = forecaster.get_feature_importances(step=2, sort_importance=False)
+    results = results.astype({'importance': float})
+    expected = pd.DataFrame({
+                   'feature': ['l1_lag_1', 'l1_lag_2', 'l1_lag_3', 
+                               'l1_roll_mean_3', 'l1_roll_sum_5',
+                               'l2_lag_1', 'l2_lag_2', 'l2_lag_3',
+                               'l2_roll_mean_3', 'l2_roll_sum_5',
+                               'exog_1'],
+                   'importance': np.array([0, 18, 11,  0, 19, 12,  9,  8,  7,  3, 13])
+               }).astype({'importance': float})
     
     pd.testing.assert_frame_equal(results, expected)

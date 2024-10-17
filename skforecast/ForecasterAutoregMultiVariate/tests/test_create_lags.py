@@ -1,27 +1,13 @@
 # Unit test _create_lags ForecasterAutoregMultiVariate
 # ==============================================================================
-import re
-import pytest
 import numpy as np
-import pandas as pd
-from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.linear_model import LinearRegression
-    
-    
-def test_check_create_lags_exception_when_n_splits_less_than_0():
-    """
-    Check exception is raised when n_splits in _create_lags is less than 0.
-    """
-    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level= 'l1', 
-                                               lags=8, steps=3)
-    y = pd.Series(np.arange(10))
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 
-    err_msg = re.escape(
-        (f"The maximum lag ({forecaster.max_lag}) must be less than the length "
-         f"of the series minus the number of steps ({len(y)-(forecaster.steps-1)}).")
-    )
-    with pytest.raises(ValueError, match = err_msg):
-        forecaster._create_lags(y=y, lags=np.array([1, 2, 3, 4, 5, 6, 7, 8]))
+rolling = RollingFeatures(
+    stats=['mean', 'median', 'sum'], window_sizes=[5, 5, 6]
+)
 
   
 def test_create_lags_when_lags_is_3_steps_1_and_y_is_numpy_arange_10():
@@ -29,7 +15,7 @@ def test_create_lags_when_lags_is_3_steps_1_and_y_is_numpy_arange_10():
     Test matrix of lags created properly when lags is 3, steps is 1 and y is
     np.arange(10).
     """
-    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level= 'l1', 
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', 
                                                lags=3, steps=1)
     results = forecaster._create_lags(y=np.arange(10), lags=np.array([1, 2, 3]))
     expected = (
@@ -40,11 +26,19 @@ def test_create_lags_when_lags_is_3_steps_1_and_y_is_numpy_arange_10():
                   [6., 5., 4.],
                   [7., 6., 5.],
                   [8., 7., 6.]]),
-        np.array([[3., 4., 5., 6., 7., 8., 9.]])
+        np.array(
+            [[3.], 
+             [4.], 
+             [5.], 
+             [6.], 
+             [7.], 
+             [8.], 
+             [9.]]
+        )
     )
 
-    assert (results[0] == expected[0]).all()
-    assert (results[1] == expected[1]).all()
+    np.testing.assert_array_almost_equal(results[0], expected[0])
+    np.testing.assert_array_almost_equal(results[1], expected[1])
 
   
 def test_create_lags_when_lags_is_list_interspersed_lags_steps_1_and_y_is_numpy_arange_10():
@@ -52,7 +46,7 @@ def test_create_lags_when_lags_is_list_interspersed_lags_steps_1_and_y_is_numpy_
     Test matrix of lags created properly when lags is a list with interspersed 
     lags, steps is 1 and y is np.arange(10).
     """
-    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level= 'l1', 
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', 
                                                lags=[1, 5], steps=1)
     results = forecaster._create_lags(y=np.arange(10), lags=np.array([1, 5]))
     expected = (
@@ -61,11 +55,17 @@ def test_create_lags_when_lags_is_list_interspersed_lags_steps_1_and_y_is_numpy_
                   [6., 2.],
                   [7., 3.],
                   [8., 4.]]),
-        np.array([[5., 6., 7., 8., 9.]])
+        np.array(
+            [[5.], 
+             [6.], 
+             [7.], 
+             [8.], 
+             [9.]]
+        )
     )
 
-    assert (results[0] == expected[0]).all()
-    assert (results[1] == expected[1]).all()
+    np.testing.assert_array_almost_equal(results[0], expected[0])
+    np.testing.assert_array_almost_equal(results[1], expected[1])
 
 
 def test_create_lags_when_lags_is_3_steps_2_and_y_is_numpy_arange_10():
@@ -73,7 +73,7 @@ def test_create_lags_when_lags_is_3_steps_2_and_y_is_numpy_arange_10():
     Test matrix of lags created properly when lags is 3, steps is 2 and y is
     np.arange(10).
     """
-    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level= 'l1', 
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', 
                                                lags=3, steps=2)
     results = forecaster._create_lags(y=np.arange(10), lags=np.array([1, 2, 3]))
     expected = (
@@ -83,12 +83,18 @@ def test_create_lags_when_lags_is_3_steps_2_and_y_is_numpy_arange_10():
                   [5., 4., 3.],
                   [6., 5., 4.],
                   [7., 6., 5.]]),
-        np.array([[3., 4., 5., 6., 7., 8.],
-                  [4., 5., 6., 7., 8., 9.]])
+        np.array([
+            [3., 4.],
+            [4., 5.],
+            [5., 6.],
+            [6., 7.],
+            [7., 8.],
+            [8., 9.]]
+        )
     )
 
-    assert (results[0] == expected[0]).all()
-    assert (results[1] == expected[1]).all()
+    np.testing.assert_array_almost_equal(results[0], expected[0])
+    np.testing.assert_array_almost_equal(results[1], expected[1])
 
 
 def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10():
@@ -96,33 +102,31 @@ def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10():
     Test matrix of lags created properly when lags is 3, steps is 5 and y is
     np.arange(10).
     """
-    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level= 'l1', 
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', 
                                                lags=3, steps=5)
     results = forecaster._create_lags(y=np.arange(10), lags=np.array([1, 2, 3]))
     expected = (
         np.array([[2., 1., 0.],
                   [3., 2., 1.],
                   [4., 3., 2.]]),
-        np.array([[3., 4., 5.],
-                  [4., 5., 6.],
-                  [5., 6., 7.],
-                  [6., 7., 8.],
-                  [7., 8., 9.]])
+        np.array([[3., 4., 5., 6., 7.],
+                  [4., 5., 6., 7., 8.],
+                  [5., 6., 7., 8., 9.]])
     )
 
-    assert (results[0] == expected[0]).all()
-    assert (results[1] == expected[1]).all()
+    np.testing.assert_array_almost_equal(results[0], expected[0])
+    np.testing.assert_array_almost_equal(results[1], expected[1])
 
 
-def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10_return_data_X():
+def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10_data_to_return_X():
     """
     Test matrix of lags created properly when lags is 3, steps is 5 and y is
-    np.arange(10) and `return_data` is 'X'.
+    np.arange(10) and `data_to_return` is 'X'.
     """
-    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level= 'l1', 
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', 
                                                lags=3, steps=5)
     results = forecaster._create_lags(y=np.arange(10), lags=np.array([1, 2, 3]),
-                                      return_data='X')
+                                      data_to_return='X')
     expected = (
         np.array([[2., 1., 0.],
                   [3., 2., 1.],
@@ -130,27 +134,70 @@ def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10_return_data
         None
     )
 
-    assert (results[0] == expected[0]).all()
-    assert isinstance(results[1], type(None))
+    np.testing.assert_array_almost_equal(results[0], expected[0])
+    assert results[1] == expected[1]
 
 
-def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10_return_data_y():
+def test_create_lags_when_lags_is_3_steps_5_and_y_is_numpy_arange_10_data_to_return_y():
     """
     Test matrix of lags created properly when lags is 3, steps is 5 and y is
-    np.arange(10) and `return_data` is 'y'.
+    np.arange(10) and `data_to_return` is 'y'.
     """
-    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level= 'l1', 
+    forecaster = ForecasterAutoregMultiVariate(LinearRegression(), level='l1', 
                                                lags=3, steps=5)
     results = forecaster._create_lags(y=np.arange(10), lags=np.array([1, 2, 3]),
-                                      return_data='y')
+                                      data_to_return='y')
     expected = (
         None,
-        np.array([[3., 4., 5.],
-                  [4., 5., 6.],
-                  [5., 6., 7.],
-                  [6., 7., 8.],
-                  [7., 8., 9.]])
+        np.array([[3., 4., 5., 6., 7.],
+                  [4., 5., 6., 7., 8.],
+                  [5., 6., 7., 8., 9.]])
     )
 
-    assert isinstance(results[0], type(None))
-    assert (results[1] == expected[1]).all()
+    assert results[0] == expected[0]
+    np.testing.assert_array_almost_equal(results[1], expected[1])
+
+
+def test_create_lags_output_lags_None():
+    """
+    Test matrix of lags when lags=None.
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+        LinearRegression(), level='l1', lags=None, steps=2, window_features=rolling
+    )
+    results = forecaster._create_lags(
+        y=np.arange(10), lags=None, data_to_return=None
+    )
+    expected = (
+        None,
+        None
+    )
+
+    assert results[0] == expected[0]
+    assert results[1] == expected[1]
+
+
+def test_create_lags_when_window_size_window_features_greater_than_max_lag():
+    """
+    Test matrix of lags created properly when lags is 3, steps is 2, y is
+    np.arange(10) and window_size of window_features is greater than max lag.
+    """
+    forecaster = ForecasterAutoregMultiVariate(
+        LinearRegression(), level='l1', lags=3, steps=2, window_features=rolling
+    )
+    results = forecaster._create_lags(
+        y=np.arange(10), lags=np.array([1, 2, 3]), data_to_return='both'
+    )
+    expected = (
+        np.array([[5., 4., 3.],
+                  [6., 5., 4.],
+                  [7., 6., 5.]]),
+        np.array([
+            [6., 7.],
+            [7., 8.],
+            [8., 9.]]
+        )
+    )
+
+    np.testing.assert_array_almost_equal(results[0], expected[0])
+    np.testing.assert_array_almost_equal(results[1], expected[1])

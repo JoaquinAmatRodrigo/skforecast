@@ -3,10 +3,9 @@
 import re
 import pytest
 import numpy as np
-import pandas as pd
 from sklearn.linear_model import Ridge
 from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.utils import initialize_lags_grid
+from skforecast.model_selection._utils import initialize_lags_grid
 
 
 def test_TypeError_initialize_lags__rid_when_not_list_dict_or_None():

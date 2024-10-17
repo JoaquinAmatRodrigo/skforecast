@@ -12,6 +12,7 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.compose import make_column_transformer
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import HistGradientBoostingRegressor
+from skforecast.utils import transform_numpy
 from skforecast.preprocessing import RollingFeatures
 from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 
@@ -198,7 +199,7 @@ def test_create_predict_X_output_with_transform_y_and_transform_exog(n_jobs):
     exog = pd.DataFrame({
                 'col_1': [7.5, 24.4, 60.3, 57.3, 50.7, 41.4, 87.2, 47.4, 60.3, 87.2,
                           7.5, 60.4, 50.3, 57.3, 24.7, 87.4, 87.2, 60.4, 50.7, 7.5],
-                'col_2': ['a']*10 + ['b']*10}
+                'col_2': ['a'] * 10 + ['b'] * 10}
            )
     exog_predict = exog.copy()
     exog_predict.index = pd.RangeIndex(start=20, stop=40)
@@ -504,3 +505,118 @@ def test_create_predict_X_when_window_features_and_lags_None_steps_10():
     )
 
     pd.testing.assert_frame_equal(results, expected)
+
+
+def test_create_predict_X_same_predictions_as_predict():
+    """
+    Test create_predict_X matrix returns the same predictions as predict method
+    when passing to the regressor predict method.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoregDirect(
+                     regressor        = LinearRegression(),
+                     lags             = [1, 5],
+                     window_features  = [rolling, rolling_2],
+                     steps            = 6,
+                     transformer_y    = None,
+                     transformer_exog = None,
+                     differentiation  = None
+                 )
+    forecaster.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    X_predict = forecaster.create_predict_X(exog=exog.loc[end_train:])
+
+    for i, step in enumerate(range(1, forecaster.steps + 1)):
+        results = forecaster.regressors_[step].predict(X_predict.iloc[[i]])
+        expected = forecaster.predict(steps=[step], exog=exog.loc[end_train:]).to_numpy()
+        np.testing.assert_array_almost_equal(results, expected, decimal=7)
+
+
+def test_create_predict_X_same_predictions_as_predict_transformers():
+    """
+    Test create_predict_X matrix returns the same predictions as predict method
+    when passing to the regressor predict method with transformation.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoregDirect(
+                     regressor        = LinearRegression(),
+                     lags             = [1, 5],
+                     window_features  = [rolling, rolling_2],
+                     steps            = 6,
+                     transformer_y    = StandardScaler(),
+                     transformer_exog = StandardScaler(),
+                     differentiation  = None
+                 )
+    forecaster.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    X_predict = forecaster.create_predict_X(exog=exog.loc[end_train:])
+
+    for i, step in enumerate(range(1, forecaster.steps + 1)):
+        results = forecaster.regressors_[step].predict(X_predict.iloc[[i]])
+        results = transform_numpy(
+                      array             = results,
+                      transformer       = forecaster.transformer_y,
+                      fit               = False,
+                      inverse_transform = True
+                  )
+        expected = forecaster.predict(steps=[step], exog=exog.loc[end_train:]).to_numpy()
+        np.testing.assert_array_almost_equal(results, expected, decimal=7)
+
+
+def test_create_predict_X_same_predictions_as_predict_transformers_diff():
+    """
+    Test create_predict_X matrix returns the same predictions as predict method
+    when passing to the regressor predict method with transformation and differentiation.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoregDirect(
+                     regressor        = LinearRegression(),
+                     lags             = [1, 5],
+                     window_features  = [rolling, rolling_2],
+                     steps            = 6,
+                     transformer_y    = StandardScaler(),
+                     transformer_exog = StandardScaler(),
+                     differentiation  = 1
+                 )
+    forecaster.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
+    X_predict = forecaster.create_predict_X(exog=exog.loc[end_train:])
+
+    for i, step in enumerate(range(1, forecaster.steps + 1)):
+        results = forecaster.regressors_[step].predict(X_predict.iloc[[i]])
+        results = forecaster.differentiator.inverse_transform_next_window(results)
+        results = transform_numpy(
+                      array             = results,
+                      transformer       = forecaster.transformer_y,
+                      fit               = False,
+                      inverse_transform = True
+                  )
+        expected = forecaster.predict(steps=[step], exog=exog.loc[end_train:]).to_numpy()
+        np.testing.assert_array_almost_equal(results, expected, decimal=7)

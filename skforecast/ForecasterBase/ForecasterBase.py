@@ -7,7 +7,11 @@
 
 from abc import ABC, abstractmethod
 from typing import Union, Tuple, Optional
+import uuid
+import textwrap
 import pandas as pd
+from copy import copy
+from sklearn.pipeline import Pipeline
 
 
 class ForecasterBase(ABC):
@@ -15,6 +19,198 @@ class ForecasterBase(ABC):
     Base class for all forecasters in skforecast. All forecasters should specify
     all the parameters that can be set at the class level in their ``__init__``.     
     """
+
+    def _preprocess_repr(
+        self,
+        regressor: object,
+        training_range_: Optional[dict] = None,
+        series_names_in_: Optional[list] = None,
+        exog_names_in_: Optional[list] = None,
+        transformer_series: Optional[Union[str, dict]] = None
+    ) -> Tuple[str, Optional[str], Optional[str], Optional[str], Optional[Union[str, object]]]:
+        """
+        Prepare the information to be displayed when a Forecaster object is printed.
+
+        Parameters
+        ----------
+        regressor : object
+            Regressor object.
+        training_range_ : dict, default `None`
+            Training range. Only used for `ForecasterAutoregMultiSeries`.
+        series_names_in_ : list, default `None`
+            Names of the series used in the forecaster. Only used for `ForecasterAutoregMultiSeries`.
+        exog_names_in_ : list, default `None`
+            Names of the exogenous variables used in the forecaster.
+        transformer_series : str, dict, default `None`
+            Transformer used in the series. Only used for `ForecasterAutoregMultiSeries`.
+        
+        """
+
+        if isinstance(regressor, Pipeline):
+            name_pipe_steps = tuple(name + "__" for name in regressor.named_steps.keys())
+            params = {key: value for key, value in regressor.get_params().items() 
+                      if key.startswith(name_pipe_steps)}
+        else:
+            params = regressor.get_params()
+        params = str(params)
+
+        if training_range_ is not None:
+            training_range_ = [
+                f"'{k}': {v.astype(str).to_list()}" 
+                for k, v in training_range_.items()
+            ]
+            if len(training_range_) > 10:
+                training_range_ = training_range_[:5] + ['...'] + training_range_[-5:]
+            training_range_ = ", ".join(training_range_)
+
+        if series_names_in_ is not None:
+            if len(series_names_in_) > 50:
+                series_names_in_ = series_names_in_[:25] + ["..."] + series_names_in_[-25:]
+            series_names_in_ = ", ".join(series_names_in_)
+
+        if exog_names_in_ is not None:
+            if len(exog_names_in_) > 50:
+                exog_names_in_ = exog_names_in_[:25] + ["..."] + exog_names_in_[-25:]
+            exog_names_in_ = ", ".join(exog_names_in_)
+        
+        if transformer_series is not None:
+            if isinstance(transformer_series, dict):
+                transformer_series = [
+                    f"'{k}': {v}" 
+                    for k, v in transformer_series.items()
+                ]
+                if len(transformer_series) > 10:
+                    transformer_series = transformer_series[:5] + ["..."] + transformer_series[-5:]
+                transformer_series = ", ".join(transformer_series)
+            else:
+                transformer_series = str(transformer_series)        
+
+        return params, training_range_, series_names_in_, exog_names_in_, transformer_series
+
+    def _format_text_repr(
+        self, 
+        text: str, 
+        max_text_length: int = 58,
+        width: int = 80, 
+        indent: str = "    "
+    ) -> str:
+        """
+        Format text for __repr__ method.
+
+        Parameters
+        ----------
+        text : str
+            Text to format.
+        max_text_length : int, default `58`
+            Maximum length of the text before wrapping.
+        width : int, default `80`
+            Maximum width of the text.
+        indent : str, default `"    "`
+            Indentation of the text.
+        
+        Returns
+        -------
+        text : str
+            Formatted text.
+
+        """
+
+        if text is not None and len(text) > max_text_length:
+            text = "\n    " + textwrap.fill(
+                str(text), width=width, subsequent_indent=indent
+            )
+        
+        return text
+    
+    def _get_style_repr_html(
+        self, 
+        is_fitted: bool
+    ) -> Tuple[str, str]:
+        """
+        Return style and unique_id for HTML representation.
+
+        Parameters
+        ----------
+        is_fitted : bool
+            If the forecaster has been fitted.
+        
+        Returns
+        -------
+        style : str
+            CSS style.
+        unique_id : str
+            Unique id for the HTML container.
+        
+        """
+
+        unique_id = str(uuid.uuid4()).replace('-', '')
+        background_color = "#f0f8ff" if is_fitted else "#f9f1e2"
+        section_color = "#b3dbfd" if is_fitted else "#fae3b3"
+
+        style = f"""
+        <style>
+            .container-{unique_id} {{
+                font-family: 'Arial', sans-serif;
+                font-size: 0.9em;
+                color: #333;
+                border: 1px solid #ddd;
+                background-color: {background_color};
+                padding: 5px 15px;
+                border-radius: 8px;
+                max-width: 600px;
+                #margin: auto;
+            }}
+            .container-{unique_id} h2 {{
+                font-size: 1.5em;
+                color: #222;
+                border-bottom: 2px solid #ddd;
+                padding-bottom: 5px;
+                margin-bottom: 15px;
+            }}
+            .container-{unique_id} details {{
+                margin: 10px 0;
+            }}
+            .container-{unique_id} summary {{
+                font-weight: bold;
+                font-size: 1.1em;
+                cursor: pointer;
+                margin-bottom: 5px;
+                background-color: {section_color};
+                padding: 5px;
+                border-radius: 5px;
+            }}
+            .container-{unique_id} summary:hover {{
+                background-color: #e0e0e0;
+            }}
+            .container-{unique_id} ul {{
+                font-family: 'Courier New', monospace;
+                list-style-type: none;
+                padding-left: 20px;
+                margin: 10px 0;
+            }}
+            .container-{unique_id} li {{
+                margin: 5px 0;
+                font-family: 'Courier New', monospace;
+            }}
+            .container-{unique_id} li strong {{
+                font-weight: bold;
+                color: #444;
+            }}
+            .container-{unique_id} li::before {{
+                content: "- ";
+                color: #666;
+            }}
+            .container-{unique_id} a {{
+                color: #001633;
+                text-decoration: none;
+            }}
+            .container-{unique_id} a:hover {{
+                color: #359ccb; 
+            }}
+        </style>
+        """
+
+        return style, unique_id
 
     @abstractmethod
     def create_train_X_y(
@@ -47,7 +243,6 @@ class ForecasterBase(ABC):
         
         pass
 
-
     @abstractmethod
     def fit(
         self,
@@ -73,7 +268,6 @@ class ForecasterBase(ABC):
         """
         
         pass
-
 
     @abstractmethod        
     def predict(
@@ -107,7 +301,6 @@ class ForecasterBase(ABC):
 
         pass
         
-
     @abstractmethod
     def set_params(self, params: dict) -> None:
         """
@@ -127,7 +320,6 @@ class ForecasterBase(ABC):
         
         pass
         
-   
     def set_lags(self, lags: int) -> None:
         """
         Set new value to the attribute `lags`.
@@ -149,7 +341,6 @@ class ForecasterBase(ABC):
         """
         
         pass
-
 
     def summary(self) -> None:
         """

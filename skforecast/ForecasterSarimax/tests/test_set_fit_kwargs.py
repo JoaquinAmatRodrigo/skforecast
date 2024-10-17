@@ -2,7 +2,7 @@
 # ==============================================================================
 import re
 import pytest
-from skforecast.Sarimax import Sarimax
+from skforecast.sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.exceptions import IgnoredArgumentWarning
 

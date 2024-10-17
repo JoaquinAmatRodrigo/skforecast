@@ -831,7 +831,7 @@ class ForecasterRnn(ForecasterBase):
     #     steps: Optional[Union[int, list]] = None,
     #     last_window: Optional[pd.DataFrame] = None,
     #     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    #     n_boot: int = 500,
+    #     n_boot: int = 250,
     #     random_state: int = 123,
     #     use_in_sample_residuals: bool = True,
     #     levels: Any = None,
@@ -861,7 +861,7 @@ class ForecasterRnn(ForecasterBase):
     #         right after training data.
     #     exog : pandas Series, pandas DataFrame, default `None`
     #         Exogenous variable/s included as predictor/s.
-    #     n_boot : int, default `500`
+    #     n_boot : int, default `250`
     #         Number of bootstrapping iterations used to estimate prediction
     #         intervals.
     #     random_state : int, default `123`
@@ -982,7 +982,7 @@ class ForecasterRnn(ForecasterBase):
     #     last_window: Optional[pd.DataFrame] = None,
     #     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
     #     interval: list = [5, 95],
-    #     n_boot: int = 500,
+    #     n_boot: int = 250,
     #     random_state: int = 123,
     #     in_sample_residuals: bool = True,
     #     levelss: Any = None,
@@ -1014,7 +1014,7 @@ class ForecasterRnn(ForecasterBase):
     #         Confidence of the prediction interval estimated. Sequence of
     #         percentiles to compute, which must be between 0 and 100 inclusive.
     #         For example, interval of 95% should be as `interval = [2.5, 97.5]`.
-    #     n_boot : int, default `500`
+    #     n_boot : int, default `250`
     #         Number of bootstrapping iterations used to estimate prediction
     #         intervals.
     #     random_state : int, default `123`
@@ -1073,7 +1073,7 @@ class ForecasterRnn(ForecasterBase):
     #     steps: Optional[Union[int, list]] = None,
     #     last_window: Optional[pd.DataFrame] = None,
     #     exog: Optional[Union[pd.Series, pd.DataFrame]] = None,
-    #     n_boot: int = 500,
+    #     n_boot: int = 250,
     #     random_state: int = 123,
     #     in_sample_residuals: bool = True,
     #     levelss: Any = None,
@@ -1104,7 +1104,7 @@ class ForecasterRnn(ForecasterBase):
     #         right after training data.
     #     exog : pandas Series, pandas DataFrame, default `None`
     #         Exogenous variable/s included as predictor/s.
-    #     n_boot : int, default `500`
+    #     n_boot : int, default `250`
     #         Number of bootstrapping iterations used to estimate prediction
     #         intervals.
     #     random_state : int, default `123`

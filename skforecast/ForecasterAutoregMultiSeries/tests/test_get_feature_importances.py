@@ -2,17 +2,25 @@
 # ==============================================================================
 import re
 import pytest
+import joblib
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
+from pathlib import Path
 from sklearn.exceptions import NotFittedError
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.neural_network import MLPRegressor
 from sklearn.ensemble import RandomForestRegressor
+from lightgbm import LGBMRegressor
+
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 # Fixtures
+THIS_DIR = Path(__file__).parent
+series_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series.joblib')
+exog_dict = joblib.load(THIS_DIR/'fixture_sample_multi_series_exog.joblib')
 series = pd.DataFrame({'1': pd.Series(np.arange(10)), 
                        '2': pd.Series(np.arange(10))})
 
@@ -265,4 +273,27 @@ def test_output_get_feature_importances_when_regressor_is_RandomForest_with_exog
                    'importance': np.array([0.732699, 0.211938, 0.055363, 0.])
                }).sort_values(by='importance', ascending=False)
 
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_output_get_feature_importances_when_window_features():
+    """
+    Test output of get_feature_importances when regressor is LGMBRegressor with 
+    lags=3 and window features.
+    """    
+    rolling = RollingFeatures(stats=['mean', 'sum'], window_sizes=[3, 5])
+    forecaster = ForecasterAutoregMultiSeries(
+        LGBMRegressor(verbose=-1, random_state=123), lags=3, window_features=rolling
+    )
+    forecaster.fit(series=series_dict, exog=exog_dict)
+
+    results = forecaster.get_feature_importances(sort_importance=False)
+    results = results.astype({'importance': float})
+    expected = pd.DataFrame({
+                   'feature': ['lag_1', 'lag_2', 'lag_3', 'roll_mean_3', 'roll_sum_5', '_level_skforecast', 
+                               'sin_day_of_week', 'cos_day_of_week', 'air_temperature', 'wind_speed'],
+                   'importance': np.array([480.0, 361.0, 323.0, 251.0, 430.0, 
+                                           41.0, 175.0, 105.0, 468.0, 366.0])
+               }).astype({'importance': float})
+    
     pd.testing.assert_frame_equal(results, expected)
