@@ -2052,8 +2052,9 @@ class ForecasterAutoreg(ForecasterBase):
                         inverse_transform = False
                     )
         if self.differentiation is not None:
-            y_true = self.differentiator.fit_transform(y_true)[self.differentiation:]
-            y_pred = self.differentiator.fit_transform(y_pred)[self.differentiation:]
+            differentiator = copy(self.differentiator)
+            y_true = differentiator.fit_transform(y_true)[self.differentiation:]
+            y_pred = differentiator.fit_transform(y_pred)[self.differentiation:]
         
         residuals = y_true - y_pred
         data = pd.DataFrame({'prediction': y_pred, 'residuals': residuals})
