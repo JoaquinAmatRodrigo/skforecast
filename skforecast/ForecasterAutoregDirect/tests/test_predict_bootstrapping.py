@@ -243,6 +243,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_and_di
     boot_predictions_diff = forecaster_1.predict_bootstrapping(
         exog=exog_diff.loc[end_train:], n_boot=10
     )
+
+    # Revert the differentiation
     last_value_train = data.loc[:end_train].iloc[[-1]]
     boot_predictions_1 = boot_predictions_diff.copy()
     boot_predictions_1.loc[last_value_train.index[0]] = last_value_train.values[0]

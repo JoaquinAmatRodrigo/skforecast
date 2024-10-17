@@ -5,16 +5,21 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.linear_model import LinearRegression
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
+from lightgbm import LGBMRegressor
+
+from skforecast.preprocessing import RollingFeatures
+from skforecast.preprocessing import TimeSeriesDifferentiator
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 
 # Fixtures
 from .fixtures_ForecasterAutoregMultiVariate import series
 from .fixtures_ForecasterAutoregMultiVariate import exog
 from .fixtures_ForecasterAutoregMultiVariate import exog_predict
+from .fixtures_ForecasterAutoregMultiVariate import data  # to test results when using differentiation
 
 transformer_exog = ColumnTransformer(
                        [('scale', StandardScaler(), ['exog_1']),
@@ -229,5 +234,200 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_steps_
                    index   = pd.RangeIndex(start=50, stop=52)
                )
     
-    pd.testing.assert_frame_equal(expected, results)    
+    pd.testing.assert_frame_equal(expected, results)
+
+
+def test_predict_bootstrapping_output_when_regressor_is_LinearRegression_with_exog_and_differentiation_is_1_steps_1():
+    """
+    Test predict_bootstrapping output when using LinearRegression as regressor 
+    and differentiation=1 and steps=1.
+    """
+
+    arr = data.to_numpy(copy=True)
+    series_2 = pd.DataFrame(
+        {'l1': arr,
+         'l2': arr * 1.6},
+        index=data.index
+    )
+
+    # Data differentiated
+    diferenciator = TimeSeriesDifferentiator(order=1)
+    series_diff = pd.DataFrame(
+        {'l1': diferenciator.fit_transform(arr),
+         'l2': diferenciator.fit_transform(arr * 1.6)},
+        index=data.index
+    ).dropna()
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff = exog.iloc[1:]
+    end_train = '2003-03-01 23:59:00'
+
+    forecaster_1 = ForecasterAutoregMultiVariate(
+        regressor=LinearRegression(), level='l1', steps=1, lags=15, transformer_series=None
+    )
+    forecaster_1.fit(series=series_diff.loc[:end_train], exog=exog_diff.loc[:end_train])
+    boot_predictions_diff = forecaster_1.predict_bootstrapping(
+        exog=exog_diff.loc[end_train:], n_boot=10
+    )
+
+    # Revert the differentiation
+    last_value_train = series_2[['l1']].loc[:end_train].iloc[[-1]]
+    boot_predictions_1 = boot_predictions_diff.copy()
+    last_value_train = pd.DataFrame(
+        np.full(shape=(1, 10), fill_value=last_value_train.values[0]), 
+        columns = boot_predictions_1.columns, 
+        index   = pd.date_range(last_value_train.index[0], periods=1)
+    )
+    boot_predictions_1 = pd.concat([last_value_train, boot_predictions_1])    
+    boot_predictions_1 = boot_predictions_1.sort_index()
+    boot_predictions_1 = boot_predictions_1.cumsum(axis=0).iloc[1:,]
+    boot_predictions_1 = boot_predictions_1.asfreq('MS')
+
+    forecaster_2 = ForecasterAutoregMultiVariate(
+        regressor=LinearRegression(), level='l1', steps=1, lags=15, transformer_series=None, differentiation=1
+    )
+    forecaster_2.fit(series=series_2.loc[:end_train], exog=exog.loc[:end_train])
+    boot_predictions_2 = forecaster_2.predict_bootstrapping(
+        exog=exog_diff.loc[end_train:], n_boot=10
+    )
+
+    pd.testing.assert_frame_equal(boot_predictions_1, boot_predictions_2)
+
+
+def test_predict_bootstrapping_output_when_regressor_is_LinearRegression_with_exog_and_differentiation_is_1_steps_10():
+    """
+    Test predict_bootstrapping output when using LinearRegression as regressor 
+    and differentiation=1 and steps=10.
+    """
+
+    arr = data.to_numpy(copy=True)
+    series_2 = pd.DataFrame(
+        {'l1': arr,
+         'l2': arr * 1.6},
+        index=data.index
+    )
+
+    # Data differentiated
+    diferenciator = TimeSeriesDifferentiator(order=1)
+    series_diff = pd.DataFrame(
+        {'l1': diferenciator.fit_transform(arr),
+         'l2': diferenciator.fit_transform(arr * 1.6)},
+        index=data.index
+    ).dropna()
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    exog_diff = exog.iloc[1:]
+    end_train = '2003-03-01 23:59:00'
+
+    forecaster_1 = ForecasterAutoregMultiVariate(
+        regressor=LinearRegression(), level='l1', steps=10, lags=15, transformer_series=None
+    )
+    forecaster_1.fit(series=series_diff.loc[:end_train], exog=exog_diff.loc[:end_train])
+    boot_predictions_diff = forecaster_1.predict_bootstrapping(
+        exog=exog_diff.loc[end_train:], n_boot=10
+    )
+
+    # Revert the differentiation
+    last_value_train = series_2[['l1']].loc[:end_train].iloc[[-1]]
+    boot_predictions_1 = boot_predictions_diff.copy()
+    last_value_train = pd.DataFrame(
+        np.full(shape=(1, 10), fill_value=last_value_train.values[0]), 
+        columns = boot_predictions_1.columns, 
+        index   = pd.date_range(last_value_train.index[0], periods=1)
+    )
+    boot_predictions_1 = pd.concat([last_value_train, boot_predictions_1])    
+    boot_predictions_1 = boot_predictions_1.sort_index()
+    boot_predictions_1 = boot_predictions_1.cumsum(axis=0).iloc[1:,]
+    boot_predictions_1 = boot_predictions_1.asfreq('MS')
+
+    forecaster_2 = ForecasterAutoregMultiVariate(
+        regressor=LinearRegression(), level='l1', steps=10, lags=15, transformer_series=None, differentiation=1
+    )
+    forecaster_2.fit(series=series_2.loc[:end_train], exog=exog.loc[:end_train])
+    boot_predictions_2 = forecaster_2.predict_bootstrapping(
+        exog=exog_diff.loc[end_train:], n_boot=10
+    )
+
+    pd.testing.assert_frame_equal(boot_predictions_1, boot_predictions_2)
+
+
+def test_predict_output_when_window_features_steps_1():
+    """
+    Test output of predict when regressor is LGBMRegressor and window features
+    with steps=1.
+    """
+
+    rolling = RollingFeatures(stats=['mean', 'sum'], window_sizes=[3, 5])
+    forecaster = ForecasterAutoregMultiVariate(
+        regressor=LGBMRegressor(verbose=-1, random_state=123), level='l1', 
+        steps=1, lags=5, window_features=rolling
+    )
+    forecaster.fit(series=series, exog=exog['exog_1'])
+    predictions = forecaster.predict_bootstrapping(
+        n_boot=10, exog=exog_predict['exog_1'], use_in_sample_residuals=True
+    )
+
+    expected = pd.DataFrame(
+                   data    = np.array(
+                                 [[0.60290414, 0.4125675 , 0.49927603, 0.64983046, 0.49009973,
+                                   0.48971982, 0.40030064, 0.3430941 , 0.82287993, 0.67578235]]
+                             ),
+                   columns = [f"pred_boot_{i}" for i in range(10)],
+                   index   = pd.RangeIndex(start=50, stop=51)
+               )
     
+    pd.testing.assert_frame_equal(predictions, expected)
+
+
+def test_predict_output_when_window_features_steps_10():
+    """
+    Test output of predict when regressor is LGBMRegressor and window features
+    with steps=10.
+    """
+
+    rolling = RollingFeatures(stats=['mean', 'sum'], window_sizes=[3, 5])
+    forecaster = ForecasterAutoregMultiVariate(
+        regressor=LGBMRegressor(verbose=-1, random_state=123), level='l1', 
+        steps=10, lags=5, window_features=rolling
+    )
+    forecaster.fit(series=series, exog=exog['exog_1'])
+    predictions = forecaster.predict_bootstrapping(
+        n_boot=10, exog=exog_predict['exog_1'], use_in_sample_residuals=True
+    )
+
+    expected = pd.DataFrame(
+                   data    = np.array(
+                                 [[0.42310646, 0.63097612, 0.36178866, 0.9807642 , 0.89338916,
+                                   0.43857224, 0.39804426, 0.72904971, 0.17545176, 0.72904971],
+                                  [0.53155137, 0.31226122, 0.72445532, 0.50183668, 0.72445532,
+                                   0.73799541, 0.42583029, 0.31226122, 0.89338916, 0.94416002],
+                                  [0.68482974, 0.32295891, 0.18249173, 0.73799541, 0.73799541,
+                                   0.42635131, 0.31226122, 0.39804426, 0.84943179, 0.4936851 ],
+                                  [0.0596779 , 0.09210494, 0.61102351, 0.1156184 , 0.42583029,
+                                   0.18249173, 0.94416002, 0.42635131, 0.73799541, 0.36178866],
+                                  [0.89338916, 0.17545176, 0.17545176, 0.39804426, 0.39211752,
+                                   0.36178866, 0.39211752, 0.63097612, 0.61102351, 0.73799541],
+                                  [0.61102351, 0.34317802, 0.73799541, 0.36178866, 0.43857224,
+                                   0.42635131, 0.53182759, 0.41482621, 0.18249173, 0.43086276],
+                                  [0.63097612, 0.86630916, 0.4936851 , 0.31728548, 0.22826323,
+                                   0.53155137, 0.17545176, 0.31728548, 0.53155137, 0.89338916],
+                                  [0.09210494, 0.72445532, 0.36178866, 0.62395295, 0.29371405,
+                                   0.41482621, 0.48303426, 0.72445532, 0.09210494, 0.09210494],
+                                  [0.43086276, 0.73799541, 0.36178866, 0.4936851 , 0.48303426,
+                                   0.84943179, 0.42635131, 0.62395295, 0.48303426, 0.53182759],
+                                  [0.94416002, 0.32295891, 0.63097612, 0.39804426, 0.62395295,
+                                   0.73799541, 0.22826323, 0.43370117, 0.94416002, 0.09210494]]
+                             ),
+                   columns = [f"pred_boot_{i}" for i in range(10)],
+                   index   = pd.RangeIndex(start=50, stop=60)
+               )
+    
+    pd.testing.assert_frame_equal(predictions, expected)
