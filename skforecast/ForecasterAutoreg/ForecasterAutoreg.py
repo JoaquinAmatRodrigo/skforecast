@@ -2052,7 +2052,7 @@ class ForecasterAutoreg(ForecasterBase):
                          inverse_transform = False
                      )
         if self.differentiation is not None:
-            differentiator = copy(self.differentiator)
+            differentiator = clone(self.differentiator)
             y_true = differentiator.fit_transform(y_true)[self.differentiation:]
             y_pred = differentiator.fit_transform(y_pred)[self.differentiation:]
         

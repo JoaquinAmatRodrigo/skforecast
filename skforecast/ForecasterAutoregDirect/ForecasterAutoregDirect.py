@@ -2089,6 +2089,8 @@ class ForecasterAutoregDirect(ForecasterBase):
         rng = np.random.default_rng(seed=random_state)
         y_true = y_true.copy()
         y_pred = y_pred.copy()
+        if self.differentiation is not None:
+            differentiator = clone(self.differentiator)
         for k in steps_to_update:
             if isinstance(y_true[k], pd.Series):
                 y_true[k] = y_true[k].to_numpy()
@@ -2108,8 +2110,8 @@ class ForecasterAutoregDirect(ForecasterBase):
                                 inverse_transform = False
                             )
             if self.differentiation is not None:
-                y_true[k] = self.differentiator.fit_transform(y_true[k])[self.differentiation:]
-                y_pred[k] = self.differentiator.fit_transform(y_pred[k])[self.differentiation:]
+                y_true[k] = differentiator.fit_transform(y_true[k])[self.differentiation:]
+                y_pred[k] = differentiator.fit_transform(y_pred[k])[self.differentiation:]
 
             residuals[k] = y_true[k] - y_pred[k]
 
