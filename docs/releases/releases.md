@@ -16,9 +16,11 @@ The main changes in this release are:
 
 This release has undergone a major refactoring to improve the performance of the library. Visit the [migration guide](https://skforecast.org/latest/user_guides/migration-guide.html) section for more information.
 
-+ <span class="badge text-bg-feature">Feature</span> WINDOW FEATURES......... <code>[RollingFeatures]</code>
++ <span class="badge text-bg-feature">Feature</span> Window features can be added to the training matrix using the `window_features` argument in all forecasters. You can use the <code>[RollingFeatures]</code> class to create these features or create your own object.
 
-+ <span class="badge text-bg-feature">Feature</span> CV in backtesting......... <code>[RollingFeatures]</code>
++ <span class="badge text-bg-feature">Feature</span> <code>[model_selection]</code> functions now have a new argument `cv`. This argument expect an object of type <code>[TimeSeriesFold]</code> or <code>[OneStepAheadFold]</code> which allows to define the validation strategy using the arguments `initial_train_size`, `steps`, `gap`, refit`, `fixed_train_size`, `skip_folds` and `allow_incomplete_folds`.
+
++ <span class="badge text-bg-feature">Feature</span> Hyperparameter search now allows to follow a one-step-ahead validation strategy using a <code>[OneStepAheadFold]</code> as `cv` argument in the <code>[model_selection]</code> functions.
 
 + <span class="badge text-bg-enhancement">Enhancement</span> Refactor the prediction process in <code>[ForecasterAutoregMultiSeries]</code> to improve performance when predicting multiple series.
 
@@ -36,6 +38,8 @@ This release has undergone a major refactoring to improve the performance of the
 + Added `numba>=0.59` as hard dependency.
 
 + Added `window_features` argument to all forecasters. This argument allows the user to add window features to the training matrix. See <code>[RollingFeatures]</code>.
+
++ Hyperparameter search now allows to follow a one-step-ahead validation strategy using a <code>[OneStepAheadFold]</code> as `cv` argument in the <code>[model_selection]</code> functions.
 
 + Differentiation has been extended to all forecasters. The `differentiation` argument has been added to all forecasters to model the n-order differentiated time series.
 
@@ -71,6 +75,8 @@ This release has undergone a major refactoring to improve the performance of the
 + <code>[model_selection]</code> module has been divided internally into different modules to improve code organization (`_validation`, `_search`, `_split`).
 
 + Functions from `model_selection_multiseries` and `model_selection_sarimax` modules have been moved to the <code>[model_selection]</code> module.
+
++ <code>[model_selection]</code> functions now have a new argument `cv`. This argument expect an object of type <code>[TimeSeriesFold]</code> or <code>[OneStepAheadFold]</code> which allows to define the validation strategy using the arguments `initial_train_size`, `steps`, `gap`, refit`, `fixed_train_size`, `skip_folds` and `allow_incomplete_folds`.
 
 + Added <code>[feature_selection]</code> module. The functions <code>[select_features]</code> and <code>[select_features_multiseries]</code> have been moved to this module.
 
