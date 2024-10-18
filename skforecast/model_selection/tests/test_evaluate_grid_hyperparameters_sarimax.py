@@ -6,10 +6,10 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.metrics import mean_absolute_error
-from skforecast.Sarimax import Sarimax
+from skforecast.sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.model_selection._split import TimeSeriesFold
-from skforecast.model_selection_sarimax.model_selection_sarimax import _evaluate_grid_hyperparameters_sarimax
+from skforecast.model_selection._search import _evaluate_grid_hyperparameters_sarimax
 
 # Fixtures
 from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import y_datetime

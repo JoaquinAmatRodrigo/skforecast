@@ -1,19 +1,22 @@
-# Unit test set_window_features ForecasterAutoregDirect
+# Unit test set_window_features ForecasterAutoregMultiVariate
 # ==============================================================================
 import re
 import pytest
 from sklearn.linear_model import LinearRegression 
 from skforecast.preprocessing import RollingFeatures
-from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 
 
-def test_set_window_features_ValueError_when_window_features_set_to_None_and_lags_is_None():
+@pytest.mark.parametrize("lags", 
+                         [None, {'l1': None, 'l2': None}], 
+                         ids = lambda lags: f'lags: {lags}')
+def test_set_window_features_ValueError_when_window_features_set_to_None_and_lags_is_None(lags):
     """
     Test ValueError is raised when window_features is set to None and lags is None.
     """
     rolling = RollingFeatures(stats='mean', window_sizes=6)
-    forecaster = ForecasterAutoregDirect(
-        LinearRegression(), steps=2, lags=None, window_features=rolling
+    forecaster = ForecasterAutoregMultiVariate(
+        LinearRegression(), level='l1', steps=2, lags=lags, window_features=rolling
     )
 
     err_msg = re.escape(
@@ -33,7 +36,9 @@ def test_set_window_features_with_different_inputs(wf):
     """
     Test how attributes change with window_features argument.
     """
-    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=5, steps=2)
+    forecaster = ForecasterAutoregMultiVariate(
+        LinearRegression(), level='l1', steps=2, lags=5
+    )
     forecaster.set_window_features(window_features=wf)
 
     assert forecaster.lags_names == ['lag_1', 'lag_2', 'lag_3', 'lag_4', 'lag_5']
@@ -49,8 +54,9 @@ def test_set_window_features_when_differentiation_is_not_None():
     Test how `window_size` is also updated when the forecaster includes 
     differentiation.
     """
-    forecaster = ForecasterAutoregDirect(
+    forecaster = ForecasterAutoregMultiVariate(
                      regressor       = LinearRegression(),
+                     level           = 'l1',
                      steps           = 2,
                      lags            = 3,
                      window_features = RollingFeatures(stats='median', window_sizes=2),
@@ -74,8 +80,9 @@ def test_set_window_features_when_lags():
     lags.
     """
     rolling = RollingFeatures(stats='mean', window_sizes=10)
-    forecaster = ForecasterAutoregDirect(
+    forecaster = ForecasterAutoregMultiVariate(
                      regressor       = LinearRegression(),
+                     level           = 'l1',
                      lags            = 9,
                      steps           = 2,
                      window_features = rolling
@@ -98,8 +105,9 @@ def test_set_window_features_to_None():
     Test how attributes change when window_features is set to None.
     """
     rolling = RollingFeatures(stats='mean', window_sizes=6)
-    forecaster = ForecasterAutoregDirect(
+    forecaster = ForecasterAutoregMultiVariate(
                      regressor       = LinearRegression(),
+                     level           = 'l1',
                      lags            = 5,
                      steps           = 3,
                      window_features = rolling

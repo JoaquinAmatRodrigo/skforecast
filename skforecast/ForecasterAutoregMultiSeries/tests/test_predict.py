@@ -21,6 +21,7 @@ from sklearn.ensemble import HistGradientBoostingRegressor
 from lightgbm import LGBMRegressor
 
 from skforecast.exceptions import IgnoredArgumentWarning
+from skforecast.preprocessing import RollingFeatures
 from skforecast.preprocessing import TimeSeriesDifferentiator
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
@@ -553,6 +554,43 @@ def test_predict_output_when_categorical_features_native_implementation_LGBMRegr
                                     [0.45119292, 0.4503941 ],
                                     [0.61998977, 0.65552498]]),
                    index   = pd.RangeIndex(start=50, stop=60, step=1),
+                   columns = ['1', '2']
+               )
+    
+    pd.testing.assert_frame_equal(predictions, expected)
+
+
+def test_predict_output_when_window_features():
+    """
+    Test output of predict when regressor is LGBMRegressor and window features.
+    """
+
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=4)
+    transformer_exog = ColumnTransformer(
+                           [('scale', StandardScaler(), ['exog_1']),
+                            ('onehot', OneHotEncoder(), ['exog_2'])],
+                           remainder = 'passthrough',
+                           verbose_feature_names_out = False
+                       )
+    
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor          = LGBMRegressor(verbose=-1),
+                     lags               = 5,
+                     window_features    = rolling,
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = transformer_exog
+                 )
+    forecaster.fit(series=series, exog=exog)
+    predictions = forecaster.predict(steps=5, exog=exog_predict)
+
+    expected = pd.DataFrame(
+                   data = np.array([
+                              [0.62360244, 0.72875212],
+                              [0.47067417, 0.29193681],
+                              [0.56289914, 0.60510683],
+                              [0.72004167, 0.74123332],
+                              [0.51581126, 0.54273085]]),
+                   index   = pd.RangeIndex(start=50, stop=55, step=1),
                    columns = ['1', '2']
                )
     

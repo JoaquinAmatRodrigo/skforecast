@@ -1,6 +1,5 @@
 # Unit test fit ForecasterAutoregMultiVariate
 # ==============================================================================
-import re
 import pytest
 import numpy as np
 import pandas as pd
@@ -8,6 +7,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.linear_model import LinearRegression
+from skforecast.preprocessing import RollingFeatures
 from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 
 # Fixtures
@@ -26,12 +26,16 @@ def test_forecaster_y_exog_features_stored():
     """
     Test forecaster stores y and exog features after fitting.
     """
+    rolling = RollingFeatures(
+        stats=['ratio_min_max', 'median'], window_sizes=4
+    )
     forecaster = ForecasterAutoregMultiVariate(
-                     regressor          = LinearRegression(), 
-                     level              = 'l1',
-                     lags               = 3,
-                     steps              = 2,
-                     transformer_exog   = transformer_exog
+                     regressor        = LinearRegression(), 
+                     level            = 'l1',
+                     steps            = 2,
+                     lags             = 3,
+                     window_features  = rolling,
+                     transformer_exog = transformer_exog
                  )
     forecaster.fit(series=series_fixtures, exog=exog)
 
@@ -41,13 +45,21 @@ def test_forecaster_y_exog_features_stored():
     exog_type_in_ = type(exog)
     exog_names_in_ = ['exog_1', 'exog_2']
     exog_dtypes_in_ = {'exog_1': exog['exog_1'].dtype, 'exog_2': exog['exog_2'].dtype}
+    X_train_window_features_names_out_ = [
+        'l1_roll_ratio_min_max_4', 'l1_roll_median_4',
+        'l2_roll_ratio_min_max_4', 'l2_roll_median_4'
+    ]
     X_train_exog_names_out_ = ['exog_1', 'exog_2_a', 'exog_2_b']
-    X_train_direct_exog_names_out_ = ['exog_1_step_1', 'exog_2_a_step_1', 'exog_2_b_step_1',
-                                      'exog_1_step_2', 'exog_2_a_step_2', 'exog_2_b_step_2']
-    X_train_features_names_out_ = ['l1_lag_1', 'l1_lag_2', 'l1_lag_3',
-                                   'l2_lag_1', 'l2_lag_2', 'l2_lag_3',
-                                   'exog_1_step_1', 'exog_2_a_step_1', 'exog_2_b_step_1', 
-                                   'exog_1_step_2', 'exog_2_a_step_2', 'exog_2_b_step_2']
+    X_train_direct_exog_names_out_ = [
+        'exog_1_step_1', 'exog_2_a_step_1', 'exog_2_b_step_1',
+        'exog_1_step_2', 'exog_2_a_step_2', 'exog_2_b_step_2'
+    ]
+    X_train_features_names_out_ = [
+        'l1_lag_1', 'l1_lag_2', 'l1_lag_3', 'l1_roll_ratio_min_max_4', 'l1_roll_median_4',
+        'l2_lag_1', 'l2_lag_2', 'l2_lag_3', 'l2_roll_ratio_min_max_4', 'l2_roll_median_4',
+        'exog_1_step_1', 'exog_2_a_step_1', 'exog_2_b_step_1', 
+        'exog_1_step_2', 'exog_2_a_step_2', 'exog_2_b_step_2'
+    ]
     
     assert forecaster.series_names_in_ == series_names_in_
     assert forecaster.X_train_series_names_in_ == X_train_series_names_in_
@@ -55,6 +67,7 @@ def test_forecaster_y_exog_features_stored():
     assert forecaster.exog_type_in_ == exog_type_in_
     assert forecaster.exog_names_in_ == exog_names_in_
     assert forecaster.exog_dtypes_in_ == exog_dtypes_in_
+    assert forecaster.X_train_window_features_names_out_ == X_train_window_features_names_out_
     assert forecaster.X_train_exog_names_out_ == X_train_exog_names_out_
     assert forecaster.X_train_direct_exog_names_out_ == X_train_direct_exog_names_out_
     assert forecaster.X_train_features_names_out_ == X_train_features_names_out_
@@ -269,5 +282,5 @@ def test_fit_last_window_stored_when_lags_dict_with_None(level):
     expected.index = pd.RangeIndex(start=7, stop=10, step=1)
 
     pd.testing.assert_frame_equal(forecaster.last_window_, expected)
-    assert forecaster.series_names_in_ == ['l1'] if level == 'l1' else ['l1', 'l2']
+    assert forecaster.series_names_in_ == ['l1', 'l2']
     assert forecaster.X_train_series_names_in_ == ['l1']

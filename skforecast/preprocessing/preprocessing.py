@@ -11,6 +11,7 @@ import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
 from sklearn.base import TransformerMixin
+from sklearn.exceptions import NotFittedError
 from numba import njit
 
 
@@ -225,7 +226,7 @@ class TimeSeriesDifferentiator(BaseEstimator, TransformerMixin):
         
         array_ndim = X.ndim
         if array_ndim == 1:
-            X = X.reshape(-1, 1)
+            X = X[:, np.newaxis]
 
         # Remove initial rows with nan values if present
         X = X[~np.isnan(X).any(axis=1)]
@@ -1023,7 +1024,10 @@ class RollingFeatures():
     ) -> np.ndarray:
         """
         Transform a numpy array using rolling windows and compute the 
-        specified statistics. The input array must be a 1D array.
+        specified statistics. The returned array will have the shape 
+        (X.shape[1] if exists, n_stats). For example, if X is a flat
+        array, the output will have shape (n_stats,). If X is a 2D array,
+        the output will have shape (X.shape[1], n_stats).
 
         Parameters
         ----------
@@ -1037,12 +1041,255 @@ class RollingFeatures():
         
         """
 
-        rolling_features = np.full(shape=self.n_stats, fill_value=np.nan, dtype=float)
-        for i, stat in enumerate(self.stats):
+        array_ndim = X.ndim
+        if array_ndim == 1:
+            X = X[:, np.newaxis]
+            
+        rolling_features = np.full(
+            shape=(X.shape[1], self.n_stats), fill_value=np.nan, dtype=float
+        )
 
-            X_window = X[-self.window_sizes[i]:]
-            X_window = X_window[~np.isnan(X_window)]
+        for i in range(X.shape[1]):
+            for j, stat in enumerate(self.stats):
+                X_window = X[-self.window_sizes[j]:, i]
+                X_window = X_window[~np.isnan(X_window)]
+                rolling_features[i, j] = self._apply_stat_numpy_jit(X_window, stat)
 
-            rolling_features[i] = self._apply_stat_numpy_jit(X_window, stat)
+        if array_ndim == 1:
+            rolling_features = rolling_features.ravel()
         
         return rolling_features
+    
+
+class QuantileBinner:
+    """
+    QuantileBinner class to bin data into quantile-based bins using `numpy.percentile`.
+    This class is similar to `KBinsDiscretizer` but faster for binning data into
+    quantile-based bins.
+    
+    Parameters
+    ----------
+    n_bins : int
+        The number of quantile-based bins to create.
+    method : str, default='linear'
+        The method used to compute the quantiles. This parameter is passed to 
+        `numpy.percentile`. Default is 'linear'. Valid values are "inverse_cdf",
+        "averaged_inverse_cdf", "closest_observation", "interpolated_inverse_cdf",
+        "hazen", "weibull", "linear", "median_unbiased", "normal_unbiased".
+    subsample : int, default=200000
+        The number of samples to use for computing quantiles. If the dataset 
+        has more samples than `subsample`, a random subset will be used.
+    random_state : int, default=789654
+        The random seed to use for generating a random subset of the data.
+    dtype : data type, default=numpy.float64
+        The data type to use for the bin indices. Default is `numpy.float64`.
+    
+    Attributes
+    ----------
+    n_bins : int
+        The number of quantile-based bins to create.
+    method : str, default='linear'
+        The method used to compute the quantiles. This parameter is passed to 
+        `numpy.percentile`. Default is 'linear'. Valid values are 'linear',
+        'lower', 'higher', 'midpoint', 'nearest'.
+    subsample : int, default=200000
+        The number of samples to use for computing quantiles. If the dataset 
+        has more samples than `subsample`, a random subset will be used.
+    random_state : int, default=789654
+        The random seed to use for generating a random subset of the data.
+    dtype : data type, default=numpy.float64
+        The data type to use for the bin indices. Default is `numpy.float64`.
+     n_bins_ : int
+        The number of bins learned during fitting.
+    bin_edges_ : numpy ndarray
+        The edges of the bins learned during fitting.
+    """
+
+    def __init__(
+        self,
+        n_bins: int,
+        method: Optional[str] = "linear",
+        subsample: int = 200000,
+        dtype: Optional[type] = np.float64,
+        random_state: Optional[int] = 789654
+    ):
+        
+        self._validate_params(
+            n_bins,
+            method,
+            subsample,
+            dtype,
+            random_state
+        )
+
+        self.n_bins       = n_bins
+        self.method       = method
+        self.subsample    = subsample
+        self.random_state = random_state
+        self.dtype        = dtype
+        self.n_bins_      = None
+        self.bin_edges_   = None
+        self.intervals_   = None
+
+
+    def _validate_params(
+            self,
+            n_bins: int,
+            method: str,
+            subsample: int,
+            dtype: type,
+            random_state: int
+    ):
+        """
+        Validate the parameters passed to the class initializer.
+        """
+    
+        if not isinstance(n_bins, int) or n_bins < 2:
+            raise ValueError(
+                f"`n_bins` must be an int greater than 1. Got {n_bins}."
+            )
+
+        valid_methods = [
+            "inverse_cdf",
+            "averaged_inverse_cdf",
+            "closest_observation",
+            "interpolated_inverse_cdf",
+            "hazen",
+            "weibull",
+            "linear",
+            "median_unbiased",
+            "normal_unbiased",
+        ]
+        if method not in valid_methods:
+            raise ValueError(
+                f"`method` must be one of {valid_methods}. Got {method}."
+            )
+        if not isinstance(subsample, int) or subsample < 1:
+            raise ValueError(
+                f"`subsample` must be an integer greater than or equal to 1. "
+                f"Got {subsample}."
+            )
+        if not isinstance(random_state, int) or random_state < 0:
+            raise ValueError(
+                f"`random_state` must be an integer greater than or equal to 0. "
+                f"Got {random_state}."
+            )
+        if not isinstance(dtype, type):
+            raise ValueError(
+                f"`dtype` must be a valid numpy dtype. Got {dtype}."
+            )
+
+    def fit(self, X: np.ndarray):
+        """
+        Learn the bin edges based on quantiles from the training data.
+        
+        Parameters
+        ----------
+        X : numpy ndarray
+            The training data used to compute the quantiles.
+        
+        Returns
+        -------
+        self : QuantileBinner
+            Fitted estimator.
+        """
+
+        if X.size == 0:
+            raise ValueError("Input data `X` cannot be empty.")
+        if len(X) > self.subsample:
+            rng = np.random.default_rng(self.random_state)
+            X = X[rng.integers(0, len(X), self.subsample)]
+
+        self.bin_edges_ = np.percentile(
+            a      = X,
+            q      = np.linspace(0, 100, self.n_bins + 1),
+            method = self.method
+        )
+
+        self.n_bins_ = len(self.bin_edges_) - 1
+        self.intervals_ = {
+            float(i): (float(self.bin_edges_[i]), float(self.bin_edges_[i + 1]))
+            for i in range(self.n_bins_)
+        }
+
+        return self
+
+    def transform(self, X: np.ndarray):
+        """
+        Assign new data to the learned bins.
+        
+        Parameters
+        ----------
+        X : numpy ndarray
+            The data to assign to the bins.
+        
+        Returns
+        -------
+        bin_indices : numpy ndarray 
+            The indices of the bins each value belongs to.
+            Values less than the smallest bin edge are assigned to the first bin,
+            and values greater than the largest bin edge are assigned to the last bin.
+        """
+
+        if self.bin_edges_ is None:
+            raise NotFittedError(
+                "The model has not been fitted yet. Call 'fit' with training data first."
+            )
+
+        bin_indices = np.digitize(X, bins=self.bin_edges_, right=True)
+        bin_indices = np.clip(bin_indices, 1, self.n_bins_).astype(self.dtype) - 1
+
+        return bin_indices
+
+    def fit_transform(self, X):
+        """
+        Fit the model to the data and return the bin indices for the same data.
+        
+        Parameters
+        ----------
+        X : numpy.ndarray
+            The data to fit and transform.
+        
+        Returns
+        -------
+        bin_indices : numpy.ndarray
+            The indices of the bins each value belongs to.
+            Values less than the smallest bin edge are assigned to the first bin,
+            and values greater than the largest bin edge are assigned to the last bin.
+        """
+        self.fit(X)
+
+        return self.transform(X)
+
+    def get_params(self):
+        """
+        Get the parameters of the quantile binner.
+        
+        Returns
+        -------
+        params : dict
+            A dictionary of the parameters of the quantile binner.
+        """
+
+        return {
+            "n_bins": self.n_bins,
+            "method": self.method,
+            "subsample": self.subsample,
+            "dtype": self.dtype,
+            "random_state": self.random_state,
+        }
+
+    def set_params(self, **params):
+        """
+        Set the parameters of the quantile binner.
+        
+        Parameters
+        ----------
+        params : dict
+            A dictionary of the parameters to set.
+        """
+
+        for param, value in params.items():
+            setattr(self, param, value)
+
+        return self

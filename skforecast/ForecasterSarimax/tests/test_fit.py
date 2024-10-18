@@ -4,7 +4,7 @@ import re
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.Sarimax import Sarimax
+from skforecast.sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 
 # Fixtures

@@ -3,9 +3,10 @@
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 
 def test_fit_correct_dict_create_series_weights_weight_func_transformer_series():
@@ -24,7 +25,7 @@ def test_fit_correct_dict_create_series_weights_weight_func_transformer_series()
                         '2022-01-13'], dtype='datetime64[ns]', freq='D' 
                    )
 
-    def custom_weights(index):
+    def custom_weights(index):  # pragma: no cover
         """
         Return 0 if index is between '2022-01-08' and '2022-01-10', 1 otherwise.
         """
@@ -137,8 +138,12 @@ def test_fit_in_sample_residuals_stored(encoding):
     series = pd.DataFrame({'1': pd.Series(np.arange(5)), 
                            '2': pd.Series(np.arange(5))})
 
-    forecaster = ForecasterAutoregMultiSeries(LinearRegression(), lags=3,
-                                              encoding=encoding)
+    rolling = RollingFeatures(
+        stats=['ratio_min_max', 'median'], window_sizes=4
+    )
+    forecaster = ForecasterAutoregMultiSeries(
+        LinearRegression(), lags=3, encoding=encoding, window_features=rolling
+    )
     forecaster.fit(series=series, store_in_sample_residuals=True)
     results = forecaster.in_sample_residuals_
 
@@ -146,14 +151,16 @@ def test_fit_in_sample_residuals_stored(encoding):
                 '2': np.array([0., 0.]),
                 '_unknown_level': np.array([-4.4408921e-16, 0.0000000e+00, 0., 0.])}
     
+    X_train_window_features_names_out_ = ['roll_ratio_min_max_4', 'roll_median_4']
     X_train_features_names_out_ = (
-        ['lag_1', 'lag_2', 'lag_3', '_level_skforecast'] 
+        ['lag_1', 'lag_2', 'lag_3', 'roll_ratio_min_max_4', 'roll_median_4', '_level_skforecast'] 
         if encoding != 'onehot' 
-        else ['lag_1', 'lag_2', 'lag_3', '1', '2']
+        else ['lag_1', 'lag_2', 'lag_3', 'roll_ratio_min_max_4', 'roll_median_4', '1', '2']
     )
 
     assert forecaster.series_names_in_ == ['1', '2']
     assert forecaster.X_train_series_names_in_ == ['1', '2']
+    assert forecaster.X_train_window_features_names_out_ == X_train_window_features_names_out_
     assert forecaster.X_train_features_names_out_ == X_train_features_names_out_
     assert isinstance(results, dict)
     assert np.all(isinstance(x, np.ndarray) for x in results.values())

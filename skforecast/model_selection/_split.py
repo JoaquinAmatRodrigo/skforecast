@@ -1,5 +1,5 @@
 ################################################################################
-#                             skforecast._split                                #
+#                     skforecast.model_selection._split                        #
 #                                                                              #
 # This work by skforecast team is licensed under the BSD 3-Clause License.     #
 ################################################################################
@@ -791,7 +791,7 @@ class TimeSeriesFold(BaseFold):
             externally_fitted = False
 
         index = self._extract_index(X)
-        idx = range(len(X))
+        idx = range(len(index))
         folds = []
         i = 0
         last_fold_excluded = False

@@ -5,7 +5,6 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.exceptions import NotFittedError
-from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 from sklearn.compose import ColumnTransformer
 from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import MinMaxScaler
@@ -14,11 +13,15 @@ from sklearn.preprocessing import OrdinalEncoder
 from sklearn.compose import make_column_transformer
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import HistGradientBoostingRegressor
+from skforecast.utils import transform_numpy
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoregMultiVariate import ForecasterAutoregMultiVariate
 
 # Fixtures
 from .fixtures_ForecasterAutoregMultiVariate import series
 from .fixtures_ForecasterAutoregMultiVariate import exog
 from .fixtures_ForecasterAutoregMultiVariate import exog_predict
+from .fixtures_ForecasterAutoregMultiVariate import data  # to test results when using differentiation
 
 transformer_exog = ColumnTransformer(
                        [('scale', StandardScaler(), ['exog_1']),
@@ -443,3 +446,139 @@ def test_create_predict_X_output_when_categorical_features_native_implementation
     )
     
     pd.testing.assert_frame_equal(results, expected)
+
+
+def test_create_predict_X_same_predictions_as_predict():
+    """
+    Test create_predict_X matrix returns the same predictions as predict method
+    when passing to the regressor predict method.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+    arr = data.to_numpy(copy=True)
+    series = pd.DataFrame(
+        {'l1': arr,
+         'l2': arr * 1.6},
+        index=data.index
+    )
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(),
+                     level              = 'l1',
+                     lags               = [1, 5],
+                     window_features    = [rolling, rolling_2],
+                     steps              = 6,
+                     transformer_series = None,
+                     transformer_exog   = None,
+                     differentiation    = None
+                 )
+    forecaster.fit(series=series.loc[:end_train], exog=exog.loc[:end_train])
+    X_predict = forecaster.create_predict_X(exog=exog.loc[end_train:])
+
+    for i, step in enumerate(range(1, forecaster.steps + 1)):
+        results = forecaster.regressors_[step].predict(X_predict.iloc[[i]])
+        expected = forecaster.predict(steps=[step], exog=exog.loc[end_train:]).to_numpy().item()
+        np.testing.assert_array_almost_equal(results, expected, decimal=7)
+
+
+def test_create_predict_X_same_predictions_as_predict_transformers():
+    """
+    Test create_predict_X matrix returns the same predictions as predict method
+    when passing to the regressor predict method with transformation.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+    arr = data.to_numpy(copy=True)
+    series = pd.DataFrame(
+        {'l1': arr,
+         'l2': arr * 1.6},
+        index=data.index
+    )
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(),
+                     level              = 'l1',
+                     lags               = [1, 5],
+                     window_features    = [rolling, rolling_2],
+                     steps              = 6,
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = StandardScaler(),
+                     differentiation    = None
+                 )
+    forecaster.fit(series=series.loc[:end_train], exog=exog.loc[:end_train])
+    X_predict = forecaster.create_predict_X(exog=exog.loc[end_train:])
+
+    for i, step in enumerate(range(1, forecaster.steps + 1)):
+        results = forecaster.regressors_[step].predict(X_predict.iloc[[i]])
+        results = transform_numpy(
+                      array             = results,
+                      transformer       = forecaster.transformer_series_[forecaster.level],
+                      fit               = False,
+                      inverse_transform = True
+                  )
+        expected = forecaster.predict(steps=[step], exog=exog.loc[end_train:]).to_numpy().item()
+        np.testing.assert_array_almost_equal(results, expected, decimal=7)
+
+
+def test_create_predict_X_same_predictions_as_predict_transformers_diff():
+    """
+    Test create_predict_X matrix returns the same predictions as predict method
+    when passing to the regressor predict method with transformation and differentiation.
+    """
+
+    end_train = '2003-03-01 23:59:00'
+    arr = data.to_numpy(copy=True)
+    series = pd.DataFrame(
+        {'l1': arr,
+         'l2': arr * 1.6},
+        index=data.index
+    )
+
+    # Simulated exogenous variable
+    rng = np.random.default_rng(9876)
+    exog = pd.Series(
+        rng.normal(loc=0, scale=1, size=len(data)), index=data.index, name='exog'
+    )
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=[5, 5])
+    rolling_2 = RollingFeatures(stats='sum', window_sizes=[6])
+
+    forecaster = ForecasterAutoregMultiVariate(
+                     regressor          = LinearRegression(),
+                     level              = 'l1',
+                     lags               = [1, 5],
+                     window_features    = [rolling, rolling_2],
+                     steps              = 6,
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = StandardScaler(),
+                     differentiation    = 1
+                 )
+    forecaster.fit(series=series.loc[:end_train], exog=exog.loc[:end_train])
+    X_predict = forecaster.create_predict_X(exog=exog.loc[end_train:])
+
+    for i, step in enumerate(range(1, forecaster.steps + 1)):
+        results = forecaster.regressors_[step].predict(X_predict.iloc[[i]])
+        results = forecaster.differentiator_[forecaster.level].inverse_transform_next_window(results)
+        results = transform_numpy(
+                      array             = results,
+                      transformer       = forecaster.transformer_series_[forecaster.level],
+                      fit               = False,
+                      inverse_transform = True
+                  )
+        expected = forecaster.predict(steps=[step], exog=exog.loc[end_train:]).to_numpy().item()
+        np.testing.assert_array_almost_equal(results, expected, decimal=7)

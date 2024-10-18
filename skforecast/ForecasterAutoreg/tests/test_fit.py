@@ -33,16 +33,17 @@ def test_forecaster_y_exog_features_stored():
     rolling = RollingFeatures(
         stats=['ratio_min_max', 'median'], window_sizes=4
     )
-    forecaster = ForecasterAutoreg(LinearRegression(), lags=3,
-                                   window_features=rolling)
+    forecaster = ForecasterAutoreg(
+        LinearRegression(), lags=3, window_features=rolling
+    )
     forecaster.fit(y=y, exog=exog)
 
     exog_in_ = True
     exog_type_in_ = type(exog)
     exog_names_in_ = ['exog']
     exog_dtypes_in_ = {'exog': exog.dtype}
-    X_train_exog_names_out_ = ['exog']
     X_train_window_features_names_out_ = ['roll_ratio_min_max_4', 'roll_median_4']
+    X_train_exog_names_out_ = ['exog']
     X_train_features_names_out_ = ['lag_1', 'lag_2', 'lag_3', 
                                    'roll_ratio_min_max_4', 'roll_median_4', 'exog']
     
@@ -50,8 +51,8 @@ def test_forecaster_y_exog_features_stored():
     assert forecaster.exog_type_in_ == exog_type_in_
     assert forecaster.exog_names_in_ == exog_names_in_
     assert forecaster.exog_dtypes_in_ == exog_dtypes_in_
-    assert forecaster.X_train_exog_names_out_ == X_train_exog_names_out_
     assert forecaster.X_train_window_features_names_out_ == X_train_window_features_names_out_
+    assert forecaster.X_train_exog_names_out_ == X_train_exog_names_out_
     assert forecaster.X_train_features_names_out_ == X_train_features_names_out_
 
 
@@ -148,16 +149,16 @@ def test_fit_in_sample_residuals_by_bin_stored():
         assert forecaster.binner_intervals_[k][1] == approx(expected_3[k][1])
 
 
-def test_fit_same_residuals_when_residuals_greater_than_1000():
+def test_fit_same_residuals_when_residuals_greater_than_10000():
     """
-    Test fit return same residuals when residuals len is greater than 1000.
+    Test fit return same residuals when residuals len is greater than 10_000.
     Testing with two different forecaster.
     """
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=pd.Series(np.arange(1200)))
+    forecaster.fit(y=pd.Series(np.arange(12000)))
     results_1 = forecaster.in_sample_residuals_
     forecaster = ForecasterAutoreg(LinearRegression(), lags=3)
-    forecaster.fit(y=pd.Series(np.arange(1200)))
+    forecaster.fit(y=pd.Series(np.arange(12000)))
     results_2 = forecaster.in_sample_residuals_
     
     assert isinstance(results_1, np.ndarray)

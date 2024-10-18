@@ -47,9 +47,19 @@ def test_init_window_size_correctly_stored(lags, window_features, expected):
                  )
     
     assert forecaster.window_size == expected
+    if lags:
+        np.testing.assert_array_almost_equal(forecaster.lags, np.array([1, 2, 3, 4, 5]))
+        assert forecaster.lags_names == [f'lag_{i}' for i in range(1, lags + 1)]
+        assert forecaster.max_lag == lags
+    else:
+        assert forecaster.lags is None
+        assert forecaster.lags_names is None
+        assert forecaster.max_lag is None
     if window_features:
+        assert forecaster.window_features_names == ['roll_ratio_min_max_5', 'roll_median_6']
         assert forecaster.window_features_class_names == ['RollingFeatures']
     else:
+        assert forecaster.window_features_names is None
         assert forecaster.window_features_class_names is None
 
 
@@ -98,8 +108,8 @@ def test_init_binner_is_created_when_binner_kwargs_is_None():
                  )
     
     expected = {
-        'n_bins': 10, 'encode': 'ordinal', 'strategy': 'quantile',
-        'subsample': 10000, 'random_state': 789654, 'dtype': np.float64
+        'n_bins': 10, 'method': 'linear', 'subsample': 200000,
+        'random_state': 789654, 'dtype': np.float64
     }
 
     assert forecaster.binner.get_params() == expected
@@ -110,8 +120,8 @@ def test_init_binner_is_created_when_binner_kwargs_is_not_None():
     Test binner is initialized with kwargs
     """
     binner_kwargs = {
-        'n_bins': 10, 'encode': 'onehot', 'strategy': 'quantile',
-        'subsample': 100, 'random_state': 1234, 'dtype': np.float64
+        'n_bins': 10, 'method': 'linear', 'subsample': 500,
+        'random_state': 1234, 'dtype': np.float64
     }
     forecaster = ForecasterAutoreg(
                      regressor     = object(),
@@ -120,8 +130,8 @@ def test_init_binner_is_created_when_binner_kwargs_is_not_None():
                  )
     
     expected = {
-        'n_bins': 10, 'encode': 'ordinal', 'strategy': 'quantile',
-        'subsample': 100, 'random_state': 1234, 'dtype': np.float64
+        'n_bins': 10, 'method': 'linear', 'subsample': 500,
+        'random_state': 1234, 'dtype': np.float64
     }
 
     assert forecaster.binner.get_params() == expected

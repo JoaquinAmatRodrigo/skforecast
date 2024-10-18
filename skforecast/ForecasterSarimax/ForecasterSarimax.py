@@ -33,7 +33,7 @@ class ForecasterSarimax():
     
     Parameters
     ----------
-    regressor : skforecast.Sarimax.Sarimax
+    regressor : skforecast.sarimax.Sarimax
         A Sarimax model instance from skforecast.
     transformer_y : object transformer (preprocessor), default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
@@ -53,7 +53,7 @@ class ForecasterSarimax():
     
     Attributes
     ----------
-    regressor : skforecast.Sarimax.Sarimax
+    regressor : skforecast.sarimax.Sarimax
         A Sarimax model instance from skforecast.
     params: dict
         Parameters of the sarimax model.
@@ -144,10 +144,10 @@ class ForecasterSarimax():
         self.python_version          = sys.version.split(" ")[0]
         self.forecaster_id           = forecaster_id
         
-        if not isinstance(self.regressor, skforecast.Sarimax.Sarimax):
+        if not isinstance(self.regressor, skforecast.sarimax.Sarimax):
             raise TypeError(
                 (f"`regressor` must be an instance of type "
-                 f"`skforecast.Sarimax.Sarimax`. Got '{type(regressor)}'.")
+                 f"`skforecast.sarimax.Sarimax`. Got '{type(regressor)}'.")
             )
 
         self.params = self.regressor.get_params(deep=True)

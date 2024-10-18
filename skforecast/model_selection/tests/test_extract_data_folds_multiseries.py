@@ -3,7 +3,7 @@
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.model_selection_multiseries.model_selection_multiseries import _extract_data_folds_multiseries
+from skforecast.model_selection._utils import _extract_data_folds_multiseries
 
 # Fixtures
 series = pd.DataFrame({

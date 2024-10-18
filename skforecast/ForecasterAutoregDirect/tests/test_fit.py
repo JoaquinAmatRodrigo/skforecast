@@ -1,11 +1,11 @@
 # Unit test fit ForecasterAutoregDirect
 # ==============================================================================
-import re
 import pytest
 import numpy as np
 import pandas as pd
-from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 from sklearn.linear_model import LinearRegression
+from skforecast.preprocessing import RollingFeatures
+from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
 
 # Fixtures
 from .fixtures_ForecasterAutoregDirect import y
@@ -16,21 +16,31 @@ def test_forecaster_y_exog_features_stored():
     """
     Test forecaster stores y and exog features after fitting.
     """
-    forecaster = ForecasterAutoregDirect(LinearRegression(), lags=3, steps=2)
+    rolling = RollingFeatures(
+        stats=['ratio_min_max', 'median'], window_sizes=4
+    )
+    forecaster = ForecasterAutoregDirect(
+        LinearRegression(), lags=3, steps=2, window_features=rolling
+    )
     forecaster.fit(y=y, exog=exog)
 
     exog_in_ = True
     exog_type_in_ = type(exog)
     exog_names_in_ = ['exog']
     exog_dtypes_in_ = {'exog': exog.dtype}
+    X_train_window_features_names_out_ = ['roll_ratio_min_max_4', 'roll_median_4']
     X_train_exog_names_out_ = ['exog']
     X_train_direct_exog_names_out_ = ['exog_step_1', 'exog_step_2']
-    X_train_features_names_out_ = ['lag_1', 'lag_2', 'lag_3', 'exog_step_1', 'exog_step_2']
+    X_train_features_names_out_ = [
+        'lag_1', 'lag_2', 'lag_3', 
+        'roll_ratio_min_max_4', 'roll_median_4', 'exog_step_1', 'exog_step_2'
+    ]
     
     assert forecaster.exog_in_ == exog_in_
     assert forecaster.exog_type_in_ == exog_type_in_
     assert forecaster.exog_names_in_ == exog_names_in_
     assert forecaster.exog_dtypes_in_ == exog_dtypes_in_
+    assert forecaster.X_train_window_features_names_out_ == X_train_window_features_names_out_
     assert forecaster.X_train_exog_names_out_ == X_train_exog_names_out_
     assert forecaster.X_train_direct_exog_names_out_ == X_train_direct_exog_names_out_
     assert forecaster.X_train_features_names_out_ == X_train_features_names_out_

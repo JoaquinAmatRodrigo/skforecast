@@ -8,6 +8,8 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.linear_model import Ridge
 from sklearn.linear_model import LinearRegression
+from lightgbm import LGBMRegressor
+from skforecast.preprocessing import RollingFeatures
 from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
 
 # Fixtures
@@ -174,6 +176,90 @@ def test_recursive_predict_output_when_regressor_is_LinearRegression_with_transf
                    [-5.50366938e-02,  4.43021934e-01],
                    [ 2.24101497e-01,  4.50750363e-01],
                    [ 9.30561169e-02,  1.78713706e-01]]
+               )
+
+    np.testing.assert_array_almost_equal(predictions, expected)
+
+
+def test_recursive_predict_output_with_window_features():
+    """
+    Test _recursive_predict output with window features.
+    """
+
+    rolling = RollingFeatures(stats=['mean', 'median'], window_sizes=4)
+    transformer_exog = ColumnTransformer(
+                           [('scale', StandardScaler(), ['exog_1']),
+                            ('onehot', OneHotEncoder(), ['exog_2'])],
+                           remainder = 'passthrough',
+                           verbose_feature_names_out = False
+                       )
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor          = LGBMRegressor(verbose=-1),
+                     lags               = 5,
+                     window_features    = rolling,
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = transformer_exog,
+                 )
+    forecaster.fit(series=series, exog=exog)
+
+    last_window, exog_values_dict, levels, _, _ = (
+        forecaster._create_predict_inputs(steps=5, exog=exog_predict)
+    )
+    predictions = forecaster._recursive_predict(
+                      steps            = 5,
+                      levels           = levels,
+                      last_window      = last_window,
+                      exog_values_dict = exog_values_dict
+                  )
+
+    expected = np.array([
+                   [ 0.52368935,  0.88399212],
+                   [-0.13413796, -0.81145254],
+                   [ 0.26257161,  0.40407821],
+                   [ 0.93852676,  0.93243637],
+                   [ 0.06002111,  0.16197356]]
+               )
+
+    np.testing.assert_array_almost_equal(predictions, expected)
+
+
+def test_recursive_predict_output_with_two_window_features():
+    """
+    Test _recursive_predict output with 2 window features.
+    """
+    rolling = RollingFeatures(stats=['mean'], window_sizes=4)
+    rolling_2 = RollingFeatures(stats=['median'], window_sizes=4)
+    transformer_exog = ColumnTransformer(
+                           [('scale', StandardScaler(), ['exog_1']),
+                            ('onehot', OneHotEncoder(), ['exog_2'])],
+                           remainder = 'passthrough',
+                           verbose_feature_names_out = False
+                       )
+    forecaster = ForecasterAutoregMultiSeries(
+                     regressor          = LGBMRegressor(verbose=-1),
+                     lags               = 5,
+                     window_features    = [rolling, rolling_2],
+                     transformer_series = StandardScaler(),
+                     transformer_exog   = transformer_exog,
+                 )
+    forecaster.fit(series=series, exog=exog)
+
+    last_window, exog_values_dict, levels, _, _ = (
+        forecaster._create_predict_inputs(steps=5, exog=exog_predict)
+    )
+    predictions = forecaster._recursive_predict(
+                      steps            = 5,
+                      levels           = levels,
+                      last_window      = last_window,
+                      exog_values_dict = exog_values_dict
+                  )
+
+    expected = np.array([
+                   [ 0.52368935,  0.88399212],
+                   [-0.13413796, -0.81145254],
+                   [ 0.26257161,  0.40407821],
+                   [ 0.93852676,  0.93243637],
+                   [ 0.06002111,  0.16197356]]
                )
 
     np.testing.assert_array_almost_equal(predictions, expected)

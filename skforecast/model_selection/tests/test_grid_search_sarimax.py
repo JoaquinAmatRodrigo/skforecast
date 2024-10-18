@@ -2,10 +2,10 @@
 # ==============================================================================
 import numpy as np
 import pandas as pd
-from skforecast.Sarimax import Sarimax
+from skforecast.sarimax import Sarimax
 from skforecast.ForecasterSarimax import ForecasterSarimax
 from skforecast.model_selection._split import TimeSeriesFold
-from skforecast.model_selection_sarimax import grid_search_sarimax
+from skforecast.model_selection._search import grid_search_sarimax
 
 # Fixtures
 from ...ForecasterSarimax.tests.fixtures_ForecasterSarimax import y_datetime
