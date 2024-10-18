@@ -1,22 +1,22 @@
 |-- skforecast
     |-- ForecasterAutoreg
-        |-- ForecasterAutoreg.py
+        |-- ForecasterAutoreg.py                   -> ForecasterAutoreg 
     |-- ForecasterAutoregCustom.py
-        |-- ForecasterAutoregCustom.py
+        |-- ForecasterAutoregCustom.py             -> ForecasterAutoregCustom
     |-- ForecasterAutoregDirect
-        |-- ForecasterAutoregDirect.py
+        |-- ForecasterAutoregDirect.py             -> ForecasterAutoregDirect
     |-- ForecasterAutoregMultiSeries
-        |-- ForecasterAutoregMultiSeries.py
+        |-- ForecasterAutoregMultiSeries.py        -> ForecasterAutoregMultiSeries
     |-- ForecasterAutoregMultiVariate
-        |-- ForecasterAutoregMultiVariate.py
+        |-- ForecasterAutoregMultiVariate.py       -> ForecasterAutoregMultiVariate
     |-- ForecasterRnn
-        |-- ForecasterRnn.py
+        |-- ForecasterRnn.py                       -> ForecasterRnn
     |-- ForecsaterBase
-        |-- ForecasterBase.py
+        |-- ForecasterBase.py                      -> ForecasterBase
     |-- ForecasterSarimax
-        |-- ForecasterSarimax.py
+        |-- ForecasterSarimax.py                   -> ForecasterSarimax
     |-- Sarimax
-        |-- Sarimax.py
+        |-- Sarimax.py                             -> Sarimax
 
 
 |-- skforecast

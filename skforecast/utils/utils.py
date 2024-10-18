@@ -1500,6 +1500,8 @@ def expand_index(
 
     """
 
+    # TODO: Create `transform_datetime_to_int` function
+    # ===========================================================================
     if isinstance(steps, (str, pd.Timestamp)):
         if not isinstance(index, pd.DatetimeIndex):
             raise ValueError(
@@ -1520,6 +1522,7 @@ def expand_index(
 
     elif not isinstance(steps, (int, np.int64, np.int32)):
         raise TypeError("`steps` must be an integer, string or pandas Timestamp.")
+    # ===========================================================================
 
     if isinstance(index, pd.Index):
         

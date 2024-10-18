@@ -666,8 +666,8 @@ def test_output_backtesting_forecaster_interval_out_sample_residuals_no_exog_no_
         index=pd.RangeIndex(start=38, stop=50, step=1)
     )
 
-    forecaster = ForecasterRecursive(regressor=LinearRegression(), lags=3)
-    forecaster.set_out_sample_residuals(residuals=out_sample_residuals, append=False)
+    forecaster = ForecasterRecursive(regressor=LinearRegression(), lags=3)    
+    forecaster.out_sample_residuals_ = out_sample_residuals
     n_backtest = 12
     y_train = y[:-n_backtest]
     cv = TimeSeriesFold(
