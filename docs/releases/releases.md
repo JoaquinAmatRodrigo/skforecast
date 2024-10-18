@@ -51,6 +51,8 @@ This release has undergone a major refactoring to improve the performance of the
 
 + New private function `_calculate_metrics_one_step_ahead` to <code>[model_selection]</code> module to calculate the metrics when predicting one step ahead.
 
++ The `steps` argument in the predict method of the <code>[ForecasterAutoreg]</code> can now be a str or a pandas datetime. If so, the method will predict up to the specified date. (contribution by @imMoya).
+
 
 **Changed**
 
