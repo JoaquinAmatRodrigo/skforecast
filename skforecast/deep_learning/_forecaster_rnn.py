@@ -738,7 +738,7 @@ class ForecasterRnn(ForecasterBase):
         #     predictions_reshaped = np.reshape(
         #         predictions, (predictions.shape[1], predictions.shape[2])
         #     )
-        idx, _ = expand_index(index=last_window_index, steps=max(steps))
+        idx = expand_index(index=last_window_index, steps=max(steps))
 
         predictions = pd.DataFrame(
             data=predictions_reshaped[np.array(steps) - 1],

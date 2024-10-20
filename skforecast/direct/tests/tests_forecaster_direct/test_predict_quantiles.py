@@ -7,9 +7,9 @@ from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler
 
 # Fixtures
-from .fixtures_ForecasterAutoregDirect import y
-from .fixtures_ForecasterAutoregDirect import exog
-from .fixtures_ForecasterAutoregDirect import exog_predict
+from .fixtures_forecaster_direct import y
+from .fixtures_forecaster_direct import exog
+from .fixtures_forecaster_direct import exog_predict
 
 
 def test_predict_quantiles_output_when_forecaster_is_LinearRegression_steps_is_2_in_sample_residuals_True_exog_and_transformer():

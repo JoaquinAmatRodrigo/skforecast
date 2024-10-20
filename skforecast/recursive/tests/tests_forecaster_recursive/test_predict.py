@@ -429,7 +429,10 @@ def test_predict_output_when_regressor_is_LinearRegression_with_exog_and_differe
     pd.testing.assert_series_equal(predictions_1.asfreq('MS'), predictions_2, check_names=False)
 
 
-def test_predict_output_when_window_features():
+@pytest.mark.parametrize("steps", 
+                         [10, '2001-03-01', pd.to_datetime('2001-03-01')], 
+                         ids=lambda steps: f'steps: {steps}')
+def test_predict_output_when_window_features(steps):
     """
     Test output of predict when regressor is LGBMRegressor and window features.
     """
@@ -445,7 +448,7 @@ def test_predict_output_when_window_features():
         LGBMRegressor(verbose=-1, random_state=123), lags=3, window_features=rolling
     )
     forecaster.fit(y=y_datetime, exog=exog_datetime)
-    predictions = forecaster.predict(steps=10, exog=exog_predict_datetime)
+    predictions = forecaster.predict(steps=steps, exog=exog_predict_datetime)
 
     expected = pd.Series(
                    data = np.array([0.5326654111553376, 0.5050280233102159, 

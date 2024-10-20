@@ -316,7 +316,7 @@ class ForecasterEquivalentDate():
         last_window_values, last_window_index = preprocess_last_window(
                                                     last_window = last_window
                                                 )
-        prediction_index, _ = expand_index(index=last_window_index, steps=steps)
+        prediction_index = expand_index(index=last_window_index, steps=steps)
         
         if isinstance(self.offset, int):
 
