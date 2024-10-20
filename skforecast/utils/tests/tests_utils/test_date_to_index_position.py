@@ -14,7 +14,8 @@ def test_TypeError_date_to_index_position_when_index_is_not_DatetimeIndex():
     index = pd.RangeIndex(start=0, stop=3, step=1)
     
     err_msg = re.escape(
-        "Index must be a pandas DatetimeIndex when `steps` is not an integer."
+        "Index must be a pandas DatetimeIndex when `steps` is not an integer. "
+        "Check input series or last window."
     )
     with pytest.raises(TypeError, match=err_msg):
         date_to_index_position(index, date_input='1990-01-10')

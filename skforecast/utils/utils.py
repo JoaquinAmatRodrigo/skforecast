@@ -1514,7 +1514,7 @@ def date_to_index_position(
     
     Returns
     -------
-    date_int : int
+    date_position : int
         Integer representing the position of the datetime in the index.
     
     """
@@ -1523,7 +1523,7 @@ def date_to_index_position(
         if not isinstance(index, pd.DatetimeIndex):
             raise TypeError(
                 f"Index must be a pandas DatetimeIndex when `{date_literal}` is "
-                f"not an integer."
+                f"not an integer. Check input series or last window."
             )
         
         target_date = pd.to_datetime(date_input, **kwargs_pd_to_datetime)
@@ -1534,16 +1534,16 @@ def date_to_index_position(
             )
         
         steps_diff = pd.date_range(start=last_date, end=target_date, freq=index.freq)
-        date_int = len(steps_diff) - 1
+        date_position = len(steps_diff) - 1
     
     elif isinstance(date_input, (int, np.integer)):
-        date_int = date_input
+        date_position = date_input
     else:
         raise TypeError(
             f"`{date_literal}` must be an integer, string, or pandas Timestamp."
         )
     
-    return date_int
+    return date_position
 
 
 def expand_index(
