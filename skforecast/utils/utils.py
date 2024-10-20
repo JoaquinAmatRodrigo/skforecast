@@ -1022,7 +1022,7 @@ def check_predict_input(
                         )
 
             # Check exog starts one step ahead of last_window end.
-            expected_index = expand_index(last_window.index, 1)[0][0]
+            expected_index = expand_index(last_window.index, 1)[0]
             if expected_index != exog_to_check.index[0]:
                 if forecaster_name in ['ForecasterRecursiveMultiSeries']:
                     warnings.warn(
@@ -1381,7 +1381,7 @@ def cast_exog_dtypes(
 def exog_to_direct(
     exog: Union[pd.Series, pd.DataFrame],
     steps: int
-) -> pd.DataFrame:
+) -> Union[pd.DataFrame, list]:
     """
     Transforms `exog` to a pandas DataFrame with the shape needed for Direct
     forecasting.
@@ -1390,13 +1390,16 @@ def exog_to_direct(
     ----------
     exog : pandas Series, pandas DataFrame
         Exogenous variables.
-    steps : int.
+    steps : int
         Number of steps that will be predicted using exog.
 
     Returns
     -------
-    exog_transformed : pandas DataFrame
+    exog_direct : pandas DataFrame
         Exogenous variables transformed.
+    exog_direct_names : list
+        Names of the columns of the exogenous variables transformed. Only 
+        created if `exog` is a pandas Series or DataFrame.
     
     """
 
@@ -1408,73 +1411,145 @@ def exog_to_direct(
 
     n_rows = len(exog)
     exog_idx = exog.index
-    exog_transformed = []
-
+    exog_cols = exog.columns
+    exog_direct = []
     for i in range(steps):
-        exog_column_transformed = exog.iloc[i : n_rows - (steps - 1 - i), ]
-        exog_column_transformed.index = pd.RangeIndex(len(exog_column_transformed))
-        exog_column_transformed.columns = [f"{col}_step_{i + 1}" 
-                                           for col in exog_column_transformed.columns]
-        exog_transformed.append(exog_column_transformed)
+        exog_step = exog.iloc[i : n_rows - (steps - 1 - i), ]
+        exog_step.index = pd.RangeIndex(len(exog_step))
+        exog_step.columns = [f"{col}_step_{i + 1}" for col in exog_cols]
+        exog_direct.append(exog_step)
 
-    if len(exog_transformed) > 1:
-        exog_transformed = pd.concat(exog_transformed, axis=1, copy=False)
+    if len(exog_direct) > 1:
+        exog_direct = pd.concat(exog_direct, axis=1, copy=False)
     else:
-        exog_transformed = exog_column_transformed
+        exog_direct = exog_direct[0]
 
-    exog_transformed.index = exog_idx[-len(exog_transformed):]
+    exog_direct_names = exog_direct.columns.to_list()
+    exog_direct.index = exog_idx[-len(exog_direct):]
     
-    return exog_transformed
+    return exog_direct, exog_direct_names
 
-# TODO: See if can return direct cols names
+
 def exog_to_direct_numpy(
-    exog: np.ndarray,
+    exog: Union[np.ndarray, pd.Series, pd.DataFrame],
     steps: int
-) -> np.ndarray:
+) -> Tuple[np.ndarray, Optional[list]]:
     """
     Transforms `exog` to numpy ndarray with the shape needed for Direct
     forecasting.
     
     Parameters
     ----------
-    exog : numpy ndarray, shape(samples,)
-        Exogenous variables.
-    steps : int.
+    exog : numpy ndarray, pandas Series, pandas DataFrame
+        Exogenous variables, shape(samples,). If exog is a pandas format, the 
+        direct exog names are created.
+    steps : int
         Number of steps that will be predicted using exog.
 
     Returns
     -------
-    exog_transformed : numpy ndarray
+    exog_direct : numpy ndarray
         Exogenous variables transformed.
+    exog_direct_names : list, None
+        Names of the columns of the exogenous variables transformed. Only 
+        created if `exog` is a pandas Series or DataFrame.
 
     """
 
-    if not isinstance(exog, np.ndarray):
-        raise TypeError(f"`exog` must be a numpy ndarray. Got {type(exog)}.")
+    if isinstance(exog, (pd.Series, pd.DataFrame)):
+        exog_cols = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
+        exog_direct_names = [
+            f"{col}_step_{i + 1}" for i in range(steps) for col in exog_cols
+        ]
+        exog = exog.to_numpy()
+    else:
+        exog_direct_names = None
+        if not isinstance(exog, np.ndarray):
+            raise TypeError(
+                f"`exog` must be a numpy ndarray, pandas Series or DataFrame. "
+                f"Got {type(exog)}."
+            )
 
     if exog.ndim == 1:
         exog = np.expand_dims(exog, axis=1)
 
     n_rows = len(exog)
-    exog_transformed = []
-
+    exog_direct = []
     for i in range(steps):
-        exog_column_transformed = exog[i : n_rows - (steps - 1 - i)]
-        exog_transformed.append(exog_column_transformed)
+        exog_step = exog[i : n_rows - (steps - 1 - i)]
+        exog_direct.append(exog_step)
 
-    if len(exog_transformed) > 1:
-        exog_transformed = np.concatenate(exog_transformed, axis=1)
+    if len(exog_direct) > 1:
+        exog_direct = np.concatenate(exog_direct, axis=1)
     else:
-        exog_transformed = exog_column_transformed.copy()
+        exog_direct = exog_direct[0]
     
-    return exog_transformed
+    return exog_direct, exog_direct_names
+
+
+def date_to_index_position(
+    index: pd.Index,
+    date_input: Union[int, str, pd.Timestamp],
+    date_literal: str = 'steps',
+    kwargs_pd_to_datetime: dict = {}
+) -> int:
+    """
+    Transform a datetime string or pandas Timestamp to an integer. The integer
+    represents the position of the datetime in the index.
+    
+    Parameters
+    ----------
+    index : pandas Index
+        Original datetime index (must be a pandas DatetimeIndex if `date_input` 
+        is not an int).
+    date_input : int, str, pandas Timestamp
+        Datetime to transform to integer.
+        
+        + If int, returns the same integer.
+        + If str or pandas Timestamp, it is converted and expanded into the index.
+    date_literal : str, default 'steps'
+        Variable name used in error messages.
+    kwargs_pd_to_datetime : dict, default {}
+        Additional keyword arguments to pass to `pd.to_datetime()`.
+    
+    Returns
+    -------
+    date_int : int
+        Integer representing the position of the datetime in the index.
+    
+    """
+    
+    if isinstance(date_input, (str, pd.Timestamp)):
+        if not isinstance(index, pd.DatetimeIndex):
+            raise TypeError(
+                f"Index must be a pandas DatetimeIndex when `{date_literal}` is "
+                f"not an integer."
+            )
+        
+        target_date = pd.to_datetime(date_input, **kwargs_pd_to_datetime)
+        last_date = pd.to_datetime(index[-1])
+        if target_date <= last_date:
+            raise ValueError(
+                "The provided date must be later than the last date in the index."
+            )
+        
+        steps_diff = pd.date_range(start=last_date, end=target_date, freq=index.freq)
+        date_int = len(steps_diff) - 1
+    
+    elif isinstance(date_input, (int, np.integer)):
+        date_int = date_input
+    else:
+        raise TypeError(
+            f"`{date_literal}` must be an integer, string, or pandas Timestamp."
+        )
+    
+    return date_int
 
 
 def expand_index(
     index: Union[pd.Index, None], 
-    steps: Union[int, str, pd.Timestamp],
-    kwargs_pd_to_datetime: dict = {}
-) -> Tuple[pd.Index, int]:
+    steps: int
+) -> pd.Index:
     """
     Create a new index of length `steps` starting at the end of the index.
     
@@ -1482,47 +1557,18 @@ def expand_index(
     ----------
     index : pandas Index, None
         Original index.
-    steps : int, str, pandas Timestamp
-        Number of steps to expand. 
-        
-        + If steps is int, expand index by this number of steps.
-        + If str or pandas Datetime, expand index to this date 
-        (str must be convertible to pandas Datetime format).
-    kwargs_pd_to_datetime : dict, default `{}`
-        Other keyword arguments (key, value mappings) to pass to `pd.to_datetime()`).
+    steps : int
+        Number of steps to expand.
 
     Returns
     -------
     new_index : pandas Index
         New index.
-    steps : int
-        Number of steps.
 
     """
 
-    # TODO: Create `transform_datetime_to_int` function
-    # ===========================================================================
-    if isinstance(steps, (str, pd.Timestamp)):
-        if not isinstance(index, pd.DatetimeIndex):
-            raise ValueError(
-                "`index` must be a pandas DatetimeIndex when `steps` is not an integer."
-            )
-        
-        else:
-            target_date = pd.to_datetime(steps, **kwargs_pd_to_datetime)
-            last_date = pd.to_datetime(index[-1])
-            if target_date <= last_date:
-                raise ValueError(
-                    "The provided date cannot be earlier than or equal to the last "
-                    "observation date."
-                )
-        
-            steps_diff = pd.date_range(start=last_date, end=target_date, freq=index.freq)
-            steps = len(steps_diff) - 1
-
-    elif not isinstance(steps, (int, np.int64, np.int32)):
-        raise TypeError("`steps` must be an integer, string or pandas Timestamp.")
-    # ===========================================================================
+    if not isinstance(steps, (int, np.integer)):
+        raise TypeError(f"`steps` must be an integer. Got {type(steps)}.")
 
     if isinstance(index, pd.Index):
         
@@ -1547,7 +1593,7 @@ def expand_index(
                         stop  = steps
                     )
     
-    return new_index, steps
+    return new_index
 
 
 def transform_numpy(

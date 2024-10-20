@@ -1608,11 +1608,10 @@ class ForecasterDirectMultiVariate(ForecasterBase):
         else:
             Xs = [X_autoreg] * len(steps)
 
-        prediction_index, _ = expand_index(
-                                  index = last_window_index,
-                                  steps = max(steps)
-                              )
-        prediction_index = prediction_index[np.array(steps) - 1]
+        prediction_index = expand_index(
+                               index = last_window_index,
+                               steps = max(steps)
+                           )[np.array(steps) - 1]
         if isinstance(last_window_index, pd.DatetimeIndex) and np.array_equal(
             steps, np.arange(min(steps), max(steps) + 1)
         ):
