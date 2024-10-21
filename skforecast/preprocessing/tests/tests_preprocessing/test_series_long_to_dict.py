@@ -95,3 +95,27 @@ def test_ValueError_when_values_not_in_data():
             values=values,
             freq="D",
         )
+
+
+def test_warning_when_series_is_incomplete():
+    """
+    Raise warning if series is incomplete and NaN values are introduced
+    after setting the index frequency.
+    """
+    data = pd.DataFrame({
+        "series_id": ["A"] * 4 + ["B"] * 4,
+        "index": pd.date_range("2020-01-01", periods=4, freq="D").tolist() * 2,
+        "values": [1, 2, 3, 4] * 2,
+    })
+    data = data.iloc[[0, 1, 2, 3, 4, 5, 7]]
+    msg = (
+        "Series 'B' is incomplete. NaNs have been introduced after setting the frequency."
+    )
+    with pytest.warns(UserWarning, match=msg):
+        series_long_to_dict(
+            data=data,
+            series_id="series_id",
+            index="index",
+            values="values",
+            freq="D",
+        )

@@ -7,6 +7,7 @@
 
 from typing import Any, Union, Optional
 from typing_extensions import Self
+import warnings
 import numpy as np
 import pandas as pd
 from sklearn.base import BaseEstimator
@@ -251,7 +252,11 @@ def series_long_to_dict(
     freq: str,
 ) -> dict:
     """
-    Convert long format series to dictionary.
+    Convert long format series to dictionary of pandas Series with frequency.
+    Input data must be a pandas DataFrame with columns for the series identifier,
+    time index, and values. The function will group the data by the series
+    identifier and convert the time index to a datetime index with the given
+    frequency.
 
     Parameters
     ----------
@@ -279,11 +284,17 @@ def series_long_to_dict(
     for col in [series_id, index, values]:
         if col not in data.columns:
             raise ValueError(f"Column '{col}' not found in `data`.")
-
+        
+    original_sizes = data.groupby(series_id).size()
     series_dict = {}
     for k, v in data.groupby(series_id):
         series_dict[k] = v.set_index(index)[values].asfreq(freq).rename(k)
         series_dict[k].index.name = None
+        if len(series_dict[k]) != original_sizes[k]:
+            warnings.warn(
+                f"Series '{k}' is incomplete. NaNs have been introduced after "
+                f"setting the frequency."
+        )
 
     return series_dict
 
@@ -296,7 +307,10 @@ def exog_long_to_dict(
     dropna: bool = False,
 ) -> dict:
     """
-    Convert long format exogenous variables to dictionary.
+    Convert long format exogenous variables to dictionary. Input data must be a
+    pandas DataFrame with columns for the series identifier, time index, and
+    exogenous variables. The function will group the data by the series identifier
+    and convert the time index to a datetime index with the given frequency.
 
     Parameters
     ----------
