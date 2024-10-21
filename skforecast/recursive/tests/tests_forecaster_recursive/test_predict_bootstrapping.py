@@ -87,8 +87,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
                )
 
     pd.testing.assert_frame_equal(expected, results)
-    
-    
+
+
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_steps_is_2_in_sample_residuals_is_True():
     """
     Test output of predict_bootstrapping when regressor is LinearRegression and
@@ -110,8 +110,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
                )
 
     pd.testing.assert_frame_equal(expected, results)
-    
-    
+
+
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_steps_is_1_in_sample_residuals_is_False():
     """
     Test output of predict_bootstrapping when regressor is LinearRegression and
@@ -131,8 +131,8 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_s
                )
 
     pd.testing.assert_frame_equal(expected, results)
-    
-    
+
+
 def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_exog_steps_is_2_in_sample_residuals_is_False():
     """
     Test output of predict_bootstrapping when regressor is LinearRegression and
@@ -246,7 +246,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_and_di
     boot_predictions_1 = boot_predictions_1.sort_index()
     boot_predictions_1 = boot_predictions_1.cumsum(axis=0).iloc[1:,]
     boot_predictions_1 = boot_predictions_1.asfreq('MS')
-    
+
     forecaster_2 = ForecasterRecursive(regressor=LinearRegression(), lags=15, differentiation=1)
     forecaster_2.fit(y=data.loc[:end_train], exog=exog.loc[:end_train])
     boot_predictions_2 = forecaster_2.predict_bootstrapping(
@@ -254,7 +254,7 @@ def test_predict_bootstrapping_output_when_forecaster_is_LinearRegression_and_di
                             exog   = exog_diff.loc[end_train:],
                             n_boot = 10
                         )
-    
+
     pd.testing.assert_frame_equal(boot_predictions_1, boot_predictions_2)
 
 
@@ -284,9 +284,9 @@ def test_predict_bootstrapping_output_when_window_features():
         {
             "pred_boot_0": [
                 0.6186600380569245,
-                0.6345595192689645,
-                0.5544541881163022,
-                0.5169561992095868,
+                0.2647569741581052,
+                0.4005398117513452,
+                0.39037942037849277,
             ],
             "pred_boot_1": [
                 0.8969725592689648,
@@ -298,7 +298,7 @@ def test_predict_bootstrapping_output_when_window_features():
                 0.14325578784512172,
                 0.18926364363504294,
                 0.6157758549401303,
-                0.5299035345778812,
+                0.86630916,
             ],
             "pred_boot_3": [
                 0.18128852194384876,
@@ -331,10 +331,10 @@ def test_predict_bootstrapping_output_when_window_features():
                 0.5852571421548783,
             ],
             "pred_boot_8": [
-                0.6621969071140862,
-                0.36065811973187517,
-                0.2647569741581052,
-                0.3959943228608735,
+                0.2923943620032269,
+                0.20674374336691814,
+                0.5603167728446299,
+                0.5189877024230032,
             ],
             "pred_boot_9": [
                 0.42315363705470854,

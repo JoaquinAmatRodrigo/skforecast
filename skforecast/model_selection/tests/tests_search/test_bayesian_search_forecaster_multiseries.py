@@ -521,7 +521,7 @@ def test_results_output_bayesian_search_forecaster_multivariate_ForecasterAutore
     pd.testing.assert_frame_equal(results, expected_results)
 
 
-def test_output_bayesian_search_forecaster_multiseries_ForecasterAutoregMultiVaraite_one_step_ahead():
+def test_output_bayesian_search_forecaster_multiseries_ForecasterAutoregMultiVariate_one_step_ahead():
     """
     Test output of bayesian_search_forecaster_multiseries when forecaster is ForecasterRecursiveMultiSeries
     and method is one_step_ahead.

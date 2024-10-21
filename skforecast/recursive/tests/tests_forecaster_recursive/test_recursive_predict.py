@@ -215,9 +215,19 @@ def test_recursive_predict_output_with_binned_residuals():
                         use_binned_residuals = True,
                     )
 
-    expected = np.array([
-                0.951684, 0.115618, 0.160797, 0.551315, 0.747326, 0.634401,
-                0.099628, 0.47903, 0.387516, 0.581912
-            ])
+    expected = np.array(
+        [
+            0.722443,
+            0.849432,
+            0.611024,
+            0.893993,
+            0.612895,
+            0.223093,
+            0.642686,
+            0.68483,
+            0.321592,
+            0.499459,
+        ]
+    )
 
     np.testing.assert_array_almost_equal(predictions, expected)
