@@ -14,7 +14,7 @@ from skforecast.preprocessing import RollingFeatures
 from skforecast.direct import ForecasterDirect
 
 # Fixtures
-from .fixtures_ForecasterAutoregDirect import data  # to test results when using differentiation
+from .fixtures_forecaster_direct import data  # to test results when using differentiation
 
 
 def test_create_train_X_y_TypeError_when_exog_is_categorical_of_no_int():

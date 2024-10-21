@@ -33,6 +33,7 @@ from ..utils import (
     preprocess_last_window,
     preprocess_exog,
     input_to_frame,
+    date_to_index_position,
     expand_index,
     transform_numpy,
     transform_dataframe,
@@ -1123,6 +1124,15 @@ class ForecasterRecursive(ForecasterBase):
         if last_window is None:
             last_window = self.last_window_
 
+        # TODO: Not clear maybe the error "Index must be a pandas DatetimeIndex"
+        # which variable is causing it.
+        if self.is_fitted:
+            steps = date_to_index_position(
+                        index        = last_window.index,
+                        date_input   = steps,
+                        date_literal = 'steps'
+                    )
+
         if check_inputs:
             check_predict_input(
                 forecaster_name  = type(self).__name__,
@@ -1181,10 +1191,10 @@ class ForecasterRecursive(ForecasterBase):
         else:
             exog_values = None
 
-        prediction_index, steps = expand_index(
-                                      index = last_window_index,
-                                      steps = steps,
-                                  )
+        prediction_index = expand_index(
+                               index = last_window_index,
+                               steps = steps,
+                           )
 
         return last_window_values, exog_values, prediction_index, steps
 

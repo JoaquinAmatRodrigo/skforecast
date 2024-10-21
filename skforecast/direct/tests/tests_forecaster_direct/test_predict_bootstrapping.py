@@ -14,10 +14,10 @@ from skforecast.preprocessing import TimeSeriesDifferentiator
 from skforecast.direct import ForecasterDirect
 
 # Fixtures
-from .fixtures_ForecasterAutoregDirect import y
-from .fixtures_ForecasterAutoregDirect import exog
-from .fixtures_ForecasterAutoregDirect import exog_predict
-from .fixtures_ForecasterAutoregDirect import data  # to test results when using differentiation
+from .fixtures_forecaster_direct import y
+from .fixtures_forecaster_direct import exog
+from .fixtures_forecaster_direct import exog_predict
+from .fixtures_forecaster_direct import data  # to test results when using differentiation
 
 
 def test_predict_NotFittedError_when_fitted_is_False():

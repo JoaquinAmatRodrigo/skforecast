@@ -1065,7 +1065,9 @@ class QuantileBinner:
     """
     QuantileBinner class to bin data into quantile-based bins using `numpy.percentile`.
     This class is similar to `KBinsDiscretizer` but faster for binning data into
-    quantile-based bins.
+    quantile-based bins. Bin  intervals are defined following the convention:
+    bins[i-1] <= x < bins[i]. See more information in `numpy.percentile` and
+    `numpy.digitize`.
     
     Parameters
     ----------
@@ -1236,7 +1238,7 @@ class QuantileBinner:
                 "The model has not been fitted yet. Call 'fit' with training data first."
             )
 
-        bin_indices = np.digitize(X, bins=self.bin_edges_, right=True)
+        bin_indices = np.digitize(X, bins=self.bin_edges_, right=False)
         bin_indices = np.clip(bin_indices, 1, self.n_bins_).astype(self.dtype) - 1
 
         return bin_indices

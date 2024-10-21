@@ -16,8 +16,8 @@ from skforecast.preprocessing import RollingFeatures
 from skforecast.direct import ForecasterDirect
 
 # Fixtures
-from .fixtures_ForecasterAutoregDirect import y
-from .fixtures_ForecasterAutoregDirect import exog
+from .fixtures_forecaster_direct import y
+from .fixtures_forecaster_direct import exog
 
 
 def test_TypeError_is_raised_when_step_is_not_int():

@@ -407,7 +407,7 @@ class ForecasterSarimax():
             # training series.
 
             # Check index append values
-            expected_index = expand_index(index=self.extended_index_, steps=1)[0][0]
+            expected_index = expand_index(index=self.extended_index_, steps=1)[0]
             if expected_index != last_window.index[0]:
                 raise ValueError(
                     (f"To make predictions unrelated to the original data, `last_window` "

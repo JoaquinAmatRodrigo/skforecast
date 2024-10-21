@@ -22,10 +22,10 @@ from skforecast.preprocessing import TimeSeriesDifferentiator
 from skforecast.direct import ForecasterDirect
 
 # Fixtures
-from .fixtures_ForecasterAutoregDirect import y as y_categorical
-from .fixtures_ForecasterAutoregDirect import exog as exog_categorical
-from .fixtures_ForecasterAutoregDirect import exog_predict as exog_predict_categorical
-from .fixtures_ForecasterAutoregDirect import data  # to test results when using differentiation
+from .fixtures_forecaster_direct import y as y_categorical
+from .fixtures_forecaster_direct import exog as exog_categorical
+from .fixtures_forecaster_direct import exog_predict as exog_predict_categorical
+from .fixtures_forecaster_direct import data  # to test results when using differentiation
 
 
 @pytest.mark.parametrize("steps", [[1, 2.0, 3], [1, 4.]], 

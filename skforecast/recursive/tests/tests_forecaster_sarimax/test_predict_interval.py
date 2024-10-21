@@ -246,7 +246,7 @@ def test_predict_interval_ValueError_when_last_window_index_does_not_follow_trai
 
     forecaster = ForecasterSarimax(regressor = Sarimax(order=(1, 0, 0)))
     forecaster.fit(y=y_test)
-    expected_index = expand_index(forecaster.extended_index_, 1)[0][0]
+    expected_index = expand_index(forecaster.extended_index_, 1)[0]
 
     err_msg = re.escape(
         (f"To make predictions unrelated to the original data, `last_window` "
@@ -282,7 +282,7 @@ def test_predict_interval_ValueError_when_last_window_exog_index_does_not_follow
 
     forecaster = ForecasterSarimax(regressor = Sarimax(order=(1, 0, 0)))
     forecaster.fit(y=y_test, exog=exog_test)
-    expected_index = expand_index(forecaster.extended_index_, 1)[0][0]
+    expected_index = expand_index(forecaster.extended_index_, 1)[0]
 
     err_msg = re.escape(
         (f"To make predictions unrelated to the original data, `last_window_exog` "

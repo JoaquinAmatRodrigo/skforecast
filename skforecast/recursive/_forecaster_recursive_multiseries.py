@@ -1743,10 +1743,10 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
                                    last_window   = last_window,
                                    return_values = False
                                )
-        prediction_index, _ = expand_index(
-                                  index = last_window_index,
-                                  steps = steps
-                              )
+        prediction_index = expand_index(
+                               index = last_window_index,
+                               steps = steps
+                           )
 
         if exog is not None:
             if isinstance(exog, dict):
