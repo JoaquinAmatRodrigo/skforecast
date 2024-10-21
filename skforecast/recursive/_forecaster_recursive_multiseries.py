@@ -2236,6 +2236,7 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         sample_residuals = np.full(
                                shape      = (steps, n_boot, n_levels),
                                fill_value = np.nan,
+                               order      = 'F',
                                dtype      = float
                            )
         for i, level in enumerate(levels):
@@ -2249,6 +2250,7 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         boot_predictions_full = np.full(
                                     shape      = (steps, n_levels, n_boot),
                                     fill_value = np.nan,
+                                    order      = 'F',
                                     dtype      = float
                                 )
         for i in range(n_boot):

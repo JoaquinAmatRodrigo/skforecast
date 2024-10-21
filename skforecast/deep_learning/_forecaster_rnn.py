@@ -383,18 +383,18 @@ class ForecasterRnn(ForecasterBase):
             raise ValueError(
                 (
                     f"The maximum lag ({self.max_lag}) must be less than the length "
-                    f"of the series minus the maximum of steps ({len(y)-self.max_step})."
+                    f"of the series minus the maximum of steps ({len(y) - self.max_step})."
                 )
             )
 
         X_data = np.full(
-            shape=(n_splits, (self.max_lag)), fill_value=np.nan, dtype=float
+            shape=(n_splits, (self.max_lag)), fill_value=np.nan, order='F', dtype=float
         )
         for i, lag in enumerate(range(self.max_lag - 1, -1, -1)):
             X_data[:, i] = y[self.max_lag - lag - 1 : -(lag + self.max_step)]
 
         y_data = np.full(
-            shape=(n_splits, self.max_step), fill_value=np.nan, dtype=float
+            shape=(n_splits, self.max_step), fill_value=np.nan, order='F', dtype=float
         )
         for step in range(self.max_step):
             y_data[:, step] = y[self.max_lag + step : self.max_lag + step + n_splits]
@@ -403,7 +403,7 @@ class ForecasterRnn(ForecasterBase):
         X_data = X_data[:, self.lags - 1]
 
         # Get steps index
-        y_data = y_data[:, self.steps-1]
+        y_data = y_data[:, self.steps - 1]
 
         return X_data, y_data
 
