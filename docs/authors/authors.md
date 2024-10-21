@@ -32,4 +32,6 @@ A detailed overview on how to contribute can be found in the [contributing guide
 
 + Lillian Jensen, MPH, [tyg3rr](https://github.com/tyg3rr)
 
-+ Ivan Liu , [IvanLiuTW](https://github.com/IvanLiuTW)
++ Ivan Liu, [IvanLiuTW](https://github.com/IvanLiuTW)
+
++ Ignacio Moya, [imMoya](https://github.com/imMoya)

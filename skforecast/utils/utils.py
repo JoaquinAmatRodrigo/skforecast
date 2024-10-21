@@ -89,7 +89,7 @@ def initialize_lags(
             if np.any(lags < 1):
                 raise ValueError("Minimum value of lags allowed is 1.")
         else:
-            if forecaster_name != 'ForecasterAutoregMultiVariate':
+            if forecaster_name != 'ForecasterDirectMultiVariate':
                 raise TypeError(
                     (f"`lags` argument must be an int, 1d numpy ndarray, range, "
                      f"tuple or list. Got {type(lags)}.")
@@ -244,7 +244,7 @@ def initialize_weights(
 
     if weight_func is not None:
 
-        if forecaster_name in ['ForecasterAutoregMultiSeries']:
+        if forecaster_name in ['ForecasterRecursiveMultiSeries']:
             if not isinstance(weight_func, (Callable, dict)):
                 raise TypeError(
                     (f"Argument `weight_func` must be a Callable or a dict of "
@@ -311,7 +311,7 @@ def initialize_transformer_series(
     series_names_in_ : list
         Names of the series (levels) used during training.
     encoding : str, default `None`
-        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`).
+        Encoding used to identify the different series (`ForecasterRecursiveMultiSeries`).
     transformer_series : object, dict, default `None`
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -326,7 +326,7 @@ def initialize_transformer_series(
     """
 
     multiseries_forecasters = [
-        'ForecasterAutoregMultiSeries'
+        'ForecasterRecursiveMultiSeries'
     ]
 
     if forecaster_name in multiseries_forecasters:
@@ -732,19 +732,19 @@ def check_predict_input(
     alpha : float, default `None`
         The confidence intervals used in ForecasterSarimax are (1 - alpha) %.
     max_steps: int, default `None`
-        Maximum number of steps allowed (`ForecasterAutoregDirect` and 
-        `ForecasterAutoregMultiVariate`).
+        Maximum number of steps allowed (`ForecasterDirect` and 
+        `ForecasterDirectMultiVariate`).
     levels : str, list, default `None`
-        Time series to be predicted (`ForecasterAutoregMultiSeries`
+        Time series to be predicted (`ForecasterRecursiveMultiSeries`
         and `ForecasterRnn).
     levels_forecaster : str, list, default `None`
         Time series used as output data of a multiseries problem in a RNN problem
         (`ForecasterRnn`).
     series_names_in_ : list, default `None`
-        Names of the columns used during fit (`ForecasterAutoregMultiSeries`, 
-        `ForecasterAutoregMultiVariate` and `ForecasterRnn`).
+        Names of the columns used during fit (`ForecasterRecursiveMultiSeries`, 
+        `ForecasterDirectMultiVariate` and `ForecasterRnn`).
     encoding : str, default `None`
-        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`).
+        Encoding used to identify the different series (`ForecasterRecursiveMultiSeries`).
 
     Returns
     -------
@@ -780,7 +780,7 @@ def check_predict_input(
     if interval is not None or alpha is not None:
         check_interval(interval=interval, alpha=alpha)
 
-    if forecaster_name in ['ForecasterAutoregMultiSeries', 
+    if forecaster_name in ['ForecasterRecursiveMultiSeries', 
                            'ForecasterRnn']:
         if not isinstance(levels, (type(None), str, list)):
             raise TypeError(
@@ -830,7 +830,7 @@ def check_predict_input(
     # Checks last_window
     # Check last_window type (pd.Series or pd.DataFrame according to forecaster)
     if isinstance(last_window, type(None)) and forecaster_name not in [
-        'ForecasterAutoregMultiSeries', 
+        'ForecasterRecursiveMultiSeries', 
         'ForecasterRnn'
     ]:
         raise ValueError(
@@ -838,8 +838,8 @@ def check_predict_input(
              "to retrain the Forecaster, provide `last_window` as argument.")
         )
 
-    if forecaster_name in ['ForecasterAutoregMultiSeries', 
-                           'ForecasterAutoregMultiVariate',
+    if forecaster_name in ['ForecasterRecursiveMultiSeries', 
+                           'ForecasterDirectMultiVariate',
                            'ForecasterRnn']:
         if not isinstance(last_window, pd.DataFrame):
             raise TypeError(
@@ -848,7 +848,7 @@ def check_predict_input(
 
         last_window_cols = last_window.columns.to_list()
 
-        if forecaster_name in ['ForecasterAutoregMultiSeries', 
+        if forecaster_name in ['ForecasterRecursiveMultiSeries', 
                                'ForecasterRnn'] and \
             len(set(levels) - set(last_window_cols)) != 0:
             raise ValueError(
@@ -858,7 +858,7 @@ def check_predict_input(
                  f"    `last_window` columns : {last_window_cols}")
             )
 
-        if forecaster_name == 'ForecasterAutoregMultiVariate':
+        if forecaster_name == 'ForecasterDirectMultiVariate':
             if len(set(series_names_in_) - set(last_window_cols)) > 0:
                 raise ValueError(
                     (f"`last_window` columns must be the same as the `series` "
@@ -905,7 +905,7 @@ def check_predict_input(
     if exog is not None:
 
         # Check type, nulls and expected type
-        if forecaster_name in ['ForecasterAutoregMultiSeries']:
+        if forecaster_name in ['ForecasterRecursiveMultiSeries']:
             if not isinstance(exog, (pd.Series, pd.DataFrame, dict)):
                 raise TypeError(
                     f"`exog` must be a pandas Series, DataFrame or dict. Got {type(exog)}."
@@ -954,7 +954,7 @@ def check_predict_input(
             # Check exog has many values as distance to max step predicted
             last_step = max(steps) if isinstance(steps, list) else steps
             if len(exog_to_check) < last_step:
-                if forecaster_name in ['ForecasterAutoregMultiSeries']:
+                if forecaster_name in ['ForecasterRecursiveMultiSeries']:
                     warnings.warn(
                         (f"{exog_name} doesn't have as many values as steps "
                          f"predicted, {last_step}. Missing values are filled "
@@ -972,7 +972,7 @@ def check_predict_input(
             if isinstance(exog_to_check, pd.DataFrame):
                 col_missing = set(exog_names_in_).difference(set(exog_to_check.columns))
                 if col_missing:
-                    if forecaster_name in ['ForecasterAutoregMultiSeries']:
+                    if forecaster_name in ['ForecasterRecursiveMultiSeries']:
                         warnings.warn(
                             (f"{col_missing} not present in {exog_name}. All "
                              f"values will be NaN."),
@@ -990,7 +990,7 @@ def check_predict_input(
                     )
 
                 if exog_to_check.name not in exog_names_in_:
-                    if forecaster_name in ['ForecasterAutoregMultiSeries']:
+                    if forecaster_name in ['ForecasterRecursiveMultiSeries']:
                         warnings.warn(
                             (f"'{exog_to_check.name}' was not observed during training. "
                              f"{exog_name} is ignored. Exogenous variables must be one "
@@ -1013,7 +1013,7 @@ def check_predict_input(
                     (f"Expected index of type {index_type_} for {exog_name}. "
                      f"Got {type(exog_index)}.")
                 )
-            if forecaster_name not in ['ForecasterAutoregMultiSeries']:
+            if forecaster_name not in ['ForecasterRecursiveMultiSeries']:
                 if isinstance(exog_index, pd.DatetimeIndex):
                     if not exog_index.freqstr == index_freq_:
                         raise TypeError(
@@ -1024,7 +1024,7 @@ def check_predict_input(
             # Check exog starts one step ahead of last_window end.
             expected_index = expand_index(last_window.index, 1)[0]
             if expected_index != exog_to_check.index[0]:
-                if forecaster_name in ['ForecasterAutoregMultiSeries']:
+                if forecaster_name in ['ForecasterRecursiveMultiSeries']:
                     warnings.warn(
                         (f"To make predictions {exog_name} must start one step "
                          f"ahead of `last_window`. Missing values are filled "
@@ -1381,7 +1381,7 @@ def cast_exog_dtypes(
 def exog_to_direct(
     exog: Union[pd.Series, pd.DataFrame],
     steps: int
-) -> pd.DataFrame:
+) -> Union[pd.DataFrame, list]:
     """
     Transforms `exog` to a pandas DataFrame with the shape needed for Direct
     forecasting.
@@ -1390,13 +1390,16 @@ def exog_to_direct(
     ----------
     exog : pandas Series, pandas DataFrame
         Exogenous variables.
-    steps : int.
+    steps : int
         Number of steps that will be predicted using exog.
 
     Returns
     -------
-    exog_transformed : pandas DataFrame
+    exog_direct : pandas DataFrame
         Exogenous variables transformed.
+    exog_direct_names : list
+        Names of the columns of the exogenous variables transformed. Only 
+        created if `exog` is a pandas Series or DataFrame.
     
     """
 
@@ -1408,73 +1411,145 @@ def exog_to_direct(
 
     n_rows = len(exog)
     exog_idx = exog.index
-    exog_transformed = []
-
+    exog_cols = exog.columns
+    exog_direct = []
     for i in range(steps):
-        exog_column_transformed = exog.iloc[i : n_rows - (steps - 1 - i), ]
-        exog_column_transformed.index = pd.RangeIndex(len(exog_column_transformed))
-        exog_column_transformed.columns = [f"{col}_step_{i + 1}" 
-                                           for col in exog_column_transformed.columns]
-        exog_transformed.append(exog_column_transformed)
+        exog_step = exog.iloc[i : n_rows - (steps - 1 - i), ]
+        exog_step.index = pd.RangeIndex(len(exog_step))
+        exog_step.columns = [f"{col}_step_{i + 1}" for col in exog_cols]
+        exog_direct.append(exog_step)
 
-    if len(exog_transformed) > 1:
-        exog_transformed = pd.concat(exog_transformed, axis=1, copy=False)
+    if len(exog_direct) > 1:
+        exog_direct = pd.concat(exog_direct, axis=1, copy=False)
     else:
-        exog_transformed = exog_column_transformed
+        exog_direct = exog_direct[0]
 
-    exog_transformed.index = exog_idx[-len(exog_transformed):]
+    exog_direct_names = exog_direct.columns.to_list()
+    exog_direct.index = exog_idx[-len(exog_direct):]
     
-    return exog_transformed
+    return exog_direct, exog_direct_names
 
-# TODO: See if can return direct cols names
+
 def exog_to_direct_numpy(
-    exog: np.ndarray,
+    exog: Union[np.ndarray, pd.Series, pd.DataFrame],
     steps: int
-) -> np.ndarray:
+) -> Tuple[np.ndarray, Optional[list]]:
     """
     Transforms `exog` to numpy ndarray with the shape needed for Direct
     forecasting.
     
     Parameters
     ----------
-    exog : numpy ndarray, shape(samples,)
-        Exogenous variables.
-    steps : int.
+    exog : numpy ndarray, pandas Series, pandas DataFrame
+        Exogenous variables, shape(samples,). If exog is a pandas format, the 
+        direct exog names are created.
+    steps : int
         Number of steps that will be predicted using exog.
 
     Returns
     -------
-    exog_transformed : numpy ndarray
+    exog_direct : numpy ndarray
         Exogenous variables transformed.
+    exog_direct_names : list, None
+        Names of the columns of the exogenous variables transformed. Only 
+        created if `exog` is a pandas Series or DataFrame.
 
     """
 
-    if not isinstance(exog, np.ndarray):
-        raise TypeError(f"`exog` must be a numpy ndarray. Got {type(exog)}.")
+    if isinstance(exog, (pd.Series, pd.DataFrame)):
+        exog_cols = exog.columns if isinstance(exog, pd.DataFrame) else [exog.name]
+        exog_direct_names = [
+            f"{col}_step_{i + 1}" for i in range(steps) for col in exog_cols
+        ]
+        exog = exog.to_numpy()
+    else:
+        exog_direct_names = None
+        if not isinstance(exog, np.ndarray):
+            raise TypeError(
+                f"`exog` must be a numpy ndarray, pandas Series or DataFrame. "
+                f"Got {type(exog)}."
+            )
 
     if exog.ndim == 1:
         exog = np.expand_dims(exog, axis=1)
 
     n_rows = len(exog)
-    exog_transformed = []
-
+    exog_direct = []
     for i in range(steps):
-        exog_column_transformed = exog[i : n_rows - (steps - 1 - i)]
-        exog_transformed.append(exog_column_transformed)
+        exog_step = exog[i : n_rows - (steps - 1 - i)]
+        exog_direct.append(exog_step)
 
-    if len(exog_transformed) > 1:
-        exog_transformed = np.concatenate(exog_transformed, axis=1)
+    if len(exog_direct) > 1:
+        exog_direct = np.concatenate(exog_direct, axis=1)
     else:
-        exog_transformed = exog_column_transformed.copy()
+        exog_direct = exog_direct[0]
     
-    return exog_transformed
+    return exog_direct, exog_direct_names
+
+
+def date_to_index_position(
+    index: pd.Index,
+    date_input: Union[int, str, pd.Timestamp],
+    date_literal: str = 'steps',
+    kwargs_pd_to_datetime: dict = {}
+) -> int:
+    """
+    Transform a datetime string or pandas Timestamp to an integer. The integer
+    represents the position of the datetime in the index.
+    
+    Parameters
+    ----------
+    index : pandas Index
+        Original datetime index (must be a pandas DatetimeIndex if `date_input` 
+        is not an int).
+    date_input : int, str, pandas Timestamp
+        Datetime to transform to integer.
+        
+        + If int, returns the same integer.
+        + If str or pandas Timestamp, it is converted and expanded into the index.
+    date_literal : str, default 'steps'
+        Variable name used in error messages.
+    kwargs_pd_to_datetime : dict, default {}
+        Additional keyword arguments to pass to `pd.to_datetime()`.
+    
+    Returns
+    -------
+    date_position : int
+        Integer representing the position of the datetime in the index.
+    
+    """
+    
+    if isinstance(date_input, (str, pd.Timestamp)):
+        if not isinstance(index, pd.DatetimeIndex):
+            raise TypeError(
+                f"Index must be a pandas DatetimeIndex when `{date_literal}` is "
+                f"not an integer. Check input series or last window."
+            )
+        
+        target_date = pd.to_datetime(date_input, **kwargs_pd_to_datetime)
+        last_date = pd.to_datetime(index[-1])
+        if target_date <= last_date:
+            raise ValueError(
+                "The provided date must be later than the last date in the index."
+            )
+        
+        steps_diff = pd.date_range(start=last_date, end=target_date, freq=index.freq)
+        date_position = len(steps_diff) - 1
+    
+    elif isinstance(date_input, (int, np.integer)):
+        date_position = date_input
+    else:
+        raise TypeError(
+            f"`{date_literal}` must be an integer, string, or pandas Timestamp."
+        )
+    
+    return date_position
 
 
 def expand_index(
     index: Union[pd.Index, None], 
-    steps: Union[int, str, pd.Timestamp],
-    **kwargs
-) -> Tuple[pd.Index, int]:
+    steps: int
+) -> pd.Index:
     """
     Create a new index of length `steps` starting at the end of the index.
     
@@ -1482,11 +1557,8 @@ def expand_index(
     ----------
     index : pandas Index, None
         Original index.
-    steps : int, str, pandas Timestamp]
-        If steps is int, number of steps to expand. If str or pandas Datetime, 
-        expand index to this date (str must be convertible to pandas Datetime format).
-    **kwargs
-        Additional keyword arguments to pass to `pd.to_datetime()`.
+    steps : int
+        Number of steps to expand.
 
     Returns
     -------
@@ -1495,22 +1567,8 @@ def expand_index(
 
     """
 
-    if isinstance(steps, (str, pd.Timestamp)):
-        # Changes `steps` to integer based on datetime expansion
-        if not isinstance(index, pd.DatetimeIndex):
-            raise ValueError( "Argument `index` must be a pandas DatetimeIndex when `steps` is a datetime.")
-        
-        else:
-            target_date = pd.to_datetime(steps, **kwargs)
-            last_date = pd.to_datetime(index[-1])
-            if target_date <= last_date:
-                raise ValueError("The provided date is earlier than or equal to the last observation date.")
-        
-            steps_diff = pd.date_range(start=last_date, end=target_date, freq=index.freq)
-            steps = len(steps_diff) - 1
-
-    elif not isinstance(steps, int):
-        raise TypeError("Argument `steps` must be an integer, string or pandas Timestamp.")
+    if not isinstance(steps, (int, np.integer)):
+        raise TypeError(f"`steps` must be an integer. Got {type(steps)}.")
 
     if isinstance(index, pd.Index):
         
@@ -1535,7 +1593,7 @@ def expand_index(
                         stop  = steps
                     )
     
-    return new_index, steps
+    return new_index
 
 
 def transform_numpy(
@@ -2005,7 +2063,7 @@ def select_n_jobs_fit_forecaster(
     
     The number of jobs is chosen as follows:
     
-    - If forecaster_name is 'ForecasterAutoregDirect' or 'ForecasterAutoregMultiVariate'
+    - If forecaster_name is 'ForecasterDirect' or 'ForecasterDirectMultiVariate'
     and regressor_name is a linear regressor then `n_jobs = 1`, otherwise `n_jobs = cpu_count() - 1`.
 
     - If `LGBMRegressor` then `n_jobs = 1`. This is because `lightgbm` 
@@ -2033,8 +2091,8 @@ def select_n_jobs_fit_forecaster(
         if not regressor_name.startswith('_')
     ]
 
-    if forecaster_name in ['ForecasterAutoregDirect', 
-                           'ForecasterAutoregMultiVariate']:
+    if forecaster_name in ['ForecasterDirect', 
+                           'ForecasterDirectMultiVariate']:
         if regressor_name in linear_regressors or regressor_name == 'LGBMRegressor':
             n_jobs = 1
         else:
@@ -2049,7 +2107,7 @@ def check_preprocess_series(
     series: Union[pd.DataFrame, dict],
 ) -> Tuple[dict, pd.Index]:
     """
-    Check and preprocess `series` argument in `ForecasterAutoregMultiSeries` class.
+    Check and preprocess `series` argument in `ForecasterRecursiveMultiSeries` class.
 
     - If `series` is a pandas DataFrame, it is converted to a dict of pandas 
     Series and index is overwritten according to the rules of preprocess_y.
@@ -2155,7 +2213,7 @@ def check_preprocess_exog_multiseries(
     exog_dict: dict,
 ) -> Tuple[dict, list]:
     """
-    Check and preprocess `exog` argument in `ForecasterAutoregMultiSeries` class.
+    Check and preprocess `exog` argument in `ForecasterRecursiveMultiSeries` class.
 
     - If input series is a pandas DataFrame (input_series_is_dict = False),  
     checks that input exog (pandas Series, DataFrame or dict) has the same index 
@@ -2519,7 +2577,7 @@ def prepare_residuals_multiseries(
     use_in_sample_residuals : bool
         Indicates if `forecaster.in_sample_residuals_` are used.
     encoding : str, default `None`
-        Encoding used to identify the different series (`ForecasterAutoregMultiSeries`).
+        Encoding used to identify the different series (`ForecasterRecursiveMultiSeries`).
     in_sample_residuals_ : dict, default `None`
         Residuals of the model when predicting training data. Only stored up to
         1000 values in the form `{level: residuals}`. If `transformer_series` 

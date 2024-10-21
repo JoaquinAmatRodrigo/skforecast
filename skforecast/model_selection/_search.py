@@ -51,7 +51,7 @@ def grid_search_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
+    forecaster : ForecasterRecursive, ForecasterDirect
         Forecaster model.
     y : pandas Series
         Training time series.
@@ -150,7 +150,7 @@ def random_search_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
+    forecaster : ForecasterRecursive, ForecasterDirect
         Forecaster model.
     y : pandas Series
         Training time series.
@@ -243,7 +243,7 @@ def _calculate_metrics_one_step_ahead(
 ) -> list:
     """
     Calculate metrics when predictions are one-step-ahead. When forecaster is
-    of type ForecasterAutoregDirect only the regressor for step 1 is used.
+    of type ForecasterDirect only the regressor for step 1 is used.
 
     Parameters
     ----------
@@ -269,7 +269,7 @@ def _calculate_metrics_one_step_ahead(
     
     """
 
-    if type(forecaster).__name__ == 'ForecasterAutoregDirect':
+    if type(forecaster).__name__ == 'ForecasterDirect':
 
         step = 1  # Only model for step 1 is optimized.
         X_train, y_train = forecaster.filter_train_X_y_for_step(
@@ -335,7 +335,7 @@ def _evaluate_grid_hyperparameters(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
+    forecaster : ForecasterRecursive, ForecasterDirect
         Forecaster model.
     y : pandas Series
         Training time series.
@@ -583,7 +583,7 @@ def bayesian_search_forecaster(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
+    forecaster : ForecasterRecursive, ForecasterDirect
         Forecaster model.
     y : pandas Series
         Training time series.
@@ -699,7 +699,7 @@ def _bayesian_search_optuna(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoreg, ForecasterAutoregDirect
+    forecaster : ForecasterRecursive, ForecasterDirect
         Forecaster model.
     y : pandas Series
         Training time series. 
@@ -1004,7 +1004,7 @@ def grid_search_forecaster_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate
+    forecaster : ForecasterRecursiveMultiSeries, ForecasterDirectMultiVariate
         Forecaster model.
     series : pandas DataFrame, dict
         Training time series.
@@ -1126,7 +1126,7 @@ def random_search_forecaster_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate
+    forecaster : ForecasterRecursiveMultiSeries, ForecasterDirectMultiVariate
         Forecaster model.
     series : pandas DataFrame, dict
         Training time series.
@@ -1250,7 +1250,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate
+    forecaster : ForecasterRecursiveMultiSeries, ForecasterDirectMultiVariate
         Forecaster model.
     series : pandas DataFrame, dict
         Training time series.
@@ -1562,7 +1562,7 @@ def bayesian_search_forecaster_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate
+    forecaster : ForecasterRecursiveMultiSeries, ForecasterDirectMultiVariate
         Forecaster model.
     series : pandas DataFrame, dict
         Training time series.
@@ -1706,7 +1706,7 @@ def _bayesian_search_optuna_multiseries(
     
     Parameters
     ----------
-    forecaster : ForecasterAutoregMultiSeries, ForecasterAutoregMultiVariate
+    forecaster : ForecasterRecursiveMultiSeries, ForecasterDirectMultiVariate
         Forecaster model.
     series : pandas DataFrame, dict
         Training time series.
@@ -2019,7 +2019,7 @@ def _bayesian_search_optuna_multiseries(
         params_list.append(regressor_params)
         lags_list.append(lags)
     
-    if type(forecaster).__name__ not in ['ForecasterAutoregMultiVariate']:
+    if type(forecaster).__name__ not in ['ForecasterDirectMultiVariate']:
         lags_list = [
             initialize_lags(forecaster_name=type(forecaster).__name__, lags = lag)[0]
             for lag in lags_list

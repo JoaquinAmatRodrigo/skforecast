@@ -78,14 +78,14 @@ nav:
     - Spanish: examples/examples_spanish.md
 
   - API Reference:
-    - ForecasterAutoreg: api/ForecasterAutoreg.md
-    - ForecasterAutoregDirect: api/ForecasterAutoregDirect.md
-    - ForecasterMultiSeries: api/ForecasterMultiSeries.md
-    - ForecasterMultiVariate: api/ForecasterMultiVariate.md
+    - ForecasterRecursive: api/ForecasterRecursive.md
+    - ForecasterDirect: api/ForecasterDirect.md
+    - ForecasterRecursiveMultiSeries: api/ForecasterRecursiveMultiSeries.md
+    - ForecasterDirectMultiVariate: api/ForecasterDirectMultiVariate.md
     - ForecasterRnn: api/ForecasterRnn.md
-    - ForecasterSarimax: api/ForecasterSarimax.md
     - sarimax: api/sarimax.md
-    - ForecasterBaseline: api/ForecasterBaseline.md
+    - ForecasterSarimax: api/ForecasterSarimax.md
+    - ForecasterEquivalentDate: api/ForecasterEquivalentDate.md
     - model_selection: api/model_selection.md
     - preprocessing: api/preprocessing.md
     - metrics: api/metrics.md
@@ -118,7 +118,7 @@ plugins:
             docstring_style: numpy
             docstring_section_style: table
             show_root_heading: true
-            show_root_full_path: false
+            show_root_full_path: true
             merge_init_into_class: true
             filters: ["!__"] # exclude all members starting with __
             members_order: source
