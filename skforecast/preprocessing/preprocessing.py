@@ -1147,7 +1147,6 @@ class QuantileBinner:
         self.bin_edges_   = None
         self.intervals_   = None
 
-
     def _validate_params(
             self,
             n_bins: int,
