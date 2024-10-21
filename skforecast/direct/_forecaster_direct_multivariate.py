@@ -964,18 +964,20 @@ class ForecasterDirectMultiVariate(ForecasterBase):
             # The first `self.window_size` positions have to be removed from X_exog
             # since they are not in X_lags.
             X_train_exog_names_out_ = exog.columns.to_list()
-            # TODO: See if can return direct cols names with exog_to_direct_numpy
-            exog_to_train = exog_to_direct(
-                                exog  = exog,
-                                steps = self.steps
-                            )
-            exog_to_train = exog_to_train.iloc[-len_train_index:, :]
-            # NOTE: Need here for filter_train_X_y_for_step to work without fitting
-            self.X_train_direct_exog_names_out_ = exog_to_train.columns.to_list()
             if categorical_features:
+                exog_to_train, X_train_direct_exog_names_out_ = exog_to_direct(
+                    exog=exog, steps=self.steps
+                )
+                exog_to_train = exog_to_train.iloc[-len_train_index:, :]
                 exog_to_train.index = train_index
             else:
-                exog_to_train = exog_to_train.to_numpy()
+                exog_to_train, X_train_direct_exog_names_out_ = exog_to_direct_numpy(
+                    exog=exog, steps=self.steps
+                )
+                exog_to_train = exog_to_train[-len_train_index:, :]
+
+            # NOTE: Need here for filter_train_X_y_for_step to work without fitting
+            self.X_train_direct_exog_names_out_ = X_train_direct_exog_names_out_
 
             X_train_features_names_out_.extend(self.X_train_direct_exog_names_out_)
             X_train.append(exog_to_train)
@@ -1585,10 +1587,11 @@ class ForecasterDirectMultiVariate(ForecasterBase):
                        inverse_transform = False
                    )
             check_exog_dtypes(exog=exog)
-            exog_values = exog_to_direct_numpy(
-                              exog  = exog.to_numpy()[:max(steps)],
-                              steps = max(steps)
-                          )[0]
+            exog_values, _ = exog_to_direct_numpy(
+                                 exog  = exog.to_numpy()[:max(steps)],
+                                 steps = max(steps)
+                             )
+            exog_values = exog_values[0]
             
             n_exog = exog.shape[1]
             Xs = [
