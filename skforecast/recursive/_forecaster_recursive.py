@@ -644,7 +644,7 @@ class ForecasterRecursive(ForecasterBase):
             if not self.is_fitted:
                 y_values = self.differentiator.fit_transform(y_values)
             else:
-                differentiator = clone(self.differentiator)
+                differentiator = copy(self.differentiator)
                 y_values = differentiator.fit_transform(y_values)
 
         exog_names_in_ = None
@@ -2087,7 +2087,7 @@ class ForecasterRecursive(ForecasterBase):
                          inverse_transform = False
                      )
         if self.differentiation is not None:
-            differentiator = clone(self.differentiator)
+            differentiator = copy(self.differentiator)
             y_true = differentiator.fit_transform(y_true)[self.differentiation:]
             y_pred = differentiator.fit_transform(y_pred)[self.differentiation:]
         

@@ -777,7 +777,7 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
             if not self.is_fitted:
                 y_values = self.differentiator_[series_name].fit_transform(y_values)
             else:
-                differentiator = clone(self.differentiator_[series_name])
+                differentiator = copy(self.differentiator_[series_name])
                 y_values = differentiator.fit_transform(y_values)
 
         X_train_autoreg = []
@@ -952,7 +952,7 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
             self.differentiator_ = {serie: None for serie in series_names_in_}
         else:
             if not self.is_fitted:
-                self.differentiator_ = {serie: clone(self.differentiator)
+                self.differentiator_ = {serie: copy(self.differentiator)
                                         for serie in series_names_in_}
 
         series_dict, exog_dict = align_series_and_exog_multiseries(
@@ -1783,7 +1783,7 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
    
             if self.differentiation is not None:
                 if level not in self.differentiator_.keys():
-                    self.differentiator_[level] = clone(self.differentiator)
+                    self.differentiator_[level] = copy(self.differentiator)
                 last_window_level = self.differentiator_[level].fit_transform(last_window_level)
             
             last_window[level] = last_window_level
