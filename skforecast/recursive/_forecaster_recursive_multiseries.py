@@ -1900,37 +1900,39 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         )
         last_window = np.concatenate((last_window.to_numpy(), predictions), axis=0)
 
-        for i in range(steps):
-            
-            if self.lags is not None:
-                features[:, :n_lags] = last_window[-self.lags - (steps - i), :].transpose()
-            if self.window_features is not None:
-                features[:, n_lags:n_autoreg] = np.concatenate(
-                    [wf.transform(last_window[i:-(steps - i), :]) 
-                     for wf in self.window_features],
-                    axis=1
-                )
-            if exog_values_dict is not None:
-                features[:, -n_exog:] = exog_values_dict[i + 1]
+        with warnings.catch_warnings():
+            # Suppress scikit-learn warning: "X does not have valid feature names,
+            # but NoOpTransformer was fitted with feature names".
+            warnings.filterwarnings(
+                "ignore", 
+                message="X does not have valid feature names", 
+                category=UserWarning
+            )
+            for i in range(steps):
+                
+                if self.lags is not None:
+                    features[:, :n_lags] = last_window[
+                        -self.lags - (steps - i), :
+                    ].transpose()
+                if self.window_features is not None:
+                    features[:, n_lags:n_autoreg] = np.concatenate(
+                        [wf.transform(last_window[i:-(steps - i), :]) 
+                        for wf in self.window_features],
+                        axis=1
+                    )
+                if exog_values_dict is not None:
+                    features[:, -n_exog:] = exog_values_dict[i + 1]
 
-            with warnings.catch_warnings():
-                # Suppress scikit-learn warning: "X does not have valid feature names,
-                # but NoOpTransformer was fitted with feature names".
-                warnings.filterwarnings(
-                    "ignore", 
-                    message="X does not have valid feature names", 
-                    category=UserWarning
-                )
                 pred = self.regressor.predict(features)
-            
-            if residuals is not None:
-                pred += residuals[i, :]
-            
-            predictions[i, :] = pred 
+                
+                if residuals is not None:
+                    pred += residuals[i, :]
+                
+                predictions[i, :] = pred 
 
-            # Update `last_window` values. The first position is discarded and 
-            # the new prediction is added at the end.
-            last_window[-(steps - i), :] = pred
+                # Update `last_window` values. The first position is discarded and 
+                # the new prediction is added at the end.
+                last_window[-(steps - i), :] = pred
 
         return predictions
 
