@@ -153,7 +153,7 @@ def test_save_forecaster_warning_dont_save_custom_functions(weight_func):
                  )
 
     warn_msg = re.escape(
-        "Custom functions used to create predictors or weights are not saved. "
+        "Custom function(s) used to create weights are not saved. "
         "To save them, set `save_custom_functions` to `True`."
     )
     with pytest.warns(SaveLoadSkforecastWarning, match = warn_msg):

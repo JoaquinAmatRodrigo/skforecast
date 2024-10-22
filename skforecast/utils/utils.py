@@ -1883,7 +1883,7 @@ def save_forecaster(
     else:
         if hasattr(forecaster, 'weight_func') and forecaster.weight_func is not None:
             warnings.warn(
-                "Custom functions used to weights are not saved. To save them, "
+                "Custom function(s) used to create weights are not saved. To save them, "
                 "set `save_custom_functions` to `True`.",
                 SaveLoadSkforecastWarning
             )
