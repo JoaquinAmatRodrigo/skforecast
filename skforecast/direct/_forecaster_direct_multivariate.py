@@ -831,7 +831,7 @@ class ForecasterDirectMultiVariate(ForecasterBase):
         else:
             if not self.is_fitted:
                 self.differentiator_ = {
-                    serie: clone(self.differentiator)
+                    serie: copy(self.differentiator)
                     for serie in series_to_create_autoreg_features_and_y
                 }
 
@@ -900,7 +900,7 @@ class ForecasterDirectMultiVariate(ForecasterBase):
                 if not self.is_fitted:
                     y_values = self.differentiator_[col].fit_transform(y_values)
                 else:
-                    differentiator = clone(self.differentiator_[col])
+                    differentiator = copy(self.differentiator_[col])
                     y_values = differentiator.fit_transform(y_values)
 
             X_train_autoreg_col = []

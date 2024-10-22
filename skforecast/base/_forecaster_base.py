@@ -355,4 +355,10 @@ class ForecasterBase(ABC):
         
         """
         
-        print(self)
+        # If environment supports HTML (like Jupyter Notebook)
+        if hasattr(self, '_repr_html_') and callable(getattr(self, '_repr_html_')):
+            from IPython.display import display, HTML
+            display(HTML(self._repr_html_()))
+        else:
+            # Fall back to __repr__ if _repr_html_ is not available
+            print(self.__repr__())

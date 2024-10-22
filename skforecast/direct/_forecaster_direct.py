@@ -664,7 +664,7 @@ class ForecasterDirect(ForecasterBase):
             if not self.is_fitted:
                 y_values = self.differentiator.fit_transform(y_values)
             else:
-                differentiator = clone(self.differentiator)
+                differentiator = copy(self.differentiator)
                 y_values = differentiator.fit_transform(y_values)
 
         exog_names_in_ = None
@@ -2093,7 +2093,7 @@ class ForecasterDirect(ForecasterBase):
         y_true = y_true.copy()
         y_pred = y_pred.copy()
         if self.differentiation is not None:
-            differentiator = clone(self.differentiator)
+            differentiator = copy(self.differentiator)
         for k in steps_to_update:
             if isinstance(y_true[k], pd.Series):
                 y_true[k] = y_true[k].to_numpy()
