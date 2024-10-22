@@ -9,6 +9,7 @@ from abc import ABC, abstractmethod
 from typing import Union, Tuple, Optional
 import uuid
 import textwrap
+from IPython.display import display, HTML
 import pandas as pd
 from sklearn.pipeline import Pipeline
 
@@ -357,7 +358,6 @@ class ForecasterBase(ABC):
         
         # If environment supports HTML (like Jupyter Notebook)
         if hasattr(self, '_repr_html_') and callable(getattr(self, '_repr_html_')):
-            from IPython.display import display, HTML
             display(HTML(self._repr_html_()))
         else:
             # Fall back to __repr__ if _repr_html_ is not available
