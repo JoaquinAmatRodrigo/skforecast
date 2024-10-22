@@ -180,7 +180,8 @@ def test_save_forecaster_warning_when_user_defined_window_features():
         "The Forecaster includes custom user-defined classes in the "
         "`window_features` argument. These classes are not saved automatically "
         "when saving the Forecaster. Please ensure you save these classes "
-        "manually and import them before loading the Forecaster."
+        "manually and import them before loading the Forecaster.\n"
+        "    Custom classes: " + ', '.join({'UserWindowFeature'}),
     )
     with pytest.warns(SaveLoadSkforecastWarning, match = warn_msg):
         save_forecaster(forecaster=forecaster, file_name='forecaster.joblib', 
