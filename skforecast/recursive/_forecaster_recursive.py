@@ -1333,9 +1333,9 @@ class ForecasterRecursive(ForecasterBase):
                 category=UserWarning
             )
             predictions = self._recursive_predict(
-                            steps              = steps,
-                            last_window_values = last_window_values,
-                            exog_values        = exog_values
+                              steps              = steps,
+                              last_window_values = last_window_values,
+                              exog_values        = exog_values
                           )
 
         X_predict = []
@@ -1420,12 +1420,11 @@ class ForecasterRecursive(ForecasterBase):
                 message="X does not have valid feature names", 
                 category=UserWarning
             )
-
             predictions = self._recursive_predict(
-                            steps              = steps,
-                            last_window_values = last_window_values,
-                            exog_values        = exog_values
-                        )
+                              steps              = steps,
+                              last_window_values = last_window_values,
+                              exog_values        = exog_values
+                          )
 
         if self.differentiation is not None:
             predictions = self.differentiator.inverse_transform_next_window(predictions)
@@ -1541,7 +1540,7 @@ class ForecasterRecursive(ForecasterBase):
             sampled_residuals = residuals[
                 rng.integers(low=0, high=len(residuals), size=(steps, n_boot))
             ]
-            
+        
         boot_columns = []
         boot_predictions = np.full(
                                shape      = (steps, n_boot),
@@ -1549,7 +1548,6 @@ class ForecasterRecursive(ForecasterBase):
                                order      = 'F',
                                dtype      = float
                            )
-        
         with warnings.catch_warnings():
             warnings.filterwarnings(
                 "ignore", 

@@ -1900,37 +1900,33 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         )
         last_window = np.concatenate((last_window.to_numpy(), predictions), axis=0)
 
-        with warnings.catch_warnings():
-            warnings.filterwarnings(
-                "ignore", 
-                message="X does not have valid feature names", 
-                category=UserWarning
-            )
-            for i in range(steps):
-                
-                if self.lags is not None:
-                    features[:, :n_lags] = last_window[
-                        -self.lags - (steps - i), :
-                    ].transpose()
-                if self.window_features is not None:
-                    features[:, n_lags:n_autoreg] = np.concatenate(
-                        [wf.transform(last_window[i:-(steps - i), :]) 
-                        for wf in self.window_features],
-                        axis=1
-                    )
-                if exog_values_dict is not None:
-                    features[:, -n_exog:] = exog_values_dict[i + 1]
+        for i in range(steps):
+            
+            if self.lags is not None:
+                features[:, :n_lags] = last_window[
+                    -self.lags - (steps - i), :
+                ].transpose()
+            if self.window_features is not None:
+                features[:, n_lags:n_autoreg] = np.concatenate(
+                    [
+                        wf.transform(last_window[i:-(steps - i), :]) 
+                        for wf in self.window_features
+                    ],
+                    axis=1
+                )
+            if exog_values_dict is not None:
+                features[:, -n_exog:] = exog_values_dict[i + 1]
 
-                pred = self.regressor.predict(features)
-                
-                if residuals is not None:
-                    pred += residuals[i, :]
-                
-                predictions[i, :] = pred 
+            pred = self.regressor.predict(features)
+            
+            if residuals is not None:
+                pred += residuals[i, :]
+            
+            predictions[i, :] = pred 
 
-                # Update `last_window` values. The first position is discarded and 
-                # the new prediction is added at the end.
-                last_window[-(steps - i), :] = pred
+            # Update `last_window` values. The first position is discarded and 
+            # the new prediction is added at the end.
+            last_window[-(steps - i), :] = pred
 
         return predictions
 
@@ -1998,11 +1994,11 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
                 category=UserWarning
             )
             predictions = self._recursive_predict(
-                            steps            = steps,
-                            levels           = levels,
-                            last_window      = last_window,
-                            exog_values_dict = exog_values_dict
-                        )
+                              steps            = steps,
+                              levels           = levels,
+                              last_window      = last_window,
+                              exog_values_dict = exog_values_dict
+                          )
         
         X_predict_dict = {}
         if self.lags is not None:
@@ -2131,11 +2127,11 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
                 category=UserWarning
             )
             predictions = self._recursive_predict(
-                            steps            = steps,
-                            levels           = levels,
-                            last_window      = last_window,
-                            exog_values_dict = exog_values_dict
-                        )
+                              steps            = steps,
+                              levels           = levels,
+                              last_window      = last_window,
+                              exog_values_dict = exog_values_dict
+                          )
         
         for i, level in enumerate(levels):
             if self.differentiation is not None:
