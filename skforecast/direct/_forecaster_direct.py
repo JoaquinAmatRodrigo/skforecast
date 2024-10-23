@@ -1415,8 +1415,6 @@ class ForecasterDirect(ForecasterBase):
 
         regressors = [self.regressors_[step] for step in steps]
         with warnings.catch_warnings():
-            # Suppress scikit-learn warning: "X does not have valid feature names,
-            # but NoOpTransformer was fitted with feature names".
             warnings.filterwarnings(
                 "ignore", 
                 message="X does not have valid feature names", 
@@ -1562,8 +1560,6 @@ class ForecasterDirect(ForecasterBase):
         # NOTE: Predictions must be transformed and differenced before adding residuals
         regressors = [self.regressors_[step] for step in steps]
         with warnings.catch_warnings():
-            # Suppress scikit-learn warning: "X does not have valid feature names,
-            # but NoOpTransformer was fitted with feature names".
             warnings.filterwarnings(
                 "ignore", 
                 message="X does not have valid feature names", 

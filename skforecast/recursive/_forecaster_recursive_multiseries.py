@@ -1901,8 +1901,6 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         last_window = np.concatenate((last_window.to_numpy(), predictions), axis=0)
 
         with warnings.catch_warnings():
-            # Suppress scikit-learn warning: "X does not have valid feature names,
-            # but NoOpTransformer was fitted with feature names".
             warnings.filterwarnings(
                 "ignore", 
                 message="X does not have valid feature names", 
@@ -1993,13 +1991,18 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
             exog         = exog
         )
   
-        # TODO: move here the warning.catch_warnings() context manager
-        predictions = self._recursive_predict(
-                          steps            = steps,
-                          levels           = levels,
-                          last_window      = last_window,
-                          exog_values_dict = exog_values_dict
-                      )
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", 
+                message="X does not have valid feature names", 
+                category=UserWarning
+            )
+            predictions = self._recursive_predict(
+                            steps            = steps,
+                            levels           = levels,
+                            last_window      = last_window,
+                            exog_values_dict = exog_values_dict
+                        )
         
         X_predict_dict = {}
         if self.lags is not None:
@@ -2121,13 +2124,18 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
             check_inputs = check_inputs
         )
 
-        # TODO: move here the warning.catch_warnings() context manager
-        predictions = self._recursive_predict(
-                          steps            = steps,
-                          levels           = levels,
-                          last_window      = last_window,
-                          exog_values_dict = exog_values_dict
-                      )
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", 
+                message="X does not have valid feature names", 
+                category=UserWarning
+            )
+            predictions = self._recursive_predict(
+                            steps            = steps,
+                            levels           = levels,
+                            last_window      = last_window,
+                            exog_values_dict = exog_values_dict
+                        )
         
         for i, level in enumerate(levels):
             if self.differentiation is not None:
@@ -2257,17 +2265,23 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
                                     order      = 'F',
                                     dtype      = float
                                 )
-        # TODO: move here the warning.catch_warnings() context manager
-        for i in range(n_boot):
-
-            boot_columns.append(f"pred_boot_{i}")
-            boot_predictions_full[:, :, i] = self._recursive_predict(
-                steps            = steps,
-                levels           = levels,
-                last_window      = last_window,
-                exog_values_dict = exog_values_dict,
-                residuals        = sample_residuals[:, i, :]
+        
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", 
+                message="X does not have valid feature names", 
+                category=UserWarning
             )
+            for i in range(n_boot):
+
+                boot_columns.append(f"pred_boot_{i}")
+                boot_predictions_full[:, :, i] = self._recursive_predict(
+                    steps            = steps,
+                    levels           = levels,
+                    last_window      = last_window,
+                    exog_values_dict = exog_values_dict,
+                    residuals        = sample_residuals[:, i, :]
+                )
 
         boot_predictions = {}
         for i, level in enumerate(levels):
