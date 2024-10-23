@@ -6,13 +6,13 @@
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width,initial-scale=1">
       
-        <meta name="description" content="Python library that eases using machine learning models as single and multi-step forecasters. It works with any regressor compatible with the scikit-learn API (XGBoost, LightGBM, Ranger...).">
+        <meta name="description" content="Python library for time series forecasting using machine learning models. It works with any regressor compatible with the scikit-learn API, including popular options like LightGBM, XGBoost, CatBoost, Keras, and many others.">
       
       
         <meta name="author" content="Joaquin Amat Rodrigo and Javier Escobar Ortiz">
       
       
-        <link rel="canonical" href="https://joaquinamatrodrigo.github.io/skforecast/0.14.0/releases/releases.html">
+        <link rel="canonical" href="https://skforecast.org/0.14.0/releases/releases.html">
       
       
         <link rel="prev" href="../faq/profiling-skforecast.html">
@@ -106,9 +106,9 @@
           <aside class="md-banner md-banner--warning">
             <div class="md-banner__inner md-grid md-typeset">
               
-  You're not viewing the latest version.
+This is documentation for an unstable development version.
   <a href="../..">
-    <strong>Click here to go to latest.</strong>
+    <strong>Switch to latest stable version.</strong>
   </a>
 
             </div>
@@ -220,7 +220,7 @@
     
     
       <div class="md-header__source">
-        <a href="https://github.com/JoaquinAmatRodrigo/skforecast" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/skforecast/skforecast" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
@@ -242,12 +242,10 @@
         
   
   
-    
-  
   
     
     
-      <li class="md-tabs__item md-tabs__item--active">
+      <li class="md-tabs__item">
         <a href="../index.html" class="md-tabs__link">
           
   
@@ -263,17 +261,16 @@
   
   
   
-    
-    
-      <li class="md-tabs__item">
-        <a href="../introduction-forecasting/introduction-forecasting.html" class="md-tabs__link">
-          
+    <li class="md-tabs__item">
+      <a href="../introduction-forecasting/introduction-forecasting.html" class="md-tabs__link">
+        
   
-  Introduction to forecasting
-
-        </a>
-      </li>
     
+  
+  Intro to Forecasting
+
+      </a>
+    </li>
   
 
       
@@ -302,7 +299,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../user_guides/user-guides.html" class="md-tabs__link">
+        <a href="../user_guides/table-of-contents.html" class="md-tabs__link">
           
   
   User Guides
@@ -317,16 +314,17 @@
   
   
   
-    <li class="md-tabs__item">
-      <a href="../examples/examples.html" class="md-tabs__link">
-        
-  
     
+    
+      <li class="md-tabs__item">
+        <a href="../examples/examples_english.html" class="md-tabs__link">
+          
   
   Examples and tutorials
 
-      </a>
-    </li>
+        </a>
+      </li>
+    
   
 
       
@@ -337,7 +335,7 @@
     
     
       <li class="md-tabs__item">
-        <a href="../api/ForecasterAutoreg.html" class="md-tabs__link">
+        <a href="../api/ForecasterRecursive.html" class="md-tabs__link">
           
   
   API Reference
@@ -439,7 +437,7 @@
   </label>
   
     <div class="md-nav__source">
-      <a href="https://github.com/JoaquinAmatRodrigo/skforecast" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/skforecast/skforecast" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81"/></svg>
@@ -456,30 +454,23 @@
       
   
   
-    
   
   
-  
     
     
     
       
-        
-        
-      
-      
-        
       
     
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--section md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
         
         
-        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" checked>
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_1" >
         
           
-          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="">
+          <label class="md-nav__link" for="__nav_1" id="__nav_1_label" tabindex="0">
             
   
   <span class="md-ellipsis">
@@ -490,7 +481,7 @@
             <span class="md-nav__icon md-icon"></span>
           </label>
         
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="true">
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_1_label" aria-expanded="false">
           <label class="md-nav__title" for="__nav_1">
             <span class="md-nav__icon md-icon"></span>
             Home
@@ -518,448 +509,6 @@
 
               
             
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../introduction-forecasting/introduction-forecasting.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Introduction to forecasting
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../quick-start/quick-start-skforecast.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Quick start
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/user-guides.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    User Guides
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../examples/examples.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Examples and tutorials
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../api/ForecasterAutoreg.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    API Reference
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq/faq.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    FAQ and Tips
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-    
-  
-  
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Releases
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="releases.html" class="md-nav__link md-nav__link--active">
-        
-  
-  <span class="md-ellipsis">
-    Releases
-  </span>
-  
-
-      </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#0.13.0" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.13.0 Aug 01, 2024
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.12.1" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.12.1 May 20, 2024
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.12.0" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.12.0 May 05, 2024
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.11.0" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.11.0 Nov 16, 2023
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.10.1" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.10.1 Sep 26, 2023
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.10.0" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.10.0 Sep 07, 2023
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.9.1" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.9.1 Jul 14, 2023
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.9.0" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.9.0 Jul 09, 2023
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.8.1" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.8.1 May 27, 2023
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.8.0" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.8.0 May 16, 2023
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.7.0" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.7.0 Mar 21, 2023
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.6.0" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.6.0 Nov 30, 2022
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.5.1" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.5.1 Oct 05, 2022
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.5.0" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.5.0 Sep 23, 2022
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.4.3" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.4.3 Mar 18, 2022
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.4.2" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.4.2 Jan 08, 2022
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.4.1" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.4.1 Dec 13, 2021
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.4.0" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.4.0 Dec 10, 2021
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.3.0" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.3.0 Sep 01, 2021
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.2.0" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.2.0 Aug 26, 2021
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.1.9" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.1.9 Jul 27, 2021
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.1.8.1" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.1.8.1 May 17, 2021
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.1.8" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.1.8 Apr 02, 2021
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.1.7" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.1.7 Mar 19, 2021
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.1.6" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.1.6 Mar 14, 2021
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#0.1.4" class="md-nav__link">
-    <span class="md-ellipsis">
-      0.1.4 Feb 15, 2021
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../authors/authors.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Authors
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
           </ul>
         </nav>
       
@@ -973,54 +522,12 @@
   
   
   
-    
-    
-    
-      
-      
-        
-      
-    
-    
-    <li class="md-nav__item md-nav__item--nested">
-      
-        
-        
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_2" >
-        
-          
-          <label class="md-nav__link" for="__nav_2" id="__nav_2_label" tabindex="0">
-            
-  
-  <span class="md-ellipsis">
-    Introduction to forecasting
-  </span>
-  
-
-            <span class="md-nav__icon md-icon"></span>
-          </label>
-        
-        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_2_label" aria-expanded="false">
-          <label class="md-nav__title" for="__nav_2">
-            <span class="md-nav__icon md-icon"></span>
-            Introduction to forecasting
-          </label>
-          <ul class="md-nav__list" data-md-scrollfix>
-            
-              
-                
-  
-  
-  
-  
     <li class="md-nav__item">
       <a href="../introduction-forecasting/introduction-forecasting.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Introduction to forecasting
+    Intro to Forecasting
   </span>
   
 
@@ -1028,14 +535,6 @@
     </li>
   
 
-              
-            
-          </ul>
-        </nav>
-      
-    </li>
-  
-
     
       
       
@@ -1047,8 +546,6 @@
     
     
       
-      
-        
       
     
     
@@ -1056,9 +553,7 @@
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_3" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_3" >
         
           
           <label class="md-nav__link" for="__nav_3" id="__nav_3_label" tabindex="0">
@@ -1181,17 +676,13 @@
     
       
       
-        
-      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_4" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4" >
         
           
           <label class="md-nav__link" for="__nav_4" id="__nav_4_label" tabindex="0">
@@ -1219,11 +710,32 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/user-guides.html" class="md-nav__link">
+      <a href="../user_guides/table-of-contents.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    User Guides
+    Table of contents
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/migration-guide.md" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Skforecast 0.14 Migration guide
   </span>
   
 
@@ -1260,6 +772,44 @@
   
   
   
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_4" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_4" id="__nav_4_4_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Single series Forecasters
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_4_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_4">
+            <span class="md-nav__icon md-icon"></span>
+            Single series Forecasters
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
     <li class="md-nav__item">
       <a href="../user_guides/autoregresive-forecaster.html" class="md-nav__link">
         
@@ -1287,90 +837,6 @@
   
   <span class="md-ellipsis">
     Direct multi-step forecasting
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/independent-multi-time-series-forecasting.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Global Models : Independent multi-time series forecasting
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/multi-series-with-different-length-and-different_exog.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Global Models : Series with different lengths and different exogenous variables
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/dependent-multi-series-multivariate-forecasting.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Global Models : Dependent multivariate series forecasting
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/forecasting-with-deep-learning-rnn-lstm.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Deep learning Recurrent Neural Networks
   </span>
   
 
@@ -1422,6 +888,182 @@
 
               
             
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_5" id="__nav_4_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Global Forecasters (multiple series)
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_5">
+            <span class="md-nav__icon md-icon"></span>
+            Global Forecasters (multiple series)
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/independent-multi-time-series-forecasting.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Independent multi-time series forecasting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/multi-series-with-different-length-and-different_exog.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Series with different lengths and different exogenous variables
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/dependent-multi-series-multivariate-forecasting.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Dependent multivariate series forecasting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/forecasting-with-deep-learning-rnn-lstm.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Deep learning Recurrent Neural Networks
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_6" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_6" id="__nav_4_6_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Feature Engineering
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_6_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_6">
+            <span class="md-nav__icon md-icon"></span>
+            Feature Engineering
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
               
                 
   
@@ -1455,132 +1097,6 @@
   
   <span class="md-ellipsis">
     Window and custom features
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/weighted-time-series-forecasting.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Weighted time series forecasting
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/backtesting.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Backtesting forecaster
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/metrics.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Metrics
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/hyperparameter-tuning-and-lags-selection.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Hyperparameter tuning and lags selection
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/sklearn-transformers-and-pipeline.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Scikit-learn Transformers and Pipelines
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/probabilistic-forecasting.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Probabilistic forecasting
   </span>
   
 
@@ -1639,11 +1155,627 @@
   
   
     <li class="md-nav__item">
+      <a href="../user_guides/sklearn-transformers-and-pipeline.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Data transformation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/time-series-differentiation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Differentiation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../user_guides/feature-selection.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
     Feature selection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_7" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_7" id="__nav_4_7_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Model Evaluation and Tuning
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_7_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_7">
+            <span class="md-nav__icon md-icon"></span>
+            Model Evaluation and Tuning
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/metrics.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Metrics
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/backtesting.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Backtesting forecaster
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/hyperparameter-tuning-and-lags-selection.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Hyperparameter tuning and lags selection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/feature-selection.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Feature selection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_8" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_8" id="__nav_4_8_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Probabilistic Forecasting
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_8_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_8">
+            <span class="md-nav__icon md-icon"></span>
+            Probabilistic Forecasting
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/probabilistic-forecasting.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Probabilistic forecasting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_9" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_9" id="__nav_4_9_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Model Explainability
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_9_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_9">
+            <span class="md-nav__icon md-icon"></span>
+            Model Explainability
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/explainability.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Explainability
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_10" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_10" id="__nav_4_10_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Model deployment
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_10_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_10">
+            <span class="md-nav__icon md-icon"></span>
+            Model deployment
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/save-load-forecaster.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Save and load forecaster
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/forecaster-in-production.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Forecaster in production
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_11" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_11" id="__nav_4_11_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Plotting
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_11_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_11">
+            <span class="md-nav__icon md-icon"></span>
+            Plotting
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/plotting.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Plotting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_12" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_12" id="__nav_4_12_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Datasets
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_12_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_12">
+            <span class="md-nav__icon md-icon"></span>
+            Datasets
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/datasets.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Datasets
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_13" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_13" id="__nav_4_13_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Additional Resources
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_13_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_13">
+            <span class="md-nav__icon md-icon"></span>
+            Additional Resources
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/weighted-time-series-forecasting.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Weighted time series forecasting
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../user_guides/stacking-ensemble-models-forecasting.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Stacking multiple models
   </span>
   
 
@@ -1681,69 +1813,6 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/forecaster-in-production.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Forecaster in production
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/save-load-forecaster.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Save and load forecaster
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../user_guides/explainability.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Explainability
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../user_guides/skforecast-in-GPU.html" class="md-nav__link">
         
   
@@ -1758,6 +1827,52 @@
 
               
             
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_4_14" >
+        
+          
+          <label class="md-nav__link" for="__nav_4_14" id="__nav_4_14_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    FAQ and forecasting tips
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="2" aria-labelledby="__nav_4_14_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_4_14">
+            <span class="md-nav__icon md-icon"></span>
+            FAQ and forecasting tips
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
               
                 
   
@@ -1765,11 +1880,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/plotting.html" class="md-nav__link">
+      <a href="../faq/forecasting-time-series-with-missing-values.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Plotting
+    Time series with missing values
   </span>
   
 
@@ -1786,11 +1901,211 @@
   
   
     <li class="md-nav__item">
-      <a href="../user_guides/datasets.html" class="md-nav__link">
+      <a href="../faq/non-negative-predictions.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Datasets
+    Non negative predictions
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/forecasting-with-delayed-historical-data.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Forecasting with delayed data
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/parallelization-skforecast.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Parallelization
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/time-series-aggregation.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Time series aggregation
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/profiling-skforecast.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Profiling skforecast
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../faq/parameters-search-backetesting-vs-one-step-ahead.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Backtesting vs One-step-ahead
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+              
+            
+          </ul>
+        </nav>
+      
+    </li>
+  
+
+    
+      
+      
+  
+  
+  
+  
+    
+    
+    
+      
+      
+    
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+        
+        
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_5" >
+        
+          
+          <label class="md-nav__link" for="__nav_5" id="__nav_5_label" tabindex="0">
+            
+  
+  <span class="md-ellipsis">
+    Examples and tutorials
+  </span>
+  
+
+            <span class="md-nav__icon md-icon"></span>
+          </label>
+        
+        <nav class="md-nav" data-md-level="1" aria-labelledby="__nav_5_label" aria-expanded="false">
+          <label class="md-nav__title" for="__nav_5">
+            <span class="md-nav__icon md-icon"></span>
+            Examples and tutorials
+          </label>
+          <ul class="md-nav__list" data-md-scrollfix>
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/examples_english.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    English
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../examples/examples_spanish.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    Spanish
   </span>
   
 
@@ -1813,32 +2128,10 @@
   
   
   
-    <li class="md-nav__item">
-      <a href="../examples/examples.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Examples and tutorials
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-    
-      
-      
-  
-  
-  
-  
     
     
     
       
-      
-        
       
     
     
@@ -1846,9 +2139,7 @@
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_6" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_6" >
         
           
           <label class="md-nav__link" for="__nav_6" id="__nav_6_label" tabindex="0">
@@ -1876,11 +2167,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/ForecasterAutoreg.html" class="md-nav__link">
+      <a href="../api/ForecasterRecursive.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    API Reference
+    ForecasterRecursive
   </span>
   
 
@@ -1897,11 +2188,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/ForecasterAutoregCustom.html" class="md-nav__link">
+      <a href="../api/ForecasterDirect.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    ForecasterAutoregCustom
+    ForecasterDirect
   </span>
   
 
@@ -1918,11 +2209,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/ForecasterAutoregDirect.html" class="md-nav__link">
+      <a href="../api/ForecasterRecursiveMultiSeries.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    ForecasterAutoregDirect
+    ForecasterRecursiveMultiSeries
   </span>
   
 
@@ -1939,53 +2230,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/ForecasterMultiSeries.html" class="md-nav__link">
+      <a href="../api/ForecasterDirectMultiVariate.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    ForecasterMultiSeries
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../api/ForecasterMultiSeriesCustom.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    ForecasterMultiSeriesCustom
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../api/ForecasterMultiVariate.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    ForecasterMultiVariate
+    ForecasterDirectMultiVariate
   </span>
   
 
@@ -2023,6 +2272,27 @@
   
   
     <li class="md-nav__item">
+      <a href="../api/Sarimax.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    sarimax
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../api/ForecasterSarimax.html" class="md-nav__link">
         
   
@@ -2044,32 +2314,11 @@
   
   
     <li class="md-nav__item">
-      <a href="../api/Sarimax.html" class="md-nav__link">
+      <a href="../api/ForecasterEquivalentDate.html" class="md-nav__link">
         
   
   <span class="md-ellipsis">
-    Sarimax
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../api/ForecasterBaseline.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    ForecasterBaseline
+    ForecasterEquivalentDate
   </span>
   
 
@@ -2091,48 +2340,6 @@
   
   <span class="md-ellipsis">
     model_selection
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../api/model_selection_multiseries.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    model_selection_multiseries
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../api/model_selection_sarimax.html" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    model_selection_sarimax
   </span>
   
 
@@ -2286,17 +2493,13 @@
     
       
       
-        
-      
     
     
     <li class="md-nav__item md-nav__item--nested">
       
         
         
-          
-        
-        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" type="checkbox" id="__nav_7" >
+        <input class="md-nav__toggle md-toggle " type="checkbox" id="__nav_7" >
         
           
           <label class="md-nav__link" for="__nav_7" id="__nav_7_label" tabindex="0">
@@ -2328,7 +2531,7 @@
         
   
   <span class="md-ellipsis">
-    FAQ and Tips
+    Table of contents
   </span>
   
 
@@ -2345,7 +2548,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/time-series-differentiation.html" class="md-nav__link">
+      <a href="../faq/time-series-differentiation.ipynb" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2370,7 +2573,7 @@
         
   
   <span class="md-ellipsis">
-    Avoid negative predictions when forecasting
+    Non negative predictions
   </span>
   
 
@@ -2391,7 +2594,7 @@
         
   
   <span class="md-ellipsis">
-    Forecasting time series with missing values
+    Time series with missing values
   </span>
   
 
@@ -2429,7 +2632,7 @@
   
   
     <li class="md-nav__item">
-      <a href="../faq/stacking-ensemble-models-forecasting.html" class="md-nav__link">
+      <a href="../faq/stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -2454,7 +2657,7 @@
         
   
   <span class="md-ellipsis">
-    Forecasting with delayed historical data
+    Forecasting with delayed data
   </span>
   
 
@@ -2496,7 +2699,7 @@
         
   
   <span class="md-ellipsis">
-    Parallelization in skforecast
+    Parallelization
   </span>
   
 
@@ -2585,6 +2788,15 @@
       Table of contents
     </label>
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#0.14.0" class="md-nav__link">
+    <span class="md-ellipsis">
+      0.14.0 In development
+    </span>
+  </a>
+  
+</li>
       
         <li class="md-nav__item">
   <a href="#0.13.0" class="md-nav__link">
@@ -2875,6 +3087,15 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#0.14.0" class="md-nav__link">
+    <span class="md-ellipsis">
+      0.14.0 In development
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#0.13.0" class="md-nav__link">
     <span class="md-ellipsis">
       0.13.0 Aug 01, 2024
@@ -3154,14 +3375,236 @@
 </tr>
 </tbody>
 </table>
+<h2 id="0.14.0">0.14.0 <small>In development</small><a class="headerlink" href="#0.14.0" title="Permanent link">&para;</a></h2>
+<p>The main changes in this release are:</p>
+<p>This release has undergone a major refactoring to improve the performance of the library. Visit the <a href="https://skforecast.org/latest/user_guides/migration-guide.html">migration guide</a> section for more information.</p>
+<ul>
+<li>
+<p><span class="badge text-bg-feature">Feature</span> Window features can be added to the training matrix using the <code>window_features</code> argument in all forecasters. You can use the <code><a href="https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.RollingFeatures">RollingFeatures</a></code> class to create these features or create your own object.</p>
+</li>
+<li>
+<p><span class="badge text-bg-feature">Feature</span> <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> functions now have a new argument <code>cv</code>. This argument expect an object of type <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.timeseriesfold">TimeSeriesFold</a></code> or <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.onestepaheadfold">OneStepAheadFold</a></code> which allows to define the validation strategy using the arguments <code>initial_train_size</code>, <code>steps</code>, <code>gap</code>, refit<code>,</code>fixed_train_size<code>,</code>skip_folds<code>and</code>allow_incomplete_folds`.</p>
+</li>
+<li>
+<p><span class="badge text-bg-feature">Feature</span> Hyperparameter search now allows to follow a one-step-ahead validation strategy using a <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.onestepaheadfold">OneStepAheadFold</a></code> as <code>cv</code> argument in the <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> functions.</p>
+</li>
+<li>
+<p><span class="badge text-bg-enhancement">Enhancement</span> Refactor the prediction process in <code><a href="https://skforecast.org/latest/api/forecastermultiseries">ForecasterRecursiveMultiSeries</a></code> to improve performance when predicting multiple series.</p>
+</li>
+<li>
+<p><span class="badge text-bg-enhancement">Enhancement</span> The bootstrapping process in the <code>predict_bootstrapping</code> method of all forecasters has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.</p>
+</li>
+<li>
+<p><span class="badge text-bg-api-change">API Change</span> package structure has been changed to improve code organization. The forecasters have been grouped into the <code>recursive</code>, <code>direct</code> amd <code>deep_learning</code> modules. Visit the <a href="https://skforecast.org/latest/user_guides/migration-guide.html">migration guide</a> section for more information.</p>
+</li>
+<li>
+<p><span class="badge text-bg-api-change">API Change</span> <code><a href="https://skforecast.org/0.13.0/api/forecasterautoregcustom">ForecasterAutoregCustom</a></code> has been deprecated. Window features can be added using the <code>window_features</code> argument in the <code><a href="https://skforecast.org/latest/api/forecasterrecursive">ForecasterRecursive</a></code>.</p>
+</li>
+<li>
+<p><span class="badge text-bg-api-change">API Change</span> The <code>pmdarima.ARIMA</code> regressor is no longer supported by the <code><a href="https://skforecast.org/latest/api/forecastersarimax">ForecasterSarimax</a></code>. You can use the skforecast <code><a href="https://skforecast.org/latest/api/sarimax">Sarimax</a></code> model or, to continue using it, use skforecast 0.13.0 or lower.</p>
+</li>
+<li>
+<p><span class="badge text-bg-danger">Fix</span> Fixed a bug where the <code>create_predict_X</code> method in recursive Forecasters did not correctly generate the matrix correctly when using transformations and/or differentiations</p>
+</li>
+</ul>
+<p><strong>Added</strong></p>
+<ul>
+<li>
+<p>Added <code>numba&gt;=0.59</code> as hard dependency.</p>
+</li>
+<li>
+<p>Added <code>window_features</code> argument to all forecasters. This argument allows the user to add window features to the training matrix. See <code><a href="https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.RollingFeatures">RollingFeatures</a></code>.</p>
+</li>
+<li>
+<p>Hyperparameter search now allows to follow a one-step-ahead validation strategy using a <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.onestepaheadfold">OneStepAheadFold</a></code> as <code>cv</code> argument in the <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> functions.</p>
+</li>
+<li>
+<p>Differentiation has been extended to all forecasters. The <code>differentiation</code> argument has been added to all forecasters to model the n-order differentiated time series.</p>
+</li>
+<li>
+<p>Create <code>transform_numpy</code> function in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module to carry out the transformation of the modeled time series and exogenous variables as numpy arrays.</p>
+</li>
+<li>
+<p><code>random_state</code> argument in the <code>fit</code> method of <code><a href="https://skforecast.org/latest/api/forecasterrecursive">ForecasterRecursive</a></code> to set a seed for the random generator so that the stored sample residuals are always deterministic.</p>
+</li>
+<li>
+<p>New private method <code>_train_test_split_one_step_ahead</code> in all forecasters.</p>
+</li>
+<li>
+<p>New private function <code>_calculate_metrics_one_step_ahead</code> to <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> module to calculate the metrics when predicting one step ahead.</p>
+</li>
+<li>
+<p>The <code>steps</code> argument in the predict method of the <code><a href="https://skforecast.org/latest/api/forecasterrecursive">ForecasterRecursive</a></code> can now be a str or a pandas datetime. If so, the method will predict up to the specified date. (contribution by @imMoya).</p>
+</li>
+</ul>
+<p><strong>Changed</strong></p>
+<ul>
+<li>
+<p><code><a href="https://skforecast.org/0.13.0/api/forecasterautoregcustom">ForecasterAutoregCustom</a></code> has been deprecated. Window features can be added using the <code>window_features</code> argument in the <code><a href="https://skforecast.org/latest/api/forecasterrecursive">ForecasterRecursive</a></code>.</p>
+</li>
+<li>
+<p>Refactor <code>recursive_predict</code> in <code><a href="https://skforecast.org/latest/api/forecastermultiseries">ForecasterRecursiveMultiSeries</a></code> to predict all series at once and include option of adding residuals. This improves performance when predicting multiple series.</p>
+</li>
+<li>
+<p>Refactor <code>predict_bootstrapping</code> in all Forecasters. The bootstrapping process has been optimized to improve performance. This may result in slightly different results when using the same seed as in previous versions.</p>
+</li>
+<li>
+<p>Change the default value of <code>encoding</code> to <code>ordinal</code> in <code><a href="https://skforecast.org/latest/api/forecastermultiseries">ForecasterRecursiveMultiSeries</a></code>. This will avoid conflicts if the regressor does not support categorical variables by default.</p>
+</li>
+<li>
+<p>Removed argument <code>engine</code> from <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.bayesian_search_forecaster">bayesian_search_forecaster</a></code> and <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._search.bayesian_search_forecaster_multiseries">bayesian_search_forecaster_multiseries</a></code>.</p>
+</li>
+<li>
+<p>The <code>pmdarima.ARIMA</code> regressor is no longer supported by the <code><a href="https://skforecast.org/latest/api/forecastersarimax">ForecasterSarimax</a></code>. You can use the skforecast <code><a href="https://skforecast.org/latest/api/sarimax">Sarimax</a></code> model or, to continue using it, use skforecast 0.13.0 or lower.</p>
+</li>
+<li>
+<p><code>initialize_lags</code> in <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> now returns the maximum lag, <code>max_lag</code>.</p>
+</li>
+<li>
+<p>Removed attribute <code>window_size_diff</code> from all Forecasters. The window size extended by the order of differentiation is now calculated on <code>window_size</code>.</p>
+</li>
+<li>
+<p><code>lags</code> can be <code>None</code> when initializing any Forecaster that includes window features.</p>
+</li>
+<li>
+<p><code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> module has been divided internally into different modules to improve code organization (<code>_validation</code>, <code>_search</code>, <code>_split</code>).</p>
+</li>
+<li>
+<p>Functions from <code>model_selection_multiseries</code> and <code>model_selection_sarimax</code> modules have been moved to the <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> module.</p>
+</li>
+<li>
+<p><code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> functions now have a new argument <code>cv</code>. This argument expect an object of type <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.timeseriesfold">TimeSeriesFold</a></code> or <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.onestepaheadfold">OneStepAheadFold</a></code> which allows to define the validation strategy using the arguments <code>initial_train_size</code>, <code>steps</code>, <code>gap</code>, refit<code>,</code>fixed_train_size<code>,</code>skip_folds<code>and</code>allow_incomplete_folds`.</p>
+</li>
+<li>
+<p>Added <code><a href="https://skforecast.org/latest/api/feature_selection">feature_selection</a></code> module. The functions <code><a href="https://skforecast.org/latest/api/feature_selection#skforecast.feature_selection.feature_selection.select_features">select_features</a></code> and <code><a href="https://skforecast.org/latest/api/feature_selection#skforecast.feature_selection.feature_selection.select_features_multiseries">select_features_multiseries</a></code> have been moved to this module.</p>
+</li>
+<li>
+<p><code>exog_to_direct</code> and <code>exog_to_direct_numpy</code> in <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> now returns a the names of the columns of the transformed exogenous variables.</p>
+</li>
+<li>
+<p>Renamed attributes in all Forecasters:</p>
+<ul>
+<li>
+<p><code>encoding_mapping</code> has been renamed to <code>encoding_mapping_</code>.</p>
+</li>
+<li>
+<p><code>last_window</code> has been renamed to <code>last_window_</code>.</p>
+</li>
+<li>
+<p><code>index_type</code> has been renamed to <code>index_type_</code>.</p>
+</li>
+<li>
+<p><code>index_freq</code> has been renamed to <code>index_freq_</code>.</p>
+</li>
+<li>
+<p><code>training_range</code> has been renamed to <code>training_range_</code>.</p>
+</li>
+<li>
+<p><code>series_col_names</code> has been renamed to <code>series_names_in_</code>.</p>
+</li>
+<li>
+<p><code>included_exog</code> has been renamed to <code>exog_in_</code>.</p>
+</li>
+<li>
+<p><code>exog_type</code> has been renamed to <code>exog_type_in_</code>.</p>
+</li>
+<li>
+<p><code>exog_dtypes</code> has been renamed to <code>exog_dtypes_in_</code>.</p>
+</li>
+<li>
+<p><code>exog_col_names</code> has been renamed to <code>exog_names_in_</code>.</p>
+</li>
+<li>
+<p><code>series_X_train</code> has been renamed to <code>X_train_series_names_in_</code>.</p>
+</li>
+<li>
+<p><code>X_train_col_names</code> has been renamed to <code>X_train_features_names_out_</code>.</p>
+</li>
+<li>
+<p><code>binner_intervals</code> has been renamed to <code>binner_intervals_</code>.</p>
+</li>
+<li>
+<p><code>in_sample_residuals</code> has been renamed to <code>in_sample_residuals_</code>.</p>
+</li>
+<li>
+<p><code>out_sample_residuals</code> has been renamed to <code>out_sample_residuals_</code>.</p>
+</li>
+<li>
+<p><code>fitted</code> has been renamed to <code>is_fitted</code>.</p>
+</li>
+</ul>
+</li>
+<li>
+<p>Renamed arguments in different functions and methods:</p>
+<ul>
+<li>
+<p><code>in_sample_residuals</code> has been renamed to <code>use_in_sample_residuals</code>.</p>
+</li>
+<li>
+<p><code>binned_residuals</code> has been renamed to <code>use_binned_residuals</code>.</p>
+</li>
+<li>
+<p><code>series_col_names</code> has been renamed to <code>series_names_in_</code> in the <code>check_predict_input</code>, <code>check_preprocess_exog_multiseries</code> and <code>initialize_transformer_series</code> functions in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+<li>
+<p><code>series_X_train</code> has been renamed to <code>X_train_series_names_in_</code> in the <code>prepare_levels_multiseries</code> function in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+<li>
+<p><code>exog_col_names</code> has been renamed to <code>exog_names_in_</code> in the <code>check_predict_input</code> and <code>check_preprocess_exog_multiseries</code> functions in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+<li>
+<p><code>index_type</code> has been renamed to <code>index_type_</code> in the <code>check_predict_input</code> function in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+<li>
+<p><code>index_freq</code> has been renamed to <code>index_freq_</code> in the <code>check_predict_input</code> function in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+<li>
+<p><code>included_exog</code> has been renamed to <code>exog_in_</code> in the <code>check_predict_input</code> function in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+<li>
+<p><code>exog_type</code> has been renamed to <code>exog_type_in_</code> in the <code>check_predict_input</code> function in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+<li>
+<p><code>exog_dtypes</code> has been renamed to <code>exog_dtypes_in_</code> in the <code>check_predict_input</code> function in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+<li>
+<p><code>fitted</code> has been renamed to <code>is_fitted</code> in the <code>check_predict_input</code> function in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+<li>
+<p><code>use_in_sample</code> has been renamed to <code>use_in_sample_residuals</code> in the <code>prepare_residuals_multiseries</code> function in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+<li>
+<p><code>in_sample_residuals</code> has been renamed to <code>use_in_sample_residuals</code> in the <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._validation.backtesting_forecaster">backtesting_forecaster</a></code>, <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._validation.backtesting_forecaster_multiseries">backtesting_forecaster_multiseries</a></code> and <code>check_backtesting_input</code> (<code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module) functions.</p>
+</li>
+</ul>
+</li>
+<li>
+<p><code>binned_residuals</code> has been renamed to <code>use_binned_residuals</code> in the <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._validation.backtesting_forecaster">backtesting_forecaster</a></code> function.</p>
+<ul>
+<li>
+<p><code>in_sample_residuals</code> has been renamed to <code>in_sample_residuals_</code> in the <code>prepare_residuals_multiseries</code> function in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+<li>
+<p><code>out_sample_residuals</code> has been renamed to <code>out_sample_residuals_</code> in the <code>prepare_residuals_multiseries</code> function in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+<li>
+<p><code>last_window</code> has been renamed to <code>last_window_</code> in the <code>preprocess_levels_self_last_window_multiseries</code> function in the <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> module.</p>
+</li>
+</ul>
+</li>
+</ul>
+<p><strong>Fixed</strong></p>
+<ul>
+<li>Fixed a bug where the <code>create_predict_X</code> method in recursive Forecasters did not correctly generate the matrix correctly when using transformations and/or differentiations.</li>
+</ul>
 <h2 id="0.13.0">0.13.0 <small>Aug 01, 2024</small><a class="headerlink" href="#0.13.0" title="Permanent link">&para;</a></h2>
 <p>The main changes in this release are:</p>
 <ul>
 <li>
-<p><span class="badge text-bg-feature">Feature</span> Global Forecasters <code><a href="https://skforecast.org/latest/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> and <code><a href="https://skforecast.org/latest/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code> are able to <a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html#forecasting-unknown-series">predict series not seen during training</a>. This is useful when the user wants to predict a new series that was not included in the training data.</p>
+<p><span class="badge text-bg-feature">Feature</span> Global Forecasters <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> and <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code> are able to <a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html#forecasting-unknown-series">predict series not seen during training</a>. This is useful when the user wants to predict a new series that was not included in the training data.</p>
 </li>
 <li>
-<p><span class="badge text-bg-feature">Feature</span> <code>encoding</code> can be set to <code>None</code> in Global Forecasters <code><a href="https://skforecast.org/latest/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> and <code><a href="https://skforecast.org/latest/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code>. This option does <a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting#series-encoding-in-multi-series">not add the encoded series ids</a> to the regressor training matrix.</p>
+<p><span class="badge text-bg-feature">Feature</span> <code>encoding</code> can be set to <code>None</code> in Global Forecasters <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> and <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code>. This option does <a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting#series-encoding-in-multi-series">not add the encoded series ids</a> to the regressor training matrix.</p>
 </li>
 <li>
 <p><span class="badge text-bg-feature">Feature</span> New <code>create_predict_X</code> method in all recursive and direct Forecasters to allow the user to inspect the matrix passed to the predict method of the regressor.</p>
@@ -3170,16 +3613,16 @@
 <p><span class="badge text-bg-feature">Feature</span> New module <code><a href="https://skforecast.org/latest/api/metrics">metrics</a></code> with functions to calculate metrics for time series forecasting such as <code><a href="https://skforecast.org/latest/api/metrics#skforecast.metrics.metrics.mean_absolute_scaled_error">mean_absolute_scaled_error</a></code> and <code><a href="https://skforecast.org/latest/api/metrics#skforecast.metrics.metrics.root_mean_squared_scaled_error">root_mean_squared_scaled_error</a></code>. Visit <a href="https://skforecast.org/latest/user_guides/metrics.html">Time Series Forecasting Metrics</a> for more information.</p>
 </li>
 <li>
-<p><span class="badge text-bg-feature">Feature</span> New argument <code>add_aggregated_metric</code> in <code><a href="https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.backtesting_forecaster_multiseries">backtesting_forecaster_multiseries</a></code> to include, in addition to the metrics for each level, the aggregated metric of all levels using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).</p>
+<p><span class="badge text-bg-feature">Feature</span> New argument <code>add_aggregated_metric</code> in <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._validation.backtesting_forecaster_multiseries">backtesting_forecaster_multiseries</a></code> to include, in addition to the metrics for each level, the aggregated metric of all levels using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).</p>
 </li>
 <li>
-<p><span class="badge text-bg-feature">Feature</span> New argument <code>skip_folds</code> in <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> and <code><a href="https://skforecast.org/latest/api/model_selection_multiseries">model_selection_multiseries</a></code> functions. It allows the user to <a href="https://skforecast.org/latest/user_guides/backtesting#backtesting-with-skip-folds">skip some folds during backtesting</a>, which can be useful to speed up the backtesting process and thus the hyperparameter search.</p>
+<p><span class="badge text-bg-feature">Feature</span> New argument <code>skip_folds</code> in <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> and <code><a href="https://skforecast.org/0.13.0/api/model_selection_multiseries">model_selection_multiseries</a></code> functions. It allows the user to <a href="https://skforecast.org/latest/user_guides/backtesting#backtesting-with-skip-folds">skip some folds during backtesting</a>, which can be useful to speed up the backtesting process and thus the hyperparameter search.</p>
 </li>
 <li>
 <p><span class="badge text-bg-api-change">API Change</span> backtesting procedures now pass the training series to the metric functions so it can be used to calculate metrics that depend on the training series.</p>
 </li>
 <li>
-<p><span class="badge text-bg-api-change">API Change</span> Changed the default value of the <code>transformer_series</code> argument to <code>None</code> in the Global Forecasters <code><a href="https://skforecast.org/latest/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> and <code><a href="https://skforecast.org/latest/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code>. In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.</p>
+<p><span class="badge text-bg-api-change">API Change</span> Changed the default value of the <code>transformer_series</code> argument to <code>None</code> in the Global Forecasters <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> and <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code>. In most cases, tree-based models are used as regressors in these forecasters, so no transformation is applied by default as it is not necessary.</p>
 </li>
 </ul>
 <p><strong>Added</strong></p>
@@ -3206,22 +3649,22 @@
 <p>New module <code><a href="https://skforecast.org/latest/api/metrics">metrics</a></code> with functions to calculate metrics for time series forecasting such as <code>mean_absolute_scaled_error</code> and <code>root_mean_squared_scaled_error</code>.</p>
 </li>
 <li>
-<p>New argument <code>skip_folds</code> in <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> and <code><a href="https://skforecast.org/latest/api/model_selection_multiseries">model_selection_multiseries</a></code> functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.</p>
+<p>New argument <code>skip_folds</code> in <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> and <code><a href="https://skforecast.org/0.13.0/api/model_selection_multiseries">model_selection_multiseries</a></code> functions. It allows the user to skip some folds during backtesting, which can be useful to speed up the backtesting process and thus the hyperparameter search.</p>
 </li>
 <li>
 <p>New function <code><a href="https://skforecast.org/latest/api/plot#skforecast.plot.plot.plot_prediction_intervals">plot_prediction_intervals</a></code> in module <code><a href="https://skforecast.org/latest/api/plot">plot</a></code>.</p>
 </li>
 <li>
-<p>Global Forecasters <code><a href="https://skforecast.org/latest/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> and <code><a href="https://skforecast.org/latest/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code> are able to predict series not seen during training. This is useful when the user wants to predict a new series that was not included in the training data.</p>
+<p>Global Forecasters <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> and <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code> are able to predict series not seen during training. This is useful when the user wants to predict a new series that was not included in the training data.</p>
 </li>
 <li>
-<p><code>encoding</code> can be set to <code>None</code> in Global Forecasters <code><a href="https://skforecast.org/latest/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> and <code><a href="https://skforecast.org/latest/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code>. This option does not add the encoded series ids to the regressor training matrix.</p>
+<p><code>encoding</code> can be set to <code>None</code> in Global Forecasters <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> and <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code>. This option does not add the encoded series ids to the regressor training matrix.</p>
 </li>
 <li>
-<p>New argument <code>add_aggregated_metric</code> in <code><a href="https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.backtesting_forecaster_multiseries">backtesting_forecaster_multiseries</a></code> to include, in addition to the metrics for each level, the aggregated metric of all levels using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).</p>
+<p>New argument <code>add_aggregated_metric</code> in <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._validation.backtesting_forecaster_multiseries">backtesting_forecaster_multiseries</a></code> to include, in addition to the metrics for each level, the aggregated metric of all levels using the average (arithmetic mean), weighted average (weighted by the number of predicted values of each level) or pooling (the values of all levels are pooled and then the metric is calculated).</p>
 </li>
 <li>
-<p>New argument <code>aggregate_metric</code> in <code><a href="https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.grid_search_forecaster_multiseries">grid_search_forecaster_multiseries</a></code>, <code><a href="https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.random_search_forecaster_multiseries">random_search_forecaster_multiseries</a></code> and <code><a href="https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.bayesian_search_forecaster_multiseries">bayesian_search_forecaster_multiseries</a></code> to select the aggregation method used to combine the metric(s) of all levels during the hyperparameter search. The available methods are: mean (arithmetic mean), weighted (weighted by the number of predicted values of each level) and pool (the values of all levels are pooled and then the metric is calculated). If more than one metric and/or aggregation method is used, all are reported in the results, but the first of each is used to select the best model.</p>
+<p>New argument <code>aggregate_metric</code> in <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._search.grid_search_forecaster_multiseries">grid_search_forecaster_multiseries</a></code>, <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._search.random_search_forecaster_multiseries">random_search_forecaster_multiseries</a></code> and <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._search.bayesian_search_forecaster_multiseries">bayesian_search_forecaster_multiseries</a></code> to select the aggregation method used to combine the metric(s) of all levels during the hyperparameter search. The available methods are: mean (arithmetic mean), weighted (weighted by the number of predicted values of each level) and pool (the values of all levels are pooled and then the metric is calculated). If more than one metric and/or aggregation method is used, all are reported in the results, but the first of each is used to select the best model.</p>
 </li>
 <li>
 <p>New class <code><a href="https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.DateTimeFeatureTransformer">DateTimeFeatureTransformer</a></code> and function <code><a href="https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.create_datetime_features">create_datetime_features</a></code> in the <code><a href="https://skforecast.org/latest/api/preprocessing">preprocessing</a></code> module to create datetime and calendar features from a datetime index.</p>
@@ -3236,30 +3679,30 @@
 <p>Update <a href="https://skforecast.org/latest/quick-start/how-to-install">project dependencies</a>.</p>
 </li>
 <li>
-<p>Change default value of <code>n_bins</code> when initializing <code><a href="https://skforecast.org/latest/api/forecasterautoreg">ForecasterAutoreg</a></code> from 15 to 10.</p>
+<p>Change default value of <code>n_bins</code> when initializing <code><a href="https://skforecast.org/0.13.0/api/forecasterautoreg">ForecasterAutoreg</a></code> from 15 to 10.</p>
 </li>
 <li>
 <p>Refactor <code>_recursive_predict</code> in all recursive forecasters.</p>
 </li>
 <li>
-<p>Change default value of <code>transformer_series</code> when initializing <code><a href="https://skforecast.org/latest/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> and <code><a href="https://skforecast.org/latest/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code> from <code>StandardScaler()</code> to <code>None</code>.</p>
+<p>Change default value of <code>transformer_series</code> when initializing <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> and <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code> from <code>StandardScaler()</code> to <code>None</code>.</p>
 </li>
 <li>
 <p>Function <code>_get_metric</code> moved from <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> to <code><a href="https://skforecast.org/latest/api/metrics">metrics</a></code>.</p>
 </li>
 <li>
-<p>Change information message when <code>verbose</code> is <code>True</code> in <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.backtesting_forecaster">backtesting_forecaster</a></code> and <code><a href="https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.backtesting_forecaster_multiseries">backtesting_forecaster_multiseries</a></code>.</p>
+<p>Change information message when <code>verbose</code> is <code>True</code> in <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._validation.backtesting_forecaster">backtesting_forecaster</a></code> and <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._validation.backtesting_forecaster_multiseries">backtesting_forecaster_multiseries</a></code>.</p>
 </li>
 <li>
 <p><code>select_n_jobs_backtesting</code> and <code>select_n_jobs_fit</code> in <code><a href="https://skforecast.org/latest/api/utils">utils</a></code> return <code>n_jobs = 1</code> if regressor is <code>LGBMRegressor</code>. This is because <code>lightgbm</code> is highly optimized for gradient boosting and parallelizes operations at a very fine-grained level, making additional parallelization unnecessary and potentially harmful due to resource contention.</p>
 </li>
 <li>
-<p><code>metric_values</code> returned by <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection.model_selection.backtesting_forecaster">backtesting_forecaster</a></code> and <code><a href="https://skforecast.org/latest/api/model_selection_sarimax#skforecast.model_selection_sarimax.model_selection_sarimax.backtesting_sarimax">backtesting_sarimax</a></code> is a <code>pandas DataFrame</code> with one column per metric instead of a <code>list</code>.</p>
+<p><code>metric_values</code> returned by <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._validation.backtesting_forecaster">backtesting_forecaster</a></code> and <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._validation.backtesting_sarimax">backtesting_sarimax</a></code> is a <code>pandas DataFrame</code> with one column per metric instead of a <code>list</code>.</p>
 </li>
 </ul>
 <p><strong>Fixed</strong></p>
 <ul>
-<li>Bug fix in <code><a href="https://skforecast.org/latest/api/model_selection_multiseries#skforecast.model_selection_multiseries.model_selection_multiseries.backtesting_forecaster_multiseries">backtesting_forecaster_multiseries</a></code> using a <code><a href="https://skforecast.org/latest/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> or <code><a href="https://skforecast.org/latest/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code> that includes differentiation.</li>
+<li>Bug fix in <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._validation.backtesting_forecaster_multiseries">backtesting_forecaster_multiseries</a></code> using a <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseries">ForecasterAutoregMultiSeries</a></code> or <code><a href="https://skforecast.org/0.13.0/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a></code> that includes differentiation.</li>
 </ul>
 <h2 id="0.12.1">0.12.1 <small>May 20, 2024</small><a class="headerlink" href="#0.12.1" title="Permanent link">&para;</a></h2>
 <p><span class="badge text-bg-danger">Fix</span> This is a minor release to fix a bug.</p>
@@ -4060,7 +4503,7 @@
 </ul>
 <p><strong>Changed</strong></p>
 <ul>
-<li>New implementation of <code>ForecasterAutoregMultiOutput</code>. The training process in the new version creates a different X_train for each step. See <a href="https://github.com/JoaquinAmatRodrigo/skforecast#introduction">Direct multi-step forecasting</a> for more details. Old versión can be acces with <code>skforecast.deprecated.ForecasterAutoregMultiOutput</code>.</li>
+<li>New implementation of <code>ForecasterAutoregMultiOutput</code>. The training process in the new version creates a different X_train for each step. See <a href="https://github.com/skforecast/skforecast#introduction">Direct multi-step forecasting</a> for more details. Old versión can be acces with <code>skforecast.deprecated.ForecasterAutoregMultiOutput</code>.</li>
 </ul>
 <p><strong>Fixed</strong></p>
 <h2 id="0.1.9">0.1.9 <small>Jul 27, 2021</small><a class="headerlink" href="#0.1.9" title="Permanent link">&para;</a></h2>
@@ -4079,7 +4522,7 @@
 <p><strong>Changed</strong></p>
 <ul>
 <li>
-<p>New implementation of <code>ForecasterAutoregMultiOutput</code>. The training process in the new version creates a different X_train for each step. See <a href="https://github.com/JoaquinAmatRodrigo/skforecast#introduction">Direct multi-step forecasting</a> for more details. Old versión can be acces with <code>skforecast.deprecated.ForecasterAutoregMultiOutput</code>.</p>
+<p>New implementation of <code>ForecasterAutoregMultiOutput</code>. The training process in the new version creates a different X_train for each step. See <a href="https://github.com/skforecast/skforecast#introduction">Direct multi-step forecasting</a> for more details. Old versión can be acces with <code>skforecast.deprecated.ForecasterAutoregMultiOutput</code>.</p>
 </li>
 <li>
 <p>Class <code>ForecasterCustom</code> has been renamed to <code>ForecasterAutoregCustom</code>. However, <code>ForecasterCustom</code> will still remain to keep backward compatibility.</p>
@@ -4177,12 +4620,12 @@
 <!-- Forecasters -->
 <!-- metrics -->
 <!-- model_selection -->
-<!-- model_selection_multiseries -->
-<!-- model_selection_sarimax -->
+<!-- feature_selection -->
 <!-- preprocessing -->
 <!-- plot -->
 <!-- datasets -->
 <!-- utils -->
+<!-- OLD -->
 
 
 
@@ -4315,7 +4758,7 @@
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.sections", "navigation.expand", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>
