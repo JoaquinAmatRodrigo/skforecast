@@ -4,7 +4,7 @@
 
 .md-typeset h1, .md-typeset h2 {
     font-weight: 500;
-    letter-spacing: -.01em;
+    letter-spacing: -.01rem;
 }
 
 
@@ -17,12 +17,12 @@
 .jupyter-wrapper .CodeMirror.cm-s-jupyter {
   background: var(--jp-layout-color0);
   color: var(--jp-content-font-color1);
-  font-size: medium;
+  font-size: 1rem;
 }
 
 /* Styling for Jupyter output area preformatted text */
 /* .jupyter-wrapper .highlight-ipynb pre {
-  font-size: 0.9em;
+  font-size: 0.9rem;
 } */
 
 /* Styling for Jupyter Output Area */
@@ -35,7 +35,7 @@
   word-break: break-all;
   word-wrap: break-word;
   white-space: pre-wrap;
-  font-size: medium;
+  font-size: 1rem;
 }
 
 /* Display inline tables for dataframes in Jupyter */
@@ -70,27 +70,34 @@
 
 /* Set font size for inline code in Markdown */
 .md-typeset code {
-  font-size: 1em;
+  font-size: 1rem;
 }
 
 /* Set font size and line height for H2 headers in Markdown */
 .md-typeset h2 {
-  font-size: 1.3em;
+  font-size: 1.3rem;
   line-height: 1.2;
 }
 
 /* Set font size and line height for H3 headers in Markdown */
 .md-typeset h3 {
-  font-size: 1.1em;
+  font-size: 1.1rem;
   line-height: 1.2;
 }
 
 /* Justify paragraph text in Markdown */
 p {
+  font-size: 1rem;
   text-align: justify;
   text-justify: inter-word;
+  margin-bottom: 1rem; /* Add spacing between paragraphs */
 }
 
+/* Base styling for the body */
+body {
+  font-size: 16px; /* Base font size */
+  line-height: 1.6; /* Consistent line height */
+}
 
 /* ===============================
    Color Scheme Styles
@@ -148,7 +155,7 @@ p {
   white-space: nowrap;
   vertical-align: baseline;
   border-radius: 0.25rem;
-  /* margin-right: 0.25em; */
+  /* margin-right: 0.25rem; */
 }
 
 /* Enhancement Badge */

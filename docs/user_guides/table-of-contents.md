@@ -2,7 +2,8 @@
 
 Welcome to the skforecast user guides! This comprehensive collection of guides is designed to help you navigate through the various features and functionalities of skforecast. Whether you are a beginner or an advanced user, you will find the necessary resources to master time series forecasting with skforecast. Below, you will find the user guides categorized by topic for easier navigation.
 
-## Single series Forecasters
+<span style="font-size: 1.3em; font-weight: bold;">Single series Forecasters</span>
+
 - [Recursive multi-step forecasting](../user_guides/autoregresive-forecaster)
 - [Direct multi-step forecasting](../user_guides/direct-multi-step-forecasting)
 - [ARIMA and SARIMAX forecasting](../user_guides/forecasting-sarimax-arima)
