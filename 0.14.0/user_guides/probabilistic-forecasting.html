@@ -426,7 +426,9 @@ This is documentation for an unstable development version.
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
@@ -2706,27 +2708,6 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
-      <a href="../faq/time-series-differentiation.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Time series differentiation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../faq/non-negative-predictions.html" class="md-nav__link">
         
   
@@ -2774,27 +2755,6 @@ This is documentation for an unstable development version.
   
   <span class="md-ellipsis">
     Cyclical features in time series
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq/stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Stacking (ensemble) machine learning models
   </span>
   
 
@@ -2941,143 +2901,6 @@ This is documentation for an unstable development version.
                 </div>
               </div>
             
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#prediction-intervals-using-bootstrapped-residuals" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prediction intervals using bootstrapped residuals
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Prediction intervals using bootstrapped residuals">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#libraries" class="md-nav__link">
-    <span class="md-ellipsis">
-      Libraries
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#data" class="md-nav__link">
-    <span class="md-ellipsis">
-      Data
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#intervals-with-in-sample-residuals" class="md-nav__link">
-    <span class="md-ellipsis">
-      Intervals with In-sample residuals
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#out-sample-residuals-non-conditioned-on-predicted-values" class="md-nav__link">
-    <span class="md-ellipsis">
-      Out-sample residuals (non-conditioned on predicted values)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#intervals-conditioned-on-predicted-values-binned-residuals" class="md-nav__link">
-    <span class="md-ellipsis">
-      Intervals conditioned on predicted values (binned residuals)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#predict-bootstraping-interval-quantile-and-distribution" class="md-nav__link">
-    <span class="md-ellipsis">
-      Predict bootstraping, interval, quantile and distribution
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#prediction-intervals-using-quantile-regression-models" class="md-nav__link">
-    <span class="md-ellipsis">
-      Prediction intervals using quantile regression models
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Prediction intervals using quantile regression models">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#data_1" class="md-nav__link">
-    <span class="md-ellipsis">
-      Data
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#quantile-regresion-models" class="md-nav__link">
-    <span class="md-ellipsis">
-      Quantile regresion models
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#predictions-backtesting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Predictions (backtesting)
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
             
           
           
@@ -3688,8 +3511,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">OneHotEncoder</span>
 <span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="kn">import</span> <span class="n">ColumnTransformer</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_pinball_loss</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoregDirect</span> <span class="kn">import</span> <span class="n">ForecasterAutoregDirect</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
+<span class="kn">from</span> <span class="nn">skforecast.direct</span> <span class="kn">import</span> <span class="n">ForecasterDirect</span>
 <span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">backtesting_forecaster</span>
 
 <span class="c1"># Configuration</span>
@@ -3720,8 +3543,8 @@ from lightgbm import LGBMRegressor
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.metrics import mean_pinball_loss
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
+from skforecast.recursive import ForecasterRecursive
+from skforecast.direct import ForecasterDirect
 from skforecast.model_selection import backtesting_forecaster
 
 # Configuration
@@ -4189,7 +4012,7 @@ ax.legend();</div>
 <span class="p">}</span>
 <span class="n">lags</span> <span class="o">=</span> <span class="mi">48</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">15926</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="n">lags</span>
              <span class="p">)</span>
@@ -4212,7 +4035,7 @@ params = {
 }
 lags = 48
 
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = LGBMRegressor(random_state=15926, verbose=-1, **params),
                  lags      = lags
              )
@@ -4636,7 +4459,7 @@ def empirical_coverage(y, lower_bound, upper_bound):
     <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="s2">"lower_bound"</span><span class="p">],</span> 
     <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="s2">"upper_bound"</span><span class="p">]</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Predicted interval coverage: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">coverage</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> %"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Predicted interval coverage: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">coverage</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> %"</span><span class="p">)</span>
 
 <span class="c1"># Area of the interval</span>
 <span class="c1"># ==============================================================================</span>
@@ -4662,7 +4485,7 @@ coverage = empirical_coverage(
     lower_bound = predictions["lower_bound"], 
     upper_bound = predictions["upper_bound"]
 )
-print(f"Predicted interval coverage: {round(100*coverage, 2)} %")
+print(f"Predicted interval coverage: {round(100 * coverage, 2)} %")
 
 # Area of the interval
 # ==============================================================================
@@ -5081,7 +4904,7 @@ predictions.head(5)</div>
     <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="s2">"lower_bound"</span><span class="p">],</span> 
     <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="s2">"upper_bound"</span><span class="p">]</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Predicted interval coverage: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">coverage</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> %"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Predicted interval coverage: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">coverage</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> %"</span><span class="p">)</span>
 
 <span class="c1"># Area of the interval</span>
 <span class="c1"># ==============================================================================</span>
@@ -5107,7 +4930,7 @@ coverage = empirical_coverage(
     lower_bound = predictions["lower_bound"], 
     upper_bound = predictions["upper_bound"]
 )
-print(f"Predicted interval coverage: {round(100*coverage, 2)} %")
+print(f"Predicted interval coverage: {round(100 * coverage, 2)} %")
 
 # Area of the interval
 # ==============================================================================
@@ -5175,7 +4998,7 @@ Area of the interval: 316412.72
 <i style="font-size: 18px; color:#00bfa5;"></i>
 <b style="color: #00bfa5;">💡 Tip</b>
 </p>
-<p>Since this is a new feature, intervals conditioned on predicted values (binned residuals) are only available for the <code>ForecasterAutoreg</code> class. Let us know via <a href="https://github.com/skforecast/skforecast/issues">GitHub issues</a> if you want us to extend this feature to all Forecasters.</p>
+<p>Since this is a new feature, intervals conditioned on predicted values (binned residuals) are only available for the <code>ForecasterRecursive</code> class. Let us know via <a href="https://github.com/skforecast/skforecast/issues">GitHub issues</a> if you want us to extend this feature to all Forecasters.</p>
 </div>
 </div>
 </div>
@@ -5201,7 +5024,7 @@ Area of the interval: 316412.72
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and train forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>     <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">15926</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">),</span>
                  <span class="n">lags</span>          <span class="o">=</span> <span class="n">lags</span><span class="p">,</span>
                  <span class="n">binner_kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">'n_bins'</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>   
@@ -5214,7 +5037,7 @@ Area of the interval: 316412.72
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-18"># Create and train forecaster
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor     = LGBMRegressor(random_state=15926, verbose=-1, **params),
                  lags          = lags,
                  binner_kwargs = {'n_bins': 10}   
@@ -5554,9 +5377,9 @@ plt.show();</div>
                           <span class="n">metric</span>              <span class="o">=</span> <span class="s1">'mean_absolute_error'</span><span class="p">,</span>
                           <span class="n">initial_train_size</span>  <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[:</span><span class="n">end_validation</span><span class="p">]),</span>
                           <span class="n">refit</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                          <span class="n">interval</span>            <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span> <span class="c1"># 80% prediction interval</span>
+                          <span class="n">interval</span>            <span class="o">=</span> <span class="p">[</span><span class="mi">10</span><span class="p">,</span> <span class="mi">90</span><span class="p">],</span>  <span class="c1"># 80% prediction interval</span>
                           <span class="n">n_boot</span>              <span class="o">=</span> <span class="mi">250</span><span class="p">,</span>
-                          <span class="n">in_sample_residuals</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="c1"># Use out-sample residuals</span>
+                          <span class="n">in_sample_residuals</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>  <span class="c1"># Use out-sample residuals</span>
                           <span class="n">binned_residuals</span>    <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># Use binned residuals</span>
                           <span class="n">n_jobs</span>              <span class="o">=</span> <span class="s1">'auto'</span><span class="p">,</span>
                           <span class="n">verbose</span>             <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -5575,9 +5398,9 @@ metric, predictions = backtesting_forecaster(
                           metric              = 'mean_absolute_error',
                           initial_train_size  = len(data.loc[:end_validation]),
                           refit               = False,
-                          interval            = [10, 90], # 80% prediction interval
+                          interval            = [10, 90],  # 80% prediction interval
                           n_boot              = 250,
-                          in_sample_residuals = False, # Use out-sample residuals
+                          in_sample_residuals = False,  # Use out-sample residuals
                           binned_residuals    = True,  # Use binned residuals
                           n_jobs              = 'auto',
                           verbose             = False,
@@ -5690,7 +5513,7 @@ predictions.head(3)</div>
     <span class="n">lower_bound</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="s2">"lower_bound"</span><span class="p">],</span> 
     <span class="n">upper_bound</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[</span><span class="s2">"upper_bound"</span><span class="p">]</span>
 <span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Predicted interval coverage: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="mi">100</span><span class="o">*</span><span class="n">coverage</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> %"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Predicted interval coverage: </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="mi">100</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="n">coverage</span><span class="p">,</span><span class="w"> </span><span class="mi">2</span><span class="p">)</span><span class="si">}</span><span class="s2"> %"</span><span class="p">)</span>
 
 <span class="c1"># Area of the interval</span>
 <span class="c1"># ==============================================================================</span>
@@ -5716,7 +5539,7 @@ coverage = empirical_coverage(
     lower_bound = predictions["lower_bound"], 
     upper_bound = predictions["upper_bound"]
 )
-print(f"Predicted interval coverage: {round(100*coverage, 2)} %")
+print(f"Predicted interval coverage: {round(100 * coverage, 2)} %")
 
 # Area of the interval
 # ==============================================================================
@@ -5793,7 +5616,7 @@ Area of the interval: 284549.02
 <i style="font-size: 18px; color:#00bfa5;"></i>
 <b style="color: #00bfa5;">💡 Tip</b>
 </p>
-<p>All of these methods can be used either with in-sample or out-sample residuals using the <code>in_sample_residuals</code> argument, and, in the case of the <code>ForecasterAutoreg</code>, with binned intervals conditioned on predicted values using the <code>binned_residuals</code> argument.</p>
+<p>All of these methods can be used either with in-sample or out-sample residuals using the <code>use_in_sample_residuals</code> argument, and, in the case of the <code>ForecasterRecursive</code>, with binned intervals conditioned on predicted values using the <code>use_binned_residuals</code> argument.</p>
 </div>
 </div>
 </div>
@@ -5841,7 +5664,7 @@ Area of the interval: 284549.02
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Fit forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">15926</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">params</span><span class="p">),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="n">lags</span>
              <span class="p">)</span>
@@ -5853,7 +5676,7 @@ Area of the interval: 284549.02
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-26"># Fit forecaster
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = LGBMRegressor(random_state=15926, verbose=-1, **params),
                  lags      = lags
              )
@@ -6651,7 +6474,7 @@ predictions</div>
 <p>where $\alpha$ is the target quantile, $y$ the real value and $\hat{y}$ the quantile prediction.</p>
 <p>It can be seen that loss differs depending on the evaluated quantile. The higher the quantile, the more the loss function penalizes underestimates, and the less it penalizes overestimates. As with MSE and MAE, the goal is to minimize its values (the lower loss, the better).</p>
 <p>Two disadvantages of quantile regression, compared to the bootstrap approach to prediction intervals, are that each quantile needs its regressor and quantile regression is not available for all types of regression models. However, once the models are trained, the inference is much faster since no iterative process is needed.</p>
-<p>This type of prediction intervals can be easily estimated using <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/api/ForecasterAutoregDirect.html">ForecasterAutoregDirect</a> and <a href="https://joaquinamatrodrigo.github.io/skforecast/latest/api/ForecasterMultiVariate.html">ForecasterAutoregMultiVariate</a> models.</p>
+<p>This type of prediction intervals can be easily estimated using <a href="https://skforecast.org/latest/api/forecasterdirect">ForecasterDirect</a> and <a href="https://skforecast.org/latest/api/forecasterdirectmultivariate">ForecasterDirectMultiVariate</a> models.</p>
 </div>
 </div>
 </div>
@@ -6667,7 +6490,7 @@ predictions</div>
 <i style="font-size: 18px; color:#ff9100; border-color: #ff1744;"></i>
 <b style="color: #ff9100;"> <span style="color: #ff9100;">⚠</span> Warning</b>
 </p>
-<p>Forecasters of type <code>ForecasterAutoregDirect</code> are slower than <code>ForecasterAutoregRecursive</code> because they require training one model per step. Although they can achieve better performance, their scalability is an important limitation when many steps need to be predicted. To limit the time required to run the following examples, the data is aggregated from hourly frequency to daily frequency and only 7 steps ahead (one week) are predicted.</p>
+<p>Forecasters of type <code>ForecasterDirect</code> are slower than <code>ForecasterRecursive</code> because they require training one model per step. Although they can achieve better performance, their scalability is an important limitation when many steps need to be predicted. To limit the time required to run the following examples, the data is aggregated from hourly frequency to daily frequency and only 7 steps ahead (one week) are predicted.</p>
 </div>
 </div>
 </div>
@@ -7012,7 +6835,7 @@ ax.legend();</div>
 <span class="c1"># interval (90% - 10% = 80%).</span>
 
 <span class="c1"># Forecaster for quantile 10%</span>
-<span class="n">forecaster_q10</span> <span class="o">=</span> <span class="n">ForecasterAutoregDirect</span><span class="p">(</span>
+<span class="n">forecaster_q10</span> <span class="o">=</span> <span class="n">ForecasterDirect</span><span class="p">(</span>
                      <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span>
                                      <span class="n">objective</span>     <span class="o">=</span> <span class="s1">'quantile'</span><span class="p">,</span>
                                      <span class="n">metric</span>        <span class="o">=</span> <span class="s1">'quantile'</span><span class="p">,</span>
@@ -7027,7 +6850,7 @@ ax.legend();</div>
                  <span class="p">)</span>
                   
 <span class="c1"># Forecaster for quantile 90%</span>
-<span class="n">forecaster_q90</span> <span class="o">=</span> <span class="n">ForecasterAutoregDirect</span><span class="p">(</span>
+<span class="n">forecaster_q90</span> <span class="o">=</span> <span class="n">ForecasterDirect</span><span class="p">(</span>
                      <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span>
                                      <span class="n">objective</span>     <span class="o">=</span> <span class="s1">'quantile'</span><span class="p">,</span>
                                      <span class="n">metric</span>        <span class="o">=</span> <span class="s1">'quantile'</span><span class="p">,</span>
@@ -7050,7 +6873,7 @@ ax.legend();</div>
 # interval (90% - 10% = 80%).
 
 # Forecaster for quantile 10%
-forecaster_q10 = ForecasterAutoregDirect(
+forecaster_q10 = ForecasterDirect(
                      regressor = LGBMRegressor(
                                      objective     = 'quantile',
                                      metric        = 'quantile',
@@ -7065,7 +6888,7 @@ forecaster_q10 = ForecasterAutoregDirect(
                  )
                   
 # Forecaster for quantile 90%
-forecaster_q90 = ForecasterAutoregDirect(
+forecaster_q90 = ForecasterDirect(
                      regressor = LGBMRegressor(
                                      objective     = 'quantile',
                                      metric        = 'quantile',
@@ -7455,6 +7278,21 @@ Area of the interval: 2832564.24
   
 </div>
       
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/skforecast/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
     </div>
   </div>
 </footer>
@@ -7539,7 +7377,7 @@ Area of the interval: 2832564.24
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.integrate", "navigation.breadcrumbs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>

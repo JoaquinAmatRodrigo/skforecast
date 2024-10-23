@@ -426,7 +426,9 @@ This is documentation for an unstable development version.
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
@@ -2631,27 +2633,6 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
-      <a href="../faq/time-series-differentiation.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Time series differentiation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../faq/non-negative-predictions.html" class="md-nav__link">
         
   
@@ -2699,27 +2680,6 @@ This is documentation for an unstable development version.
   
   <span class="md-ellipsis">
     Cyclical features in time series
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq/stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Stacking (ensemble) machine learning models
   </span>
   
 
@@ -2866,68 +2826,6 @@ This is documentation for an unstable development version.
                 </div>
               </div>
             
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#timeseriesdifferentiator" class="md-nav__link">
-    <span class="md-ellipsis">
-      TimeSeriesDifferentiator
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#forecasting-with-differentiation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Forecasting with differentiation
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#internal-differentiation-vs-pre-processing" class="md-nav__link">
-    <span class="md-ellipsis">
-      Internal differentiation vs pre-processing
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#conslusions" class="md-nav__link">
-    <span class="md-ellipsis">
-      Conslusions
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
             
           
           
@@ -3650,7 +3548,7 @@ Differenced time series: [nan  3.  4. -2.  4.  3.  4. -2.]
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_absolute_error</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">skforecast.preprocessing</span> <span class="kn">import</span> <span class="n">TimeSeriesDifferentiator</span>
 <span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">backtesting_forecaster</span>
 </pre></div>
@@ -3670,7 +3568,7 @@ from xgboost import XGBRegressor
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error
 from sklearn.preprocessing import StandardScaler
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.recursive import ForecasterRecursive
 from skforecast.preprocessing import TimeSeriesDifferentiator
 from skforecast.model_selection import backtesting_forecaster</div>
 </div>
@@ -3824,11 +3722,11 @@ Test dates  : 1957-01-01 00:00:00 --- 1960-12-01 00:00:00  (n=48)
 <span class="n">steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">end_train</span><span class="p">:])</span>
 
 <span class="c1"># Forecasters</span>
-<span class="n">forecaster_rf</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster_rf</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                     <span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">),</span>
                     <span class="n">lags</span>      <span class="o">=</span> <span class="mi">12</span>
                 <span class="p">)</span>
-<span class="n">forecaster_gb</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster_gb</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                     <span class="n">regressor</span> <span class="o">=</span> <span class="n">XGBRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">),</span>
                     <span class="n">lags</span>      <span class="o">=</span> <span class="mi">12</span>
                 <span class="p">)</span>
@@ -3852,7 +3750,7 @@ Test dates  : 1957-01-01 00:00:00 --- 1960-12-01 00:00:00  (n=48)
 <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">end_train</span><span class="p">:]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'test'</span><span class="p">)</span>
 <span class="n">predictions_rf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Random Forest'</span><span class="p">)</span>
 <span class="n">predictions_gb</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Gradient Boosting'</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Forecasting without differentiation'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'Forecasting without differentiation'</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">''</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </pre></div>
@@ -3861,11 +3759,11 @@ Test dates  : 1957-01-01 00:00:00 --- 1960-12-01 00:00:00  (n=48)
 steps = len(data.loc[end_train:])
 
 # Forecasters
-forecaster_rf = ForecasterAutoreg(
+forecaster_rf = ForecasterRecursive(
                     regressor = RandomForestRegressor(random_state=963),
                     lags      = 12
                 )
-forecaster_gb = ForecasterAutoreg(
+forecaster_gb = ForecasterRecursive(
                     regressor = XGBRegressor(random_state=963),
                     lags      = 12
                 )
@@ -3889,7 +3787,7 @@ data.loc[:end_train].plot(ax=ax, label='train')
 data.loc[end_train:].plot(ax=ax, label='test')
 predictions_rf.plot(ax=ax, label='Random Forest')
 predictions_gb.plot(ax=ax, label='Gradient Boosting')
-ax.set_title(f'Forecasting without differentiation')
+ax.set_title('Forecasting without differentiation')
 ax.set_xlabel('')
 ax.legend();</div>
 </div>
@@ -3963,12 +3861,12 @@ Error (MAE) Gradient Boosting: 49.16
 <span class="n">steps</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">end_train</span><span class="p">:])</span>
 
 <span class="c1"># Forecasters</span>
-<span class="n">forecaster_rf</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster_rf</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                     <span class="n">regressor</span>       <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">),</span>
                     <span class="n">lags</span>            <span class="o">=</span> <span class="mi">12</span><span class="p">,</span>
                     <span class="n">differentiation</span> <span class="o">=</span> <span class="mi">1</span>
                 <span class="p">)</span>
-<span class="n">forecaster_gb</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster_gb</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                     <span class="n">regressor</span>       <span class="o">=</span> <span class="n">XGBRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">),</span>
                     <span class="n">lags</span>            <span class="o">=</span> <span class="mi">12</span><span class="p">,</span>
                     <span class="n">differentiation</span> <span class="o">=</span> <span class="mi">1</span>
@@ -3993,7 +3891,7 @@ Error (MAE) Gradient Boosting: 49.16
 <span class="n">data</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">end_train</span><span class="p">:]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'test'</span><span class="p">)</span>
 <span class="n">predictions_rf</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Random Forest'</span><span class="p">)</span>
 <span class="n">predictions_gb</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">'Gradient Boosting'</span><span class="p">)</span>
-<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Forecasting with differentiation'</span><span class="p">)</span>
+<span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">'Forecasting with differentiation'</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">''</span><span class="p">)</span>
 <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">();</span>
 </pre></div>
@@ -4002,12 +3900,12 @@ Error (MAE) Gradient Boosting: 49.16
 steps = len(data.loc[end_train:])
 
 # Forecasters
-forecaster_rf = ForecasterAutoreg(
+forecaster_rf = ForecasterRecursive(
                     regressor       = RandomForestRegressor(random_state=963),
                     lags            = 12,
                     differentiation = 1
                 )
-forecaster_gb = ForecasterAutoreg(
+forecaster_gb = ForecasterRecursive(
                     regressor       = XGBRegressor(random_state=963),
                     lags            = 12,
                     differentiation = 1
@@ -4032,7 +3930,7 @@ data.loc[:end_train].plot(ax=ax, label='train')
 data.loc[end_train:].plot(ax=ax, label='test')
 predictions_rf.plot(ax=ax, label='Random Forest')
 predictions_gb.plot(ax=ax, label='Gradient Boosting')
-ax.set_title(f'Forecasting with differentiation')
+ax.set_title('Forecasting with differentiation')
 ax.set_xlabel('')
 ax.legend();</div>
 </div>
@@ -4125,7 +4023,7 @@ Error (MAE) Gradient Boosting: 25.49
 <span class="n">data_diff</span> <span class="o">=</span> <span class="n">diferenciator</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
 <span class="n">data_diff</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data_diff</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="mi">15</span>
              <span class="p">)</span>
@@ -4145,7 +4043,7 @@ diferenciator = TimeSeriesDifferentiator(order=1)
 data_diff = diferenciator.fit_transform(data.to_numpy())
 data_diff = pd.Series(data_diff, index=data.index).dropna()
 
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = RandomForestRegressor(random_state=963),
                  lags      = 15
              )
@@ -4201,7 +4099,7 @@ Freq: MS, Name: pred, dtype: float64</pre>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Time series differentiated internally by the forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>       <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">),</span>
                  <span class="n">lags</span>            <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
                  <span class="n">differentiation</span> <span class="o">=</span> <span class="mi">1</span>
@@ -4213,7 +4111,7 @@ Freq: MS, Name: pred, dtype: float64</pre>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-9"># Time series differentiated internally by the forecaster
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor       = RandomForestRegressor(random_state=963),
                  lags            = 15,
                  differentiation = 1
@@ -4325,7 +4223,7 @@ pd.testing.assert_series_equal(predictions_1, predictions_2)</div>
 <span class="n">data_scaled_diff</span> <span class="o">=</span> <span class="n">TimeSeriesDifferentiator</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">data_scaled</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">())</span>
 <span class="n">data_scaled_diff</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">data_scaled_diff</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="o">.</span><span class="n">dropna</span><span class="p">()</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>     <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">),</span>
                  <span class="n">lags</span>          <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
              <span class="p">)</span>
@@ -4345,7 +4243,7 @@ pd.testing.assert_series_equal(predictions_1, predictions_2)</div>
 
 <span class="c1"># Time series differentiated internally by the forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>       <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">),</span>
                  <span class="n">lags</span>            <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
                  <span class="n">differentiation</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -4365,7 +4263,7 @@ data_scaled = pd.Series(data_scaled.flatten(), index=data.index)
 data_scaled_diff = TimeSeriesDifferentiator(order=1).fit_transform(data_scaled.to_numpy())
 data_scaled_diff = pd.Series(data_scaled_diff, index=data.index).dropna()
 
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor     = RandomForestRegressor(random_state=963),
                  lags          = 15,
              )
@@ -4385,7 +4283,7 @@ display(predictions_1.head(5))
 
 # Time series differentiated internally by the forecaster
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor       = RandomForestRegressor(random_state=963),
                  lags            = 15,
                  differentiation = 1,
@@ -4492,7 +4390,7 @@ pd.testing.assert_series_equal(predictions_1, predictions_2)</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Backtesting with the time series differentiated by preprocessing before training</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">steps</span> <span class="o">=</span> <span class="mi">5</span>
-<span class="n">forecaster_1</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster_1</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                    <span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">),</span>
                    <span class="n">lags</span>      <span class="o">=</span> <span class="mi">15</span>
                <span class="p">)</span>
@@ -4509,7 +4407,7 @@ pd.testing.assert_series_equal(predictions_1, predictions_2)</div>
                        <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                        <span class="n">n_jobs</span>                <span class="o">=</span> <span class="s1">'auto'</span><span class="p">,</span>
                        <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                       <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span>  
+                       <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span>
                    <span class="p">)</span>
 
 <span class="c1"># Revert differentiation of predictions. Predictions of each fold must be reverted</span>
@@ -4546,7 +4444,7 @@ pd.testing.assert_series_equal(predictions_1, predictions_2)</div>
 <div class="clipboard-copy-txt" id="cell-13"># Backtesting with the time series differentiated by preprocessing before training
 # ==============================================================================
 steps = 5
-forecaster_1 = ForecasterAutoreg(
+forecaster_1 = ForecasterRecursive(
                    regressor = RandomForestRegressor(random_state=963),
                    lags      = 15
                )
@@ -4563,7 +4461,7 @@ _, predictions_1 = backtesting_forecaster(
                        refit                 = True,
                        n_jobs                = 'auto',
                        verbose               = False,
-                       show_progress         = True  
+                       show_progress         = True
                    )
 
 # Revert differentiation of predictions. Predictions of each fold must be reverted
@@ -4716,7 +4614,7 @@ predictions_1.head(5)</div>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Backtesting with the time series differentiated internally</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster_2</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster_2</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                    <span class="n">regressor</span>       <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">),</span>
                    <span class="n">lags</span>            <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
                    <span class="n">differentiation</span> <span class="o">=</span> <span class="mi">1</span>
@@ -4734,14 +4632,14 @@ predictions_1.head(5)</div>
                        <span class="n">refit</span>                 <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
                        <span class="n">n_jobs</span>                <span class="o">=</span> <span class="s1">'auto'</span><span class="p">,</span>
                        <span class="n">verbose</span>               <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-                       <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span>  
+                       <span class="n">show_progress</span>         <span class="o">=</span> <span class="kc">True</span>
                    <span class="p">)</span>
 
 <span class="n">predictions_2</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-14"># Backtesting with the time series differentiated internally
 # ==============================================================================
-forecaster_2 = ForecasterAutoreg(
+forecaster_2 = ForecasterRecursive(
                    regressor       = RandomForestRegressor(random_state=963),
                    lags            = 15,
                    differentiation = 1
@@ -4759,7 +4657,7 @@ _, predictions_2 = backtesting_forecaster(
                        refit                 = True,
                        n_jobs                = 'auto',
                        verbose               = False,
-                       show_progress         = True  
+                       show_progress         = True
                    )
 
 predictions_2.head(5)</div>
@@ -4893,7 +4791,7 @@ pd.testing.assert_series_equal(predictions_1['pred'], predictions_2['pred'])</di
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Time series differentiated by preprocessing before training</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster_1</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster_1</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                    <span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">),</span>
                    <span class="n">lags</span>      <span class="o">=</span> <span class="mi">15</span>
                <span class="p">)</span>
@@ -4914,7 +4812,7 @@ pd.testing.assert_series_equal(predictions_1['pred'], predictions_2['pred'])</di
 
 <span class="c1"># Time series differentiated internally by the forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster_2</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster_2</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                    <span class="n">regressor</span>       <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">),</span>
                    <span class="n">lags</span>            <span class="o">=</span> <span class="mi">15</span><span class="p">,</span>
                    <span class="n">differentiation</span> <span class="o">=</span> <span class="mi">1</span>
@@ -4925,7 +4823,7 @@ pd.testing.assert_series_equal(predictions_1['pred'], predictions_2['pred'])</di
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-16"># Time series differentiated by preprocessing before training
 # ==============================================================================
-forecaster_1 = ForecasterAutoreg(
+forecaster_1 = ForecasterRecursive(
                    regressor = RandomForestRegressor(random_state=963),
                    lags      = 15
                )
@@ -4946,7 +4844,7 @@ boot_predictions_1 = boot_predictions_1.asfreq('MS')
 
 # Time series differentiated internally by the forecaster
 # ==============================================================================
-forecaster_2 = ForecasterAutoreg(
+forecaster_2 = ForecasterRecursive(
                    regressor       = RandomForestRegressor(random_state=963),
                    lags            = 15,
                    differentiation = 1
@@ -5064,6 +4962,21 @@ pd.testing.assert_frame_equal(boot_predictions_1, boot_predictions_2)</div>
   
 </div>
       
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/skforecast/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
     </div>
   </div>
 </footer>
@@ -5148,7 +5061,7 @@ pd.testing.assert_frame_equal(boot_predictions_1, boot_predictions_2)</div>
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.integrate", "navigation.breadcrumbs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>

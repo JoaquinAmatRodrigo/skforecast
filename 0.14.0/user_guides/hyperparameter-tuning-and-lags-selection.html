@@ -426,7 +426,9 @@ This is documentation for an unstable development version.
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
@@ -2700,27 +2702,6 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
-      <a href="../faq/time-series-differentiation.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Time series differentiation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../faq/non-negative-predictions.html" class="md-nav__link">
         
   
@@ -2768,27 +2749,6 @@ This is documentation for an unstable development version.
   
   <span class="md-ellipsis">
     Cyclical features in time series
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq/stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Stacking (ensemble) machine learning models
   </span>
   
 
@@ -2935,137 +2895,6 @@ This is documentation for an unstable development version.
                 </div>
               </div>
             
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#libraries" class="md-nav__link">
-    <span class="md-ellipsis">
-      Libraries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data" class="md-nav__link">
-    <span class="md-ellipsis">
-      Data
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#grid-search" class="md-nav__link">
-    <span class="md-ellipsis">
-      Grid search
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#random-search" class="md-nav__link">
-    <span class="md-ellipsis">
-      Random search
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#bayesian-search" class="md-nav__link">
-    <span class="md-ellipsis">
-      Bayesian search
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Bayesian search">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#optuna" class="md-nav__link">
-    <span class="md-ellipsis">
-      Optuna
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#scikit-optimize" class="md-nav__link">
-    <span class="md-ellipsis">
-      Scikit-optimize
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#hyperparameter-tuning-with-custom-metric" class="md-nav__link">
-    <span class="md-ellipsis">
-      Hyperparameter tuning with custom metric
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#compare-multiple-metrics" class="md-nav__link">
-    <span class="md-ellipsis">
-      Compare multiple metrics
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#compare-multiple-regressors" class="md-nav__link">
-    <span class="md-ellipsis">
-      Compare multiple regressors
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#saving-results-to-file" class="md-nav__link">
-    <span class="md-ellipsis">
-      Saving results to file
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
             
           
           
@@ -3602,7 +3431,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_squared_error</span>
 
 <span class="kn">from</span> <span class="nn">skforecast.datasets</span> <span class="kn">import</span> <span class="n">fetch_dataset</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">grid_search_forecaster</span>
 <span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">random_search_forecaster</span>
 <span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">bayesian_search_forecaster</span>
@@ -3616,7 +3445,7 @@ from lightgbm import LGBMRegressor
 from sklearn.metrics import mean_squared_error
 
 from skforecast.datasets import fetch_dataset
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
+from skforecast.recursive import ForecasterRecursive
 from skforecast.model_selection import grid_search_forecaster
 from skforecast.model_selection import random_search_forecaster
 from skforecast.model_selection import bayesian_search_forecaster</div>
@@ -3846,13 +3675,13 @@ Test dates       : 2006-02-01 00:00:00 --- 2008-06-01 00:00:00 (n=29)
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Grid search hyperparameters and lags</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
-                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span> <span class="c1"># Placeholder, the value will be overwritten</span>
+                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Placeholder, the value will be overwritten</span>
              <span class="p">)</span>
 
 <span class="c1"># Lags used as predictors</span>
-<span class="n">lags_grid</span> <span class="o">=</span><span class="p">{</span>
+<span class="n">lags_grid</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">'lags_1'</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
     <span class="s1">'lags_2'</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
     <span class="s1">'lags_3'</span><span class="p">:</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">20</span><span class="p">]</span>
@@ -3884,13 +3713,13 @@ Test dates       : 2006-02-01 00:00:00 --- 2008-06-01 00:00:00 (n=29)
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-4"># Grid search hyperparameters and lags
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = LGBMRegressor(random_state=123, verbose=-1),
-                 lags      = 10 # Placeholder, the value will be overwritten
+                 lags      = 10  # Placeholder, the value will be overwritten
              )
 
 # Lags used as predictors
-lags_grid ={
+lags_grid = {
     'lags_1': 3,
     'lags_2': 10,
     'lags_3': [1, 2, 3, 20]
@@ -4261,9 +4090,9 @@ Forecaster id: None </pre>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Random search hyperparameters and lags</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
-                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span> <span class="c1"># Placeholder, the value will be overwritten</span>
+                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Placeholder, the value will be overwritten</span>
              <span class="p">)</span>
 
 <span class="c1"># Lags used as predictors</span>
@@ -4297,9 +4126,9 @@ Forecaster id: None </pre>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-6"># Random search hyperparameters and lags
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = LGBMRegressor(random_state=123, verbose=-1),
-                 lags      = 10 # Placeholder, the value will be overwritten
+                 lags      = 10  # Placeholder, the value will be overwritten
              )
 
 # Lags used as predictors
@@ -4505,21 +4334,23 @@ results.head(4)</div>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Bayesian search hyperparameters and lags with Optuna</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
-                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span> <span class="c1"># Placeholder, the value will be overwritten</span>
+                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Placeholder, the value will be overwritten</span>
              <span class="p">)</span>
+
 
 <span class="c1"># Search space</span>
 <span class="k">def</span> <span class="nf">search_space</span><span class="p">(</span><span class="n">trial</span><span class="p">):</span>
     <span class="n">search_space</span>  <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">'lags'</span>             <span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s1">'lags'</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]),</span>
-        <span class="s1">'n_estimators'</span>     <span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">'n_estimators'</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
-        <span class="s1">'min_samples_leaf'</span> <span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">'min_samples_leaf'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
-        <span class="s1">'max_features'</span>     <span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s1">'max_features'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'log2'</span><span class="p">,</span> <span class="s1">'sqrt'</span><span class="p">])</span>
+        <span class="s1">'lags'</span>            <span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s1">'lags'</span><span class="p">,</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">]),</span>
+        <span class="s1">'n_estimators'</span>    <span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">'n_estimators'</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span>
+        <span class="s1">'min_samples_leaf'</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">'min_samples_leaf'</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
+        <span class="s1">'max_features'</span>    <span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s1">'max_features'</span><span class="p">,</span> <span class="p">[</span><span class="s1">'log2'</span><span class="p">,</span> <span class="s1">'sqrt'</span><span class="p">])</span>
     <span class="p">}</span>
     
     <span class="k">return</span> <span class="n">search_space</span>
+
 
 <span class="n">results</span><span class="p">,</span> <span class="n">best_trial</span> <span class="o">=</span> <span class="n">bayesian_search_forecaster</span><span class="p">(</span>
                           <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
@@ -4545,21 +4376,23 @@ results.head(4)</div>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-7"># Bayesian search hyperparameters and lags with Optuna
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = LGBMRegressor(random_state=123, verbose=-1),
-                 lags      = 10 # Placeholder, the value will be overwritten
+                 lags      = 10  # Placeholder, the value will be overwritten
              )
+
 
 # Search space
 def search_space(trial):
     search_space  = {
-        'lags'             : trial.suggest_categorical('lags', [3, 5]),
-        'n_estimators'     : trial.suggest_int('n_estimators', 10, 20),
-        'min_samples_leaf' : trial.suggest_int('min_samples_leaf', 1, 10),
-        'max_features'     : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
+        'lags'            : trial.suggest_categorical('lags', [3, 5]),
+        'n_estimators'    : trial.suggest_int('n_estimators', 10, 20),
+        'min_samples_leaf': trial.suggest_int('min_samples_leaf', 1, 10),
+        'max_features'    : trial.suggest_categorical('max_features', ['log2', 'sqrt'])
     }
     
     return search_space
+
 
 results, best_trial = bayesian_search_forecaster(
                           forecaster            = forecaster,
@@ -4836,9 +4669,9 @@ def custom_metric(y_true, y_pred):
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Grid search hyperparameter and lags with custom metric</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
-                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span> <span class="c1"># Placeholder, the value will be overwritten</span>
+                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Placeholder, the value will be overwritten</span>
              <span class="p">)</span>
 
 <span class="c1"># Lags used as predictors</span>
@@ -4868,9 +4701,9 @@ def custom_metric(y_true, y_pred):
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-10"># Grid search hyperparameter and lags with custom metric
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = LGBMRegressor(random_state=123, verbose=-1),
-                 lags      = 10 # Placeholder, the value will be overwritten
+                 lags      = 10  # Placeholder, the value will be overwritten
              )
 
 # Lags used as predictors
@@ -5043,9 +4876,9 @@ results.head(4)</div>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Grid search hyperparameter and lags with multiple metrics</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
-                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span> <span class="c1"># Placeholder, the value will be overwritten</span>
+                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Placeholder, the value will be overwritten</span>
              <span class="p">)</span>
 
 <span class="c1"># Lags used as predictors</span>
@@ -5075,9 +4908,9 @@ results.head(4)</div>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-11"># Grid search hyperparameter and lags with multiple metrics
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = LGBMRegressor(random_state=123, verbose=-1),
-                 lags      = 10 # Placeholder, the value will be overwritten
+                 lags      = 10  # Placeholder, the value will be overwritten
              )
 
 # Lags used as predictors
@@ -5281,9 +5114,9 @@ results.head(4)</div>
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
 
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Grid search for regressor: </span><span class="si">{</span><span class="n">model</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"-------------------------"</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"-------------------------"</span><span class="p">)</span>
 
-    <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+    <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                      <span class="n">regressor</span> <span class="o">=</span> <span class="n">model</span><span class="p">,</span>
                      <span class="n">lags</span>      <span class="o">=</span> <span class="mi">3</span>
                  <span class="p">)</span>
@@ -5340,9 +5173,9 @@ df_results = pd.DataFrame()
 for i, model in enumerate(models):
 
     print(f"Grid search for regressor: {model}")
-    print(f"-------------------------")
+    print("-------------------------")
 
-    forecaster = ForecasterAutoreg(
+    forecaster = ForecasterRecursive(
                      regressor = model,
                      lags      = 3
                  )
@@ -5627,9 +5460,9 @@ Number of models compared: 6.
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Save results to file</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
-                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span> <span class="c1"># Placeholder, the value will be overwritten</span>
+                 <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># Placeholder, the value will be overwritten</span>
              <span class="p">)</span>
 
 <span class="c1"># Lags used as predictors</span>
@@ -5660,9 +5493,9 @@ Number of models compared: 6.
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-13"># Save results to file
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = LGBMRegressor(random_state=123, verbose=-1),
-                 lags      = 10 # Placeholder, the value will be overwritten
+                 lags      = 10  # Placeholder, the value will be overwritten
              )
 
 # Lags used as predictors
@@ -6021,6 +5854,21 @@ pd.read_csv("results_grid_search.txt", sep="\t")</div>
   
 </div>
       
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/skforecast/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
     </div>
   </div>
 </footer>
@@ -6105,7 +5953,7 @@ pd.read_csv("results_grid_search.txt", sep="\t")</div>
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.integrate", "navigation.breadcrumbs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>

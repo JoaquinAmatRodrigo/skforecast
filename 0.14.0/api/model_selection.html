@@ -426,7 +426,9 @@ This is documentation for an unstable development version.
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
@@ -2827,27 +2829,6 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
-      <a href="../faq/time-series-differentiation.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Time series differentiation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../faq/non-negative-predictions.html" class="md-nav__link">
         
   
@@ -2895,27 +2876,6 @@ This is documentation for an unstable development version.
   
   <span class="md-ellipsis">
     Cyclical features in time series
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq/stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Stacking (ensemble) machine learning models
   </span>
   
 
@@ -3062,266 +3022,6 @@ This is documentation for an unstable development version.
                 </div>
               </div>
             
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._validation.backtesting_forecaster" class="md-nav__link">
-    <span class="md-ellipsis">
-      backtesting_forecaster
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._search.grid_search_forecaster" class="md-nav__link">
-    <span class="md-ellipsis">
-      grid_search_forecaster
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._search.random_search_forecaster" class="md-nav__link">
-    <span class="md-ellipsis">
-      random_search_forecaster
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._search.bayesian_search_forecaster" class="md-nav__link">
-    <span class="md-ellipsis">
-      bayesian_search_forecaster
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._validation.backtesting_forecaster_multiseries" class="md-nav__link">
-    <span class="md-ellipsis">
-      backtesting_forecaster_multiseries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._search.grid_search_forecaster_multiseries" class="md-nav__link">
-    <span class="md-ellipsis">
-      grid_search_forecaster_multiseries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._search.random_search_forecaster_multiseries" class="md-nav__link">
-    <span class="md-ellipsis">
-      random_search_forecaster_multiseries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._search.bayesian_search_forecaster_multiseries" class="md-nav__link">
-    <span class="md-ellipsis">
-      bayesian_search_forecaster_multiseries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._validation.backtesting_sarimax" class="md-nav__link">
-    <span class="md-ellipsis">
-      backtesting_sarimax
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._search.grid_search_sarimax" class="md-nav__link">
-    <span class="md-ellipsis">
-      grid_search_sarimax
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._search.random_search_sarimax" class="md-nav__link">
-    <span class="md-ellipsis">
-      random_search_sarimax
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._split.BaseFold" class="md-nav__link">
-    <span class="md-ellipsis">
-      BaseFold
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="BaseFold">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.model_selection._split.BaseFold._validate_params" class="md-nav__link">
-    <span class="md-ellipsis">
-      _validate_params
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.model_selection._split.BaseFold._extract_index" class="md-nav__link">
-    <span class="md-ellipsis">
-      _extract_index
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.model_selection._split.BaseFold.set_params" class="md-nav__link">
-    <span class="md-ellipsis">
-      set_params
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._split.TimeSeriesFold" class="md-nav__link">
-    <span class="md-ellipsis">
-      TimeSeriesFold
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="TimeSeriesFold">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.model_selection._split.TimeSeriesFold.split" class="md-nav__link">
-    <span class="md-ellipsis">
-      split
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.model_selection._split.TimeSeriesFold._print_info" class="md-nav__link">
-    <span class="md-ellipsis">
-      _print_info
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._split.OneStepAheadFold" class="md-nav__link">
-    <span class="md-ellipsis">
-      OneStepAheadFold
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="OneStepAheadFold">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.model_selection._split.OneStepAheadFold.split" class="md-nav__link">
-    <span class="md-ellipsis">
-      split
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.model_selection._split.OneStepAheadFold._print_info" class="md-nav__link">
-    <span class="md-ellipsis">
-      _print_info
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._utils.initialize_lags_grid" class="md-nav__link">
-    <span class="md-ellipsis">
-      initialize_lags_grid
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._utils.check_backtesting_input" class="md-nav__link">
-    <span class="md-ellipsis">
-      check_backtesting_input
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.model_selection._utils.select_n_jobs_backtesting" class="md-nav__link">
-    <span class="md-ellipsis">
-      select_n_jobs_backtesting
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
             
           
           
@@ -3617,7 +3317,7 @@ for backtesting.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_validation.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_validation.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">308</span>
 <span class="normal">309</span>
 <span class="normal">310</span>
@@ -4159,7 +3859,7 @@ The results will be saved in a tab-separated values (TSV) format. If
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_search.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_search.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 34</span>
 <span class="normal"> 35</span>
 <span class="normal"> 36</span>
@@ -4632,7 +4332,7 @@ The results will be saved in a tab-separated values (TSV) format. If
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_search.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_search.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">131</span>
 <span class="normal">132</span>
 <span class="normal">133</span>
@@ -5143,7 +4843,7 @@ sampler is used during optimization.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_search.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_search.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">571</span>
 <span class="normal">572</span>
 <span class="normal">573</span>
@@ -5690,7 +5390,7 @@ If there is more than one level, this structure will be repeated for each of the
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_validation.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_validation.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">772</span>
 <span class="normal">773</span>
 <span class="normal">774</span>
@@ -6302,7 +6002,7 @@ metric will be the average of the optimization of all levels.</li>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_search.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_search.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 991</span>
 <span class="normal"> 992</span>
 <span class="normal"> 993</span>
@@ -6874,7 +6574,7 @@ metric will be the average of the optimization of all levels.</li>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_search.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_search.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1111</span>
 <span class="normal">1112</span>
 <span class="normal">1113</span>
@@ -7222,30 +6922,6 @@ trial.suggest_int, trial.suggest_categorical) as values.</p>
             </td>
           </tr>
           <tr class="doc-section-item">
-            <td><code>method</code></td>
-            <td>
-                  <code>str</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Method used to evaluate the model.</p>
-<ul>
-<li>'backtesting': the model is evaluated using backtesting process in which
-the model predicts <code>steps</code> ahead in each iteration.</li>
-<li>'one_step_ahead': the model is evaluated using only one step ahead predictions.
-This is faster than backtesting but the results may not reflect the actual
-performance of the model when predicting multiple steps ahead. Arguments <code>steps</code>,
-<code>fixed_train_size</code>, <code>gap</code>, <code>skip_folds</code>, <code>allow_incomplete_fold</code> and <code>refit</code> are 
-ignored when <code>method</code> is 'one_step_ahead'.
-<strong>New in version 0.14.0</strong></li>
-</ul>
-              </div>
-            </td>
-            <td>
-                  <code>`&#39;backtesting&#39;`</code>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
             <td><code>aggregate_metric</code></td>
             <td>
                   <code>(str, list)</code>
@@ -7491,7 +7167,7 @@ metric will be the average of the optimization of all levels.</li>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_search.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_search.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1557</span>
 <span class="normal">1558</span>
 <span class="normal">1559</span>
@@ -7622,18 +7298,7 @@ metric will be the average of the optimization of all levels.</li>
 <span class="normal">1684</span>
 <span class="normal">1685</span>
 <span class="normal">1686</span>
-<span class="normal">1687</span>
-<span class="normal">1688</span>
-<span class="normal">1689</span>
-<span class="normal">1690</span>
-<span class="normal">1691</span>
-<span class="normal">1692</span>
-<span class="normal">1693</span>
-<span class="normal">1694</span>
-<span class="normal">1695</span>
-<span class="normal">1696</span>
-<span class="normal">1697</span>
-<span class="normal">1698</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">bayesian_search_forecaster_multiseries</span><span class="p">(</span>
+<span class="normal">1687</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">bayesian_search_forecaster_multiseries</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
     <span class="n">series</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="nb">dict</span><span class="p">],</span>
     <span class="n">cv</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">TimeSeriesFold</span><span class="p">,</span> <span class="n">OneStepAheadFold</span><span class="p">],</span>
@@ -7675,17 +7340,6 @@ metric will be the average of the optimization of all levels.</li>
 <span class="sd">        - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`</span>
 <span class="sd">        (Optional) that returns a float.</span>
 <span class="sd">        - If `list`: List containing multiple strings and/or Callables.</span>
-<span class="sd">    method : str, default `&#39;backtesting&#39;`</span>
-<span class="sd">        Method used to evaluate the model.</span>
-
-<span class="sd">        - &#39;backtesting&#39;: the model is evaluated using backtesting process in which</span>
-<span class="sd">        the model predicts `steps` ahead in each iteration.</span>
-<span class="sd">        - &#39;one_step_ahead&#39;: the model is evaluated using only one step ahead predictions.</span>
-<span class="sd">        This is faster than backtesting but the results may not reflect the actual</span>
-<span class="sd">        performance of the model when predicting multiple steps ahead. Arguments `steps`,</span>
-<span class="sd">        `fixed_train_size`, `gap`, `skip_folds`, `allow_incomplete_fold` and `refit` are </span>
-<span class="sd">        ignored when `method` is &#39;one_step_ahead&#39;.</span>
-<span class="sd">        **New in version 0.14.0**</span>
 <span class="sd">    aggregate_metric : str, list, default `[&#39;weighted_average&#39;, &#39;average&#39;, &#39;pooling&#39;]`</span>
 <span class="sd">        Aggregation method/s used to combine the metric/s of all levels (series)</span>
 <span class="sd">        when multiple levels are predicted. If list, the first aggregation method</span>
@@ -8023,7 +7677,7 @@ for backtesting.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_validation.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_validation.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1195</span>
 <span class="normal">1196</span>
 <span class="normal">1197</span>
@@ -8490,8 +8144,19 @@ The results will be saved in a tab-separated values (TSV) format. If
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_search.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2101</span>
+              <summary>Source code in <code>skforecast\model_selection\_search.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2090</span>
+<span class="normal">2091</span>
+<span class="normal">2092</span>
+<span class="normal">2093</span>
+<span class="normal">2094</span>
+<span class="normal">2095</span>
+<span class="normal">2096</span>
+<span class="normal">2097</span>
+<span class="normal">2098</span>
+<span class="normal">2099</span>
+<span class="normal">2100</span>
+<span class="normal">2101</span>
 <span class="normal">2102</span>
 <span class="normal">2103</span>
 <span class="normal">2104</span>
@@ -8569,18 +8234,7 @@ The results will be saved in a tab-separated values (TSV) format. If
 <span class="normal">2176</span>
 <span class="normal">2177</span>
 <span class="normal">2178</span>
-<span class="normal">2179</span>
-<span class="normal">2180</span>
-<span class="normal">2181</span>
-<span class="normal">2182</span>
-<span class="normal">2183</span>
-<span class="normal">2184</span>
-<span class="normal">2185</span>
-<span class="normal">2186</span>
-<span class="normal">2187</span>
-<span class="normal">2188</span>
-<span class="normal">2189</span>
-<span class="normal">2190</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_sarimax</span><span class="p">(</span>
+<span class="normal">2179</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">grid_search_sarimax</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">cv</span><span class="p">:</span> <span class="n">TimeSeriesFold</span><span class="p">,</span>
@@ -8948,8 +8602,19 @@ The results will be saved in a tab-separated values (TSV) format. If
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_search.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2193</span>
+              <summary>Source code in <code>skforecast\model_selection\_search.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2182</span>
+<span class="normal">2183</span>
+<span class="normal">2184</span>
+<span class="normal">2185</span>
+<span class="normal">2186</span>
+<span class="normal">2187</span>
+<span class="normal">2188</span>
+<span class="normal">2189</span>
+<span class="normal">2190</span>
+<span class="normal">2191</span>
+<span class="normal">2192</span>
+<span class="normal">2193</span>
 <span class="normal">2194</span>
 <span class="normal">2195</span>
 <span class="normal">2196</span>
@@ -9034,18 +8699,7 @@ The results will be saved in a tab-separated values (TSV) format. If
 <span class="normal">2275</span>
 <span class="normal">2276</span>
 <span class="normal">2277</span>
-<span class="normal">2278</span>
-<span class="normal">2279</span>
-<span class="normal">2280</span>
-<span class="normal">2281</span>
-<span class="normal">2282</span>
-<span class="normal">2283</span>
-<span class="normal">2284</span>
-<span class="normal">2285</span>
-<span class="normal">2286</span>
-<span class="normal">2287</span>
-<span class="normal">2288</span>
-<span class="normal">2289</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_sarimax</span><span class="p">(</span>
+<span class="normal">2278</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">random_search_sarimax</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
     <span class="n">y</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
     <span class="n">cv</span><span class="p">:</span> <span class="n">TimeSeriesFold</span><span class="p">,</span>
@@ -9489,7 +9143,7 @@ test set.</p>
     </table>
 
                   <details class="quote">
-                    <summary>Source code in <code>skforecast/model_selection/_split.py</code></summary>
+                    <summary>Source code in <code>skforecast\model_selection\_split.py</code></summary>
                     <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 93</span>
 <span class="normal"> 94</span>
 <span class="normal"> 95</span>
@@ -9600,7 +9254,7 @@ test set.</p>
         <p>Validate all input parameters to ensure correctness.</p>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_split.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_split.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">135</span>
 <span class="normal">136</span>
 <span class="normal">137</span>
@@ -9894,7 +9548,7 @@ test set.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_split.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_split.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">247</span>
 <span class="normal">248</span>
 <span class="normal">249</span>
@@ -10039,7 +9693,7 @@ current parameters, the input parameters are validated to ensure correctness.</p
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_split.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_split.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">284</span>
 <span class="normal">285</span>
 <span class="normal">286</span>
@@ -10489,7 +10143,7 @@ forecaster should not be trained in this fold.</p>
 exclusive. This means that the last index is not included in the slice.</p>
 </details>
                   <details class="quote">
-                    <summary>Source code in <code>skforecast/model_selection/_split.py</code></summary>
+                    <summary>Source code in <code>skforecast\model_selection\_split.py</code></summary>
                     <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">641</span>
 <span class="normal">642</span>
 <span class="normal">643</span>
@@ -10670,7 +10324,7 @@ slice.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_split.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_split.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">693</span>
 <span class="normal">694</span>
 <span class="normal">695</span>
@@ -11160,7 +10814,7 @@ slice.</p>
         <p>Print information about folds.</p>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_split.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_split.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 929</span>
 <span class="normal"> 930</span>
 <span class="normal"> 931</span>
@@ -11607,7 +11261,7 @@ forecasting.</p>
     </table>
 
                   <details class="quote">
-                    <summary>Source code in <code>skforecast/model_selection/_split.py</code></summary>
+                    <summary>Source code in <code>skforecast\model_selection\_split.py</code></summary>
                     <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">368</span>
 <span class="normal">369</span>
 <span class="normal">370</span>
@@ -11764,7 +11418,7 @@ slice.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_split.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_split.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">402</span>
 <span class="normal">403</span>
 <span class="normal">404</span>
@@ -11970,7 +11624,7 @@ slice.</p>
         <p>Print information about folds.</p>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_split.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_split.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">496</span>
 <span class="normal">497</span>
 <span class="normal">498</span>
@@ -12163,7 +11817,7 @@ DataFrame, and the values are used as the lists of lags to try.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_utils.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">24</span>
 <span class="normal">25</span>
 <span class="normal">26</span>
@@ -12288,20 +11942,6 @@ modules <code>model_selection</code>, <code>model_selection_multiseries</code> a
             <td>
               <div class="doc-md-description">
                 <p>Forecaster model.</p>
-              </div>
-            </td>
-            <td>
-                <em>required</em>
-            </td>
-          </tr>
-          <tr class="doc-section-item">
-            <td><code>steps</code></td>
-            <td>
-                  <code>(int, list)</code>
-            </td>
-            <td>
-              <div class="doc-md-description">
-                <p>Number of future steps predicted.</p>
               </div>
             </td>
             <td>
@@ -12573,7 +12213,7 @@ information.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_utils.py</code></summary>
+              <summary>Source code in <code>skforecast\model_selection\_utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 68</span>
 <span class="normal"> 69</span>
 <span class="normal"> 70</span>
@@ -12850,9 +12490,7 @@ information.</p>
 <span class="normal">341</span>
 <span class="normal">342</span>
 <span class="normal">343</span>
-<span class="normal">344</span>
-<span class="normal">345</span>
-<span class="normal">346</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">check_backtesting_input</span><span class="p">(</span>
+<span class="normal">344</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">check_backtesting_input</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
     <span class="n">cv</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
     <span class="n">metric</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="nb">list</span><span class="p">],</span>
@@ -12880,8 +12518,6 @@ information.</p>
 <span class="sd">    ----------</span>
 <span class="sd">    forecaster : Forecaster</span>
 <span class="sd">        Forecaster model.</span>
-<span class="sd">    steps : int, list</span>
-<span class="sd">        Number of future steps predicted.</span>
 <span class="sd">    cv : TimeSeriesFold</span>
 <span class="sd">        TimeSeriesFold object with the information needed to split the data into folds.</span>
 <span class="sd">    metric : str, Callable, list</span>
@@ -13240,8 +12876,10 @@ potentially harmful due to resource contention.</li>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/model_selection/_utils.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">349</span>
+              <summary>Source code in <code>skforecast\model_selection\_utils.py</code></summary>
+              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">347</span>
+<span class="normal">348</span>
+<span class="normal">349</span>
 <span class="normal">350</span>
 <span class="normal">351</span>
 <span class="normal">352</span>
@@ -13317,9 +12955,7 @@ potentially harmful due to resource contention.</li>
 <span class="normal">422</span>
 <span class="normal">423</span>
 <span class="normal">424</span>
-<span class="normal">425</span>
-<span class="normal">426</span>
-<span class="normal">427</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">select_n_jobs_backtesting</span><span class="p">(</span>
+<span class="normal">425</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">select_n_jobs_backtesting</span><span class="p">(</span>
     <span class="n">forecaster</span><span class="p">:</span> <span class="nb">object</span><span class="p">,</span>
     <span class="n">refit</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -13451,6 +13087,21 @@ potentially harmful due to resource contention.</li>
   
 </div>
       
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/skforecast/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
     </div>
   </div>
 </footer>
@@ -13535,7 +13186,7 @@ potentially harmful due to resource contention.</li>
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.integrate", "navigation.breadcrumbs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>

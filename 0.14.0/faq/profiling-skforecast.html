@@ -426,7 +426,9 @@ This is documentation for an unstable development version.
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
@@ -2647,27 +2649,6 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
-      <a href="time-series-differentiation.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Time series differentiation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="non-negative-predictions.html" class="md-nav__link">
         
   
@@ -2715,27 +2696,6 @@ This is documentation for an unstable development version.
   
   <span class="md-ellipsis">
     Cyclical features in time series
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Stacking (ensemble) machine learning models
   </span>
   
 
@@ -2976,86 +2936,6 @@ This is documentation for an unstable development version.
                 </div>
               </div>
             
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#libraries" class="md-nav__link">
-    <span class="md-ellipsis">
-      Libraries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data" class="md-nav__link">
-    <span class="md-ellipsis">
-      Data
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#dummy-regressor" class="md-nav__link">
-    <span class="md-ellipsis">
-      Dummy regressor
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#profiling-fit" class="md-nav__link">
-    <span class="md-ellipsis">
-      Profiling fit
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#profiling-create_train_x_y" class="md-nav__link">
-    <span class="md-ellipsis">
-      Profiling create_train_X_y
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#profiling-predict" class="md-nav__link">
-    <span class="md-ellipsis">
-      Profiling predict
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
             
           
           
@@ -3568,17 +3448,17 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="kn">import</span> <span class="nn">platform</span>
 <span class="kn">import</span> <span class="nn">psutil</span>
 
-<span class="kn">import</span> <span class="nn">skforecast</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoregCustom</span> <span class="kn">import</span> <span class="n">ForecasterAutoregCustom</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoregDirect</span> <span class="kn">import</span> <span class="n">ForecasterAutoregDirect</span>
-<span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">grid_search_forecaster</span>
-<span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">backtesting_forecaster</span>
 <span class="kn">import</span> <span class="nn">sklearn</span>
 <span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">LinearRegression</span>
 <span class="kn">from</span> <span class="nn">sklearn.linear_model</span> <span class="kn">import</span> <span class="n">Ridge</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">HistGradientBoostingRegressor</span>
 <span class="kn">from</span> <span class="nn">lightgbm</span> <span class="kn">import</span> <span class="n">LGBMRegressor</span>
+
+<span class="kn">import</span> <span class="nn">skforecast</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
+<span class="kn">from</span> <span class="nn">skforecast.direct</span> <span class="kn">import</span> <span class="n">ForecasterDirect</span>
+<span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">grid_search_forecaster</span>
+<span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">backtesting_forecaster</span>
 
 <span class="o">%</span><span class="n">load_ext</span> <span class="n">pyinstrument</span>
 </pre></div>
@@ -3591,17 +3471,17 @@ import matplotlib.pyplot as plt
 import platform
 import psutil
 
-import skforecast
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterAutoregCustom import ForecasterAutoregCustom
-from skforecast.ForecasterAutoregDirect import ForecasterAutoregDirect
-from skforecast.model_selection import grid_search_forecaster
-from skforecast.model_selection import backtesting_forecaster
 import sklearn
 from sklearn.linear_model import LinearRegression
 from sklearn.linear_model import Ridge
 from sklearn.ensemble import HistGradientBoostingRegressor
 from lightgbm import LGBMRegressor
+
+import skforecast
+from skforecast.recursive import ForecasterRecursive
+from skforecast.direct import ForecasterDirect
+from skforecast.model_selection import grid_search_forecaster
+from skforecast.model_selection import backtesting_forecaster
 
 %load_ext pyinstrument</div>
 </div>
@@ -3794,8 +3674,7 @@ data = pd.Series(data = np.random.normal(size=n))</div>
 
     def predict(self, y):
         predictions = np.ones(shape = len(y))
-        return predictions
-        </div>
+        return predictions</div>
 </div>
 </div>
 </div>
@@ -3833,7 +3712,7 @@ data = pd.Series(data = np.random.normal(size=n))</div>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="o">%%</span><span class="n">pyinstrument</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">DummyRegressor</span><span class="p">(),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="mi">24</span>
              <span class="p">)</span>
@@ -3842,7 +3721,7 @@ data = pd.Series(data = np.random.normal(size=n))</div>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-5">%%pyinstrument
 
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = DummyRegressor(),
                  lags      = 24
              )
@@ -3905,7 +3784,7 @@ forecaster.fit(y=data)</div>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="o">%%</span><span class="n">pyinstrument</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">HistGradientBoostingRegressor</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="mi">24</span>
              <span class="p">)</span>
@@ -3914,7 +3793,7 @@ forecaster.fit(y=data)</div>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-6">%%pyinstrument
 
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = HistGradientBoostingRegressor(max_iter=10, random_state=123),
                  lags      = 24
              )
@@ -3997,7 +3876,7 @@ forecaster.fit(y=data)</div>
 
 <span class="k">for</span> <span class="n">lags</span> <span class="ow">in</span> <span class="n">n_lags</span><span class="p">:</span>
     <span class="n">execution_time</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+    <span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                      <span class="n">regressor</span> <span class="o">=</span> <span class="n">DummyRegressor</span><span class="p">(),</span>
                      <span class="n">lags</span>      <span class="o">=</span> <span class="n">lags</span>
                  <span class="p">)</span>
@@ -4007,12 +3886,12 @@ forecaster.fit(y=data)</div>
         <span class="n">tic</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
         <span class="n">_</span> <span class="o">=</span> <span class="n">forecaster</span><span class="o">.</span><span class="n">create_train_X_y</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">y</span><span class="p">)</span>
         <span class="n">toc</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">perf_counter</span><span class="p">()</span>
-        <span class="n">execution_time</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">toc</span><span class="o">-</span><span class="n">tic</span><span class="p">)</span>
+        <span class="n">execution_time</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">toc</span> <span class="o">-</span> <span class="n">tic</span><span class="p">)</span>
 
     <span class="n">results</span><span class="p">[</span><span class="n">lags</span><span class="p">]</span> <span class="o">=</span> <span class="n">execution_time</span>
 
 <span class="n">results</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-              <span class="n">data</span> <span class="o">=</span>  <span class="n">results</span><span class="p">,</span>
+              <span class="n">data</span> <span class="o">=</span> <span class="n">results</span><span class="p">,</span>
               <span class="n">index</span> <span class="o">=</span> <span class="n">series_length</span>
           <span class="p">)</span>
 
@@ -4026,7 +3905,7 @@ results = {}
 
 for lags in n_lags:
     execution_time = []
-    forecaster = ForecasterAutoreg(
+    forecaster = ForecasterRecursive(
                      regressor = DummyRegressor(),
                      lags      = lags
                  )
@@ -4036,12 +3915,12 @@ for lags in n_lags:
         tic = time.perf_counter()
         _ = forecaster.create_train_X_y(y=y)
         toc = time.perf_counter()
-        execution_time.append(toc-tic)
+        execution_time.append(toc - tic)
 
     results[lags] = execution_time
 
 results = pd.DataFrame(
-              data =  results,
+              data = results,
               index = series_length
           )
 
@@ -4210,14 +4089,14 @@ ax.legend(title='number of lags');</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">DummyRegressor</span><span class="p">(),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="mi">24</span>
              <span class="p">)</span>
 
 <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-9">forecaster = ForecasterAutoreg(
+<div class="clipboard-copy-txt" id="cell-9">forecaster = ForecasterRecursive(
                  regressor = DummyRegressor(),
                  lags      = 24
              )
@@ -4304,14 +4183,14 @@ _ = forecaster.predict(steps=1000)</div>
 </div>
 </clipboard-copy>
 </div>
-<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<div class="highlight-ipynb hl-python"><pre><span></span><span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">HistGradientBoostingRegressor</span><span class="p">(</span><span class="n">max_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="mi">24</span>
              <span class="p">)</span>
 
 <span class="n">forecaster</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">data</span><span class="p">)</span>
 </pre></div>
-<div class="clipboard-copy-txt" id="cell-11">forecaster = ForecasterAutoreg(
+<div class="clipboard-copy-txt" id="cell-11">forecaster = ForecasterRecursive(
                  regressor = HistGradientBoostingRegressor(max_iter=10, random_state=123),
                  lags      = 24
              )
@@ -4432,6 +4311,21 @@ _ = forecaster.predict(steps=1000)</div>
   
 </div>
       
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/skforecast/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
     </div>
   </div>
 </footer>
@@ -4516,7 +4410,7 @@ _ = forecaster.predict(steps=1000)</div>
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.integrate", "navigation.breadcrumbs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>

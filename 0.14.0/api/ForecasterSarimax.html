@@ -426,7 +426,9 @@ This is documentation for an unstable development version.
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
@@ -2689,27 +2691,6 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
-      <a href="../faq/time-series-differentiation.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Time series differentiation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../faq/non-negative-predictions.html" class="md-nav__link">
         
   
@@ -2757,27 +2738,6 @@ This is documentation for an unstable development version.
   
   <span class="md-ellipsis">
     Cyclical features in time series
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq/stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Stacking (ensemble) machine learning models
   </span>
   
 
@@ -2924,128 +2884,6 @@ This is documentation for an unstable development version.
                 </div>
               </div>
             
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.recursive._forecaster_sarimax.ForecasterSarimax" class="md-nav__link">
-    <span class="md-ellipsis">
-      ForecasterSarimax
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="ForecasterSarimax">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.recursive._forecaster_sarimax.ForecasterSarimax.fit" class="md-nav__link">
-    <span class="md-ellipsis">
-      fit
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.recursive._forecaster_sarimax.ForecasterSarimax._create_predict_inputs" class="md-nav__link">
-    <span class="md-ellipsis">
-      _create_predict_inputs
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.recursive._forecaster_sarimax.ForecasterSarimax.predict" class="md-nav__link">
-    <span class="md-ellipsis">
-      predict
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.recursive._forecaster_sarimax.ForecasterSarimax.predict_interval" class="md-nav__link">
-    <span class="md-ellipsis">
-      predict_interval
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.recursive._forecaster_sarimax.ForecasterSarimax.set_params" class="md-nav__link">
-    <span class="md-ellipsis">
-      set_params
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.recursive._forecaster_sarimax.ForecasterSarimax.set_fit_kwargs" class="md-nav__link">
-    <span class="md-ellipsis">
-      set_fit_kwargs
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.recursive._forecaster_sarimax.ForecasterSarimax.get_feature_importances" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_feature_importances
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.recursive._forecaster_sarimax.ForecasterSarimax.get_info_criteria" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_info_criteria
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.recursive._forecaster_sarimax.ForecasterSarimax.summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      summary
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
             
           
           
@@ -3441,7 +3279,7 @@ some exogenous variables are transformed during the training process.</p>
     </table>
 
                   <details class="quote">
-                    <summary>Source code in <code>skforecast/recursive/_forecaster_sarimax.py</code></summary>
+                    <summary>Source code in <code>skforecast\recursive\_forecaster_sarimax.py</code></summary>
                     <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">117</span>
 <span class="normal">118</span>
 <span class="normal">119</span>
@@ -3658,7 +3496,7 @@ that y[i] is regressed on exog[i].</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/recursive/_forecaster_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\recursive\_forecaster_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">213</span>
 <span class="normal">214</span>
 <span class="normal">215</span>
@@ -4010,7 +3848,7 @@ of the training data.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/recursive/_forecaster_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\recursive\_forecaster_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">319</span>
 <span class="normal">320</span>
 <span class="normal">321</span>
@@ -4431,7 +4269,7 @@ of the training data.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/recursive/_forecaster_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\recursive\_forecaster_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">467</span>
 <span class="normal">468</span>
 <span class="normal">469</span>
@@ -4748,7 +4586,7 @@ provided, <code>alpha</code> will be used.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/recursive/_forecaster_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\recursive\_forecaster_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">545</span>
 <span class="normal">546</span>
 <span class="normal">547</span>
@@ -5022,7 +4860,7 @@ provided, <code>alpha</code> will be used.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/recursive/_forecaster_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\recursive\_forecaster_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">648</span>
 <span class="normal">649</span>
 <span class="normal">650</span>
@@ -5137,7 +4975,7 @@ method of the regressor.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/recursive/_forecaster_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\recursive\_forecaster_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">671</span>
 <span class="normal">672</span>
 <span class="normal">673</span>
@@ -5259,7 +5097,7 @@ method of the regressor.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/recursive/_forecaster_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\recursive\_forecaster_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">698</span>
 <span class="normal">699</span>
 <span class="normal">700</span>
@@ -5418,7 +5256,7 @@ method; 'lutkepohl' computes the information criteria as in Lütkepohl
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/recursive/_forecaster_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\recursive\_forecaster_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">734</span>
 <span class="normal">735</span>
 <span class="normal">736</span>
@@ -5575,7 +5413,7 @@ method; 'lutkepohl' computes the information criteria as in Lütkepohl
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/recursive/_forecaster_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\recursive\_forecaster_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">779</span>
 <span class="normal">780</span>
 <span class="normal">781</span>
@@ -5666,6 +5504,21 @@ method; 'lutkepohl' computes the information criteria as in Lütkepohl
   
 </div>
       
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/skforecast/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
     </div>
   </div>
 </footer>
@@ -5750,7 +5603,7 @@ method; 'lutkepohl' computes the information criteria as in Lütkepohl
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.integrate", "navigation.breadcrumbs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>

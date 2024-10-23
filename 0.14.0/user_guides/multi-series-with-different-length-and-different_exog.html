@@ -426,7 +426,9 @@ This is documentation for an unstable development version.
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
@@ -2649,27 +2651,6 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
-      <a href="../faq/time-series-differentiation.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Time series differentiation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../faq/non-negative-predictions.html" class="md-nav__link">
         
   
@@ -2717,27 +2698,6 @@ This is documentation for an unstable development version.
   
   <span class="md-ellipsis">
     Cyclical features in time series
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq/stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Stacking (ensemble) machine learning models
   </span>
   
 
@@ -2884,86 +2844,6 @@ This is documentation for an unstable development version.
                 </div>
               </div>
             
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#libraries" class="md-nav__link">
-    <span class="md-ellipsis">
-      Libraries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data" class="md-nav__link">
-    <span class="md-ellipsis">
-      Data
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#train-and-predict" class="md-nav__link">
-    <span class="md-ellipsis">
-      Train and predict
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#missing-values-in-the-series" class="md-nav__link">
-    <span class="md-ellipsis">
-      Missing values in the series
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#backtesting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Backtesting
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#hyperparameter-tuning-and-lags-selection" class="md-nav__link">
-    <span class="md-ellipsis">
-      Hyperparameter tuning and lags selection
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
             
           
           
@@ -3429,7 +3309,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>When faced with a multi-series forecasting problem, it is common for the series to have varying lengths due to differences in the starting times of data recording. To address this scenario, the classes <a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting">ForecasterAutoregMultiSeries</a> and <a href="https://skforecast.org/latest/user_guides/window-features-and-custom-features#forecasterautoregmultiseriescustom">ForecasterAutoregMultiSeriesCustom</a> allow the simultaneous modeling of time series of different lengths and using different exogenous variables.</p>
+<p>When faced with a multi-series forecasting problem, it is common for the series to have varying lengths due to differences in the starting times of data recording. To address this scenario, the class <a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting">ForecasterRecursiveMultiSeries</a> allows the simultaneous modeling of time series of different lengths and using different exogenous variables.</p>
 <ul>
 <li>When the modeled series have different lengths, they must be stored in a Python dictionary. The keys of the dictionary are the names of the series and the values are the series themselves. All series must be of type <code>pandas.Series</code>, have a <code>pandas.DatetimeIndex</code> with the <strong>same frequency</strong>.</li>
 </ul>
@@ -3477,15 +3357,7 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <i style="font-size: 18px; color:#00bfa5;"></i>
 <b style="color: #00bfa5;">💡 Tip</b>
 </p>
-<p>API Reference:</p>
-<ul>
-<li>
-<a href="https://skforecast.org/latest/api/forecastermultiseries">ForecasterAutoregMultiSeries</a>
-</li>
-<li>
-<a href="https://skforecast.org/latest/api/forecastermultiseriescustom">ForecasterAutoregMultiSeriesCustom</a>
-</li>
-</ul>
+<p>API Reference <a href="https://skforecast.org/latest/api/forecasterrecursivemultiseries">ForecasterRecursiveMultiSeries</a>.</p>
 </div>
 </div>
 </div>
@@ -3530,9 +3402,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="kn">from</span> <span class="nn">skforecast.plot</span> <span class="kn">import</span> <span class="n">set_dark_theme</span>
 <span class="kn">from</span> <span class="nn">skforecast.preprocessing</span> <span class="kn">import</span> <span class="n">series_long_to_dict</span>
 <span class="kn">from</span> <span class="nn">skforecast.preprocessing</span> <span class="kn">import</span> <span class="n">exog_long_to_dict</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoregMultiSeries</span> <span class="kn">import</span> <span class="n">ForecasterAutoregMultiSeries</span>
-<span class="kn">from</span> <span class="nn">skforecast.model_selection_multiseries</span> <span class="kn">import</span> <span class="n">backtesting_forecaster_multiseries</span>
-<span class="kn">from</span> <span class="nn">skforecast.model_selection_multiseries</span> <span class="kn">import</span> <span class="n">bayesian_search_forecaster_multiseries</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursiveMultiSeries</span>
+<span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">backtesting_forecaster_multiseries</span>
+<span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">bayesian_search_forecaster_multiseries</span>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-1"># Libraries
 # ==============================================================================
@@ -3544,9 +3416,9 @@ from lightgbm import LGBMRegressor
 from skforecast.plot import set_dark_theme
 from skforecast.preprocessing import series_long_to_dict
 from skforecast.preprocessing import exog_long_to_dict
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
-from skforecast.model_selection_multiseries import backtesting_forecaster_multiseries
-from skforecast.model_selection_multiseries import bayesian_search_forecaster_multiseries</div>
+from skforecast.recursive import ForecasterRecursiveMultiSeries
+from skforecast.model_selection import backtesting_forecaster_multiseries
+from skforecast.model_selection import bayesian_search_forecaster_multiseries</div>
 </div>
 </div>
 </div>
@@ -4178,7 +4050,7 @@ id_1004:
 <i style="font-size: 18px; color:#ff9100; border-color: #ff1744;"></i>
 <b style="color: #ff9100;"> <span style="color: #ff9100;">⚠</span> Warning</b>
 </p>
-<p>Starting with version <code>0.13.0</code>, the <code>ForecasterAutoregMultiSeries</code> class defaults to using <code>encoding='ordinal_category'</code> for encoding time series identifiers. This approach creates a new column (<i>_level_skforecast</i>) of type pandas <code>category</code>. Consequently, the regressors must be able to handle categorical variables. If the regressors do not support categorical variables, the user should set the encoding to <code>'ordinal'</code> or <code>'onehot'</code> for compatibility.</p>
+<p>Starting with version <code>0.13.0</code>, the <code>ForecasterRecursiveMultiSeries</code> class can use <code>encoding='ordinal_category'</code> for encoding time series identifiers. This approach creates a new column (<i>_level_skforecast</i>) of type pandas <code>category</code>. Consequently, the regressors must be able to handle categorical variables. If the regressors do not support categorical variables, the user should set the encoding to <code>'ordinal'</code> or <code>'onehot'</code> for compatibility.</p>
 <p>Some examples of regressors that support categorical variables and how to enable them are:</p>
 <ul>
 <li>
@@ -4219,7 +4091,7 @@ id_1004:
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Fit forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregMultiSeries</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursiveMultiSeries</span><span class="p">(</span>
                  <span class="n">regressor</span>          <span class="o">=</span> <span class="n">regressor</span><span class="p">,</span> 
                  <span class="n">lags</span>               <span class="o">=</span> <span class="mi">14</span><span class="p">,</span> 
                  <span class="n">encoding</span>           <span class="o">=</span> <span class="s2">"ordinal"</span><span class="p">,</span> 
@@ -4232,7 +4104,7 @@ id_1004:
 <div class="clipboard-copy-txt" id="cell-9"># Fit forecaster
 # ==============================================================================
 regressor = LGBMRegressor(random_state=123, verbose=-1, max_depth=5)
-forecaster = ForecasterAutoregMultiSeries(
+forecaster = ForecasterRecursiveMultiSeries(
                  regressor          = regressor, 
                  lags               = 14, 
                  encoding           = "ordinal", 
@@ -4537,7 +4409,7 @@ plt.tight_layout()</div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create Matrices, dropna_from_series = False</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregMultiSeries</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursiveMultiSeries</span><span class="p">(</span>
                  <span class="n">regressor</span>          <span class="o">=</span> <span class="n">regressor</span><span class="p">,</span> 
                  <span class="n">lags</span>               <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> 
                  <span class="n">encoding</span>           <span class="o">=</span> <span class="s2">"ordinal"</span><span class="p">,</span> 
@@ -4556,7 +4428,7 @@ plt.tight_layout()</div>
 <div class="clipboard-copy-txt" id="cell-12"># Create Matrices, dropna_from_series = False
 # ==============================================================================
 regressor = LGBMRegressor(random_state=123, verbose=-1, max_depth=5)
-forecaster = ForecasterAutoregMultiSeries(
+forecaster = ForecasterRecursiveMultiSeries(
                  regressor          = regressor, 
                  lags               = 3, 
                  encoding           = "ordinal", 
@@ -4699,7 +4571,7 @@ dtype: int64
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create Matrices, dropna_from_series = False</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregMultiSeries</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursiveMultiSeries</span><span class="p">(</span>
                  <span class="n">regressor</span>          <span class="o">=</span> <span class="n">regressor</span><span class="p">,</span> 
                  <span class="n">lags</span>               <span class="o">=</span> <span class="mi">3</span><span class="p">,</span> 
                  <span class="n">encoding</span>           <span class="o">=</span> <span class="s2">"ordinal"</span><span class="p">,</span> 
@@ -4718,7 +4590,7 @@ dtype: int64
 <div class="clipboard-copy-txt" id="cell-13"># Create Matrices, dropna_from_series = False
 # ==============================================================================
 regressor = LGBMRegressor(random_state=123, verbose=-1, max_depth=5)
-forecaster = ForecasterAutoregMultiSeries(
+forecaster = ForecasterRecursiveMultiSeries(
                  regressor          = regressor, 
                  lags               = 3, 
                  encoding           = "ordinal", 
@@ -4942,7 +4814,7 @@ Forecaster id: None </pre>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Backtesting</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregMultiSeries</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursiveMultiSeries</span><span class="p">(</span>
                  <span class="n">regressor</span>          <span class="o">=</span> <span class="n">regressor</span><span class="p">,</span> 
                  <span class="n">lags</span>               <span class="o">=</span> <span class="mi">14</span><span class="p">,</span> 
                  <span class="n">encoding</span>           <span class="o">=</span> <span class="s2">"ordinal"</span><span class="p">,</span> 
@@ -4974,7 +4846,7 @@ Forecaster id: None </pre>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-15"># Backtesting
 # ==============================================================================
-forecaster = ForecasterAutoregMultiSeries(
+forecaster = ForecasterRecursiveMultiSeries(
                  regressor          = regressor, 
                  lags               = 14, 
                  encoding           = "ordinal", 
@@ -5283,7 +5155,7 @@ Fold: 6
 
 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">series_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
     <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">series_dict</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">series_dict</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">colors</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">end_train</span><span class="p">)</span> <span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">'white'</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">'--'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="c1"># End train</span>
+    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">end_train</span><span class="p">),</span> <span class="n">color</span><span class="o">=</span><span class="s1">'white'</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">'--'</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># End train</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">backtest_predictions</span><span class="p">[</span><span class="n">s</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">'prediction'</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">"white"</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
@@ -5300,7 +5172,7 @@ fig, axs = plt.subplots(5, 1, figsize=(8, 4), sharex=True)
 
 for i, s in enumerate(series_dict.keys()):
     axs[i].plot(series_dict[s], label=series_dict[s].name, color=colors[i])
-    axs[i].axvline(pd.to_datetime(end_train) , color='white', linestyle='--', linewidth=1) # End train
+    axs[i].axvline(pd.to_datetime(end_train), color='white', linestyle='--', linewidth=1)  # End train
     try:
         axs[i].plot(backtest_predictions[s], label='prediction', color="white")
     except:
@@ -5361,21 +5233,23 @@ plt.tight_layout()</div>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Bayesian search hyperparameters and lags with Optuna</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregMultiSeries</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursiveMultiSeries</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="mi">14</span><span class="p">,</span>
                  <span class="n">encoding</span>  <span class="o">=</span> <span class="s1">'ordinal'</span>
              <span class="p">)</span>
 
+
 <span class="c1"># Search space</span>
 <span class="k">def</span> <span class="nf">search_space</span><span class="p">(</span><span class="n">trial</span><span class="p">):</span>
     <span class="n">search_space</span>  <span class="o">=</span> <span class="p">{</span>
-        <span class="s1">'lags'</span>             <span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s1">'lags'</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">14</span><span class="p">]),</span>
-        <span class="s1">'min_samples_leaf'</span> <span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">'min_samples_leaf'</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
-        <span class="s1">'max_depth'</span>        <span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">'max_depth'</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
+        <span class="s1">'lags'</span>            <span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_categorical</span><span class="p">(</span><span class="s1">'lags'</span><span class="p">,</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">14</span><span class="p">]),</span>
+        <span class="s1">'min_samples_leaf'</span><span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">'min_samples_leaf'</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+        <span class="s1">'max_depth'</span>       <span class="p">:</span> <span class="n">trial</span><span class="o">.</span><span class="n">suggest_int</span><span class="p">(</span><span class="s1">'max_depth'</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
     <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">search_space</span>
+
 
 <span class="n">results</span><span class="p">,</span> <span class="n">best_trial</span> <span class="o">=</span> <span class="n">bayesian_search_forecaster_multiseries</span><span class="p">(</span>
     <span class="n">forecaster</span>            <span class="o">=</span> <span class="n">forecaster</span><span class="p">,</span>
@@ -5401,21 +5275,23 @@ plt.tight_layout()</div>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-17"># Bayesian search hyperparameters and lags with Optuna
 # ==============================================================================
-forecaster = ForecasterAutoregMultiSeries(
+forecaster = ForecasterRecursiveMultiSeries(
                  regressor = LGBMRegressor(random_state=123, verbose=-1),
                  lags      = 14,
                  encoding  = 'ordinal'
              )
 
+
 # Search space
 def search_space(trial):
     search_space  = {
-        'lags'             : trial.suggest_categorical('lags', [7, 14]),
-        'min_samples_leaf' : trial.suggest_int('min_samples_leaf', 10, 30),
-        'max_depth'        : trial.suggest_int('max_depth', 3, 7)
+        'lags'            : trial.suggest_categorical('lags', [7, 14]),
+        'min_samples_leaf': trial.suggest_int('min_samples_leaf', 10, 30),
+        'max_depth'       : trial.suggest_int('max_depth', 3, 7)
     }
 
     return search_space
+
 
 results, best_trial = bayesian_search_forecaster_multiseries(
     forecaster            = forecaster,
@@ -5592,6 +5468,21 @@ results.head(4)</div>
   
 </div>
       
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/skforecast/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
     </div>
   </div>
 </footer>
@@ -5676,7 +5567,7 @@ results.head(4)</div>
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.integrate", "navigation.breadcrumbs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>

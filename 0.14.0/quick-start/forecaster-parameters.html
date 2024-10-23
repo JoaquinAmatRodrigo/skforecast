@@ -426,7 +426,9 @@ This is documentation for an unstable development version.
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
@@ -675,6 +677,15 @@ This is documentation for an unstable development version.
   <a href="#lags" class="md-nav__link">
     <span class="md-ellipsis">
       Lags
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#window-features" class="md-nav__link">
+    <span class="md-ellipsis">
+      Window Features
     </span>
   </a>
   
@@ -2713,27 +2724,6 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
-      <a href="../faq/time-series-differentiation.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Time series differentiation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../faq/non-negative-predictions.html" class="md-nav__link">
         
   
@@ -2781,27 +2771,6 @@ This is documentation for an unstable development version.
   
   <span class="md-ellipsis">
     Cyclical features in time series
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq/stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Stacking (ensemble) machine learning models
   </span>
   
 
@@ -2949,152 +2918,6 @@ This is documentation for an unstable development version.
               </div>
             
             
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#general-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      General parameters
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="General parameters">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#regressor" class="md-nav__link">
-    <span class="md-ellipsis">
-      Regressor
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#lags" class="md-nav__link">
-    <span class="md-ellipsis">
-      Lags
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#transformers" class="md-nav__link">
-    <span class="md-ellipsis">
-      Transformers
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#custom-weights" class="md-nav__link">
-    <span class="md-ellipsis">
-      Custom weights
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#differentiation" class="md-nav__link">
-    <span class="md-ellipsis">
-      Differentiation
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#inclusion-of-kwargs-in-the-regressor-fit-method" class="md-nav__link">
-    <span class="md-ellipsis">
-      Inclusion of kwargs in the regressor fit method
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#intervals-conditioned-on-predicted-values-binned-residuals" class="md-nav__link">
-    <span class="md-ellipsis">
-      Intervals conditioned on predicted values (binned residuals)
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#forecaster-id" class="md-nav__link">
-    <span class="md-ellipsis">
-      Forecaster ID
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#direct-multi-step-parameters" class="md-nav__link">
-    <span class="md-ellipsis">
-      Direct multi-step parameters
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Direct multi-step parameters">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#steps" class="md-nav__link">
-    <span class="md-ellipsis">
-      Steps
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#number-of-jobs" class="md-nav__link">
-    <span class="md-ellipsis">
-      Number of jobs
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
-            
           
           
             <div class="md-content" data-md-component="content">
@@ -3108,7 +2931,7 @@ This is documentation for an unstable development version.
 
 <h1 id="understanding-the-forecaster-parameters">Understanding the forecaster parameters<a class="headerlink" href="#understanding-the-forecaster-parameters" title="Permanent link">&para;</a></h1>
 <p>Understanding what can be done when initializing a forecaster with skforecast can have a significant impact on the accuracy and effectiveness of the model. This guide highlights key considerations to keep in mind when initializing a forecaster and how these functionalities can be used to create more powerful and accurate forecasting models in Python.</p>
-<p>We will explore the arguments that can be included in a <code>ForecasterAutoreg</code>, but this can be extrapolated to any of the skforecast forecasters.</p>
+<p>We will explore the arguments that can be included in a <code>ForecasterRecursive</code>, but this can be extrapolated to any of the skforecast forecasters.</p>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -3124,14 +2947,16 @@ This is documentation for an unstable development version.
 <span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="normal">16</span>
+<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                 <span class="n">window_features</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3143,7 +2968,7 @@ This is documentation for an unstable development version.
 </code></pre></div></td></tr></table></div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
-<p>To be able to create and train a forecaster, at least <code>regressor</code> and <code>lags</code> must be specified.</p>
+<p>To be able to create and train a forecaster, at least <code>regressor</code> and <code>lags</code> and/or <code>window_features</code> must be specified.</p>
 </div>
 <h2 id="general-parameters">General parameters<a class="headerlink" href="#general-parameters" title="Permanent link">&para;</a></h2>
 <h3 id="regressor">Regressor<a class="headerlink" href="#regressor" title="Permanent link">&para;</a></h3>
@@ -3172,10 +2997,10 @@ This is documentation for an unstable development version.
 <span class="normal">8</span>
 <span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="kc">None</span>
              <span class="p">)</span>
@@ -3200,14 +3025,19 @@ This is documentation for an unstable development version.
 <span class="normal">8</span>
 <span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster using 5 lags</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="mi">5</span>
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
+<h3 id="window-features">Window Features<a class="headerlink" href="#window-features" title="Permanent link">&para;</a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>TODO</p>
+</div>
 <h3 id="transformers">Transformers<a class="headerlink" href="#transformers" title="Permanent link">&para;</a></h3>
 <p>Skforecast has two arguments in all the forecasters that allow more detailed control over input data transformations. This feature is particularly useful as many machine learning models require specific data pre-processing transformations. For example, linear models may benefit from features being scaled, or categorical features being transformed into numerical values.</p>
 <p>Both arguments expect an instance of a transformer (preprocessor) compatible with the <code>scikit-learn</code> preprocessing API with the methods: <code>fit</code>, <code>transform</code>, <code>fit_transform</code> and, <code>inverse_transform</code>.</p>
@@ -3227,15 +3057,17 @@ This is documentation for an unstable development version.
 <span class="normal"> 9</span>
 <span class="normal">10</span>
 <span class="normal">11</span>
-<span class="normal">12</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="normal">12</span>
+<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">window_features</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">(),</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
              <span class="p">)</span>
@@ -3269,9 +3101,10 @@ This is documentation for an unstable development version.
 <span class="normal">24</span>
 <span class="normal">25</span>
 <span class="normal">26</span>
-<span class="normal">27</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="normal">27</span>
+<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 
@@ -3289,9 +3122,10 @@ This is documentation for an unstable development version.
 
     <span class="k">return</span> <span class="n">weights</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">window_features</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="n">custom_weights</span>
@@ -3300,10 +3134,6 @@ This is documentation for an unstable development version.
 <h3 id="differentiation">Differentiation<a class="headerlink" href="#differentiation" title="Permanent link">&para;</a></h3>
 <p>Time series differentiation involves computing the differences between consecutive observations in the time series. When it comes to training forecasting models, differentiation offers the advantage of focusing on relative rates of change rather than directly attempting to model the absolute values. <strong>Skforecast</strong>, version 0.10.0 or higher, introduces a novel differentiation parameter within its Forecasters. </p>
 <p>More information: <a href="https://skforecast.org/latest/faq/time-series-differentiation">Time series differentiation</a>.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>The <code>differentiation</code> parameter is only available for the <code>ForecasterAutoreg</code> and <code>ForecasterAutoregMultiSeries</code> in the following versions it will be incorporated to the rest of the Forecasters.</p>
-</div>
 <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -3317,15 +3147,17 @@ This is documentation for an unstable development version.
 <span class="normal">11</span>
 <span class="normal">12</span>
 <span class="normal">13</span>
-<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">window_features</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3356,14 +3188,16 @@ This is documentation for an unstable development version.
 <span class="normal">11</span>
 <span class="normal">12</span>
 <span class="normal">13</span>
-<span class="normal">14</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="normal">14</span>
+<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">lightgbm</span> <span class="kn">import</span> <span class="n">LGBMRegressor</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(),</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">window_features</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3388,14 +3222,16 @@ This is documentation for an unstable development version.
 <span class="normal">12</span>
 <span class="normal">13</span>
 <span class="normal">14</span>
-<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">lightgbm</span> <span class="kn">import</span> <span class="n">LGBMRegressor</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(),</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">window_features</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3420,14 +3256,16 @@ This is documentation for an unstable development version.
 <span class="normal">12</span>
 <span class="normal">13</span>
 <span class="normal">14</span>
-<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">window_features</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3437,7 +3275,7 @@ This is documentation for an unstable development version.
              <span class="p">)</span>
 </code></pre></div></td></tr></table></div>
 <h2 id="direct-multi-step-parameters">Direct multi-step parameters<a class="headerlink" href="#direct-multi-step-parameters" title="Permanent link">&para;</a></h2>
-<p>For the Forecasters that follow a <a href="https://skforecast.org/latest/introduction-forecasting/introduction-forecasting#direct-multi-step-forecasting">direct multi-step strategy</a> (<code>ForecasterAutoregDirect</code> and <code>ForecasterAutoregMultiVariate</code>), there are two additional parameters in addition to those mentioned above.</p>
+<p>For the Forecasters that follow a <a href="https://skforecast.org/latest/introduction-forecasting/introduction-forecasting#direct-multi-step-forecasting">direct multi-step strategy</a> (<code>ForecasterDirect</code> and <code>ForecasterDirectMultiVariate</code>), there are two additional parameters in addition to those mentioned above.</p>
 <h3 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h3>
 <p>Direct multi-step forecasting consists of training a different model for each step of the forecast horizon. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. </p>
 <p>The number of models to be trained is specified by the <code>steps</code> parameter.</p>
@@ -3455,15 +3293,17 @@ This is documentation for an unstable development version.
 <span class="normal">12</span>
 <span class="normal">13</span>
 <span class="normal">14</span>
-<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="normal">15</span>
+<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoregDirect</span> <span class="kn">import</span> <span class="n">ForecasterAutoregDirect</span>
+<span class="kn">from</span> <span class="nn">skforecast.direct</span> <span class="kn">import</span> <span class="n">ForecasterDirect</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregDirect</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterDirect</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
                  <span class="n">steps</span>            <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">window_features</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3490,15 +3330,17 @@ This is documentation for an unstable development version.
 <span class="normal">13</span>
 <span class="normal">14</span>
 <span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<span class="normal">16</span>
+<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoregDirect</span> <span class="kn">import</span> <span class="n">ForecasterAutoregDirect</span>
+<span class="kn">from</span> <span class="nn">skforecast.direct</span> <span class="kn">import</span> <span class="n">ForecasterDirect</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregDirect</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterDirect</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
                  <span class="n">steps</span>            <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
+                 <span class="n">window_features</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3551,6 +3393,21 @@ This is documentation for an unstable development version.
     Made with
     <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
       Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/skforecast/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
     </a>
   
 </div>
@@ -3639,7 +3496,7 @@ This is documentation for an unstable development version.
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.integrate", "navigation.breadcrumbs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>

@@ -426,7 +426,9 @@ This is documentation for an unstable development version.
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
@@ -2707,27 +2709,6 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
-      <a href="../faq/time-series-differentiation.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Time series differentiation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../faq/non-negative-predictions.html" class="md-nav__link">
         
   
@@ -2775,27 +2756,6 @@ This is documentation for an unstable development version.
   
   <span class="md-ellipsis">
     Cyclical features in time series
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq/stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Stacking (ensemble) machine learning models
   </span>
   
 
@@ -2942,146 +2902,6 @@ This is documentation for an unstable development version.
                 </div>
               </div>
             
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.sarimax._sarimax.Sarimax" class="md-nav__link">
-    <span class="md-ellipsis">
-      Sarimax
-    </span>
-  </a>
-  
-    <nav class="md-nav" aria-label="Sarimax">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.sarimax._sarimax.Sarimax._consolidate_kwargs" class="md-nav__link">
-    <span class="md-ellipsis">
-      _consolidate_kwargs
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.sarimax._sarimax.Sarimax._create_sarimax" class="md-nav__link">
-    <span class="md-ellipsis">
-      _create_sarimax
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.sarimax._sarimax.Sarimax.fit" class="md-nav__link">
-    <span class="md-ellipsis">
-      fit
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.sarimax._sarimax.Sarimax.predict" class="md-nav__link">
-    <span class="md-ellipsis">
-      predict
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.sarimax._sarimax.Sarimax.append" class="md-nav__link">
-    <span class="md-ellipsis">
-      append
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.sarimax._sarimax.Sarimax.apply" class="md-nav__link">
-    <span class="md-ellipsis">
-      apply
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.sarimax._sarimax.Sarimax.extend" class="md-nav__link">
-    <span class="md-ellipsis">
-      extend
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.sarimax._sarimax.Sarimax.set_params" class="md-nav__link">
-    <span class="md-ellipsis">
-      set_params
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.sarimax._sarimax.Sarimax.params" class="md-nav__link">
-    <span class="md-ellipsis">
-      params
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.sarimax._sarimax.Sarimax.summary" class="md-nav__link">
-    <span class="md-ellipsis">
-      summary
-    </span>
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#skforecast.sarimax._sarimax.Sarimax.get_info_criteria" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_info_criteria
-    </span>
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
             
           
           
@@ -3803,7 +3623,7 @@ created by statsmodels after fitting the SARIMAX model.</p>
     </table>
 
                   <details class="quote">
-                    <summary>Source code in <code>skforecast/sarimax/_sarimax.py</code></summary>
+                    <summary>Source code in <code>skforecast\sarimax\_sarimax.py</code></summary>
                     <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">243</span>
 <span class="normal">244</span>
 <span class="normal">245</span>
@@ -4029,7 +3849,7 @@ over those provided by the user using via the statsmodels kwargs dicts.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/sarimax/_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\sarimax\_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">330</span>
 <span class="normal">331</span>
 <span class="normal">332</span>
@@ -4224,7 +4044,7 @@ when initializing the model.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/sarimax/_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\sarimax\_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">385</span>
 <span class="normal">386</span>
 <span class="normal">387</span>
@@ -4367,7 +4187,7 @@ that y[i] is regressed on exog[i].</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/sarimax/_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\sarimax\_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">413</span>
 <span class="normal">414</span>
 <span class="normal">415</span>
@@ -4576,7 +4396,7 @@ output type is the same as the type of <code>y</code> used in the fit method.</p
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/sarimax/_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\sarimax\_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">456</span>
 <span class="normal">457</span>
 <span class="normal">458</span>
@@ -4880,7 +4700,7 @@ much faster if the original dataset is large), see the extend method.</p>
 <p><a href="https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.mlemodel.MLEResults.append.html#statsmodels.tsa.statespace.mlemodel.MLEResults.append">https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.mlemodel.MLEResults.append.html#statsmodels.tsa.statespace.mlemodel.MLEResults.append</a></p>
 </details>
             <details class="quote">
-              <summary>Source code in <code>skforecast/sarimax/_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\sarimax\_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">536</span>
 <span class="normal">537</span>
 <span class="normal">538</span>
@@ -5153,7 +4973,7 @@ its last element, see the append and extend methods.</p>
 <p><a href="https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.mlemodel.MLEResults.apply.html#statsmodels.tsa.statespace.mlemodel.MLEResults.apply">https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.mlemodel.MLEResults.apply.html#statsmodels.tsa.statespace.mlemodel.MLEResults.apply</a></p>
 </details>
             <details class="quote">
-              <summary>Source code in <code>skforecast/sarimax/_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\sarimax\_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">603</span>
 <span class="normal">604</span>
 <span class="normal">605</span>
@@ -5387,7 +5207,7 @@ see the append method.</p>
 <p><a href="https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.mlemodel.MLEResults.extend.html#statsmodels.tsa.statespace.mlemodel.MLEResults.extend">https://www.statsmodels.org/dev/generated/statsmodels.tsa.statespace.mlemodel.MLEResults.extend.html#statsmodels.tsa.statespace.mlemodel.MLEResults.extend</a></p>
 </details>
             <details class="quote">
-              <summary>Source code in <code>skforecast/sarimax/_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\sarimax\_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">663</span>
 <span class="normal">664</span>
 <span class="normal">665</span>
@@ -5561,7 +5381,7 @@ see the append method.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/sarimax/_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\sarimax\_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">716</span>
 <span class="normal">717</span>
 <span class="normal">718</span>
@@ -5664,7 +5484,7 @@ coefficients, and finally the <code>k_ma</code> MA coefficients.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/sarimax/_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\sarimax\_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">747</span>
 <span class="normal">748</span>
 <span class="normal">749</span>
@@ -5785,7 +5605,7 @@ converted to various output formats.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/sarimax/_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\sarimax\_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">766</span>
 <span class="normal">767</span>
 <span class="normal">768</span>
@@ -5926,7 +5746,7 @@ method; 'lutkepohl' computes the information criteria as in Lütkepohl
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/sarimax/_sarimax.py</code></summary>
+              <summary>Source code in <code>skforecast\sarimax\_sarimax.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">793</span>
 <span class="normal">794</span>
 <span class="normal">795</span>
@@ -6075,6 +5895,21 @@ method; 'lutkepohl' computes the information criteria as in Lütkepohl
   
 </div>
       
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/skforecast/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
     </div>
   </div>
 </footer>
@@ -6159,7 +5994,7 @@ method; 'lutkepohl' computes the information criteria as in Lütkepohl
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.integrate", "navigation.breadcrumbs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>

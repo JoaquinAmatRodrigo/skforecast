@@ -426,7 +426,9 @@ This is documentation for an unstable development version.
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
@@ -2676,27 +2678,6 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
-      <a href="../faq/time-series-differentiation.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Time series differentiation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../faq/non-negative-predictions.html" class="md-nav__link">
         
   
@@ -2744,27 +2725,6 @@ This is documentation for an unstable development version.
   
   <span class="md-ellipsis">
     Cyclical features in time series
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq/stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Stacking (ensemble) machine learning models
   </span>
   
 
@@ -2911,113 +2871,6 @@ This is documentation for an unstable development version.
                 </div>
               </div>
             
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#libraries-and-data" class="md-nav__link">
-    <span class="md-ellipsis">
-      Libraries and data
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#one-hot-encoding" class="md-nav__link">
-    <span class="md-ellipsis">
-      One Hot Encoding
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#ordinal-encoding" class="md-nav__link">
-    <span class="md-ellipsis">
-      Ordinal encoding
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#target-encoding" class="md-nav__link">
-    <span class="md-ellipsis">
-      Target encoding
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#native-implementation-for-categorical-features" class="md-nav__link">
-    <span class="md-ellipsis">
-      Native implementation for categorical features
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#lightgbm" class="md-nav__link">
-    <span class="md-ellipsis">
-      LightGBM
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#scikit-learn-histogramgradientboosting" class="md-nav__link">
-    <span class="md-ellipsis">
-      Scikit-learn HistogramGradientBoosting
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#xgboost" class="md-nav__link">
-    <span class="md-ellipsis">
-      XGBoost
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#catboost" class="md-nav__link">
-    <span class="md-ellipsis">
-      CatBoost
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
             
           
           
@@ -3557,8 +3410,9 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="kn">import</span> <span class="n">make_column_transformer</span>
 <span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="kn">import</span> <span class="n">make_column_selector</span>
 <span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">make_pipeline</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
+
 <span class="kn">from</span> <span class="nn">skforecast.datasets</span> <span class="kn">import</span> <span class="n">fetch_dataset</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 
 <span class="n">plt</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">use</span><span class="p">(</span><span class="s1">'fivethirtyeight'</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">'lines.linewidth'</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.5</span>
@@ -3585,8 +3439,9 @@ from sklearn.preprocessing import FunctionTransformer
 from sklearn.compose import make_column_transformer
 from sklearn.compose import make_column_selector
 from sklearn.pipeline import make_pipeline
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
+
 from skforecast.datasets import fetch_dataset
+from skforecast.recursive import ForecasterRecursive
 
 plt.style.use('fivethirtyeight')
 plt.rcParams['lines.linewidth'] = 1.5
@@ -3666,7 +3521,7 @@ Shape of the dataset: (17544, 12)
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=d434ff3e">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=33ec167a">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -3982,7 +3837,7 @@ one_hot_encoder = make_column_transformer(
 <span class="c1"># ==============================================================================</span>
 <span class="n">exog_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'holiday'</span><span class="p">,</span> <span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'temp'</span><span class="p">,</span> <span class="s1">'hum'</span><span class="p">]</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
                  <span class="n">lags</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="n">one_hot_encoder</span>
@@ -3999,7 +3854,7 @@ one_hot_encoder = make_column_transformer(
 # ==============================================================================
 exog_features = ['holiday', 'weather', 'temp', 'hum']
 
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = LGBMRegressor(random_state=123, verbose=-1),
                  lags = 5,
                  transformer_exog = one_hot_encoder
@@ -5010,7 +4865,7 @@ ordinal_encoder = make_column_transformer(
 <span class="c1"># ==============================================================================</span>
 <span class="n">exog_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'holiday'</span><span class="p">,</span> <span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'temp'</span><span class="p">,</span> <span class="s1">'hum'</span><span class="p">]</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="n">ordinal_encoder</span>
@@ -5027,7 +4882,7 @@ ordinal_encoder = make_column_transformer(
 # ==============================================================================
 exog_features = ['holiday', 'weather', 'temp', 'hum']
 
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = LGBMRegressor(random_state=123, verbose=-1),
                  lags      = 5,
                  transformer_exog = ordinal_encoder
@@ -5347,7 +5202,7 @@ Freq: h, Name: pred, dtype: float64</pre>
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=954e7451">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs" id="cell-id=2e74074b">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -5414,7 +5269,7 @@ target_encoder = make_column_transformer(
 </div>
 </div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
-<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=c1835b78">
+<div class="jp-Cell jp-CodeCell jp-Notebook-cell" id="cell-id=554bd343">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
@@ -5679,7 +5534,7 @@ transformer_exog = make_column_transformer(
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and fit forecaster indicating the categorical features</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">exog_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'holiday'</span><span class="p">,</span> <span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'temp'</span><span class="p">,</span> <span class="s1">'hum'</span><span class="p">]</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="n">transformer_exog</span><span class="p">,</span>
@@ -5693,7 +5548,7 @@ transformer_exog = make_column_transformer(
 <div class="clipboard-copy-txt" id="cell-18"># Create and fit forecaster indicating the categorical features
 # ==============================================================================
 exog_features = ['holiday', 'weather', 'temp', 'hum']
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor        = LGBMRegressor(random_state=963, verbose=-1),
                  lags             = 5,
                  transformer_exog = transformer_exog,
@@ -5982,7 +5837,7 @@ transformer_exog = make_column_transformer(
 <span class="c1"># ==============================================================================</span>
 <span class="n">exog_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'holiday'</span><span class="p">,</span> <span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'temp'</span><span class="p">,</span> <span class="s1">'hum'</span><span class="p">]</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="n">transformer_exog</span><span class="p">,</span>
@@ -5998,7 +5853,7 @@ transformer_exog = make_column_transformer(
 # ==============================================================================
 exog_features = ['holiday', 'weather', 'temp', 'hum']
 
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor        = LGBMRegressor(random_state=963, verbose=-1),
                  lags             = 5,
                  transformer_exog = transformer_exog,
@@ -6390,7 +6245,7 @@ transformer_exog = make_column_transformer(
 <span class="c1"># ==============================================================================</span>
 <span class="n">exog_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'holiday'</span><span class="p">,</span> <span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'temp'</span><span class="p">,</span> <span class="s1">'hum'</span><span class="p">]</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">HistGradientBoostingRegressor</span><span class="p">(</span>
                                  <span class="n">categorical_features</span> <span class="o">=</span> <span class="n">categorical_features</span><span class="p">,</span>
                                  <span class="n">random_state</span> <span class="o">=</span> <span class="mi">963</span>
@@ -6408,7 +6263,7 @@ transformer_exog = make_column_transformer(
 # ==============================================================================
 exog_features = ['holiday', 'weather', 'temp', 'hum']
 
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = HistGradientBoostingRegressor(
                                  categorical_features = categorical_features,
                                  random_state = 963
@@ -6701,7 +6556,7 @@ transformer_exog = make_column_transformer(
 <span class="c1"># ==============================================================================</span>
 <span class="n">exog_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'holiday'</span><span class="p">,</span> <span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'temp'</span><span class="p">,</span> <span class="s1">'hum'</span><span class="p">]</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">HistGradientBoostingRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">963</span><span class="p">,</span> <span class="n">categorical_features</span><span class="o">=</span><span class="s1">'from_dtype'</span><span class="p">),</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">5</span><span class="p">,</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="n">transformer_exog</span><span class="p">,</span>
@@ -6716,7 +6571,7 @@ transformer_exog = make_column_transformer(
 # ==============================================================================
 exog_features = ['holiday', 'weather', 'temp', 'hum']
 
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor        = HistGradientBoostingRegressor(random_state=963, categorical_features='from_dtype'),
                  lags             = 5,
                  transformer_exog = transformer_exog,
@@ -6942,7 +6797,7 @@ transformer_exog = make_column_transformer(
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">exog_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'holiday'</span><span class="p">,</span> <span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'temp'</span><span class="p">,</span> <span class="s1">'hum'</span><span class="p">]</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">XGBRegressor</span><span class="p">(</span>
                                  <span class="n">tree_method</span>        <span class="o">=</span> <span class="s1">'hist'</span><span class="p">,</span>
                                  <span class="n">random_state</span>       <span class="o">=</span> <span class="mi">12345</span><span class="p">,</span>
@@ -6955,7 +6810,7 @@ transformer_exog = make_column_transformer(
 <div class="clipboard-copy-txt" id="cell-37"># Create forecaster
 # ==============================================================================
 exog_features = ['holiday', 'weather', 'temp', 'hum']
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = XGBRegressor(
                                  tree_method        = 'hist',
                                  random_state       = 12345,
@@ -7506,7 +7361,7 @@ transformer_exog = make_column_transformer(
 <span class="c1"># ==============================================================================</span>
 <span class="n">exog_features</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'holiday'</span><span class="p">,</span> <span class="s1">'weather'</span><span class="p">,</span> <span class="s1">'temp'</span><span class="p">,</span> <span class="s1">'hum'</span><span class="p">]</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">XGBRegressor</span><span class="p">(</span>
                                  <span class="n">enable_categorical</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
                                  <span class="n">tree_method</span><span class="o">=</span><span class="s1">'hist'</span><span class="p">,</span>
@@ -7525,7 +7380,7 @@ transformer_exog = make_column_transformer(
 # ==============================================================================
 exog_features = ['holiday', 'weather', 'temp', 'hum']
 
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = XGBRegressor(
                                  enable_categorical=True,
                                  tree_method='hist',
@@ -7704,6 +7559,21 @@ features_in_model[feature_types == 'c']</div>
   
 </div>
       
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/skforecast/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
     </div>
   </div>
 </footer>
@@ -7788,7 +7658,7 @@ features_in_model[feature_types == 'c']</div>
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.integrate", "navigation.breadcrumbs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>

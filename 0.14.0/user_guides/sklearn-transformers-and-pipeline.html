@@ -426,7 +426,9 @@ This is documentation for an unstable development version.
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
@@ -2658,27 +2660,6 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
-      <a href="../faq/time-series-differentiation.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Time series differentiation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../faq/non-negative-predictions.html" class="md-nav__link">
         
   
@@ -2726,27 +2707,6 @@ This is documentation for an unstable development version.
   
   <span class="md-ellipsis">
     Cyclical features in time series
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq/stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Stacking (ensemble) machine learning models
   </span>
   
 
@@ -2893,95 +2853,6 @@ This is documentation for an unstable development version.
                 </div>
               </div>
             
-            
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#libraries" class="md-nav__link">
-    <span class="md-ellipsis">
-      Libraries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#data" class="md-nav__link">
-    <span class="md-ellipsis">
-      Data
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#transforming-input-series" class="md-nav__link">
-    <span class="md-ellipsis">
-      Transforming input series
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#transforming-exogenous-variables" class="md-nav__link">
-    <span class="md-ellipsis">
-      Transforming exogenous variables
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#custom-transformers" class="md-nav__link">
-    <span class="md-ellipsis">
-      Custom transformers
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#scikit-learn-pipelines" class="md-nav__link">
-    <span class="md-ellipsis">
-      Scikit-learn pipelines
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#transforming-multiple-input-series-in-global-models" class="md-nav__link">
-    <span class="md-ellipsis">
-      Transforming multiple input series in global models
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
             
           
           
@@ -3491,8 +3362,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <span class="kn">from</span> <span class="nn">sklearn.compose</span> <span class="kn">import</span> <span class="n">ColumnTransformer</span>
 <span class="kn">from</span> <span class="nn">sklearn.pipeline</span> <span class="kn">import</span> <span class="n">make_pipeline</span>
 
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoreg</span> <span class="kn">import</span> <span class="n">ForecasterAutoreg</span>
-<span class="kn">from</span> <span class="nn">skforecast.ForecasterAutoregMultiSeries</span> <span class="kn">import</span> <span class="n">ForecasterAutoregMultiSeries</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
+<span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursiveMultiSeries</span>
 <span class="kn">from</span> <span class="nn">skforecast.model_selection</span> <span class="kn">import</span> <span class="n">grid_search_forecaster</span>
 <span class="kn">from</span> <span class="nn">skforecast.datasets</span> <span class="kn">import</span> <span class="n">fetch_dataset</span>
 </pre></div>
@@ -3509,8 +3380,8 @@ from sklearn.preprocessing import FunctionTransformer
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import make_pipeline
 
-from skforecast.ForecasterAutoreg import ForecasterAutoreg
-from skforecast.ForecasterAutoregMultiSeries import ForecasterAutoregMultiSeries
+from skforecast.recursive import ForecasterRecursive
+from skforecast.recursive import ForecasterRecursiveMultiSeries
 from skforecast.model_selection import grid_search_forecaster
 from skforecast.datasets import fetch_dataset</div>
 </div>
@@ -3731,7 +3602,7 @@ data.head()</div>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and fit forecaster that scales the input series</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">(),</span>
@@ -3743,7 +3614,7 @@ data.head()</div>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-4"># Create and fit forecaster that scales the input series
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor        = Ridge(random_state=123),
                  lags             = 3,
                  transformer_y    = StandardScaler(),
@@ -3822,7 +3693,7 @@ Forecaster id: None </pre>
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and fit forecaster with same tranformation for all exogenous variables</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3834,7 +3705,7 @@ Forecaster id: None </pre>
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-5"># Create and fit forecaster with same tranformation for all exogenous variables
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor        = Ridge(random_state=123),
                  lags             = 3,
                  transformer_y    = None,
@@ -3922,7 +3793,7 @@ Forecaster id: None </pre>
                        <span class="n">verbose_feature_names_out</span> <span class="o">=</span> <span class="kc">False</span>
                    <span class="p">)</span>
 
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>        <span class="o">=</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
                  <span class="n">lags</span>             <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -3943,7 +3814,7 @@ transformer_exog = ColumnTransformer(
                        verbose_feature_names_out = False
                    )
 
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor        = Ridge(random_state=123),
                  lags             = 3,
                  transformer_y    = None,
@@ -4267,7 +4138,8 @@ Freq: MS, Name: y, dtype: float64</pre>
 <span class="w">    </span><span class="sd">""" </span>
 <span class="sd">    Calculate log adding 1 to avoid calculation errors if x is very close to 0.</span>
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
 
 <span class="k">def</span> <span class="nf">exp_transform</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
@@ -4275,11 +4147,12 @@ Freq: MS, Name: y, dtype: float64</pre>
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
+
 <span class="n">transformer_y</span> <span class="o">=</span> <span class="n">FunctionTransformer</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">log_transform</span><span class="p">,</span> <span class="n">inverse_func</span><span class="o">=</span><span class="n">exp_transform</span><span class="p">)</span>
 
 <span class="c1"># Create and train forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span>     <span class="o">=</span> <span class="n">Ridge</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">),</span>
                  <span class="n">lags</span>          <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
                  <span class="n">transformer_y</span> <span class="o">=</span> <span class="n">transformer_y</span>
@@ -4293,7 +4166,8 @@ def log_transform(x):
     """ 
     Calculate log adding 1 to avoid calculation errors if x is very close to 0.
     """
-    return np.log(x+1)
+    return np.log(x + 1)
+
 
 def exp_transform(x):
     """
@@ -4301,11 +4175,12 @@ def exp_transform(x):
     """
     return np.exp(x) - 1
 
+
 transformer_y = FunctionTransformer(func=log_transform, inverse_func=exp_transform)
 
 # Create and train forecaster
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor     = Ridge(random_state=123),
                  lags          = 3,
                  transformer_y = transformer_y
@@ -4865,7 +4740,7 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Create and fit forecaster</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">pipe</span><span class="p">,</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="mi">10</span>
              <span class="p">)</span>
@@ -4875,7 +4750,7 @@ div.sk-label-container:hover .sk-estimator-doc-link.fitted:hover,
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-13"># Create and fit forecaster
 # ==============================================================================
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = pipe,
                  lags      = 10
              )
@@ -4953,7 +4828,7 @@ Forecaster id: None </pre>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Hyperparameter grid search using a scikit-learn pipeline</span>
 <span class="c1"># ==============================================================================</span>
 <span class="n">pipe</span> <span class="o">=</span> <span class="n">make_pipeline</span><span class="p">(</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">Ridge</span><span class="p">())</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoreg</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursive</span><span class="p">(</span>
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">pipe</span><span class="p">,</span>
                  <span class="n">lags</span> <span class="o">=</span> <span class="mi">10</span>  <span class="c1"># This value will be replaced in the grid search</span>
              <span class="p">)</span>
@@ -4984,7 +4859,7 @@ Forecaster id: None </pre>
 <div class="clipboard-copy-txt" id="cell-14"># Hyperparameter grid search using a scikit-learn pipeline
 # ==============================================================================
 pipe = make_pipeline(StandardScaler(), Ridge())
-forecaster = ForecasterAutoreg(
+forecaster = ForecasterRecursive(
                  regressor = pipe,
                  lags = 10  # This value will be replaced in the grid search
              )
@@ -5125,7 +5000,7 @@ results_grid.head(4)</div>
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="transforming-multiple-input-series-in-global-models">Transforming multiple input series in global models<a class="anchor-link" href="#transforming-multiple-input-series-in-global-models">¶</a></h2><p>When using global forecasting models (<a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html#scikit-learn-transformers-in-multi-series">ForecasterAutoregMultiSeries</a> or <a href="https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html#scikit-learn-transformers-in-multivariate">ForecasterAutoregMultiVariate</a>) the <code>transformer_series</code> argument replaces <code>transformer_y</code>. Three diferent options are available:</p>
+<h2 id="transforming-multiple-input-series-in-global-models">Transforming multiple input series in global models<a class="anchor-link" href="#transforming-multiple-input-series-in-global-models">¶</a></h2><p>When using global forecasting models (<a href="https://skforecast.org/latest/user_guides/independent-multi-time-series-forecasting.html#scikit-learn-transformers-in-multi-series">ForecasterRecursiveMultiSeries</a> or <a href="https://skforecast.org/latest/user_guides/dependent-multi-series-multivariate-forecasting.html#scikit-learn-transformers-in-multivariate">ForecasterDirectMultiVariate</a>) the <code>transformer_series</code> argument replaces <code>transformer_y</code>. Three different options are available:</p>
 <ul>
 <li><p><code>transformer_series</code> is a single transformer: When a single transformer is provided, it is automatically cloned for each individual series. Each cloned transformer is then trained separately on one of the series.</p>
 </li>
@@ -5277,7 +5152,7 @@ Shape of the dataset: (1097, 3)
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Series transformation: same transformation for all series</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregMultiSeries</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursiveMultiSeries</span><span class="p">(</span>
                  <span class="n">regressor</span>          <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
                  <span class="n">lags</span>               <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
                  <span class="n">encoding</span>           <span class="o">=</span> <span class="s1">'ordinal'</span><span class="p">,</span>
@@ -5288,7 +5163,7 @@ Shape of the dataset: (1097, 3)
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-16"># Series transformation: same transformation for all series
 # ==============================================================================
-forecaster = ForecasterAutoregMultiSeries(
+forecaster = ForecasterRecursiveMultiSeries(
                  regressor          = LGBMRegressor(random_state=123, verbose=-1),
                  lags               = 24,
                  encoding           = 'ordinal',
@@ -5383,7 +5258,7 @@ Series _unknown_level: StandardScaler() mean=[18.61195143], scale=[5.21803675]
 </div>
 <div class="highlight-ipynb hl-python"><pre><span></span><span class="c1"># Series transformation: different transformation for each series</span>
 <span class="c1"># ==============================================================================</span>
-<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterAutoregMultiSeries</span><span class="p">(</span>
+<span class="n">forecaster</span> <span class="o">=</span> <span class="n">ForecasterRecursiveMultiSeries</span><span class="p">(</span>
                  <span class="n">regressor</span>          <span class="o">=</span> <span class="n">LGBMRegressor</span><span class="p">(</span><span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=-</span><span class="mi">1</span><span class="p">),</span>
                  <span class="n">lags</span>               <span class="o">=</span> <span class="mi">24</span><span class="p">,</span>
                  <span class="n">encoding</span>           <span class="o">=</span> <span class="s1">'ordinal'</span><span class="p">,</span>
@@ -5395,7 +5270,7 @@ Series _unknown_level: StandardScaler() mean=[18.61195143], scale=[5.21803675]
 </pre></div>
 <div class="clipboard-copy-txt" id="cell-18"># Series transformation: different transformation for each series
 # ==============================================================================
-forecaster = ForecasterAutoregMultiSeries(
+forecaster = ForecasterRecursiveMultiSeries(
                  regressor          = LGBMRegressor(random_state=123, verbose=-1),
                  lags               = 24,
                  encoding           = 'ordinal',
@@ -5535,6 +5410,21 @@ Series _unknown_level: {'copy': True, 'with_mean': True, 'with_std': True}
   
 </div>
       
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/skforecast/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
     </div>
   </div>
 </footer>
@@ -5619,7 +5509,7 @@ Series _unknown_level: {'copy': True, 'with_mean': True, 'with_std': True}
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.integrate", "navigation.breadcrumbs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>

@@ -8,12 +8,8 @@ Thank you for choosing skforecast and visiting our Frequently Asked Questions (F
 + [Forecasting with delayed historical data](https://skforecast.org/latest/faq/forecasting-with-delayed-historical-data.html)
 
 ## Feature Engineering
-+ [Time series differentiation (modelling trend)](https://skforecast.org/latest/faq/time-series-differentiation.html)
 + [Cyclical features in time series](https://skforecast.org/latest/faq/cyclical-features-time-series.html)
 + [Time series aggregation](https://skforecast.org/latest/faq/time-series-aggregation.html)
-
-## Advanced Techniques
-+ [Stacking (ensemble) machine learning models to improve forecasting](https://skforecast.org/latest/faq/stacking-ensemble-models-forecasting.html)
 
 ## Performance Optimization
 + [Parallelization in skforecast](https://skforecast.org/latest/faq/parallelization-skforecast.html)

@@ -20,11 +20,11 @@ Welcome to the skforecast user guides! This comprehensive collection of guides i
 - [Categorical features](https://skforecast.org/latest/user_guides/categorical-features)
 - [Calendars features](https://skforecast.org/latest/user_guides/calendar-features)
 - [Data transformations](https://skforecast.org/latest/user_guides/sklearn-transformers-and-pipeline)
-- [Differentiation](user_guides/time-series-differentiation.ipynb)
+- [Differentiation](../user_guides/time-series-differentiation.ipynb)
 - [Feature selection](https://skforecast.org/latest/user_guides/feature-selection)
 
 ## Model Evaluation and Tuning
-- [Metrics](user_guides/metrics.ipynb)
+- [Metrics](../user_guides/metrics.ipynb)
 - [Backtesting forecaster](https://skforecast.org/latest/user_guides/backtesting)
 - [Hyperparameter tuning and lags selection](https://skforecast.org/latest/user_guides/hyperparameter-tuning-and-lags-selection)
 - [Feature selection](https://skforecast.org/latest/user_guides/feature-selection)
@@ -33,30 +33,30 @@ Welcome to the skforecast user guides! This comprehensive collection of guides i
 - [Probabilistic forecasting](https://skforecast.org/latest/user_guides/probabilistic-forecasting)
 
 ## Model deployment:
-- [Save and load forecaster](user_guides/save-load-forecaster.ipynb)
-- [Forecaster in production](user_guides/forecaster-in-production.ipynb)
+- [Save and load forecaster](../user_guides/save-load-forecaster.ipynb)
+- [Forecaster in production](../user_guides/forecaster-in-production.ipynb)
 
 ## Plotting:
-- [Plotting](user_guides/plotting.ipynb)
+- [Plotting](../user_guides/plotting.ipynb)
 
 ## Datasets:
-- [Datasets](user_guides/datasets.ipynb)
+- [Datasets](../user_guides/datasets.ipynb)
 
 ## Additional Resources:
-- [Skforecast 0.14 Migration guide](user_guides/migration-guide.ipynb)
-- [Weighted time series forecasting](user_guides/weighted-time-series-forecasting.ipynb)
-- [Stacking multiple models](user_guides/stacking-ensemble-models-forecasting.ipynb)
-- [Forecasting with XGBoost and LightGBM](user_guides/forecasting-xgboost-lightgbm.ipynb)
-- [Skforecast in GPU](user_guides/skforecast-in-GPU.ipynb)
+- [Skforecast 0.14 Migration guide](../user_guides/migration-guide.ipynb)
+- [Weighted time series forecasting](../user_guides/weighted-time-series-forecasting.ipynb)
+- [Stacking multiple models](../user_guides/stacking-ensemble-models-forecasting.ipynb)
+- [Forecasting with XGBoost and LightGBM](../user_guides/forecasting-xgboost-lightgbm.ipynb)
+- [Skforecast in GPU](../user_guides/skforecast-in-GPU.ipynb)
 
 ## FAQ and forecasting tips:
-- [Time series with missing values](faq/forecasting-time-series-with-missing-values.ipynb)
-- [Non negative predictions](faq/non-negative-predictions.ipynb)
-- [Forecasting with delayed data](faq/forecasting-with-delayed-historical-data.ipynb)
-- [Parallelization](faq/parallelization-skforecast.ipynb)
-- [Time series aggregation](faq/time-series-aggregation.ipynb)
-- [Profiling skforecast](faq/profiling-skforecast.ipynb)
-- [Backtesting vs One-step-ahead](faq/parameters-search-backetesting-vs-one-step-ahead.ipynb)
+- [Time series with missing values](../faq/forecasting-time-series-with-missing-values.ipynb)
+- [Non negative predictions](../faq/non-negative-predictions.ipynb)
+- [Forecasting with delayed data](../faq/forecasting-with-delayed-historical-data.ipynb)
+- [Parallelization](../faq/parallelization-skforecast.ipynb)
+- [Time series aggregation](../faq/time-series-aggregation.ipynb)
+- [Profiling skforecast](../faq/profiling-skforecast.ipynb)
+- [Backtesting vs One-step-ahead](../faq/parameters-search-backetesting-vs-one-step-ahead.ipynb)
 
 
 

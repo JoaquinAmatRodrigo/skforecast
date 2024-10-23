@@ -426,7 +426,9 @@ This is documentation for an unstable development version.
   
 
 
-<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  
+
+<nav class="md-nav md-nav--primary md-nav--lifted md-nav--integrated" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
     <a href=".." title="Skforecast Docs" class="md-nav__button md-logo" aria-label="Skforecast Docs" data-md-component="logo">
       
@@ -2881,27 +2883,6 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
-      <a href="../faq/time-series-differentiation.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Time series differentiation
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
       <a href="../faq/non-negative-predictions.html" class="md-nav__link">
         
   
@@ -2949,27 +2930,6 @@ This is documentation for an unstable development version.
   
   <span class="md-ellipsis">
     Cyclical features in time series
-  </span>
-  
-
-      </a>
-    </li>
-  
-
-              
-            
-              
-                
-  
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../faq/stacking-ensemble-models-forecasting.ipynb" class="md-nav__link">
-        
-  
-  <span class="md-ellipsis">
-    Stacking (ensemble) machine learning models
   </span>
   
 
@@ -3117,320 +3077,6 @@ This is documentation for an unstable development version.
               </div>
             
             
-              
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.save_forecaster" class="md-nav__link">
-    <span class="md-ellipsis">
-      save_forecaster
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.load_forecaster" class="md-nav__link">
-    <span class="md-ellipsis">
-      load_forecaster
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.initialize_lags" class="md-nav__link">
-    <span class="md-ellipsis">
-      initialize_lags
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.initialize_weights" class="md-nav__link">
-    <span class="md-ellipsis">
-      initialize_weights
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.initialize_transformer_series" class="md-nav__link">
-    <span class="md-ellipsis">
-      initialize_transformer_series
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.check_select_fit_kwargs" class="md-nav__link">
-    <span class="md-ellipsis">
-      check_select_fit_kwargs
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.check_y" class="md-nav__link">
-    <span class="md-ellipsis">
-      check_y
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.check_exog" class="md-nav__link">
-    <span class="md-ellipsis">
-      check_exog
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.get_exog_dtypes" class="md-nav__link">
-    <span class="md-ellipsis">
-      get_exog_dtypes
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.check_exog_dtypes" class="md-nav__link">
-    <span class="md-ellipsis">
-      check_exog_dtypes
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.check_interval" class="md-nav__link">
-    <span class="md-ellipsis">
-      check_interval
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.check_predict_input" class="md-nav__link">
-    <span class="md-ellipsis">
-      check_predict_input
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.preprocess_y" class="md-nav__link">
-    <span class="md-ellipsis">
-      preprocess_y
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.preprocess_last_window" class="md-nav__link">
-    <span class="md-ellipsis">
-      preprocess_last_window
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.preprocess_exog" class="md-nav__link">
-    <span class="md-ellipsis">
-      preprocess_exog
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.cast_exog_dtypes" class="md-nav__link">
-    <span class="md-ellipsis">
-      cast_exog_dtypes
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.exog_to_direct" class="md-nav__link">
-    <span class="md-ellipsis">
-      exog_to_direct
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.exog_to_direct_numpy" class="md-nav__link">
-    <span class="md-ellipsis">
-      exog_to_direct_numpy
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.expand_index" class="md-nav__link">
-    <span class="md-ellipsis">
-      expand_index
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.transform_numpy" class="md-nav__link">
-    <span class="md-ellipsis">
-      transform_numpy
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.transform_series" class="md-nav__link">
-    <span class="md-ellipsis">
-      transform_series
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.transform_dataframe" class="md-nav__link">
-    <span class="md-ellipsis">
-      transform_dataframe
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.check_optional_dependency" class="md-nav__link">
-    <span class="md-ellipsis">
-      check_optional_dependency
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.multivariate_time_series_corr" class="md-nav__link">
-    <span class="md-ellipsis">
-      multivariate_time_series_corr
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.select_n_jobs_fit_forecaster" class="md-nav__link">
-    <span class="md-ellipsis">
-      select_n_jobs_fit_forecaster
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.check_preprocess_series" class="md-nav__link">
-    <span class="md-ellipsis">
-      check_preprocess_series
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.check_preprocess_exog_multiseries" class="md-nav__link">
-    <span class="md-ellipsis">
-      check_preprocess_exog_multiseries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.align_series_and_exog_multiseries" class="md-nav__link">
-    <span class="md-ellipsis">
-      align_series_and_exog_multiseries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.prepare_levels_multiseries" class="md-nav__link">
-    <span class="md-ellipsis">
-      prepare_levels_multiseries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.preprocess_levels_self_last_window_multiseries" class="md-nav__link">
-    <span class="md-ellipsis">
-      preprocess_levels_self_last_window_multiseries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.prepare_residuals_multiseries" class="md-nav__link">
-    <span class="md-ellipsis">
-      prepare_residuals_multiseries
-    </span>
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#skforecast.utils.utils.set_skforecast_warnings" class="md-nav__link">
-    <span class="md-ellipsis">
-      set_skforecast_warnings
-    </span>
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-                  </div>
-                </div>
-              </div>
-            
           
           
             <div class="md-content" data-md-component="content">
@@ -3556,7 +3202,7 @@ where the forecaster is going to be loaded.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1836</span>
 <span class="normal">1837</span>
 <span class="normal">1838</span>
@@ -3787,7 +3433,7 @@ in the environment where the forecaster is going to be loaded.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1909</span>
 <span class="normal">1910</span>
 <span class="normal">1911</span>
@@ -3979,7 +3625,7 @@ in the environment where the forecaster is going to be loaded.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 50</span>
 <span class="normal"> 51</span>
 <span class="normal"> 52</span>
@@ -4237,7 +3883,7 @@ function(s) used to create weights.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">214</span>
 <span class="normal">215</span>
 <span class="normal">216</span>
@@ -4520,7 +4166,7 @@ objects in <code>transformer_series</code> and is used internally to avoid overw
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">295</span>
 <span class="normal">296</span>
 <span class="normal">297</span>
@@ -4750,7 +4396,7 @@ regressor after removing the unused keys.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">368</span>
 <span class="normal">369</span>
 <span class="normal">370</span>
@@ -4946,7 +4592,7 @@ regressor after removing the unused keys.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">425</span>
 <span class="normal">426</span>
 <span class="normal">427</span>
@@ -5103,7 +4749,7 @@ in the warning message.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">454</span>
 <span class="normal">455</span>
 <span class="normal">456</span>
@@ -5261,7 +4907,7 @@ in the warning message.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">499</span>
 <span class="normal">500</span>
 <span class="normal">501</span>
@@ -5413,7 +5059,7 @@ in the warning message.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">525</span>
 <span class="normal">526</span>
 <span class="normal">527</span>
@@ -5647,7 +5293,7 @@ inclusive. For example, quantiles of 0.05, 0.5 and 0.95 should be as
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">592</span>
 <span class="normal">593</span>
 <span class="normal">594</span>
@@ -6148,7 +5794,7 @@ and `ForecasterRnn).</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 677</span>
 <span class="normal"> 678</span>
 <span class="normal"> 679</span>
@@ -7128,7 +6774,7 @@ intended to avoid copying data when it is not necessary.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1116</span>
 <span class="normal">1117</span>
 <span class="normal">1118</span>
@@ -7354,7 +7000,7 @@ is intended to avoid copying data when it is not necessary.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1178</span>
 <span class="normal">1179</span>
 <span class="normal">1180</span>
@@ -7580,7 +7226,7 @@ intended to avoid copying data when it is not necessary.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1240</span>
 <span class="normal">1241</span>
 <span class="normal">1242</span>
@@ -7797,7 +7443,7 @@ then the type is cast to <code>int</code> and then to <code>category</code>. </l
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1340</span>
 <span class="normal">1341</span>
 <span class="normal">1342</span>
@@ -7981,7 +7627,7 @@ created if <code>exog</code> is a pandas Series or DataFrame.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1385</span>
 <span class="normal">1386</span>
 <span class="normal">1387</span>
@@ -8180,7 +7826,7 @@ created if <code>exog</code> is a pandas Series or DataFrame.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1437</span>
 <span class="normal">1438</span>
 <span class="normal">1439</span>
@@ -8376,7 +8022,7 @@ created if <code>exog</code> is a pandas Series or DataFrame.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1553</span>
 <span class="normal">1554</span>
 <span class="normal">1555</span>
@@ -8592,7 +8238,7 @@ when using transformers of class scikit-learn ColumnTransformers.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1603</span>
 <span class="normal">1604</span>
 <span class="normal">1605</span>
@@ -8857,7 +8503,7 @@ be a Series or a DataFrame.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1677</span>
 <span class="normal">1678</span>
 <span class="normal">1679</span>
@@ -9143,7 +8789,7 @@ when using transformers of class scikit-learn ColumnTransformers.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1762</span>
 <span class="normal">1763</span>
 <span class="normal">1764</span>
@@ -9360,7 +9006,7 @@ with installation instructions.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1984</span>
 <span class="normal">1985</span>
 <span class="normal">1986</span>
@@ -9539,7 +9185,7 @@ time series. </p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2016</span>
 <span class="normal">2017</span>
 <span class="normal">2018</span>
@@ -9747,7 +9393,7 @@ potentially harmful due to resource contention.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2072</span>
 <span class="normal">2073</span>
 <span class="normal">2074</span>
@@ -9932,7 +9578,7 @@ frequency. No multiple frequency is allowed.</li>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2122</span>
 <span class="normal">2123</span>
 <span class="normal">2124</span>
@@ -10279,7 +9925,7 @@ values to pandas DataFrames.</li>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2224</span>
 <span class="normal">2225</span>
 <span class="normal">2226</span>
@@ -10733,7 +10379,7 @@ different lengths. Reindexing is applied.</li>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2393</span>
 <span class="normal">2394</span>
 <span class="normal">2395</span>
@@ -10957,7 +10603,7 @@ different lengths. Reindexing is applied.</li>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2464</span>
 <span class="normal">2465</span>
 <span class="normal">2466</span>
@@ -11130,7 +10776,7 @@ first iteration of the prediction (t + 1).</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2496</span>
 <span class="normal">2497</span>
 <span class="normal">2498</span>
@@ -11435,7 +11081,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2579</span>
 <span class="normal">2580</span>
 <span class="normal">2581</span>
@@ -11700,7 +11346,7 @@ for more information.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast/utils/utils.py</code></summary>
+              <summary>Source code in <code>skforecast\utils\utils.py</code></summary>
               <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">2717</span>
 <span class="normal">2718</span>
 <span class="normal">2719</span>
@@ -11805,6 +11451,21 @@ for more information.</p>
   
 </div>
       
+        <div class="md-social">
+  
+    
+    
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/company/skforecast/" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2024 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3M135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5m282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9z"/></svg>
+    </a>
+  
+</div>
+      
     </div>
   </div>
 </footer>
@@ -11889,7 +11550,7 @@ for more information.</p>
       </div>
       <script>var consent=__md_get("__consent");if(consent)for(var input of document.forms.consent.elements)input.name&&(input.checked=consent[input.name]||!1);else"file:"!==location.protocol&&setTimeout((function(){document.querySelector("[data-md-component=consent]").hidden=!1}),250);var form=document.forms.consent;for(var action of["submit","reset"])form.addEventListener(action,(function(e){if(e.preventDefault(),"reset"===e.type)for(var n of document.forms.consent.elements)n.name&&(n.checked=!1);__md_set("__consent",Object.fromEntries(Array.from(new FormData(form).keys()).map((function(e){return[e,!0]})))),location.hash="",location.reload()}))</script>
     
-    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
+    <script id="__config" type="application/json">{"base": "..", "features": ["navigation.tabs", "navigation.tabs.sticky", "navigation.top", "toc.integrate", "navigation.breadcrumbs"], "search": "../assets/javascripts/workers/search.6ce7567c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": {"provider": "mike"}}</script>
     
     
       <script src="../assets/javascripts/bundle.525ec568.min.js"></script>
