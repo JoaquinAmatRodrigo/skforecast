@@ -2,7 +2,6 @@
     <img src="https://github.com/skforecast/skforecast/blob/master/images/banner-landing-page-skforecast.png?raw=true#only-light" style= margin-top: 0px;>
 </h1>
 
-<br>
 
 | | |
 | --- | --- |
