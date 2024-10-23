@@ -1,6 +1,6 @@
 site_name: Skforecast Docs
 extra_css:
-  - stylesheets/extra.css
+  - stylesheets/extra_0_14.css
 repo_url: https://github.com/skforecast/skforecast
 site_url: https://skforecast.org
 remote_branch: docs_dev
