@@ -87,6 +87,7 @@ nav:
     - ForecasterSarimax: api/ForecasterSarimax.md
     - ForecasterEquivalentDate: api/ForecasterEquivalentDate.md
     - model_selection: api/model_selection.md
+    - feature_selection: api/feature_selection.md
     - preprocessing: api/preprocessing.md
     - metrics: api/metrics.md
     - plot: api/plot.md
@@ -96,11 +97,9 @@ nav:
 
   - FAQ and Tips:
     - Table of contents: faq/faq.md
-    - Time series differentiation: faq/time-series-differentiation.ipynb
     - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
     - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
     - Cyclical features in time series: faq/cyclical-features-time-series.ipynb
-    - Stacking (ensemble) machine learning models: faq/stacking-ensemble-models-forecasting.ipynb
     - Forecasting with delayed historical data: faq/forecasting-with-delayed-historical-data.ipynb
     - Time series aggregation: faq/time-series-aggregation.ipynb
     - Parallelization in skforecast: faq/parallelization-skforecast.ipynb
@@ -154,6 +153,8 @@ theme:
     #- navigation.sections # To expand sections on the table of contents
     #- navigation.expand # To expand sections on the table of contents
     - navigation.top
+    - toc.integrate # TODO review with Ximo
+    - navigation.breadcrumbs
   font:
     text: Open Sans
     code: Ubuntu Mono
@@ -232,3 +233,10 @@ extra:
       as to measure the effectiveness of our documentation and whether users
       find what they're searching for. With your consent, you're helping us to
       make our documentation better.
+  social:
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/skforecast/
+  seo:
+    description: >-
+      Skforecast is a Python library for time series forecasting using machine learning models. It works with any regressor compatible with the scikit-learn API, including popular options like LightGBM, XGBoost, CatBoost, Keras, and many others.
+    keywords: time series, forecasting, machine learning, python, data science, scikit-learn, lightgbm, xgboost, catboost, keras, probabilistic forecasting, multiple time series forecasting
