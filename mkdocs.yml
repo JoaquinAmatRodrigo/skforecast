@@ -83,7 +83,7 @@ nav:
     - ForecasterRecursiveMultiSeries: api/ForecasterRecursiveMultiSeries.md
     - ForecasterDirectMultiVariate: api/ForecasterDirectMultiVariate.md
     - ForecasterRnn: api/ForecasterRnn.md
-    - sarimax: api/sarimax.md
+    - sarimax: api/Sarimax.md
     - ForecasterSarimax: api/ForecasterSarimax.md
     - ForecasterEquivalentDate: api/ForecasterEquivalentDate.md
     - model_selection: api/model_selection.md
