@@ -104,7 +104,7 @@ test = [
 
 [project.urls]
 Homepage = "https://www.skforecast.org"
-Repository = "https://github.com/JoaquinAmatRodrigo/skforecast"
+Repository = "https://github.com/skforecast/skforecast"
 Documentation = "https://www.skforecast.org"
 "Release Notes" = "https://skforecast.org/latest/releases/releases"
 
