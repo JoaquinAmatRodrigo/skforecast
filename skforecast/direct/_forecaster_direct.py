@@ -915,7 +915,7 @@ class ForecasterDirect(ForecasterBase):
 
         Parameters
         ----------
-        series : pandas Series, pandas DataFrame, dict
+        y : pandas Series
             Training time series.
         initial_train_size : int
             Initial size of the training set. It is the number of observations used
