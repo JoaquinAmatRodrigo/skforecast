@@ -60,7 +60,7 @@
 /* Set font size and line height for H3 headers in Markdown */
 .md-typeset h3 {
   font-size: 1.2em; /* Reduced from 1.1em */
-  margin: 0 0 1em 0;
+  margin: 1em 0 1em 0;
 }
 
 .md-typeset .admonition>*, .md-typeset details>* {
