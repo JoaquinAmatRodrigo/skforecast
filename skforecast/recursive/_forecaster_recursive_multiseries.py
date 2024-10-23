@@ -1993,6 +1993,7 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
             exog         = exog
         )
   
+        # TODO: move here the warning.catch_warnings() context manager
         predictions = self._recursive_predict(
                           steps            = steps,
                           levels           = levels,
@@ -2120,6 +2121,7 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
             check_inputs = check_inputs
         )
 
+        # TODO: move here the warning.catch_warnings() context manager
         predictions = self._recursive_predict(
                           steps            = steps,
                           levels           = levels,
@@ -2255,6 +2257,7 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
                                     order      = 'F',
                                     dtype      = float
                                 )
+        # TODO: move here the warning.catch_warnings() context manager
         for i in range(n_boot):
 
             boot_columns.append(f"pred_boot_{i}")
