@@ -54,7 +54,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra_0_14.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -2901,14 +2901,16 @@ This is documentation for an unstable development version.
 
 
 <h2 id="skforecast.exceptions.exceptions.MissingValuesWarning" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">MissingValuesWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.exceptions.exceptions.MissingValuesWarning</span>
+
 
 <a href="#skforecast.exceptions.exceptions.MissingValuesWarning" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">MissingValuesWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code>UserWarning</code></p>
+              Bases: <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#UserWarning">UserWarning</a></code></p>
 
 
         <p>Warning used to indicate that there are missing values in the data. This 
@@ -2949,14 +2951,16 @@ missing values, so the Forecaster's <code>fit' and</code>predict' methods may fa
 
 
 <h2 id="skforecast.exceptions.exceptions.MissingExogWarning" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">MissingExogWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.exceptions.exceptions.MissingExogWarning</span>
+
 
 <a href="#skforecast.exceptions.exceptions.MissingExogWarning" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">MissingExogWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code>UserWarning</code></p>
+              Bases: <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#UserWarning">UserWarning</a></code></p>
 
 
         <p>Warning used to indicate that there are missing exogenous variables in the
@@ -2996,14 +3000,16 @@ Forecaster's <code>fit' and</code>predict' methods may fail.</p>
 
 
 <h2 id="skforecast.exceptions.exceptions.DataTypeWarning" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">DataTypeWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.exceptions.exceptions.DataTypeWarning</span>
+
 
 <a href="#skforecast.exceptions.exceptions.DataTypeWarning" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">DataTypeWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code>UserWarning</code></p>
+              Bases: <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#UserWarning">UserWarning</a></code></p>
 
 
         <p>Warning used to notify there are dtypes in the exogenous data that are not
@@ -3043,14 +3049,16 @@ accept other data types, therefore the forecaster <code>fit</code> and <code>pre
 
 
 <h2 id="skforecast.exceptions.exceptions.UnknownLevelWarning" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">UnknownLevelWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.exceptions.exceptions.UnknownLevelWarning</span>
+
 
 <a href="#skforecast.exceptions.exceptions.UnknownLevelWarning" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">UnknownLevelWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code>UserWarning</code></p>
+              Bases: <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#UserWarning">UserWarning</a></code></p>
 
 
         <p>Warning used to notify that a level being predicted was not part of the
@@ -3089,14 +3097,16 @@ training data.</p>
 
 
 <h2 id="skforecast.exceptions.exceptions.LongTrainingWarning" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">LongTrainingWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.exceptions.exceptions.LongTrainingWarning</span>
+
 
 <a href="#skforecast.exceptions.exceptions.LongTrainingWarning" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">LongTrainingWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code>UserWarning</code></p>
+              Bases: <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#UserWarning">UserWarning</a></code></p>
 
 
         <p>Warning used to notify that a large number of models will be trained and the
@@ -3135,14 +3145,16 @@ the process may take a while to run.</p>
 
 
 <h2 id="skforecast.exceptions.exceptions.IgnoredArgumentWarning" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">IgnoredArgumentWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.exceptions.exceptions.IgnoredArgumentWarning</span>
+
 
 <a href="#skforecast.exceptions.exceptions.IgnoredArgumentWarning" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">IgnoredArgumentWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code>UserWarning</code></p>
+              Bases: <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#UserWarning">UserWarning</a></code></p>
 
 
         <p>Warning used to notify that an argument is ignored when using a method 
@@ -3181,14 +3193,16 @@ or a function.</p>
 
 
 <h2 id="skforecast.exceptions.exceptions.SaveLoadSkforecastWarning" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">SaveLoadSkforecastWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.exceptions.exceptions.SaveLoadSkforecastWarning</span>
+
 
 <a href="#skforecast.exceptions.exceptions.SaveLoadSkforecastWarning" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">SaveLoadSkforecastWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code>UserWarning</code></p>
+              Bases: <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#UserWarning">UserWarning</a></code></p>
 
 
         <p>Warning used to notify any issues that may arise when saving or loading
@@ -3227,14 +3241,16 @@ a forecaster.</p>
 
 
 <h2 id="skforecast.exceptions.exceptions.SkforecastVersionWarning" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">SkforecastVersionWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.exceptions.exceptions.SkforecastVersionWarning</span>
+
 
 <a href="#skforecast.exceptions.exceptions.SkforecastVersionWarning" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">SkforecastVersionWarning</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
-              Bases: <code>UserWarning</code></p>
+              Bases: <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/exceptions.html#UserWarning">UserWarning</a></code></p>
 
 
         <p>Warning used to notify that the skforecast version installed in the 

@@ -54,7 +54,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra_0_14.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -2925,10 +2925,12 @@ This is documentation for an unstable development version.
 
 
 <h2 id="skforecast.deep_learning._forecaster_rnn.ForecasterRnn" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">deep_learning</span><span class="o">.</span><span class="n">_forecaster_rnn</span><span class="o">.</span><span class="n">ForecasterRnn</span><span class="p">(</span><span class="n">regressor</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">transformer_series</span><span class="o">=</span><span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">weight_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">forecaster_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformer_exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.deep_learning._forecaster_rnn.ForecasterRnn</span>
+
 
 <a href="#skforecast.deep_learning._forecaster_rnn.ForecasterRnn" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">ForecasterRnn</span><span class="p">(</span><span class="n">regressor</span><span class="p">,</span> <span class="n">levels</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">transformer_series</span><span class="o">=</span><span class="n">MinMaxScaler</span><span class="p">(</span><span class="n">feature_range</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)),</span> <span class="n">weight_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">forecaster_id</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformer_exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
@@ -2969,7 +2971,7 @@ either JAX, TensorFlow, or PyTorch. See documentation for more details.</p>
           <tr class="doc-section-item">
             <td><code>levels</code></td>
             <td>
-                  <code>(str, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2985,7 +2987,7 @@ will be available for prediction.</p>
           <tr class="doc-section-item">
             <td><code>lags</code></td>
             <td>
-                  <code>(int, list, str)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3000,7 +3002,7 @@ extracted from the input layer <code>self.regressor.layers[0].input_shape[0][1]<
           <tr class="doc-section-item">
             <td><code>transformer_series</code></td>
             <td>
-                  <code>(object, dict)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3022,7 +3024,7 @@ inverse_transform method.</p>
           <tr class="doc-section-item">
             <td><code>fit_kwargs</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3036,7 +3038,7 @@ inverse_transform method.</p>
           <tr class="doc-section-item">
             <td><code>forecaster_id</code></td>
             <td>
-                  <code>(str, int)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3050,7 +3052,7 @@ inverse_transform method.</p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>(int, list, str)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3065,7 +3067,7 @@ extracted from the output layer <code>self.regressor.layers[-1].output_shape[1]<
           <tr class="doc-section-item">
             <td><code>lags</code></td>
             <td>
-                  <code><span title="typing.Optional">Optional</span>[<span title="typing.Union">Union</span>[int, list, str]]</code>
+                  <code><a class="autorefs autorefs-external" title="typing.Optional" href="https://docs.python.org/3/library/typing.html#typing.Optional">Optional</a>[<a class="autorefs autorefs-external" title="typing.Union" href="https://docs.python.org/3/library/typing.html#typing.Union">Union</a>[<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>]]</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3148,7 +3150,7 @@ are stored in <code>self.regressors_</code>.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.levels">levels</span></code></td>
             <td>
-                  <code>(str, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3185,7 +3187,7 @@ should be defined before training.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.transformer_series">transformer_series</span></code></td>
             <td>
-                  <code>(object, dict)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3200,7 +3202,7 @@ inverse_transform method.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.transformer_series_">transformer_series_</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3223,7 +3225,7 @@ objects in <code>transformer_series</code> and is used internally to avoid overw
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.max_lag">max_lag</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3234,7 +3236,7 @@ objects in <code>transformer_series</code> and is used internally to avoid overw
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.window_size">window_size</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3257,7 +3259,7 @@ needed to predict the next <code>step</code> immediately after the training data
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.index_type_">index_type_</span></code></td>
             <td>
-                  <code>type</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#type">type</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3268,7 +3270,7 @@ needed to predict the next <code>step</code> immediately after the training data
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.index_freq_">index_freq_</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3290,7 +3292,7 @@ needed to predict the next <code>step</code> immediately after the training data
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.series_names_in_">series_names_in_</span></code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3301,7 +3303,7 @@ needed to predict the next <code>step</code> immediately after the training data
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.exog_in_">exog_in_</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3312,7 +3314,7 @@ needed to predict the next <code>step</code> immediately after the training data
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.exog_names_in_">exog_names_in_</span></code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3323,7 +3325,7 @@ needed to predict the next <code>step</code> immediately after the training data
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.exog_type_in_">exog_type_in_</span></code></td>
             <td>
-                  <code>type</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#type">type</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3334,7 +3336,7 @@ needed to predict the next <code>step</code> immediately after the training data
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.exog_dtypes_in_">exog_dtypes_in_</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3346,7 +3348,7 @@ is used, the dtypes are calculated after the transformation.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.X_train_dim_names_">X_train_dim_names_</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3357,7 +3359,7 @@ is used, the dtypes are calculated after the transformation.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.y_train_dim_names_">y_train_dim_names_</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3368,7 +3370,7 @@ is used, the dtypes are calculated after the transformation.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.fit_kwargs">fit_kwargs</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3379,7 +3381,7 @@ is used, the dtypes are calculated after the transformation.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.in_sample_residuals_">in_sample_residuals_</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3392,7 +3394,7 @@ is not <code>None</code>, residuals are stored in the transformed scale.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.out_sample_residuals">out_sample_residuals</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3406,7 +3408,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.creation_date">creation_date</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3417,7 +3419,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.is_fitted">is_fitted</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3428,7 +3430,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.fit_date">fit_date</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3439,7 +3441,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.skforcast_version">skforcast_version</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3450,7 +3452,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.python_version">python_version</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3461,7 +3463,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.forecaster_id">forecaster_id</span></code></td>
             <td>
-                  <code>(str, int)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3472,7 +3474,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.history">history</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3812,10 +3814,12 @@ internally to avoid overwriting.</p>
 
 
 <h3 id="skforecast.deep_learning._forecaster_rnn.ForecasterRnn._create_lags" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_create_lags</span><span class="p">(</span><span class="n">y</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">_create_lags</span>
+
 
 <a href="#skforecast.deep_learning._forecaster_rnn.ForecasterRnn._create_lags" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_create_lags</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4015,10 +4019,12 @@ Shape: (len(max_step), samples - max(lags))</p>
 
 
 <h3 id="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.create_train_X_y" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">create_train_X_y</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">create_train_X_y</span>
+
 
 <a href="#skforecast.deep_learning._forecaster_rnn.ForecasterRnn.create_train_X_y" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">create_train_X_y</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4103,7 +4109,7 @@ The resulting array has 3 dimensions: (time_points, n_steps, n_levels)</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>dimension_names</code></td>            <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4381,10 +4387,12 @@ The resulting array has 3 dimensions: (time_points, n_steps, n_levels)</p>
 
 
 <h3 id="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.fit" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">store_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">store_last_window</span><span class="o">=</span><span class="s1">&#39;Ignored&#39;</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">fit</span>
+
 
 <a href="#skforecast.deep_learning._forecaster_rnn.ForecasterRnn.fit" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">store_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">store_last_window</span><span class="o">=</span><span class="s1">&#39;Ignored&#39;</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4421,7 +4429,7 @@ can be added with the <code>fit_kwargs</code> argument when initializing the for
           <tr class="doc-section-item">
             <td><code>store_in_sample_residuals</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4450,7 +4458,7 @@ after fitting (<code>in_sample_residuals_</code> attribute).</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4674,10 +4682,12 @@ information.</p>
 
 
 <h3 id="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.predict" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">predict</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">predict</span>
+
 
 <a href="#skforecast.deep_learning._forecaster_rnn.ForecasterRnn.predict" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">predict</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4698,7 +4708,7 @@ information.</p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>(int, list, None)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, None)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4720,7 +4730,7 @@ initialization.</li>
           <tr class="doc-section-item">
             <td><code>levels</code></td>
             <td>
-                  <code>(str, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4768,7 +4778,7 @@ right after training data.</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5102,10 +5112,12 @@ information.</p>
 
 
 <h3 id="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.plot_history" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">plot_history</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fig_kw</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">plot_history</span>
+
 
 <a href="#skforecast.deep_learning._forecaster_rnn.ForecasterRnn.plot_history" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">plot_history</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fig_kw</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -5142,7 +5154,7 @@ internally.</p>
           <tr class="doc-section-item">
             <td><code>fig_kw</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5314,10 +5326,12 @@ internally.</p>
 
 
 <h3 id="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.set_params" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">set_params</span>
+
 
 <a href="#skforecast.deep_learning._forecaster_rnn.ForecasterRnn.set_params" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -5340,7 +5354,7 @@ configuration of parameters and hyperparameters.</p>
           <tr class="doc-section-item">
             <td><code>params</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5434,10 +5448,12 @@ configuration of parameters and hyperparameters.</p>
 
 
 <h3 id="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.set_fit_kwargs" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_fit_kwargs</span><span class="p">(</span><span class="n">fit_kwargs</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">set_fit_kwargs</span>
+
 
 <a href="#skforecast.deep_learning._forecaster_rnn.ForecasterRnn.set_fit_kwargs" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_fit_kwargs</span><span class="p">(</span><span class="n">fit_kwargs</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -5459,7 +5475,7 @@ method of the regressor.</p>
           <tr class="doc-section-item">
             <td><code>fit_kwargs</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5547,10 +5563,12 @@ method of the regressor.</p>
 
 
 <h3 id="skforecast.deep_learning._forecaster_rnn.ForecasterRnn.set_lags" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_lags</span><span class="p">(</span><span class="n">lags</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">set_lags</span>
+
 
 <a href="#skforecast.deep_learning._forecaster_rnn.ForecasterRnn.set_lags" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_lags</span><span class="p">(</span><span class="n">lags</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -5626,10 +5644,12 @@ method of the regressor.</p>
 
 
 <h2 id="skforecast.deep_learning.utils.create_and_compile_model" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">deep_learning</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">create_and_compile_model</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">lags</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">recurrent_layer</span><span class="o">=</span><span class="s1">&#39;LSTM&#39;</span><span class="p">,</span> <span class="n">recurrent_units</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">dense_units</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">Adam</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">),</span> <span class="n">loss</span><span class="o">=</span><span class="n">MeanSquaredError</span><span class="p">(),</span> <span class="n">compile_kwargs</span><span class="o">=</span><span class="p">{})</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.deep_learning.utils.create_and_compile_model</span>
+
 
 <a href="#skforecast.deep_learning.utils.create_and_compile_model" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">create_and_compile_model</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">lags</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">recurrent_layer</span><span class="o">=</span><span class="s1">&#39;LSTM&#39;</span><span class="p">,</span> <span class="n">recurrent_units</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span> <span class="n">dense_units</span><span class="o">=</span><span class="mi">64</span><span class="p">,</span> <span class="n">activation</span><span class="o">=</span><span class="s1">&#39;relu&#39;</span><span class="p">,</span> <span class="n">optimizer</span><span class="o">=</span><span class="n">Adam</span><span class="p">(</span><span class="n">learning_rate</span><span class="o">=</span><span class="mf">0.01</span><span class="p">),</span> <span class="n">loss</span><span class="o">=</span><span class="n">MeanSquaredError</span><span class="p">(),</span> <span class="n">compile_kwargs</span><span class="o">=</span><span class="p">{})</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -5664,7 +5684,7 @@ method of the regressor.</p>
           <tr class="doc-section-item">
             <td><code>lags</code></td>
             <td>
-                  <code>(int, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5679,7 +5699,7 @@ specific lag indices.</p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>(int, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5694,7 +5714,7 @@ indices.</p>
           <tr class="doc-section-item">
             <td><code>levels</code></td>
             <td>
-                  <code>(str, int, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5709,7 +5729,7 @@ level indices. If None, defaults to the number of input series.</p>
           <tr class="doc-section-item">
             <td><code>recurrent_layer</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5723,7 +5743,7 @@ level indices. If None, defaults to the number of input series.</p>
           <tr class="doc-section-item">
             <td><code>recurrent_units</code></td>
             <td>
-                  <code>(int, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5738,7 +5758,7 @@ list of integers for multiple layers.</p>
           <tr class="doc-section-item">
             <td><code>dense_units</code></td>
             <td>
-                  <code>(int, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5752,7 +5772,7 @@ list of integers for multiple layers.</p>
           <tr class="doc-section-item">
             <td><code>activation</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5766,7 +5786,7 @@ list of integers for multiple layers.</p>
           <tr class="doc-section-item">
             <td><code>optimizer</code></td>
             <td>
-                  <code>object</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5780,7 +5800,7 @@ list of integers for multiple layers.</p>
           <tr class="doc-section-item">
             <td><code>loss</code></td>
             <td>
-                  <code>object</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5794,7 +5814,7 @@ list of integers for multiple layers.</p>
           <tr class="doc-section-item">
             <td><code>compile_kwargs</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">

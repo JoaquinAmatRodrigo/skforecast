@@ -54,7 +54,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra_0_14.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -3062,10 +3062,12 @@ This is documentation for an unstable development version.
 
 
 <h2 id="skforecast.model_selection._validation.backtesting_forecaster" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_validation</span><span class="o">.</span><span class="n">backtesting_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_binned_residuals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._validation.backtesting_forecaster</span>
+
 
 <a href="#skforecast.model_selection._validation.backtesting_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">backtesting_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_binned_residuals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -3137,7 +3139,7 @@ the process.</p>
           <tr class="doc-section-item">
             <td><code>metric</code></td>
             <td>
-                  <code>(str, <span title="typing.Callable">Callable</span>, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3175,7 +3177,7 @@ regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>interval</code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3192,7 +3194,7 @@ intervals are estimated.</p>
           <tr class="doc-section-item">
             <td><code>n_boot</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3207,7 +3209,7 @@ intervals.</p>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3222,7 +3224,7 @@ deterministic.</p>
           <tr class="doc-section-item">
             <td><code>use_in_sample_residuals</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3238,7 +3240,7 @@ are used if they are already stored inside the forecaster.</p>
           <tr class="doc-section-item">
             <td><code>use_binned_residuals</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3254,7 +3256,7 @@ randomly without conditioning on the predicted values.</p>
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3270,7 +3272,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3285,7 +3287,7 @@ for backtesting.</p>
           <tr class="doc-section-item">
             <td><code>show_progress</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3636,10 +3638,12 @@ for backtesting.</p>
 
 
 <h2 id="skforecast.model_selection._search.grid_search_forecaster" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_search</span><span class="o">.</span><span class="n">grid_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._search.grid_search_forecaster</span>
+
 
 <a href="#skforecast.model_selection._search.grid_search_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">grid_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -3705,7 +3709,7 @@ the data into folds.
           <tr class="doc-section-item">
             <td><code>param_grid</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3720,7 +3724,7 @@ settings to try as values.</p>
           <tr class="doc-section-item">
             <td><code>metric</code></td>
             <td>
-                  <code>(str, <span title="typing.Callable">Callable</span>, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3758,7 +3762,7 @@ regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>lags_grid</code></td>
             <td>
-                  <code>(list, dict)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3774,7 +3778,7 @@ DataFrame, and the values are used as the lists of lags to try.</p>
           <tr class="doc-section-item">
             <td><code>return_best</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3788,7 +3792,7 @@ DataFrame, and the values are used as the lists of lags to try.</p>
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3804,7 +3808,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3818,7 +3822,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>show_progress</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3832,7 +3836,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>output_file</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4080,10 +4084,12 @@ The results will be saved in a tab-separated values (TSV) format. If
 
 
 <h2 id="skforecast.model_selection._search.random_search_forecaster" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_search</span><span class="o">.</span><span class="n">random_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_distributions</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._search.random_search_forecaster</span>
+
 
 <a href="#skforecast.model_selection._search.random_search_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">random_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_distributions</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -4149,7 +4155,7 @@ the data into folds.
           <tr class="doc-section-item">
             <td><code>param_distributions</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4164,7 +4170,7 @@ distributions or lists of parameters to try.</p>
           <tr class="doc-section-item">
             <td><code>metric</code></td>
             <td>
-                  <code>(str, <span title="typing.Callable">Callable</span>, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4202,7 +4208,7 @@ regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>lags_grid</code></td>
             <td>
-                  <code>(list, dict)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4218,7 +4224,7 @@ DataFrame, and the values are used as the lists of lags to try.</p>
           <tr class="doc-section-item">
             <td><code>n_iter</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4233,7 +4239,7 @@ n_iter trades off runtime vs quality of the solution.</p>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4247,7 +4253,7 @@ n_iter trades off runtime vs quality of the solution.</p>
           <tr class="doc-section-item">
             <td><code>return_best</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4261,7 +4267,7 @@ n_iter trades off runtime vs quality of the solution.</p>
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4277,7 +4283,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4291,7 +4297,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>show_progress</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4305,7 +4311,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>output_file</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4567,10 +4573,12 @@ The results will be saved in a tab-separated values (TSV) format. If
 
 
 <h2 id="skforecast.model_selection._search.bayesian_search_forecaster" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_search</span><span class="o">.</span><span class="n">bayesian_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">search_space</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kwargs_create_study</span><span class="o">=</span><span class="p">{},</span> <span class="n">kwargs_study_optimize</span><span class="o">=</span><span class="p">{})</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._search.bayesian_search_forecaster</span>
+
 
 <a href="#skforecast.model_selection._search.bayesian_search_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">bayesian_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">search_space</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kwargs_create_study</span><span class="o">=</span><span class="p">{},</span> <span class="n">kwargs_study_optimize</span><span class="o">=</span><span class="p">{})</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -4635,7 +4643,7 @@ the data into folds.
           <tr class="doc-section-item">
             <td><code>search_space</code></td>
             <td>
-                  <code><span title="typing.Callable">Callable</span>(optuna)</code>
+                  <code><a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>(optuna)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4651,7 +4659,7 @@ trial.suggest_int, trial.suggest_categorical) as values.</p>
           <tr class="doc-section-item">
             <td><code>metric</code></td>
             <td>
-                  <code>(str, <span title="typing.Callable">Callable</span>, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4689,7 +4697,7 @@ regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>n_trials</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4703,7 +4711,7 @@ regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4719,7 +4727,7 @@ sampler. For example <code>{'sampler': TPESampler(seed=145)}</code>.</p>
           <tr class="doc-section-item">
             <td><code>return_best</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4733,7 +4741,7 @@ sampler. For example <code>{'sampler': TPESampler(seed=145)}</code>.</p>
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4749,7 +4757,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4763,7 +4771,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>show_progress</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4777,7 +4785,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>output_file</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4794,7 +4802,7 @@ The results will be saved in a tab-separated values (TSV) format. If
           <tr class="doc-section-item">
             <td><code>kwargs_create_study</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4810,7 +4818,7 @@ sampler is used during optimization.</p>
           <tr class="doc-section-item">
             <td><code>kwargs_study_optimize</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5102,10 +5110,12 @@ sampler is used during optimization.</p>
 
 
 <h2 id="skforecast.model_selection._validation.backtesting_forecaster_multiseries" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_validation</span><span class="o">.</span><span class="n">backtesting_forecaster_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_aggregated_metric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._validation.backtesting_forecaster_multiseries</span>
+
 
 <a href="#skforecast.model_selection._validation.backtesting_forecaster_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">backtesting_forecaster_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_aggregated_metric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -5176,7 +5186,7 @@ the process.</p>
           <tr class="doc-section-item">
             <td><code>metric</code></td>
             <td>
-                  <code>(str, <span title="typing.Callable">Callable</span>, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5198,7 +5208,7 @@ the process.</p>
           <tr class="doc-section-item">
             <td><code>levels</code></td>
             <td>
-                  <code>(str, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5212,7 +5222,7 @@ the process.</p>
           <tr class="doc-section-item">
             <td><code>add_aggregated_metric</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5248,7 +5258,7 @@ calculated.</li>
           <tr class="doc-section-item">
             <td><code>interval</code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5264,7 +5274,7 @@ intervals are estimated.</p>
           <tr class="doc-section-item">
             <td><code>n_boot</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5279,7 +5289,7 @@ intervals.</p>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5294,7 +5304,7 @@ deterministic.</p>
           <tr class="doc-section-item">
             <td><code>use_in_sample_residuals</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5310,7 +5320,7 @@ are used if they are already stored inside the forecaster.</p>
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5326,7 +5336,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5341,7 +5351,7 @@ for backtesting.</p>
           <tr class="doc-section-item">
             <td><code>show_progress</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5355,7 +5365,7 @@ for backtesting.</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5725,10 +5735,12 @@ If there is more than one level, this structure will be repeated for each of the
 
 
 <h2 id="skforecast.model_selection._search.grid_search_forecaster_multiseries" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_search</span><span class="o">.</span><span class="n">grid_search_forecaster_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">aggregate_metric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;weighted_average&#39;</span><span class="p">,</span> <span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="s1">&#39;pooling&#39;</span><span class="p">],</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._search.grid_search_forecaster_multiseries</span>
+
 
 <a href="#skforecast.model_selection._search.grid_search_forecaster_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">grid_search_forecaster_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">aggregate_metric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;weighted_average&#39;</span><span class="p">,</span> <span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="s1">&#39;pooling&#39;</span><span class="p">],</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -5794,7 +5806,7 @@ the data into folds.
           <tr class="doc-section-item">
             <td><code>param_grid</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5809,7 +5821,7 @@ settings to try as values.</p>
           <tr class="doc-section-item">
             <td><code>metric</code></td>
             <td>
-                  <code>(str, <span title="typing.Callable">Callable</span>, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5831,7 +5843,7 @@ settings to try as values.</p>
           <tr class="doc-section-item">
             <td><code>aggregate_metric</code></td>
             <td>
-                  <code>(str, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5854,7 +5866,7 @@ calculated.</li>
           <tr class="doc-section-item">
             <td><code>levels</code></td>
             <td>
-                  <code>(str, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5883,7 +5895,7 @@ If <code>None</code>, all levels are taken into account.</p>
           <tr class="doc-section-item">
             <td><code>lags_grid</code></td>
             <td>
-                  <code>(list, dict)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5899,7 +5911,7 @@ DataFrame, and the values are used as the lists of lags to try.</p>
           <tr class="doc-section-item">
             <td><code>return_best</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5913,7 +5925,7 @@ DataFrame, and the values are used as the lists of lags to try.</p>
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5929,7 +5941,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5943,7 +5955,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>show_progress</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5957,7 +5969,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5973,7 +5985,7 @@ information.</p>
           <tr class="doc-section-item">
             <td><code>output_file</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6269,10 +6281,12 @@ metric will be the average of the optimization of all levels.</li>
 
 
 <h2 id="skforecast.model_selection._search.random_search_forecaster_multiseries" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_search</span><span class="o">.</span><span class="n">random_search_forecaster_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_distributions</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">aggregate_metric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;weighted_average&#39;</span><span class="p">,</span> <span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="s1">&#39;pooling&#39;</span><span class="p">],</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._search.random_search_forecaster_multiseries</span>
+
 
 <a href="#skforecast.model_selection._search.random_search_forecaster_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">random_search_forecaster_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_distributions</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">aggregate_metric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;weighted_average&#39;</span><span class="p">,</span> <span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="s1">&#39;pooling&#39;</span><span class="p">],</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -6337,7 +6351,7 @@ the data into folds.</p>
           <tr class="doc-section-item">
             <td><code>param_distributions</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6352,7 +6366,7 @@ lists of parameters to try.</p>
           <tr class="doc-section-item">
             <td><code>metric</code></td>
             <td>
-                  <code>(str, <span title="typing.Callable">Callable</span>, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6374,7 +6388,7 @@ lists of parameters to try.</p>
           <tr class="doc-section-item">
             <td><code>aggregate_metric</code></td>
             <td>
-                  <code>(str, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6397,7 +6411,7 @@ calculated.</li>
           <tr class="doc-section-item">
             <td><code>levels</code></td>
             <td>
-                  <code>(str, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6426,7 +6440,7 @@ If <code>None</code>, all levels are taken into account.</p>
           <tr class="doc-section-item">
             <td><code>lags_grid</code></td>
             <td>
-                  <code>(list, dict)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6442,7 +6456,7 @@ DataFrame, and the values are used as the lists of lags to try.</p>
           <tr class="doc-section-item">
             <td><code>n_iter</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6457,7 +6471,7 @@ n_iter trades off runtime vs quality of the solution.</p>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6471,7 +6485,7 @@ n_iter trades off runtime vs quality of the solution.</p>
           <tr class="doc-section-item">
             <td><code>return_best</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6485,7 +6499,7 @@ n_iter trades off runtime vs quality of the solution.</p>
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6501,7 +6515,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6515,7 +6529,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>show_progress</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6529,7 +6543,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6545,7 +6559,7 @@ information.</p>
           <tr class="doc-section-item">
             <td><code>output_file</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6855,10 +6869,12 @@ metric will be the average of the optimization of all levels.</li>
 
 
 <h2 id="skforecast.model_selection._search.bayesian_search_forecaster_multiseries" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_search</span><span class="o">.</span><span class="n">bayesian_search_forecaster_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">search_space</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">aggregate_metric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;weighted_average&#39;</span><span class="p">,</span> <span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="s1">&#39;pooling&#39;</span><span class="p">],</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kwargs_create_study</span><span class="o">=</span><span class="p">{},</span> <span class="n">kwargs_study_optimize</span><span class="o">=</span><span class="p">{})</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._search.bayesian_search_forecaster_multiseries</span>
+
 
 <a href="#skforecast.model_selection._search.bayesian_search_forecaster_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">bayesian_search_forecaster_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">search_space</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">aggregate_metric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;weighted_average&#39;</span><span class="p">,</span> <span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="s1">&#39;pooling&#39;</span><span class="p">],</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kwargs_create_study</span><span class="o">=</span><span class="p">{},</span> <span class="n">kwargs_study_optimize</span><span class="o">=</span><span class="p">{})</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -6907,7 +6923,7 @@ metric will be the average of the optimization of all levels.</li>
           <tr class="doc-section-item">
             <td><code>search_space</code></td>
             <td>
-                  <code><span title="typing.Callable">Callable</span></code>
+                  <code><a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6923,7 +6939,7 @@ trial.suggest_int, trial.suggest_categorical) as values.</p>
           <tr class="doc-section-item">
             <td><code>metric</code></td>
             <td>
-                  <code>(str, <span title="typing.Callable">Callable</span>, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6945,7 +6961,7 @@ trial.suggest_int, trial.suggest_categorical) as values.</p>
           <tr class="doc-section-item">
             <td><code>aggregate_metric</code></td>
             <td>
-                  <code>(str, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6968,7 +6984,7 @@ calculated.</li>
           <tr class="doc-section-item">
             <td><code>levels</code></td>
             <td>
-                  <code>(str, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6997,7 +7013,7 @@ If <code>None</code>, all levels are taken into account.</p>
           <tr class="doc-section-item">
             <td><code>n_trials</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7011,7 +7027,7 @@ If <code>None</code>, all levels are taken into account.</p>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7025,7 +7041,7 @@ If <code>None</code>, all levels are taken into account.</p>
           <tr class="doc-section-item">
             <td><code>return_best</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7039,7 +7055,7 @@ If <code>None</code>, all levels are taken into account.</p>
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7055,7 +7071,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7069,7 +7085,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>show_progress</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7083,7 +7099,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7099,7 +7115,7 @@ information.</p>
           <tr class="doc-section-item">
             <td><code>output_file</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7116,7 +7132,7 @@ The results will be saved in a tab-separated values (TSV) format. If
           <tr class="doc-section-item">
             <td><code>kwargs_create_study</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7132,7 +7148,7 @@ sampler is used during optimization.</p>
           <tr class="doc-section-item">
             <td><code>kwargs_study_optimize</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7460,10 +7476,12 @@ metric will be the average of the optimization of all levels.</li>
 
 
 <h2 id="skforecast.model_selection._validation.backtesting_sarimax" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_validation</span><span class="o">.</span><span class="n">backtesting_sarimax</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._validation.backtesting_sarimax</span>
+
 
 <a href="#skforecast.model_selection._validation.backtesting_sarimax" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">backtesting_sarimax</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -7529,7 +7547,7 @@ the process.</p>
           <tr class="doc-section-item">
             <td><code>metric</code></td>
             <td>
-                  <code>(str, <span title="typing.Callable">Callable</span>, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7567,7 +7585,7 @@ regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>alpha</code></td>
             <td>
-                  <code>float</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7582,7 +7600,7 @@ If both, <code>alpha</code> and <code>interval</code> are provided, <code>alpha<
           <tr class="doc-section-item">
             <td><code>interval</code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7600,7 +7618,7 @@ provided, <code>alpha</code> will be used.</p>
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7616,7 +7634,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7631,7 +7649,7 @@ for backtesting.</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings_fit</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7645,7 +7663,7 @@ for backtesting.</p>
           <tr class="doc-section-item">
             <td><code>show_progress</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7926,10 +7944,12 @@ for backtesting.</p>
 
 
 <h2 id="skforecast.model_selection._search.grid_search_sarimax" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_search</span><span class="o">.</span><span class="n">grid_search_sarimax</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._search.grid_search_sarimax</span>
+
 
 <a href="#skforecast.model_selection._search.grid_search_sarimax" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">grid_search_sarimax</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -7994,7 +8014,7 @@ Validation is done using time series backtesting.</p>
           <tr class="doc-section-item">
             <td><code>param_grid</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8009,7 +8029,7 @@ settings to try as values.</p>
           <tr class="doc-section-item">
             <td><code>metric</code></td>
             <td>
-                  <code>(str, <span title="typing.Callable">Callable</span>, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8047,7 +8067,7 @@ regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>return_best</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8061,7 +8081,7 @@ regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8077,7 +8097,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8091,7 +8111,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings_fit</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8105,7 +8125,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>show_progress</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8119,7 +8139,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>output_file</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8355,10 +8375,12 @@ The results will be saved in a tab-separated values (TSV) format. If
 
 
 <h2 id="skforecast.model_selection._search.random_search_sarimax" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_search</span><span class="o">.</span><span class="n">random_search_sarimax</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_distributions</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._search.random_search_sarimax</span>
+
 
 <a href="#skforecast.model_selection._search.random_search_sarimax" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">random_search_sarimax</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_distributions</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -8423,7 +8445,7 @@ object. Validation is done using time series backtesting.</p>
           <tr class="doc-section-item">
             <td><code>param_distributions</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8438,7 +8460,7 @@ distributions or lists of parameters to try.</p>
           <tr class="doc-section-item">
             <td><code>metric</code></td>
             <td>
-                  <code>(str, <span title="typing.Callable">Callable</span>, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8476,7 +8498,7 @@ regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>n_iter</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8491,7 +8513,7 @@ n_iter trades off runtime vs quality of the solution.</p>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8505,7 +8527,7 @@ n_iter trades off runtime vs quality of the solution.</p>
           <tr class="doc-section-item">
             <td><code>return_best</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8519,7 +8541,7 @@ n_iter trades off runtime vs quality of the solution.</p>
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8535,7 +8557,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8549,7 +8571,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings_fit</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8563,7 +8585,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>show_progress</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8577,7 +8599,7 @@ skforecast.utils.select_n_jobs_backtesting.</p>
           <tr class="doc-section-item">
             <td><code>output_file</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8828,10 +8850,12 @@ The results will be saved in a tab-separated values (TSV) format. If
 
 
 <h2 id="skforecast.model_selection._split.BaseFold" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_split</span><span class="o">.</span><span class="n">BaseFold</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_folds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.model_selection._split.BaseFold</span>
+
 
 <a href="#skforecast.model_selection._split.BaseFold" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">BaseFold</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_folds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -8854,7 +8878,7 @@ all the parameters that can be set at the class level in their <code>__init__</c
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8869,7 +8893,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code>initial_train_size</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8883,7 +8907,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code>window_size</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8897,7 +8921,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code>differentiation</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8912,7 +8936,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code>refit</code></td>
             <td>
-                  <code>(bool, int)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8932,7 +8956,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code>fixed_train_size</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8946,7 +8970,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code>gap</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8961,7 +8985,7 @@ test set.</p>
           <tr class="doc-section-item">
             <td><code>skip_folds</code></td>
             <td>
-                  <code>(int, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8982,7 +9006,7 @@ test set.</p>
           <tr class="doc-section-item">
             <td><code>allow_incomplete_fold</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8997,7 +9021,7 @@ If <code>False</code>, the last fold is excluded if it is incomplete.</p>
           <tr class="doc-section-item">
             <td><code>return_all_indexes</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9011,7 +9035,7 @@ If <code>False</code>, the last fold is excluded if it is incomplete.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9039,7 +9063,7 @@ If <code>False</code>, the last fold is excluded if it is incomplete.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.BaseFold.steps">steps</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9051,7 +9075,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.BaseFold.initial_train_size">initial_train_size</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9062,7 +9086,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.BaseFold.window_size">window_size</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9073,7 +9097,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.BaseFold.differentiation">differentiation</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9085,7 +9109,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.BaseFold.refit">refit</span></code></td>
             <td>
-                  <code>(bool, int)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9096,7 +9120,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.BaseFold.fixed_train_size">fixed_train_size</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9107,7 +9131,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.BaseFold.gap">gap</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9119,7 +9143,7 @@ test set.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.BaseFold.skip_folds">skip_folds</span></code></td>
             <td>
-                  <code>(int, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9130,7 +9154,7 @@ test set.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.BaseFold.allow_incomplete_fold">allow_incomplete_fold</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9141,7 +9165,7 @@ test set.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.BaseFold.return_all_indexes">return_all_indexes</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9152,7 +9176,7 @@ test set.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.BaseFold.verbose">verbose</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9265,10 +9289,12 @@ test set.</p>
 
 
 <h3 id="skforecast.model_selection._split.BaseFold._validate_params" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_validate_params</span><span class="p">(</span><span class="n">cv_name</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_folds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">_validate_params</span>
+
 
 <a href="#skforecast.model_selection._split.BaseFold._validate_params" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_validate_params</span><span class="p">(</span><span class="n">cv_name</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_folds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -9507,10 +9533,12 @@ test set.</p>
 
 
 <h3 id="skforecast.model_selection._split.BaseFold._extract_index" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_extract_index</span><span class="p">(</span><span class="n">X</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">_extract_index</span>
+
 
 <a href="#skforecast.model_selection._split.BaseFold._extract_index" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_extract_index</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -9651,10 +9679,12 @@ test set.</p>
 
 
 <h3 id="skforecast.model_selection._split.BaseFold.set_params" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">set_params</span>
+
 
 <a href="#skforecast.model_selection._split.BaseFold.set_params" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -9676,7 +9706,7 @@ current parameters, the input parameters are validated to ensure correctness.</p
           <tr class="doc-section-item">
             <td><code>params</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9803,10 +9833,12 @@ current parameters, the input parameters are validated to ensure correctness.</p
 
 
 <h2 id="skforecast.model_selection._split.TimeSeriesFold" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_split</span><span class="o">.</span><span class="n">TimeSeriesFold</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_folds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.model_selection._split.TimeSeriesFold</span>
+
 
 <a href="#skforecast.model_selection._split.TimeSeriesFold" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">TimeSeriesFold</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_folds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
@@ -9834,7 +9866,7 @@ functions.</p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9849,7 +9881,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code>initial_train_size</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9864,7 +9896,7 @@ forecaster is not trained in the first fold.</p>
           <tr class="doc-section-item">
             <td><code>window_size</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9878,7 +9910,7 @@ forecaster is not trained in the first fold.</p>
           <tr class="doc-section-item">
             <td><code>differentiation</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9893,7 +9925,7 @@ forecaster is not trained in the first fold.</p>
           <tr class="doc-section-item">
             <td><code>refit</code></td>
             <td>
-                  <code>(bool, int)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9913,7 +9945,7 @@ forecaster is not trained in the first fold.</p>
           <tr class="doc-section-item">
             <td><code>fixed_train_size</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9927,7 +9959,7 @@ forecaster is not trained in the first fold.</p>
           <tr class="doc-section-item">
             <td><code>gap</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9942,7 +9974,7 @@ test set.</p>
           <tr class="doc-section-item">
             <td><code>skip_folds</code></td>
             <td>
-                  <code>(int, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9963,7 +9995,7 @@ test set.</p>
           <tr class="doc-section-item">
             <td><code>allow_incomplete_fold</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9978,7 +10010,7 @@ If <code>False</code>, the last fold is excluded if it is incomplete.</p>
           <tr class="doc-section-item">
             <td><code>return_all_indexes</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9992,7 +10024,7 @@ If <code>False</code>, the last fold is excluded if it is incomplete.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10020,7 +10052,7 @@ If <code>False</code>, the last fold is excluded if it is incomplete.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.TimeSeriesFold.steps">steps</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10032,7 +10064,7 @@ referred to as the forecast horizon or test size.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.TimeSeriesFold.initial_train_size">initial_train_size</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10044,7 +10076,7 @@ forecaster is not trained in the first fold.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.TimeSeriesFold.window_size">window_size</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10055,7 +10087,7 @@ forecaster is not trained in the first fold.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.TimeSeriesFold.differentiation">differentiation</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10067,7 +10099,7 @@ forecaster is not trained in the first fold.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.TimeSeriesFold.refit">refit</span></code></td>
             <td>
-                  <code>(bool, int)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10078,7 +10110,7 @@ forecaster is not trained in the first fold.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.TimeSeriesFold.fixed_train_size">fixed_train_size</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10089,7 +10121,7 @@ forecaster is not trained in the first fold.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.TimeSeriesFold.gap">gap</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10101,7 +10133,7 @@ test set.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.TimeSeriesFold.skip_folds">skip_folds</span></code></td>
             <td>
-                  <code>(int, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10112,7 +10144,7 @@ test set.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.TimeSeriesFold.allow_incomplete_fold">allow_incomplete_fold</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10123,7 +10155,7 @@ test set.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.TimeSeriesFold.return_all_indexes">return_all_indexes</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10134,7 +10166,7 @@ test set.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.TimeSeriesFold.verbose">verbose</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10239,10 +10271,12 @@ exclusive. This means that the last index is not included in the slice.</p>
 
 
 <h3 id="skforecast.model_selection._split.TimeSeriesFold.split" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">as_pandas</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">split</span>
+
 
 <a href="#skforecast.model_selection._split.TimeSeriesFold.split" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">as_pandas</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -10277,7 +10311,7 @@ exclusive. This means that the last index is not included in the slice.</p>
           <tr class="doc-section-item">
             <td><code>as_pandas</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10825,10 +10859,12 @@ slice.</p>
 
 
 <h3 id="skforecast.model_selection._split.TimeSeriesFold._print_info" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_print_info</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">folds</span><span class="p">,</span> <span class="n">externally_fitted</span><span class="p">,</span> <span class="n">last_fold_excluded</span><span class="p">,</span> <span class="n">index_to_skip</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">_print_info</span>
+
 
 <a href="#skforecast.model_selection._split.TimeSeriesFold._print_info" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_print_info</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">folds</span><span class="p">,</span> <span class="n">externally_fitted</span><span class="p">,</span> <span class="n">last_fold_excluded</span><span class="p">,</span> <span class="n">index_to_skip</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -11046,10 +11082,12 @@ slice.</p>
 
 
 <h2 id="skforecast.model_selection._split.OneStepAheadFold" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_split</span><span class="o">.</span><span class="n">OneStepAheadFold</span><span class="p">(</span><span class="n">initial_train_size</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.model_selection._split.OneStepAheadFold</span>
+
 
 <a href="#skforecast.model_selection._split.OneStepAheadFold" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">OneStepAheadFold</span><span class="p">(</span><span class="n">initial_train_size</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
@@ -11074,7 +11112,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code>initial_train_size</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11088,7 +11126,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code>window_size</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11102,7 +11140,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code>differentiation</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11117,7 +11155,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code>return_all_indexes</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11131,7 +11169,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11159,7 +11197,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.OneStepAheadFold.initial_train_size">initial_train_size</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11170,7 +11208,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.OneStepAheadFold.window_size">window_size</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11181,7 +11219,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.OneStepAheadFold.differentiation">differentiation</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11193,7 +11231,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.OneStepAheadFold.return_all_indexes">return_all_indexes</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11204,7 +11242,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.OneStepAheadFold.verbose">verbose</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11215,7 +11253,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.OneStepAheadFold.steps">steps</span></code></td>
             <td>
-                  <code><span title="typing.Any">Any</span></code>
+                  <code><a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11226,7 +11264,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.OneStepAheadFold.fixed_train_size">fixed_train_size</span></code></td>
             <td>
-                  <code><span title="typing.Any">Any</span></code>
+                  <code><a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11237,7 +11275,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.OneStepAheadFold.gap">gap</span></code></td>
             <td>
-                  <code><span title="typing.Any">Any</span></code>
+                  <code><a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11248,7 +11286,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.OneStepAheadFold.skip_folds">skip_folds</span></code></td>
             <td>
-                  <code><span title="typing.Any">Any</span></code>
+                  <code><a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11259,7 +11297,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.OneStepAheadFold.allow_incomplete_fold">allow_incomplete_fold</span></code></td>
             <td>
-                  <code><span title="typing.Any">Any</span></code>
+                  <code><a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11270,7 +11308,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.model_selection._split.OneStepAheadFold.refit">refit</span></code></td>
             <td>
-                  <code><span title="typing.Any">Any</span></code>
+                  <code><a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11333,10 +11371,12 @@ forecasting.</p>
 
 
 <h3 id="skforecast.model_selection._split.OneStepAheadFold.split" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">as_pandas</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">externally_fitted</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">split</span>
+
 
 <a href="#skforecast.model_selection._split.OneStepAheadFold.split" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">split</span><span class="p">(</span><span class="n">X</span><span class="p">,</span> <span class="n">as_pandas</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">externally_fitted</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -11371,7 +11411,7 @@ forecasting.</p>
           <tr class="doc-section-item">
             <td><code>as_pandas</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11386,7 +11426,7 @@ the folds in a more interpretable way.</p>
           <tr class="doc-section-item">
             <td><code>externally_fitted</code></td>
             <td>
-                  <code><span title="typing.Any">Any</span></code>
+                  <code><a class="autorefs autorefs-external" title="typing.Any" href="https://docs.python.org/3/library/typing.html#typing.Any">Any</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11635,10 +11675,12 @@ slice.</p>
 
 
 <h3 id="skforecast.model_selection._split.OneStepAheadFold._print_info" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_print_info</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">fold</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">_print_info</span>
+
 
 <a href="#skforecast.model_selection._split.OneStepAheadFold._print_info" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_print_info</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">fold</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -11749,10 +11791,12 @@ slice.</p>
 
 
 <h2 id="skforecast.model_selection._utils.initialize_lags_grid" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_utils</span><span class="o">.</span><span class="n">initialize_lags_grid</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._utils.initialize_lags_grid</span>
+
 
 <a href="#skforecast.model_selection._utils.initialize_lags_grid" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">initialize_lags_grid</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -11788,7 +11832,7 @@ ForecasterRecursiveMultiSeries, ForecasterDirectMultiVariate.</p>
           <tr class="doc-section-item">
             <td><code>lags_grid</code></td>
             <td>
-                  <code>(list, dict)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11816,7 +11860,7 @@ DataFrame, and the values are used as the lists of lags to try.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>lags_grid</code></td>            <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11826,7 +11870,7 @@ DataFrame, and the values are used as the lists of lags to try.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>lags_label</code></td>            <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11932,10 +11976,12 @@ DataFrame, and the values are used as the lists of lags to try.</p>
 
 
 <h2 id="skforecast.model_selection._utils.check_backtesting_input" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_utils</span><span class="o">.</span><span class="n">check_backtesting_input</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">add_aggregated_metric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">series</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_binned_residuals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._utils.check_backtesting_input</span>
+
 
 <a href="#skforecast.model_selection._utils.check_backtesting_input" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">check_backtesting_input</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">add_aggregated_metric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">series</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_binned_residuals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -11986,7 +12032,7 @@ modules <code>model_selection</code>, <code>model_selection_multiseries</code> a
           <tr class="doc-section-item">
             <td><code>metric</code></td>
             <td>
-                  <code>(str, <span title="typing.Callable">Callable</span>, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12000,7 +12046,7 @@ modules <code>model_selection</code>, <code>model_selection_multiseries</code> a
           <tr class="doc-section-item">
             <td><code>add_aggregated_metric</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12057,7 +12103,7 @@ over all levels are also returned (only multiseries).</p>
           <tr class="doc-section-item">
             <td><code>interval</code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12072,7 +12118,7 @@ to compute, which must be between 0 and 100 inclusive.</p>
           <tr class="doc-section-item">
             <td><code>alpha</code></td>
             <td>
-                  <code>float</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12086,7 +12132,7 @@ to compute, which must be between 0 and 100 inclusive.</p>
           <tr class="doc-section-item">
             <td><code>n_boot</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12101,7 +12147,7 @@ intervals.</p>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12116,7 +12162,7 @@ deterministic.</p>
           <tr class="doc-section-item">
             <td><code>use_in_sample_residuals</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12132,7 +12178,7 @@ are used if they are already stored inside the forecaster.</p>
           <tr class="doc-section-item">
             <td><code>use_binned_residuals</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12148,7 +12194,7 @@ randomly without conditioning on the predicted values.</p>
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12165,7 +12211,7 @@ skforecast.utils.select_n_jobs_fit_forecaster.
           <tr class="doc-section-item">
             <td><code>show_progress</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12179,7 +12225,7 @@ skforecast.utils.select_n_jobs_fit_forecaster.
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12195,7 +12241,7 @@ information.</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings_fit</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12798,10 +12844,12 @@ information.</p>
 
 
 <h2 id="skforecast.model_selection._utils.select_n_jobs_backtesting" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">model_selection</span><span class="o">.</span><span class="n">_utils</span><span class="o">.</span><span class="n">select_n_jobs_backtesting</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">refit</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.model_selection._utils.select_n_jobs_backtesting</span>
+
 
 <a href="#skforecast.model_selection._utils.select_n_jobs_backtesting" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">select_n_jobs_backtesting</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">refit</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -12859,7 +12907,7 @@ potentially harmful due to resource contention.</li>
           <tr class="doc-section-item">
             <td><code>refit</code></td>
             <td>
-                  <code>(bool, int)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -12885,7 +12933,7 @@ potentially harmful due to resource contention.</li>
       <tbody>
           <tr class="doc-section-item">
 <td><code>n_jobs</code></td>            <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">

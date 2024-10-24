@@ -54,7 +54,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra_0_14.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -3051,10 +3051,12 @@ This is documentation for an unstable development version.
 
 
 <h2 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">direct</span><span class="o">.</span><span class="n">_forecaster_direct_multivariate</span><span class="o">.</span><span class="n">ForecasterDirectMultiVariate</span><span class="p">(</span><span class="n">regressor</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformer_series</span><span class="o">=</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">transformer_exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weight_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">forecaster_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">ForecasterDirectMultiVariate</span><span class="p">(</span><span class="n">regressor</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">lags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window_features</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformer_series</span><span class="o">=</span><span class="n">StandardScaler</span><span class="p">(),</span> <span class="n">transformer_exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">weight_func</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fit_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">forecaster_id</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
@@ -3094,7 +3096,7 @@ is created for each forecast time step. See documentation for more details.</p>
           <tr class="doc-section-item">
             <td><code>level</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3108,7 +3110,7 @@ is created for each forecast time step. See documentation for more details.</p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3145,7 +3147,7 @@ this value must be defined before training.</p>
           <tr class="doc-section-item">
             <td><code>window_features</code></td>
             <td>
-                  <code>(object, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3160,7 +3162,7 @@ are created from the original time series and are included as predictors.</p>
           <tr class="doc-section-item">
             <td><code>transformer_series</code></td>
             <td>
-                  <code>(transformer(preprocessor), dict)</code>
+                  <code>(transformer(preprocessor), <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3198,7 +3200,7 @@ forecaster. <code>inverse_transform</code> is not available when using ColumnTra
           <tr class="doc-section-item">
             <td><code>weight_func</code></td>
             <td>
-                  <code><span title="typing.Callable">Callable</span></code>
+                  <code><a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3215,7 +3217,7 @@ method. The resulting <code>sample_weight</code> cannot have negative values.</p
           <tr class="doc-section-item">
             <td><code>fit_kwargs</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3229,7 +3231,7 @@ method. The resulting <code>sample_weight</code> cannot have negative values.</p
           <tr class="doc-section-item">
             <td><code>n_jobs</code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3245,7 +3247,7 @@ skforecast.utils.select_n_jobs_fit_forecaster.</p>
           <tr class="doc-section-item">
             <td><code>forecaster_id</code></td>
             <td>
-                  <code>(str, int)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3286,7 +3288,7 @@ are stored in <code>self.regressors_</code>.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.regressors_">regressors_</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3298,7 +3300,7 @@ as a copy of <code>regressor</code>.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.steps">steps</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3322,7 +3324,7 @@ should be defined before training.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.lags_">lags_</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3334,7 +3336,7 @@ creating the training matrices and used internally to avoid overwriting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.lags_names">lags_names</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3345,7 +3347,7 @@ creating the training matrices and used internally to avoid overwriting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.max_lag">max_lag</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3356,7 +3358,7 @@ creating the training matrices and used internally to avoid overwriting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.window_features">window_features</span></code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3367,7 +3369,7 @@ creating the training matrices and used internally to avoid overwriting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.window_features_names">window_features_names</span></code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3378,7 +3380,7 @@ creating the training matrices and used internally to avoid overwriting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.window_features_class_names">window_features_class_names</span></code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3389,7 +3391,7 @@ creating the training matrices and used internally to avoid overwriting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.max_size_window_features">max_size_window_features</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3400,7 +3402,7 @@ creating the training matrices and used internally to avoid overwriting.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.window_size">window_size</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3433,7 +3435,7 @@ inverse_transform method.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.transformer_series_">transformer_series_</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3458,7 +3460,7 @@ forecaster. <code>inverse_transform</code> is not available when using ColumnTra
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.weight_func">weight_func</span></code></td>
             <td>
-                  <code><span title="typing.Callable">Callable</span></code>
+                  <code><a class="autorefs autorefs-external" title="typing.Callable" href="https://docs.python.org/3/library/typing.html#typing.Callable">Callable</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3472,7 +3474,7 @@ Ignored if <code>regressor</code> does not have the argument <code>sample_weight
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.source_code_weight_func">source_code_weight_func</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3483,7 +3485,7 @@ Ignored if <code>regressor</code> does not have the argument <code>sample_weight
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.differentiation">differentiation</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3506,7 +3508,7 @@ forecaster.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.differentiator_">differentiator_</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3536,7 +3538,7 @@ of differentiation. For example, if <code>lags</code> = 7 and <code>differentiat
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.index_type_">index_type_</span></code></td>
             <td>
-                  <code>type</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#type">type</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3547,7 +3549,7 @@ of differentiation. For example, if <code>lags</code> = 7 and <code>differentiat
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.index_freq_">index_freq_</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3569,7 +3571,7 @@ of differentiation. For example, if <code>lags</code> = 7 and <code>differentiat
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.exog_in_">exog_in_</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3580,7 +3582,7 @@ of differentiation. For example, if <code>lags</code> = 7 and <code>differentiat
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.exog_type_in_">exog_type_in_</span></code></td>
             <td>
-                  <code>type</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#type">type</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3591,7 +3593,7 @@ of differentiation. For example, if <code>lags</code> = 7 and <code>differentiat
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.exog_dtypes_in_">exog_dtypes_in_</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3603,7 +3605,7 @@ is used, the dtypes are calculated after the transformation.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.exog_names_in_">exog_names_in_</span></code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3614,7 +3616,7 @@ is used, the dtypes are calculated after the transformation.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.series_names_in_">series_names_in_</span></code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3625,7 +3627,7 @@ is used, the dtypes are calculated after the transformation.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.X_train_series_names_in_">X_train_series_names_in_</span></code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3638,7 +3640,7 @@ matrices with <code>_create_train_X_y</code> method. It is a subset of
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.X_train_window_features_names_out_">X_train_window_features_names_out_</span></code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3650,7 +3652,7 @@ internally for training.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.X_train_exog_names_out_">X_train_exog_names_out_</span></code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3663,7 +3665,7 @@ some exogenous variables are transformed during the training process.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.X_train_direct_exog_names_out_">X_train_direct_exog_names_out_</span></code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3675,7 +3677,7 @@ exogenous variable is repeated for each step.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.X_train_features_names_out_">X_train_features_names_out_</span></code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3686,7 +3688,7 @@ exogenous variable is repeated for each step.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.fit_kwargs">fit_kwargs</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3697,7 +3699,7 @@ exogenous variable is repeated for each step.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.in_sample_residuals_">in_sample_residuals_</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3710,7 +3712,7 @@ is not <code>None</code>, residuals are stored in the transformed scale.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.out_sample_residuals_">out_sample_residuals_</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3724,7 +3726,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.creation_date">creation_date</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3735,7 +3737,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.is_fitted">is_fitted</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3746,7 +3748,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.fit_date">fit_date</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3757,7 +3759,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.skforecast_version">skforecast_version</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3768,7 +3770,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.python_version">python_version</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3779,7 +3781,7 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.n_jobs">n_jobs</span></code></td>
             <td>
-                  <code>(int, auto)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, auto)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3792,7 +3794,7 @@ skforecast.utils.select_n_jobs_fit_forecaster.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.forecaster_id">forecaster_id</span></code></td>
             <td>
-                  <code>(str, int)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4145,10 +4147,12 @@ note that all models share the same parameter and hyperparameter configuration.<
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._repr_html_" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_repr_html_</span><span class="p">()</span></code>
+            <span class="doc doc-object-name doc-function-name">_repr_html_</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._repr_html_" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_repr_html_</span><span class="p">()</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4342,10 +4346,12 @@ The "General Information" section is expanded by default.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._create_data_to_return_dict" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_create_data_to_return_dict</span><span class="p">(</span><span class="n">series_names_in_</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">_create_data_to_return_dict</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._create_data_to_return_dict" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_create_data_to_return_dict</span><span class="p">(</span><span class="n">series_names_in_</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4368,7 +4374,7 @@ the <code>_create_lags</code> method.</p>
           <tr class="doc-section-item">
             <td><code>series_names_in_</code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4394,7 +4400,7 @@ the <code>_create_lags</code> method.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>data_to_return_dict</code></td>            <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4405,7 +4411,7 @@ the <code>_create_lags</code> method.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>X_train_series_names_in_</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4575,10 +4581,12 @@ matrices with <code>_create_train_X_y</code> method. It is a subset of
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._create_lags" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_create_lags</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">lags</span><span class="p">,</span> <span class="n">data_to_return</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">_create_lags</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._create_lags" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_create_lags</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">lags</span><span class="p">,</span> <span class="n">data_to_return</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4629,7 +4637,7 @@ column, the lag 2 in the in the second column and so on.</p>
           <tr class="doc-section-item">
             <td><code>data_to_return</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4793,10 +4801,12 @@ column, the lag 2 in the in the second column and so on.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._create_window_features" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_create_window_features</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">X_as_pandas</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">_create_window_features</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._create_window_features" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_create_window_features</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">train_index</span><span class="p">,</span> <span class="n">X_as_pandas</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4845,7 +4855,7 @@ column, the lag 2 in the in the second column and so on.</p>
           <tr class="doc-section-item">
             <td><code>X_as_pandas</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4872,7 +4882,7 @@ pandas DataFrame.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>X_train_window_features</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4882,7 +4892,7 @@ pandas DataFrame.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>X_train_window_features_names_out_</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5012,10 +5022,12 @@ pandas DataFrame.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._create_train_X_y" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_create_train_X_y</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">_create_train_X_y</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._create_train_X_y" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_create_train_X_y</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -5091,7 +5103,7 @@ step in the filter_train_X_y_for_step method.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>y_train</code></td>            <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5102,7 +5114,7 @@ step in the form {step: y_step_[i]}.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>series_names_in_</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5112,7 +5124,7 @@ step in the form {step: y_step_[i]}.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>X_train_series_names_in_</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5124,7 +5136,7 @@ matrices with <code>_create_train_X_y</code> method. It is a subset of
           </tr>
           <tr class="doc-section-item">
 <td><code>exog_names_in_</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5134,7 +5146,7 @@ matrices with <code>_create_train_X_y</code> method. It is a subset of
           </tr>
           <tr class="doc-section-item">
 <td><code>X_train_exog_names_out_</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5146,7 +5158,7 @@ some exogenous variables are transformed during the training process.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>X_train_features_names_out_</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5156,7 +5168,7 @@ some exogenous variables are transformed during the training process.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>exog_dtypes_in_</code></td>            <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5751,10 +5763,12 @@ is used, the dtypes are calculated before the transformation.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.create_train_X_y" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">create_train_X_y</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">create_train_X_y</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.create_train_X_y" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">create_train_X_y</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -5806,7 +5820,7 @@ number of observations as <code>series</code> and their indexes must be aligned.
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5846,7 +5860,7 @@ step in the filter_train_X_y_for_step method.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>y_train</code></td>            <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5965,10 +5979,12 @@ step in the form {step: y_step_[i]}.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.filter_train_X_y_for_step" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">filter_train_X_y_for_step</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">remove_suffix</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">filter_train_X_y_for_step</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.filter_train_X_y_for_step" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">filter_train_X_y_for_step</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">X_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">remove_suffix</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -5993,7 +6009,7 @@ will be removed from the column names. </p>
           <tr class="doc-section-item">
             <td><code>step</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6021,7 +6037,7 @@ will be removed from the column names. </p>
           <tr class="doc-section-item">
             <td><code>y_train</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6035,7 +6051,7 @@ will be removed from the column names. </p>
           <tr class="doc-section-item">
             <td><code>remove_suffix</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6233,10 +6249,12 @@ will be removed from the column names. </p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._train_test_split_one_step_ahead" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_train_test_split_one_step_ahead</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">_train_test_split_one_step_ahead</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._train_test_split_one_step_ahead" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_train_test_split_one_step_ahead</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -6272,7 +6290,7 @@ predictions.</p>
           <tr class="doc-section-item">
             <td><code>initial_train_size</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6324,7 +6342,7 @@ number of observations as <code>series</code> and their indexes must be aligned.
           </tr>
           <tr class="doc-section-item">
 <td><code>y_train</code></td>            <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6345,7 +6363,7 @@ step in the form {step: y_step_[i]}.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>y_test</code></td>            <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6574,10 +6592,12 @@ step in the form {step: y_step_[i]}.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.create_sample_weights" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">create_sample_weights</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">create_sample_weights</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.create_sample_weights" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">create_sample_weights</span><span class="p">(</span><span class="n">X_train</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -6732,10 +6752,12 @@ methods, first return.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.fit" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">store_last_window</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">store_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">fit</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.fit" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">fit</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">store_last_window</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">store_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -6788,7 +6810,7 @@ that series[i] is regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>store_last_window</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6802,7 +6824,7 @@ that series[i] is regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>store_in_sample_residuals</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -6817,7 +6839,7 @@ after fitting (<code>in_sample_residuals_</code> attribute).</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7229,10 +7251,12 @@ information.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._create_predict_inputs" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_create_predict_inputs</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">check_inputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">_create_predict_inputs</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate._create_predict_inputs" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_create_predict_inputs</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">check_inputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -7253,7 +7277,7 @@ information.</p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>(int, list, None)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, None)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7307,7 +7331,7 @@ right after training data.</p>
           <tr class="doc-section-item">
             <td><code>check_inputs</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7335,7 +7359,7 @@ for internal use and is not recommended to be changed.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>Xs</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7345,7 +7369,7 @@ for internal use and is not recommended to be changed.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>Xs_col_names</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7355,7 +7379,7 @@ for internal use and is not recommended to be changed.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>steps</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7703,10 +7727,12 @@ for internal use and is not recommended to be changed.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.create_predict_X" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">create_predict_X</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">create_predict_X</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.create_predict_X" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">create_predict_X</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -7727,7 +7753,7 @@ for internal use and is not recommended to be changed.</p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>(int, list, None)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, None)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7781,7 +7807,7 @@ right after training data.</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -7946,10 +7972,12 @@ is the same as the prediction index.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.predict" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">predict</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">check_inputs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">predict</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.predict" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">predict</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">check_inputs</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -7970,7 +7998,7 @@ is the same as the prediction index.</p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>(int, list, None)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, None)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8024,7 +8052,7 @@ right after training data.</p>
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8040,7 +8068,7 @@ information.</p>
           <tr class="doc-section-item">
             <td><code>check_inputs</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8284,10 +8312,12 @@ for internal use and is not recommended to be changed.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.predict_bootstrapping" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">predict_bootstrapping</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">predict_bootstrapping</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.predict_bootstrapping" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">predict_bootstrapping</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -8311,7 +8341,7 @@ See the Notes section for more information. </p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>(int, list, None)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, None)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8365,7 +8395,7 @@ right after training data.</p>
           <tr class="doc-section-item">
             <td><code>n_boot</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8379,7 +8409,7 @@ right after training data.</p>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8394,7 +8424,7 @@ deterministic.</p>
           <tr class="doc-section-item">
             <td><code>use_in_sample_residuals</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8412,7 +8442,7 @@ calculated and stored the residuals within the forecaster (see
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8824,10 +8854,12 @@ Forecasting: Principles and Practice (3nd ed) Rob J Hyndman and George Athanasop
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.predict_interval" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">predict_interval</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">95</span><span class="p">],</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">predict_interval</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.predict_interval" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">predict_interval</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="p">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">95</span><span class="p">],</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -8849,7 +8881,7 @@ Both predictions and intervals are returned.</p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>(int, list, None)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, None)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8903,7 +8935,7 @@ right after training data.</p>
           <tr class="doc-section-item">
             <td><code>interval</code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8919,7 +8951,7 @@ For example, interval of 95% should be as <code>interval = [2.5, 97.5]</code>.</
           <tr class="doc-section-item">
             <td><code>n_boot</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8933,7 +8965,7 @@ For example, interval of 95% should be as <code>interval = [2.5, 97.5]</code>.</
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8948,7 +8980,7 @@ deterministic.</p>
           <tr class="doc-section-item">
             <td><code>use_in_sample_residuals</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -8966,7 +8998,7 @@ calculated and stored the residuals within the forecaster (see
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9249,10 +9281,12 @@ George Athanasopoulos.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.predict_quantiles" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">predict_quantiles</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quantiles</span><span class="o">=</span><span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">],</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">predict_quantiles</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.predict_quantiles" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">predict_quantiles</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">quantiles</span><span class="o">=</span><span class="p">[</span><span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">],</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -9273,7 +9307,7 @@ George Athanasopoulos.</p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>(int, list, None)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, None)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9327,7 +9361,7 @@ right after training data.</p>
           <tr class="doc-section-item">
             <td><code>quantiles</code></td>
             <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9343,7 +9377,7 @@ inclusive. For example, quantiles of 0.05, 0.5 and 0.95 should be as
           <tr class="doc-section-item">
             <td><code>n_boot</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9357,7 +9391,7 @@ inclusive. For example, quantiles of 0.05, 0.5 and 0.95 should be as
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9372,7 +9406,7 @@ deterministic.</p>
           <tr class="doc-section-item">
             <td><code>use_in_sample_residuals</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9390,7 +9424,7 @@ calculated and stored the residuals within the forecaster (see
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9640,10 +9674,12 @@ George Athanasopoulos.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.predict_dist" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">predict_dist</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">predict_dist</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.predict_dist" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">predict_dist</span><span class="p">(</span><span class="n">distribution</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">last_window</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -9680,7 +9716,7 @@ step is fitted to the given distribution.</p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>(int, list, None)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, None)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9734,7 +9770,7 @@ right after training data.</p>
           <tr class="doc-section-item">
             <td><code>n_boot</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9748,7 +9784,7 @@ right after training data.</p>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9763,7 +9799,7 @@ deterministic.</p>
           <tr class="doc-section-item">
             <td><code>use_in_sample_residuals</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -9781,7 +9817,7 @@ calculated and stored the residuals within the forecaster (see
           <tr class="doc-section-item">
             <td><code>suppress_warnings</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10029,10 +10065,12 @@ information.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.set_params" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">set_params</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.set_params" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_params</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -10055,7 +10093,7 @@ configuration of parameters and hyperparameters.</p>
           <tr class="doc-section-item">
             <td><code>params</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10151,10 +10189,12 @@ configuration of parameters and hyperparameters.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.set_fit_kwargs" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_fit_kwargs</span><span class="p">(</span><span class="n">fit_kwargs</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">set_fit_kwargs</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.set_fit_kwargs" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_fit_kwargs</span><span class="p">(</span><span class="n">fit_kwargs</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -10176,7 +10216,7 @@ method of the regressor.</p>
           <tr class="doc-section-item">
             <td><code>fit_kwargs</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10264,10 +10304,12 @@ method of the regressor.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.set_lags" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_lags</span><span class="p">(</span><span class="n">lags</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">set_lags</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.set_lags" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_lags</span><span class="p">(</span><span class="n">lags</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -10482,10 +10524,12 @@ method of the regressor.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.set_window_features" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_window_features</span><span class="p">(</span><span class="n">window_features</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">set_window_features</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.set_window_features" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_window_features</span><span class="p">(</span><span class="n">window_features</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -10508,7 +10552,7 @@ method of the regressor.</p>
           <tr class="doc-section-item">
             <td><code>window_features</code></td>
             <td>
-                  <code>(object, list)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10641,10 +10685,12 @@ are created from the original time series and are included as predictors.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.set_out_sample_residuals" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_out_sample_residuals</span><span class="p">(</span><span class="n">residuals</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">set_out_sample_residuals</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.set_out_sample_residuals" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_out_sample_residuals</span><span class="p">(</span><span class="n">residuals</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">transform</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -10667,7 +10713,7 @@ participate in the training process.</p>
           <tr class="doc-section-item">
             <td><code>residuals</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10683,7 +10729,7 @@ sample of 1000 values are stored.</p>
           <tr class="doc-section-item">
             <td><code>append</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10700,7 +10746,7 @@ is overwritten with the new residuals.</p>
           <tr class="doc-section-item">
             <td><code>transform</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10714,7 +10760,7 @@ is overwritten with the new residuals.</p>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -10964,10 +11010,12 @@ is overwritten with the new residuals.</p>
 
 
 <h3 id="skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.get_feature_importances" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_feature_importances</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">sort_importance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">get_feature_importances</span>
+
 
 <a href="#skforecast.direct._forecaster_direct_multivariate.ForecasterDirectMultiVariate.get_feature_importances" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_feature_importances</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">sort_importance</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -10993,7 +11041,7 @@ the attribute <code>feature_importances_</code> or <code>coef_</code>. Otherwise
           <tr class="doc-section-item">
             <td><code>step</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -11008,7 +11056,7 @@ for each forecast time step). First step is 1.</p>
           <tr class="doc-section-item">
             <td><code>sort_importance</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">

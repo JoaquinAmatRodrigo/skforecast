@@ -54,7 +54,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra_0_14.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -2846,10 +2846,12 @@ This is documentation for an unstable development version.
 
 
 <h2 id="skforecast.feature_selection.feature_selection.select_features" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">feature_selection</span><span class="o">.</span><span class="n">feature_selection</span><span class="o">.</span><span class="n">select_features</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">select_only</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_inclusion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subsample</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.feature_selection.feature_selection.select_features</span>
+
 
 <a href="#skforecast.feature_selection.feature_selection.select_features" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">select_features</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">select_only</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_inclusion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subsample</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -2894,7 +2896,7 @@ selector will only be applied to the features of the first step.</p>
           <tr class="doc-section-item">
             <td><code>selector</code></td>
             <td>
-                  <code>object</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2938,7 +2940,7 @@ regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>select_only</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2961,7 +2963,7 @@ in the output (<code>selected_autoreg</code>).</li>
           <tr class="doc-section-item">
             <td><code>force_inclusion</code></td>
             <td>
-                  <code>(list, str)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2981,7 +2983,7 @@ with "sun_" will be included in the final list of selected features.</li>
           <tr class="doc-section-item">
             <td><code>subsample</code></td>
             <td>
-                  <code>(int, float)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2995,7 +2997,7 @@ with "sun_" will be included in the final list of selected features.</li>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3010,7 +3012,7 @@ is always deterministic.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3036,7 +3038,7 @@ is always deterministic.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>selected_autoreg</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3046,7 +3048,7 @@ is always deterministic.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>selected_exog</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3434,10 +3436,12 @@ is always deterministic.</p>
 
 
 <h2 id="skforecast.feature_selection.feature_selection.select_features_multiseries" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">feature_selection</span><span class="o">.</span><span class="n">feature_selection</span><span class="o">.</span><span class="n">select_features_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">select_only</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_inclusion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subsample</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">skforecast.feature_selection.feature_selection.select_features_multiseries</span>
+
 
 <a href="#skforecast.feature_selection.feature_selection.select_features_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">select_features_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">selector</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">select_only</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force_inclusion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">subsample</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
 
@@ -3481,7 +3485,7 @@ list of selected features using the <code>force_inclusion</code> parameter.</p>
           <tr class="doc-section-item">
             <td><code>selector</code></td>
             <td>
-                  <code>object</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3523,7 +3527,7 @@ list of selected features using the <code>force_inclusion</code> parameter.</p>
           <tr class="doc-section-item">
             <td><code>select_only</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3546,7 +3550,7 @@ in the output (<code>selected_autoreg</code>).</li>
           <tr class="doc-section-item">
             <td><code>force_inclusion</code></td>
             <td>
-                  <code>(list, str)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3566,7 +3570,7 @@ with "sun_" will be included in the final list of selected features.</li>
           <tr class="doc-section-item">
             <td><code>subsample</code></td>
             <td>
-                  <code>(int, float)</code>
+                  <code>(<a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a>, <a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a>)</code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3580,7 +3584,7 @@ with "sun_" will be included in the final list of selected features.</li>
           <tr class="doc-section-item">
             <td><code>random_state</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3595,7 +3599,7 @@ is always deterministic.</p>
           <tr class="doc-section-item">
             <td><code>verbose</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3621,7 +3625,7 @@ is always deterministic.</p>
       <tbody>
           <tr class="doc-section-item">
 <td><code>selected_autoreg</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3631,7 +3635,7 @@ is always deterministic.</p>
           </tr>
           <tr class="doc-section-item">
 <td><code>selected_exog</code></td>            <td>
-                  <code>list</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#list">list</a></code>
             </td>
             <td>
               <div class="doc-md-description">

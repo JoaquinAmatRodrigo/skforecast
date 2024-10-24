@@ -54,7 +54,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra_0_14.css">
+      <link rel="stylesheet" href="../stylesheets/extra.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -2943,10 +2943,12 @@ This is documentation for an unstable development version.
 
 
 <h2 id="skforecast.sarimax._sarimax.Sarimax" class="doc doc-heading">
-              <code class="highlight language-python"><span class="n">skforecast</span><span class="o">.</span><span class="n">sarimax</span><span class="o">.</span><span class="n">_sarimax</span><span class="o">.</span><span class="n">Sarimax</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">seasonal_order</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">trend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">measurement_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">time_varying_regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mle_regression</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">simple_differencing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">enforce_stationarity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">enforce_invertibility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hamilton_representation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">concentrate_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trend_offset</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">use_exact_diffuse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">validate_specification</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">start_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sm_init_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">sm_fit_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">sm_predict_kwargs</span><span class="o">=</span><span class="p">{})</span></code>
+            <span class="doc doc-object-name doc-class-name">skforecast.sarimax._sarimax.Sarimax</span>
+
 
 <a href="#skforecast.sarimax._sarimax.Sarimax" class="headerlink" title="Permanent link">&para;</a></h2>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">Sarimax</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">seasonal_order</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">trend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">measurement_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">time_varying_regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mle_regression</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">simple_differencing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">enforce_stationarity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">enforce_invertibility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hamilton_representation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">concentrate_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trend_offset</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">use_exact_diffuse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">validate_specification</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">start_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sm_init_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">sm_fit_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">sm_predict_kwargs</span><span class="o">=</span><span class="p">{})</span>
+</code></pre></div>
 
     <div class="doc doc-contents first">
             <p class="doc doc-class-bases">
@@ -2976,7 +2978,7 @@ for the best level of detail.</p>
           <tr class="doc-section-item">
             <td><code>order</code></td>
             <td>
-                  <code>tuple</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -2997,7 +2999,7 @@ giving specific AR and / or MA lags to include.</li>
           <tr class="doc-section-item">
             <td><code>seasonal_order</code></td>
             <td>
-                  <code>tuple</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3020,7 +3022,7 @@ often it is 4 for quarterly data or 12 for monthly data.</li>
           <tr class="doc-section-item">
             <td><code>trend</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3043,7 +3045,7 @@ denotes <code>a + b*t + ct^3</code>.</li>
           <tr class="doc-section-item">
             <td><code>measurement_error</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3058,7 +3060,7 @@ with error.</p>
           <tr class="doc-section-item">
             <td><code>time_varying_regression</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3073,7 +3075,7 @@ or not coefficients on the exogenous regressors are allowed to vary over time.</
           <tr class="doc-section-item">
             <td><code>mle_regression</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3090,7 +3092,7 @@ the Kalman filter (i.e. recursive least squares). If
           <tr class="doc-section-item">
             <td><code>simple_differencing</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3112,7 +3114,7 @@ that all datapoints can be used in estimation.</li>
           <tr class="doc-section-item">
             <td><code>enforce_stationarity</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3127,7 +3129,7 @@ in the autoregressive component of the model.</p>
           <tr class="doc-section-item">
             <td><code>enforce_invertibility</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3142,7 +3144,7 @@ in the moving average component of the model.</p>
           <tr class="doc-section-item">
             <td><code>hamilton_representation</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3157,7 +3159,7 @@ in the moving average component of the model.</p>
           <tr class="doc-section-item">
             <td><code>concentrate_scale</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3174,7 +3176,7 @@ be available for the scale parameter.</p>
           <tr class="doc-section-item">
             <td><code>trend_offset</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3190,7 +3192,7 @@ set when the model created by extending a previous dataset.</p>
           <tr class="doc-section-item">
             <td><code>use_exact_diffuse</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3206,7 +3208,7 @@ initialization is used).</p>
           <tr class="doc-section-item">
             <td><code>method</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3231,7 +3233,7 @@ can be chosen from among the following strings:</p>
           <tr class="doc-section-item">
             <td><code>maxiter</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3260,7 +3262,7 @@ If <code>None</code>, the default is given by regressor.start_params.</p>
           <tr class="doc-section-item">
             <td><code>disp</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3274,7 +3276,7 @@ If <code>None</code>, the default is given by regressor.start_params.</p>
           <tr class="doc-section-item">
             <td><code>sm_init_kwargs</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3289,7 +3291,7 @@ when it is initialized.</p>
           <tr class="doc-section-item">
             <td><code>sm_fit_kwargs</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3307,7 +3309,7 @@ by the user using via <code>sm_fit_kwargs</code>.</p>
           <tr class="doc-section-item">
             <td><code>sm_predict_kwargs</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3336,7 +3338,7 @@ statsmodels SARIMAXResults object.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.order">order</span></code></td>
             <td>
-                  <code>tuple</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3348,7 +3350,7 @@ and MA parameters.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.seasonal_order">seasonal_order</span></code></td>
             <td>
-                  <code>tuple</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#tuple">tuple</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3360,7 +3362,7 @@ parameters, differences, MA parameters, and periodicity.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.trend">trend</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3371,7 +3373,7 @@ parameters, differences, MA parameters, and periodicity.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.measurement_error">measurement_error</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3383,7 +3385,7 @@ with error.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.time_varying_regression">time_varying_regression</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3395,7 +3397,7 @@ or not coefficients on the exogenous regressors are allowed to vary over time.</
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.mle_regression">mle_regression</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3409,7 +3411,7 @@ the Kalman filter (i.e. recursive least squares). If
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.simple_differencing">simple_differencing</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3421,7 +3423,7 @@ estimation.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.enforce_stationarity">enforce_stationarity</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3433,7 +3435,7 @@ in the autoregressive component of the model.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.enforce_invertibility">enforce_invertibility</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3445,7 +3447,7 @@ in the moving average component of the model.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.hamilton_representation">hamilton_representation</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3457,7 +3459,7 @@ in the moving average component of the model.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.concentrate_scale">concentrate_scale</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3471,7 +3473,7 @@ be available for the scale parameter.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.trend_offset">trend_offset</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3482,7 +3484,7 @@ be available for the scale parameter.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.use_exact_diffuse">use_exact_diffuse</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3494,7 +3496,7 @@ states.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.method">method</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3505,7 +3507,7 @@ states.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.maxiter">maxiter</span></code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3527,7 +3529,7 @@ states.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.disp">disp</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3538,7 +3540,7 @@ states.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.sm_init_kwargs">sm_init_kwargs</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3550,7 +3552,7 @@ when it is initialized.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.sm_fit_kwargs">sm_fit_kwargs</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3562,7 +3564,7 @@ statsmodels SARIMAX model.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.sm_predict_kwargs">sm_predict_kwargs</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3574,7 +3576,7 @@ statsmodels SARIMAXResults object.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax._sarimax_params">_sarimax_params</span></code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3585,7 +3587,7 @@ statsmodels SARIMAXResults object.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.output_type">output_type</span></code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3598,7 +3600,7 @@ train the model, <code>'numpy'</code> or <code>'pandas'</code>.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.sarimax">sarimax</span></code></td>
             <td>
-                  <code>object</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3609,7 +3611,7 @@ train the model, <code>'numpy'</code> or <code>'pandas'</code>.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.fitted">fitted</span></code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3620,7 +3622,7 @@ train the model, <code>'numpy'</code> or <code>'pandas'</code>.</p>
           <tr class="doc-section-item">
             <td><code><span title="skforecast.sarimax._sarimax.Sarimax.sarimax_res">sarimax_res</span></code></td>
             <td>
-                  <code>object</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#object">object</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -3807,10 +3809,12 @@ created by statsmodels after fitting the SARIMAX model.</p>
 
 
 <h3 id="skforecast.sarimax._sarimax.Sarimax._consolidate_kwargs" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_consolidate_kwargs</span><span class="p">()</span></code>
+            <span class="doc doc-object-name doc-function-name">_consolidate_kwargs</span>
+
 
 <a href="#skforecast.sarimax._sarimax.Sarimax._consolidate_kwargs" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_consolidate_kwargs</span><span class="p">()</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -3986,10 +3990,12 @@ over those provided by the user using via the statsmodels kwargs dicts.</p>
 
 
 <h3 id="skforecast.sarimax._sarimax.Sarimax._create_sarimax" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">_create_sarimax</span><span class="p">(</span><span class="n">endog</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">_create_sarimax</span>
+
 
 <a href="#skforecast.sarimax._sarimax.Sarimax._create_sarimax" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_create_sarimax</span><span class="p">(</span><span class="n">endog</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4127,10 +4133,12 @@ when initializing the model.</p>
 
 
 <h3 id="skforecast.sarimax._sarimax.Sarimax.fit" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">fit</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">fit</span>
+
 
 <a href="#skforecast.sarimax._sarimax.Sarimax.fit" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">fit</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4300,10 +4308,12 @@ that y[i] is regressed on exog[i].</p>
 
 
 <h3 id="skforecast.sarimax._sarimax.Sarimax.predict" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">predict</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_conf_int</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">predict</span>
+
 
 <a href="#skforecast.sarimax._sarimax.Sarimax.predict" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">predict</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_conf_int</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4330,7 +4340,7 @@ when initializing the model.</p>
           <tr class="doc-section-item">
             <td><code>steps</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4359,7 +4369,7 @@ observations needed is the number of steps to predict.</p>
           <tr class="doc-section-item">
             <td><code>return_conf_int</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4373,7 +4383,7 @@ observations needed is the number of steps to predict.</p>
           <tr class="doc-section-item">
             <td><code>alpha</code></td>
             <td>
-                  <code>float</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4583,10 +4593,12 @@ output type is the same as the type of <code>y</code> used in the fit method.</p
 
 
 <h3 id="skforecast.sarimax._sarimax.Sarimax.append" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">append</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">copy_initialization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">append</span>
+
 
 <a href="#skforecast.sarimax._sarimax.Sarimax.append" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">append</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">copy_initialization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4640,7 +4652,7 @@ aligned so that y[i] is regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>refit</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4654,7 +4666,7 @@ aligned so that y[i] is regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>copy_initialization</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4861,10 +4873,12 @@ much faster if the original dataset is large), see the extend method.</p>
 
 
 <h3 id="skforecast.sarimax._sarimax.Sarimax.apply" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">apply</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">copy_initialization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">apply</span>
+
 
 <a href="#skforecast.sarimax._sarimax.Sarimax.apply" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">apply</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">copy_initialization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -4918,7 +4932,7 @@ aligned so that y[i] is regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>refit</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -4932,7 +4946,7 @@ aligned so that y[i] is regressed on exog[i].</p>
           <tr class="doc-section-item">
             <td><code>copy_initialization</code></td>
             <td>
-                  <code>bool</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#bool">bool</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5120,10 +5134,12 @@ its last element, see the append and extend methods.</p>
 
 
 <h3 id="skforecast.sarimax._sarimax.Sarimax.extend" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">extend</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">extend</span>
+
 
 <a href="#skforecast.sarimax._sarimax.Sarimax.extend" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">extend</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -5340,10 +5356,12 @@ see the append method.</p>
 
 
 <h3 id="skforecast.sarimax._sarimax.Sarimax.set_params" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">set_params</span>
+
 
 <a href="#skforecast.sarimax._sarimax.Sarimax.set_params" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_params</span><span class="p">(</span><span class="o">**</span><span class="n">params</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -5364,7 +5382,7 @@ see the append method.</p>
           <tr class="doc-section-item">
             <td><code>params</code></td>
             <td>
-                  <code>dict</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#dict">dict</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5470,10 +5488,12 @@ see the append method.</p>
 
 
 <h3 id="skforecast.sarimax._sarimax.Sarimax.params" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">params</span><span class="p">()</span></code>
+            <span class="doc doc-object-name doc-function-name">params</span>
+
 
 <a href="#skforecast.sarimax._sarimax.Sarimax.params" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">params</span><span class="p">()</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -5549,10 +5569,12 @@ coefficients, and finally the <code>k_ma</code> MA coefficients.</p>
 
 
 <h3 id="skforecast.sarimax._sarimax.Sarimax.summary" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">summary</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">summary</span>
+
 
 <a href="#skforecast.sarimax._sarimax.Sarimax.summary" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">summary</span><span class="p">(</span><span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -5573,7 +5595,7 @@ coefficients, and finally the <code>k_ma</code> MA coefficients.</p>
           <tr class="doc-section-item">
             <td><code>alpha</code></td>
             <td>
-                  <code>float</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5587,7 +5609,7 @@ coefficients, and finally the <code>k_ma</code> MA coefficients.</p>
           <tr class="doc-section-item">
             <td><code>start</code></td>
             <td>
-                  <code>int</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#int">int</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5686,10 +5708,12 @@ converted to various output formats.</p>
 
 
 <h3 id="skforecast.sarimax._sarimax.Sarimax.get_info_criteria" class="doc doc-heading">
-            <code class="highlight language-python"><span class="n">get_info_criteria</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="s1">&#39;aic&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">)</span></code>
+            <span class="doc doc-object-name doc-function-name">get_info_criteria</span>
+
 
 <a href="#skforecast.sarimax._sarimax.Sarimax.get_info_criteria" class="headerlink" title="Permanent link">&para;</a></h3>
-
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">get_info_criteria</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="s1">&#39;aic&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;standard&#39;</span><span class="p">)</span>
+</code></pre></div>
 
     <div class="doc doc-contents ">
 
@@ -5712,7 +5736,7 @@ to know more about statsmodels info_criteria method.</p>
           <tr class="doc-section-item">
             <td><code>criteria</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5727,7 +5751,7 @@ to know more about statsmodels info_criteria method.</p>
           <tr class="doc-section-item">
             <td><code>method</code></td>
             <td>
-                  <code>str</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/stdtypes.html#str">str</a></code>
             </td>
             <td>
               <div class="doc-md-description">
@@ -5755,7 +5779,7 @@ method; 'lutkepohl' computes the information criteria as in Lütkepohl
       <tbody>
           <tr class="doc-section-item">
 <td><code>metric</code></td>            <td>
-                  <code>float</code>
+                  <code><a class="autorefs autorefs-external" href="https://docs.python.org/3/library/functions.html#float">float</a></code>
             </td>
             <td>
               <div class="doc-md-description">
