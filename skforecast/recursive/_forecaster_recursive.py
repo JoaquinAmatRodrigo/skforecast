@@ -1265,15 +1265,7 @@ class ForecasterRecursive(ForecasterBase):
             if exog_values is not None:
                 X[n_lags + n_window_features:] = exog_values[i]
         
-            with warnings.catch_warnings():
-                # Suppress scikit-learn warning: "X does not have valid feature names,
-                # but NoOpTransformer was fitted with feature names".
-                warnings.filterwarnings(
-                    "ignore", 
-                    message="X does not have valid feature names", 
-                    category=UserWarning
-                )
-                pred = self.regressor.predict(X.reshape(1, -1)).ravel()
+            pred = self.regressor.predict(X.reshape(1, -1)).ravel()
             
             if residuals is not None:
                 if use_binned_residuals:
@@ -1330,15 +1322,21 @@ class ForecasterRecursive(ForecasterBase):
         
         """
 
-        last_window_values, exog_values, prediction_index, steps = self._create_predict_inputs(
-            steps=steps, last_window=last_window, exog=exog
+        last_window_values, exog_values, prediction_index, steps = (
+            self._create_predict_inputs(steps=steps, last_window=last_window, exog=exog)
         )
         
-        predictions = self._recursive_predict(
-                          steps              = steps,
-                          last_window_values = last_window_values,
-                          exog_values        = exog_values
-                      )
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", 
+                message="X does not have valid feature names", 
+                category=UserWarning
+            )
+            predictions = self._recursive_predict(
+                              steps              = steps,
+                              last_window_values = last_window_values,
+                              exog_values        = exog_values
+                          )
 
         X_predict = []
         full_predictors = np.concatenate((last_window_values, predictions))
@@ -1412,15 +1410,26 @@ class ForecasterRecursive(ForecasterBase):
         
         """
 
-        last_window_values, exog_values, prediction_index, steps = self._create_predict_inputs(
-            steps=steps, last_window=last_window, exog=exog, check_inputs=check_inputs
+        last_window_values, exog_values, prediction_index, steps = (
+            self._create_predict_inputs(
+                steps=steps,
+                last_window=last_window,
+                exog=exog,
+                check_inputs=check_inputs,
+            )
         )
 
-        predictions = self._recursive_predict(
-                          steps              = steps,
-                          last_window_values = last_window_values,
-                          exog_values        = exog_values
-                      )
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", 
+                message="X does not have valid feature names", 
+                category=UserWarning
+            )
+            predictions = self._recursive_predict(
+                              steps              = steps,
+                              last_window_values = last_window_values,
+                              exog_values        = exog_values
+                          )
 
         if self.differentiation is not None:
             predictions = self.differentiator.inverse_transform_next_window(predictions)
@@ -1536,7 +1545,7 @@ class ForecasterRecursive(ForecasterBase):
             sampled_residuals = residuals[
                 rng.integers(low=0, high=len(residuals), size=(steps, n_boot))
             ]
-            
+        
         boot_columns = []
         boot_predictions = np.full(
                                shape      = (steps, n_boot),
@@ -1544,24 +1553,30 @@ class ForecasterRecursive(ForecasterBase):
                                order      = 'F',
                                dtype      = float
                            )
-        for i in range(n_boot):
-
-            if use_binned_residuals:
-                boot_sampled_residuals = {
-                    k: v[:, i]
-                    for k, v in sampled_residuals.items()
-                }
-            else:
-                boot_sampled_residuals = sampled_residuals[:, i]
-
-            boot_columns.append(f"pred_boot_{i}")
-            boot_predictions[:, i] = self._recursive_predict(
-                steps                = steps,
-                last_window_values   = last_window_values,
-                exog_values          = exog_values,
-                residuals            = boot_sampled_residuals,
-                use_binned_residuals = use_binned_residuals,
+        with warnings.catch_warnings():
+            warnings.filterwarnings(
+                "ignore", 
+                message="X does not have valid feature names", 
+                category=UserWarning
             )
+            for i in range(n_boot):
+
+                if use_binned_residuals:
+                    boot_sampled_residuals = {
+                        k: v[:, i]
+                        for k, v in sampled_residuals.items()
+                    }
+                else:
+                    boot_sampled_residuals = sampled_residuals[:, i]
+
+                boot_columns.append(f"pred_boot_{i}")
+                boot_predictions[:, i] = self._recursive_predict(
+                    steps                = steps,
+                    last_window_values   = last_window_values,
+                    exog_values          = exog_values,
+                    residuals            = boot_sampled_residuals,
+                    use_binned_residuals = use_binned_residuals,
+                )
 
         if self.differentiation is not None:
             boot_predictions = (
