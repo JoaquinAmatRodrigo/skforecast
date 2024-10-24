@@ -1,6 +1,6 @@
 site_name: Skforecast Docs
 extra_css:
-  - stylesheets/extra_0_14.css
+  - stylesheets/extra.css
 repo_url: https://github.com/skforecast/skforecast
 site_url: https://skforecast.org
 remote_branch: docs_dev
@@ -113,12 +113,21 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          import:
+            - https://docs.python.org/3/objects.inv
+            - https://mkdocstrings.github.io/autorefs/objects.inv
+            - https://www.mkdocs.org/objects.inv
+            - https://python-markdown.github.io/objects.inv
           options:
             docstring_style: numpy
             docstring_section_style: table
             show_root_heading: true
             show_root_full_path: true
             merge_init_into_class: true
+            show_symbol_type_heading: false
+            separate_signature: true
+            show_signature_annotations: false
+            summary: true
             filters: ["!__"] # exclude all members starting with __
             members_order: source
             docstring_options:
@@ -142,9 +151,6 @@ plugins:
 
 theme:
   name: material
-  # codehilite:
-  #   linenums: true
-  #   pygments_style: vs
   custom_dir: docs/overrides
   favicon: img/favicon.png
   features:
@@ -204,7 +210,7 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
       use_pygments: true
-      linenums: true
+      linenums: false
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
