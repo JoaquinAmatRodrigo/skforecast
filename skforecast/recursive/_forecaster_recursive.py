@@ -1322,8 +1322,8 @@ class ForecasterRecursive(ForecasterBase):
         
         """
 
-        last_window_values, exog_values, prediction_index, steps = self._create_predict_inputs(
-            steps=steps, last_window=last_window, exog=exog
+        last_window_values, exog_values, prediction_index, steps = (
+            self._create_predict_inputs(steps=steps, last_window=last_window, exog=exog)
         )
         
         with warnings.catch_warnings():
@@ -1410,8 +1410,13 @@ class ForecasterRecursive(ForecasterBase):
         
         """
 
-        last_window_values, exog_values, prediction_index, steps = self._create_predict_inputs(
-            steps=steps, last_window=last_window, exog=exog, check_inputs=check_inputs
+        last_window_values, exog_values, prediction_index, steps = (
+            self._create_predict_inputs(
+                steps=steps,
+                last_window=last_window,
+                exog=exog,
+                check_inputs=check_inputs,
+            )
         )
 
         with warnings.catch_warnings():
