@@ -35,13 +35,13 @@ Markdown Content Styles
 .md-typeset h1 {
   font-weight: 500;
   letter-spacing: -0.01em;
-  color: #212121
+  color: var(--md-default-fg-color);
 }
 
 .md-typeset h2 {
   font-weight: 500;
   letter-spacing: -0.01em;
-  color: #212121;
+  color: var(--md-default-fg-color);
 }
 
 .md-typeset h3 {
@@ -50,7 +50,7 @@ Markdown Content Styles
   letter-spacing: -.01em;
   line-height: 1.5;
   margin: 1.6em 0 .8em;
-  color: #212121;
+  color: var(--md-default-fg-color);
 }
 
 
@@ -72,6 +72,10 @@ Markdown Content Styles
   word-break: break-word;
 }
 
+.md-typeset code:not(.focus-visible) {
+  font-size: 1.1em;
+}
+
 .md-typeset table:not([class]) td>:last-child, .md-typeset table:not([class]) th>:last-child {
   font-size: 1.1em;
 }
@@ -87,6 +91,7 @@ Color Scheme Styles
   --md-accent-fg-color: #f79939;
   --md-primary-bg-color: #f79939;
   --md-typeset-a-color: #f79939;
+  --md-default-fg-color: #2c2c2c;
 }
 
 /* Slate color scheme styles */
