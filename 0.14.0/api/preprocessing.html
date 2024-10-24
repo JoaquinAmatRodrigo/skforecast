@@ -15,7 +15,7 @@
         <link rel="canonical" href="https://skforecast.org/0.14.0/api/preprocessing.html">
       
       
-        <link rel="prev" href="model_selection.html">
+        <link rel="prev" href="feature_selection.html">
       
       
         <link rel="next" href="metrics.html">
@@ -54,7 +54,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../stylesheets/extra_0_14.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -2360,6 +2360,27 @@ This is documentation for an unstable development version.
                 
   
   
+  
+  
+    <li class="md-nav__item">
+      <a href="feature_selection.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    feature_selection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
     
   
   
@@ -3214,8 +3235,8 @@ statistics.</p>
     </table>
 
                   <details class="quote">
-                    <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">724</span>
+                    <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+                    <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">724</span>
 <span class="normal">725</span>
 <span class="normal">726</span>
 <span class="normal">727</span>
@@ -3492,8 +3513,8 @@ methods are: 'mean', 'median', 'ffill', 'bfill', or a float value.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">792</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">792</span>
 <span class="normal">793</span>
 <span class="normal">794</span>
 <span class="normal">795</span>
@@ -3832,8 +3853,8 @@ methods are: 'mean', 'median', 'ffill', 'bfill', or a float value.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">920</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">920</span>
 <span class="normal">921</span>
 <span class="normal">922</span>
 <span class="normal">923</span>
@@ -3985,8 +4006,8 @@ specified statistics.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 961</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 961</span>
 <span class="normal"> 962</span>
 <span class="normal"> 963</span>
 <span class="normal"> 964</span>
@@ -4175,8 +4196,8 @@ specified statistics.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1014</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1014</span>
 <span class="normal">1015</span>
 <span class="normal">1016</span>
 <span class="normal">1017</span>
@@ -4331,8 +4352,8 @@ the output will have shape (X.shape[1], n_stats).</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1055</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1055</span>
 <span class="normal">1056</span>
 <span class="normal">1057</span>
 <span class="normal">1058</span>
@@ -4568,8 +4589,8 @@ frequency.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">248</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">248</span>
 <span class="normal">249</span>
 <span class="normal">250</span>
 <span class="normal">251</span>
@@ -4831,8 +4852,8 @@ frequency.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">308</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">308</span>
 <span class="normal">309</span>
 <span class="normal">310</span>
 <span class="normal">311</span>
@@ -5072,8 +5093,8 @@ used to fit the transformer.</p>
     </table>
 
                   <details class="quote">
-                    <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">85</span>
+                    <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+                    <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">85</span>
 <span class="normal">86</span>
 <span class="normal">87</span>
 <span class="normal">88</span>
@@ -5194,8 +5215,8 @@ used to fit the transformer.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 99</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 99</span>
 <span class="normal">100</span>
 <span class="normal">101</span>
 <span class="normal">102</span>
@@ -5356,8 +5377,8 @@ the original time series but the first n=<code>order</code> values are nan.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">137</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">137</span>
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span>
@@ -5501,8 +5522,8 @@ the same time series used to fit the transformer but differentiated.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">167</span>
 <span class="normal">168</span>
 <span class="normal">169</span>
 <span class="normal">170</span>
@@ -5660,8 +5681,8 @@ the time series used to fit the transformer.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">203</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">203</span>
 <span class="normal">204</span>
 <span class="normal">205</span>
 <span class="normal">206</span>
@@ -5963,8 +5984,8 @@ has more samples than <code>subsample</code>, a random subset will be used.</p>
     </table>
 
                   <details class="quote">
-                    <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-                    <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1144</span>
+                    <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+                    <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1144</span>
 <span class="normal">1145</span>
 <span class="normal">1146</span>
 <span class="normal">1147</span>
@@ -6042,8 +6063,8 @@ has more samples than <code>subsample</code>, a random subset will be used.</p>
         <p>Validate the parameters passed to the class initializer.</p>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1170</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1170</span>
 <span class="normal">1171</span>
 <span class="normal">1172</span>
 <span class="normal">1173</span>
@@ -6206,8 +6227,8 @@ has more samples than <code>subsample</code>, a random subset will be used.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1217</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1217</span>
 <span class="normal">1218</span>
 <span class="normal">1219</span>
 <span class="normal">1220</span>
@@ -6348,8 +6369,8 @@ and values greater than the largest bin edge are assigned to the last bin.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1252</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1252</span>
 <span class="normal">1253</span>
 <span class="normal">1254</span>
 <span class="normal">1255</span>
@@ -6474,8 +6495,8 @@ and values greater than the largest bin edge are assigned to the last bin.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1279</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1279</span>
 <span class="normal">1280</span>
 <span class="normal">1281</span>
 <span class="normal">1282</span>
@@ -6555,8 +6576,8 @@ and values greater than the largest bin edge are assigned to the last bin.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1299</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1299</span>
 <span class="normal">1300</span>
 <span class="normal">1301</span>
 <span class="normal">1302</span>
@@ -6638,8 +6659,8 @@ and values greater than the largest bin edge are assigned to the last bin.</p>
     </table>
 
             <details class="quote">
-              <summary>Source code in <code>skforecast\preprocessing\preprocessing.py</code></summary>
-              <div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1317</span>
+              <summary>Source code in <code>skforecast/preprocessing/preprocessing.py</code></summary>
+              <div class="language-python highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1317</span>
 <span class="normal">1318</span>
 <span class="normal">1319</span>
 <span class="normal">1320</span>

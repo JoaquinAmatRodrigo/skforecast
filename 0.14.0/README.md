@@ -1,9 +1,12 @@
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
 
-<img src="img/banner-landing-page-skforecast.png#only-light" align="left"  style="margin-bottom: 30px; margin-top: 0px;">
+<div style="margin-bottom: 20px;">
+    <img src="img/banner-landing-page-skforecast.png#only-light" align="left"  style="margin-bottom: 30px; margin-top: 0px;">
 
-<img src="img/banner-landing-page-dark-mode-skforecast-no-background.png#only-dark" align="left" style="margin-bottom: 30px; margin-top: 0px;">
+    <img src="img/banner-landing-page-dark-mode-skforecast-no-background.png#only-dark" align="left" style="margin-bottom: 30px; margin-top: 0px;">
+</div>
 
+<br>
 
 ![Python](https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue)
 [![PyPI](https://img.shields.io/pypi/v/skforecast)](https://pypi.org/project/skforecast/)

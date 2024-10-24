@@ -52,7 +52,7 @@
     
       <link rel="stylesheet" href="assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="stylesheets/extra.css">
+      <link rel="stylesheet" href="stylesheets/extra_0_14.css">
     
     <script>__md_scope=new URL(".",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -2517,6 +2517,27 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
+      <a href="api/feature_selection.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    feature_selection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="api/preprocessing.html" class="md-nav__link">
         
   
@@ -2918,8 +2939,13 @@ This is documentation for an unstable development version.
 
 <script src="https://kit.fontawesome.com/d20edc211b.js" crossorigin="anonymous"></script>
 
-<p><img src="img/banner-landing-page-skforecast.png#only-light" align="left"  style="margin-bottom: 30px; margin-top: 0px;"></p>
-<p><img src="img/banner-landing-page-dark-mode-skforecast-no-background.png#only-dark" align="left" style="margin-bottom: 30px; margin-top: 0px;"></p>
+<div style="margin-bottom: 20px;">
+    <img src="img/banner-landing-page-skforecast.png#only-light" align="left"  style="margin-bottom: 30px; margin-top: 0px;">
+
+    <img src="img/banner-landing-page-dark-mode-skforecast-no-background.png#only-dark" align="left" style="margin-bottom: 30px; margin-top: 0px;">
+</div>
+
+<p><br></p>
 <p><img alt="Python" src="https://img.shields.io/badge/python-3.9%20%7C%203.10%20%7C%203.11%20%7C%203.12-blue" />
 <a href="https://pypi.org/project/skforecast/"><img alt="PyPI" src="https://img.shields.io/pypi/v/skforecast" /></a>
 <a href="https://codecov.io/gh/skforecast/skforecast"><img alt="codecov" src="https://codecov.io/gh/skforecast/skforecast/branch/master/graph/badge.svg" /></a>
@@ -2956,8 +2982,8 @@ This is documentation for an unstable development version.
 <p>Together, we can make time series forecasting accessible to everyone.</p>
 <h2 id="installation-dependencies">Installation &amp; Dependencies<a class="headerlink" href="#installation-dependencies" title="Permanent link">&para;</a></h2>
 <p>To install the basic version of <code>skforecast</code> with core dependencies, run the following:</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>skforecast
-</code></pre></div></td></tr></table></div>
+<div class="language-bash highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>skforecast
+</code></pre></div>
 <p>For more installation options, including dependencies and additional features, check out our <a href="https://skforecast.org/latest/quick-start/how-to-install.html">Installation Guide</a>.</p>
 <h2 id="forecasters">Forecasters<a class="headerlink" href="#forecasters" title="Permanent link">&para;</a></h2>
 <p>A <strong>Forecaster</strong> object in the skforecast library is a comprehensive container that provides essential functionality and methods for training a forecasting model and generating predictions for future points in time.</p>
@@ -3064,22 +3090,13 @@ This is documentation for an unstable development version.
 <h2 id="citation">Citation<a class="headerlink" href="#citation" title="Permanent link">&para;</a></h2>
 <p>If you use skforecast for a scientific publication, we would appreciate citations to the published software.</p>
 <p><strong>Zenodo</strong></p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>Amat Rodrigo, Joaquin, &amp; Escobar Ortiz, Javier. (2024). skforecast (v0.13.0). Zenodo. https://doi.org/10.5281/zenodo.8382788
-</code></pre></div></td></tr></table></div>
+<div class="language-text highlight"><pre><span></span><code>Amat Rodrigo, Joaquin, &amp; Escobar Ortiz, Javier. (2024). skforecast (v0.13.0). Zenodo. https://doi.org/10.5281/zenodo.8382788
+</code></pre></div>
 <p><strong>APA</strong>:
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span></pre></div></td><td class="code"><div><pre><span></span><code>Amat Rodrigo, J., &amp; Escobar Ortiz, J. (2024). skforecast (Version 0.13.0) [Computer software]. https://doi.org/10.5281/zenodo.8382788
-</code></pre></div></td></tr></table></div></p>
+<div class="language-text highlight"><pre><span></span><code>Amat Rodrigo, J., &amp; Escobar Ortiz, J. (2024). skforecast (Version 0.13.0) [Computer software]. https://doi.org/10.5281/zenodo.8382788
+</code></pre></div></p>
 <p><strong>BibTeX</strong>:
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span></pre></div></td><td class="code"><div><pre><span></span><code>@software{skforecast,
+<div class="language-text highlight"><pre><span></span><code>@software{skforecast,
 author = {Amat Rodrigo, Joaquin and Escobar Ortiz, Javier},
 title = {skforecast},
 version = {0.13.0},
@@ -3089,7 +3106,7 @@ license = {BSD-3-Clause},
 url = {https://skforecast.org/},
 doi = {10.5281/zenodo.8382788}
 }
-</code></pre></div></td></tr></table></div></p>
+</code></pre></div></p>
 <h3 id="publications-citing-skforecast">Publications citing skforecast<a class="headerlink" href="#publications-citing-skforecast" title="Permanent link">&para;</a></h3>
 <ul>
 

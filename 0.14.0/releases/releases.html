@@ -54,7 +54,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../stylesheets/extra_0_14.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -2358,6 +2358,27 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
+      <a href="../api/feature_selection.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    feature_selection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../api/preprocessing.html" class="md-nav__link">
         
   
@@ -3074,7 +3095,7 @@ This is documentation for an unstable development version.
 <p><span class="badge text-bg-feature">Feature</span> Window features can be added to the training matrix using the <code>window_features</code> argument in all forecasters. You can use the <code><a href="https://skforecast.org/latest/api/preprocessing#skforecast.preprocessing.preprocessing.RollingFeatures">RollingFeatures</a></code> class to create these features or create your own object.</p>
 </li>
 <li>
-<p><span class="badge text-bg-feature">Feature</span> <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> functions now have a new argument <code>cv</code>. This argument expect an object of type <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.timeseriesfold">TimeSeriesFold</a></code> or <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.onestepaheadfold">OneStepAheadFold</a></code> which allows to define the validation strategy using the arguments <code>initial_train_size</code>, <code>steps</code>, <code>gap</code>, refit<code>,</code>fixed_train_size<code>,</code>skip_folds<code>and</code>allow_incomplete_folds`.</p>
+<p><span class="badge text-bg-feature">Feature</span> <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> functions now have a new argument <code>cv</code>. This argument expect an object of type <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.timeseriesfold">TimeSeriesFold</a></code> or <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.onestepaheadfold">OneStepAheadFold</a></code> which allows to define the validation strategy using the arguments <code>initial_train_size</code>, <code>steps</code>, <code>gap</code>, <code>refit</code>, <code>fixed_train_size</code>, <code>skip_folds</code> and <code>allow_incomplete_folds</code>.</p>
 </li>
 <li>
 <p><span class="badge text-bg-feature">Feature</span> Hyperparameter search now allows to follow a one-step-ahead validation strategy using a <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.onestepaheadfold">OneStepAheadFold</a></code> as <code>cv</code> argument in the <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> functions.</p>
@@ -3164,7 +3185,7 @@ This is documentation for an unstable development version.
 <p>Functions from <code>model_selection_multiseries</code> and <code>model_selection_sarimax</code> modules have been moved to the <code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> module.</p>
 </li>
 <li>
-<p><code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> functions now have a new argument <code>cv</code>. This argument expect an object of type <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.timeseriesfold">TimeSeriesFold</a></code> or <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.onestepaheadfold">OneStepAheadFold</a></code> which allows to define the validation strategy using the arguments <code>initial_train_size</code>, <code>steps</code>, <code>gap</code>, refit<code>,</code>fixed_train_size<code>,</code>skip_folds<code>and</code>allow_incomplete_folds`.</p>
+<p><code><a href="https://skforecast.org/latest/api/model_selection">model_selection</a></code> functions now have a new argument <code>cv</code>. This argument expect an object of type <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.timeseriesfold">TimeSeriesFold</a></code> or <code><a href="https://skforecast.org/latest/api/model_selection#skforecast.model_selection._split.onestepaheadfold">OneStepAheadFold</a></code> which allows to define the validation strategy using the arguments <code>initial_train_size</code>, <code>steps</code>, <code>gap</code>, <code>refit</code>, <code>fixed_train_size</code>, <code>skip_folds</code> and <code>allow_incomplete_folds</code>.</p>
 </li>
 <li>
 <p>Added <code><a href="https://skforecast.org/latest/api/feature_selection">feature_selection</a></code> module. The functions <code><a href="https://skforecast.org/latest/api/feature_selection#skforecast.feature_selection.feature_selection.select_features">select_features</a></code> and <code><a href="https://skforecast.org/latest/api/feature_selection#skforecast.feature_selection.feature_selection.select_features_multiseries">select_features_multiseries</a></code> have been moved to this module.</p>

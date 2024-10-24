@@ -54,7 +54,7 @@
     
       <link rel="stylesheet" href="../assets/_mkdocstrings.css">
     
-      <link rel="stylesheet" href="../stylesheets/extra.css">
+      <link rel="stylesheet" href="../stylesheets/extra_0_14.css">
     
     <script>__md_scope=new URL("..",location),__md_hash=e=>[...e].reduce(((e,_)=>(e<<5)-e+_.charCodeAt(0)),0),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
@@ -2532,6 +2532,27 @@ This is documentation for an unstable development version.
   
   
     <li class="md-nav__item">
+      <a href="../api/feature_selection.html" class="md-nav__link">
+        
+  
+  <span class="md-ellipsis">
+    feature_selection
+  </span>
+  
+
+      </a>
+    </li>
+  
+
+              
+            
+              
+                
+  
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../api/preprocessing.html" class="md-nav__link">
         
   
@@ -2932,23 +2953,7 @@ This is documentation for an unstable development version.
 <h1 id="understanding-the-forecaster-parameters">Understanding the forecaster parameters<a class="headerlink" href="#understanding-the-forecaster-parameters" title="Permanent link">&para;</a></h1>
 <p>Understanding what can be done when initializing a forecaster with skforecast can have a significant impact on the accuracy and effectiveness of the model. This guide highlights key considerations to keep in mind when initializing a forecaster and how these functionalities can be used to create more powerful and accurate forecasting models in Python.</p>
 <p>We will explore the arguments that can be included in a <code>ForecasterRecursive</code>, but this can be extrapolated to any of the skforecast forecasters.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
@@ -2965,7 +2970,7 @@ This is documentation for an unstable development version.
                  <span class="n">binner_kwargs</span>    <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">forecaster_id</span>    <span class="o">=</span> <span class="kc">None</span>
              <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
 <div class="admonition tip">
 <p class="admonition-title">Tip</p>
 <p>To be able to create and train a forecaster, at least <code>regressor</code> and <code>lags</code> and/or <code>window_features</code> must be specified.</p>
@@ -2987,15 +2992,7 @@ This is documentation for an unstable development version.
 <p><a href="https://catboost.ai/en/docs/concepts/python-reference_catboostregressor">CatBoost</a></p>
 </li>
 </ul>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span>
-<span class="normal">6</span>
-<span class="normal">7</span>
-<span class="normal">8</span>
-<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
@@ -3004,7 +3001,7 @@ This is documentation for an unstable development version.
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="kc">None</span>
              <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
 <h3 id="lags">Lags<a class="headerlink" href="#lags" title="Permanent link">&para;</a></h3>
 <p>To apply machine learning models to forecasting problems, the time series needs to be transformed into a matrix where each value is associated with a specific time window (known as lags) that precedes it. In the context of time series, a lag with respect to a time step <em>t</em> is defined as the value of the series at previous time steps. For instance, lag 1 represents the value at time step <em>t-1</em>, while lag <em>m</em> represents the value at time step <em>t-m</em>.</p>
 <p>Learn more about <a href="https://skforecast.org/latest/introduction-forecasting/introduction-forecasting#machine-learning-for-forecasting">machine learning for forecasting</a>.
@@ -3015,15 +3012,7 @@ This is documentation for an unstable development version.
 <font size="2.5"> <i>Time series transformation into a matrix of 5 lags and a vector with the value of the series that follows each row of the matrix.</i></font>
 </p>
 
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">1</span>
-<span class="normal">2</span>
-<span class="normal">3</span>
-<span class="normal">4</span>
-<span class="normal">5</span>
-<span class="normal">6</span>
-<span class="normal">7</span>
-<span class="normal">8</span>
-<span class="normal">9</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster using 5 lags</span>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Create a forecaster using 5 lags</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
@@ -3032,7 +3021,7 @@ This is documentation for an unstable development version.
                  <span class="n">regressor</span> <span class="o">=</span> <span class="n">RandomForestRegressor</span><span class="p">(),</span>
                  <span class="n">lags</span>      <span class="o">=</span> <span class="mi">5</span>
              <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
 <h3 id="window-features">Window Features<a class="headerlink" href="#window-features" title="Permanent link">&para;</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -3046,19 +3035,7 @@ This is documentation for an unstable development version.
 <p class="admonition-title">Example</p>
 <p>In this example, a scikit-learn <code>StandardScaler</code> preprocessor is used for both the time series and the exogenous variables.</p>
 </div>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
@@ -3071,38 +3048,11 @@ This is documentation for an unstable development version.
                  <span class="n">transformer_y</span>    <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">(),</span>
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="n">StandardScaler</span><span class="p">()</span>
              <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
 <h3 id="custom-weights">Custom weights<a class="headerlink" href="#custom-weights" title="Permanent link">&para;</a></h3>
 <p>The <code>weight_func</code> parameter allows the user to define custom weights for each observation in the time series. These custom weights can be used to assign different levels of importance to different time periods. For example, assign higher weights to recent data points and lower weights to older data points to emphasize the importance of recent observations in the forecast model.</p>
 <p>More information: <a href="https://skforecast.org/latest/user_guides/weighted-time-series-forecasting">Weighted time series forecasting</a>.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span>
-<span class="normal">18</span>
-<span class="normal">19</span>
-<span class="normal">20</span>
-<span class="normal">21</span>
-<span class="normal">22</span>
-<span class="normal">23</span>
-<span class="normal">24</span>
-<span class="normal">25</span>
-<span class="normal">26</span>
-<span class="normal">27</span>
-<span class="normal">28</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
@@ -3130,25 +3080,11 @@ This is documentation for an unstable development version.
                  <span class="n">transformer_exog</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="n">custom_weights</span>
              <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
 <h3 id="differentiation">Differentiation<a class="headerlink" href="#differentiation" title="Permanent link">&para;</a></h3>
 <p>Time series differentiation involves computing the differences between consecutive observations in the time series. When it comes to training forecasting models, differentiation offers the advantage of focusing on relative rates of change rather than directly attempting to model the absolute values. <strong>Skforecast</strong>, version 0.10.0 or higher, introduces a novel differentiation parameter within its Forecasters. </p>
 <p>More information: <a href="https://skforecast.org/latest/faq/time-series-differentiation">Time series differentiation</a>.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.preprocessing</span> <span class="kn">import</span> <span class="n">StandardScaler</span>
@@ -3163,7 +3099,7 @@ This is documentation for an unstable development version.
                  <span class="n">weight_func</span>      <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">differentiation</span>  <span class="o">=</span> <span class="mi">1</span>
              <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
 <h3 id="inclusion-of-kwargs-in-the-regressor-fit-method">Inclusion of kwargs in the regressor fit method<a class="headerlink" href="#inclusion-of-kwargs-in-the-regressor-fit-method" title="Permanent link">&para;</a></h3>
 <p>Some regressors include the possibility to add some additional configuration during the fitting method. The predictor parameter <code>fit_kwargs</code> allows these arguments to be set when the forecaster is declared.</p>
 <div class="admonition danger">
@@ -3175,21 +3111,7 @@ This is documentation for an unstable development version.
 <p>The following example demonstrates the inclusion of categorical features in an LGBM regressor. This must be done during the <code>LGBMRegressor</code> fit method. <a href="https://lightgbm.readthedocs.io/en/latest/pythonapi/lightgbm.LGBMRegressor.html#lightgbm.LGBMRegressor.fit">Fit parameters lightgbm</a></p>
 </div>
 <p>More information: <a href="https://skforecast.org/latest/user_guides/categorical-features.html#native-implementation-for-categorical-features">Categorical features</a>.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">lightgbm</span> <span class="kn">import</span> <span class="n">LGBMRegressor</span>
@@ -3204,26 +3126,11 @@ This is documentation for an unstable development version.
                  <span class="n">differentiation</span>  <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">fit_kwargs</span>       <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;categorical_feature&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;exog_1&#39;</span><span class="p">,</span> <span class="s1">&#39;exog_2&#39;</span><span class="p">]}</span>
              <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
 <h3 id="intervals-conditioned-on-predicted-values-binned-residuals">Intervals conditioned on predicted values (binned residuals)<a class="headerlink" href="#intervals-conditioned-on-predicted-values-binned-residuals" title="Permanent link">&para;</a></h3>
 <p>When creating prediction intervals, skforecast uses a <code>sklearn.preprocessing.KBinsDiscretizer</code> to bin the residuals. The <code>binner_kwargs</code> parameter allows the user to pass additional arguments to the <code>KBinsDiscretizer</code> object. </p>
 <p>More information: <a href="https://skforecast.org/latest/user_guides/probabilistic-forecasting#intervals-conditioned-on-predicted-values-binned-residuals">Intervals conditioned on predicted values (binned residuals)</a>.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">lightgbm</span> <span class="kn">import</span> <span class="n">LGBMRegressor</span>
@@ -3239,25 +3146,10 @@ This is documentation for an unstable development version.
                  <span class="n">fit_kwargs</span>       <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">binner_kwargs</span>    <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;n_bins&#39;</span><span class="p">:</span> <span class="mi">10</span><span class="p">}</span>
              <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
 <h3 id="forecaster-id">Forecaster ID<a class="headerlink" href="#forecaster-id" title="Permanent link">&para;</a></h3>
 <p>Name used as an identifier of the forecaster. It may be used, for example to identify the time series being modeled.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.recursive</span> <span class="kn">import</span> <span class="n">ForecasterRecursive</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
@@ -3273,28 +3165,13 @@ This is documentation for an unstable development version.
                  <span class="n">fit_kwargs</span>       <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">forecaster_id</span>    <span class="o">=</span> <span class="s1">&#39;my_forecaster&#39;</span>
              <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
 <h2 id="direct-multi-step-parameters">Direct multi-step parameters<a class="headerlink" href="#direct-multi-step-parameters" title="Permanent link">&para;</a></h2>
 <p>For the Forecasters that follow a <a href="https://skforecast.org/latest/introduction-forecasting/introduction-forecasting#direct-multi-step-forecasting">direct multi-step strategy</a> (<code>ForecasterDirect</code> and <code>ForecasterDirectMultiVariate</code>), there are two additional parameters in addition to those mentioned above.</p>
 <h3 id="steps">Steps<a class="headerlink" href="#steps" title="Permanent link">&para;</a></h3>
 <p>Direct multi-step forecasting consists of training a different model for each step of the forecast horizon. For example, to predict the next 5 values of a time series, 5 different models are trained, one for each step. As a result, the predictions are independent of each other. </p>
 <p>The number of models to be trained is specified by the <code>steps</code> parameter.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.direct</span> <span class="kn">import</span> <span class="n">ForecasterDirect</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
@@ -3310,28 +3187,12 @@ This is documentation for an unstable development version.
                  <span class="n">fit_kwargs</span>       <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                  <span class="n">forecaster_id</span>    <span class="o">=</span> <span class="s1">&#39;my_forecaster&#39;</span>
              <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
 <h3 id="number-of-jobs">Number of jobs<a class="headerlink" href="#number-of-jobs" title="Permanent link">&para;</a></h3>
 <p>The <code>n_jobs</code> parameter allows multi-process parallelization to train regressors for all <code>steps</code> simultaneously. </p>
 <p>The benefits of parallelization depend on several factors, including the regressor used, the number of fits to be performed, and the volume of data involved. When the <code>n_jobs</code> parameter is set to <code>'auto'</code>, the level of parallelization is automatically selected based on heuristic rules that aim to choose the best option for each scenario.</p>
 <p>For a more detailed look at parallelization, visit <a href="https://skforecast.org/latest/faq/parallelization-skforecast">Parallelization in skforecast</a>.</p>
-<div class="highlight"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 1</span>
-<span class="normal"> 2</span>
-<span class="normal"> 3</span>
-<span class="normal"> 4</span>
-<span class="normal"> 5</span>
-<span class="normal"> 6</span>
-<span class="normal"> 7</span>
-<span class="normal"> 8</span>
-<span class="normal"> 9</span>
-<span class="normal">10</span>
-<span class="normal">11</span>
-<span class="normal">12</span>
-<span class="normal">13</span>
-<span class="normal">14</span>
-<span class="normal">15</span>
-<span class="normal">16</span>
-<span class="normal">17</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="c1"># Create a forecaster</span>
+<div class="language-python highlight"><pre><span></span><code><span class="c1"># Create a forecaster</span>
 <span class="c1"># ==============================================================================</span>
 <span class="kn">from</span> <span class="nn">skforecast.direct</span> <span class="kn">import</span> <span class="n">ForecasterDirect</span>
 <span class="kn">from</span> <span class="nn">sklearn.ensemble</span> <span class="kn">import</span> <span class="n">RandomForestRegressor</span>
@@ -3348,7 +3209,7 @@ This is documentation for an unstable development version.
                  <span class="n">n_jobs</span>           <span class="o">=</span> <span class="s1">&#39;auto&#39;</span><span class="p">,</span>
                  <span class="n">forecaster_id</span>    <span class="o">=</span> <span class="s1">&#39;my_forecaster&#39;</span>
              <span class="p">)</span>
-</code></pre></div></td></tr></table></div>
+</code></pre></div>
 
 
 
