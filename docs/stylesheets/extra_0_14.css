@@ -3,9 +3,11 @@
     =============================== */
 /* Styling for Jupyter CodeMirror editor */
 .jupyter-wrapper .CodeMirror.cm-s-jupyter {
-  background: var(--jp-layout-color0);
-  color: var(--jp-content-font-color1);
   font-size: 0.9em; 
+}
+
+.jupyter-wrapper {
+  --jp-code-font-size: 0.9em
 }
 
 /* Styling for Jupyter Output Area */
@@ -66,6 +68,11 @@
 }
 
 .md-typeset pre {
+  font-size: 0.9em;
+}
+
+.md-typeset ul {
+  list-style-type: disc;
   font-size: 0.9em;
 }
 
