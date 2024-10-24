@@ -23,102 +23,32 @@ nav:
 
   - User Guides:
     - Table of contents: user_guides/table-of-contents.md
-    - Skforecast 0.14 Migration guide: user_guides/migration-guide.ipynb
-    - Input data: user_guides/input-data.ipynb
     - Single series Forecasters:
       - Recursive multi-step forecasting: user_guides/autoregresive-forecaster.ipynb
-      - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb
-      - ARIMA and SARIMAX forecasting: user_guides/forecasting-sarimax-arima.ipynb
-      - Foreasting baseline: user_guides/forecasting-baseline.ipynb
-    - Global Forecasters (multiple series):
-      - Independent multi-time series forecasting: user_guides/independent-multi-time-series-forecasting.ipynb
-      - Series with different lengths and different exogenous variables: user_guides/multi-series-with-different-length-and-different_exog.ipynb
-      - Dependent multivariate series forecasting: user_guides/dependent-multi-series-multivariate-forecasting.ipynb
-      - Deep learning Recurrent Neural Networks: user_guides/forecasting-with-deep-learning-rnn-lstm.ipynb
-    - Feature Engineering:
-      - Exogenous variables: user_guides/exogenous-variables.ipynb
-      - Window and custom features: user_guides/window-features-and-custom-features.ipynb
-      - Categorical features: user_guides/categorical-features.ipynb
-      - Calendars features: user_guides/calendar-features.ipynb
-      - Data transformation: user_guides/sklearn-transformers-and-pipeline.ipynb
-      - Differentiation: user_guides/time-series-differentiation.ipynb
-      - Feature selection: user_guides/feature-selection.ipynb
-    - Model Evaluation and Tuning:
-      - Metrics: user_guides/metrics.ipynb
-      - Backtesting forecaster: user_guides/backtesting.ipynb
-      - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
-      - Feature selection: user_guides/feature-selection.ipynb
-    - Probabilistic Forecasting:
-      - Probabilistic forecasting: user_guides/probabilistic-forecasting.ipynb
-    - Model Explainability:
-      - Explainability: user_guides/explainability.ipynb
-    - Model deployment:
-      - Save and load forecaster: user_guides/save-load-forecaster.ipynb
-      - Forecaster in production: user_guides/forecaster-in-production.ipynb
-    - Plotting:
-      - Plotting: user_guides/plotting.ipynb
-    - Datasets:
-      - Datasets: user_guides/datasets.ipynb
-    - Additional Resources:
-      - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
-      - Stacking multiple models: user_guides/stacking-ensemble-models-forecasting.ipynb
-      - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
-      - Skforecast in GPU: user_guides/skforecast-in-GPU.ipynb
-    - FAQ and forecasting tips:
-      - Time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
-      - Non negative predictions: faq/non-negative-predictions.ipynb
-      - Forecasting with delayed data: faq/forecasting-with-delayed-historical-data.ipynb
-      - Parallelization: faq/parallelization-skforecast.ipynb
-      - Time series aggregation: faq/time-series-aggregation.ipynb
-      - Profiling skforecast: faq/profiling-skforecast.ipynb
-      - Backtesting vs One-step-ahead: faq/parameters-search-backetesting-vs-one-step-ahead.ipynb
-
-  - Examples and tutorials:
-    - English: examples/examples_english.md
-    - Spanish: examples/examples_spanish.md
 
   - API Reference:
     - ForecasterRecursive: api/ForecasterRecursive.md
-    - ForecasterDirect: api/ForecasterDirect.md
-    - ForecasterRecursiveMultiSeries: api/ForecasterRecursiveMultiSeries.md
-    - ForecasterDirectMultiVariate: api/ForecasterDirectMultiVariate.md
-    - ForecasterRnn: api/ForecasterRnn.md
-    - sarimax: api/Sarimax.md
-    - ForecasterSarimax: api/ForecasterSarimax.md
-    - ForecasterEquivalentDate: api/ForecasterEquivalentDate.md
     - model_selection: api/model_selection.md
-    - feature_selection: api/feature_selection.md
-    - preprocessing: api/preprocessing.md
-    - metrics: api/metrics.md
-    - plot: api/plot.md
-    - utils: api/utils.md
-    - datasets: api/datasets.md
-    - exceptions: api/exceptions.md
-
-  - FAQ and Tips:
-    - Table of contents: faq/faq.md
-    - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
-    - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
-    - Cyclical features in time series: faq/cyclical-features-time-series.ipynb
-    - Forecasting with delayed historical data: faq/forecasting-with-delayed-historical-data.ipynb
-    - Time series aggregation: faq/time-series-aggregation.ipynb
-    - Parallelization in skforecast: faq/parallelization-skforecast.ipynb
-    - Profiling skforecast: faq/profiling-skforecast.ipynb
-
-  - Releases: releases/releases.md
-
-  - Authors: authors/authors.md
 
 plugins:
   - mkdocstrings:
       handlers:
         python:
+          import:
+            - https://docs.python.org/3/objects.inv
+            - https://mkdocstrings.github.io/autorefs/objects.inv
+            - https://www.mkdocs.org/objects.inv
+            - https://python-markdown.github.io/objects.inv
           options:
             docstring_style: numpy
             docstring_section_style: table
             show_root_heading: true
             show_root_full_path: true
             merge_init_into_class: true
+            show_symbol_type_heading: false
+            separate_signature: true
+            show_signature_annotations: false
+            summary: true
             filters: ["!__"] # exclude all members starting with __
             members_order: source
             docstring_options:
@@ -142,9 +72,6 @@ plugins:
 
 theme:
   name: material
-  # codehilite:
-  #   linenums: true
-  #   pygments_style: vs
   custom_dir: docs/overrides
   favicon: img/favicon.png
   features:
@@ -191,6 +118,7 @@ markdown_extensions:
   - footnotes
   - pymdownx.details
   - md_in_html
+  - codehilite
   - toc:
       permalink: true
   - pymdownx.arithmatex:
@@ -204,14 +132,14 @@ markdown_extensions:
       emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - pymdownx.highlight:
       use_pygments: true
-      linenums: true
+      linenums: false
       pygments_lang_class: true
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.keys
   - pymdownx.mark
   - pymdownx.smartsymbols
-  - pymdownx.superfences
+  - pymdownx.superfences:
   - pymdownx.tabbed:
       alternate_style: true
   - pymdownx.tasklist:

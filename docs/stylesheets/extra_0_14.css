@@ -1,31 +1,8 @@
-/* ===============================
-    Jupyter Wrapper Styles
-    =============================== */
-/* Styling for Jupyter CodeMirror editor */
-.jupyter-wrapper .CodeMirror.cm-s-jupyter {
-  font-size: 0.9em; 
-}
-
-.jupyter-wrapper {
-  --jp-code-font-size: 0.9em
-}
-
-/* Styling for Jupyter Output Area */
-.jupyter-wrapper .jp-OutputArea-output pre {
-  border: none;
-  margin: 0;
-  padding: 0;
-  overflow: auto;
-  word-break: break-all;
-  white-space: pre-wrap;
-  font-size: 1.1em;
-}
-
-
-/* Display inline tables for dataframes in Jupyter */
-.jupyter-wrapper table.dataframe {
-  display: inline;
-}
+/*
+===============================
+Jupyter Wrapper Styles
+===============================
+*/
 
 /* Hide output prompt in Jupyter */
 .jupyter-wrapper .jp-OutputPrompt,
@@ -34,63 +11,72 @@
   display: none;
 }
 
-/* ===============================
-    Markdown Content Styles
-    =============================== */
-/* Hide the Markdown content button */
-.md-content__button {
-  display: none;
+/* Size of code cells in Jupyter Notebooks */
+.jupyter-wrapper .jp-CodeCell .jp-InputArea-editor .CodeMirror {
+  font-size: 0.95em; /* Adjust the size as needed */
 }
 
-/* Set font size for inline code in Markdown */
-.md-typeset code {
-  font-size: 1em;
+/* Size of output cells in Jupyter Notebooks */
+.jupyter-wrapper .jp-RenderedText.jp-OutputArea-output pre {
+  font-size: 1.2em; /* Adjust the size as needed */
 }
+
+/* Display inline tables for dataframes in Jupyter */
+.jupyter-wrapper table.dataframe {
+  display: inline;
+}
+
+/*
+===============================
+Markdown Content Styles
+===============================
+*/
 
 .md-typeset h1 {
   font-weight: 500;
   letter-spacing: -0.01em;
-  margin: 0 0 1em 0;
+  color: #212121
 }
 
-/* Set font size and line height for H2 headers in Markdown */
 .md-typeset h2 {
   font-weight: 500;
-  font-size: 1.3em;
-  margin: 2em 0 1em 0;
+  letter-spacing: -0.01em;
+  color: #212121;
 }
 
-/* Set font size and line height for H3 headers in Markdown */
 .md-typeset h3 {
+  font-size: 1.25em;
   font-weight: 500;
-  font-size: 1.2em;
-  margin: 1em 0 1em 0;
+  letter-spacing: -.01em;
+  line-height: 1.5;
+  margin: 1.6em 0 .8em;
+  color: #212121;
 }
 
-.md-typeset pre {
-  font-size: 0.9em;
-}
 
-.md-typeset ul {
-  list-style-type: disc;
-  font-size: 0.9em;
-}
-
-.md-typeset .admonition>*, .md-typeset details>* {
-  box-sizing: border-box;
-  font-size: 1em;
-}
-
-/* Justify paragraph text in Markdown */
-p {
+/* Justify text */
+.md-typeset p {
   text-align: justify;
-  text-justify: inter-word;
-  font-size: 0.9em;
 }
 
-/* ===============================
-    Color Scheme Styles
-    =============================== */
+/* Increase font size of code blocks in Markdown cells */
+.md-typeset pre {
+  font-size: 0.95em; /* Adjust the size as needed */
+}
+
+.md-typeset pre>code {
+  border-bottom-left-radius: 0;
+  border-top-left-radius: 0;
+  font-size: 1.1em;
+  white-space: pre-wrap; 
+  word-break: break-word;
+}
+
+/*
+===============================
+Color Scheme Styles
+===============================
+*/
 /* Light color scheme styles */
 [data-md-color-scheme="light"] {
   --md-primary-fg-color: #001633;
@@ -119,9 +105,11 @@ p {
   display: none; 
 }
 
-/* ===============================
-    Badge Styles
-    =============================== */
+/*
+===============================
+Badge Styles
+=============================== 
+*/
 .badge {
   display: inline-block;
   padding: 0.2em 0.4em;
