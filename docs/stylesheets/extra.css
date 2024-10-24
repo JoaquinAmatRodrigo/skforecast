@@ -72,6 +72,10 @@ Markdown Content Styles
   word-break: break-word;
 }
 
+.md-typeset table:not([class]) td>:last-child, .md-typeset table:not([class]) th>:last-child {
+  font-size: 1.1em;
+}
+
 /*
 ===============================
 Color Scheme Styles
