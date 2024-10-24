@@ -1,4 +1,3 @@
-
 /* ===============================
     Jupyter Wrapper Styles
     =============================== */
@@ -6,7 +5,7 @@
 .jupyter-wrapper .CodeMirror.cm-s-jupyter {
   background: var(--jp-layout-color0);
   color: var(--jp-content-font-color1);
-  font-size: small; /* Reduced from medium */
+  font-size: 0.9em; 
 }
 
 /* Styling for Jupyter Output Area */
@@ -17,8 +16,9 @@
   overflow: auto;
   word-break: break-all;
   white-space: pre-wrap;
-  font-size: small; /* Reduced from medium */
+  font-size: 1.1em;
 }
+
 
 /* Display inline tables for dataframes in Jupyter */
 .jupyter-wrapper table.dataframe {
@@ -42,7 +42,7 @@
 
 /* Set font size for inline code in Markdown */
 .md-typeset code {
-  font-size: 1em; /* Reduced from 1em */
+  font-size: 1em;
 }
 
 .md-typeset h1 {
@@ -53,14 +53,20 @@
 
 /* Set font size and line height for H2 headers in Markdown */
 .md-typeset h2 {
-  font-size: 1.3em; /* Reduced from 1.3em */
+  font-weight: 500;
+  font-size: 1.3em;
   margin: 2em 0 1em 0;
 }
 
 /* Set font size and line height for H3 headers in Markdown */
 .md-typeset h3 {
-  font-size: 1.2em; /* Reduced from 1.1em */
+  font-weight: 500;
+  font-size: 1.2em;
   margin: 1em 0 1em 0;
+}
+
+.md-typeset pre {
+  font-size: 0.9em;
 }
 
 .md-typeset .admonition>*, .md-typeset details>* {
@@ -72,7 +78,7 @@
 p {
   text-align: justify;
   text-justify: inter-word;
-  font-size: 0.9em; /* Reduced font size for paragraphs */
+  font-size: 0.9em;
 }
 
 /* ===============================
@@ -112,7 +118,7 @@ p {
 .badge {
   display: inline-block;
   padding: 0.2em 0.4em;
-  font-size: 0.75em; /* Reduced font size */
+  font-size: 0.75em; 
   font-weight: 700;
   line-height: 1;
   text-align: center;
