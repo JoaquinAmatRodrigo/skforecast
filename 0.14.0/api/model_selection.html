@@ -3066,7 +3066,21 @@ This is documentation for an unstable development version.
 
 
 <a href="#skforecast.model_selection._validation.backtesting_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">backtesting_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_binned_residuals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">backtesting_forecaster</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">cv</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+    <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">use_binned_residuals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -3642,7 +3656,20 @@ for backtesting.</p>
 
 
 <a href="#skforecast.model_selection._search.grid_search_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">grid_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">grid_search_forecaster</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">cv</span><span class="p">,</span>
+    <span class="n">param_grid</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -4088,7 +4115,22 @@ The results will be saved in a tab-separated values (TSV) format. If
 
 
 <a href="#skforecast.model_selection._search.random_search_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">random_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_distributions</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">random_search_forecaster</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">cv</span><span class="p">,</span>
+    <span class="n">param_distributions</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+    <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -4577,7 +4619,23 @@ The results will be saved in a tab-separated values (TSV) format. If
 
 
 <a href="#skforecast.model_selection._search.bayesian_search_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">bayesian_search_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">search_space</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kwargs_create_study</span><span class="o">=</span><span class="p">{},</span> <span class="n">kwargs_study_optimize</span><span class="o">=</span><span class="p">{})</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">bayesian_search_forecaster</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">cv</span><span class="p">,</span>
+    <span class="n">search_space</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+    <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">kwargs_create_study</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">kwargs_study_optimize</span><span class="o">=</span><span class="p">{},</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -5114,7 +5172,23 @@ sampler is used during optimization.</p>
 
 
 <a href="#skforecast.model_selection._validation.backtesting_forecaster_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">backtesting_forecaster_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">add_aggregated_metric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">backtesting_forecaster_multiseries</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">series</span><span class="p">,</span>
+    <span class="n">cv</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">,</span>
+    <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">add_aggregated_metric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+    <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -5739,7 +5813,27 @@ If there is more than one level, this structure will be repeated for each of the
 
 
 <a href="#skforecast.model_selection._search.grid_search_forecaster_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">grid_search_forecaster_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">aggregate_metric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;weighted_average&#39;</span><span class="p">,</span> <span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="s1">&#39;pooling&#39;</span><span class="p">],</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">grid_search_forecaster_multiseries</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">series</span><span class="p">,</span>
+    <span class="n">cv</span><span class="p">,</span>
+    <span class="n">param_grid</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">,</span>
+    <span class="n">aggregate_metric</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;weighted_average&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;average&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pooling&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -6285,7 +6379,29 @@ metric will be the average of the optimization of all levels.</li>
 
 
 <a href="#skforecast.model_selection._search.random_search_forecaster_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">random_search_forecaster_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_distributions</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">aggregate_metric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;weighted_average&#39;</span><span class="p">,</span> <span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="s1">&#39;pooling&#39;</span><span class="p">],</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">random_search_forecaster_multiseries</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">series</span><span class="p">,</span>
+    <span class="n">cv</span><span class="p">,</span>
+    <span class="n">param_distributions</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">,</span>
+    <span class="n">aggregate_metric</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;weighted_average&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;average&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pooling&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">lags_grid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+    <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -6873,7 +6989,30 @@ metric will be the average of the optimization of all levels.</li>
 
 
 <a href="#skforecast.model_selection._search.bayesian_search_forecaster_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">bayesian_search_forecaster_multiseries</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">series</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">search_space</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">aggregate_metric</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;weighted_average&#39;</span><span class="p">,</span> <span class="s1">&#39;average&#39;</span><span class="p">,</span> <span class="s1">&#39;pooling&#39;</span><span class="p">],</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">kwargs_create_study</span><span class="o">=</span><span class="p">{},</span> <span class="n">kwargs_study_optimize</span><span class="o">=</span><span class="p">{})</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">bayesian_search_forecaster_multiseries</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">series</span><span class="p">,</span>
+    <span class="n">cv</span><span class="p">,</span>
+    <span class="n">search_space</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">,</span>
+    <span class="n">aggregate_metric</span><span class="o">=</span><span class="p">[</span>
+        <span class="s2">&quot;weighted_average&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;average&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;pooling&quot;</span><span class="p">,</span>
+    <span class="p">],</span>
+    <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_trials</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+    <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">kwargs_create_study</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">kwargs_study_optimize</span><span class="o">=</span><span class="p">{},</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -7480,7 +7619,19 @@ metric will be the average of the optimization of all levels.</li>
 
 
 <a href="#skforecast.model_selection._validation.backtesting_sarimax" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">backtesting_sarimax</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">backtesting_sarimax</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">cv</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -7948,7 +8099,20 @@ for backtesting.</p>
 
 
 <a href="#skforecast.model_selection._search.grid_search_sarimax" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">grid_search_sarimax</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_grid</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">grid_search_sarimax</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">cv</span><span class="p">,</span>
+    <span class="n">param_grid</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -8379,7 +8543,22 @@ The results will be saved in a tab-separated values (TSV) format. If
 
 
 <a href="#skforecast.model_selection._search.random_search_sarimax" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">random_search_sarimax</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">param_distributions</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">random_search_sarimax</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">cv</span><span class="p">,</span>
+    <span class="n">param_distributions</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_iter</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+    <span class="n">return_best</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">output_file</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -8854,7 +9033,19 @@ The results will be saved in a tab-separated values (TSV) format. If
 
 
 <a href="#skforecast.model_selection._split.BaseFold" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">BaseFold</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_folds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">BaseFold</span><span class="p">(</span>
+    <span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">initial_train_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">skip_folds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -9293,7 +9484,20 @@ test set.</p>
 
 
 <a href="#skforecast.model_selection._split.BaseFold._validate_params" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_validate_params</span><span class="p">(</span><span class="n">cv_name</span><span class="p">,</span> <span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_folds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_validate_params</span><span class="p">(</span>
+    <span class="n">cv_name</span><span class="p">,</span>
+    <span class="n">steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">initial_train_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">skip_folds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -9837,7 +10041,19 @@ current parameters, the input parameters are validated to ensure correctness.</p
 
 
 <a href="#skforecast.model_selection._split.TimeSeriesFold" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">TimeSeriesFold</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">initial_train_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">skip_folds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">TimeSeriesFold</span><span class="p">(</span>
+    <span class="n">steps</span><span class="p">,</span>
+    <span class="n">initial_train_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">fixed_train_size</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">gap</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+    <span class="n">skip_folds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">allow_incomplete_fold</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -10863,7 +11079,13 @@ slice.</p>
 
 
 <a href="#skforecast.model_selection._split.TimeSeriesFold._print_info" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_print_info</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">folds</span><span class="p">,</span> <span class="n">externally_fitted</span><span class="p">,</span> <span class="n">last_fold_excluded</span><span class="p">,</span> <span class="n">index_to_skip</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_print_info</span><span class="p">(</span>
+    <span class="n">index</span><span class="p">,</span>
+    <span class="n">folds</span><span class="p">,</span>
+    <span class="n">externally_fitted</span><span class="p">,</span>
+    <span class="n">last_fold_excluded</span><span class="p">,</span>
+    <span class="n">index_to_skip</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -11086,7 +11308,13 @@ slice.</p>
 
 
 <a href="#skforecast.model_selection._split.OneStepAheadFold" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">OneStepAheadFold</span><span class="p">(</span><span class="n">initial_train_size</span><span class="p">,</span> <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">OneStepAheadFold</span><span class="p">(</span>
+    <span class="n">initial_train_size</span><span class="p">,</span>
+    <span class="n">window_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">differentiation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">return_all_indexes</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -11980,7 +12208,25 @@ DataFrame, and the values are used as the lists of lags to try.</p>
 
 
 <a href="#skforecast.model_selection._utils.check_backtesting_input" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">check_backtesting_input</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">cv</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">add_aggregated_metric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">series</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">use_binned_residuals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">n_jobs</span><span class="o">=</span><span class="s1">&#39;auto&#39;</span><span class="p">,</span> <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">check_backtesting_input</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">cv</span><span class="p">,</span>
+    <span class="n">metric</span><span class="p">,</span>
+    <span class="n">add_aggregated_metric</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">y</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">series</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">n_boot</span><span class="o">=</span><span class="mi">250</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">123</span><span class="p">,</span>
+    <span class="n">use_in_sample_residuals</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">use_binned_residuals</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">n_jobs</span><span class="o">=</span><span class="s2">&quot;auto&quot;</span><span class="p">,</span>
+    <span class="n">show_progress</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">suppress_warnings_fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">

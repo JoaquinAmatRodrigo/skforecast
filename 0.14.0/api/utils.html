@@ -3120,7 +3120,12 @@ This is documentation for an unstable development version.
 
 
 <a href="#skforecast.utils.utils.save_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">save_forecaster</span><span class="p">(</span><span class="n">forecaster</span><span class="p">,</span> <span class="n">file_name</span><span class="p">,</span> <span class="n">save_custom_functions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">save_forecaster</span><span class="p">(</span>
+    <span class="n">forecaster</span><span class="p">,</span>
+    <span class="n">file_name</span><span class="p">,</span>
+    <span class="n">save_custom_functions</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">verbose</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -3788,7 +3793,9 @@ in the environment where the forecaster is going to be loaded.</p>
 
 
 <a href="#skforecast.utils.utils.initialize_weights" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">initialize_weights</span><span class="p">(</span><span class="n">forecaster_name</span><span class="p">,</span> <span class="n">regressor</span><span class="p">,</span> <span class="n">weight_func</span><span class="p">,</span> <span class="n">series_weights</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">initialize_weights</span><span class="p">(</span>
+    <span class="n">forecaster_name</span><span class="p">,</span> <span class="n">regressor</span><span class="p">,</span> <span class="n">weight_func</span><span class="p">,</span> <span class="n">series_weights</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -4084,7 +4091,12 @@ function(s) used to create weights.</p>
 
 
 <a href="#skforecast.utils.utils.initialize_transformer_series" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">initialize_transformer_series</span><span class="p">(</span><span class="n">forecaster_name</span><span class="p">,</span> <span class="n">series_names_in_</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">transformer_series</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">initialize_transformer_series</span><span class="p">(</span>
+    <span class="n">forecaster_name</span><span class="p">,</span>
+    <span class="n">series_names_in_</span><span class="p">,</span>
+    <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">transformer_series</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -5008,7 +5020,9 @@ in the warning message.</p>
 
 
 <a href="#skforecast.utils.utils.check_exog_dtypes" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">check_exog_dtypes</span><span class="p">(</span><span class="n">exog</span><span class="p">,</span> <span class="n">call_check_exog</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">series_id</span><span class="o">=</span><span class="s1">&#39;`exog`&#39;</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">check_exog_dtypes</span><span class="p">(</span>
+    <span class="n">exog</span><span class="p">,</span> <span class="n">call_check_exog</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">series_id</span><span class="o">=</span><span class="s2">&quot;`exog`&quot;</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -5516,7 +5530,27 @@ inclusive. For example, quantiles of 0.05, 0.5 and 0.95 should be as
 
 
 <a href="#skforecast.utils.utils.check_predict_input" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">check_predict_input</span><span class="p">(</span><span class="n">forecaster_name</span><span class="p">,</span> <span class="n">steps</span><span class="p">,</span> <span class="n">is_fitted</span><span class="p">,</span> <span class="n">exog_in_</span><span class="p">,</span> <span class="n">index_type_</span><span class="p">,</span> <span class="n">index_freq_</span><span class="p">,</span> <span class="n">window_size</span><span class="p">,</span> <span class="n">last_window</span><span class="p">,</span> <span class="n">last_window_exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog_type_in_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exog_names_in_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">max_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">levels_forecaster</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">series_names_in_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">check_predict_input</span><span class="p">(</span>
+    <span class="n">forecaster_name</span><span class="p">,</span>
+    <span class="n">steps</span><span class="p">,</span>
+    <span class="n">is_fitted</span><span class="p">,</span>
+    <span class="n">exog_in_</span><span class="p">,</span>
+    <span class="n">index_type_</span><span class="p">,</span>
+    <span class="n">index_freq_</span><span class="p">,</span>
+    <span class="n">window_size</span><span class="p">,</span>
+    <span class="n">last_window</span><span class="p">,</span>
+    <span class="n">last_window_exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">exog_type_in_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">exog_names_in_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">interval</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">alpha</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">max_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">levels_forecaster</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">series_names_in_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -8191,7 +8225,9 @@ created if <code>exog</code> is a pandas Series or DataFrame.</p>
 
 
 <a href="#skforecast.utils.utils.transform_numpy" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">transform_numpy</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">transformer</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inverse_transform</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">transform_numpy</span><span class="p">(</span>
+    <span class="n">array</span><span class="p">,</span> <span class="n">transformer</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inverse_transform</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -8457,7 +8493,9 @@ when using transformers of class scikit-learn ColumnTransformers.</p>
 
 
 <a href="#skforecast.utils.utils.transform_series" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">transform_series</span><span class="p">(</span><span class="n">series</span><span class="p">,</span> <span class="n">transformer</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inverse_transform</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">transform_series</span><span class="p">(</span>
+    <span class="n">series</span><span class="p">,</span> <span class="n">transformer</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inverse_transform</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -8746,7 +8784,9 @@ be a Series or a DataFrame.</p>
 
 
 <a href="#skforecast.utils.utils.transform_dataframe" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">transform_dataframe</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">transformer</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inverse_transform</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">transform_dataframe</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">,</span> <span class="n">transformer</span><span class="p">,</span> <span class="n">fit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">inverse_transform</span><span class="o">=</span><span class="kc">False</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -9147,7 +9187,9 @@ with installation instructions.</p>
 
 
 <a href="#skforecast.utils.utils.multivariate_time_series_corr" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">multivariate_time_series_corr</span><span class="p">(</span><span class="n">time_series</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">lags</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;pearson&#39;</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">multivariate_time_series_corr</span><span class="p">(</span>
+    <span class="n">time_series</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">lags</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s2">&quot;pearson&quot;</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -9376,7 +9418,9 @@ time series. </p>
 
 
 <a href="#skforecast.utils.utils.select_n_jobs_fit_forecaster" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">select_n_jobs_fit_forecaster</span><span class="p">(</span><span class="n">forecaster_name</span><span class="p">,</span> <span class="n">regressor_name</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">select_n_jobs_fit_forecaster</span><span class="p">(</span>
+    <span class="n">forecaster_name</span><span class="p">,</span> <span class="n">regressor_name</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -9865,7 +9909,13 @@ frequency. No multiple frequency is allowed.</li>
 
 
 <a href="#skforecast.utils.utils.check_preprocess_exog_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">check_preprocess_exog_multiseries</span><span class="p">(</span><span class="n">input_series_is_dict</span><span class="p">,</span> <span class="n">series_indexes</span><span class="p">,</span> <span class="n">series_names_in_</span><span class="p">,</span> <span class="n">exog</span><span class="p">,</span> <span class="n">exog_dict</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">check_preprocess_exog_multiseries</span><span class="p">(</span>
+    <span class="n">input_series_is_dict</span><span class="p">,</span>
+    <span class="n">series_indexes</span><span class="p">,</span>
+    <span class="n">series_names_in_</span><span class="p">,</span>
+    <span class="n">exog</span><span class="p">,</span>
+    <span class="n">exog_dict</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -10348,7 +10398,9 @@ values to pandas DataFrames.</li>
 
 
 <a href="#skforecast.utils.utils.align_series_and_exog_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">align_series_and_exog_multiseries</span><span class="p">(</span><span class="n">series_dict</span><span class="p">,</span> <span class="n">input_series_is_dict</span><span class="p">,</span> <span class="n">exog_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">align_series_and_exog_multiseries</span><span class="p">(</span>
+    <span class="n">series_dict</span><span class="p">,</span> <span class="n">input_series_is_dict</span><span class="p">,</span> <span class="n">exog_dict</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -10608,7 +10660,9 @@ different lengths. Reindexing is applied.</li>
 
 
 <a href="#skforecast.utils.utils.prepare_levels_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">prepare_levels_multiseries</span><span class="p">(</span><span class="n">X_train_series_names_in_</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">prepare_levels_multiseries</span><span class="p">(</span>
+    <span class="n">X_train_series_names_in_</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -10756,7 +10810,9 @@ different lengths. Reindexing is applied.</li>
 
 
 <a href="#skforecast.utils.utils.preprocess_levels_self_last_window_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">preprocess_levels_self_last_window_multiseries</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">input_levels_is_list</span><span class="p">,</span> <span class="n">last_window_</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">preprocess_levels_self_last_window_multiseries</span><span class="p">(</span>
+    <span class="n">levels</span><span class="p">,</span> <span class="n">input_levels_is_list</span><span class="p">,</span> <span class="n">last_window_</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -11033,7 +11089,13 @@ first iteration of the prediction (t + 1).</p>
 
 
 <a href="#skforecast.utils.utils.prepare_residuals_multiseries" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">prepare_residuals_multiseries</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">use_in_sample_residuals</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">in_sample_residuals_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">out_sample_residuals_</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">prepare_residuals_multiseries</span><span class="p">(</span>
+    <span class="n">levels</span><span class="p">,</span>
+    <span class="n">use_in_sample_residuals</span><span class="p">,</span>
+    <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">in_sample_residuals_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">out_sample_residuals_</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -11354,7 +11416,9 @@ is not <code>None</code>, residuals are assumed to be in the transformed scale. 
 
 
 <a href="#skforecast.utils.utils.set_skforecast_warnings" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_skforecast_warnings</span><span class="p">(</span><span class="n">suppress_warnings</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;default&#39;</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">set_skforecast_warnings</span><span class="p">(</span>
+    <span class="n">suppress_warnings</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;default&quot;</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">

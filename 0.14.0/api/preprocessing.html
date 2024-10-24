@@ -3031,7 +3031,13 @@ This is documentation for an unstable development version.
 
 
 <a href="#skforecast.preprocessing.preprocessing.RollingFeatures" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">RollingFeatures</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">window_sizes</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">features_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fillna</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">RollingFeatures</span><span class="p">(</span>
+    <span class="n">stats</span><span class="p">,</span>
+    <span class="n">window_sizes</span><span class="p">,</span>
+    <span class="n">min_periods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">features_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fillna</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -3394,7 +3400,13 @@ statistics.</p>
 
 
 <a href="#skforecast.preprocessing.preprocessing.RollingFeatures._validate_params" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_validate_params</span><span class="p">(</span><span class="n">stats</span><span class="p">,</span> <span class="n">window_sizes</span><span class="p">,</span> <span class="n">min_periods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">features_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fillna</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_validate_params</span><span class="p">(</span>
+    <span class="n">stats</span><span class="p">,</span>
+    <span class="n">window_sizes</span><span class="p">,</span>
+    <span class="n">min_periods</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">features_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fillna</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4468,7 +4480,14 @@ the output will have shape (X.shape[1], n_stats).</p>
 
 
 <a href="#skforecast.preprocessing.preprocessing.series_long_to_dict" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">series_long_to_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">series_id</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">series_long_to_dict</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">series_id</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">,</span>
+    <span class="n">values</span><span class="p">,</span>
+    <span class="n">freq</span><span class="p">,</span>
+    <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -4733,7 +4752,14 @@ frequency.</p>
 
 
 <a href="#skforecast.preprocessing.preprocessing.exog_long_to_dict" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">exog_long_to_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">series_id</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">freq</span><span class="p">,</span> <span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">exog_long_to_dict</span><span class="p">(</span>
+    <span class="n">data</span><span class="p">,</span>
+    <span class="n">series_id</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">,</span>
+    <span class="n">freq</span><span class="p">,</span>
+    <span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">suppress_warnings</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -5816,7 +5842,13 @@ the time series used to fit the transformer.</p>
 
 
 <a href="#skforecast.preprocessing.preprocessing.QuantileBinner" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">QuantileBinner</span><span class="p">(</span><span class="n">n_bins</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="n">subsample</span><span class="o">=</span><span class="mi">200000</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="n">random_state</span><span class="o">=</span><span class="mi">789654</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">QuantileBinner</span><span class="p">(</span>
+    <span class="n">n_bins</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;linear&quot;</span><span class="p">,</span>
+    <span class="n">subsample</span><span class="o">=</span><span class="mi">200000</span><span class="p">,</span>
+    <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+    <span class="n">random_state</span><span class="o">=</span><span class="mi">789654</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -6085,7 +6117,9 @@ has more samples than <code>subsample</code>, a random subset will be used.</p>
 
 
 <a href="#skforecast.preprocessing.preprocessing.QuantileBinner._validate_params" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_validate_params</span><span class="p">(</span><span class="n">n_bins</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">subsample</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">random_state</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">_validate_params</span><span class="p">(</span>
+    <span class="n">n_bins</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">subsample</span><span class="p">,</span> <span class="n">dtype</span><span class="p">,</span> <span class="n">random_state</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

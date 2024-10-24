@@ -2947,7 +2947,32 @@ This is documentation for an unstable development version.
 
 
 <a href="#skforecast.sarimax._sarimax.Sarimax" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">Sarimax</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">seasonal_order</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="n">trend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">measurement_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">time_varying_regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mle_regression</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">simple_differencing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">enforce_stationarity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">enforce_invertibility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">hamilton_representation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">concentrate_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">trend_offset</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">use_exact_diffuse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">dates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">validate_specification</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;lbfgs&#39;</span><span class="p">,</span> <span class="n">maxiter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">start_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sm_init_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">sm_fit_kwargs</span><span class="o">=</span><span class="p">{},</span> <span class="n">sm_predict_kwargs</span><span class="o">=</span><span class="p">{})</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">Sarimax</span><span class="p">(</span>
+    <span class="n">order</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="n">seasonal_order</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+    <span class="n">trend</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">measurement_error</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">time_varying_regression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">mle_regression</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">simple_differencing</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">enforce_stationarity</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">enforce_invertibility</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">hamilton_representation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">concentrate_scale</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">trend_offset</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">use_exact_diffuse</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">dates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">freq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">missing</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">,</span>
+    <span class="n">validate_specification</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;lbfgs&quot;</span><span class="p">,</span>
+    <span class="n">maxiter</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span>
+    <span class="n">start_params</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">disp</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">sm_init_kwargs</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">sm_fit_kwargs</span><span class="o">=</span><span class="p">{},</span>
+    <span class="n">sm_predict_kwargs</span><span class="o">=</span><span class="p">{},</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -4312,7 +4337,9 @@ that y[i] is regressed on exog[i].</p>
 
 
 <a href="#skforecast.sarimax._sarimax.Sarimax.predict" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">predict</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_conf_int</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">predict</span><span class="p">(</span>
+    <span class="n">steps</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">return_conf_int</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.05</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4597,7 +4624,13 @@ output type is the same as the type of <code>y</code> used in the fit method.</p
 
 
 <a href="#skforecast.sarimax._sarimax.Sarimax.append" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">append</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">copy_initialization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">append</span><span class="p">(</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">copy_initialization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">
@@ -4877,7 +4910,13 @@ much faster if the original dataset is large), see the extend method.</p>
 
 
 <a href="#skforecast.sarimax._sarimax.Sarimax.apply" class="headerlink" title="Permanent link">&para;</a></h3>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">apply</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">copy_initialization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">apply</span><span class="p">(</span>
+    <span class="n">y</span><span class="p">,</span>
+    <span class="n">exog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">refit</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">copy_initialization</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents ">

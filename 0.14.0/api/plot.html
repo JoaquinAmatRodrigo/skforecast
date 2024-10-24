@@ -3053,7 +3053,13 @@ using the <code>plt.rcParams.update()</code> method.</p>
 
 
 <a href="#skforecast.plot.plot.plot_residuals" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">plot_residuals</span><span class="p">(</span><span class="n">residuals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_true</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">y_pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fig_kw</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">plot_residuals</span><span class="p">(</span>
+    <span class="n">residuals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">y_true</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">y_pred</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">fig</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">fig_kw</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -3475,7 +3481,9 @@ internally.</p>
 
 
 <a href="#skforecast.plot.plot.plot_prediction_distribution" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">plot_prediction_distribution</span><span class="p">(</span><span class="n">bootstrapping_predictions</span><span class="p">,</span> <span class="n">bw_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fig_kw</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">plot_prediction_distribution</span><span class="p">(</span>
+    <span class="n">bootstrapping_predictions</span><span class="p">,</span> <span class="n">bw_method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">fig_kw</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
@@ -3704,7 +3712,16 @@ is used. See scipy.stats.gaussian_kde for more information.</p>
 
 
 <a href="#skforecast.plot.plot.plot_prediction_intervals" class="headerlink" title="Permanent link">&para;</a></h2>
-<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">plot_prediction_intervals</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">y_true</span><span class="p">,</span> <span class="n">target_variable</span><span class="p">,</span> <span class="n">initial_x_zoom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">xaxis_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">yaxis_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+<div class="language-python doc-signature highlight"><pre><span></span><code><span class="nf">plot_prediction_intervals</span><span class="p">(</span>
+    <span class="n">predictions</span><span class="p">,</span>
+    <span class="n">y_true</span><span class="p">,</span>
+    <span class="n">target_variable</span><span class="p">,</span>
+    <span class="n">initial_x_zoom</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">xaxis_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">yaxis_title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span>
 </code></pre></div>
 
     <div class="doc doc-contents first">
