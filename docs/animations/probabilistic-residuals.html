@@ -25,12 +25,13 @@ const {cl, ease, lin, P, lerp, V, mw, text, rect, line, circle, path, polyline, 
 
 /* ------------------------------------------------------------------ data */
 // A series whose error grows with its level: the noise is proportional to the
-// value of the series. Observations k = 0..31 are the training data, 32..49 the
-// validation data and 50..64 the test data, revealed while the coverage is counted.
-const N = 65, TR = 32, VA = 50, NT = N - VA;
-const m = k => 52 + 20*Math.sin(2*Math.PI*(k + 1.5)/10) + .12*(k - 32);   // what the model predicts
+// value of the series. Observations k = 0..59 are the training data and 60..74 the
+// test data, revealed while the coverage is counted. For backtesting, the training
+// data are split into train (0..29) and validation (30..59).
+const N = 75, TR = 30, VA = 60, NT = N - VA;
+const m = k => 52 + 20*Math.sin(2*Math.PI*(k + 1.5)/10) + .12*(k - 37);   // what the model predicts
 const sg = k => 2*(.6 + .085*(m(k) - 28));                              // error scale, grows with the level
-let seed = 4956;
+let seed = 11283;
 const rnd = () => (seed = (seed*16807) % 2147483647)/2147483647;
 const E = [];
 for (let k = 0; k < N; k++){
@@ -43,14 +44,15 @@ const quantile = (arr, p) => {
   return s[i] + (s[Math.min(i + 1, s.length - 1)] - s[i])*(h - i);
 };
 
-// In-sample: the model has seen the training data, so its fitted values follow
-// the observations closely and its errors are smaller than the real ones.
+// In-sample: the model is fitted with all the training data, so its fitted values
+// follow the observations closely and its errors are smaller than the real ones.
 const RIN = [];
-for (let k = 0; k < TR; k++){ const p = Y[k] - .6*sg(k)*E[k]; RIN.push({k, p, r: Y[k] - p}); }
+for (let k = 0; k < VA; k++){ const p = Y[k] - .6*sg(k)*E[k]; RIN.push({k, p, r: Y[k] - p}); }
 // Out-of-sample: predictions of the validation data by a model trained without them (backtesting).
 const ROUT = [];
 for (let k = TR; k < VA; k++) ROUT.push({k, p: m(k), r: Y[k] - m(k)});
-// Bins of predicted value with the same number of residuals each (terciles).
+// Bins of predicted value with the same number of residuals each (terciles, 10
+// residuals per bin: skforecast warns when there are fewer than 10 on average).
 const E1 = quantile(ROUT.map(d => d.p), 1/3), E2 = quantile(ROUT.map(d => d.p), 2/3);
 const binOf = p => p < E1 ? 0 : p < E2 ? 1 : 2;
 ROUT.forEach(d => { d.b = binOf(d.p); });
@@ -110,7 +112,7 @@ const XTR = xk(TR - .5), XVA = xk(VA - .5);
 const PX0 = 900, PX1 = 1240, PY0 = 124, PY1 = 438, Z0 = 312;
 const SX0 = PX0 + 30, SX1 = PX1 - 30, GAP = 26, GW = (SX1 - SX0 - 2*GAP)/3;
 const slotX = (n, count) => SX0 + n*(SX1 - SX0)/(count - 1);
-const binX = (b, j) => SX0 + b*(GW + GAP) + j*GW/5;
+const BN = ROUT.length/3, binX = (b, j) => SX0 + b*(GW + GAP) + j*GW/(BN - 1);
 const ry = r => Z0 - r*SC;
 const BIN_NAMES = ['low', 'medium', 'high'];
 
@@ -121,9 +123,9 @@ function chartStick(o, x, p, yObs, op){
   o.push(line(x, yv(p), x, yv(yObs), {stroke:V('resid'), sw:2, op}));
 }
 // Residual drawn as a stick from its zero line, with a dot at the observation.
-function stick(o, x, y0, r, op){
-  o.push(line(x, y0, x, y0 - r*SC, {stroke:V('resid'), sw:2.2, op}));
-  o.push(circle(x, y0 - r*SC, 2.4, {fill:V('resid'), op}));
+function stick(o, x, y0, r, op, thin){
+  o.push(line(x, y0, x, y0 - r*SC, {stroke:V('resid'), sw: thin ? 1.5 : 2.2, op}));
+  o.push(circle(x, y0 - r*SC, thin ? 1.8 : 2.4, {fill:V('resid'), op}));
 }
 // Bracket that covers 80% of the residuals (from the 0.1 to the 0.9 quantile).
 function bracket(o, x0, x1, q, op, label){
@@ -178,18 +180,21 @@ function chart(t, o){
   o.push(rect(XVA, CY0 - 14, CX1 + 10 - XVA, CY1 - CY0 + 28, {rx:8, fill:V('panel'), op:ca*pa}));
   const hl = P(t, ...T.valHL)*(1 - P(t, ...T.outOut));
   o.push(rect(XTR, CY0 - 14, XVA - XTR, CY1 - CY0 + 28, {fill:V('resid'), fo:.07, op:hl}));
-  for (const x of [XTR, XVA]) o.push(line(x, CY0 - 14, x, CY1 + 14, {stroke:V('border'), dash:'4 4', op:pa}));
-  const lab = (x0, x1, s, sub, sa, sc) => {
-    o.push(text((x0 + x1)/2, CY0 - 26, s, {size:14, weight:700, anchor:'middle', fill:V('muted'), op:pa}));
-    if (sub) o.push(text((x0 + x1)/2, CY0 + 2, sub, {size:12, anchor:'middle', fill:V(sc), op:sa}));
-  };
+  // for backtesting, the training data are split into train and validation
+  const split = P(t, ...T.valHL);
+  o.push(line(XVA, CY0 - 14, XVA, CY1 + 14, {stroke:V('border'), dash:'4 4', op:pa}));
+  o.push(line(XTR, CY0 - 14, XTR, lerp(CY0 - 14, CY1 + 14, split), {stroke:V('border'), dash:'4 4', op:split}));
+  const lab = (x0, x1, s, op) => o.push(text((x0 + x1)/2, CY0 - 26, s, {size:14, weight:700, anchor:'middle', fill:V('muted'), op}));
+  const sub = (x0, x1, s, c, op) => o.push(text((x0 + x1)/2, CY0 + 2, s, {size:12, anchor:'middle', fill:V(c), op}));
+  lab(CX0 - 6, XVA, 'training data', pa*(1 - P(t, ...T.outIn)));
+  lab(CX0 - 6, XTR, 'train', split);
+  lab(XTR, XVA, 'validation', split);
+  lab(XVA, CX1 + 10, 'test', pa);
   const sIn = P(t, T.fitIn[0], T.fitIn[0] + .4)*(1 - P(t, ...T.outIn));
   const sOut = P(t, ...T.valHL)*(1 - P(t, ...T.outOut));
-  lab(CX0 - 6, XTR, 'train', '', 0);
-  o.push(text((CX0 + XTR)/2, CY0 + 2, 'the model has seen these values', {size:12, anchor:'middle', fill:V('targetText'), op:sIn}));
-  o.push(text((CX0 + XTR)/2, CY0 + 2, 'the backtesting model is trained here', {size:12, anchor:'middle', fill:V('targetText'), op:sOut}));
-  lab(XTR, XVA, 'validation', 'not seen by the model', sOut, 'resid');
-  lab(XVA, CX1 + 10, 'test', '', 0);
+  sub(CX0 - 6, XVA, 'the model is fitted with these values', 'targetText', sIn);
+  sub(CX0 - 6, XTR, 'the backtesting model is fitted here', 'targetText', sOut);
+  sub(XTR, XVA, 'not seen by that model', 'resid', sOut);
 
   // bins of predicted value
   const st = P(t, ...T.stripes);
@@ -269,7 +274,7 @@ function panel(t, o){
     const s0 = flyStart(T.flyIn, i, RIN.length), q = ease(lin(t, s0, s0 + .7));
     if (q <= 0 || aIn <= 0) return;
     const x = lerp(xk(d.k), slotX(d.n, RIN.length), q), y0 = lerp(yv(d.p), Z0, q);
-    stick(o, x, y0, d.r, aIn);
+    stick(o, x, y0, d.r, aIn, true);
   });
   bracket(o, SX0 - 8, SX1 + 8, QIN, P(t, ...T.brIn)*aIn, '80% of the residuals');
 
@@ -287,7 +292,7 @@ function panel(t, o){
   // while the binned band is drawn, the bracket of the bin in use is highlighted
   const cur = t >= T.bandBin[0] && t < T.bandBin[1] ? binOf(m(VA + Math.round(lin(t, ...T.bandBin)*(NT - 1)))) : -1;
   for (let b = 0; b < 3; b++){
-    bracket(o, binX(b, 0) - 8, binX(b, 5) + 8, QBIN[b], bb, '');
+    bracket(o, binX(b, 0) - 8, binX(b, BN - 1) + 8, QBIN[b], bb, '');
     if (b === cur) o.push(rect(binX(b, 0) - 11, ry(QBIN[b][1]) - 3, GW + 22, (QBIN[b][1] - QBIN[b][0])*SC + 6, {rx:6, stroke:V('targetText'), sw:2.2}));
     o.push(text(binX(b, 0) + GW/2, PY1 - 16, BIN_NAMES[b], {size:12.5, weight: b === cur ? 700 : 400, anchor:'middle', fill: b === cur ? V('fg') : V('muted'), op:tBin}));
   }
@@ -307,7 +312,7 @@ const TY0 = 470, TROW = 26, TC1 = PX0 + 190, TC2 = PX1 - 6;
 function table(t, o, counts){
   const a = P(t, T.testIn - .4, T.testIn);
   if (a <= 0) return;
-  o.push(text(PX0 + 6, TY0, 'Test data', {size:12.5, weight:700, fill:V('muted'), op:a}));
+  o.push(text(PX0 + 6, TY0, 'residuals', {size:12.5, weight:700, fill:V('muted'), op:a}));
   o.push(text(TC1, TY0, 'coverage', {size:12.5, weight:700, anchor:'end', fill:V('muted'), op:a}));
   o.push(text(TC2, TY0, 'mean width', {size:12.5, weight:700, anchor:'end', fill:V('muted'), op:a}));
   o.push(line(PX0 + 6, TY0 + 9, TC2, TY0 + 9, {stroke:V('border'), op:a}));
@@ -321,17 +326,23 @@ function table(t, o, counts){
     o.push(text(TC1, y, done ? pct(s.cov, NT) : `${cov} / ${n}`, {size:14, cls:'m', weight:700, anchor:'end', fill: low ? V('miss') : V('fg'), op:ra}));
     o.push(text(TC2, y, s.width.toFixed(1), {size:14, cls:'m', anchor:'end', op:ra*P(t, bw[1] - .3, bw[1])}));
   });
-  o.push(text(PX0 + 6, TY0 + 30 + 3*TROW, 'nominal coverage: 80%', {size:12, cls:'i', fill:V('muted'), op:a}));
+  o.push(text(PX0 + 6, TY0 + 30 + 3*TROW, 'Intervals on the test data, nominal coverage: 80%', {size:12, cls:'i', fill:V('muted'), op:a}));
+  // legend of the test observations, under the test data
+  const lx = XVA + 10, ly = CY1 + 38;
+  o.push(circle(lx, ly - 4, 3.4, {fill:V('series'), op:a}));
+  o.push(text(lx + 10, ly, 'inside the interval', {size:12, fill:V('muted'), op:a}));
+  o.push(circle(lx, ly + 16, 4.2, {fill:V('bg'), stroke:V('miss'), sw:2.2, op:a}));
+  o.push(text(lx + 10, ly + 20, 'outside the interval', {size:12, fill:V('muted'), op:a}));
 }
 
 /* ------------------------------------------------------------------ run */
 SkfAnim.run({
   title: 'Residuals and prediction intervals',
-  desc: 'A series whose error grows with its level is split into training, validation and test data. ' +
+  desc: 'A series whose error grows with its level is split into training and test data. ' +
         'In-sample residuals, the errors of the model on its own training data, are small because the model ' +
         'has already seen those values: the interval built from them covers only ' + pct(SCORE.in.cov, NT) +
-        ' of the test observations for a nominal 80%. Out-of-sample residuals, obtained by backtesting on the ' +
-        'validation data, are larger and the interval covers ' + pct(SCORE.out.cov, NT) + '. Binned residuals, ' +
+        ' of the test observations for a nominal 80%. Out-of-sample residuals, obtained by backtesting a model ' +
+        'trained on the first part of the training data over the rest of it (validation), are larger and the interval covers ' + pct(SCORE.out.cov, NT) + '. Binned residuals, ' +
         'grouped by predicted value, keep that coverage (' + pct(SCORE.bin.cov, NT) + ') with an interval that ' +
         'is narrow for low predictions and wide for high ones.',
   total: T.total,
