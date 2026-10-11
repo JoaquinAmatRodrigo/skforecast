@@ -25,8 +25,8 @@ const {ease, lin, P, lerp, V, text, rect, line, circle, path, polyline, header} 
 
 /* ------------------------------------------------------------------ data */
 // History k = 0..29 and test data k = 30..49. Three models give the same point
-// forecast with a nominal 80% interval of different width: A too narrow, B
-// calibrated and C too wide. Every number shown is computed from these data.
+// forecast with a nominal 80% interval of different width: A too narrow, B too
+// wide and C calibrated. Every number shown is computed from these data.
 const NH = 30, NT = 20, N = NH + NT, ALPHA = .2;
 const m = k => 50 + 12*Math.sin(2*Math.PI*(k + 1)/12) + .1*(k - 30);   // forecast
 let seed = 183;
@@ -38,8 +38,8 @@ for (let k = 0; k < N; k++){
 }
 const MODELS = [
   {name:'Model A', h:3},
-  {name:'Model B', h:5.2},
-  {name:'Model C', h:10}
+  {name:'Model B', h:10},
+  {name:'Model C', h:5.2}
 ];
 // Winkler score of each test observation (skforecast.metrics.winkler_score):
 // width + (2/alpha)*distance below the lower bound + (2/alpha)*distance above the upper bound.
@@ -58,8 +58,8 @@ const BEST = MODELS.reduce((b, M) => M.winkler < b.winkler ? M : b);
 const pct = c => Math.round(100*c/NT) + '%';
 
 /* -------------------------------------------------------------- timeline */
-// Order in which the models are shown: A (narrow), C (wide), B (calibrated).
-const SHOW = [0, 2, 1];
+// Order in which the models are shown: A (narrow), B (wide), C (calibrated).
+const SHOW = [0, 1, 2];
 const T = {
   hist:[0.3,2.0], fcst:[1.8,2.6], test:[2.8,4.4],
   slot0:5.0, slot:7.0, bandIn:.9, count:1.2, step:.12,
@@ -72,16 +72,16 @@ const WS = [];                                      // Winkler of SHOW[i]
 { let t = T.w0; for (let i = 0; i < 3; i++){ WS.push(t); t += T.wslot[i]; } }
 const WEND = WS[2] + T.wslot[2];
 const CAPTIONS = [
-  [0.0, 5.0, 'To evaluate prediction intervals, compare them with test data not used to train the model.'],
+  [0.0, 5.0, 'Three models forecast test data not used to train them: same predictions, different 80% intervals.'],
   [5.0, 12.0,'Coverage: share of observations inside the interval. Model A covers ' + pct(MODELS[0].cov) + ', far from the nominal 80%.'],
-  [12.0,19.0,'Model C covers every observation, but its interval is so wide that it says little about the future.'],
-  [19.0,26.6,'Model B reaches the nominal coverage with a narrower interval: it is calibrated and sharp.'],
+  [12.0,19.0,'Model B covers every observation, but its interval is so wide that it says little about the future.'],
+  [19.0,26.6,'Model C reaches the nominal 80% with an interval about half as wide as that of model B.'],
   [26.6,30.2,'Coverage measures calibration and width measures sharpness. To rank models, one score must combine both.'],
   [WS[0],WS[0] + 2.8,'Winkler score: the width of the interval plus a penalty for each observation that falls outside it.'],
-  [WS[0] + 2.8,WS[1],'The penalty is 2/α times the distance to the interval: 10 times for an 80% interval.'],
-  [WS[1],WS[2],'Model C has no penalties, but its width alone gives it a high score.'],
-  [WS[2],WEND,'Model B balances coverage and width, and gets the lowest score: lower is better.'],
-  [WEND,99,  'Rank models with proper scores: the Winkler score for one interval, the WIS or the CRPS for the whole distribution.']
+  [WS[0] + 2.8,WS[1],'Each miss costs 2/α = 10 times its distance to the interval: the misses of model A outweigh its narrow width.'],
+  [WS[1],WS[2],'Model B has no penalties, but its width alone gives it a high score.'],
+  [WS[2],WEND,'Model C balances coverage and width, and gets the lowest score: lower is better.'],
+  [WEND,99,  'Rank models with proper scores: Winkler for one interval, weighted interval score (WIS) or CRPS for the distribution.']
 ];
 const STEPS = [['Test data',0,5.0],['Coverage and width',5.0,WS[0]],['Winkler score',WS[0],99]];
 
@@ -249,13 +249,13 @@ function table(t, o){
 /* ------------------------------------------------------------------ run */
 SkfAnim.run({
   title: 'Evaluating prediction intervals',
-  desc: 'Three models forecast the same test data with a nominal 80% interval. Model A has a narrow interval ' +
-        '(width ' + MODELS[0].width.toFixed(1) + ') that covers ' + pct(MODELS[0].cov) + ' of the observations; model C ' +
-        'covers ' + pct(MODELS[2].cov) + ' with an interval of width ' + MODELS[2].width.toFixed(1) + '; model B covers ' +
-        pct(MODELS[1].cov) + ' with a width of ' + MODELS[1].width.toFixed(1) + '. The Winkler score adds to the width ' +
-        'a penalty of 10 times the distance of each observation outside the interval. Model B has the lowest ' +
-        'score (' + MODELS[1].winkler.toFixed(1) + ', against ' + MODELS[0].winkler.toFixed(1) + ' for A and ' +
-        MODELS[2].winkler.toFixed(1) + ' for C).',
+  desc: 'Three models forecast the same test data with the same predictions and a nominal 80% interval. ' +
+        'Model A has a narrow interval (width ' + MODELS[0].width.toFixed(1) + ') that covers ' + pct(MODELS[0].cov) +
+        ' of the observations; model B covers ' + pct(MODELS[1].cov) + ' with an interval of width ' +
+        MODELS[1].width.toFixed(1) + '; model C covers ' + pct(MODELS[2].cov) + ' with a width of ' +
+        MODELS[2].width.toFixed(1) + '. The Winkler score adds to the width a penalty of 10 times the distance of each ' +
+        'observation outside the interval. Model C has the lowest score (' + MODELS[2].winkler.toFixed(1) +
+        ', against ' + MODELS[0].winkler.toFixed(1) + ' for A and ' + MODELS[1].winkler.toFixed(1) + ' for B).',
   total: T.total,
   height: 640,
   still: 49,
