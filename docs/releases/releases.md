@@ -127,6 +127,8 @@ The main changes in this release are:
 
 + New [home page](../README.md) and GitHub README, and the [examples and tutorials](../examples/examples_english.md) pages (English, Spanish and Chinese) are a card grid with a search box and level and topic filters. The site serves its fonts and scripts from its own domain, so visitors no longer connect to third parties. ([#1323](https://github.com/skforecast/skforecast/pull/1323))
 
++ The [probabilistic forecasting overview](../user_guides/probabilistic-forecasting-overview.md) explains which residuals to use (in-sample or out-of-sample, binned), compares the methods in a table and adds a section on how to evaluate prediction intervals.
+
 
 **Fixed**
 
