@@ -12,6 +12,10 @@ Skforecast implements three families of methods for probabilistic forecasting, e
 
 + [**Quantile regression**](probabilistic-forecasting-quantile-regression.ipynb): train models that directly predict the quantiles that define the bounds of the interval.
 
+<div class="skf-anim-embed">
+  <iframe src="../animations/probabilistic-methods.html" title="Animation: how each probabilistic forecasting method builds the interval" loading="lazy" allowfullscreen></iframe>
+</div>
+
 Bootstrapping and conformal prediction build the interval from the past errors of the model (residuals), so the interval is only as good as those residuals: the section [Residuals](#residuals) explains which ones to use. The last sections compare the methods and explain how to evaluate the resulting intervals.
 
 
