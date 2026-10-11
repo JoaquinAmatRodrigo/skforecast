@@ -68,6 +68,10 @@ Bootstrapping and conformal prediction use the residuals of the model as an esti
 
 By default (`use_binned_residuals=True`), the residuals are conditioned on the predicted value: they are grouped into bins according to the prediction that generated them, and each new prediction uses the residuals of its bin. The width of the interval then adapts to the magnitude of the prediction. For example, when the error grows with the level of the series, the intervals are narrow for low predictions and wide for high ones.
 
+<div class="skf-anim-embed">
+  <iframe src="../animations/probabilistic-residuals.html" title="Animation: in-sample, out-of-sample and binned residuals" loading="lazy" allowfullscreen></iframe>
+</div>
+
 
 ## Which method to use?
 
