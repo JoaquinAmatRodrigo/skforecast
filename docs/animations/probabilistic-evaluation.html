@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<!--
+  Copyright (c) 2021-present Joaquín Amat Rodrigo and Javier Escobar Ortiz.
+  Part of the skforecast documentation, licensed under CC BY-NC-SA 4.0
+  (https://creativecommons.org/licenses/by-nc-sa/4.0/). It is not covered by the
+  BSD-3-Clause license of the skforecast software.
+  The skforecast trademark and logo are registered with the EUIPO (application
+  number 019109684) and may not be used without permission.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Evaluating prediction intervals</title>
+<meta name="description" content="Animated explanation of how to evaluate prediction intervals: coverage measures calibration, the width of the interval measures sharpness, and the Winkler score combines both in a single number to rank models.">
+<link rel="stylesheet" href="skf-anim.css">
+</head>
+<body>
+<div class="skf-anim"></div>
+<script src="skf-anim.js"></script>
+<script>
+(function(){
+"use strict";
+const {ease, lin, P, lerp, V, text, rect, line, circle, path, polyline, header} = SkfAnim;
+
+/* ------------------------------------------------------------------ data */
+// History k = 0..29 and test data k = 30..49. Three models give the same point
+// forecast with a nominal 80% interval of different width: A too narrow, B
+// calibrated and C too wide. Every number shown is computed from these data.
+const NH = 30, NT = 20, N = NH + NT, ALPHA = .2;
+const m = k => 50 + 12*Math.sin(2*Math.PI*(k + 1)/12) + .1*(k - 30);   // forecast
+let seed = 183;
+const rnd = () => (seed = (seed*16807) % 2147483647)/2147483647;
+const Y = [];
+for (let k = 0; k < N; k++){
+  const r = Math.sqrt(-2*Math.log(rnd() + 1e-12)), th = 2*Math.PI*rnd();
+  Y.push(m(k) + 4*r*Math.cos(th));
+}
+const MODELS = [
+  {name:'Model A', h:3},
+  {name:'Model B', h:5.2},
+  {name:'Model C', h:10}
+];
+// Winkler score of each test observation (skforecast.metrics.winkler_score):
+// width + (2/alpha)*distance below the lower bound + (2/alpha)*distance above the upper bound.
+for (const M of MODELS){
+  M.obs = [];
+  for (let k = NH; k < N; k++){
+    const lo = m(k) - M.h, hi = m(k) + M.h, y = Y[k];
+    const pen = (2/ALPHA)*(Math.max(0, lo - y) + Math.max(0, y - hi));
+    M.obs.push({k, lo, hi, inside: pen === 0, width: hi - lo, pen});
+  }
+  M.cov = M.obs.filter(o => o.inside).length;
+  M.width = 2*M.h;
+  M.winkler = M.obs.reduce((s, o) => s + o.width + o.pen, 0)/NT;
+}
+const BEST = MODELS.reduce((b, M) => M.winkler < b.winkler ? M : b);
+const pct = c => Math.round(100*c/NT) + '%';
+
+/* -------------------------------------------------------------- timeline */
+// Order in which the models are shown: A (narrow), C (wide), B (calibrated).
+const SHOW = [0, 2, 1];
+const T = {
+  hist:[0.3,2.0], fcst:[1.8,2.6], test:[2.8,4.4],
+  slot0:5.0, slot:7.0, bandIn:.9, count:1.2, step:.12,
+  cols:[26.6,27.2], colsOut:[29.6,30.0],
+  w0:30.2, wslot:[5.6, 3.8, 4.0], bars:.08,
+  fadeOut:[50.8,51.6], total:51.6
+};
+const SLOT = i => T.slot0 + i*T.slot;               // coverage and width of SHOW[i]
+const WS = [];                                      // Winkler of SHOW[i]
+{ let t = T.w0; for (let i = 0; i < 3; i++){ WS.push(t); t += T.wslot[i]; } }
+const WEND = WS[2] + T.wslot[2];
+const CAPTIONS = [
+  [0.0, 5.0, 'To evaluate prediction intervals, compare them with test data not used to train the model.'],
+  [5.0, 12.0,'Coverage: share of observations inside the interval. Model A covers ' + pct(MODELS[0].cov) + ', far from the nominal 80%.'],
+  [12.0,19.0,'Model C covers every observation, but its interval is so wide that it says little about the future.'],
+  [19.0,26.6,'Model B reaches the nominal coverage with a narrower interval: it is calibrated and sharp.'],
+  [26.6,30.2,'Coverage measures calibration and width measures sharpness. To rank models, one score must combine both.'],
+  [WS[0],WS[0] + 2.8,'Winkler score: the width of the interval plus a penalty for each observation that falls outside it.'],
+  [WS[0] + 2.8,WS[1],'The penalty is 2/α times the distance to the interval: 10 times for an 80% interval.'],
+  [WS[1],WS[2],'Model C has no penalties, but its width alone gives it a high score.'],
+  [WS[2],WEND,'Model B balances coverage and width, and gets the lowest score: lower is better.'],
+  [WEND,99,  'Rank models with proper scores: the Winkler score for one interval, the WIS or the CRPS for the whole distribution.']
+];
+const STEPS = [['Test data',0,5.0],['Coverage and width',5.0,WS[0]],['Winkler score',WS[0],99]];
+
+/* ---------------------------------------------------------------- layout */
+const CX0 = 64, CX1 = 820, DX = (CX1 - CX0)/(N - 1);
+const xk = k => CX0 + k*DX;
+const VLO = 22, VHI = 80, CY0 = 140, CY1 = 380, SC = (CY1 - CY0)/(VHI - VLO);
+const yv = v => CY1 - (v - VLO)*SC;
+const XT = xk(NH - .5);
+const BY1 = 572, BS = 3.0, BW = DX*.62;            // Winkler bars: baseline and scale
+const TX0 = 892, TX1 = 1240, TY0 = 150, TROW = 34;
+const COLS = [TX0 + 160, TX0 + 252, TX1 - 4];      // right edge of coverage, width, Winkler
+
+/* --------------------------------------------------------------- helpers */
+// Which model is on the chart at time t, and its opacity.
+function current(t){
+  for (let i = 2; i >= 0; i--){
+    const s = WS[i], e = s + T.wslot[i];
+    if (t >= s - .3) return {i, M: MODELS[SHOW[i]], a: P(t, s - .3, s + .2)*(i === 2 ? 1 : 1 - P(t, e - .4, e - .05)), t0: s + .3, w: true};
+  }
+  for (let i = 2; i >= 0; i--){
+    const s = SLOT(i), e = s + T.slot;
+    if (t >= s){
+      const out = i === 2 ? P(t, T.colsOut[0], T.colsOut[1]) : P(t, e - .4, e);
+      return {i, M: MODELS[SHOW[i]], a: P(t, s, s + .5)*(1 - out), t0: s + T.count, w: false};
+    }
+  }
+  return null;
+}
+
+function band(o, M, p, op){
+  if (p <= 0 || op <= 0) return;
+  const up = [], lo = [];
+  for (let k = NH; k < N; k++){ up.push([xk(k), yv(m(k) + M.h)]); lo.push([xk(k), yv(m(k) - M.h)]); }
+  const pu = polyline(up, p), pl = polyline(lo, p);
+  const lr = lo.slice(0, Math.max(1, Math.ceil(p*(NT - 1)) + 1));
+  const d = pu + ' ' + polyline(lr.reverse(), 1).replace('M', 'L') + ' Z';
+  o.push(path(d, {fill:V('target'), op:op*.18}));
+  o.push(path(pu, {stroke:V('target'), sw:1.3, op:op*.8}));
+  o.push(path(pl, {stroke:V('target'), sw:1.3, op:op*.8}));
+}
+
+/* ----------------------------------------------------------------- chart */
+function chart(t, o){
+  const ca = P(t, 0, .5);
+  // the test panel grows to hold the Winkler bars when they are needed
+  const ph = lerp(CY1 - CY0 + 28, BY1 - CY0 + 26, P(t, T.w0 - .7, T.w0 - .1));
+  o.push(rect(XT, CY0 - 14, CX1 + 12 - XT, ph, {rx:8, fill:V('panel'), op:ca*P(t, ...T.test)}));
+  o.push(text(XT + (CX1 + 12 - XT)/2, CY0 - 24, 'test', {size:14, weight:700, anchor:'middle', fill:V('muted'), op:P(t, ...T.test)}));
+  o.push(text((CX0 + XT)/2, CY0 - 24, 'history', {size:14, weight:700, anchor:'middle', fill:V('muted'), op:P(t, ...T.hist)}));
+
+  // history and forecast
+  const hp = P(t, ...T.hist), hpts = [];
+  for (let k = 0; k < NH; k++) hpts.push([xk(k), yv(Y[k])]);
+  o.push(path(polyline(hpts, hp), {stroke:V('series'), sw:1.6, op:ca}));
+  const fpts = [];
+  for (let k = NH - 1; k < N; k++) fpts.push([xk(k), yv(k === NH - 1 ? Y[k] : m(k))]);
+  o.push(path(polyline(fpts, P(t, ...T.fcst)), {stroke:V('target'), sw:2.2, dash:'5 4'}));
+
+  // interval of the current model
+  const c = current(t);
+  if (c) band(o, c.M, c.w ? 1 : lin(t, SLOT(c.i), SLOT(c.i) + T.bandIn), c.a);
+
+  // test observations: neutral first, then inside or outside the current interval
+  for (let i = 0; i < NT; i++){
+    const k = NH + i, x = xk(k), y = yv(Y[k]);
+    const a = lin(t, T.test[0] + i*.07, T.test[0] + i*.07 + .25);
+    if (a <= 0) continue;
+    let mark = 0, ob = null;
+    if (c){ ob = c.M.obs[i]; mark = c.a*lin(t, c.t0 + i*(c.w ? T.bars : T.step), c.t0 + i*(c.w ? T.bars : T.step) + .15); }
+    if (ob && !ob.inside && mark > 0){
+      const edge = yv(Y[k] > ob.hi ? ob.hi : ob.lo);
+      o.push(line(x, edge, x, y, {stroke:V('miss'), sw:1.6, dash:'2 3', op:mark}));
+      o.push(circle(x, y, 4.2, {fill:V('bg'), stroke:V('miss'), sw:2.2, op:mark}));
+      o.push(circle(x, y, 3.4, {fill:V('series'), op:a*(1 - mark)}));
+    } else {
+      o.push(circle(x, y, 3.4, {fill:V('series'), op:a}));
+    }
+  }
+
+  // width of the interval, measured at the last step
+  if (c && !c.w){
+    const wa = c.a*P(t, SLOT(c.i) + T.bandIn, SLOT(c.i) + T.bandIn + .4), k = N - 1;
+    const x = CX1 + 22, yt = yv(m(k) + c.M.h), yb = yv(m(k) - c.M.h);
+    o.push(line(x, yt, x, yb, {stroke:V('fg'), sw:1.4, op:wa}));
+    o.push(line(x - 4, yt, x + 4, yt, {stroke:V('fg'), sw:1.4, op:wa}));
+    o.push(line(x - 4, yb, x + 4, yb, {stroke:V('fg'), sw:1.4, op:wa}));
+    o.push(text(x + 8, (yt + yb)/2 - 4, 'width', {size:11.5, fill:V('muted'), op:wa}));
+    o.push(text(x + 8, (yt + yb)/2 + 12, c.M.width.toFixed(1), {size:12, cls:'m', weight:700, op:wa}));
+  }
+
+  // legend of the observations
+  const la = P(t, SLOT(0) + T.count - .4, SLOT(0) + T.count);
+  o.push(circle(CX0 + 6, CY0 + 4, 3.4, {fill:V('series'), op:la}));
+  o.push(text(CX0 + 16, CY0 + 8, 'inside the interval', {size:12, fill:V('muted'), op:la}));
+  o.push(circle(CX0 + 146, CY0 + 4, 4.2, {fill:V('bg'), stroke:V('miss'), sw:2.2, op:la}));
+  o.push(text(CX0 + 156, CY0 + 8, 'outside the interval', {size:12, fill:V('muted'), op:la}));
+  return c;
+}
+
+/* ----------------------------------------------------------- Winkler bars */
+function winkler(t, o, c){
+  const a = P(t, T.w0 - .4, T.w0 + .2);
+  if (a <= 0) return;
+  // explanation, under the history
+  o.push(text(CX0, BY1 - 100, 'Winkler score of each observation', {size:15, weight:700, op:a}));
+  o.push(text(CX0, BY1 - 76, 'width of the interval', {size:13, fill:V('muted'), op:a}));
+  o.push(text(CX0, BY1 - 56, '+ 10 × distance outside it (2/α, α = 0.2)', {size:13, fill:V('muted'), op:a}));
+  o.push(rect(CX0, BY1 - 34, 12, 12, {rx:2, fill:V('target'), fo:.75, op:a}));
+  o.push(text(CX0 + 18, BY1 - 24, 'width', {size:12, fill:V('muted'), op:a}));
+  o.push(rect(CX0 + 76, BY1 - 34, 12, 12, {rx:2, fill:V('miss'), op:a}));
+  o.push(text(CX0 + 94, BY1 - 24, 'penalty', {size:12, fill:V('muted'), op:a}));
+  o.push(line(XT + 6, BY1, CX1 + 6, BY1, {stroke:V('border'), op:a}));
+  if (!c || !c.w) return;
+  const M = c.M;
+  M.obs.forEach((ob, i) => {
+    const s = c.t0 + i*T.bars, p = ease(lin(t, s, s + .3));
+    if (p <= 0) return;
+    const x = xk(ob.k) - BW/2, hw = ob.width*BS*p, hp = ob.pen*BS*p;
+    o.push(rect(x, BY1 - hw, BW, hw, {fill:V('target'), fo:.75, op:c.a}));
+    if (hp > 0) o.push(rect(x, BY1 - hw - hp, BW, hp, {fill:V('miss'), op:c.a}));
+  });
+  // mean of the bars = Winkler score of the model
+  const ma = c.a*P(t, c.t0 + NT*T.bars + .3, c.t0 + NT*T.bars + .7), ym = BY1 - M.winkler*BS;
+  o.push(line(XT + 6, ym, CX1 + 6, ym, {stroke:V('fg'), sw:1.6, dash:'6 4', op:ma}));
+  o.push(text(CX1 + 12, ym + 4, 'mean', {size:11.5, fill:V('muted'), op:ma}));
+  o.push(text(CX1 + 12, ym + 19, M.winkler.toFixed(1), {size:12, cls:'m', weight:700, op:ma}));
+}
+
+/* ----------------------------------------------------------------- table */
+function table(t, o){
+  const a = P(t, SLOT(0) + .2, SLOT(0) + .7);
+  if (a <= 0) return;
+  const hc = P(t, ...T.cols)*(1 - P(t, ...T.colsOut));                  // coverage and width highlighted
+  const wa = P(t, T.w0 - .2, T.w0 + .3);
+  o.push(rect(TX0, TY0 - 30, TX1 - TX0, 3*TROW + 84, {rx:12, fill:V('panel'), stroke:V('border'), sw:1.2, op:a}));
+  const hy = TY0 + 2;
+  o.push(text(TX0 + 16, hy, '80% interval', {size:12.5, weight:700, fill:V('muted'), op:a}));
+  [['coverage', a], ['width', a], ['Winkler', a*wa]].forEach(([s, op], j) =>
+    o.push(text(COLS[j] - 12*(j === 2), hy, s, {size:12.5, weight:700, anchor:'end', fill:V('muted'), op})));
+  for (const j of [0, 1]) o.push(rect(COLS[j] - 78, hy - 18, 86, 3*TROW + 30, {rx:6, stroke:V('targetText'), sw:1.8, op:hc}));
+  o.push(line(TX0 + 16, hy + 10, TX1 - 16, hy + 10, {stroke:V('border'), op:a}));
+  MODELS.forEach((M, r) => {
+    const i = SHOW.indexOf(r), y = hy + 36 + r*TROW;
+    const ra = P(t, SLOT(i) + .2, SLOT(i) + .6);
+    const done = SLOT(i) + T.count + NT*T.step + .2;
+    o.push(text(TX0 + 16, y, M.name, {size:14, op:a}));
+    // coverage counted live while the observations are marked
+    const n = Math.max(0, Math.min(NT, Math.floor((t - SLOT(i) - T.count)/T.step) + 1));
+    const cov = M.obs.slice(0, n).filter(ob => ob.inside).length;
+    const cs = t >= done ? pct(M.cov) : n > 0 ? `${cov}/${n}` : '';
+    const far = t >= done && Math.abs(M.cov/NT - .8) > .1;
+    o.push(text(COLS[0] - 12, y, cs, {size:14, cls:'m', weight:700, anchor:'end', fill: far ? V('miss') : V('fg'), op:ra}));
+    o.push(text(COLS[1] - 12, y, M.width.toFixed(1), {size:14, cls:'m', anchor:'end', op:ra*P(t, SLOT(i) + T.bandIn, SLOT(i) + T.bandIn + .4)}));
+    const wi = SHOW.indexOf(r), wdone = WS[wi] + .3 + NT*T.bars + .7;
+    o.push(text(COLS[2] - 16, y, M.winkler.toFixed(1), {size:14, cls:'m', weight: M === BEST ? 700 : 400, anchor:'end', op:P(t, wdone - .2, wdone + .2)}));
+    // the best model by Winkler score, once all the scores are known
+    const ba = M === BEST ? P(t, WEND - .6, WEND) : 0;
+    o.push(rect(TX0 + 8, y - 20, TX1 - TX0 - 16, 28, {rx:6, stroke:V('target'), sw:2, op:ba}));
+  });
+  o.push(text(TX0 + 16, hy + 30 + 3*TROW, 'In red: coverage far from the nominal 80%', {size:12, cls:'i', fill:V('muted'), op:a}));
+  o.push(text(TX0 + 16, hy + 48 + 3*TROW, 'Winkler: lower is better', {size:12, cls:'i', fill:V('muted'), op:wa}));
+}
+
+/* ------------------------------------------------------------------ run */
+SkfAnim.run({
+  title: 'Evaluating prediction intervals',
+  desc: 'Three models forecast the same test data with a nominal 80% interval. Model A has a narrow interval ' +
+        '(width ' + MODELS[0].width.toFixed(1) + ') that covers ' + pct(MODELS[0].cov) + ' of the observations; model C ' +
+        'covers ' + pct(MODELS[2].cov) + ' with an interval of width ' + MODELS[2].width.toFixed(1) + '; model B covers ' +
+        pct(MODELS[1].cov) + ' with a width of ' + MODELS[1].width.toFixed(1) + '. The Winkler score adds to the width ' +
+        'a penalty of 10 times the distance of each observation outside the interval. Model B has the lowest ' +
+        'score (' + MODELS[1].winkler.toFixed(1) + ', against ' + MODELS[0].winkler.toFixed(1) + ' for A and ' +
+        MODELS[2].winkler.toFixed(1) + ' for C).',
+  total: T.total,
+  height: 640,
+  still: 49,
+  fadeOut: T.fadeOut,
+  render(t, o){
+    header(t, o, {title:'Evaluating prediction intervals', captions:CAPTIONS, steps:STEPS});
+    const c = chart(t, o);
+    winkler(t, o, c);
+    table(t, o);
+  }
+});
+})();
+</script>
+</body>
+</html>
