@@ -76,7 +76,7 @@ nav:
       - Hyperparameter tuning and lags selection: user_guides/hyperparameter-tuning-and-lags-selection.ipynb
       - Feature selection: user_guides/feature-selection.ipynb
     - Probabilistic Forecasting: 
-      - Probabilistic forecasting: user_guides/probabilistic-forecasting-overview.ipynb
+      - Probabilistic forecasting: user_guides/probabilistic-forecasting-overview.md
       - Bootstrapped residuals: user_guides/probabilistic-forecasting-bootstrapped-residuals.ipynb
       - Conformal predictions: user_guides/probabilistic-forecasting-conformal-prediction.ipynb
       - Conformal calibration: user_guides/probabilistic-forecasting-conformal-calibration.ipynb

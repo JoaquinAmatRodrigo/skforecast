@@ -52,7 +52,7 @@ Welcome to the skforecast user guides! This comprehensive collection of guides i
 
 <span style="font-size: 1.3em;">Probabilistic Forecasting</span>
 
-- [Probabilistic forecasting](../user_guides/probabilistic-forecasting-overview.ipynb)
+- [Probabilistic forecasting](../user_guides/probabilistic-forecasting-overview.md)
 - [Bootstrapped residuals](../user_guides/probabilistic-forecasting-bootstrapped-residuals.ipynb)
 - [Conformal predictions](../user_guides/probabilistic-forecasting-conformal-prediction.ipynb)
 - [Conformal calibration](../user_guides/probabilistic-forecasting-conformal-calibration.ipynb)
