@@ -33,12 +33,13 @@ const quantile = (arr, p) => {
 };
 
 // Introduction: history k = 0..39 and 12 forecast steps, with an 80% interval
-// that widens with the horizon. The true future values are revealed at the end.
+// that widens with the horizon. The true future values are revealed at the end:
+// 10 of the 12 fall inside, close to the nominal 80%.
 const IH = 40, IF = 12, IN = IH + IF;
 const ib = k => 50 + 14*Math.sin(2*Math.PI*(k + 2)/12) + .15*(k - 40);
 const IY = [];
 for (let k = 0; k < IN; k++) IY.push(ib(k) + 3*gauss());
-const ihw = k => 4 + .7*(k - IH + 1);                                     // half width of the interval
+const ihw = k => 3 + .5*(k - IH + 1);                                     // half width of the interval
 
 // Panels: history k = 0..9 and forecast k = 10..19, the same in the four panels.
 const PH = 10, PN = 20, PS = PN - PH;
@@ -142,14 +143,17 @@ function intro(t, o){
     if (inside) o.push(circle(ixk(k), iyv(IY[k]), 4, {fill:V('series'), op:va}));
     else o.push(circle(ixk(k), iyv(IY[k]), 4.6, {fill:V('bg'), stroke:V('miss'), sw:2.2, op:va}));
   }
-  o.push(text(ixk(IN - 1), IY1 + 22, 'true values, observed later', {size:12.5, cls:'i', anchor:'end', fill:V('muted'), op:a*P(t, T.truth[0], T.truth[0] + .5)}));
+  const ta = a*P(t, T.truth[0], T.truth[0] + .5), lx = ixk(IN - 1) - mw('true values, observed later', 12.5, 400, 'i') - 150;
+  o.push(text(ixk(IN - 1), IY1 + 22, 'true values, observed later', {size:12.5, cls:'i', anchor:'end', fill:V('muted'), op:ta}));
+  o.push(circle(lx, IY1 + 18, 4.6, {fill:V('bg'), stroke:V('miss'), sw:2.2, op:ta}));
+  o.push(text(lx + 10, IY1 + 22, 'outside the interval', {size:12.5, fill:V('muted'), op:ta}));
 }
 
 /* ---------------------------------------------------------------- panels */
 const PANELS = [
   {kind:'boot', name:'Bootstrapping', sub:"method='bootstrapping'", needs:'out-of-sample residuals', shape:'asymmetric, can widen'},
   {kind:'conf', name:'Conformal', sub:"method='conformal'", needs:'out-of-sample residuals', shape:'symmetric'},
-  {kind:'qr', name:'Quantile regression', sub:'quantile loss estimators', needs:'one model per quantile', shape:'asymmetric, may cross'},
+  {kind:'qr', name:'Quantile regression', sub:'quantile loss estimators', needs:'a forecaster per quantile', shape:'asymmetric, may cross'},
   {kind:'found', name:'Foundation models', sub:'ForecasterFoundation', needs:'no training', shape:'set by the model'}
 ];
 const APW = 285, APG = 20, APY0 = 118, APY1 = 592;
@@ -232,7 +236,7 @@ function panel(t, o, i, A){
   }
   if (d.kind === 'conf'){
     // sorted absolute residuals and their 80% quantile
-    o.push(text(px + 20, SY0 + 4, '|residuals|, sorted', {size:12, fill:V('muted'), op}));
+    o.push(text(px + 20, SY0 + 4, 'absolute residuals, sorted', {size:12, fill:V('muted'), op}));
     const sw = (APW - 100)/11;
     ABS12.forEach((v, j) => {
       const x = px + 40 + j*sw, h = v*SCP, a = lin(p, .05 + j*.015, .12 + j*.015);
@@ -251,7 +255,7 @@ function panel(t, o, i, A){
   }
   if (d.kind === 'qr'){
     // one forecaster per quantile, trained independently
-    o.push(text(px + 20, SY0 + 4, 'one forecaster per bound', {size:12, fill:V('muted'), op}));
+    o.push(text(px + 20, SY0 + 4, 'one forecaster per quantile', {size:12, fill:V('muted'), op}));
     const chip = (x, lab, a) => {
       o.push(rect(x, SY0 + 22, 104, 40, {rx:8, fill:V('bg'), stroke:V('series'), sw:1.3, op:op*a}));
       o.push(text(x + 52, SY0 + 39, 'estimator', {size:11.5, anchor:'middle', fill:V('muted'), op:op*a}));
@@ -263,9 +267,7 @@ function panel(t, o, i, A){
     for (let s = 1; s <= PS; s++){ up.push([pxk(px, PH - 1 + s), pyv(F(PH - 1 + s) + QU[s - 1])]); dn.push([pxk(px, PH - 1 + s), pyv(F(PH - 1 + s) + QL[s - 1])]); }
     fill(o, px, s => F(PH - 1 + s) + QL[s - 1], s => F(PH - 1 + s) + QU[s - 1], lin(p, .62, .74), op);
     o.push(path(polyline(up, lin(p, .12, .38)), {stroke:V('target'), sw:1.8, op}));
-    o.push(path(polyline(dn, lin(p, .38, .62)), {stroke:V('target'), sw:1.8, dash:'5 3', op}));
-    o.push(text(pxk(px, PN - 1), pyv(F(PN - 1) + QU[PS - 1]) - 8, 'q = 0.9', {size:11, cls:'m', anchor:'end', fill:V('targetText'), op:op*lin(p, .36, .42)}));
-    o.push(text(pxk(px, PN - 1), pyv(F(PN - 1) + QL[PS - 1]) + 16, 'q = 0.1', {size:11, cls:'m', anchor:'end', fill:V('targetText'), op:op*lin(p, .6, .66)}));
+    o.push(path(polyline(dn, lin(p, .38, .62)), {stroke:V('target'), sw:1.8, op}));
     // crossing: the lower bound above the upper bound
     const ca = op*lin(p, .76, .86), k = PH + XS, x = pxk(px, k), y = pyv(F(k) + (QU[XS] + QL[XS])/2);
     o.push(circle(x, y, 9, {stroke:V('miss'), sw:2.2, op:ca}));
@@ -304,7 +306,7 @@ function panel(t, o, i, A){
 SkfAnim.run({
   title: 'Probabilistic forecasting methods',
   desc: 'A point forecast is shown with an 80% prediction interval around it, and the true future values fall ' +
-        'mostly inside it. Then four panels show how the interval is built: bootstrapping simulates future paths ' +
+        'inside it (10 of 12). Then four panels show how the interval is built: bootstrapping simulates future paths ' +
         'with resampled residuals and takes their quantiles, so the interval can be asymmetric and widen with the ' +
         'horizon; conformal prediction adds and subtracts the 80% quantile of the absolute residuals, a symmetric ' +
         'interval of constant width; quantile regression trains one model per bound, so the interval can be ' +
