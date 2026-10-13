@@ -16,7 +16,7 @@ Skforecast implements three families of methods for probabilistic forecasting, e
   <iframe src="../animations/probabilistic-methods.html" title="Animation: how each probabilistic forecasting method builds the interval" loading="lazy" allowfullscreen></iframe>
 </div>
 
-Bootstrapping and conformal prediction build the interval from the past errors of the model (residuals), so the interval is only as good as those residuals: the section [Residuals](#residuals) explains which ones to use. The last sections compare the methods and explain how to evaluate the resulting intervals.
+Bootstrapping and conformal prediction build the interval from the past errors of the model (residuals), so the interval is only reliable when those residuals are representative of the errors the model will make in the future: the section [Residuals](#residuals) explains which ones to use. The last sections compare the methods and explain how to evaluate the resulting intervals.
 
 
 ## Bootstrapped residuals
