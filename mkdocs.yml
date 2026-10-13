@@ -189,6 +189,9 @@ hooks:
   - tools/docs/hooks/user_guides_toc.py
   # Warns about notebooks saved with Jupyter widgets (see the file)
   - tools/docs/hooks/notebook_widgets.py
+  # Sets the search engine title and description of each page from
+  # tools/docs/hooks/page_meta.yml
+  - tools/docs/hooks/page_meta.py
 
 # `mkdocs serve` only watches docs_dir and mkdocs.yml, so the examples data needs
 # to be watched explicitly. Note that edits to the hook module itself require a
