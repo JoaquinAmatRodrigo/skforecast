@@ -131,6 +131,8 @@ The main changes in this release are:
 
 + The [user guides index](../user_guides/table-of-contents.md) is a card grid with one card per section, and the navigation of the user guides is reorganised: new Data section, and the migration guide, drift detection, GPU and training matrices guides move to the section they belong to. ([#1393](https://github.com/skforecast/skforecast/pull/1393))
 
++ New user guide [Migrating from Prophet to skforecast](../user_guides/migrate-from-prophet.ipynb): how seasonalities, holidays, regressors, prediction intervals and cross-validation translate to skforecast, with side-by-side backtests of both libraries on the same folds. ([#1398](https://github.com/skforecast/skforecast/pull/1398))
+
 
 **Fixed**
 
