@@ -2404,6 +2404,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#foundation-models" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Foundation models
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#residuals" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -5171,7 +5182,7 @@
 <h1 id="probabilistic-forecasting">Probabilistic forecasting<a class="headerlink" href="#probabilistic-forecasting" title="Permanent link">&para;</a></h1>
 <p>When trying to predict future values, most forecasting models estimate a single value, usually the expected (mean) value of the series at each future step. This is called point forecasting. Although knowing the expected value of a time series in advance is useful in almost any business case, this type of prediction does not provide any information about the confidence of the model or the uncertainty of the prediction.</p>
 <p>Probabilistic forecasting, as opposed to point forecasting, is a family of techniques that estimate the distribution of the outcome rather than a single future value. This type of forecasting provides much richer information because it allows the creation of prediction intervals, the range of likely values where the true value may fall. More formally, a prediction interval defines the interval within which the true value of the response variable is expected to be found with a given probability.</p>
-<p>Skforecast implements three families of methods for probabilistic forecasting, each summarized below and explained in detail in its own user guide:</p>
+<p>Skforecast implements four families of methods for probabilistic forecasting, each summarized below and explained in detail in its own user guide:</p>
 <ul>
 <li>
 <p><a href="probabilistic-forecasting-bootstrapped-residuals.html"><strong>Bootstrapped residuals</strong></a>: simulate many possible future paths by adding resampled past errors to the predictions.</p>
@@ -5181,6 +5192,9 @@
 </li>
 <li>
 <p><a href="probabilistic-forecasting-quantile-regression.html"><strong>Quantile regression</strong></a>: train models that directly predict the quantiles that define the bounds of the interval.</p>
+</li>
+<li>
+<p><a href="foundation-forecasting-models.html"><strong>Foundation models</strong></a>: pre-trained models that predict the quantiles of a new series directly, with no residuals and no training.</p>
 </li>
 </ul>
 <div class="skf-anim-embed">
@@ -5218,6 +5232,19 @@
 <p>Quantile regression is a technique for estimating the conditional quantiles of a response variable. Instead of minimizing the squared error, the model minimizes the quantile loss (also known as pinball loss), which penalizes underestimation and overestimation asymmetrically, so that the predictions converge to the requested quantile. By combining the predictions of two quantile estimators, an interval can be constructed, with each model estimating one of the bounds of the interval. For example, models trained on <span class="arithmatex">\(Q = 0.1\)</span> and <span class="arithmatex">\(Q = 0.9\)</span> produce a nominal 80% prediction interval (<span class="arithmatex">\(90\% - 10\% = 80\%\)</span>).</p>
 <p>If a machine learning algorithm capable of modeling quantiles is used as the <code>estimator</code> in a forecaster, the <code>predict</code> method returns predictions for the quantile the estimator was trained on. Examples of such estimators are LightGBM (<code>LGBMRegressor(objective='quantile', alpha=0.9)</code>) and scikit-learn's <code>GradientBoostingRegressor(loss='quantile', alpha=0.9)</code> or <code>HistGradientBoostingRegressor(loss='quantile', quantile=0.9)</code>. By creating two forecasters, each configured with a different quantile, their predictions can be combined to generate a prediction interval. As explained in <a href="#which-method-to-use">Which method to use?</a>, a direct forecaster such as <a href="https://skforecast.org/latest/api/forecasterdirect"><code>ForecasterDirect</code></a> is preferred for this method.</p>
 <p>Discover how to use this method in <a href="probabilistic-forecasting-quantile-regression.html">Probabilistic forecasting with quantile regression</a>.</p>
+<h2 id="foundation-models">Foundation models<a class="headerlink" href="#foundation-models" title="Permanent link">&para;</a></h2>
+<p>Foundation models are large models pre-trained on a vast number of time series, which forecast a new series without being trained on it (zero-shot). Most of them are probabilistic by design: besides the point forecast, they predict a set of quantiles of the future values. The interval comes directly from the model, so it needs no residuals, no calibration set and no additional training. This makes them a strong option when the series is short or new, or when there are no residuals representative of the errors the model will make in the future.</p>
+<p><a href="https://skforecast.org/latest/api/forecasterfoundation"><code>ForecasterFoundation</code></a> gives access to these quantiles with the same API as the other forecasters, for a single series or for many:</p>
+<ul>
+<li>
+<p><a href="https://skforecast.org/latest/api/forecasterfoundation#skforecast.foundation._forecaster_foundation.ForecasterFoundation.predict_interval"><code>predict_interval()</code></a>: the lower and upper bounds of the interval, which are the two quantiles predicted by the model for the requested interval.</p>
+</li>
+<li>
+<p><a href="https://skforecast.org/latest/api/forecasterfoundation#skforecast.foundation._forecaster_foundation.ForecasterFoundation.predict_quantiles"><code>predict_quantiles()</code></a>: any list of the quantiles the model supports.</p>
+</li>
+</ul>
+<p>The quantiles available depend on the model: some accept any quantile, whereas others only return a fixed set of them, which limits the widest interval they can provide.</p>
+<p>Discover how to use these models in <a href="foundation-forecasting-models.html">Forecasting with foundation models</a>.</p>
 <h2 id="residuals">Residuals<a class="headerlink" href="#residuals" title="Permanent link">&para;</a></h2>
 <p>Bootstrapping and conformal prediction use the residuals of the model as an estimate of the errors it will make in the future. Two types of residuals can be used, selected with the <code>use_in_sample_residuals</code> argument:</p>
 <ul>
@@ -5267,6 +5294,13 @@
 <td style="text-align: left;">One quantile per forecaster</td>
 <td style="text-align: left;">One forecaster trained per quantile</td>
 </tr>
+<tr>
+<td style="text-align: left;">Foundation models</td>
+<td style="text-align: left;">A pre-trained model; no training and no residuals</td>
+<td style="text-align: left;">Set by the model; can be asymmetric</td>
+<td style="text-align: left;">Intervals and quantiles</td>
+<td style="text-align: left;">No training, but the inference of a large model: a GPU is recommended</td>
+</tr>
 </tbody>
 </table>
 <p>Some general guidelines can be followed:</p>
@@ -5280,8 +5314,11 @@
 <li>
 <p><strong>Quantile regression</strong>: An appropriate choice when the estimator is capable of modeling quantiles. However, it has three drawbacks. First, one forecaster must be trained for each quantile, which can be computationally expensive. Second, since each model is trained independently, nothing prevents the predicted quantiles from crossing (for example, a lower bound above the upper bound). Third, in recursive forecasters the quantile predictions are fed back as lags, so the predictions of later steps are built on quantile values instead of expected values. For this reason, a direct strategy (<a href="https://skforecast.org/latest/api/forecasterdirect"><code>ForecasterDirect</code></a>) is preferred. The coverage of these intervals can be corrected with <a href="probabilistic-forecasting-conformal-calibration.html">conformal calibration</a>.</p>
 </li>
+<li>
+<p><strong>Foundation models</strong>: The only method with nothing to train and no residuals to collect, so it is the natural choice for short or new series and a strong candidate in any other case. The same model forecasts any series, and its interval does not have to be symmetric around the forecast. Its drawbacks: it needs more compute than a machine learning model (usually a GPU), some models only return a fixed set of quantiles, and a model trained with features of the domain can still be more accurate on a given dataset. As with the other methods, its coverage should be validated with backtesting.</p>
+</li>
 </ul>
-<p>A comparison of these methods on the same dataset can be found in the article <a href="https://cienciadedatos.net/documentos/py42-probabilistic-forecasting">Probabilistic forecasting with machine learning</a>.</p>
+<p>A comparison of bootstrapping, conformal prediction and quantile regression on the same dataset can be found in the article <a href="https://cienciadedatos.net/documentos/py42-probabilistic-forecasting">Probabilistic forecasting with machine learning</a>.</p>
 <h2 id="evaluating-prediction-intervals">Evaluating prediction intervals<a class="headerlink" href="#evaluating-prediction-intervals" title="Permanent link">&para;</a></h2>
 <p>A good prediction interval is calibrated (its empirical coverage is close to the nominal one) and sharp (it is as narrow as possible). The coverage (<a href="https://skforecast.org/latest/api/metrics#skforecast.metrics.calculate_coverage"><code>calculate_coverage()</code></a>) and the width of the interval measure each property separately and are easy to interpret, but neither of them can rank models on its own: a wider interval always achieves a higher coverage. To compare models or tune hyperparameters, use a proper scoring rule that combines both aspects:</p>
 <ul>
@@ -5316,13 +5353,10 @@
 <p>Besides the methods above, skforecast offers probabilistic forecasts in other contexts:</p>
 <ul>
 <li>
-<p><strong>Global models</strong>: all the methods described above can be applied to models trained on multiple series. In global forecasters, <code>predict_interval()</code> uses conformal prediction by default. See <a href="probabilistic-forecasting-global-models.html">Probabilistic forecasting: global models</a>.</p>
+<p><strong>Global models</strong>: bootstrapping, conformal prediction and quantile regression can also be applied to models trained on multiple series. In global forecasters, <code>predict_interval()</code> uses conformal prediction by default. See <a href="probabilistic-forecasting-global-models.html">Probabilistic forecasting: global models</a>.</p>
 </li>
 <li>
 <p><strong>Statistical models</strong>: <a href="https://skforecast.org/latest/api/forecasterstats"><code>ForecasterStats</code></a> returns the prediction intervals calculated by the underlying statistical model (ARIMA, SARIMAX, ETS, ARAR) through its <code>predict_interval()</code> method.</p>
-</li>
-<li>
-<p><strong>Foundation models</strong>: <a href="https://skforecast.org/latest/api/forecasterfoundation"><code>ForecasterFoundation</code></a> returns the quantiles predicted natively by pre-trained foundation models through its <code>predict_interval()</code> and <code>predict_quantiles()</code> methods, with no residuals or additional training required.</p>
 </li>
 </ul>
 <div class="admonition tip">
