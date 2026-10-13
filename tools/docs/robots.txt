@@ -1,0 +1,9 @@
+# robots.txt of https://skforecast.org, served from the root of the gh-pages
+# branch (mike only rewrites the version folders and versions.json, so this file
+# is kept between deployments). Every version declares a canonical URL in
+# /latest/, so old versions stay crawlable instead of being disallowed.
+# Copy it to the root of gh-pages after editing it.
+User-agent: *
+Allow: /
+
+Sitemap: https://skforecast.org/latest/sitemap.xml
