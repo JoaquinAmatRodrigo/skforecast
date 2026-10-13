@@ -6,15 +6,14 @@ name: Foundation Backends Compatibility
 # adapter still works with it: a contract test (signatures, no weights) and a
 # smoke test (real weights, public API). See tools/foundation_compat/README.md.
 #
-# - latest: the backend as a user installs it today. Detects new breakages.
-# - pinned: the last versions known to work. Detects regressions of skforecast.
+# The backend is installed as a user installs it today: skforecast does not
+# pin its backends.
 #
 # The schedule is launched from the default branch, but it checks out the
 # highest release branch (`X.Y.x`), where the development happens, so a fix of
 # an adapter is checked every week before it is released.
-# Pull requests to main (the release ones) run both variants, and `latest`
-# does not block the pull request (its failures are shown in the summary of
-# the run). Pull requests to the release branches (`*.x`) do not run it:
+# Pull requests to main (the release ones) run it too. Pull requests to the
+# release branches (`*.x`) do not:
 # their changes are checked by the next scheduled run.
 
 permissions:
@@ -25,12 +24,6 @@ on:
     # Every Monday at 06:00 UTC
     - cron: '0 6 * * 1'
   workflow_dispatch:  # Allow manual trigger
-    inputs:
-      variant:
-        description: 'Variant of the environments'
-        type: choice
-        options: [both, latest, pinned]
-        default: both
   pull_request:
     branches:
       - main
@@ -67,17 +60,15 @@ jobs:
 
   backend:
     needs: setup
-    name: ${{ matrix.adapter }} (${{ matrix.variant }})
+    name: ${{ matrix.adapter }}
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    continue-on-error: ${{ github.event_name == 'pull_request' && matrix.variant == 'latest' }}
     strategy:
       fail-fast: false
       matrix:
         # Same entries as tools/foundation_compat/adapters.toml (checked by
         # the unit test test_backends_compat_config.py).
         adapter: [chronos, timesfm25, timesfm3, moirai, tabicl, tabpfn, t0, nori, tsicl]
-        variant: ${{ fromJSON((github.event_name == 'workflow_dispatch' && inputs.variant != 'both') && format('["{0}"]', inputs.variant) || '["latest", "pinned"]') }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
@@ -106,7 +97,7 @@ jobs:
       # The tokens must be read-only and belong to a dedicated account: they
       # are exposed to third-party packages that are not pinned.
       - name: Check the adapter against its backend
-        run: python tools/foundation_compat/run.py --adapter ${{ matrix.adapter }} --variant ${{ matrix.variant }}
+        run: python tools/foundation_compat/run.py --adapter ${{ matrix.adapter }}
         env:
           HF_TOKEN: ${{ secrets.HF_TOKEN }}
           TABPFN_TOKEN: ${{ secrets.TABPFN_TOKEN }}
@@ -115,7 +106,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: result-${{ matrix.adapter }}-${{ matrix.variant }}
+          name: result-${{ matrix.adapter }}
           path: results/
           if-no-files-found: ignore
 
@@ -146,7 +137,6 @@ jobs:
         id: summary
         run: |
           python3 tools/foundation_compat/summarize.py results \
-            --variants ${{ (github.event_name == 'workflow_dispatch' && inputs.variant != 'both') && inputs.variant || 'latest pinned' }} \
             --github-output "$GITHUB_OUTPUT" > summary.md
           cat summary.md >> "$GITHUB_STEP_SUMMARY"
 

@@ -45,8 +45,8 @@ def test_adapters_toml_covers_every_registered_adapter():
 def test_adapters_toml_entries_match_the_adapter_classes():
     """
     Test that, for every entry in adapters.toml, `model_id` is routed to the
-    adapter class named in `adapter`, `backend_package` is the one declared by
-    that class, and the pinned variant is fully defined.
+    adapter class named in `adapter` and `backend_package` is the one declared
+    by that class.
     """
     adapters = load_adapters()
 
@@ -54,8 +54,6 @@ def test_adapters_toml_entries_match_the_adapter_classes():
         adapter_cls = _resolve_adapter(config["model_id"])
         assert adapter_cls.__name__ == config["adapter"], name
         assert adapter_cls.backend_package == config["backend_package"], name
-        assert config["pinned"], name
-        assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", config["exclude_newer"]), name
 
 
 def test_workflow_matrix_matches_adapters_toml():

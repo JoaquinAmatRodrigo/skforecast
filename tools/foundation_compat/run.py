@@ -4,15 +4,12 @@ Check that a foundation model adapter works with its backend library.
 Creates a virtual environment with uv, installs skforecast from this checkout
 together with the backend of one adapter, runs the tests in
 `tools/foundation_compat/tests` inside it and writes the outcome to
-`<results-dir>/<adapter>-<variant>.json`.
+`<results-dir>/<adapter>.json`.
 
-Two variants of the environment (see `adapters.toml`):
-
-- `latest`: the backend as a user installs it today (`backend_package`). The
-  installed version is compared with the latest one on PyPI: if the resolver
-  held the backend back, the run fails, because it would be testing an old
-  version.
-- `pinned`: the last versions known to work (`pinned` and `exclude_newer`).
+The backend is installed as a user installs it today (`backend_package` in
+`adapters.toml`); skforecast does not pin its backends. The installed version
+is compared with the latest one on PyPI: if the resolver held the backend
+back, the run fails, because it would be testing an old version.
 
 Two levels of tests:
 
@@ -26,8 +23,8 @@ the same command reproduces locally what the workflow
 `.github/workflows/foundation-backends.yml` does.
 
 Usage:
-    python tools/foundation_compat/run.py --adapter t0 --variant latest
-    python tools/foundation_compat/run.py --adapter moirai --variant pinned --level contract
+    python tools/foundation_compat/run.py --adapter t0
+    python tools/foundation_compat/run.py --adapter moirai --level contract
 
 Exits with code 1 if the installation or a test fails, or if the backend was
 held back.
@@ -111,12 +108,7 @@ def short_error(text: str) -> str:
     return lines[-1][:MAX_ERROR_LENGTH] if lines else ""
 
 
-def install(
-    venv_python: Path,
-    config: dict,
-    variant: str,
-    work_dir: Path,
-) -> tuple[bool, str]:
+def install(venv_python: Path, config: dict, work_dir: Path) -> tuple[bool, str]:
     """
     Install skforecast, pytest and the backend in one resolution.
 
@@ -126,8 +118,6 @@ def install(
         Python interpreter of the virtual environment.
     config : dict
         Entry of the adapter in `adapters.toml`.
-    variant : str
-        `'latest'` or `'pinned'`.
     work_dir : Path
         Directory where the overrides file is written.
 
@@ -148,13 +138,8 @@ def install(
         "--torch-backend", "cpu",
         "-e", str(REPO_ROOT),
         "pytest",
+        config["backend_package"],
     ]
-    if variant == "latest":
-        command.append(config["backend_package"])
-    else:
-        command.extend(config["pinned"])
-        command.extend(["--exclude-newer", config["exclude_newer"]])
-
     if config.get("overrides"):
         overrides_file = work_dir / "overrides.txt"
         overrides_file.write_text("\n".join(config["overrides"]) + "\n")
@@ -267,7 +252,6 @@ def main() -> int:
         description="Check that a foundation model adapter works with its backend."
     )
     parser.add_argument("--adapter", required=True, choices=sorted(adapters))
-    parser.add_argument("--variant", default="latest", choices=("latest", "pinned"))
     parser.add_argument("--level", default="all", choices=(*LEVELS, "all"))
     parser.add_argument(
         "--results-dir", default="results", help="Directory of the JSON result."
@@ -285,7 +269,6 @@ def main() -> int:
     result = {
         "adapter": args.adapter,
         "adapter_class": config["adapter"],
-        "variant": args.variant,
         "backend": package,
         "model_id": config["model_id"],
         "overrides": config.get("overrides", []),
@@ -310,7 +293,7 @@ def main() -> int:
         subprocess.run(
             ["uv", "venv", str(venv_dir), "--python", args.python], check=True
         )
-        installed, output = install(venv_python, config, args.variant, work_dir)
+        installed, output = install(venv_python, config, work_dir)
 
         if installed:
             result["install"] = {"status": "passed", "error": ""}
@@ -318,7 +301,7 @@ def main() -> int:
                 venv_python, [package, *REPORTED_PACKAGES]
             )
             result["latest_on_pypi"] = latest_version_on_pypi(package)
-            if args.variant == "latest" and result["latest_on_pypi"]:
+            if result["latest_on_pypi"]:
                 result["held_back"] = (
                     version_key(result["versions"][package])
                     < version_key(result["latest_on_pypi"])
@@ -355,7 +338,7 @@ def main() -> int:
 
     results_dir = Path(args.results_dir)
     results_dir.mkdir(parents=True, exist_ok=True)
-    result_file = results_dir / f"{args.adapter}-{args.variant}.json"
+    result_file = results_dir / f"{args.adapter}.json"
     result_file.write_text(json.dumps(result, indent=2) + "\n")
     print(json.dumps(result, indent=2))
     print(f"\nResult written to {result_file}")

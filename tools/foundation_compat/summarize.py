@@ -2,12 +2,11 @@
 Summarize the results of the foundation backends compatibility check.
 
 Reads the JSON files written by `run.py` and prints a Markdown report with one
-row per adapter and variant. An environment without a JSON file (job cancelled
+row per adapter. An environment without a JSON file (job cancelled
 or crashed before writing it) is reported as "no result".
 
 Usage:
     python tools/foundation_compat/summarize.py results
-    python tools/foundation_compat/summarize.py results --variants latest
 
 With `--github-output <file>`, it also writes `failures` (number of failed
 environments) and `fingerprint` (a hash of what failed, to tell whether the
@@ -19,13 +18,11 @@ import argparse
 import hashlib
 import json
 import os
-import re
 import sys
 import tomllib
 from pathlib import Path
 
 COMPAT_DIR = Path(__file__).resolve().parent
-VARIANTS = ("latest", "pinned")
 LEVELS = ("contract", "smoke")
 SYMBOLS = {
     "passed": "✓",
@@ -34,18 +31,10 @@ SYMBOLS = {
     "not run": "not run",
 }
 HEADER = (
-    "| Adapter | Variant | Backend | Installed | Latest on PyPI | torch "
+    "| Adapter | Backend | Installed | Latest on PyPI | torch "
     "| Install | Contract | Smoke | Detail |\n"
-    "|---|---|---|---|---|---|---|---|---|---|"
+    "|---|---|---|---|---|---|---|---|---|"
 )
-
-
-def version_key(version: str) -> tuple[int, ...]:
-    """
-    Return the numeric components of a version, to compare two releases.
-    """
-
-    return tuple(int(part) for part in re.findall(r"\d+", version))
 
 
 def failed_checks(result: dict | None) -> list[str]:
@@ -87,14 +76,14 @@ def detail(result: dict) -> str:
     return " ".join(parts).replace("|", "\\|").replace("\n", " ")
 
 
-def row(adapter: str, variant: str, result: dict | None, run_url: str) -> str:
+def row(adapter: str, result: dict | None, run_url: str) -> str:
     """
     Return the Markdown row of an environment.
     """
 
     if result is None:
         link = f"see the [jobs of the run]({run_url})" if run_url else ""
-        cells = [adapter, variant, "", "", "", "", "no result", "", "", link]
+        cells = [adapter, "", "", "", "", "no result", "", "", link]
         return "| " + " | ".join(cells) + " |"
 
     versions = result["versions"]
@@ -106,7 +95,6 @@ def row(adapter: str, variant: str, result: dict | None, run_url: str) -> str:
 
     cells = [
         adapter,
-        variant,
         result["backend"],
         versions.get(result["backend"]) or "",
         result["latest_on_pypi"] or "",
@@ -120,43 +108,11 @@ def row(adapter: str, variant: str, result: dict | None, run_url: str) -> str:
     return "| " + " | ".join(cells) + " |"
 
 
-def pins_to_update(results: dict) -> list[str]:
-    """
-    Return the adapters whose `latest` environment passed with a newer version
-    of the backend than the one of their `pinned` environment.
-    """
-
-    lines = []
-    adapters = sorted({adapter for adapter, _ in results})
-    for adapter in adapters:
-        latest = results.get((adapter, "latest"))
-        pinned = results.get((adapter, "pinned"))
-        if not latest or not pinned or failed_checks(latest):
-            continue
-        backend = latest["backend"]
-        latest_version = latest["versions"].get(backend)
-        pinned_version = pinned["versions"].get(backend)
-        if (
-            latest_version
-            and pinned_version
-            and version_key(pinned_version) < version_key(latest_version)
-        ):
-            lines.append(
-                f"- `{adapter}`: {backend} {pinned_version} -> {latest_version}"
-            )
-
-    return lines
-
-
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Summarize the foundation backends compatibility results."
     )
     parser.add_argument("results_dir", help="Directory with the JSON results.")
-    parser.add_argument(
-        "--variants", nargs="+", default=list(VARIANTS), choices=VARIANTS,
-        help="Variants expected in the results.",
-    )
     parser.add_argument(
         "--github-output", help="File where `failures` and `fingerprint` are written."
     )
@@ -168,7 +124,7 @@ def main() -> int:
     results = {}
     for file in sorted(Path(args.results_dir).rglob("*.json")):
         result = json.loads(file.read_text())
-        results[(result["adapter"], result["variant"])] = result
+        results[result["adapter"]] = result
 
     run_url = ""
     if os.environ.get("GITHUB_RUN_ID"):
@@ -180,12 +136,9 @@ def main() -> int:
     rows = []
     failures = []
     for adapter in adapters:
-        for variant in args.variants:
-            result = results.get((adapter, variant))
-            rows.append(row(adapter, variant, result, run_url))
-            failures.extend(
-                f"{adapter}-{variant}: {check}" for check in failed_checks(result)
-            )
+        result = results.get(adapter)
+        rows.append(row(adapter, result, run_url))
+        failures.extend(f"{adapter}: {check}" for check in failed_checks(result))
 
     n_failed = len({failure.split(":")[0] for failure in failures})
     print("## Foundation backends compatibility\n")
@@ -195,14 +148,6 @@ def main() -> int:
         print(f"All {len(rows)} environments passed.\n")
     print(HEADER)
     print("\n".join(rows))
-
-    pins = pins_to_update(results)
-    if pins:
-        print(
-            "\nPins that can be updated in `tools/foundation_compat/adapters.toml` "
-            "(`latest` passed with a newer version):\n"
-        )
-        print("\n".join(pins))
 
     if args.github_output:
         fingerprint = hashlib.sha256("\n".join(failures).encode()).hexdigest()[:16]
