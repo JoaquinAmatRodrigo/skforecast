@@ -1,5 +1,6 @@
 ---
 template: home.html
+title: skforecast
 hide:
   - navigation
   - toc

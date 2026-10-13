@@ -6,10 +6,11 @@ notebook metadata would mean editing every notebook. Instead, the texts live in
 `page_meta.yml`, next to this file, keyed by the path of the page relative to
 `docs/`. For each page listed there, the hook fills `page.meta`:
 
-- `title`: the `<title>` tag (Material appends " - <site_name>", except on the
-  home page, see `docs/overrides/home.html`) and the Open Graph title. The
-  short title of `nav` in `mkdocs.yml` still names the page in the sidebar, the
-  breadcrumbs and the footer links.
+- `seo_title`, from `title`: the `<title>` tag, followed by " - <site_name>"
+  except on the home page, and the Open Graph title (`docs/overrides/main.html`
+  and `home.html`). It is not stored as `page.meta.title`, which Material would
+  also show in the header bar: the short title of `nav` in `mkdocs.yml` keeps
+  naming the page in the header, the sidebar, the breadcrumbs and the footer.
 - `description`: the meta description, also used by the Open Graph and Twitter
   tags of `docs/overrides/main.html`. Without it, a page gets `site_description`.
 
@@ -49,6 +50,8 @@ HERE = Path(__file__).resolve().parent
 DATA_FILE = HERE / "page_meta.yml"
 DOCS_DIR = HERE.parents[2] / "docs"
 KEYS = ("title", "description")
+# Key of `page.meta` where each text of the YAML is stored
+META_KEYS = {"title": "seo_title", "description": "description"}
 HOME = "README.md"
 # mkdocs-jupyter also takes `.py` files as pages, and `exclude_docs` is applied
 # after `on_files`, so the pages are selected by their extension.
@@ -154,7 +157,7 @@ def on_page_markdown(markdown, page, config, files):
     # Runs after `page.read_source`, which resets `page.meta` to the front
     # matter. mkdocs-jupyter renders notebooks later but calls this hook too.
     for key, value in PAGE_META.get(page.file.src_uri, {}).items():
-        page.meta.setdefault(key, value)
+        page.meta.setdefault(META_KEYS[key], value)
     return markdown
 
 

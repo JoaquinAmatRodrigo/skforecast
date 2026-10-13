@@ -1,5 +1,15 @@
 {% extends "base.html" %}
 
+{#- Search engine title from tools/docs/hooks/page_meta.yml, stored as
+    `seo_title` so that the header keeps the short title of `nav`. -#}
+{% block htmltitle %}
+  {% if page and page.meta and page.meta.seo_title %}
+    <title>{{ page.meta.seo_title | e }} - {{ config.site_name }}</title>
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}
+
 {% block extrahead %}
   {#- Preview when a page is shared (LinkedIn, Slack, X...). Social networks
       need absolute URLs, so they point to the latest release, like the
@@ -16,7 +26,7 @@
   {% endif %}
   {% block social_meta scoped %}
     {% if page and page.file %}
-      {% set share_title = (page.meta.title or page.title) | striptags %}
+      {% set share_title = (page.meta.seo_title or page.title) | striptags %}
       {% set share_text = page.meta.description or config.site_description %}
       {% set share_image = latest_url ~ "img/social-card-home.png" %}
       <meta property="og:type" content="website">

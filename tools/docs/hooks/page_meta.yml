@@ -6,7 +6,7 @@
 #   for, not the API. At most 42 characters, so that the whole tag fits in the
 #   60 characters a search result shows (60 for the home page, which has no
 #   suffix). The short title of `nav` in mkdocs.yml still names the page in
-#   the sidebar.
+#   the header, the sidebar and the breadcrumbs.
 # - description: the meta description and the summary shown when the page is
 #   shared. Between 120 and 160 characters, unique, main keyword first,
 #   without en or em dashes.
