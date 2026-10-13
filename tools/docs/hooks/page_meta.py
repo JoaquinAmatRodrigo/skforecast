@@ -14,6 +14,16 @@ notebook metadata would mean editing every notebook. Instead, the texts live in
 - `description`: the meta description, also used by the Open Graph and Twitter
   tags of `docs/overrides/main.html`. Without it, a page gets `site_description`.
 
+The hook also writes the canonical URL of every page in lowercase, which the
+sitemap reuses. Netlify, which serves skforecast.org, answers any URL with
+uppercase letters (`api/ForecasterRecursive.html`) with a 301 redirect to its
+lowercase form, and this cannot be disabled. A canonical URL or a sitemap entry
+that redirects sends search engines contradictory signals, while the lowercase
+URL (`api/forecasterrecursive.html`) is served directly. Files, `nav` and links
+keep their names. If the site moves to a host with case-sensitive paths, remove
+`_lowercase_canonical_url`, or the canonical URL of those pages would be a 404.
+`docs/overrides/main.html` lowercases `og:url` for the same reason.
+
 Registered in `mkdocs.yml` as:
 
     hooks:
@@ -41,6 +51,7 @@ import logging
 import sys
 from collections import Counter
 from pathlib import Path
+from urllib.parse import urlsplit, urlunsplit
 
 import yaml
 
@@ -158,7 +169,18 @@ def on_page_markdown(markdown, page, config, files):
     # matter. mkdocs-jupyter renders notebooks later but calls this hook too.
     for key, value in PAGE_META.get(page.file.src_uri, {}).items():
         page.meta.setdefault(META_KEYS[key], value)
+    _lowercase_canonical_url(page)
     return markdown
+
+
+def _lowercase_canonical_url(page):
+    """
+    Write the path of the canonical URL of `page` in lowercase, the form that
+    Netlify serves without a redirect (see the module docstring).
+    """
+    if page.canonical_url:
+        parts = urlsplit(page.canonical_url)
+        page.canonical_url = urlunsplit(parts._replace(path=parts.path.lower()))
 
 
 def _pages_on_disk():
