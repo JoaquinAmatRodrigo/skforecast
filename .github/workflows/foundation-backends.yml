@@ -1,0 +1,184 @@
+name: Foundation Backends Compatibility
+
+# Each adapter in skforecast/foundation wraps an external library that changes
+# its API without notice, and the unit tests use fakes of those libraries. This
+# workflow installs each backend in its own environment and checks that the
+# adapter still works with it: a contract test (signatures, no weights) and a
+# smoke test (real weights, public API). See tools/foundation_compat/README.md.
+#
+# - latest: the backend as a user installs it today. Detects new breakages.
+# - pinned: the last versions known to work. Detects regressions of skforecast.
+#
+# The schedule is launched from the default branch, but it checks out the
+# highest release branch (`X.Y.x`), where the development happens, so a fix of
+# an adapter is checked every week before it is released.
+# Pull requests to main (the release ones) run both variants, and `latest`
+# does not block the pull request (its failures are shown in the summary of
+# the run). Pull requests to the release branches (`*.x`) do not run it:
+# their changes are checked by the next scheduled run.
+
+permissions:
+  contents: read
+
+on:
+  schedule:
+    # Every Monday at 06:00 UTC
+    - cron: '0 6 * * 1'
+  workflow_dispatch:  # Allow manual trigger
+    inputs:
+      variant:
+        description: 'Variant of the environments'
+        type: choice
+        options: [both, latest, pinned]
+        default: both
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'skforecast/foundation/**'
+      - 'tools/foundation_compat/**'
+      - '.github/workflows/foundation-backends.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  setup:
+    name: Resolve the branch to check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      ref: ${{ steps.branch.outputs.ref }}
+    steps:
+      # Empty for the other events: the checkout then uses the branch of the
+      # pull request or the one selected in the manual trigger.
+      - name: Find the highest release branch
+        id: branch
+        if: github.event_name == 'schedule'
+        run: |
+          ref=$(git ls-remote --heads "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY" '*.x' \
+            | sed 's|.*refs/heads/||' \
+            | grep -E '^[0-9]+\.[0-9]+\.x$' \
+            | sort -V \
+            | tail -n 1)
+          echo "Branch to check: ${ref:-default branch}"
+          echo "ref=$ref" >> "$GITHUB_OUTPUT"
+
+  backend:
+    needs: setup
+    name: ${{ matrix.adapter }} (${{ matrix.variant }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    continue-on-error: ${{ github.event_name == 'pull_request' && matrix.variant == 'latest' }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # Same entries as tools/foundation_compat/adapters.toml (checked by
+        # the unit test test_backends_compat_config.py).
+        adapter: [chronos, timesfm25, timesfm3, moirai, tabicl, tabpfn, t0, nori, tsicl]
+        variant: ${{ fromJSON((github.event_name == 'workflow_dispatch' && inputs.variant != 'both') && format('["{0}"]', inputs.variant) || '["latest", "pinned"]') }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.setup.outputs.ref }}
+          persist-credentials: false
+
+      - name: Set up uv and Python
+        uses: astral-sh/setup-uv@v10.2.0
+        with:
+          python-version: '3.12'
+          activate-environment: true  # creates .venv and puts it on PATH for the next steps
+          enable-cache: true
+          cache-dependency-glob: "tools/foundation_compat/adapters.toml"
+          prune-cache: true
+
+      - name: Cache model weights
+        uses: actions/cache@v6
+        with:
+          path: ~/.cache/huggingface
+          key: foundation-weights-${{ matrix.adapter }}-${{ hashFiles('tools/foundation_compat/adapters.toml') }}
+          restore-keys: |
+            foundation-weights-${{ matrix.adapter }}-
+
+      # The script creates its own environment with skforecast and the backend.
+      # The tokens must be read-only and belong to a dedicated account: they
+      # are exposed to third-party packages that are not pinned.
+      - name: Check the adapter against its backend
+        run: python tools/foundation_compat/run.py --adapter ${{ matrix.adapter }} --variant ${{ matrix.variant }}
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+          TABPFN_TOKEN: ${{ secrets.TABPFN_TOKEN }}
+
+      - name: Upload result
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: result-${{ matrix.adapter }}-${{ matrix.variant }}
+          path: results/
+          if-no-files-found: ignore
+
+  summary:
+    name: Summary
+    needs: [setup, backend]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      issues: write  # Only for the issue opened by the scheduled run
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.setup.outputs.ref }}
+          persist-credentials: false
+
+      - name: Download results
+        uses: actions/download-artifact@v8
+        with:
+          pattern: result-*
+          path: results
+          merge-multiple: true
+
+      - name: Write summary
+        id: summary
+        run: |
+          python3 tools/foundation_compat/summarize.py results \
+            --variants ${{ (github.event_name == 'workflow_dispatch' && inputs.variant != 'both') && inputs.variant || 'latest pinned' }} \
+            --github-output "$GITHUB_OUTPUT" > summary.md
+          cat summary.md >> "$GITHUB_STEP_SUMMARY"
+
+      # One open issue with the label `backend-compat`. It is updated, with a
+      # comment, only when what fails changes, not every week.
+      - name: Open or update the issue
+        if: github.event_name == 'schedule' && steps.summary.outputs.failures != '0'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          FINGERPRINT: ${{ steps.summary.outputs.fingerprint }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          BRANCH: ${{ needs.setup.outputs.ref || github.ref_name }}
+        run: |
+          marker="<!-- fingerprint: $FINGERPRINT -->"
+          {
+            cat summary.md
+            echo
+            echo "Run: $RUN_URL (branch \`$BRANCH\`, commit $(git rev-parse HEAD))."
+            echo
+            echo "$marker"
+          } > issue.md
+
+          gh label create backend-compat --color D93F0B \
+            --description "A foundation model adapter fails with its backend" 2>/dev/null || true
+          number=$(gh issue list --label backend-compat --state open --json number --jq '.[0].number // empty')
+
+          if [ -z "$number" ]; then
+            gh issue create --label backend-compat --body-file issue.md \
+              --title "Foundation backends compatibility check is failing"
+          elif ! gh issue view "$number" --json body --jq .body | grep -qF "$marker"; then
+            gh issue edit "$number" --body-file issue.md
+            gh issue comment "$number" \
+              --body "The failures changed in $RUN_URL. The description of the issue has the new results."
+          fi
