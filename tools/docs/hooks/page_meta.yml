@@ -8,3 +8,33 @@
 # - description: the meta description and the summary shown when the page is
 #   shared. Between 120 and 160 characters, unique, main keyword first,
 #   without en or em dashes.
+
+introduction-forecasting/introduction-forecasting.md:
+  title: Introduction to time series forecasting
+  description: >-
+    Introduction to time series forecasting with machine learning: lags,
+    recursive and direct strategies, global models and backtesting in Python.
+
+quick-start/quick-start-skforecast.ipynb:
+  title: "Quick start: forecasting in Python"
+  description: >-
+    Quick start to time series forecasting in Python with skforecast: train a
+    forecaster, predict, backtest and tune its hyperparameters in a few lines.
+
+user_guides/backtesting.ipynb:
+  title: Backtesting time series models in Python
+  description: >-
+    Backtesting time series models in Python with skforecast: evaluate
+    forecasts on past data with or without refit, rolling windows and gaps.
+
+faq/non-negative-predictions.ipynb:
+  title: Avoid negative predictions in forecasting
+  description: >-
+    Avoid negative predictions in time series forecasting with log transforms
+    or Poisson and gamma objectives in LightGBM and XGBoost with skforecast.
+
+examples/examples_english.md:
+  title: Time series forecasting examples in Python
+  description: >-
+    Time series forecasting examples in Python: skforecast tutorials with
+    gradient boosting, global models, foundation models and prediction intervals.
