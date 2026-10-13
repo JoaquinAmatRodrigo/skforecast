@@ -87,6 +87,7 @@ EXCLUDE_NOTEBOOKS = [
     "user_guides/foundation-forecasting-with-heterogeneous-series.ipynb",  # Specific environment
     "user_guides/skforecast-in-GPU.ipynb",
     "user_guides/sktime-pipelines.ipynb",
+    "user_guides/migrate-from-prophet.ipynb",  # Needs prophet (not a dependency)
 
     "faq/profiling-skforecast.ipynb",
     "faq/skforecast-benchmark.ipynb"
