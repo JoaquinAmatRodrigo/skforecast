@@ -17,6 +17,12 @@
 -#}
 {% extends "main.html" %}
 
+{#- The brand is already in the title (tools/docs/hooks/page_meta.yml), so the
+    " - <site_name>" suffix of the other pages is not added. -#}
+{% block htmltitle %}
+  <title>{{ page.meta.title | d(config.site_name, true) }}</title>
+{% endblock %}
+
 {% block social_meta %}
   {#- Preview when the page is shared (LinkedIn, Slack, X...). It replaces the
       default tags of main.html, which computes latest_url (absolute URL of the
