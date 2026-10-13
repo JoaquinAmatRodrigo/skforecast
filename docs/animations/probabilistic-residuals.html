@@ -25,13 +25,17 @@ const {cl, ease, lin, P, lerp, V, mw, text, rect, line, circle, path, polyline, 
 
 /* ------------------------------------------------------------------ data */
 // A series whose error grows with its level: the noise is proportional to the
-// value of the series. Observations k = 0..59 are the training data and 60..74 the
+// value of the series. Observations k = 0..49 are the training data and 50..59 the
 // test data, revealed while the coverage is counted. For backtesting, the training
-// data are split into train (0..29) and validation (30..59).
-const N = 75, TR = 30, VA = 60, NT = N - VA;
-const m = k => 52 + 20*Math.sin(2*Math.PI*(k + 1.5)/10) + .12*(k - 37);   // what the model predicts
-const sg = k => 2*(.6 + .085*(m(k) - 28));                              // error scale, grows with the level
-let seed = 11283;
+// data are split into train (0..19) and validation (20..49).
+// The cycle is long (20 steps) and the test data go from a peak to a trough: the
+// forecast is never steep, so a point close to a bound of the interval is seen on
+// the right side of it, and the three levels of the series (high, medium, low)
+// appear once and in order.
+const N = 60, TR = 20, VA = 50, NT = N - VA;
+const m = k => 52 + 18*Math.cos(2*Math.PI*(k - VA + .5)/20) + .06*(k - 40);   // what the model predicts
+const sg = k => 2 + 11*(m(k) - 34)/36;                                  // error scale, grows with the level
+let seed = 1149453;
 const rnd = () => (seed = (seed*16807) % 2147483647)/2147483647;
 const E = [];
 for (let k = 0; k < N; k++){
@@ -39,6 +43,15 @@ for (let k = 0; k < N; k++){
   E.push(r*Math.cos(th));
 }
 const Y = E.map((e, k) => m(k) + sg(k)*e);
+// The errors of the 10 test observations are set by hand, so that each one is
+// clearly inside or clearly outside the three intervals compared, and those
+// outside are never consecutive. Each interval fails where it is expected to:
+//   k = 50 (high)  above the in-sample and out-of-sample intervals, inside the binned one
+//   k = 52 (high)  below the in-sample interval only
+//   k = 55         far above the three intervals
+//   k = 59 (low)   below the in-sample and binned intervals, inside the out-of-sample one
+const RT = [11.6, -1.6, -7.8, 2.2, -.8, 13.5, 1.8, -.6, .5, -7.8];
+for (let k = VA; k < N; k++) Y[k] = m(k) + RT[k - VA];
 const quantile = (arr, p) => {
   const s = [...arr].sort((a, b) => a - b), h = (s.length - 1)*p, i = Math.floor(h);
   return s[i] + (s[Math.min(i + 1, s.length - 1)] - s[i])*(h - i);
@@ -47,7 +60,7 @@ const quantile = (arr, p) => {
 // In-sample: the model is fitted with all the training data, so its fitted values
 // follow the observations closely and its errors are smaller than the real ones.
 const RIN = [];
-for (let k = 0; k < VA; k++){ const p = Y[k] - .6*sg(k)*E[k]; RIN.push({k, p, r: Y[k] - p}); }
+for (let k = 0; k < VA; k++){ const p = Y[k] - .5*sg(k)*E[k]; RIN.push({k, p, r: Y[k] - p}); }
 // Out-of-sample: predictions of the validation data by a model trained without them (backtesting).
 const ROUT = [];
 for (let k = TR; k < VA; k++) ROUT.push({k, p: m(k), r: Y[k] - m(k)});
@@ -80,26 +93,26 @@ for (const [key, iv] of Object.entries(MODES)){
 /* -------------------------------------------------------------- timeline */
 const T = {
   series:[0.3,2.6], parts:[2.0,2.8],
-  fitIn:[5.9,7.0], sticksIn:[7.0,8.0], flyIn:[8.4,10.2], brIn:[10.4,11.0],
-  fcst:[12.3,12.9], bandIn:[13.0,14.4], testIn:14.6, testStep:.17,
+  fitIn:[4.9,6.0], sticksIn:[6.0,7.0], flyIn:[7.4,9.2], brIn:[9.4,10.0],
+  fcst:[11.3,11.9], bandIn:[12.0,13.4], testIn:13.6, testStep:.22,
   outIn:[19.2,19.8],
   valHL:[19.8,20.4], predOut:[20.4,21.3], sticksOut:[21.3,22.1], flyOut:[22.5,24.3], brOut:[24.5,25.1],
   bandOut:[27.2,28.6], testOut:28.8,
-  outOut:[33.2,33.8], stripes:[33.8,34.5], regroup:[34.7,36.1], brBin:[36.3,36.9],
-  bandBin:[38.6,41.0], testBin:41.2,
-  fadeOut:[49.2,50.0], total:50.0
+  outOut:[34.2,34.8], stripes:[34.8,35.5], regroup:[35.7,37.1], brBin:[37.3,37.9],
+  bandBin:[39.6,42.0], testBin:42.2,
+  fadeOut:[50.2,51.0], total:51.0
 };
 const CAPTIONS = [
-  [0.0, 5.6, 'Bootstrapping and conformal prediction build the interval from the residuals: the past errors of the model.'],
-  [5.6, 12.2,'In-sample residuals: the errors of the model on the same data used to train it.'],
-  [12.2,19.2,'The model has already seen these values, so its errors look small and the interval is too narrow.'],
+  [0.0, 4.6, 'Bootstrapping and conformal prediction build the interval from the residuals: the past errors of the model.'],
+  [4.6, 11.2,'In-sample residuals: the errors of the model on the same data used to train it.'],
+  [11.2,19.2,'The model has already seen these values, so its errors look small and the interval is too narrow.'],
   [19.2,27.0,'Out-of-sample residuals: errors on data not used to train the model, obtained by backtesting.'],
-  [27.0,33.2,'They estimate the future error better, and the coverage gets close to the nominal 80%.'],
-  [33.2,38.4,'By default, the residuals are grouped by predicted value (binned), and each forecast uses those of its bin.'],
-  [38.4,44.4,'The interval adapts to the prediction: narrow for low values, wide for high ones.'],
-  [44.4,99,  'Use out-of-sample residuals, and validate the coverage of the intervals with backtesting.']
+  [27.0,34.2,'They estimate the future error better, and the coverage gets close to the nominal 80%.'],
+  [34.2,39.4,'By default, the residuals are grouped by predicted value (binned), and each forecast uses those of its bin.'],
+  [39.4,45.4,'The interval adapts to the prediction: narrow for low values, wide for high ones.'],
+  [45.4,99,  'Here, binning keeps the coverage with a narrower interval. Use out-of-sample residuals and validate the coverage with backtesting.']
 ];
-const STEPS = [['Residuals',0,5.6],['In-sample',5.6,19.2],['Out-of-sample',19.2,33.2],['Binned',33.2,99]];
+const STEPS = [['Residuals',0,4.6],['In-sample',4.6,19.2],['Out-of-sample',19.2,34.2],['Binned',34.2,99]];
 
 /* ---------------------------------------------------------------- layout */
 const CX0 = 64, CX1 = 820, DX = (CX1 - CX0)/(N - 1);
@@ -132,7 +145,7 @@ function bracket(o, x0, x1, q, op, label){
   if (op <= 0) return;
   const yt = ry(q[1]), yb = ry(q[0]);
   o.push(rect(x0, yt, x1 - x0, yb - yt, {rx:4, fill:V('target'), fo:.16, stroke:V('target'), sw:1.4, op}));
-  if (label) o.push(text(x0, yt - 8, label, {size:12, weight:700, fill:V('targetText'), op}));
+  if (label) o.push(text(x0, yt - 8, label, {size:14, weight:700, fill:V('targetText'), op}));
 }
 // Interval band around the forecast of the test data, drawn up to progress p.
 function band(o, iv, p, op){
@@ -185,7 +198,7 @@ function chart(t, o){
   o.push(line(XVA, CY0 - 14, XVA, CY1 + 14, {stroke:V('border'), dash:'4 4', op:pa}));
   o.push(line(XTR, CY0 - 14, XTR, lerp(CY0 - 14, CY1 + 14, split), {stroke:V('border'), dash:'4 4', op:split}));
   const lab = (x0, x1, s, op) => o.push(text((x0 + x1)/2, CY0 - 26, s, {size:14, weight:700, anchor:'middle', fill:V('muted'), op}));
-  const sub = (x0, x1, s, c, op) => o.push(text((x0 + x1)/2, CY0 + 2, s, {size:12, anchor:'middle', fill:V(c), op}));
+  const sub = (x0, x1, s, c, op) => o.push(text((x0 + x1)/2, CY0 + 2, s, {size:14, anchor:'middle', fill:V(c), op}));
   lab(CX0 - 6, XVA, 'training data', pa*(1 - P(t, ...T.outIn)));
   lab(CX0 - 6, XTR, 'train', split);
   lab(XTR, XVA, 'validation', split);
@@ -202,7 +215,7 @@ function chart(t, o){
     // the bins are computed from the predictions of the validation data
     for (const e of [E1, E2]) o.push(line(XTR, yv(e), CX1 + 10, yv(e), {stroke:V('faint'), dash:'5 4', sw:1.2, op:st}));
     const mids = [(yv(E1) + CY1)/2, (yv(E2) + yv(E1))/2, (CY0 + yv(E2))/2];
-    mids.forEach((y, b) => o.push(text(CX1 + 16, y + 4, BIN_NAMES[b], {size:11.5, fill:V('muted'), op:st})));
+    mids.forEach((y, b) => o.push(text(CX1 + 16, y + 4, BIN_NAMES[b], {size:14, fill:V('muted'), op:st})));
   }
 
   // observed series (train and validation)
@@ -223,7 +236,7 @@ function chart(t, o){
   const fpts = [];
   for (let k = VA; k < N; k++) fpts.push([xk(k), yv(m(k))]);
   o.push(path(polyline(fpts, fp), {stroke:V('target'), sw:2.2, dash:'5 4'}));
-  o.push(text(xk(N - 1), yv(m(N - 1)) - 14, 'forecast', {size:12, weight:700, anchor:'end', fill:V('targetText'), op:fp*(1 - P(t, T.bandIn[0], T.bandIn[0] + .3))}));
+  o.push(text(xk(VA) + 4, yv(m(VA)) - 16, 'forecast', {size:14, weight:700, fill:V('targetText'), op:fp*(1 - P(t, T.bandIn[0], T.bandIn[0] + .3))}));
 
   // in-sample: fitted values of the training data and their residuals
   const fitP = P(t, ...T.fitIn);
@@ -260,13 +273,13 @@ function panel(t, o){
   const tIn = 1 - P(t, ...T.outIn), tOut = P(t, ...T.valHL)*(1 - P(t, ...T.outOut)), tBin = P(t, ...T.stripes);
   const title = (s, sub, op) => {
     o.push(text(PX0 + 18, PY0 + 30, s, {size:17, weight:700, op:a*op}));
-    o.push(text(PX0 + 18, PY0 + 50, sub, {size:12.5, fill:V('muted'), op:a*op}));
+    o.push(text(PX0 + 18, PY0 + 51, sub, {size:14, fill:V('muted'), op:a*op}));
   };
   title('In-sample residuals', `${RIN.length} errors on the training data, sorted`, tIn);
   title('Out-of-sample residuals', `${ROUT.length} errors on the validation data, sorted`, tOut);
   title('Binned residuals', 'out-of-sample, grouped by predicted value', tBin);
   o.push(line(SX0 - 12, Z0, SX1 + 12, Z0, {stroke:V('faint'), sw:1.2, op:a}));
-  o.push(text(SX0 - 18, Z0 + 4, '0', {size:11.5, cls:'m', anchor:'end', fill:V('muted'), op:a}));
+  o.push(text(SX0 - 18, Z0 + 4, '0', {size:13, cls:'m', anchor:'end', fill:V('muted'), op:a}));
 
   // in-sample residuals fly from the chart and are sorted
   const aIn = 1 - P(t, ...T.outIn);
@@ -294,7 +307,7 @@ function panel(t, o){
   for (let b = 0; b < 3; b++){
     bracket(o, binX(b, 0) - 8, binX(b, BN - 1) + 8, QBIN[b], bb, '');
     if (b === cur) o.push(rect(binX(b, 0) - 11, ry(QBIN[b][1]) - 3, GW + 22, (QBIN[b][1] - QBIN[b][0])*SC + 6, {rx:6, stroke:V('targetText'), sw:2.2}));
-    o.push(text(binX(b, 0) + GW/2, PY1 - 16, BIN_NAMES[b], {size:12.5, weight: b === cur ? 700 : 400, anchor:'middle', fill: b === cur ? V('fg') : V('muted'), op:tBin}));
+    o.push(text(binX(b, 0) + GW/2, PY1 - 16, BIN_NAMES[b], {size:14, weight: b === cur ? 700 : 400, anchor:'middle', fill: b === cur ? V('fg') : V('muted'), op:tBin}));
   }
 
   // the bracket is carried to the forecast: it becomes the interval
@@ -308,13 +321,13 @@ function panel(t, o){
 }
 
 /* ---------------------------------------------------------------- table */
-const TY0 = 470, TROW = 26, TC1 = PX0 + 190, TC2 = PX1 - 6;
+const TY0 = 470, TROW = 26, TC1 = PX0 + 250, TC2 = PX1 - 6;
 function table(t, o, counts){
   const a = P(t, T.testIn - .4, T.testIn);
   if (a <= 0) return;
-  o.push(text(PX0 + 6, TY0, 'residuals', {size:12.5, weight:700, fill:V('muted'), op:a}));
-  o.push(text(TC1, TY0, 'coverage', {size:12.5, weight:700, anchor:'end', fill:V('muted'), op:a}));
-  o.push(text(TC2, TY0, 'mean width', {size:12.5, weight:700, anchor:'end', fill:V('muted'), op:a}));
+  o.push(text(PX0 + 6, TY0, 'residuals', {size:14, weight:700, fill:V('muted'), op:a}));
+  o.push(text(TC1, TY0, 'coverage (target 80%)', {size:14, weight:700, anchor:'end', fill:V('muted'), op:a}));
+  o.push(text(TC2, TY0, 'width', {size:14, weight:700, anchor:'end', fill:V('muted'), op:a}));
   o.push(line(PX0 + 6, TY0 + 9, TC2, TY0 + 9, {stroke:V('border'), op:a}));
   const rows = [['in', 'in-sample', T.testIn, T.bandIn], ['out', 'out-of-sample', T.testOut, T.bandOut], ['bin', 'binned', T.testBin, T.bandBin]];
   rows.forEach(([key, name, t0, bw], i) => {
@@ -326,13 +339,13 @@ function table(t, o, counts){
     o.push(text(TC1, y, done ? pct(s.cov, NT) : `${cov} / ${n}`, {size:14, cls:'m', weight:700, anchor:'end', fill: low ? V('miss') : V('fg'), op:ra}));
     o.push(text(TC2, y, s.width.toFixed(1), {size:14, cls:'m', anchor:'end', op:ra*P(t, bw[1] - .3, bw[1])}));
   });
-  o.push(text(PX0 + 6, TY0 + 30 + 3*TROW, 'Intervals on the test data, nominal coverage: 80%', {size:12, cls:'i', fill:V('muted'), op:a}));
+  o.push(text(PX0 + 6, TY0 + 30 + 3*TROW, 'Coverage and mean width on the test data', {size:13.5, cls:'i', fill:V('muted'), op:a}));
   // legend of the test observations, under the test data
   const lx = XVA + 10, ly = CY1 + 38;
-  o.push(circle(lx, ly - 4, 3.4, {fill:V('series'), op:a}));
-  o.push(text(lx + 10, ly, 'inside the interval', {size:12, fill:V('muted'), op:a}));
-  o.push(circle(lx, ly + 16, 4.2, {fill:V('bg'), stroke:V('miss'), sw:2.2, op:a}));
-  o.push(text(lx + 10, ly + 20, 'outside the interval', {size:12, fill:V('muted'), op:a}));
+  o.push(circle(lx, ly - 5, 3.4, {fill:V('series'), op:a}));
+  o.push(text(lx + 11, ly, 'inside the interval', {size:14, fill:V('muted'), op:a}));
+  o.push(circle(lx, ly + 17, 4.2, {fill:V('bg'), stroke:V('miss'), sw:2.2, op:a}));
+  o.push(text(lx + 11, ly + 22, 'outside the interval', {size:14, fill:V('muted'), op:a}));
 }
 
 /* ------------------------------------------------------------------ run */
@@ -347,7 +360,7 @@ SkfAnim.run({
         'is narrow for low predictions and wide for high ones.',
   total: T.total,
   height: 640,
-  still: 47,
+  still: 48,
   fadeOut: T.fadeOut,
   render(t, o){
     header(t, o, {title:'Residuals and prediction intervals', captions:CAPTIONS, steps:STEPS});
