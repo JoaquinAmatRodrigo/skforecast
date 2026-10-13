@@ -6,63 +6,142 @@ notebook metadata would mean editing every notebook. Instead, the texts live in
 `page_meta.yml`, next to this file, keyed by the path of the page relative to
 `docs/`. For each page listed there, the hook fills `page.meta`:
 
-- `title`: the `<title>` tag (Material appends " - <site_name>") and the
-  Open Graph title. The short title of `nav` in `mkdocs.yml` still names the
-  page in the sidebar, the breadcrumbs and the footer links.
+- `title`: the `<title>` tag (Material appends " - <site_name>", except on the
+  home page, see `docs/overrides/home.html`) and the Open Graph title. The
+  short title of `nav` in `mkdocs.yml` still names the page in the sidebar, the
+  breadcrumbs and the footer links.
 - `description`: the meta description, also used by the Open Graph and Twitter
   tags of `docs/overrides/main.html`. Without it, a page gets `site_description`.
-
-Front matter of a Markdown page wins over the YAML.
 
 Registered in `mkdocs.yml` as:
 
     hooks:
       - tools/docs/hooks/page_meta.py
 
+Every page needs an entry with both texts. The rules of `RULES` are checked at
+build time, as warnings (`mkdocs build --strict` fails), and without building
+the site, in CI and by hand, with:
+
+    python tools/docs/hooks/page_meta.py
+
+which exits with 1 if a page has no entry, an entry matches no page, or a text
+breaks a rule.
+
 Notes for maintainers:
 
 - The YAML is read in `on_config`, so editing it during `mkdocs serve` triggers a
   rebuild with the new texts (`watch: [tools/docs/hooks]` in `mkdocs.yml`).
   Editing *this file* has no effect until the server is restarted.
-- A page of `nav` without a description, or an entry of the YAML that matches no
-  page, is reported as a warning: the site is still built, and
-  `mkdocs build --strict` fails.
+- Front matter of a Markdown page wins over the YAML, but the check still
+  requires the entry, so that all the texts can be reviewed in one place.
 """
 
 import logging
+import sys
+from collections import Counter
 from pathlib import Path
 
 import yaml
-from mkdocs.exceptions import PluginError
 
 logger = logging.getLogger("mkdocs.hooks.page_meta")
 
 HERE = Path(__file__).resolve().parent
 DATA_FILE = HERE / "page_meta.yml"
-KEYS = {"title", "description"}
+DOCS_DIR = HERE.parents[2] / "docs"
+KEYS = ("title", "description")
+HOME = "README.md"
+# mkdocs-jupyter also takes `.py` files as pages, and `exclude_docs` is applied
+# after `on_files`, so the pages are selected by their extension.
+PAGE_SUFFIXES = (".md", ".ipynb")
+RULES = {
+    # The other titles are followed by " - Skforecast Docs" (18 characters),
+    # and a search result shows about 60 characters.
+    "title_max": 42,
+    "home_title_max": 60,
+    "description_min": 120,
+    "description_max": 160,
+}
+DASHES = ("\u2013", "\u2014")  # en and em dashes
 
 # Populated by on_config: {path relative to docs/: {"title": ..., "description": ...}}
 PAGE_META = None
 
 
-def on_config(config):
-    global PAGE_META
-    data = yaml.safe_load(DATA_FILE.read_text(encoding="utf-8")) or {}
-    for path, entry in data.items():
-        if not isinstance(entry, dict) or not set(entry) <= KEYS:
-            raise PluginError(
-                f"page_meta: entry '{path}' of {DATA_FILE.name} must be a "
-                f"mapping with keys among {sorted(KEYS)}"
+def load(path=DATA_FILE):
+    """
+    Read the YAML and return {page path: {"title": ..., "description": ...}},
+    with the texts stripped. Raise ValueError if an entry is malformed.
+    """
+    data = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    for page, entry in data.items():
+        if not isinstance(entry, dict) or not set(entry) <= set(KEYS):
+            raise ValueError(
+                f"page_meta: entry '{page}' of {path.name} must be a mapping "
+                f"with keys among {list(KEYS)}"
             )
-    PAGE_META = data
+        data[page] = {key: str(value).strip() for key, value in entry.items()}
+    return data
+
+
+def check(data, pages):
+    """
+    Return the problems of `data` (see `load`) for the documentation `pages`
+    (paths relative to `docs/`) as a list of messages.
+    """
+    problems = []
+    for page in sorted(set(pages) - set(data)):
+        problems.append(f"'{page}' has no entry in {DATA_FILE.name}")
+    for page in sorted(set(data) - set(pages)):
+        problems.append(f"'{page}' in {DATA_FILE.name} matches no page")
+
+    counts = {key: Counter(e.get(key) for e in data.values()) for key in KEYS}
+    for page, entry in sorted(data.items()):
+        for key in KEYS:
+            text = entry.get(key, "")
+            if not text:
+                problems.append(f"'{page}' has no {key}")
+                continue
+            if counts[key][text] > 1:
+                problems.append(f"'{page}' shares its {key} with another page")
+            if any(dash in text for dash in DASHES):
+                problems.append(f"'{page}' {key} contains an en or em dash")
+
+        title_max = RULES["home_title_max" if page == HOME else "title_max"]
+        title = entry.get("title", "")
+        if len(title) > title_max:
+            problems.append(
+                f"'{page}' title has {len(title)} characters (max {title_max})"
+            )
+        description = entry.get("description", "")
+        if description and not (
+            RULES["description_min"] <= len(description) <= RULES["description_max"]
+        ):
+            problems.append(
+                f"'{page}' description has {len(description)} characters "
+                f"(must be {RULES['description_min']} to {RULES['description_max']})"
+            )
+    return problems
+
+
+def on_config(config):
+    from mkdocs.exceptions import PluginError
+
+    global PAGE_META
+    try:
+        PAGE_META = load()
+    except ValueError as exc:
+        raise PluginError(str(exc)) from exc
     return config
 
 
 def on_files(files, config):
-    # The documentation pages, `.md` and notebooks, are known at this point
-    paths = {file.src_uri for file in files.documentation_pages()}
-    for path in PAGE_META.keys() - paths:
-        logger.warning(f"page_meta: '{path}' in {DATA_FILE.name} matches no page")
+    pages = [
+        file.src_uri
+        for file in files.documentation_pages()
+        if file.src_uri.endswith(PAGE_SUFFIXES)
+    ]
+    for problem in check(PAGE_META, pages):
+        logger.warning(f"page_meta: {problem}")
     return files
 
 
@@ -70,10 +149,27 @@ def on_page_markdown(markdown, page, config, files):
     # Runs after `page.read_source`, which resets `page.meta` to the front
     # matter. mkdocs-jupyter renders notebooks later but calls this hook too.
     for key, value in PAGE_META.get(page.file.src_uri, {}).items():
-        page.meta.setdefault(key, value.strip())
-    if not page.meta.get("description"):
-        logger.warning(
-            f"page_meta: '{page.file.src_uri}' has no description in "
-            f"{DATA_FILE.name}"
-        )
+        page.meta.setdefault(key, value)
     return markdown
+
+
+def _pages_on_disk():
+    """
+    Documentation pages under docs/ (Markdown and notebooks), without the theme
+    overrides, which `exclude_docs` keeps out of the site.
+    """
+    return [
+        path.relative_to(DOCS_DIR).as_posix()
+        for path in DOCS_DIR.rglob("*")
+        if path.suffix in PAGE_SUFFIXES
+        and "overrides" not in path.relative_to(DOCS_DIR).parts
+        and ".ipynb_checkpoints" not in path.parts
+    ]
+
+
+if __name__ == "__main__":
+    problems = check(load(), _pages_on_disk())
+    for problem in problems:
+        print(problem)
+    print(f"{DATA_FILE.name}: {len(problems)} problem(s)")
+    sys.exit(1 if problems else 0)
