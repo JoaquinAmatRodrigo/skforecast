@@ -89,7 +89,7 @@ Signature of `T0Forecaster.predict` in 0.6.0:
 `predict(model_input, horizon, quantile_levels=(0.1, 0.5, 0.9), *,
 context_length=None, future_covariates=None, mask=None, group_ids=None, ...)`.
 
-Both were found with the backends compatibility check
+Both were found with the backends compatibility check added in #1394
 (`python tools/foundation_compat/run.py --adapter t0 --variant latest`).
 
 ## Workaround (0.26.0)
@@ -122,7 +122,12 @@ MAE 145.53).
 4. Update the install command in the user guide table, in
    `skills/foundation-forecasting/SKILL.md` and, if needed, in
    `tools/ai/llms-base.txt`; then regenerate the AI context files.
-5. Release note in `docs/releases/releases.md`.
+5. Remove the `tfc-t0<0.4` pin added as a workaround in #1384: the warning in
+   the T0 section of `docs/user_guides/foundation-forecasting-models.ipynb`, the
+   install command in its backends table and in
+   `skills/foundation-forecasting/SKILL.md`. Re-execute the T0 cells of the
+   user guide with the new backend version.
+6. Release note in `docs/releases/releases.md`.
 
 Alternative if the backend API keeps changing: pin `backend_package` to a
 tested range (`tfc-t0[torch]>=0.6,<0.7`) and widen it after each check.
