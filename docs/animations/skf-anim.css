@@ -18,18 +18,21 @@
 
 /* Design tokens. Role colors keep the same meaning in every animation:
    lag (past values used as features), target (value to predict), roll,
-   dow (calendar), exog (exogenous variables) and s1..s3 (series identity). */
+   dow (calendar), exog (exogenous variables), s1..s3 (series identity),
+   resid (residuals of the model) and miss (observation outside an interval). */
 :root{
   --bg:#ffffff; --fg:#1d2330; --title:#001633; --muted:#687182; --faint:#b3b9c4;
   --grid:#e8ebf0; --panel:#f4f5f8; --border:#d6dae2; --series:#3b4458; --chip:#ffffff;
   --lag:#2f6db5; --target:#f79939; --targetText:#c2660a; --roll:#0f9488; --dow:#7c5acb; --exog:#d0466c;
   --s1:#0f9488; --s2:#7c5acb; --s3:#5f8f1f;
+  --resid:#a3479f; --miss:#d23c3c;
 }
 :root[data-theme="dark"]{
   --bg:#1e2029; --fg:#e4e7ee; --title:#ffffff; --muted:#9aa2b1; --faint:#596070;
   --grid:#2e3240; --panel:#262a36; --border:#3d4252; --series:#c3c9d5; --chip:#12141b;
   --lag:#6fa3ea; --target:#f79939; --targetText:#f9a852; --roll:#35c0b2; --dow:#a78bf0; --exog:#f0789a;
   --s1:#35c0b2; --s2:#a78bf0; --s3:#9ccc5a;
+  --resid:#d98bd5; --miss:#f27b7b;
 }
 
 html,body{margin:0;background:var(--bg);color:var(--fg);}
