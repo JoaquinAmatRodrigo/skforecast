@@ -77,6 +77,8 @@ skforecast/
 | ForecasterRecursiveClassifier | Classification-based forecasting |
 | ForecasterEquivalentDate | Baseline forecaster using equivalent past dates |
 
+To choose between model families, compare them on the same folds: each family has its own backtesting function (`backtesting_forecaster`, `backtesting_forecaster_multiseries`, `backtesting_stats`, `backtesting_foundation`), and passing the same `TimeSeriesFold` to all of them makes the results comparable. The user guide [Comparing forecasting models](https://skforecast.org/latest/user_guides/comparing-forecasting-models.html) does this for the seasonal naive, Ridge, LightGBM, AutoARIMA, Chronos-2 and an LSTM on three datasets, reporting MASE, interval coverage and computation time.
+
 ## Basic Usage Example
 
 ```python

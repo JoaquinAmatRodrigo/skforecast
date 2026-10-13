@@ -25,6 +25,7 @@ Skforecast supports recursive and direct multi-step forecasting strategies, glob
 
 ## User Guides
 
+- [Comparing forecasting models](https://skforecast.org/latest/user_guides/comparing-forecasting-models.html): Machine learning (Ridge, LightGBM), statistical (AutoARIMA), foundation (Chronos-2) and deep learning (LSTM) models compared with the same backtesting on three datasets
 - [Recursive multi-step forecasting](https://skforecast.org/latest/user_guides/autoregressive-forecaster.html): Complete guide to single series forecasting with ForecasterRecursive
 - [Direct multi-step forecasting](https://skforecast.org/latest/user_guides/direct-multi-step-forecasting.html): Direct strategy with one model per forecast step
 - [Global forecasting overview](https://skforecast.org/latest/user_guides/global-forecasting-overview.html): Local vs global models and which global forecaster to use
