@@ -1,5 +1,40 @@
 {% extends "base.html" %}
 
+{% block extrahead %}
+  {#- Preview when a page is shared (LinkedIn, Slack, X...). Social networks
+      need absolute URLs, so they point to the latest release, like the
+      canonical URL. `mike deploy` sets site_url to .../latest (canonical_version
+      in mkdocs.yml), a plain `mkdocs build` leaves it at the domain. The title
+      and description come from tools/docs/hooks/page_meta.yml. The home page
+      overrides the social_meta block with its own card. -#}
+  {% set site_root = config.site_url | trim("/") %}
+  {% if site_root.endswith("/latest") %}
+    {% set latest_url = site_root ~ "/" %}
+  {% else %}
+    {% set latest_url = site_root ~ "/latest/" %}
+  {% endif %}
+  {% block social_meta scoped %}
+    {% if page and page.file %}
+      {% set share_title = (page.meta.title or page.title) | striptags %}
+      {% set share_text = page.meta.description or config.site_description %}
+      {% set share_image = latest_url ~ "img/social-card-home.png" %}
+      <meta property="og:type" content="website">
+      <meta property="og:site_name" content="skforecast">
+      <meta property="og:url" content="{{ latest_url ~ page.url }}">
+      <meta property="og:title" content="{{ share_title }}">
+      <meta property="og:description" content="{{ share_text }}">
+      <meta property="og:image" content="{{ share_image }}">
+      <meta property="og:image:width" content="1200">
+      <meta property="og:image:height" content="630">
+      <meta property="og:image:alt" content="skforecast, time series forecasting in Python">
+      <meta name="twitter:card" content="summary_large_image">
+      <meta name="twitter:title" content="{{ share_title }}">
+      <meta name="twitter:description" content="{{ share_text }}">
+      <meta name="twitter:image" content="{{ share_image }}">
+    {% endif %}
+  {% endblock %}
+{% endblock %}
+
 {% block announce %}
   {% include "partials/announce.html" %}
 {% endblock %}
