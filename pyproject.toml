@@ -96,6 +96,9 @@ docs = [
     "mkdocs-material==9.7.7",
     "mkdocstrings==1.0.6",
     "mkdocstrings-python==2.0.8",
+    # pymdown-extensions 12 breaks mkdocstrings 1.0.6 (Highlight.__init__()
+    # missing argument 'md'), and Material only requires >=10.2
+    "pymdown-extensions==10.21.3",
     "black==26.5.1",
 ]
 
