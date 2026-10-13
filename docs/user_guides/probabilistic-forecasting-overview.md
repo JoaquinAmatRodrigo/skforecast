@@ -109,7 +109,7 @@ A good prediction interval is calibrated (its empirical coverage is close to the
 + [`create_mean_pinball_loss()`](https://skforecast.org/latest/api/metrics#skforecast.metrics.create_mean_pinball_loss): a single quantile, for example to tune the hyperparameters of a quantile regression model.
 
 <div class="skf-anim-embed">
-  <iframe src="../animations/probabilistic-evaluation.html" title="Animation: coverage, width and Winkler score of prediction intervals" loading="lazy" allowfullscreen></iframe>
+  <iframe src="../animations/probabilistic-evaluation.html" title="Animation: coverage and width of three prediction intervals for the same forecast" loading="lazy" allowfullscreen></iframe>
 </div>
 
 The intervals must be evaluated on data not used to train the model. The [`backtesting_forecaster()`](https://skforecast.org/latest/api/model_selection#skforecast.model_selection._validation.backtesting_forecaster) and [`backtesting_forecaster_multiseries()`](https://skforecast.org/latest/api/model_selection#skforecast.model_selection._validation.backtesting_forecaster_multiseries) functions return the intervals of every fold with the `interval` and `interval_method` arguments.
