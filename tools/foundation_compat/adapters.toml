@@ -1,0 +1,87 @@
+# Environments used to check that each foundation model adapter still works
+# with its backend library. Single source for `run.py`, the tests in `tests/`
+# and `summarize.py`. See the README of this folder.
+#
+# One table per environment:
+#
+# - adapter:         adapter class in `skforecast/foundation/_adapters.py`.
+# - backend_package: same value as the `backend_package` attribute of the
+#                    adapter. Installed as is in the `latest` variant.
+# - model_id:        checkpoint loaded by the smoke tests.
+# - pinned:          requirements of the `pinned` variant, the last versions
+#                    known to work.
+# - exclude_newer:   date passed to `uv --exclude-newer` in the `pinned`
+#                    variant, so the dependencies that are not pinned do not
+#                    move either.
+# - overrides:       optional, requirements passed to `uv --override`.
+# - secrets:         optional, environment variables the smoke tests need.
+#                    When one is missing, the smoke tests are skipped.
+#
+# A unit test (`test_backends_compat_config.py`) checks that every registered
+# adapter has an entry here and in the matrix of the workflow.
+
+[chronos]
+adapter = "ChronosAdapter"
+backend_package = "chronos-forecasting"
+model_id = "autogluon/chronos-2-small"
+pinned = ["chronos-forecasting==2.3.2", "torch==2.9.1"]
+exclude_newer = "2026-10-10"
+
+[timesfm25]
+adapter = "TimesFM25Adapter"
+backend_package = "timesfm[torch]"
+model_id = "google/timesfm-2.5-200m-pytorch"
+pinned = ["timesfm[torch]==3.0.2", "torch==2.9.1"]
+exclude_newer = "2026-10-10"
+
+[timesfm3]
+adapter = "TimesFM3Adapter"
+backend_package = "timesfm[torch]"
+model_id = "google/timesfm-3.0-pytorch"
+pinned = ["timesfm[torch]==3.0.2", "torch==2.9.1"]
+exclude_newer = "2026-10-10"
+
+[moirai]
+adapter = "MoiraiAdapter"
+backend_package = "uni2ts"
+model_id = "Salesforce/moirai-2.0-R-small"
+# uni2ts requires scipy<1.12 and skforecast requires scipy>=1.12.
+overrides = ["scipy>=1.12"]
+pinned = ["uni2ts==2.0.0", "torch==2.4.1", "numpy==1.26.4"]
+exclude_newer = "2026-10-10"
+
+[tabicl]
+adapter = "TabICLAdapter"
+backend_package = "tabicl[forecast]"
+model_id = "soda-inria/tabicl"
+pinned = ["tabicl[forecast]==2.2.0", "torch==2.9.1"]
+exclude_newer = "2026-10-10"
+
+[tabpfn]
+adapter = "TabPFNAdapter"
+backend_package = "tabpfn-time-series>=1.3"
+model_id = "priorlabs/tabpfn-ts"
+secrets = ["TABPFN_TOKEN"]
+pinned = ["tabpfn-time-series==1.3.0", "tabpfn==9.1.0", "torch==2.9.1"]
+exclude_newer = "2026-10-10"
+
+[t0]
+adapter = "T0Adapter"
+backend_package = "tfc-t0"
+model_id = "theforecastingcompany/t0-alpha"
+pinned = ["tfc-t0==0.3.2", "torch==2.9.1"]
+exclude_newer = "2026-10-10"
+
+[nori]
+adapter = "NoriAdapter"
+backend_package = "synthefy-nori"
+model_id = "Synthefy/Nori"
+pinned = ["synthefy-nori==0.21.0", "torch==2.13.0"]
+exclude_newer = "2026-10-10"
+
+[tsicl]
+adapter = "TSICLAdapter"
+backend_package = "tsicl"
+model_id = "taharnbl/TS-ICL"
+pinned = ["tsicl==0.2.1", "torch==2.9.1"]
+exclude_newer = "2026-10-10"
