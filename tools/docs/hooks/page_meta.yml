@@ -351,6 +351,12 @@ user_guides/forecasting-xgboost-lightgbm.ipynb:
     Forecasting with XGBoost and LightGBM in Python: gradient boosting models
     for time series with lags, exogenous variables and backtesting in skforecast.
 
+user_guides/migrate-from-prophet.ipynb:
+  title: "Prophet alternative: migrate to skforecast"
+  description: >-
+    Migrate from Prophet to skforecast in Python: equivalents for seasonality,
+    holidays, regressors and cross-validation, with side-by-side backtests.
+
 # FAQ and forecasting tips
 faq/table-of-contents.md:
   title: Time series forecasting FAQ and tips
