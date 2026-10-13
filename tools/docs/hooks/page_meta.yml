@@ -1,0 +1,10 @@
+# Search engine texts of each page, keyed by its path relative to docs/.
+# Read by tools/docs/hooks/page_meta.py, which explains how they are used.
+#
+# - title: the <title> tag, before " - Skforecast Docs". Name what people search
+#   for, not the API. Keep it under 43 characters so that the whole tag fits
+#   in the 60 characters a search result shows. The short title of `nav` in
+#   mkdocs.yml still names the page in the sidebar.
+# - description: the meta description and the summary shown when the page is
+#   shared. Between 120 and 160 characters, unique, main keyword first,
+#   without en or em dashes.
