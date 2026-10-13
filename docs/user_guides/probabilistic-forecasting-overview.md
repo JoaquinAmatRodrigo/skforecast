@@ -4,13 +4,15 @@ When trying to predict future values, most forecasting models estimate a single 
 
 Probabilistic forecasting, as opposed to point forecasting, is a family of techniques that estimate the distribution of the outcome rather than a single future value. This type of forecasting provides much richer information because it allows the creation of prediction intervals, the range of likely values where the true value may fall. More formally, a prediction interval defines the interval within which the true value of the response variable is expected to be found with a given probability.
 
-Skforecast implements three families of methods for probabilistic forecasting, each summarized below and explained in detail in its own user guide:
+Skforecast implements four families of methods for probabilistic forecasting, each summarized below and explained in detail in its own user guide:
 
 + [**Bootstrapped residuals**](probabilistic-forecasting-bootstrapped-residuals.ipynb): simulate many possible future paths by adding resampled past errors to the predictions.
 
 + [**Conformal prediction**](probabilistic-forecasting-conformal-prediction.ipynb): build the interval by adding and subtracting a quantile of the past errors to the point forecast. Conformal methods can also be used to [calibrate intervals](probabilistic-forecasting-conformal-calibration.ipynb) obtained with other techniques.
 
 + [**Quantile regression**](probabilistic-forecasting-quantile-regression.ipynb): train models that directly predict the quantiles that define the bounds of the interval.
+
++ [**Foundation models**](foundation-forecasting-models.ipynb): pre-trained models that predict the quantiles of a new series directly, with no residuals and no training.
 
 <div class="skf-anim-embed">
   <iframe src="../animations/probabilistic-methods.html" title="Animation: how each probabilistic forecasting method builds the interval" loading="lazy" allowfullscreen></iframe>
@@ -62,6 +64,21 @@ If a machine learning algorithm capable of modeling quantiles is used as the `es
 Discover how to use this method in [Probabilistic forecasting with quantile regression](probabilistic-forecasting-quantile-regression.ipynb).
 
 
+## Foundation models
+
+Foundation models are large models pre-trained on a vast number of time series, which forecast a new series without being trained on it (zero-shot). Most of them are probabilistic by design: besides the point forecast, they predict a set of quantiles of the future values. The interval comes directly from the model, so it needs no residuals, no calibration set and no additional training. This makes them a strong option when the series is short or new, or when there are no residuals representative of the errors the model will make in the future.
+
+[`ForecasterFoundation`](https://skforecast.org/latest/api/forecasterfoundation) gives access to these quantiles with the same API as the other forecasters, for a single series or for many:
+
++ [`predict_interval()`](https://skforecast.org/latest/api/forecasterfoundation#skforecast.foundation._forecaster_foundation.ForecasterFoundation.predict_interval): the lower and upper bounds of the interval, which are the two quantiles predicted by the model for the requested interval.
+
++ [`predict_quantiles()`](https://skforecast.org/latest/api/forecasterfoundation#skforecast.foundation._forecaster_foundation.ForecasterFoundation.predict_quantiles): any list of the quantiles the model supports.
+
+The quantiles available depend on the model: some accept any quantile, whereas others only return a fixed set of them, which limits the widest interval they can provide.
+
+Discover how to use these models in [Forecasting with foundation models](foundation-forecasting-models.ipynb).
+
+
 ## Residuals
 
 Bootstrapping and conformal prediction use the residuals of the model as an estimate of the errors it will make in the future. Two types of residuals can be used, selected with the `use_in_sample_residuals` argument:
@@ -86,6 +103,7 @@ There is no definitive answer to this question, as the resulting coverage may va
 | Bootstrapped residuals | Out-of-sample residuals | Asymmetric if the residuals are; widens along the horizon in recursive forecasters | Simulated paths, intervals, quantiles and distributions | Grows with `n_boot` and the number of series |
 | Conformal prediction | Out-of-sample residuals | Symmetric around the forecast; does not grow with the horizon | Intervals | The lowest |
 | Quantile regression | An estimator that supports a quantile loss | Asymmetric; the predicted quantiles may cross | One quantile per forecaster | One forecaster trained per quantile |
+| Foundation models | A pre-trained model; no training and no residuals | Set by the model; can be asymmetric | Intervals and quantiles | No training, but the inference of a large model: a GPU is recommended |
 
 Some general guidelines can be followed:
 
@@ -95,7 +113,9 @@ Some general guidelines can be followed:
 
 + **Quantile regression**: An appropriate choice when the estimator is capable of modeling quantiles. However, it has three drawbacks. First, one forecaster must be trained for each quantile, which can be computationally expensive. Second, since each model is trained independently, nothing prevents the predicted quantiles from crossing (for example, a lower bound above the upper bound). Third, in recursive forecasters the quantile predictions are fed back as lags, so the predictions of later steps are built on quantile values instead of expected values. For this reason, a direct strategy ([`ForecasterDirect`](https://skforecast.org/latest/api/forecasterdirect)) is preferred. The coverage of these intervals can be corrected with [conformal calibration](probabilistic-forecasting-conformal-calibration.ipynb).
 
-A comparison of these methods on the same dataset can be found in the article [Probabilistic forecasting with machine learning](https://cienciadedatos.net/documentos/py42-probabilistic-forecasting).
++ **Foundation models**: The only method with nothing to train and no residuals to collect, so it is the natural choice for short or new series and a strong candidate in any other case. The same model forecasts any series, and its interval does not have to be symmetric around the forecast. Its drawbacks: it needs more compute than a machine learning model (usually a GPU), some models only return a fixed set of quantiles, and a model trained with features of the domain can still be more accurate on a given dataset. As with the other methods, its coverage should be validated with backtesting.
+
+A comparison of bootstrapping, conformal prediction and quantile regression on the same dataset can be found in the article [Probabilistic forecasting with machine learning](https://cienciadedatos.net/documentos/py42-probabilistic-forecasting).
 
 
 ## Evaluating prediction intervals
@@ -132,11 +152,9 @@ Discover how to use these metrics in [Metrics in probabilistic forecasting](prob
 
 Besides the methods above, skforecast offers probabilistic forecasts in other contexts:
 
-+ **Global models**: all the methods described above can be applied to models trained on multiple series. In global forecasters, `predict_interval()` uses conformal prediction by default. See [Probabilistic forecasting: global models](probabilistic-forecasting-global-models.ipynb).
++ **Global models**: bootstrapping, conformal prediction and quantile regression can also be applied to models trained on multiple series. In global forecasters, `predict_interval()` uses conformal prediction by default. See [Probabilistic forecasting: global models](probabilistic-forecasting-global-models.ipynb).
 
 + **Statistical models**: [`ForecasterStats`](https://skforecast.org/latest/api/forecasterstats) returns the prediction intervals calculated by the underlying statistical model (ARIMA, SARIMAX, ETS, ARAR) through its `predict_interval()` method.
-
-+ **Foundation models**: [`ForecasterFoundation`](https://skforecast.org/latest/api/forecasterfoundation) returns the quantiles predicted natively by pre-trained foundation models through its `predict_interval()` and `predict_quantiles()` methods, with no residuals or additional training required.
 
 !!! tip
 
