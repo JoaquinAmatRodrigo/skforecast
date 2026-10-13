@@ -5,43 +5,43 @@
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
-         <loc>https://skforecast.org/latest/api/ForecasterDirect.html</loc>
+         <loc>https://skforecast.org/latest/api/forecasterdirect.html</loc>
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
-         <loc>https://skforecast.org/latest/api/ForecasterDirectMultiVariate.html</loc>
+         <loc>https://skforecast.org/latest/api/forecasterdirectmultivariate.html</loc>
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
-         <loc>https://skforecast.org/latest/api/ForecasterEquivalentDate.html</loc>
+         <loc>https://skforecast.org/latest/api/forecasterequivalentdate.html</loc>
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
-         <loc>https://skforecast.org/latest/api/ForecasterFoundation.html</loc>
+         <loc>https://skforecast.org/latest/api/forecasterfoundation.html</loc>
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
-         <loc>https://skforecast.org/latest/api/ForecasterRecursive.html</loc>
+         <loc>https://skforecast.org/latest/api/forecasterrecursive.html</loc>
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
-         <loc>https://skforecast.org/latest/api/ForecasterRecursiveClassifier.html</loc>
+         <loc>https://skforecast.org/latest/api/forecasterrecursiveclassifier.html</loc>
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
-         <loc>https://skforecast.org/latest/api/ForecasterRecursiveMultiSeries.html</loc>
+         <loc>https://skforecast.org/latest/api/forecasterrecursivemultiseries.html</loc>
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
-         <loc>https://skforecast.org/latest/api/ForecasterRnn.html</loc>
+         <loc>https://skforecast.org/latest/api/forecasterrnn.html</loc>
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
-         <loc>https://skforecast.org/latest/api/ForecasterStats.html</loc>
+         <loc>https://skforecast.org/latest/api/forecasterstats.html</loc>
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
-         <loc>https://skforecast.org/latest/api/FoundationModel.html</loc>
+         <loc>https://skforecast.org/latest/api/foundationmodel.html</loc>
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
@@ -357,7 +357,7 @@
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
-         <loc>https://skforecast.org/latest/user_guides/skforecast-in-GPU.html</loc>
+         <loc>https://skforecast.org/latest/user_guides/skforecast-in-gpu.html</loc>
          <lastmod>2026-10-13</lastmod>
     </url>
     <url>
