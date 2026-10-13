@@ -17,7 +17,9 @@
       in mkdocs.yml), a plain `mkdocs build` leaves it at the domain. The title
       and description come from tools/docs/hooks/page_meta.yml. The home page
       overrides the social_meta block with its own card. MkDocs does not
-      autoescape templates, hence the `e` filters. -#}
+      autoescape templates, hence the `e` filters. og:url is lowercase, like
+      the canonical URL, because Netlify redirects URLs with uppercase letters
+      (see tools/docs/hooks/page_meta.py). -#}
   {% set site_root = config.site_url | trim("/") %}
   {% if site_root.endswith("/latest") %}
     {% set latest_url = site_root ~ "/" %}
@@ -31,7 +33,7 @@
       {% set share_image = latest_url ~ "img/social-card-home.png" %}
       <meta property="og:type" content="website">
       <meta property="og:site_name" content="skforecast">
-      <meta property="og:url" content="{{ (latest_url ~ page.url) | e }}">
+      <meta property="og:url" content="{{ (latest_url ~ page.url | lower) | e }}">
       <meta property="og:title" content="{{ share_title | e }}">
       <meta property="og:description" content="{{ share_text | e }}">
       <meta property="og:image" content="{{ share_image | e }}">
