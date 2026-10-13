@@ -172,7 +172,6 @@ extra_css:
   - vendor/katex/katex.min.css
 extra_javascript:
   - javascripts/version-switcher.js
-  - javascripts/examples-filter.js
   - javascripts/home.js
   # Math rendering with KaTeX, served from docs/vendor/katex (update it with
   # tools/docs/vendor_katex.py)
