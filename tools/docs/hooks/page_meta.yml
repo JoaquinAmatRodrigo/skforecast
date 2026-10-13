@@ -10,6 +10,8 @@
 # - description: the meta description and the summary shown when the page is
 #   shared. Between 120 and 160 characters, unique, main keyword first,
 #   without en or em dashes.
+# - Neither text can contain double quotes or angle brackets (Material writes
+#   them unescaped).
 
 # Home, introduction and quick start
 README.md:
@@ -407,8 +409,8 @@ faq/time-series-aggregation.ipynb:
 faq/skforecast-benchmark.ipynb:
   title: skforecast performance benchmark
   description: >-
-    skforecast performance benchmark: execution time of fit, predict and
-    backtesting of every forecaster across library versions and data sizes.
+    skforecast performance benchmark: execution time of fit, predict and other
+    key methods of every forecaster, and how it evolves across library versions.
 
 faq/parallelization-skforecast.ipynb:
   title: Parallelization in skforecast

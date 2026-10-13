@@ -23,7 +23,7 @@ The kernel runs from the notebook's folder, where the repo is not on the path: i
 
 ## Page titles and descriptions
 
-Every page has a search engine title and meta description in `tools/docs/hooks/page_meta.yml`, keyed by its path in `docs/` (notebooks cannot carry front matter). When you add, rename or remove a page, update its entry and run `python tools/docs/hooks/page_meta.py`, which checks the coverage and the rules written at the top of the YAML (title length, description of 120 to 160 characters, unique texts, no en or em dashes). CI runs it on pull requests that touch the docs.
+Every page has a search engine title and meta description in `tools/docs/hooks/page_meta.yml`, keyed by its path in `docs/` (notebooks cannot carry front matter). When you add, rename or remove a page, update its entry and run `python tools/docs/hooks/page_meta.py`, which checks the coverage and the rules written at the top of the YAML (title length, description of 120 to 160 characters, unique texts, no en or em dashes, no double quotes or angle brackets). CI runs it on pull requests that touch the docs.
 
 ## Keep user guides simple
 

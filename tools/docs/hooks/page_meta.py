@@ -62,6 +62,9 @@ RULES = {
     "description_max": 160,
 }
 DASHES = ("\u2013", "\u2014")  # en and em dashes
+# Material writes the title and the description without escaping them
+# (MkDocs templates are not autoescaped), so these would break the HTML.
+UNSAFE = ('"', "<", ">")
 
 # Populated by on_config: {path relative to docs/: {"title": ..., "description": ...}}
 PAGE_META = None
@@ -105,6 +108,8 @@ def check(data, pages):
                 problems.append(f"'{page}' shares its {key} with another page")
             if any(dash in text for dash in DASHES):
                 problems.append(f"'{page}' {key} contains an en or em dash")
+            if any(char in text for char in UNSAFE):
+                problems.append(f"'{page}' {key} contains one of {' '.join(UNSAFE)}")
 
         title_max = RULES["home_title_max" if page == HOME else "title_max"]
         title = entry.get("title", "")

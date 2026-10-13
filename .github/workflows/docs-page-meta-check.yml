@@ -12,6 +12,7 @@ on:
       - 'docs/**'
       - 'mkdocs.yml'
       - 'tools/docs/hooks/**'
+      - '.github/workflows/docs-page-meta-check.yml'
 
 permissions:
   contents: read
