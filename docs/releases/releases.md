@@ -129,6 +129,8 @@ The main changes in this release are:
 
 + The [probabilistic forecasting overview](../user_guides/probabilistic-forecasting-overview.md) explains which residuals to use (in-sample or out-of-sample, binned), compares the methods in a table and adds a section on how to evaluate prediction intervals. Three new animations show how each method builds the interval, how the type of residuals changes its coverage, and how coverage and width measure the quality of an interval. ([#1393](https://github.com/skforecast/skforecast/pull/1393))
 
++ The backtesting user guide shows how to align the folds with calendar months (retrain at the end of each month and forecast the whole next month), combining `fold_stride` and `skip_folds`. [User guide](../user_guides/backtesting.ipynb#backtesting-with-calendar-month-folds) ([#1401](https://github.com/skforecast/skforecast/pull/1401))
+
 + The [user guides index](../user_guides/table-of-contents.md) is a card grid with one card per section, and the navigation of the user guides is reorganised: new Data section, and the migration guide, drift detection, GPU and training matrices guides move to the section they belong to. ([#1393](https://github.com/skforecast/skforecast/pull/1393))
 
 

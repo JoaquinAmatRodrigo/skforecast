@@ -184,7 +184,10 @@ cv = TimeSeriesFold(
 - Needs a regular index without missing dates. With sub-daily data, `is_month_start`
   is `True` for every hour of day 1: also require `date == date.normalize()` and set
   `steps` to the observations of the longest month (744 for hourly data).
-- `ForecasterDirect` and `ForecasterDirectMultiVariate` need `steps >= 31`.
+- `ForecasterDirect` and `ForecasterDirectMultiVariate` need `steps >= 31 + gap`.
+- Use `refit=True` (retrain every month) or `refit=False` (train once). An integer
+  `refit` counts the daily candidate folds, not months: `refit=3` does not retrain
+  every 3 months.
 - The metric needs no correction: overlapping folds are scored with the last
   prediction of each date, the one of its own month. It works the same in the
   multi-series backtesting and in the hyperparameter search functions.
