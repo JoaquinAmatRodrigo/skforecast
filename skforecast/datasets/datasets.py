@@ -141,7 +141,7 @@ datasets = {
         ),
         'sep': ',',
         'index_col': 'date',
-        'date_format': '%Y-%m-%d',
+        'date_format': '%d/%m/%y',
         'freq': 'D',
         'file_type': 'csv',
         'description': (

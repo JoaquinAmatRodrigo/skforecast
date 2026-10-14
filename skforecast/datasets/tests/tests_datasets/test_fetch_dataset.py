@@ -1,6 +1,7 @@
 # Unit test fetch_dataset
 # ==============================================================================
 import re
+import warnings
 import pytest
 import pandas as pd
 from unittest.mock import patch
@@ -50,6 +51,23 @@ def test_fetch_dataset_csv_multiple_series():
     assert df.index.freq == 'D'
     assert df.index[0] == pd.Timestamp('2012-01-01')
     assert df.index[-1] == pd.Timestamp('2015-01-01')
+
+
+def test_fetch_dataset_website_visits_day_first_dates():
+    """
+    `fetch_dataset` parses the day-first dates of `website_visits` (e.g.
+    '1/7/20') without warnings, returning a gapless daily DatetimeIndex.
+    """
+    with warnings.catch_warnings():
+        warnings.simplefilter('error', UserWarning)
+        df = fetch_dataset('website_visits', version='latest', raw=False, verbose=False)
+
+    assert isinstance(df.index, pd.DatetimeIndex)
+    assert df.shape == (421, 1)
+    assert df.index.freq == 'D'
+    assert df.index[0] == pd.Timestamp('2020-07-01')
+    assert df.index[-1] == pd.Timestamp('2021-08-25')
+    assert df['users'].notna().all()
 
 
 def test_fetch_dataset_kwargs_read():
