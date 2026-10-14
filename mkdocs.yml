@@ -41,6 +41,8 @@ nav:
     - Data:
       - Input data: user_guides/input-data.ipynb
       - Datasets: user_guides/datasets.ipynb
+    - Choosing a model:
+      - Comparing forecasting models: user_guides/comparing-forecasting-models.ipynb
     - Single series Forecasters:
       - Recursive multi-step forecasting: user_guides/autoregressive-forecaster.ipynb
       - Direct multi-step forecasting: user_guides/direct-multi-step-forecasting.ipynb

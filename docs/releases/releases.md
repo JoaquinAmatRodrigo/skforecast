@@ -131,6 +131,8 @@ The main changes in this release are:
 
 + The [user guides index](../user_guides/table-of-contents.md) is a card grid with one card per section, and the navigation of the user guides is reorganised: new Data section, and the migration guide, drift detection, GPU and training matrices guides move to the section they belong to. ([#1393](https://github.com/skforecast/skforecast/pull/1393))
 
++ New user guide [Comparing forecasting models](../user_guides/comparing-forecasting-models.ipynb): machine learning (Ridge, LightGBM), foundation (Chronos-2), statistical (AutoARIMA, AutoETS) and deep learning (LSTM) models evaluated with the same backtesting on three datasets, with their accuracy, interval coverage and computation time.
+
 
 **Fixed**
 

@@ -10,6 +10,7 @@
 # section titles of `nav`.
 sections:
   Data: The format skforecast expects for series and exogenous variables, and the datasets used in the examples.
+  Choosing a model: Machine learning, statistical, foundation and deep learning models compared with the same backtesting.
   Single series Forecasters: "One model for one series: recursive and direct strategies, baselines and classification."
   Global Forecasters (multiple series): One model trained on many series at once, either independent or multivariate.
   Foundation Models: Pretrained models that forecast zero-shot, without training on your data.
@@ -28,6 +29,7 @@ sections:
 # is shown in the table of contents with this longer title instead. The keys
 # are the paths of `nav`.
 titles:
+  user_guides/comparing-forecasting-models.ipynb: "Machine learning vs statistical vs foundation models: which one to use"
   user_guides/global-forecasting-overview.md: "Global forecasting: local vs global models and which forecaster to use"
   user_guides/forecasting-statistical-models.ipynb: Forecasting with statistical models
   user_guides/autocorrelation-and-lag-selection.ipynb: Autocorrelation analysis and lag selection
