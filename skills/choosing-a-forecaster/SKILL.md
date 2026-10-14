@@ -160,7 +160,7 @@ Zero-shot / no training data / cold-start (single or multi-series)?
 
 ## Measured Comparison
 
-The user guide [Comparing forecasting models](https://skforecast.org/latest/user_guides/comparing-forecasting-models.html) evaluates the seasonal naive, Ridge, LightGBM, Chronos-2, AutoARIMA, AutoETS and an LSTM with the same backtesting on three datasets: one series with exogenous variables, a short monthly series and 304 series. Use it to show users how each family behaves (accuracy, interval coverage and computation time) and as a template to compare candidates on their own data with the same `TimeSeriesFold`.
+The user guide [Comparing forecasting models](https://skforecast.org/latest/user_guides/comparing-forecasting-models.html) evaluates the seasonal naive, Ridge, LightGBM, Chronos-2, AutoARIMA, AutoETS and an LSTM with the same backtesting on three datasets: one series with exogenous variables, a short monthly series and 50 daily series that share the same patterns. Use it to show users how each family behaves (accuracy, interval coverage and computation time) and as a template to compare candidates on their own data with the same `TimeSeriesFold`.
 
 ## Next Steps
 
