@@ -36,6 +36,12 @@ El argumento clave es la medida del §3.3: un `MLPRegressor` de scikit-learn den
 
 - Revisión de `skforecast/deep_learning/_forecaster_rnn.py`, `skforecast/deep_learning/utils.py`, el uso de `ForecasterRnn` en `model_selection` y `deepcopy_forecaster`, y las guías `forecasting-with-deep-learning-rnn-lstm.ipynb` y `comparing-forecasting-models.ipynb`.
 - Experimentos y reproducciones en `dev/deep_learning_review/` (§6). No hay cambios en el paquete, ni tests nuevos, ni notas de versión.
+- Origen de los bugs: T1 y T3 salieron de la revisión del código; T4 lo detectó el autor (la salida publicada de la guía dice `device: mps` aunque Keras entrenó en CPU) y se confirmó en el código de skforecast y de Keras; T2 apareció al preparar la reproducción de `lags_grid`.
+
+**Estado de la rama:**
+- Subida a `origin/review/deep-learning-module`, primer commit `a33c955`. **Sin PR abierto.**
+- El autor del commit es la identidad que trae configurada el entorno de la nube (`Claude <noreply@anthropic.com>`); no se cambió porque las reglas del repo piden no sobrescribirla. Si se quiere a nombre del autor, hay que rehacer el commit en una rama nueva (el force push está bloqueado).
+- Los scripts de `dev/deep_learning_review/` dan avisos de ruff que se dejaron a propósito: imports después de fijar `KERAS_BACKEND` (E402, necesario) y varias sentencias por línea. CI no pasa ruff sobre `dev/`, y los ficheros que ya había en `dev/` también los dan. Solo se aplicaron los arreglos automáticos seguros (`ruff check --fix`).
 
 ---
 
@@ -103,6 +109,13 @@ Tarda de 5 a 25 s por backtest. Con 88 exógenas varía más entre semillas. No 
 ---
 
 ## 4. Tareas pendientes
+
+**Para el autor, antes de empezar:**
+- Decidir T2 (qué se puede buscar), T5, T6, T7 y la pregunta de T8 sobre la guía de comparación.
+- Decidir si la rama se queda solo como registro o si las tareas salen de ella. Si salen de ella, borrar este documento y `dev/deep_learning_review/` en el último commit de cada PR, antes de fusionar.
+- Para la autoría de los commits, ver el estado de la rama en el §2.
+
+**Para la siguiente sesión:**
 
 Orden recomendado: T1, T2, T3, T4 (bugs; cada uno, un commit con su test) y después T5 a T8. Nota de versión con el skill `release-note`, sección 0.26.0, apartado Fixed (o Changed) de `ForecasterRnn`. Si cambia algo público, `ai-context-sync`.
 
