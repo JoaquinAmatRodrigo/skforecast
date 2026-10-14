@@ -218,6 +218,33 @@ def test_fetch_dataset_duplicate_index_skips_asfreq():
     assert df.index.freq is None
 
 
+def test_fetch_dataset_m5_long_format_unsorted():
+    """
+    `fetch_dataset` sets the `datetime` column of the long-format `m5` dataset
+    as a sorted DatetimeIndex, without warnings and without frequency, as the
+    index has duplicate dates.
+    """
+    mock_df = pd.DataFrame({
+        'id': ['A', 'A', 'B', 'B'],
+        'datetime': pd.to_datetime(
+            ['2011-01-29', '2011-01-30', '2011-01-29', '2011-01-30']
+        ),
+        'sales': [1, 2, 3, 4],
+    })
+
+    with patch('pandas.read_parquet', return_value=mock_df):
+        with warnings.catch_warnings():
+            warnings.simplefilter('error', UserWarning)
+            df = fetch_dataset('m5', version='latest', raw=False, verbose=False)
+
+    assert isinstance(df.index, pd.DatetimeIndex)
+    assert df.index.name == 'datetime'
+    assert df.index.is_monotonic_increasing
+    assert df.index.freq is None
+    assert list(df.columns) == ['id', 'sales']
+    assert sorted(df['sales']) == [1, 2, 3, 4]
+
+
 def test_fetch_dataset_preprocessing_failure_warns():
     """
     `fetch_dataset` emits a `UserWarning` with an informative message when
