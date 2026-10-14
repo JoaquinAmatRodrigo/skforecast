@@ -22,7 +22,7 @@ The main changes in this release are:
 
 **Changed**
 
-+ The first fit of <code>[Ets]</code> in a new environment, when numba compiles its functions, takes about half the time (5.8 s instead of 11.7 s on a 4-core CPU). Estimates and selected models are unchanged. ([#1400](https://github.com/skforecast/skforecast/pull/1400))
++ The first fit of <code>[Ets]</code> in a new environment, when numba compiles its functions, takes about 40% less time (7 s instead of 12 s on a 4-core CPU). Estimates and selected models are unchanged. ([#1400](https://github.com/skforecast/skforecast/pull/1400))
 
 
 **Fixed**
