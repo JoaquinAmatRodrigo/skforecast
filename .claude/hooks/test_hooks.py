@@ -182,3 +182,21 @@ def test_session_start_remote_skips_deep_learning_packages_by_default():
     assert "keras" not in names
     assert "pytest" in names
     assert "statsmodels" in names
+
+
+def test_session_start_remote_versions_summary():
+    sys.path.insert(0, str(HOOKS_DIR))
+    try:
+        import session_start_remote
+    finally:
+        sys.path.remove(str(HOOKS_DIR))
+
+    freeze = "\n".join([
+        "-e file:///home/user/skforecast",
+        "numba==0.68.0",
+        "numpy==2.5.4",
+        "pytest==9.1.0",
+        "scikit_learn==1.9.1",
+    ])
+    summary = session_start_remote.versions_summary(freeze, "3.12.11")
+    assert summary == "Python 3.12.11, numpy 2.5.4, scikit-learn 1.9.1, numba 0.68.0"

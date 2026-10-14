@@ -10,7 +10,7 @@ Run every step in order and report each result. Stop at the first failure, fix i
 ## 0. How to run Python
 
 - Local session: the active conda environment (see "Python environment" in the contributor rules).
-- Cloud session (`CLAUDE_CODE_REMOTE=true`): `python` and `pytest` directly; the SessionStart hook already installed the package with the `test` extras.
+- Cloud session (`CLAUDE_CODE_REMOTE=true`): `python` and `pytest` directly; the SessionStart hook already installed the package with the `test` extras, at the latest versions allowed by `pyproject.toml`. Minimum-version checks go in a separate environment (see "Python environment" in the contributor rules).
 
 ## 1. Scope
 
