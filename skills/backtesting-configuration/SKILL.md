@@ -91,6 +91,7 @@ Scan before writing code. Each row lists a rule, the symptom when it is broken, 
 | Retrain every time new data arrives | `refit=True` |
 | Retrain weekly (with daily forecasts, steps=1) | `refit=7` |
 | Retrain monthly (with daily forecasts, steps=7) | `refit=4` (every 4 folds × 7 steps ≈ monthly) |
+| Retrain at each month end and forecast the whole next month (daily data) | `steps=31`, `fold_stride=1`, `skip_folds` = folds not starting on day 1, `refit=True` (see example below) |
 | Never retrain / train once, evaluate across time | `refit=False` (`fixed_train_size` has no effect without refit) |
 
 ### Data freshness vs volume
@@ -154,6 +155,38 @@ refit = True
 refit = True
 skip_folds = 2  # Keep every 2nd fold
 ```
+
+### "I retrain at the end of every month and forecast the whole next month" (daily data)
+
+Folds count observations, not calendar months. Create one candidate fold per day
+and skip those that do not start on day 1 of a month:
+
+```python
+first_origin = '2025-09-30'  # must be a month end: fold 0 cannot be skipped
+n_train = y.index.get_loc(first_origin) + 1
+skip_folds = [
+    i for i, date in enumerate(y.index[n_train:]) if not date.is_month_start
+]  # with gap=0, fold i starts at position n_train + i
+
+cv = TimeSeriesFold(
+    steps=31,                  # longest month
+    initial_train_size=first_origin,
+    fold_stride=1,
+    skip_folds=skip_folds,
+    refit=True,
+    fixed_train_size=False,
+    allow_incomplete_fold=True,
+)
+```
+
+- Needs a regular index without missing dates.
+- The metric is correct: overlapping folds are scored with the last prediction of
+  each date, the one of its own month.
+- `predictions` repeats the dates where months shorter than 31 days spill into the
+  next month. Filter with `predictions[~predictions.index.duplicated(keep='last')]`
+  before grouping by month or plotting.
+- The `fold` column keeps the numbering of the daily folds (0, 31, 61, ...).
+- Use `verbose=False`: `verbose=True` prints every skipped fold.
 
 ### "I want maximum evaluation coverage with a 12-step horizon"
 ```
