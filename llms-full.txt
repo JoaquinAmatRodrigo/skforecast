@@ -81,7 +81,7 @@ skforecast/
 | ForecasterRecursiveClassifier | Classification-based forecasting |
 | ForecasterEquivalentDate | Baseline forecaster using equivalent past dates |
 
-To choose between model families, compare them on the same folds: each family has its own backtesting function (`backtesting_forecaster`, `backtesting_forecaster_multiseries`, `backtesting_stats`, `backtesting_foundation`), and passing the same `TimeSeriesFold` to all of them makes the results comparable. The user guide [Comparing forecasting models](https://skforecast.org/latest/user_guides/comparing-forecasting-models.html) does this for the seasonal naive, Ridge, LightGBM, AutoARIMA, Chronos-2 and an LSTM on three datasets, reporting MASE, interval coverage and computation time.
+To choose between model families, compare them on the same folds: each family has its own backtesting function (`backtesting_forecaster`, `backtesting_forecaster_multiseries`, `backtesting_stats`, `backtesting_foundation`), and passing the same `TimeSeriesFold` to all of them makes the results comparable. The user guide [Comparing forecasting models](https://skforecast.org/latest/user_guides/comparing-forecasting-models.html) does this for the seasonal naive, Ridge, LightGBM, Chronos-2, AutoARIMA, AutoETS and an LSTM on three datasets, reporting MASE, interval coverage and computation time.
 
 ## Basic Usage Example
 
@@ -870,7 +870,7 @@ Zero-shot / no training data / cold-start (single or multi-series)?
 
 ## Measured Comparison
 
-The user guide [Comparing forecasting models](https://skforecast.org/latest/user_guides/comparing-forecasting-models.html) evaluates the seasonal naive, Ridge, LightGBM, AutoARIMA, Chronos-2 and an LSTM with the same backtesting on three datasets: one series with exogenous variables, a short monthly series and 304 series. Use it to show users how each family behaves (accuracy, interval coverage and computation time) and as a template to compare candidates on their own data with the same `TimeSeriesFold`.
+The user guide [Comparing forecasting models](https://skforecast.org/latest/user_guides/comparing-forecasting-models.html) evaluates the seasonal naive, Ridge, LightGBM, Chronos-2, AutoARIMA, AutoETS and an LSTM with the same backtesting on three datasets: one series with exogenous variables, a short monthly series and 304 series. Use it to show users how each family behaves (accuracy, interval coverage and computation time) and as a template to compare candidates on their own data with the same `TimeSeriesFold`.
 
 ## Next Steps
 

@@ -79,7 +79,7 @@ user_guides/comparing-forecasting-models.ipynb:
   title: ML vs statistical vs foundation models
   description: >-
     Machine learning vs statistical vs foundation models for time series:
-    LightGBM, Ridge, ARIMA, Chronos-2 and LSTM compared with the same backtesting.
+    LightGBM, Ridge, ARIMA, ETS, Chronos-2 and LSTM compared with the same backtesting.
 
 user_guides/autoregressive-forecaster.ipynb:
   title: Recursive multi-step forecasting in Python
