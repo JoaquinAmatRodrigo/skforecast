@@ -82,7 +82,11 @@ Markdown Content Styles
   font-size: 1.1em;
 }
 
-.md-typeset table:not([class]) td>:last-child, .md-typeset table:not([class]) th>:last-child {
+/* Larger names, types and descriptions in the parameter tables of the API
+   reference (mkdocstrings), whose cells hold a single element. Not applied to
+   other tables: a cell with several elements, such as two links, would show
+   each one at a different size. */
+.md-typeset tr.doc-section-item > td > * {
   font-size: 1.1em;
 }
 
