@@ -57,4 +57,15 @@ pass unless you work on that code. When they are needed (e.g. `ForecasterRnn`
 or foundation models), set `SKFORECAST_CLOUD_DL=1` in the cloud environment
 variables, or install them in the session with
 `uv pip install torch "keras>=3.3,<4.0" --torch-backend cpu` (`uv` is in
-`~/.local/bin` if it is not on `PATH`).
+`~/.local/bin` if it is not on `PATH`). The hook installs the latest versions
+allowed by `pyproject.toml` and prints them; do not use the system Python,
+whose preinstalled packages may be outdated. To test with the minimum versions,
+as `unit-tests-min-deps.yml` does, create a separate environment (e.g.
+`uv venv ~/.venvs/skforecast-min --python 3.10` and
+`uv pip install --python ~/.venvs/skforecast-min/bin/python --resolution lowest-direct -e ".[test]" --torch-backend cpu`);
+never downgrade the main one.
+
+Benchmarks of a change (in a pull request) run with the latest versions of the
+dependencies, and report Python and the versions of the packages involved
+(numpy, pandas, scikit-learn, numba...) next to the numbers. The `benchmarks/`
+suite keeps its own pinned requirements.

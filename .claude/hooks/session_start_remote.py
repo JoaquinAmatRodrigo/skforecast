@@ -15,10 +15,16 @@ the developer's conda environment. In the cloud (Ubuntu, no conda) it:
    models. A session can also install them later by hand.
 3. Exports VIRTUAL_ENV and PATH through $CLAUDE_ENV_FILE so later Bash commands
    use that environment.
+4. Prints the versions of Python and the main dependencies, so that the session
+   knows which versions its tests and benchmarks run with.
 
-The install is skipped when pyproject.toml and SKFORECAST_CLOUD_DL have not
-changed since the last run (resumed sessions). Failures are reported but never
-block the session. Standard library only.
+The install resolves the latest versions allowed by pyproject.toml (`--upgrade`,
+also when the environment already exists). It is skipped when pyproject.toml,
+SKFORECAST_CLOUD_DL and the installed packages have not changed since the last
+run (resumed sessions). If the packages changed, e.g. because the minimum
+versions were installed in this environment instead of a separate one, it runs
+again to restore the latest versions. Failures are reported but never block the
+session. Standard library only.
 """
 
 import hashlib
@@ -34,6 +40,9 @@ MARKER = os.path.join(VENV_DIR, ".skforecast-install-hash")
 PYTHON_VERSION = "3.12"
 DL_PACKAGES = ("torch", "keras")
 DL_ENV_VAR = "SKFORECAST_CLOUD_DL"
+REPORTED_PACKAGES = (
+    "numpy", "pandas", "scikit-learn", "scipy", "numba", "statsmodels", "optuna"
+)
 
 
 def deep_learning_enabled():
@@ -64,6 +73,42 @@ def run(cmd, cwd, env=None):
         raise RuntimeError(
             f"`{' '.join(cmd)}` failed:\n{(result.stderr or result.stdout)[-2000:]}"
         )
+    return result.stdout
+
+
+def find_uv(project_dir):
+    uv = shutil.which("uv")
+    local_uv = os.path.join(os.path.expanduser("~"), ".local", "bin", "uv")
+    if uv is None and os.path.exists(local_uv):
+        uv = local_uv
+    if uv is None:
+        run([sys.executable, "-m", "pip", "install", "--user", "uv"], project_dir)
+        uv = shutil.which("uv") or local_uv
+    return uv
+
+
+def installed_packages(uv, venv_python, project_dir):
+    """
+    Return the output of `uv pip freeze` for the environment, sorted.
+    """
+    freeze = run([uv, "pip", "freeze", "--python", venv_python], project_dir)
+    return "\n".join(sorted(freeze.strip().splitlines()))
+
+
+def versions_summary(freeze, python_version):
+    """
+    Return the versions of Python and of the main dependencies in one line.
+    """
+    versions = {}
+    for line in freeze.splitlines():
+        name, sep, version = line.partition("==")
+        if sep:
+            versions[name.strip().lower().replace("_", "-")] = version.strip()
+    summary = [f"Python {python_version}"]
+    summary += [
+        f"{name} {versions[name]}" for name in REPORTED_PACKAGES if name in versions
+    ]
+    return ", ".join(summary)
 
 
 def write_env_file():
@@ -96,21 +141,33 @@ def main():
             "in the cloud environment variables, or install them by hand, if you "
             "need them (e.g. for foundation models)"
         )
-
-    venv_python = os.path.join(VENV_DIR, "bin", "python")
-    if os.path.exists(MARKER) and os.path.exists(venv_python):
-        with open(MARKER, encoding="utf-8") as f:
-            if f.read().strip() == pyproject_hash:
-                write_env_file()
-                print(f"skforecast cloud environment ready (cached): {VENV_DIR} ({mode})")
-                return 0
+    note = (
+        "These are the latest versions allowed by pyproject.toml: run benchmarks "
+        "here and report these versions with the numbers. Test the minimum "
+        "versions in a separate environment, never in this one."
+    )
 
     start = time.time()
+    venv_python = os.path.join(VENV_DIR, "bin", "python")
     try:
-        uv = shutil.which("uv")
-        if uv is None:
-            run([sys.executable, "-m", "pip", "install", "--user", "uv"], project_dir)
-            uv = shutil.which("uv") or os.path.join(os.path.expanduser("~"), ".local", "bin", "uv")
+        uv = find_uv(project_dir)
+
+        if os.path.exists(MARKER) and os.path.exists(venv_python):
+            with open(MARKER, encoding="utf-8") as f:
+                marker = f.read().strip().split("\n")
+            freeze = installed_packages(uv, venv_python, project_dir)
+            freeze_hash = hashlib.sha256(freeze.encode()).hexdigest()
+            if marker == [pyproject_hash, freeze_hash]:
+                python_version = run(
+                    [venv_python, "-c", "import platform; print(platform.python_version())"],
+                    project_dir
+                ).strip()
+                write_env_file()
+                print(
+                    f"skforecast cloud environment ready (cached): {VENV_DIR} ({mode}).\n"
+                    f"{versions_summary(freeze, python_version)}.\n{note}"
+                )
+                return 0
 
         if not os.path.exists(venv_python):
             try:
@@ -127,23 +184,33 @@ def main():
             requirements = ["-e", "."] + requirements_without_deep_learning(
                 pyproject_path
             )
+        # --upgrade: an existing environment also gets the latest versions, so a
+        # downgrade (e.g. to the minimum versions) does not persist.
         run(
-            [uv, "pip", "install", "--python", venv_python] + requirements,
+            [uv, "pip", "install", "--upgrade", "--python", venv_python] + requirements,
             project_dir, env=env
         )
+        freeze = installed_packages(uv, venv_python, project_dir)
+        freeze_hash = hashlib.sha256(freeze.encode()).hexdigest()
         with open(MARKER, "w", encoding="utf-8") as f:
-            f.write(pyproject_hash)
+            f.write(f"{pyproject_hash}\n{freeze_hash}")
+        python_version = run(
+            [venv_python, "-c", "import platform; print(platform.python_version())"],
+            project_dir
+        ).strip()
     except Exception as exc:  # Never block the session on an install failure.
         print(
             "WARNING: the skforecast cloud environment could not be prepared. "
-            f"Install it manually before running tests.\n{exc}"
+            "Install it manually before running tests; do not use the system "
+            f"Python, its preinstalled packages may be outdated.\n{exc}"
         )
         return 0
 
     write_env_file()
     print(
         f"skforecast cloud environment installed in {time.time() - start:.0f}s: "
-        f"{VENV_DIR} (editable install, {mode})"
+        f"{VENV_DIR} (editable install, {mode}).\n"
+        f"{versions_summary(freeze, python_version)}.\n{note}"
     )
     return 0
 
