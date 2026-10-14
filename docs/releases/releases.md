@@ -133,6 +133,8 @@ The main changes in this release are:
 
 + New user guide [Migrating from Prophet to skforecast](../user_guides/migrate-from-prophet.ipynb): how seasonalities, holidays, regressors, prediction intervals and cross-validation translate to skforecast, with side-by-side backtests of both libraries on the same folds. ([#1398](https://github.com/skforecast/skforecast/pull/1398))
 
++ New user guide [Comparing forecasting models](../user_guides/comparing-forecasting-models.ipynb): machine learning (Ridge, LightGBM), foundation (Chronos-2), statistical (AutoARIMA, AutoETS) and deep learning (LSTM) models evaluated with the same backtesting on three datasets, with their accuracy, interval coverage and computation time.
+
 
 **Fixed**
 

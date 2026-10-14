@@ -82,6 +82,7 @@ SKFORECAST_WARNING_CATEGORIES = {
 
 # Notebooks to exclude (by name or relative path within docs/)
 EXCLUDE_NOTEBOOKS = [
+    "user_guides/comparing-forecasting-models.ipynb",  # Specific environment (keras, chronos)
     "user_guides/forecasting-with-deep-learning-rnn-lstm.ipynb",
     "user_guides/foundation-forecasting-models.ipynb",  # Specific environment
     "user_guides/foundation-forecasting-with-heterogeneous-series.ipynb",  # Specific environment
