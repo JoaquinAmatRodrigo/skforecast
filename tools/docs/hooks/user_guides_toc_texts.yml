@@ -23,6 +23,7 @@ sections:
   Model Deployment: Save, load, run and monitor a forecaster in production.
   Plotting: Built-in plots for residuals, prediction intervals and autocorrelation.
   Additional Resources: "Migration from earlier versions and specific techniques: weights, stacking and gradient boosting."
+  Migrating from other libraries: How the concepts of other forecasting libraries translate to skforecast, with side-by-side backtests.
   FAQ and forecasting tips: Answers to frequent questions and practical forecasting tips.
 
 # Optional. Titles of `nav` are kept short for the sidebar; a guide listed here
@@ -33,3 +34,4 @@ titles:
   user_guides/global-forecasting-overview.md: "Global forecasting: local vs global models and which forecaster to use"
   user_guides/forecasting-statistical-models.ipynb: Forecasting with statistical models
   user_guides/autocorrelation-and-lag-selection.ipynb: Autocorrelation analysis and lag selection
+  user_guides/migrate-from-prophet.ipynb: Migrating from Prophet to skforecast

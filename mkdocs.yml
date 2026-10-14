@@ -101,6 +101,8 @@ nav:
       - Weighted time series forecasting: user_guides/weighted-time-series-forecasting.ipynb
       - Stacking multiple models: user_guides/stacking-ensemble-models-forecasting.ipynb
       - Forecasting with XGBoost and LightGBM: user_guides/forecasting-xgboost-lightgbm.ipynb
+    - Migrating from other libraries:
+      - Migrating from Prophet: user_guides/migrate-from-prophet.ipynb
     - FAQ and forecasting tips:
       - Avoid negative predictions when forecasting: faq/non-negative-predictions.ipynb
       - Forecasting time series with missing values: faq/forecasting-time-series-with-missing-values.ipynb
