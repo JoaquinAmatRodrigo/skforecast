@@ -200,3 +200,116 @@ def test_session_start_remote_versions_summary():
     ])
     summary = session_start_remote.versions_summary(freeze, "3.12.11")
     assert summary == "Python 3.12.11, numpy 2.5.4, scikit-learn 1.9.1, numba 0.68.0"
+
+
+def test_session_start_remote_installs_ruff():
+    sys.path.insert(0, str(HOOKS_DIR))
+    try:
+        import session_start_remote
+    finally:
+        sys.path.remove(str(HOOKS_DIR))
+
+    assert "ruff" in session_start_remote.EXTRA_TOOLS
+
+
+# session_start_local.py
+# ==============================================================================
+
+
+def fake_env(tmp_path, name="skforecast_py99"):
+    """A conda-like prefix whose bin/python is the interpreter running the tests."""
+    prefix = tmp_path / "envs" / name
+    (prefix / "bin").mkdir(parents=True)
+    (prefix / "bin" / "python").symlink_to(sys.executable)
+    return prefix
+
+
+@pytest.mark.parametrize(
+    "env", [{"SKFORECAST_PYTHON_ENV": ""}, {"CLAUDE_CODE_REMOTE": "true"}]
+)
+def test_session_start_local_does_nothing_without_env_or_in_cloud(tmp_path, env):
+    env_file = tmp_path / "env"
+    env_file.write_text("")
+    env = {
+        "SKFORECAST_PYTHON_ENV": str(fake_env(tmp_path)), "CLAUDE_CODE_REMOTE": "",
+        **env,
+    }
+    code, stdout, _ = run_hook(
+        "session_start_local.py", {}, CLAUDE_ENV_FILE=str(env_file), **env
+    )
+    assert code == 0
+    assert stdout == ""
+    assert env_file.read_text() == ""
+
+
+def test_session_start_local_exports_environment(tmp_path):
+    prefix = fake_env(tmp_path)
+    env_file = tmp_path / "env"
+    env_file.write_text("")
+    code, stdout, _ = run_hook(
+        "session_start_local.py", {},
+        CLAUDE_CODE_REMOTE="",
+        CLAUDE_ENV_FILE=str(env_file),
+        SKFORECAST_PYTHON_ENV=str(prefix),
+        SKFORECAST_DYLD_LIBRARY_PATH="/opt/libomp/lib",
+    )
+    assert code == 0
+    exports = env_file.read_text()
+    assert f'export PATH="{prefix / "bin"}:$PATH"' in exports
+    assert 'export CONDA_DEFAULT_ENV="skforecast_py99"' in exports
+    assert 'export DYLD_LIBRARY_PATH="/opt/libomp/lib"' in exports
+    assert str(prefix) in stdout
+    assert "Python " in stdout
+
+
+def test_session_start_local_warns_when_env_has_no_python(tmp_path):
+    env_file = tmp_path / "env"
+    env_file.write_text("")
+    code, stdout, _ = run_hook(
+        "session_start_local.py", {},
+        CLAUDE_CODE_REMOTE="",
+        CLAUDE_ENV_FILE=str(env_file),
+        SKFORECAST_PYTHON_ENV=str(tmp_path / "missing"),
+    )
+    assert code == 0
+    assert "WARNING" in stdout
+    assert env_file.read_text() == ""
+
+
+# ruff_check.py
+# ==============================================================================
+
+
+def import_ruff_check():
+    sys.path.insert(0, str(HOOKS_DIR))
+    try:
+        import ruff_check
+    finally:
+        sys.path.remove(str(HOOKS_DIR))
+    return ruff_check
+
+
+def test_ruff_check_finds_ruff_in_project_environment(tmp_path, monkeypatch):
+    ruff = tmp_path / "env" / "bin" / "ruff"
+    ruff.parent.mkdir(parents=True)
+    ruff.write_text("#!/bin/sh\n")
+    ruff.chmod(0o755)
+    monkeypatch.setenv("SKFORECAST_PYTHON_ENV", str(tmp_path / "env"))
+    assert import_ruff_check().find_ruff() == [str(ruff)]
+
+
+def test_ruff_check_reports_new_findings_but_skips_dev(tmp_path):
+    if import_ruff_check().find_ruff() is None:
+        pytest.skip("ruff is not installed")
+    for folder in ("pkg", "dev"):
+        (tmp_path / folder).mkdir()
+        (tmp_path / folder / "module.py").write_text("import os\n")
+
+    def check(folder):
+        payload = {"tool_input": {"file_path": str(tmp_path / folder / "module.py")}}
+        return run_hook("ruff_check.py", payload, CLAUDE_PROJECT_DIR=str(tmp_path))
+
+    _, stdout, _ = check("pkg")
+    assert "F401" in stdout
+    _, stdout, _ = check("dev")
+    assert stdout == ""
