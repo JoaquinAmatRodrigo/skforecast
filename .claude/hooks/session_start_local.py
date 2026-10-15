@@ -11,8 +11,10 @@ session_start_remote.py) or when SKFORECAST_PYTHON_ENV is not set. Set it in the
 environment, e.g. `/opt/homebrew/Caskroom/miniconda/base/envs/skforecast_py14`.
 When the environment changes (new Python version), only that value changes.
 
-Through $CLAUDE_ENV_FILE it exports PATH, CONDA_PREFIX and CONDA_DEFAULT_ENV,
-and DYLD_LIBRARY_PATH when SKFORECAST_DYLD_LIBRARY_PATH is set. The value travels
+Through $CLAUDE_ENV_FILE it exports PATH, CONDA_PREFIX, CONDA_DEFAULT_ENV and
+PYTHONPATH=. (so scripts like `python tools/...` import the skforecast of the
+checkout or worktree they run from, not an installed copy), and
+DYLD_LIBRARY_PATH when SKFORECAST_DYLD_LIBRARY_PATH is set. The value travels
 under another name because macOS SIP removes DYLD_* variables when a protected
 shell (/bin/sh, /bin/zsh) starts; it only survives when exported inside the
 shell, which is what the env file does. It prints the versions of Python and the
@@ -47,6 +49,8 @@ def env_lines(prefix, dyld_library_path):
         f'export PATH="{os.path.join(prefix, "bin")}:$PATH"',
         f'export CONDA_PREFIX="{prefix}"',
         f'export CONDA_DEFAULT_ENV="{os.path.basename(os.path.normpath(prefix))}"',
+        # Relative on purpose: it resolves against the directory of each command.
+        'export PYTHONPATH=".${PYTHONPATH:+:$PYTHONPATH}"',
     ]
     if dyld_library_path:
         lines.append(f'export DYLD_LIBRARY_PATH="{dyld_library_path}"')

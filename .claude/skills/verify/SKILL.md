@@ -7,7 +7,7 @@ description: Definition of done for skforecast changes. Lints the changed files,
 
 Run every step in order and report each result. Stop at the first failure, fix it, and start again from that step. Never report the task as done with a failing step; if a failure is unrelated to the change, say so explicitly with the output.
 
-Reuse: if this session already ran `verify` with every step green and no file changed since (same `git status --short` and same diff), report that result again instead of rerunning it, for example right before a commit.
+Reuse: if step 1 prints `unchanged since the last green verify` and that verify ran in this session, report its result again instead of running steps 2 to 4, for example right before a commit or when opening the pull request after committing. The stamp compares the content of every non-ignored file, so a commit of the verified files keeps it valid and any edit invalidates it.
 
 ## 0. How to run Python
 
@@ -48,3 +48,5 @@ Then act on each note: `pyproject.toml` (propose the minimum versions run; the u
 ## 5. Report
 
 A short list: each step, the command, pass or fail, and the number of tests run. Mention anything skipped and why, including the packages not covered by the tests you ran.
+
+When every step is green, record it for reuse with `python .claude/skills/verify/affected.py --stamp`.

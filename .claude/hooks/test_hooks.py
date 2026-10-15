@@ -257,6 +257,7 @@ def test_session_start_local_exports_environment(tmp_path):
     exports = env_file.read_text()
     assert f'export PATH="{prefix / "bin"}:$PATH"' in exports
     assert 'export CONDA_DEFAULT_ENV="skforecast_py99"' in exports
+    assert 'export PYTHONPATH=".${PYTHONPATH:+:$PYTHONPATH}"' in exports
     assert 'export DYLD_LIBRARY_PATH="/opt/libomp/lib"' in exports
     assert str(prefix) in stdout
     assert "Python " in stdout

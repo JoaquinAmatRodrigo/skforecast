@@ -7,18 +7,26 @@ them and prints the ruff, pytest and check commands that cover them, plus notes
 that need a decision. Prints `nothing to verify` when only out-of-scope files
 (dev/, benchmarks/, images/...) changed. Standard library only.
 
+`--stamp` records the content of the working tree after a green verify; later
+runs print `unchanged since the last green verify` while every non-ignored file
+keeps that content, even after committing it.
+
 Usage:
     python .claude/skills/verify/affected.py                 # current branch
     python .claude/skills/verify/affected.py --files a.py b  # explicit files
     python .claude/skills/verify/affected.py --json
+    python .claude/skills/verify/affected.py --stamp         # after a green verify
 """
 
 import argparse
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
+import tempfile
+from datetime import datetime
 
 OUT_OF_SCOPE_PREFIXES = ("dev/", "benchmarks/", "images/")
 OUT_OF_SCOPE_FILES = {
@@ -47,6 +55,7 @@ EXCEPTIONS = {
     "skforecast/stats/seasonal/_seasonal_strength.py": "skforecast/stats/seasonal/tests/test_seasonal.py",
 }
 HARNESS_TESTS = ".claude/hooks .claude/skills"
+STAMP_FILE = "verify_stamp.json"  # Inside the git dir: per worktree, never committed.
 
 CHECKS = {
     "ai_context": "python tools/ai/generate_ai_context_files.py --check",
@@ -65,9 +74,9 @@ NOTES = {
 }
 
 
-def git(args, root):
+def git(args, root, env=None):
     result = subprocess.run(
-        ["git"] + args, cwd=root, capture_output=True, text=True
+        ["git"] + args, cwd=root, capture_output=True, text=True, env=env
     )
     return result.stdout if result.returncode == 0 else None
 
@@ -86,7 +95,9 @@ def changed_files(root):
     """Return (base description, sorted changed files) for the working tree."""
     branch = release_branch(root)
     base, base_desc = "HEAD", "HEAD"
-    for ref in ([branch, f"origin/{branch}"] if branch else []):
+    # origin first: on the release branch itself, the merge base with the local
+    # branch is HEAD and would hide the commits not pushed yet.
+    for ref in ([f"origin/{branch}", branch] if branch else []):
         merge_base = git(["merge-base", "HEAD", ref], root)
         if merge_base:
             base, base_desc = merge_base.strip(), f"merge base with {ref}"
@@ -94,6 +105,51 @@ def changed_files(root):
     files = set((git(["diff", "--name-only", base], root) or "").split())
     files |= set((git(["ls-files", "--others", "--exclude-standard"], root) or "").split())
     return base_desc, sorted(files)
+
+
+def git_path(name, root):
+    path = (git(["rev-parse", "--git-path", name], root) or "").strip()
+    return os.path.join(root, path) if path else None
+
+
+def worktree_tree(root):
+    """
+    Hash of the content of every non-ignored file in the working tree, tracked
+    or not: the tree that `git add -A` would stage, built on a copy of the index
+    so the real one is not touched. It does not depend on HEAD, so committing
+    the files does not change it.
+    """
+    index = git_path("index", root)
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp_index = os.path.join(tmp, "index")
+        if index and os.path.exists(index):
+            shutil.copyfile(index, tmp_index)  # Reuses the cached file stats.
+        env = {**os.environ, "GIT_INDEX_FILE": tmp_index}
+        if git(["add", "-A"], root, env) is None:
+            return None
+        tree = git(["write-tree"], root, env)
+    return tree.strip() if tree else None
+
+
+def write_stamp(root):
+    tree, path = worktree_tree(root), git_path(STAMP_FILE, root)
+    if not tree or not path:
+        return None
+    stamp = {"tree": tree, "time": datetime.now().isoformat(timespec="seconds")}
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(stamp, f)
+    return stamp
+
+
+def matching_stamp(root):
+    """The stamp of the last green verify if the working tree still matches it."""
+    path = git_path(STAMP_FILE, root)
+    try:
+        with open(path, encoding="utf-8") as f:
+            stamp = json.load(f)
+    except (OSError, TypeError, ValueError):
+        return None
+    return stamp if stamp.get("tree") == worktree_tree(root) else None
 
 
 def classify(path):
@@ -270,19 +326,41 @@ def main(argv=None):
     parser.add_argument("--files", nargs="+", help="changed files, relative to the root")
     parser.add_argument("--root", help="repository root (default: git top level)")
     parser.add_argument("--json", action="store_true", help="print JSON")
+    parser.add_argument(
+        "--stamp", action="store_true",
+        help="record the working tree after a green verify and exit",
+    )
     args = parser.parse_args(argv)
 
     root = args.root or (git(["rev-parse", "--show-toplevel"], os.getcwd()) or "").strip()
     if not root:
         print("Not inside a git repository.", file=sys.stderr)
         return 1
+    if args.stamp:
+        stamp = write_stamp(root)
+        if not stamp:
+            print("Could not record the working tree.", file=sys.stderr)
+            return 1
+        print(f"Stamped the green verify: tree {stamp['tree'][:12]}, {stamp['time']}")
+        return 0
     if args.files:
         base_desc, files = "files given", sorted(set(args.files))
+        stamp = None
     else:
         base_desc, files = changed_files(root)
+        stamp = matching_stamp(root)
 
     plan = build_plan(files, root)
-    print(json.dumps(plan, indent=2) if args.json else format_plan(plan, base_desc))
+    plan["unchanged_since"] = stamp["time"] if stamp else None
+    if args.json:
+        print(json.dumps(plan, indent=2))
+        return 0
+    if stamp:
+        print(
+            f"unchanged since the last green verify ({stamp['time']}): if it ran "
+            "in this session, report its result again"
+        )
+    print(format_plan(plan, base_desc))
     return 0
 
 

@@ -162,6 +162,73 @@ def test_changed_files_since_release_branch(tmp_path):
     assert files == ["a.py", "committed.py", "untracked.py"]
 
 
+def test_changed_files_on_release_branch_with_unpushed_commits(tmp_path):
+    origin, clone = tmp_path / "origin", tmp_path / "clone"
+    origin.mkdir()
+    (origin / "skforecast").mkdir()
+    (origin / "skforecast" / "__init__.py").write_text('__version__ = "1.2.0"\n')
+    git(["init", "-q", "-b", "1.2.x"], origin)
+    git(["add", "."], origin)
+    git(["commit", "-q", "-m", "base"], origin)
+    git(["clone", "-q", str(origin), str(clone)], tmp_path)
+    (clone / "unpushed.py").write_text("a = 1\n")
+    git(["add", "unpushed.py"], clone)
+    git(["commit", "-q", "-m", "not pushed"], clone)
+
+    base_desc, files = affected.changed_files(str(clone))
+    assert base_desc == "merge base with origin/1.2.x"
+    assert files == ["unpushed.py"]
+
+
+def make_repo(path):
+    (path / "a.py").write_text("a = 1\n")
+    git(["init", "-q", "-b", "main"], path)
+    git(["add", "."], path)
+    git(["commit", "-q", "-m", "base"], path)
+
+
+def test_stamp_survives_a_commit_of_the_verified_files(tmp_path):
+    make_repo(tmp_path)
+    (tmp_path / "a.py").write_text("a = 2\n")
+    (tmp_path / "new.py").write_text("b = 1\n")
+    assert affected.matching_stamp(str(tmp_path)) is None
+    assert affected.write_stamp(str(tmp_path)) is not None
+    assert affected.matching_stamp(str(tmp_path)) is not None
+
+    git(["add", "."], tmp_path)
+    git(["commit", "-q", "-m", "verified change"], tmp_path)
+    assert affected.matching_stamp(str(tmp_path)) is not None
+    assert "new.py" not in git_status(tmp_path)  # The real index was committed.
+
+
+def test_stamp_is_invalidated_by_any_change(tmp_path):
+    make_repo(tmp_path)
+    affected.write_stamp(str(tmp_path))
+    (tmp_path / "untracked.py").write_text("b = 1\n")
+    assert affected.matching_stamp(str(tmp_path)) is None
+    (tmp_path / "untracked.py").unlink()
+    assert affected.matching_stamp(str(tmp_path)) is not None
+    (tmp_path / "a.py").write_text("a = 3\n")
+    assert affected.matching_stamp(str(tmp_path)) is None
+
+
+def test_stamp_does_not_touch_the_index(tmp_path):
+    make_repo(tmp_path)
+    (tmp_path / "a.py").write_text("a = 2\n")
+    (tmp_path / "untracked.py").write_text("b = 1\n")
+    before = git_status(tmp_path)
+    affected.write_stamp(str(tmp_path))
+    affected.matching_stamp(str(tmp_path))
+    assert git_status(tmp_path) == before == " M a.py\n?? untracked.py\n"
+
+
+def git_status(path):
+    return subprocess.run(
+        ["git", "status", "--short"], cwd=path, capture_output=True, text=True,
+        check=True,
+    ).stdout
+
+
 def test_main_with_files(capsys):
     code = affected.main(["--files", "dev/x.py", "--root", str(PROJECT_DIR)])
     assert code == 0
