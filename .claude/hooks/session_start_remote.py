@@ -12,7 +12,8 @@ the developer's conda environment. In the cloud (Ubuntu, no conda) it:
    install faster. Set SKFORECAST_CLOUD_DL=1 in the cloud environment variables
    to install them too (CPU-only torch wheels from download.pytorch.org, as the
    unit-tests.yml workflow does), e.g. to work on ForecasterRnn or foundation
-   models. A session can also install them later by hand.
+   models. A session can also install them later by hand. It also installs
+   ruff, which the lint hook (ruff_check.py) and the verify skill use.
 3. Exports VIRTUAL_ENV and PATH through $CLAUDE_ENV_FILE so later Bash commands
    use that environment.
 4. Prints the versions of Python and the main dependencies, so that the session
@@ -40,6 +41,7 @@ MARKER = os.path.join(VENV_DIR, ".skforecast-install-hash")
 PYTHON_VERSION = "3.12"
 DL_PACKAGES = ("torch", "keras")
 DL_ENV_VAR = "SKFORECAST_CLOUD_DL"
+EXTRA_TOOLS = ["ruff"]
 REPORTED_PACKAGES = (
     "numpy", "pandas", "scikit-learn", "scipy", "numba", "statsmodels", "optuna"
 )
@@ -132,6 +134,7 @@ def main():
     with open(pyproject_path, "rb") as f:
         pyproject_hash = hashlib.sha256(f.read()).hexdigest()
     pyproject_hash += "-dl" if with_dl else "-nodl"
+    pyproject_hash += "-" + ",".join(EXTRA_TOOLS)
     if with_dl:
         mode = "`test` extras with CPU torch and keras"
     else:
@@ -184,6 +187,8 @@ def main():
             requirements = ["-e", "."] + requirements_without_deep_learning(
                 pyproject_path
             )
+        # ruff is not a test extra; the lint hook and the verify skill need it.
+        requirements += EXTRA_TOOLS
         # --upgrade: an existing environment also gets the latest versions, so a
         # downgrade (e.g. to the minimum versions) does not persist.
         run(

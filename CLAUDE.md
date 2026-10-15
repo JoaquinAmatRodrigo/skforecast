@@ -19,6 +19,7 @@ That header is also the first part of the generated `AGENTS.md`; edit the header
 - When a public API changes, update every AI context source in the same change: `tools/ai/llms-base.txt`, the affected `skills/*/SKILL.md` and `references/`, then regenerate (see the `ai-context-sync` skill).
 - Generated AI context files (`AGENTS.md`, `.github/copilot-instructions.md`, `llms-full.txt`, `docs/llms*.txt`) are never edited by hand. A hook blocks those edits and names the source to edit.
 - Definition of done: run the `verify` skill before reporting a code, test or docs change as finished.
+- Before a commit, run `verify` unless only out-of-scope paths changed (`dev/`, `benchmarks/`, `images/`); docs and test changes do need it (docs checks, changed tests). Reuse a green `verify` from this session when no file changed since.
 - Describe user-facing changes in [docs/releases/releases.md](docs/releases/releases.md), in the section of the version in development (`changelog.md` only links to it).
 
 ## Git workflow
