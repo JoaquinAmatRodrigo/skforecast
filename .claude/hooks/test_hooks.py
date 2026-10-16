@@ -127,6 +127,46 @@ def test_attribution_guard_ignores_github_mcp_read_tools():
     assert code == 0
 
 
+# post_pr_footer.py
+# ==============================================================================
+
+
+@pytest.mark.parametrize(
+    "tool_response, target",
+    [
+        (
+            [{"type": "text", "text": json.dumps(
+                {"id": "1", "url": "https://github.com/o/r/pull/90"}
+            )}],
+            "pull request #90",
+        ),
+        ({"url": "https://github.com/o/r/pull/7"}, "pull request #7"),
+        ("", "the pull request"),
+    ],
+    ids=["text-content", "plain-object", "no-url"],
+)
+def test_post_pr_footer_asks_to_remove_footer(tool_response, target):
+    payload = {
+        "tool_name": "mcp__github__create_pull_request",
+        "tool_input": {"title": "Fix lags", "body": "Summary"},
+        "tool_response": tool_response,
+    }
+    code, _, stderr = run_hook("post_pr_footer.py", payload)
+    assert code == 2
+    assert f"body of {target} after the call" in stderr
+    assert "do not retry" in stderr
+
+
+def test_post_pr_footer_matcher_in_settings():
+    settings = json.loads((PROJECT_DIR / ".claude" / "settings.json").read_text())
+    matchers = {
+        entry["matcher"]: entry["hooks"][0]["command"]
+        for entry in settings["hooks"]["PostToolUse"]
+    }
+    matcher = "mcp__.*github.*__create_pull_request"
+    assert "post_pr_footer.py" in matchers[matcher]
+
+
 # protect_generated.py
 # ==============================================================================
 

@@ -88,6 +88,15 @@
             "command": "\"$(command -v python3 || command -v python)\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/ruff_check.py\""
           }
         ]
+      },
+      {
+        "matcher": "mcp__.*github.*__create_pull_request",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$(command -v python3 || command -v python)\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/post_pr_footer.py\""
+          }
+        ]
       }
     ]
   }
