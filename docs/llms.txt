@@ -88,6 +88,7 @@ Skforecast supports recursive and direct multi-step forecasting strategies, glob
 - [Save and load forecaster](https://skforecast.org/latest/user_guides/save-load-forecaster.html): Serialization with joblib and pickle
 - [Forecaster in production](https://skforecast.org/latest/user_guides/forecaster-in-production.html): Deployment patterns and retraining strategies
 - [Skforecast Studio](https://skforecast.org/latest/skforecast-studio/skforecast-studio.html): Interactive application for time series forecasting
+- [Skforecast AI](https://skforecast.org/latest/skforecast-ai/skforecast-ai.html): AI forecasting assistant built on skforecast, with an MCP server that lets coding agents (Claude Code, VS Code, Codex) profile, backtest and forecast CSV files as tools
 
 ## API Reference
 
