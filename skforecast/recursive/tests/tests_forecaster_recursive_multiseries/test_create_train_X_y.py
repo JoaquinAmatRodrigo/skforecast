@@ -368,7 +368,84 @@ def test_create_train_X_y_output_when_series_and_exog_is_None():
         pd.testing.assert_series_equal(results[12][k], expected[12][k])
 
 
-@pytest.mark.parametrize("encoding, dtype", 
+def test_create_train_X_y_output_when_series_names_are_integers_and_encoding_onehot():
+    """
+    Test the output of _create_train_X_y when the series names are integers
+    and `encoding='onehot'`. The one-hot columns are named after the series
+    as strings, while the series names are kept as integers in the rest of
+    the outputs.
+    """
+    index = pd.date_range(start='2000-01-01', periods=7, freq='D')
+    series = {
+        1: pd.Series(np.arange(7, dtype=float), index=index, name=1),
+        2: pd.Series(np.arange(7, dtype=float), index=index, name=2)
+    }
+
+    forecaster = ForecasterRecursiveMultiSeries(
+        LinearRegression(),
+        transformer_series=StandardScaler(),
+        lags=3,
+        encoding="onehot"
+    )
+
+    results = forecaster._create_train_X_y(series=series)
+    expected = (
+        pd.DataFrame(
+            data = np.array([[-0.5, -1. , -1.5, 1, 0],
+                             [ 0. , -0.5, -1. , 1, 0],
+                             [ 0.5,  0. , -0.5, 1, 0],
+                             [ 1. ,  0.5,  0. , 1, 0],
+                             [-0.5, -1. , -1.5, 0, 1],
+                             [ 0. , -0.5, -1. , 0, 1],
+                             [ 0.5,  0. , -0.5, 0, 1],
+                             [ 1. ,  0.5,  0. , 0, 1]]),
+            index   = pd.DatetimeIndex([
+                "2000-01-04", "2000-01-05", "2000-01-06", "2000-01-07",
+                "2000-01-04", "2000-01-05", "2000-01-06", "2000-01-07"
+            ]),
+            columns = ['lag_1', 'lag_2', 'lag_3', '1', '2']
+        ),
+        pd.Series(
+            data  = np.array([0., 0.5, 1., 1.5, 0., 0.5, 1., 1.5]),
+            index   = pd.DatetimeIndex([
+                "2000-01-04", "2000-01-05", "2000-01-06", "2000-01-07",
+                "2000-01-04", "2000-01-05", "2000-01-06", "2000-01-07"
+            ]),
+            name  = 'y',
+            dtype = float
+        ),
+        {1: index, 2: index},
+        [1, 2],
+        [1, 2],
+        {1: pd.Series(
+                  data  = np.array([4., 5., 6.]),
+                  index = pd.date_range(start='2000-01-05', periods=3, freq='D'),
+                  name  = 1,
+                  dtype = float
+              ),
+         2: pd.Series(
+                  data  = np.array([4., 5., 6.]),
+                  index = pd.date_range(start='2000-01-05', periods=3, freq='D'),
+                  name  = 2,
+                  dtype = float
+              )
+        }
+    )
+
+    pd.testing.assert_frame_equal(results[0], expected[0])
+    pd.testing.assert_series_equal(results[1], expected[1])
+    assert results[2].keys() == expected[2].keys()
+    for k in results[2].keys():
+        pd.testing.assert_index_equal(results[2][k], expected[2][k])
+    assert results[3] == expected[3]
+    assert results[4] == expected[4]
+    assert forecaster.encoding_mapping_ == {1: 0, 2: 1}
+    assert list(results[12].keys()) == [1, 2]
+    for k in results[12].keys():
+        pd.testing.assert_series_equal(results[12][k], expected[5][k])
+
+
+@pytest.mark.parametrize("encoding, dtype",
                          [('ordinal'         , float), 
                           ('ordinal_category', 'category'),
                           (None              , float)], 

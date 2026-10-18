@@ -1584,3 +1584,47 @@ def test_predict_MissingValuesWarning_when_exog_has_categories_not_seen_in_fit()
         "`exog` has missing values after its transformation, for example "
         "categories not seen during training."
     )
+
+
+@pytest.mark.parametrize(
+    "encoding, expected_pred",
+    [('ordinal', [0.4868126323074294, 0.5024650068615651, 0.503815764769467,
+                  0.5174295272142599, 0.50181482588542, 0.5099601037013929]),
+     ('ordinal_category', [0.4868126323074294, 0.5024650068615651, 0.503815764769467,
+                           0.5174295272142599, 0.50181482588542, 0.5099601037013929]),
+     ('onehot', [0.4868126323074294, 0.502465006861565, 0.503815764769467,
+                 0.5174295272142598, 0.50181482588542, 0.5099601037013929]),
+     (None, [0.4830736746964662, 0.5061193035744198, 0.5001465472604174,
+             0.5212869740377445, 0.4982301921216813, 0.5135969153292497])],
+    ids=lambda x: f'{x}'
+)
+def test_predict_output_when_series_names_are_integers(encoding, expected_pred):
+    """
+    Test predict output when the series names are integers. The predictions
+    are the same as with the names as strings ('l1', 'l2') and the column
+    `level` keeps the integers. Before, `fit` raised a `KeyError`.
+    """
+    series = {
+        1: series_dict_dt['l1'].rename(1),
+        2: series_dict_dt['l2'].rename(2)
+    }
+    forecaster = ForecasterRecursiveMultiSeries(
+        LinearRegression(), lags=3, encoding=encoding
+    )
+    forecaster.fit(series=series)
+    predictions = forecaster.predict(steps=3)
+    predictions_level_2 = forecaster.predict(steps=3, levels=[2])
+
+    index = pd.DatetimeIndex(
+        ['2000-02-20', '2000-02-20', '2000-02-21', '2000-02-21',
+         '2000-02-22', '2000-02-22']
+    )
+    expected = pd.DataFrame(
+        {'level': [1, 2, 1, 2, 1, 2], 'pred': np.array(expected_pred)},
+        index=index
+    )
+
+    pd.testing.assert_frame_equal(predictions, expected)
+    pd.testing.assert_frame_equal(
+        predictions_level_2, expected.loc[expected['level'] == 2]
+    )
