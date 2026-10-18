@@ -5853,3 +5853,63 @@ def test_output_backtesting_forecaster_multiseries_when_exog_index_is_descending
 
     pd.testing.assert_frame_equal(results[1][0], results[0][0])
     pd.testing.assert_frame_equal(results[1][1], results[0][1])
+
+
+@pytest.mark.parametrize(
+    "encoding",
+    ['ordinal', 'onehot'],
+    ids=lambda encoding: f'encoding: {encoding}'
+)
+def test_output_backtesting_forecaster_multiseries_when_series_names_are_integers(
+    encoding
+):
+    """
+    Test output of backtesting_forecaster_multiseries in ForecasterRecursiveMultiSeries
+    when the series names are integers, as the ones created by
+    `reshape_series_long_to_dict` from a long DataFrame with numeric ids. The
+    metrics and predictions are the same as with the names as strings and the
+    names are kept as integers. Before, the backtesting raised a `KeyError`.
+    """
+    series = {
+        1: series_dict_dt['l1'].rename(1),
+        2: series_dict_dt['l2'].rename(2)
+    }
+    forecaster = ForecasterRecursiveMultiSeries(
+        LinearRegression(), lags=3, encoding=encoding
+    )
+    cv = TimeSeriesFold(steps=5, initial_train_size=40, refit=False)
+
+    metrics, predictions = backtesting_forecaster_multiseries(
+        forecaster    = forecaster,
+        series        = series,
+        cv            = cv,
+        metric        = 'mean_absolute_error',
+        show_progress = False
+    )
+
+    expected_metrics = pd.DataFrame({
+        'levels': [1, 2, 'average', 'weighted_average', 'pooling'],
+        'mean_absolute_error': np.array([
+            0.2071456247444594, 0.2242160940398036, 0.2156808593921315,
+            0.2156808593921315, 0.2156808593921315
+        ])
+    })
+    expected_predictions = pd.DataFrame(
+        {
+            'level': [1, 2] * 10,
+            'fold': [0] * 10 + [1] * 10,
+            'pred': np.array([
+                0.4838470062178786, 0.4984020716112409, 0.4985425453945824,
+                0.4999841624947072, 0.5048793011305956, 0.4953885607318123,
+                0.5050021996178055, 0.4939484472925253, 0.504623511306379,
+                0.493993299902761, 0.537836917897548, 0.4931196094888395,
+                0.4944517290071737, 0.4875724334903236, 0.4988081780848004,
+                0.4926317359825896, 0.5041335497623162, 0.4942550064154284,
+                0.5048260302317367, 0.4942474745679556
+            ])
+        },
+        index=pd.date_range('2020-02-10', periods=10, freq='D').repeat(2)
+    )
+
+    pd.testing.assert_frame_equal(metrics, expected_metrics)
+    pd.testing.assert_frame_equal(predictions, expected_predictions)

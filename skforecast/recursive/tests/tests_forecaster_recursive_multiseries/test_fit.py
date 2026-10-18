@@ -88,6 +88,25 @@ def test_fit_ValueError_when_estimator_modifies_X_train_in_place(estimator, enco
         forecaster.fit(series=series_wide_range)
 
 
+def test_fit_TypeError_when_series_names_are_not_comparable():
+    """
+    Test TypeError is raised when the series names cannot be sorted, for
+    example an integer and a string.
+    """
+    series = {
+        1: series_dict_range['l1'].rename(1),
+        '1': series_dict_range['l2'].rename('1')
+    }
+    forecaster = ForecasterRecursiveMultiSeries(LinearRegression(), lags=3)
+
+    err_msg = re.escape(
+        "The series names must be comparable with each other, for example "
+        "all strings or all integers. Got: [1, '1']."
+    )
+    with pytest.raises(TypeError, match=err_msg):
+        forecaster.fit(series=series)
+
+
 @pytest.mark.parametrize(
     "encoding",
     ['ordinal', 'onehot', None],
@@ -476,6 +495,51 @@ def test_forecaster_index_step_stored():
     expected = series['1'].index.step
 
     assert results == expected
+
+
+@pytest.mark.parametrize(
+    "series_format",
+    ['dict', 'wide'],
+    ids=lambda series_format: f'series_format: {series_format}'
+)
+@pytest.mark.parametrize(
+    "encoding",
+    ['ordinal', 'ordinal_category', 'onehot', None],
+    ids=lambda encoding: f'encoding: {encoding}'
+)
+def test_fit_when_series_names_are_integers(encoding, series_format):
+    """
+    Test that the forecaster is fitted when the series names are integers
+    (keys of a dict or columns of a wide DataFrame), and that the names are
+    kept as integers. Before, the encoding mapping was built with the names
+    as strings and `fit` raised a `KeyError`.
+    """
+    series = {
+        10: series_dict_range['l1'].rename(10),
+        2: series_dict_range['l2'].rename(2),
+        1: series_dict_range['l1'].rename(1) * 2
+    }
+    if series_format == 'wide':
+        series = pd.DataFrame(series)
+
+    forecaster = ForecasterRecursiveMultiSeries(
+        LinearRegression(), lags=3, encoding=encoding
+    )
+    forecaster.fit(series=series, store_in_sample_residuals=True, suppress_warnings=True)
+
+    assert forecaster.is_fitted
+    assert forecaster.encoding_mapping_ == {1: 0, 2: 1, 10: 2}
+    assert forecaster.series_names_in_ == [10, 2, 1]
+    assert set(forecaster.X_train_series_names_in_) == {1, 2, 10}
+    assert set(forecaster.last_window_.keys()) == {1, 2, 10}
+    if encoding is None:
+        assert list(forecaster.in_sample_residuals_.keys()) == ['_unknown_level']
+    else:
+        assert set(forecaster.in_sample_residuals_.keys()) == {1, 2, 10, '_unknown_level'}
+    if encoding == 'onehot':
+        assert forecaster.X_train_features_names_out_ == [
+            'lag_1', 'lag_2', 'lag_3', '1', '2', '10'
+        ]
 
 
 @pytest.mark.parametrize("encoding", 

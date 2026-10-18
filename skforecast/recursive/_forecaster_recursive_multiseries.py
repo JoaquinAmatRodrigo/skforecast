@@ -221,7 +221,8 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         series are identified as an integer from 0 to n_series - 1, but no column
         is created in the training matrices.
     encoding_mapping_ : dict
-        Mapping of the encoding used to identify the different series.
+        Mapping of the encoding used to identify the different series. The
+        keys are the series names as given in `series` (for example, integers).
     transformer_series : transformer (preprocessor), dict
         An instance of a transformer (preprocessor) compatible with the scikit-learn
         preprocessing API with methods: fit, transform, fit_transform and 
@@ -1225,7 +1226,7 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
             if self.encoding == 'onehot':
                 # One column per series, in the order of `encoding_mapping_`.
                 X_train[np.arange(total_rows), n_autoreg_cols + encoded_values] = 1.
-                block_col_names.extend(self.encoding_mapping_.keys())
+                block_col_names.extend(self._get_onehot_col_names())
             elif level_in_block:
                 block_col_names.append('_level_skforecast')
             for i, in_block in enumerate(exog_cols_in_block):
@@ -1282,7 +1283,7 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
                       )
 
             if self.encoding == 'onehot':
-                encoding_col_names = list(self.encoding_mapping_.keys())
+                encoding_col_names = self._get_onehot_col_names()
                 onehot_values = np.eye(n_level_cols, dtype=float)[encoded_values]
                 encoded_values = pd.DataFrame(
                                      data    = onehot_values,
@@ -1513,11 +1514,19 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         index_parts = [v.index[self.window_size:] for v in series_dict.values()]
         train_index = index_parts[0].append(index_parts[1:])
 
-        # Build encoding mapping (sorted alphabetically for consistency). It is
-        # rebuilt, not updated, so that no level of a previous fit is kept.
+        # Build encoding mapping (sorted for consistency). It is rebuilt, not
+        # updated, so that no level of a previous fit is kept. Its keys are the
+        # series names as given (e.g. integers).
         if not self.is_fitted:
+            try:
+                sorted_series_names = sorted(series_names_in_)
+            except TypeError:
+                raise TypeError(
+                    f"The series names must be comparable with each other, for "
+                    f"example all strings or all integers. Got: {series_names_in_}."
+                )
             self.encoding_mapping_ = {
-                str(level): i for i, level in enumerate(sorted(series_names_in_))
+                level: i for i, level in enumerate(sorted_series_names)
             }
 
         exog_dtypes_in_ = None
@@ -1980,17 +1989,18 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
                         )
 
         if self.encoding == 'onehot':
-            encoding_keys = list(self.encoding_mapping_.keys())
-            keys_arr = np.array(encoding_keys)
+            encoding_cols = self._get_onehot_col_names()
+            # NOTE: `object` keeps the type of each series name (e.g. integers).
+            keys_arr = np.array(list(self.encoding_mapping_.keys()), dtype=object)
             # Dot product with range recovers the column index of the active
             # one-hot column (faster than argmax for large arrays). One-hot
             # columns are float, so the result is cast to be used as an index.
-            level_indices = np.arange(len(encoding_keys))
+            level_indices = np.arange(len(encoding_cols))
             X_train_encoding = keys_arr[
-                (X_train[encoding_keys].to_numpy() @ level_indices).astype(int)
+                (X_train[encoding_cols].to_numpy() @ level_indices).astype(int)
             ]
             X_test_encoding = keys_arr[
-                (X_test[encoding_keys].to_numpy() @ level_indices).astype(int)
+                (X_test[encoding_cols].to_numpy() @ level_indices).astype(int)
             ]
         else:
             reverse_mapping = {v: k for k, v in self.encoding_mapping_.items()}
@@ -2063,6 +2073,26 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
 
         return weights
 
+    def _get_onehot_col_names(self) -> list[str]:
+        """
+        Names of the one-hot columns of the training matrices, one per series
+        in the order of `encoding_mapping_`. They are the series names as
+        text, since estimators such as scikit-learn ones only accept text
+        feature names (series names can be, for example, integers).
+
+        Parameters
+        ----------
+        self
+
+        Returns
+        -------
+        onehot_col_names : list
+            Names of the one-hot columns.
+
+        """
+
+        return [str(level) for level in self.encoding_mapping_]
+
     def _get_level_row_slices(
         self,
         X_train: pd.DataFrame
@@ -2101,18 +2131,18 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
             # matrices created by `_create_train_X_y` the one-hot columns are
             # contiguous and in the order of `encoding_mapping_`, so they are
             # read as a slice (a view). Selecting them by name copies them all.
-            encoding_keys = list(self.encoding_mapping_.keys())
-            missing_cols = [col for col in encoding_keys if col not in X_train.columns]
+            encoding_cols = self._get_onehot_col_names()
+            missing_cols = [col for col in encoding_cols if col not in X_train.columns]
             if missing_cols:
                 raise ValueError(
                     f"`X_train` must have the one-hot column of every series, as "
                     f"returned by `create_train_X_y`. Missing columns: {missing_cols}."
                 )
-            start = X_train.columns.get_loc(encoding_keys[0])
-            X_onehot = X_train.iloc[:, start:start + len(encoding_keys)]
-            if X_onehot.columns.to_list() != encoding_keys:
-                X_onehot = X_train[encoding_keys]
-            codes = X_onehot.to_numpy() @ np.arange(len(encoding_keys))
+            start = X_train.columns.get_loc(encoding_cols[0])
+            X_onehot = X_train.iloc[:, start:start + len(encoding_cols)]
+            if X_onehot.columns.to_list() != encoding_cols:
+                X_onehot = X_train[encoding_cols]
+            codes = X_onehot.to_numpy() @ np.arange(len(encoding_cols))
         else:
             codes = X_train["_level_skforecast"].to_numpy()
 

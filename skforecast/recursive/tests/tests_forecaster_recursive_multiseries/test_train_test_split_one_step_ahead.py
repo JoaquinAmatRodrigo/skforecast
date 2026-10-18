@@ -1685,3 +1685,42 @@ def test_train_test_split_one_step_ahead_when_forecaster_fitted_with_other_serie
     )
     assert X_train_encoding.to_list() == ['a'] * 8 + ['b'] * 8
     assert X_test_encoding.to_list() == ['a'] * 5 + ['b'] * 5
+
+
+@pytest.mark.parametrize(
+    "encoding",
+    ['ordinal', 'onehot', None],
+    ids=lambda encoding: f'encoding: {encoding}'
+)
+def test_train_test_split_one_step_ahead_when_series_names_are_integers(encoding):
+    """
+    Test _train_test_split_one_step_ahead when the series names are integers.
+    X_train_encoding and X_test_encoding keep the integer names, also with
+    `encoding='onehot'`, whose columns are named after the series as strings.
+    """
+    index = pd.date_range('2020-01-01', periods=15)
+    series_int = {
+        10: pd.Series(np.arange(100, 115, dtype=float), index=index, name=10),
+        2: pd.Series(np.arange(15, dtype=float), index=index, name=2)
+    }
+
+    forecaster = ForecasterRecursiveMultiSeries(
+        LinearRegression(), lags=2, encoding=encoding
+    )
+
+    (
+        X_train, y_train, X_test, y_test,
+        X_train_encoding, X_test_encoding,
+        sample_weight, fit_kwargs
+    ) = forecaster._train_test_split_one_step_ahead(
+            series=series_int, initial_train_size=10
+        )
+
+    assert X_train_encoding.to_list() == [10] * 8 + [2] * 8
+    assert X_test_encoding.to_list() == [10] * 5 + [2] * 5
+    if encoding == 'onehot':
+        assert X_train.columns.to_list() == ['lag_1', 'lag_2', '2', '10']
+        np.testing.assert_array_equal(
+            X_test[['2', '10']].to_numpy(),
+            np.array([[0., 1.]] * 5 + [[1., 0.]] * 5)
+        )
