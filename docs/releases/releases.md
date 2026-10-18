@@ -12,6 +12,11 @@ All significant changes to this project are documented in this release file.
 
 
 
+## Unreleased
+
++ <span class="badge text-bg-fix">Fix</span> Multi-series backtesting excludes a series from a training fold when it contains exactly `window_size` values, since no training row can be created from that series. The series is included again once a later training fold is long enough. ([#1410](https://github.com/skforecast/skforecast/issues/1410))
+
+
 ## 0.26.0 <small>Oct 8, 2026</small> { id="0.26.0" }
 
 The main changes in this release are:

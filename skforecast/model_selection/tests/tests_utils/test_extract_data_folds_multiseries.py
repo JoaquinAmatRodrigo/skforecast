@@ -5,12 +5,17 @@ import numpy as np
 import pandas as pd
 from lightgbm import LGBMRegressor
 from sklearn.ensemble import HistGradientBoostingRegressor, RandomForestRegressor
-from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.svm import SVR
 from skforecast.model_selection._utils import _extract_data_folds_multiseries
 from skforecast.utils import estimator_has_native_nan_support
+from skforecast.model_selection import (
+    TimeSeriesFold,
+    backtesting_forecaster_multiseries,
+)
+from skforecast.recursive import ForecasterRecursiveMultiSeries
 
 # Fixtures
 series_wide_range = pd.DataFrame({
@@ -107,6 +112,83 @@ def test_extract_data_folds_multiseries_series_DataFrame_exog_None_RangeIndex(dr
         assert data_fold[3] is None
         assert data_fold[4] is None
         assert data_fold[5] == expected_data_folds[i][5]
+
+
+@pytest.mark.parametrize("as_dict", [True, False], ids=lambda x: f"dict: {x}")
+@pytest.mark.parametrize("remaining", [2, 3, 4], ids=lambda x: f"values: {x}")
+@pytest.mark.parametrize(
+    "externally_fitted", [True, False], ids=lambda x: f"externally_fitted: {x}"
+)
+def test_extract_data_folds_multiseries_training_window_boundary(
+    as_dict: bool, remaining: int, externally_fitted: bool
+) -> None:
+    """
+    Training requires one more value than prediction's last window.
+    """
+    index = pd.date_range("2020-01-01", periods=40, freq="D")
+    start = 20 - remaining
+    series = {
+        "a": pd.Series(np.arange(40, dtype=float), index=index),
+        "b": pd.Series(np.arange(40 - start, dtype=float), index=index[start:]),
+    }
+    if not as_dict:
+        series = pd.DataFrame(series)
+    folds = [[0, [0, 20], [17, 20], [20, 25], True]]
+
+    train, last_window, levels, _, _, fold = next(
+        _extract_data_folds_multiseries(
+            series=series,
+            folds=folds,
+            span_index=index,
+            window_size=3,
+            dropna_last_window=True,
+            externally_fitted=externally_fitted,
+        )
+    )
+
+    assert ("b" in train) == (remaining > 3)
+    assert ("b" in last_window) == (
+        remaining > 3 or (externally_fitted and remaining == 3)
+    )
+    assert len(train["a"]) == 20
+    assert len(last_window) == 3
+    assert levels == list(last_window.columns)
+    assert fold == folds[0]
+
+
+@pytest.mark.parametrize("as_dict", [True, False], ids=lambda x: f"dict: {x}")
+@pytest.mark.parametrize("remaining", [2, 3, 4], ids=lambda x: f"values: {x}")
+def test_backtesting_multiseries_training_window_boundary(
+    as_dict: bool, remaining: int
+) -> None:
+    """
+    A short series joins backtesting once a training fold is long enough.
+    """
+    index = pd.date_range("2020-01-01", periods=40, freq="D")
+    start = 20 - remaining
+    rng = np.random.default_rng(0)
+    series = {
+        "a": pd.Series(rng.normal(100, 5, 40), index=index),
+        "b": pd.Series(rng.normal(100, 5, 40 - start), index=index[start:]),
+    }
+    if not as_dict:
+        series = pd.DataFrame(series)
+
+    _, predictions = backtesting_forecaster_multiseries(
+        forecaster=ForecasterRecursiveMultiSeries(
+            estimator=Ridge(), lags=3, encoding="ordinal"
+        ),
+        series=series,
+        cv=TimeSeriesFold(steps=5, initial_train_size=20, refit=True),
+        metric="mean_absolute_error",
+        show_progress=False,
+        verbose=False,
+        n_jobs=1,
+    )
+
+    assert np.isfinite(predictions["pred"]).all()
+    first_b = predictions.loc[predictions["level"] == "b"].index.min()
+    assert first_b == index[20 if remaining > 3 else 25]
 
 
 @pytest.mark.parametrize("dropna_last_window", 

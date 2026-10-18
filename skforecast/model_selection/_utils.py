@@ -1003,7 +1003,7 @@ def _extract_data_folds_multiseries(
                     last_valid_index = series_train[col].last_valid_index()
                     if (
                         len(series_train[col].loc[first_valid_index:last_valid_index])
-                        < window_size
+                        <= window_size
                     ):
                         series_to_drop.append(col)
 
@@ -1024,7 +1024,7 @@ def _extract_data_folds_multiseries(
                     last_valid_index  = v_train.last_valid_index()
                     if first_valid_index is not None and last_valid_index is not None:
                         v_train = v_train.loc[first_valid_index : last_valid_index]
-                        if len(v_train) >= window_size:
+                        if len(v_train) > window_size:
                             series_train[k] = v_train
                 
                 v_last_window = v.loc[last_window_loc_start:last_window_loc_end]

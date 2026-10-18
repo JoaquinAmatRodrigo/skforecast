@@ -2509,7 +2509,7 @@ def _backtesting_foundation(
                      series             = series,
                      folds              = folds,
                      span_index         = span_index,
-                     window_size        = 1,  # Minimum 1 observation as context.
+                     window_size        = 0,  # Require at least 1 context value.
                      exog               = exog,
                      dropna_last_window = False,
                      externally_fitted  = False

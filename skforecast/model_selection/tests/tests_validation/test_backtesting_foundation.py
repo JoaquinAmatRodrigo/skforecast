@@ -1389,6 +1389,59 @@ def test_output_backtesting_foundation_all_folds_skipped():
     assert list(backtest_predictions.columns) == ["level", "fold", "pred"]
 
 
+@pytest.mark.parametrize("as_dict", [True, False], ids=lambda x: f"dict: {x}")
+@pytest.mark.parametrize(
+    "late_start", [True, False], ids=lambda x: f"late_start: {x}"
+)
+def test_output_backtesting_foundation_single_observation_context(
+    as_dict: bool, late_start: bool
+) -> None:
+    """
+    Zero-shot backtesting accepts one observed value in the context window.
+    """
+    index = pd.date_range("2020-01-01", periods=10, freq="D")
+    short = pd.Series(np.arange(100, 110, dtype=float), index=index)
+    if late_start:
+        short = short.iloc[4:]
+    else:
+        short.iloc[:3] = np.nan
+        short.iloc[4] = np.nan
+    series = {
+        "a": pd.Series(np.arange(10, dtype=float), index=index),
+        "b": short,
+    }
+    if not as_dict:
+        series = pd.DataFrame(series)
+
+    metric, predictions = backtesting_foundation(
+        forecaster=make_forecaster(context_length=5),
+        series=series,
+        cv=TimeSeriesFold(steps=5, initial_train_size=5, refit=False),
+        metric="mean_absolute_error",
+        add_aggregated_metric=False,
+        verbose=False,
+        show_progress=False,
+    )
+
+    expected = pd.DataFrame(
+        {
+            "level": ["a", "b"] * 5,
+            "fold": [0] * 10,
+            "pred": [0.5] * 10,
+        },
+        index=pd.DatetimeIndex(
+            ["2020-01-06", "2020-01-06", "2020-01-07", "2020-01-07",
+             "2020-01-08", "2020-01-08", "2020-01-09", "2020-01-09",
+             "2020-01-10", "2020-01-10"]
+        ),
+    )
+    expected_metric = pd.DataFrame(
+        {"levels": ["a", "b"], "mean_absolute_error": [6.5, 106.5]}
+    )
+    pd.testing.assert_frame_equal(predictions, expected)
+    pd.testing.assert_frame_equal(metric, expected_metric)
+
+
 def test_output_backtesting_foundation_series_skipped_when_context_window_all_nan():
     """
     Test that a series is not predicted in a fold when the last
