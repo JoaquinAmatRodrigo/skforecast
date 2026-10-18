@@ -3065,7 +3065,7 @@ What is your forecaster producing?
 | **Penalize large errors more** | MSE (`'mean_squared_error'`) | — |
 | **Robust to outliers** | MAE or MedAE (`'median_absolute_error'`) | MSE (inflated by outliers) |
 | **Need percentage interpretation** | SMAPE (`'symmetric_mean_absolute_percentage_error'`) | MAPE if data has zeros |
-| **Data contains zeros or near-zero values** | MAE, MASE, RMSSE | MAPE (divides by y_true → infinite) |
+| **Data contains zeros or near-zero values** | MAE, MASE, RMSSE | MAPE (divides by y_true → extremely large values) |
 | **Compare across different-scale series** | MASE (`'mean_absolute_scaled_error'`) or RMSSE (`'root_mean_squared_scaled_error'`) | MAE, MSE (scale-dependent) |
 | **Target is always positive** | MSLE (`'mean_squared_log_error'`) | — (use when relative errors matter more than absolute) |
 | **Interpretable baseline comparison** | MASE (value < 1 means better than naive forecast) | — |
@@ -3376,7 +3376,8 @@ argument is silently ignored.
 
 | Mistake | Problem | Fix |
 |---------|---------|-----|
-| Using MAPE with data containing zeros | Division by zero → infinite error | Use SMAPE, MAE, or MASE instead |
+| Using MAPE with data containing zeros | Division by (almost) zero → extremely large error | Use SMAPE, MAE, or MASE instead |
+| Reading sklearn's MAPE as a percentage | It returns a fraction (0.1 = 10 %), while SMAPE is already × 100 | Multiply MAPE by 100 before reporting or comparing it with SMAPE |
 | Using MSE when data has outliers | A few large errors dominate the metric | Use MAE or MedAE for robustness |
 | Comparing MAE across differently-scaled series | MAE = 10 on sales vs MAE = 10 on temperature means nothing | Use MASE or RMSSE for cross-series comparison |
 | Interpreting high coverage as "good" | 99% coverage with a 90% interval means intervals are too wide | Target coverage ≈ nominal level; combine with CRPS for sharpness |
@@ -3412,13 +3413,18 @@ Complete reference for all metrics available in skforecast: properties, compatib
 | Mean Absolute Error | `'mean_absolute_error'` | sklearn | — | — | ✓ | ✓ | [0, ∞) | Average absolute deviation from truth |
 | Mean Squared Error | `'mean_squared_error'` | sklearn | — | — | — | ✓ | [0, ∞) | Average squared deviation; penalizes large errors |
 | Median Absolute Error | `'median_absolute_error'` | sklearn | — | — | ✓✓ | ✓ | [0, ∞) | Median of absolute deviations; very robust |
-| Mean Absolute Percentage Error | `'mean_absolute_percentage_error'` | sklearn | — | ✓ | — | — | [0, ∞) | Percentage error; undefined when y_true = 0 |
+| Mean Absolute Percentage Error | `'mean_absolute_percentage_error'` | sklearn | — | ✓ | — | — | [0, ∞) fraction | Relative error as a fraction (0.1 = 10 %), not × 100; explodes when y_true = 0 |
 | Mean Squared Log Error | `'mean_squared_log_error'` | sklearn | — | — | — | ✓* | [0, ∞) | Log-scale MSE; penalizes under-predictions more |
 | Symmetric MAPE | `'symmetric_mean_absolute_percentage_error'` | skforecast | — | ✓ | — | ✓ | [0, 200] % | Symmetric percentage; avoids MAPE's asymmetry |
 | Mean Absolute Scaled Error | `'mean_absolute_scaled_error'` | skforecast | ✓ | ✓ | ✓ | ✓ | [0, ∞) | Ratio vs naive forecast; < 1 = better than naive |
 | Root Mean Squared Scaled Error | `'root_mean_squared_scaled_error'` | skforecast | ✓ | ✓ | — | ✓ | [0, ∞) | RMSE ratio vs naive; < 1 = better than naive |
 
 *MSLE requires y_true ≥ 0 and y_pred ≥ 0 (typically used with positive data).
+
+sklearn's MAPE returns a fraction (0.1 means 10 %), while skforecast's SMAPE is
+already multiplied by 100 (10 means 10 %). Multiply MAPE by 100 before comparing
+or reporting the two side by side. When y_true = 0, sklearn divides by a tiny
+epsilon, so MAPE is not infinite but an extremely large number (about 1e16).
 
 ## Probabilistic Forecast Metrics
 

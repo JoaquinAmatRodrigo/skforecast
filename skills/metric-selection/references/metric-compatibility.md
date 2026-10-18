@@ -18,13 +18,18 @@ Complete reference for all metrics available in skforecast: properties, compatib
 | Mean Absolute Error | `'mean_absolute_error'` | sklearn | — | — | ✓ | ✓ | [0, ∞) | Average absolute deviation from truth |
 | Mean Squared Error | `'mean_squared_error'` | sklearn | — | — | — | ✓ | [0, ∞) | Average squared deviation; penalizes large errors |
 | Median Absolute Error | `'median_absolute_error'` | sklearn | — | — | ✓✓ | ✓ | [0, ∞) | Median of absolute deviations; very robust |
-| Mean Absolute Percentage Error | `'mean_absolute_percentage_error'` | sklearn | — | ✓ | — | — | [0, ∞) | Percentage error; undefined when y_true = 0 |
+| Mean Absolute Percentage Error | `'mean_absolute_percentage_error'` | sklearn | — | ✓ | — | — | [0, ∞) fraction | Relative error as a fraction (0.1 = 10 %), not × 100; explodes when y_true = 0 |
 | Mean Squared Log Error | `'mean_squared_log_error'` | sklearn | — | — | — | ✓* | [0, ∞) | Log-scale MSE; penalizes under-predictions more |
 | Symmetric MAPE | `'symmetric_mean_absolute_percentage_error'` | skforecast | — | ✓ | — | ✓ | [0, 200] % | Symmetric percentage; avoids MAPE's asymmetry |
 | Mean Absolute Scaled Error | `'mean_absolute_scaled_error'` | skforecast | ✓ | ✓ | ✓ | ✓ | [0, ∞) | Ratio vs naive forecast; < 1 = better than naive |
 | Root Mean Squared Scaled Error | `'root_mean_squared_scaled_error'` | skforecast | ✓ | ✓ | — | ✓ | [0, ∞) | RMSE ratio vs naive; < 1 = better than naive |
 
 *MSLE requires y_true ≥ 0 and y_pred ≥ 0 (typically used with positive data).
+
+sklearn's MAPE returns a fraction (0.1 means 10 %), while skforecast's SMAPE is
+already multiplied by 100 (10 means 10 %). Multiply MAPE by 100 before comparing
+or reporting the two side by side. When y_true = 0, sklearn divides by a tiny
+epsilon, so MAPE is not infinite but an extremely large number (about 1e16).
 
 ## Probabilistic Forecast Metrics
 

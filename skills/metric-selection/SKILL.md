@@ -78,7 +78,7 @@ What is your forecaster producing?
 | **Penalize large errors more** | MSE (`'mean_squared_error'`) | — |
 | **Robust to outliers** | MAE or MedAE (`'median_absolute_error'`) | MSE (inflated by outliers) |
 | **Need percentage interpretation** | SMAPE (`'symmetric_mean_absolute_percentage_error'`) | MAPE if data has zeros |
-| **Data contains zeros or near-zero values** | MAE, MASE, RMSSE | MAPE (divides by y_true → infinite) |
+| **Data contains zeros or near-zero values** | MAE, MASE, RMSSE | MAPE (divides by y_true → extremely large values) |
 | **Compare across different-scale series** | MASE (`'mean_absolute_scaled_error'`) or RMSSE (`'root_mean_squared_scaled_error'`) | MAE, MSE (scale-dependent) |
 | **Target is always positive** | MSLE (`'mean_squared_log_error'`) | — (use when relative errors matter more than absolute) |
 | **Interpretable baseline comparison** | MASE (value < 1 means better than naive forecast) | — |
@@ -389,7 +389,8 @@ argument is silently ignored.
 
 | Mistake | Problem | Fix |
 |---------|---------|-----|
-| Using MAPE with data containing zeros | Division by zero → infinite error | Use SMAPE, MAE, or MASE instead |
+| Using MAPE with data containing zeros | Division by (almost) zero → extremely large error | Use SMAPE, MAE, or MASE instead |
+| Reading sklearn's MAPE as a percentage | It returns a fraction (0.1 = 10 %), while SMAPE is already × 100 | Multiply MAPE by 100 before reporting or comparing it with SMAPE |
 | Using MSE when data has outliers | A few large errors dominate the metric | Use MAE or MedAE for robustness |
 | Comparing MAE across differently-scaled series | MAE = 10 on sales vs MAE = 10 on temperature means nothing | Use MASE or RMSSE for cross-series comparison |
 | Interpreting high coverage as "good" | 99% coverage with a 90% interval means intervals are too wide | Target coverage ≈ nominal level; combine with CRPS for sharpness |
