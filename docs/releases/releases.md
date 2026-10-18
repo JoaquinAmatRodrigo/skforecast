@@ -27,7 +27,7 @@ The main changes in this release are:
 
 **Fixed**
 
-+ <code>[ForecasterRecursiveMultiSeries]</code> raised a `KeyError` in `fit` and in backtesting when the series names were integers (dict keys, wide DataFrame columns or numeric ids in long data). The names are now kept as given; with `encoding='onehot'` the one-hot columns are named after the series as strings. ([#1357](https://github.com/skforecast/skforecast/issues/1357))
++ <code>[ForecasterRecursiveMultiSeries]</code> raised a `KeyError` in `fit` and in backtesting when the series names were integers (dict keys, wide DataFrame columns or numeric ids in long data). The names are now kept as given; with `encoding='onehot'` the one-hot columns are named after the series as strings. ([#1357](https://github.com/skforecast/skforecast/issues/1357), [#1412](https://github.com/skforecast/skforecast/pull/1412))
 
 
 ## 0.26.0 <small>Oct 8, 2026</small> { id="0.26.0" }
