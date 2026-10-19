@@ -323,14 +323,15 @@ def coverage(y_true, y_pred):  # pragma: no cover
 @pytest.mark.parametrize(
     "kwargs_interval",
     [{'interval': 0.8}, {'interval': [0.1, 0.9]}, {'interval': (0.1, 0.9)},
-     {'alpha': 0.2}],
+     {'interval': [0.1, 0.5, 0.9]}, {'alpha': 0.2}],
     ids = lambda kwargs: f'{kwargs}'
 )
 def test_check_backtesting_input_ValueError_when_metric_name_is_reserved_for_interval_metrics(kwargs_interval):
     """
     Test ValueError is raised in check_backtesting_input if a metric is named
     as one of the interval metrics (`coverage`, `interval_width`) and `interval`
-    (or `alpha`) has a lower and an upper bound.
+    has a lower and an upper bound (2 quantiles, optionally with the median),
+    or `alpha` is used.
     """
     forecaster = ForecasterRecursive(
                      estimator = Ridge(random_state=123),
@@ -343,9 +344,9 @@ def test_check_backtesting_input_ValueError_when_metric_name_is_reserved_for_int
          )
 
     err_msg = re.escape(
-        "When `interval` has a lower and an upper bound, the backtesting "
-        "metrics include ['coverage', 'interval_width']. Rename the metric(s) "
-        "['coverage', 'interval_width'] passed in `metric`."
+        "When `interval` has a lower and an upper bound, or `alpha` is used, "
+        "the backtesting metrics include ['coverage', 'interval_width']. Rename "
+        "the metric(s) ['coverage', 'interval_width'] passed in `metric`."
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
@@ -360,7 +361,7 @@ def test_check_backtesting_input_ValueError_when_metric_name_is_reserved_for_int
 
 @pytest.mark.parametrize(
     "interval",
-    [None, [0.1, 0.5, 0.9], 'bootstrapping'],
+    [None, [0.1, 0.3, 0.9], [0.05, 0.1, 0.9, 0.95], 'bootstrapping'],
     ids = lambda interval: f'interval: {interval}'
 )
 def test_check_backtesting_input_no_error_when_metric_name_is_reserved_and_interval_has_not_two_bounds(interval):

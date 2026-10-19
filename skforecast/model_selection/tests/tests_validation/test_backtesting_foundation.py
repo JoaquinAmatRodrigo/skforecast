@@ -509,6 +509,8 @@ def test_output_backtesting_foundation_single_quantiles_auto_add_median_no_refit
         backtest_predictions["q_0.9"].values, np.full(12, 0.9)
     )
     expected_metric = pd.DataFrame({"mean_absolute_error": [43.0]})
+    expected_metric["coverage"] = [0.0]
+    expected_metric["interval_width"] = [0.8000000000000002]
     pd.testing.assert_frame_equal(expected_metric, metric)
 
 
@@ -590,6 +592,8 @@ def test_output_backtesting_foundation_single_quantiles_no_refit():
         backtest_predictions["q_0.9"].values, np.full(12, 0.9)
     )
     expected_metric = pd.DataFrame({"mean_absolute_error": [43.0]})
+    expected_metric["coverage"] = [0.0]
+    expected_metric["interval_width"] = [0.8000000000000002]
     pd.testing.assert_frame_equal(expected_metric, metric)
 
 
@@ -907,6 +911,58 @@ def test_output_backtesting_foundation_multiseries_quantiles_auto_add_median():
     np.testing.assert_array_almost_equal(
         backtest_predictions["q_0.9"].values, np.full(24, 0.9)
     )
+
+
+@pytest.mark.parametrize(
+    "quantiles, expected_interval_width",
+    [([0.1, 0.9], 0.8),
+     ([0.1, 0.5, 0.9], 0.8),
+     ([0.5, 0.9], 0.4),
+     ([0.05, 0.1, 0.9, 0.95], None)],
+    ids=lambda dt: f"quantiles, expected_interval_width: {dt}"
+)
+def test_output_backtesting_foundation_multiseries_interval_metrics_when_quantiles(
+    quantiles, expected_interval_width
+):
+    """
+    Test that the interval metrics (`coverage`, `interval_width`) are added,
+    for each level and aggregated, when `quantiles` has 2 quantiles, optionally
+    with the median, with the bounds taken from those 2 quantiles. With more
+    quantiles they are not added. The fake model predicts each quantile as
+    its own value, so the series (values >= 0.9) are never covered.
+    """
+    forecaster = make_forecaster()
+    cv = TimeSeriesFold(
+        steps=3,
+        initial_train_size=38,
+        refit=False,
+        verbose=False,
+    )
+    with patch(
+        "skforecast.model_selection._validation.deepcopy_forecaster",
+        side_effect=deepcopy,
+    ):
+        metric, _ = backtesting_foundation(
+            forecaster=forecaster,
+            series=series_wide,
+            cv=cv,
+            metric="mean_absolute_error",
+            quantiles=quantiles,
+            verbose=False,
+            show_progress=False,
+        )
+
+    expected_metric = pd.DataFrame({
+        "levels": [
+            "series_1", "series_2", "average", "weighted_average", "pooling"
+        ],
+        "mean_absolute_error": [43.0, 93.0, 68.0, 68.0, 68.0],
+    })
+    if expected_interval_width is not None:
+        expected_metric["coverage"] = [0.0, 0.0, 0.0, 0.0, 0.0]
+        expected_metric["interval_width"] = [expected_interval_width] * 5
+
+    pd.testing.assert_frame_equal(metric, expected_metric)
 
 
 def test_output_backtesting_foundation_multiseries_quantiles():

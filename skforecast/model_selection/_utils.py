@@ -399,12 +399,8 @@ def check_backtesting_input(
             "`skip_folds` is not allowed for ForecasterStats. Set it to `None`."
         )
 
-    interval_has_two_bounds = (
-        isinstance(interval, float)
-        or (isinstance(interval, (list, tuple)) and len(interval) == 2)
-        or alpha is not None
-    )
-    if interval_has_two_bounds:
+    # NOTE: `backtesting_foundation` passes its `quantiles` as `interval`.
+    if _get_interval_bound_quantiles(interval) is not None or alpha is not None:
         metric_names = [
             m if isinstance(m, str) else getattr(m, '__name__', None)
             for m in (metric if isinstance(metric, list) else [metric])
@@ -412,9 +408,9 @@ def check_backtesting_input(
         reserved_names = [name for name in metric_names if name in INTERVAL_METRIC_NAMES]
         if reserved_names:
             raise ValueError(
-                f"When `interval` has a lower and an upper bound, the backtesting "
-                f"metrics include {INTERVAL_METRIC_NAMES}. Rename the metric(s) "
-                f"{reserved_names} passed in `metric`."
+                f"When `interval` has a lower and an upper bound, or `alpha` is "
+                f"used, the backtesting metrics include {INTERVAL_METRIC_NAMES}. "
+                f"Rename the metric(s) {reserved_names} passed in `metric`."
             )
 
     if not isinstance(add_aggregated_metric, bool):
@@ -1216,6 +1212,81 @@ def _warn_levels_not_predicted_multiseries(
         "aggregated metrics.\n" + "\n".join(lines),
         MissingValuesWarning
     )
+
+
+def _get_interval_bound_quantiles(
+    interval: float | list[float] | tuple[float, ...] | str | object | None
+) -> list[float] | None:
+    """
+    Quantiles of the lower and upper bounds of the prediction interval defined
+    by `interval`: a float (nominal coverage), or a list or tuple of two
+    quantiles, optionally with the median (0.5). Any other value (more
+    quantiles, 'bootstrapping', a distribution or None) does not define a
+    single interval and returns None.
+
+    Parameters
+    ----------
+    interval : float, list, tuple, str, object, None
+        Argument `interval` of the backtesting functions (or `quantiles` in
+        `backtesting_foundation`).
+
+    Returns
+    -------
+    bound_quantiles : list, None
+        Quantiles of the lower and upper bounds, sorted, or None.
+
+    """
+
+    if isinstance(interval, float):
+        return [0.5 - interval / 2, 0.5 + interval / 2]
+
+    if isinstance(interval, (list, tuple)):
+        bound_quantiles = list(interval)
+        if len(bound_quantiles) == 3 and 0.5 in bound_quantiles:
+            bound_quantiles.remove(0.5)
+        if len(bound_quantiles) == 2:
+            return sorted(bound_quantiles)
+
+    return None
+
+
+def _get_interval_columns(
+    columns: pd.Index | list[str],
+    interval: float | list[float] | tuple[float, ...] | str | object | None
+) -> list[str] | None:
+    """
+    Columns of the backtesting predictions with the lower and upper bounds of
+    the prediction interval, used to calculate the interval metrics
+    (`INTERVAL_METRIC_NAMES`): `lower_bound` and `upper_bound` if they exist,
+    otherwise the quantile columns (`q_<quantile>`) of the bounds defined by
+    `interval` (see `_get_interval_bound_quantiles`).
+
+    Parameters
+    ----------
+    columns : pandas Index, list
+        Columns of the backtesting predictions.
+    interval : float, list, tuple, str, object, None
+        Argument `interval` of the backtesting functions (or `quantiles` in
+        `backtesting_foundation`).
+
+    Returns
+    -------
+    interval_columns : list, None
+        Names of the lower and upper bound columns, or None if the predictions
+        do not define a single interval.
+
+    """
+
+    if {'lower_bound', 'upper_bound'}.issubset(columns):
+        return ['lower_bound', 'upper_bound']
+
+    bound_quantiles = _get_interval_bound_quantiles(interval)
+    if bound_quantiles is not None:
+        interval_columns = [f"q_{q}" for q in bound_quantiles]
+        if set(interval_columns).issubset(columns):
+            return interval_columns
+
+    return None
 
 
 def _calculate_interval_metrics(

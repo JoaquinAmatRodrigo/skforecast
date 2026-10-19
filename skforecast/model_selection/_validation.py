@@ -27,6 +27,7 @@ from ..model_selection._utils import (
     _extract_data_folds_multiseries,
     _warn_levels_not_predicted_multiseries,
     _calculate_metrics_backtesting_multiseries,
+    _get_interval_columns,
     _calculate_interval_metrics,
     INTERVAL_METRIC_NAMES
 )
@@ -453,8 +454,8 @@ def _backtesting_forecaster(
     -------
     metric_values : pandas DataFrame
         Value(s) of the metric(s). If `interval` has a lower and an upper bound
-        (a `float`, or a `list` or `tuple` of 2 quantiles), two more columns
-        are added after the metrics:
+        (a `float`, or a `list` or `tuple` of 2 quantiles, optionally with the
+        median 0.5), two more columns are added after the metrics:
 
         - coverage: share of true values inside the interval (bounds included).
         - interval_width: mean of `upper_bound - lower_bound`, in the units of
@@ -695,23 +696,30 @@ def _backtesting_forecaster(
     else:
         y_train = None
 
-    metric_values = [[
+    metric_values = [
         m(y_true=y_true, y_pred=y_pred, y_train=y_train)
         for m in metrics
-    ]]
+    ]
+    metric_names = [m.__name__ for m in metrics]
+
+    interval_columns = _get_interval_columns(
+                           columns  = backtest_predictions_for_metrics.columns,
+                           interval = interval
+                       )
+    if interval_columns is not None:
+        metric_values.extend(
+            _calculate_interval_metrics(
+                y_true      = y_true,
+                lower_bound = backtest_predictions_for_metrics[interval_columns[0]],
+                upper_bound = backtest_predictions_for_metrics[interval_columns[1]]
+            )
+        )
+        metric_names += INTERVAL_METRIC_NAMES
 
     metric_values = pd.DataFrame(
-        data    = metric_values,
-        columns = [m.__name__ for m in metrics]
+        data    = [metric_values],
+        columns = metric_names
     )
-
-    if {'lower_bound', 'upper_bound'}.issubset(backtest_predictions_for_metrics.columns):
-        interval_metrics = _calculate_interval_metrics(
-                               y_true      = y_true,
-                               lower_bound = backtest_predictions_for_metrics['lower_bound'],
-                               upper_bound = backtest_predictions_for_metrics['upper_bound']
-                           )
-        metric_values[INTERVAL_METRIC_NAMES] = [interval_metrics]
 
     return metric_values, backtest_predictions
 
@@ -828,8 +836,8 @@ def backtesting_forecaster(
     -------
     metric_values : pandas DataFrame
         Value(s) of the metric(s). If `interval` has a lower and an upper bound
-        (a `float`, or a `list` or `tuple` of 2 quantiles), two more columns
-        are added after the metrics:
+        (a `float`, or a `list` or `tuple` of 2 quantiles, optionally with the
+        median 0.5), two more columns are added after the metrics:
 
         - coverage: share of true values inside the interval (bounds included).
         - interval_width: mean of `upper_bound - lower_bound`, in the units of
@@ -1248,8 +1256,9 @@ def _backtesting_forecaster_multiseries(
         left out of the aggregated metrics. A `MissingValuesWarning` names the
         levels not predicted in a fold where they have observed values.
         If `interval` has a lower and an upper bound (a `float`, or a `list` or
-        `tuple` of 2 quantiles), two more columns are added after the metrics,
-        for each level and aggregated in the same way as the other metrics:
+        `tuple` of 2 quantiles, optionally with the median 0.5), two more 
+        columns are added after the metrics, for each level and aggregated in 
+        the same way as the other metrics:
 
         - coverage: share of true values inside the interval (bounds included).
         - interval_width: mean of `upper_bound - lower_bound`, in the units of
@@ -1540,13 +1549,20 @@ def _backtesting_forecaster_multiseries(
             .loc[~backtest_predictions_for_metrics.index.duplicated(keep='last')]
         )
 
-    metric_columns = ['pred']
-    if {'lower_bound', 'upper_bound'}.issubset(backtest_predictions_for_metrics.columns):
-        metric_columns += ['lower_bound', 'upper_bound']
+    predictions_for_metrics = backtest_predictions_for_metrics[['pred']]
+    interval_columns = _get_interval_columns(
+                           columns  = backtest_predictions_for_metrics.columns,
+                           interval = interval
+                       )
+    if interval_columns is not None:
+        predictions_for_metrics = (
+            backtest_predictions_for_metrics[['pred', *interval_columns]]
+            .set_axis(['pred', 'lower_bound', 'upper_bound'], axis=1)
+        )
 
     metrics_levels = _calculate_metrics_backtesting_multiseries(
         series                = series,
-        predictions           = backtest_predictions_for_metrics[metric_columns],
+        predictions           = predictions_for_metrics,
         folds                 = folds,
         span_index            = span_index,
         window_size           = forecaster.window_size,
@@ -1693,8 +1709,9 @@ def backtesting_forecaster_multiseries(
         left out of the aggregated metrics. A `MissingValuesWarning` names the
         levels not predicted in a fold where they have observed values.
         If `interval` has a lower and an upper bound (a `float`, or a `list` or
-        `tuple` of 2 quantiles), two more columns are added after the metrics,
-        for each level and aggregated in the same way as the other metrics:
+        `tuple` of 2 quantiles, optionally with the median 0.5), two more 
+        columns are added after the metrics, for each level and aggregated in 
+        the same way as the other metrics:
 
         - coverage: share of true values inside the interval (bounds included).
         - interval_width: mean of `upper_bound - lower_bound`, in the units of
@@ -2229,9 +2246,11 @@ def _backtesting_stats(
             .loc[~backtest_predictions_for_metrics.index.duplicated(keep='last')]
         )
 
-    add_interval_metrics = {'lower_bound', 'upper_bound'}.issubset(
-        backtest_predictions_for_metrics.columns
-    )
+    interval_columns = _get_interval_columns(
+                           columns  = backtest_predictions_for_metrics.columns,
+                           interval = interval
+                       )
+    add_interval_metrics = interval_columns is not None
     metric_names = [m.__name__ for m in metrics]
     if add_interval_metrics:
         metric_names += INTERVAL_METRIC_NAMES
@@ -2247,8 +2266,8 @@ def _backtesting_stats(
             metric_values.extend(
                 _calculate_interval_metrics(
                     y_true      = y_true,
-                    lower_bound = backtest_predictions_for_metrics['lower_bound'],
-                    upper_bound = backtest_predictions_for_metrics['upper_bound']
+                    lower_bound = backtest_predictions_for_metrics[interval_columns[0]],
+                    upper_bound = backtest_predictions_for_metrics[interval_columns[1]]
                 )
             )
 
@@ -2271,8 +2290,8 @@ def _backtesting_stats(
                 metric_values_estimator.extend(
                     _calculate_interval_metrics(
                         y_true      = y_true,
-                        lower_bound = group['lower_bound'],
-                        upper_bound = group['upper_bound']
+                        lower_bound = group[interval_columns[0]],
+                        upper_bound = group[interval_columns[1]]
                     )
                 )
             metric_values.append(metric_values_estimator)
@@ -2548,6 +2567,16 @@ def _backtesting_foundation(
         NaN metrics and is left out of the aggregated metrics. A
         `MissingValuesWarning` names the levels not predicted in a fold where
         they have observed values.
+        If `quantiles` has 2 quantiles, optionally with the median 0.5 (for
+        example, `[0.1, 0.9]` or `[0.1, 0.5, 0.9]`), two more columns are 
+        added after the metrics, computed with those 2 quantiles as the bounds
+        of the interval (for each level and aggregated in multi-series mode):
+
+        - coverage: share of true values inside the interval (bounds included).
+        - interval_width: mean of `upper_bound - lower_bound`, in the units of
+        the series.
+
+        **New in version 0.27.0**
     backtest_predictions : pandas DataFrame
         Value of predictions. The DataFrame includes the following columns:
 
@@ -2780,9 +2809,20 @@ def _backtesting_foundation(
         else:
             metric_col = 'pred'
 
+        predictions_for_metrics = backtest_predictions_for_metrics[[metric_col]]
+        interval_columns = _get_interval_columns(
+                               columns  = backtest_predictions_for_metrics.columns,
+                               interval = quantiles
+                           )
+        if interval_columns is not None:
+            predictions_for_metrics = (
+                backtest_predictions_for_metrics[[metric_col, *interval_columns]]
+                .set_axis([metric_col, 'lower_bound', 'upper_bound'], axis=1)
+            )
+
         metrics_levels = _calculate_metrics_backtesting_multiseries(
             series                = series,
-            predictions           = backtest_predictions_for_metrics[[metric_col]],
+            predictions           = predictions_for_metrics,
             folds                 = folds,
             span_index            = span_index,
             window_size           = 0,  # Not used here 
@@ -2822,14 +2862,29 @@ def _backtesting_foundation(
         else:
             y_train = None
 
-        metric_values = [[
+        metric_values = [
             m(y_true=y_true, y_pred=y_pred, y_train=y_train)
             for m in metrics
-        ]]
+        ]
+        metric_names = [m.__name__ for m in metrics]
+
+        interval_columns = _get_interval_columns(
+                               columns  = backtest_predictions_for_metrics.columns,
+                               interval = quantiles
+                           )
+        if interval_columns is not None:
+            metric_values.extend(
+                _calculate_interval_metrics(
+                    y_true      = y_true,
+                    lower_bound = backtest_predictions_for_metrics[interval_columns[0]],
+                    upper_bound = backtest_predictions_for_metrics[interval_columns[1]]
+                )
+            )
+            metric_names += INTERVAL_METRIC_NAMES
 
         metrics_levels = pd.DataFrame(
-            data    = metric_values,
-            columns = [m.__name__ for m in metrics],
+            data    = [metric_values],
+            columns = metric_names,
         )
 
     return metrics_levels, backtest_predictions
@@ -2924,6 +2979,16 @@ def backtesting_foundation(
         NaN metrics and is left out of the aggregated metrics. A
         `MissingValuesWarning` names the levels not predicted in a fold where
         they have observed values.
+        If `quantiles` has 2 quantiles, optionally with the median 0.5 (for
+        example, `[0.1, 0.9]` or `[0.1, 0.5, 0.9]`), two more columns are 
+        added after the metrics, computed with those 2 quantiles as the bounds
+        of the interval (for each level and aggregated in multi-series mode):
+
+        - coverage: share of true values inside the interval (bounds included).
+        - interval_width: mean of `upper_bound - lower_bound`, in the units of
+        the series.
+
+        **New in version 0.27.0**
     backtest_predictions : pandas DataFrame
         Value of predictions. The DataFrame includes the following columns:
 

@@ -60,14 +60,15 @@ def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
 
 @pytest.mark.parametrize(
     "interval",
-    [None, [0.1, 0.5, 0.9], 'bootstrapping', norm],
+    [None, [0.1, 0.3, 0.9], [0.05, 0.1, 0.9, 0.95], 'bootstrapping', norm],
     ids = lambda interval: f'interval: {interval}'
 )
 def test_backtesting_forecaster_no_interval_metrics_when_interval_has_not_two_bounds(interval):
     """
     Test that the interval metrics (`coverage`, `interval_width`) are not added 
-    to the metrics when `interval` is None, a list of more than two quantiles, 
-    'bootstrapping' or a scipy.stats distribution.
+    to the metrics when `interval` is None, a list of quantiles that is not 2
+    quantiles (optionally with the median), 'bootstrapping' or a scipy.stats
+    distribution.
     """
     forecaster = ForecasterRecursive(
                      estimator = Ridge(random_state=123),

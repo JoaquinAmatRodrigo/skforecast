@@ -35,7 +35,7 @@ epsilon, so MAPE is not infinite but an extremely large number (about 1e16).
 
 | Metric | Function | Input signature | Use with | Measures |
 |--------|----------|-----------------|----------|----------|
-| Coverage | `calculate_coverage` | `(y_true, lower_bound, upper_bound)` | Any forecaster with intervals | Calibration (proportion of truths in interval). Backtesting with a two-bound `interval` reports it as `coverage`, next to `interval_width` (mean width) |
+| Coverage | `calculate_coverage` | `(y_true, lower_bound, upper_bound)` | Any forecaster with intervals | Calibration (proportion of truths in interval). Backtesting with one interval (two quantiles, optionally with the median) reports it as `coverage`, next to `interval_width` (mean width) |
 | CRPS (bootstrap) | `crps_from_predictions` | `(y_true: float, y_pred: ndarray)` | Bootstrapped predictions | Calibration + sharpness (single observation) |
 | CRPS (quantiles) | `crps_from_quantiles` | `(y_true: float, pred_quantiles: ndarray, quantile_levels: ndarray)` | Foundation models, quantile predictions | Calibration + sharpness (single observation) |
 | Winkler Score | `winkler_score` | `(y_true, lower_bound, upper_bound, alpha)` | Any single interval | Calibration + sharpness of one interval; miscoverage penalty scaled by `alpha` |
