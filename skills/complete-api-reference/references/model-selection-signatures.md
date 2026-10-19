@@ -60,8 +60,8 @@ backtesting_stats(
     cv,                                 # TimeSeriesFold
     metric,                             # str | Callable | list[str | Callable]
     exog=None,                          # pd.Series | pd.DataFrame | None
-    alpha=None,                         # float | None, significance level
-    interval=None,                      # list[float] | tuple[float] | None
+    interval=None,                      # list[float] | tuple[float] | None, symmetric quantiles 0-1
+    alpha=None,                         # float | None, alias of interval, not both
     freeze_params=True,                 # bool, if True only first fold fits the model
     n_jobs='auto',                      # int | str
     verbose=False,                      # bool

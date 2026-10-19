@@ -68,10 +68,10 @@ forecaster.fit(y=data['target'])
 predictions = forecaster.predict(steps=12)
 
 # 3. Prediction intervals (all stat models support this natively,
-#    no bootstrapping needed). Accepts both `interval` and `alpha`.
+#    no bootstrapping needed). Default (no `interval` nor `alpha`): 95%.
 predictions_interval = forecaster.predict_interval(
     steps=12,
-    interval=[0.1, 0.9],  # quantiles (0-1). Or use alpha=0.2 for 80% interval
+    interval=[0.1, 0.9],  # symmetric quantiles (0-1), or its alias alpha=0.2
 )
 ```
 

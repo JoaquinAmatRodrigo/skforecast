@@ -32,7 +32,7 @@ cifras son las de la sesión en la nube y no se han vuelto a medir.
 
 | Tema | Elementos | Notas |
 |---|---|---|
-| Resultados erróneos silenciosos | BUG-03, BUG-01, BUG-stats-interval-ignored (+ DEP-stats-alpha), BUG-04, BUG-10, PR-1407 | Todos S. BUG-01 solo como aviso silenciable: el backtesting sobre datos de entrenamiento es un uso documentado |
+| Resultados erróneos silenciosos | BUG-03, BUG-01, BUG-stats-interval-ignored, BUG-04, BUG-10, PR-1407 | Todos S. BUG-01 solo como aviso silenciable: el backtesting sobre datos de entrenamiento es un uso documentado. BUG-stats-interval-ignored implementado en local (2026-10-19), pendiente de PR; DEP-stats-alpha descartado (decisión 5) |
 | Backtesting probabilístico (titular de la release) | QW-03, QW-09, QW-04, QW-08, BUG-02, QW-10 | Es lo que se pide desde 2024 (#885, #902, #1253, #1409, D1119). Tres cambios de salida independientes que se fusionan por separado y se anuncian juntos en `releases.md`: QW-09 (`coverage` e `interval_width`, #1409) va primero porque no depende de QW-04; QW-04 (`y_true`) y QW-10 (`step`) después |
 | Foundation para producción | QW-05, BUG-06, QW-02 | QW-02 pendiente de decisión |
 | Paneles multiserie | QW-01, BUG-07, ISSUE-1410 | PR-1408 (IDs enteros, #1357) está resuelto: se cerró y lo sustituyó #1412, ya fusionado en `0.27.x` |
@@ -44,8 +44,11 @@ El orden dentro de cada tema sigue las dependencias de la sección 1. En particu
 
 - PR-1407 va antes que QW-09 y QW-04: toca el mismo bloque de
   `_backtesting_forecaster_multiseries` y decide qué series entran en los agregados.
-- BUG-stats-interval-ignored va antes que QW-09: si no, la cobertura de `backtesting_stats`
-  se mediría sobre el intervalo del 95% aunque se pida otro.
+- BUG-stats-interval-ignored va antes que QW-09. Corrección (2026-10-19): `backtesting_stats`
+  no estaba afectado (allí `alpha=None` por defecto y `interval` se respetaba); el bug solo
+  afectaba a `ForecasterStats.predict_interval` llamado directamente. Lo que aporta a QW-09 es
+  que, tras el arreglo, `backtesting_stats` traduce `alpha` a `interval` al principio, así que
+  el intervalo nominal está siempre en `interval`.
 - ISSUE-1410 conviene antes (mismo fichero, dos líneas), pero no bloquea.
 - BUG-02 va antes que QW-10.
 
@@ -60,6 +63,12 @@ FE-04 → foundation con `interval` (tras BUG-06).
 2. **`coverage` e `interval_width` sin flag:** se añaden siempre que `interval` tenga dos cotas.
 3. **Aviso de infracobertura descartado definitivamente** (sección 7).
 4. **QW-10 (columna `step`) se hará:** es barata y no depende de QW-04 ni de QW-09.
+5. **DEP-stats-alpha descartado (2026-10-19).** `alpha` se mantiene como alias de `interval`
+   en `ForecasterStats.predict_interval` y `backtesting_stats`: es el nombre habitual para
+   quien viene de estadística (statsmodels, pmdarima) y los estimadores `Arima` y `Sarimax`
+   también lo aceptan. El bug lo causaba su valor por defecto (0,05), no el alias. En su lugar,
+   pasar `alpha` e `interval` a la vez da `ValueError`, como ya hace `Arima.predict_interval`
+   con `alpha` y `level`, y desaparece la regla de precedencia.
 
 ### Decisiones pendientes (cerrarlas antes de implementar)
 
@@ -114,7 +123,7 @@ sección 5.
 
 | Bloque | Elementos, en orden |
 |---|---|
-| A. Resultados silenciosamente erróneos, esfuerzo S | BUG-03, BUG-01, BUG-02, PR-1407 (#1406), BUG-04, BUG-10, BUG-stats-interval-ignored (+ DEP-stats-alpha) |
+| A. Resultados silenciosamente erróneos, esfuerzo S | BUG-03, BUG-01, BUG-02, PR-1407 (#1406), BUG-04, BUG-10, BUG-stats-interval-ignored (implementado, pendiente de PR) |
 | B. Quick wins diarios y PR listos | QW-03, QW-01, QW-09, QW-04, QW-10 (tres cambios de salida, un solo anuncio), PR-1389, PR-1388, ISSUE-1410, QW-02, QW-05, ISSUE-1385, PR-1400, PR-1402, PR-1387 |
 | C. Corrección de más alcance, STATS y quick wins secundarios | BUG-06, BUG-08, PERF-02, QW-07 (+ DOC-skills-percentiles-stale), BUG-07, QW-08, QW-06, BUG-11, BUG-09 |
 | D. Features y gaps | FE-02, PERF-01, GAP-foundation-backtesting-interval, FE-04, FE-03 |
@@ -466,7 +475,7 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
 | **BUG-02** | Con `fold_stride < steps` la métrica solo mide los horizontes `1..fold_stride` (con 1, el error a 1 paso) y todas las búsquedas seleccionan por ese error | model_selection | S | `dev/roadmap_0.27.0/repro/BUG-02.py` | Parámetro en `TimeSeriesFold`, p. ej. `overlapping_metric="last"` o `"all"`, aplicado en los 5 puntos de deduplicación (`_validation.py:662-667,1488-1493,2159-2164,2643-2648,2674-2679`); aviso mientras el defecto sea `"last"` (como `OneStepAheadValidationWarning`, `_utils.py:653-658`); no cambiar el defecto sin anunciarlo (la receta de meses naturales depende de `"last"`); corregir `skills/backtesting-configuration/SKILL.md:202-208`, la guía y `llms-base.txt`. Coordinar con BUG-09 |
 | **BUG-04** | Un pipeline o modelo precargado (p. ej. Chronos-2 con fine-tuning) se descarta en silencio al crear `ForecasterFoundation`: `clone` lo pierde y se recarga el checkpoint base | foundation | S | `dev/roadmap_0.27.0/repro/BUG-04.py` | `FoundationModel.__sklearn_clone__`: clon estándar y, si el usuario pasó el objeto, copiar la referencia al clon sin copiar pesos. Así lo heredan `ForecasterFoundation.__init__` (`_forecaster_foundation.py:156`), `deepcopy_forecaster` (`utils.py:4999`) y `bayesian_search_foundation`. Cada adaptador declara su atributo de backend (compartido con QW-05). Requisito de PLAN-CKPT (`dev/PLAN_UnifiedFinetunedCheckpoint.md`) |
 | **BUG-10** | TabICL (medido) y TabPFN-TS (mismo código) no ignoran las covariables solo pasadas aunque `IgnoredArgumentWarning` diga que sí: predicciones absurdas en silencio al ajustar con exog y predecir sin ella o con menos columnas | foundation | S | `dev/roadmap_0.27.0/repro/BUG-10.py` (requiere `tabicl`) | En `FoundationModel.predict`, si `adapter.supports_past_only_covariates` es False, quitar de `context_exog` las columnas sin futuro antes de llamar al adaptador (arreglo centralizado). Causa: `_adapters.py:2679-2685` (TabICL) y `:3347-3353` (TabPFN) concatenan toda la exog de contexto; T0 (`:3869-3878`) y Nori (`:4795-4799`) ya filtran bien |
-| **BUG-stats-interval-ignored** | `ForecasterStats.predict_interval` ignora `interval` porque `alpha=0.05` por defecto tiene precedencia: `interval=[0.1, 0.9]` devuelve el intervalo del 95%. La skill lo usa como ejemplo de intervalo del 80% | stats | S | `dev/roadmap_0.27.0/repro/BUG-stats-interval-ignored.py` | `alpha=None` por defecto (`_forecaster_stats.py:1010`); usar `interval` si se pasa, 0,05 si no hay ninguno; deprecar `alpha` con `FutureWarning` y versión de retirada (DEP-stats-alpha), también en `backtesting_stats`. Corregir `skills/statistical-models/SKILL.md:72-75` |
+| **BUG-stats-interval-ignored** | `ForecasterStats.predict_interval` ignora `interval` porque `alpha=0.05` por defecto tiene precedencia: `interval=[0.1, 0.9]` devuelve el intervalo del 95%. La skill lo usa como ejemplo de intervalo del 80% | stats | S | `dev/roadmap_0.27.0/repro/BUG-stats-interval-ignored.py` | **Implementado (2026-10-19), pendiente de PR.** `alpha=None` por defecto; se usa `interval` si se pasa y el 95% si no se pasa ninguno; `alpha` sigue como alias (sin deprecar, decisión 5) y pasar los dos da `ValueError`, en `predict_interval` y en `backtesting_stats`. `backtesting_stats` traduce `alpha` a `interval` al principio. `interval` pasa a ir antes que `alpha` en las dos firmas (una llamada posicional antigua falla con `TypeError`, no en silencio; no hay ninguna en el repo). Ahora también se valida `alpha` (entre 0 y 1) en `predict_interval`. Corregidos `skills/statistical-models/SKILL.md`, `skills/prediction-intervals/` y `skills/complete-api-reference/`, la guía `forecasting-statistical-models.ipynb` (re-ejecutada, mismas predicciones) y `releases.md` (Fixed, Changed, highlight y "Before upgrading") |
 | **BUG-06** | En TabICL y Nori (`point_estimate='mean'` por defecto) y TabPFN con `point_estimate` distinto de `'median'`, `predict()` da la media pero `predict_interval()['pred']` y la métrica de `backtesting_foundation` con `quantiles` usan `q_0.5`; además la salida pierde `pred` | foundation | M | `dev/roadmap_0.27.0/repro/BUG-06.py` | `FoundationModel.predict(quantiles=..., include_point=True)` devuelve `pred` junto a `q_*` (reutiliza `q_0.5` si `point_is_median`; TabICL y TabPFN-TS ya calculan el punto en la misma llamada; Nori necesita otra). `predict_interval` (`_forecaster_foundation.py:946-960`) y `_backtesting_foundation` (`_validation.py:2590-2599,2650-2653,2683-2686`) usan ese `pred`. Corregir el docstring (`_foundation_model.py:1041,1058`) y la tabla de la guía (TimesFM 2.5 usa la mediana) |
 | **BUG-08** | `freeze_params=True` (por defecto) no congela nada en `backtesting_stats` ni en `grid/random_search_stats`: la búsqueda automática de Arima/Ets se repite en cada fold y en cada candidato | model_selection (stats) | S | `dev/roadmap_0.27.0/repro/BUG-08.py` | En `_backtesting_stats`, tras el primer ajuste y antes de `Parallel`, propagar `best_params_` a las plantillas: `for est, est_ in zip(forecaster.estimators, forecaster.estimators_): if getattr(est_, "best_params_", None): est._set_params(**est_.best_params_)`. Causa: `_validation.py:2097-2100` congela `estimators_` y `_forecaster_stats.py:521` los vuelve a clonar desde las plantillas. Regenerar valores esperados de tests automáticos con `refit=True`; nota Fixed |
 | **BUG-07** | El formato largo con MultiIndex que documenta la guía solo funciona si el MultiIndex sale de `reshape_series_wide_to_long`; con `df.set_index(["series_id", "date"])` fallan `fit`, backtesting, búsquedas multiserie y foundation | recursive (multiseries) / utils | S | `dev/roadmap_0.27.0/repro/BUG-07.py` | En la rama MultiIndex de `check_preprocess_series` (`utils.py:4199-4202`), si el grupo no tiene `freq`, inferirla con `pd.infer_freq` (al menos 3 observaciones) y aplicar `asfreq`; si no se puede, `ValueError` propio del MultiIndex que sugiera `reshape_series_long_to_dict(..., freq=...)`. Corregir la errata "If it a" (`:4271,4285`) y alinear `skills/forecasting-multiple-series/SKILL.md:52` con la guía. PR-1408 tocaba `check_preprocess_series`, pero se cerró y #1412, que lo sustituye, no toca `utils.py`: sin conflicto |
@@ -601,7 +610,7 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
 | GAP-foundation-backtesting-interval | `skforecast/model_selection/_validation.py:2712-2720` (`backtesting_foundation` solo tiene `quantiles`); `skforecast/model_selection/_search.py:2091` (única búsqueda foundation) | Asimetría de API, comprobada en las firmas; sin medir | Aceptar `interval` en `backtesting_foundation` después de BUG-06; `grid_search_foundation` opcional |
 | PR-1341 / ISSUE-1190 (TiRex-2) | https://github.com/skforecast/skforecast/pull/1341, https://github.com/skforecast/skforecast/issues/1190 | PR externo +1376 líneas, blocked; no revisado | Decidir: foco foundation y demanda recurrente (TabPFN, T0 y Nori ya entraron así); revisión L |
 | ISSUE-1131 (exógenas as-of) | https://github.com/skforecast/skforecast/issues/1131 | Aplazado en marzo "a la release siguiente"; no verificado | Decidir el alcance: FE-02 cubre las variables nunca conocidas a futuro en foundation; las exógenas que son previsiones publicadas (propuesta `exog_builder`) siguen abiertas (L) |
-| DEP-stats-alpha | `skforecast/recursive/_forecaster_stats.py:1047-1055`; `backtesting_stats` | Propuesta | Deprecar `alpha` en favor de `interval` junto con BUG-stats-interval-ignored, con versión de retirada en el mensaje |
+| DEP-stats-alpha | `skforecast/recursive/_forecaster_stats.py:1047-1055`; `backtesting_stats` | Descartado el 2026-10-19 (decisión 5) | Nada: `alpha` queda como alias de `interval` y pasar los dos da `ValueError` (hecho con BUG-stats-interval-ignored) |
 | DEP-python310 | `pyproject.toml:26,65`; `.github/workflows/unit-tests-min-deps.yml:30` | Python 3.10 llega a fin de vida en octubre de 2026 (PEP 619) | Anunciar en 0.27 y retirar en 0.28 (precedente: 3.9 en la 0.19.0) |
 | DEP-arima-dictstyle | `skforecast/stats/arima/_arima_base.py:271-290` | `FutureWarning` sin versión desde la 0.22; única deprecación activa | Retirar en 0.27 o fijar la versión; valorar usar `runtime_deprecated` (`skforecast/exceptions/exceptions.py:21`), que no se usa |
 | DOC-skills-percentiles-stale | `skills/prediction-intervals/SKILL.md:55-57,70,265`; `references/interval-compatibility.md:23,205`; `skills/complete-api-reference/references/forecaster-methods.md:432,455` (`set_params` marcado como ausente en EquivalentDate) | Desactualizado (percentiles dan `ValueError` desde 0.25) | Corregir junto a QW-07 (b) y regenerar el contexto IA |
@@ -622,6 +631,9 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
   información, el umbral y el mínimo de filas son arbitrarios, no está claro si saltaría por
   serie o por agregado, y su consejo (residuos out-of-sample) no basta: LGBM con conformal y
   residuos out-of-sample cubre 0,62 frente al 0,80 nominal.
+- DEP-stats-alpha (deprecar `alpha` en favor de `interval` en `ForecasterStats` y
+  `backtesting_stats`): descartado el 2026-10-19. Se mantiene como alias para quien viene de
+  estadística; la ambigüedad se resuelve con un `ValueError` si se pasan los dos (decisión 5).
 - Duplicado "grid/random devuelven un DataFrame vacío" (lente ml-multi): fusionado en BUG-05.
 - Duplicado "propagar `differentiation` a `TimeSeriesFold`" (ml-multi): fusionado en QW-03.
 - Duplicado "aviso de exog en foundation" (consistency): fusionado en QW-02.
