@@ -4,6 +4,13 @@ SessionStart hook: prepare the Python environment in cloud sessions (claude.ai/c
 Does nothing unless CLAUDE_CODE_REMOTE == "true", so local sessions keep using
 the developer's conda environment. In the cloud (Ubuntu, no conda) it:
 
+0. Fetches the current branch from `origin`, because a cloud session may start
+   from a checkout older than its branch on GitHub (pull requests merged
+   minutes before were missing). A protected branch (`main`, `X.Y.x`) with no
+   local changes or commits is fast-forwarded to it; any other branch that is
+   behind only gets a warning, since it may hold work of a resumed session.
+   This runs before the install, so the dependencies come from the updated
+   pyproject.toml.
 1. Creates a virtual environment outside the repository (~/.venvs/skforecast),
    because the `.venv` directory at the repository root must not be used.
 2. Installs skforecast in editable mode with the `test` extras except the deep
@@ -45,6 +52,8 @@ EXTRA_TOOLS = ["ruff"]
 REPORTED_PACKAGES = (
     "numpy", "pandas", "scikit-learn", "scipy", "numba", "statsmodels", "optuna"
 )
+PROTECTED_BRANCH = re.compile(r"^(main|\d+\.\d+\.x)$")
+FETCH_TIMEOUT = 60
 
 
 def deep_learning_enabled():
@@ -76,6 +85,80 @@ def run(cmd, cwd, env=None):
             f"`{' '.join(cmd)}` failed:\n{(result.stderr or result.stdout)[-2000:]}"
         )
     return result.stdout
+
+
+def git(*args, cwd):
+    return subprocess.run(
+        ["git", *args], cwd=cwd, capture_output=True, text=True
+    ).stdout.strip()
+
+
+def sync_with_origin(cwd):
+    """
+    Fetch the current branch from `origin` and fast-forward a protected branch
+    that is behind it. Return a one line status, or None when there is nothing
+    to compare (detached HEAD, no `origin`, branch not pushed yet).
+    """
+    branch = git("rev-parse", "--abbrev-ref", "HEAD", cwd=cwd)
+    if branch in ("", "HEAD") or not git("remote", "get-url", "origin", cwd=cwd):
+        return None
+
+    remote_ref = f"origin/{branch}"
+    try:
+        # Explicit refspec: a single branch clone may not track this branch.
+        # LC_ALL=C: the error message below is matched in English.
+        fetch = subprocess.run(
+            ["git", "fetch", "--quiet", "origin",
+             f"+refs/heads/{branch}:refs/remotes/{remote_ref}"],
+            cwd=cwd, capture_output=True, text=True, timeout=FETCH_TIMEOUT,
+            env={**os.environ, "GIT_TERMINAL_PROMPT": "0", "LC_ALL": "C"},
+        )
+    except subprocess.TimeoutExpired:
+        return (
+            f"WARNING: fetching {remote_ref} timed out; the checkout may be "
+            f"older than GitHub, run `git fetch origin {branch}` and compare."
+        )
+    if fetch.returncode != 0:
+        if "couldn't find remote ref" in fetch.stderr:
+            return None
+        reason = (fetch.stderr.strip().splitlines() or ["unknown error"])[-1]
+        return (
+            f"WARNING: could not fetch {remote_ref} ({reason}); the checkout "
+            f"may be older than GitHub."
+        )
+
+    counts = git(
+        "rev-list", "--left-right", "--count", f"HEAD...{remote_ref}", cwd=cwd
+    ).split()
+    if len(counts) != 2:
+        return f"WARNING: could not compare HEAD with {remote_ref}."
+    ahead, behind = (int(n) for n in counts)
+    if behind == 0:
+        return f"Branch '{branch}' is up to date with {remote_ref} (fetched now)."
+
+    dirty = git("status", "--porcelain", "--untracked-files=no", cwd=cwd)
+    if PROTECTED_BRANCH.match(branch) and ahead == 0 and not dirty:
+        old = git("rev-parse", "--short", "HEAD", cwd=cwd)
+        merge = subprocess.run(
+            ["git", "merge", "--quiet", "--ff-only", remote_ref],
+            cwd=cwd, capture_output=True, text=True,
+        )
+        if merge.returncode == 0:
+            new = git("rev-parse", "--short", "HEAD", cwd=cwd)
+            return (
+                f"The checkout of '{branch}' was {behind} commits behind "
+                f"{remote_ref}; fast-forwarded it from {old} to {new}."
+            )
+        reason = "the fast-forward failed"
+    elif PROTECTED_BRANCH.match(branch):
+        reason = "it has local changes or commits"
+    else:
+        reason = "only protected branches are updated automatically"
+    return (
+        f"WARNING: '{branch}' is {behind} commits behind {remote_ref} "
+        f"({ahead} ahead) and was not updated: {reason}. Merge {remote_ref} "
+        f"before building on it."
+    )
 
 
 def find_uv(project_dir):
@@ -129,6 +212,10 @@ def main():
         return 0
 
     project_dir = os.environ.get("CLAUDE_PROJECT_DIR") or os.getcwd()
+    # Before the pyproject.toml hash, so the install uses the updated file.
+    sync = sync_with_origin(project_dir)
+    if sync:
+        print(sync)
     pyproject_path = os.path.join(project_dir, "pyproject.toml")
     with_dl = deep_learning_enabled()
     with open(pyproject_path, "rb") as f:

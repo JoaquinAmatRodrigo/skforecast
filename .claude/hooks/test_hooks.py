@@ -5,6 +5,7 @@ test suite (`testpaths = ["skforecast"]`); run them after changing a hook:
     python -m pytest .claude/hooks -q -p no:cacheprovider
 """
 
+import importlib
 import json
 import os
 import subprocess
@@ -240,6 +241,102 @@ def test_session_start_remote_versions_summary():
     ])
     summary = session_start_remote.versions_summary(freeze, "3.12.11")
     assert summary == "Python 3.12.11, numpy 2.5.4, scikit-learn 1.9.1, numba 0.68.0"
+
+
+def git(repo, *args):
+    subprocess.run(
+        ["git", "-c", "user.email=hook@test", "-c", "user.name=hook", *args],
+        cwd=repo, check=True, capture_output=True,
+    )
+
+
+def head(repo, ref="HEAD"):
+    return subprocess.run(
+        ["git", "rev-parse", ref], cwd=repo, capture_output=True, text=True,
+        check=True,
+    ).stdout.strip()
+
+
+def make_clone_behind(tmp_path, branch, behind):
+    """
+    A clone of a bare `origin` on `branch`, after another clone pushed
+    `behind` more commits to that branch.
+    """
+    seed = tmp_path / "seed"
+    seed.mkdir()
+    git(seed, "init", "-q")
+    git(seed, "checkout", "-q", "-b", branch)
+    (seed / "pyproject.toml").write_text("[project]\nname = 'x'\n")
+    git(seed, "add", "pyproject.toml")
+    git(seed, "commit", "-q", "-m", "init")
+    origin = tmp_path / "origin.git"
+    git(tmp_path, "clone", "-q", "--bare", str(seed), str(origin))
+    git(tmp_path, "clone", "-q", "-b", branch, str(origin), "clone")
+    git(tmp_path, "clone", "-q", "-b", branch, str(origin), "other")
+    for i in range(behind):
+        git(tmp_path / "other", "commit", "-q", "--allow-empty", "-m", f"c{i}")
+    git(tmp_path / "other", "push", "-q", "origin", branch)
+    return tmp_path / "clone"
+
+
+@pytest.fixture
+def session_start_remote(monkeypatch):
+    """The session_start_remote module, with the install failing at once."""
+    monkeypatch.syspath_prepend(str(HOOKS_DIR))
+    module = importlib.import_module("session_start_remote")
+
+    def no_uv(project_dir):
+        raise RuntimeError("install stubbed")
+
+    monkeypatch.setattr(module, "find_uv", no_uv)
+    monkeypatch.setenv("CLAUDE_CODE_REMOTE", "true")
+    monkeypatch.delenv("CLAUDE_ENV_FILE", raising=False)
+    return module
+
+
+@pytest.mark.parametrize(
+    "branch, behind, dirty, moved, expected",
+    [
+        ("0.27.x", 2, False, True, "was 2 commits behind origin/0.27.x; fast-forwarded"),
+        ("main", 1, False, True, "was 1 commits behind origin/main; fast-forwarded"),
+        ("0.27.x", 0, False, False, "'0.27.x' is up to date with origin/0.27.x"),
+        ("0.27.x", 2, True, False, "it has local changes or commits"),
+        ("fix/x", 1, False, False, "only protected branches are updated"),
+    ],
+    ids=["protected-behind", "main-behind", "up-to-date", "dirty", "not-protected"],
+)
+def test_session_start_remote_syncs_branch_with_origin(
+    session_start_remote, monkeypatch, capsys, tmp_path, branch, behind, dirty,
+    moved, expected,
+):
+    repo = make_clone_behind(tmp_path, branch, behind)
+    if dirty:
+        (repo / "notes.md").write_text("x\n")
+        git(repo, "add", "notes.md")
+    before = head(repo)
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(repo))
+
+    assert session_start_remote.main() == 0
+    out = capsys.readouterr().out
+
+    # The sync status comes before the install, which reads pyproject.toml.
+    assert out.index(expected) < out.index("install stubbed")
+    assert (head(repo) == head(repo, f"origin/{branch}")) is (moved or behind == 0)
+    assert (head(repo) != before) is moved
+
+
+def test_session_start_remote_skips_sync_for_branch_not_on_origin(
+    session_start_remote, monkeypatch, capsys, tmp_path
+):
+    repo = make_clone_behind(tmp_path, "0.27.x", 1)
+    git(repo, "checkout", "-q", "-b", "fix/new")
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(repo))
+
+    assert session_start_remote.main() == 0
+    out = capsys.readouterr().out
+
+    assert "origin/fix/new" not in out
+    assert out.startswith("WARNING: the skforecast cloud environment")
 
 
 def test_session_start_remote_installs_ruff():
