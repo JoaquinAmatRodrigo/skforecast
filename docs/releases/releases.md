@@ -16,6 +16,8 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
++ <span class="badge text-bg-feature">Feature</span> Backtesting with a two-bound `interval` reports the empirical `coverage` and the mean `interval_width` of the prediction intervals next to the other metrics, per series and aggregated in multi-series backtesting. ([#1409](https://github.com/skforecast/skforecast/issues/1409))
+
 + <span class="badge text-bg-fix">Fix</span> The `predict_interval` method of <code>[ForecasterStats]</code> returns the interval requested in `interval`; it always returned the 95% interval. ([#1416](https://github.com/skforecast/skforecast/pull/1416))
 
 !!! warning "Before upgrading"
@@ -24,10 +26,12 @@ The main changes in this release are:
 
     + <code>[ForecasterStats]</code>: `predict_interval(interval=...)` without `alpha` returns the requested interval instead of the 95% one.
 
-    And some code needs to be updated: passing both `alpha` and `interval` to <code>[ForecasterStats]</code> or <code>[backtesting_stats]</code> raises a `ValueError`. See **Changed**.
+    And some code needs to be updated: passing both `alpha` and `interval` to <code>[ForecasterStats]</code> or <code>[backtesting_stats]</code> raises a `ValueError`; and the metrics of backtesting with a two-bound `interval` have two more columns, `coverage` and `interval_width`, so code that selects them by position may need to change. See **Added** and **Changed**.
 
 
 **Added**
+
++ <code>[backtesting_forecaster]</code>, <code>[backtesting_forecaster_multiseries]</code> and <code>[backtesting_stats]</code> add `coverage` and `interval_width` (mean width of the interval, in the units of the series) to the metrics when `interval` has a lower and an upper bound. In multi-series backtesting they are reported per series and in the aggregated rows. ([#1409](https://github.com/skforecast/skforecast/issues/1409))
 
 
 **Changed**

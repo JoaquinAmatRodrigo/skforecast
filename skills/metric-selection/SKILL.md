@@ -171,6 +171,11 @@ Use these metrics when evaluating prediction intervals or quantile forecasts.
 Coverage measures the proportion of true values that fall within the predicted
 interval. **Target: match the nominal level** (e.g., 90% interval should have ~90% coverage).
 
+Backtesting functions add `coverage` and `interval_width` (mean width of the
+interval, in the units of the series) to `metric` when `interval` has a lower
+and an upper bound, so there is no need to pass them in `metric`. Use
+`calculate_coverage` for predictions made outside backtesting:
+
 ```python
 from skforecast.metrics import calculate_coverage
 

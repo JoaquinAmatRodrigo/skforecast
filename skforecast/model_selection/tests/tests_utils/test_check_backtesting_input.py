@@ -313,6 +313,82 @@ def test_check_backtesting_input_TypeError_when_metric_not_correct_type():
         )
 
 
+def coverage(y_true, y_pred):  # pragma: no cover
+    """
+    Custom metric whose name is reserved for the interval metrics.
+    """
+    return 0.0
+
+
+@pytest.mark.parametrize(
+    "kwargs_interval",
+    [{'interval': 0.8}, {'interval': [0.1, 0.9]}, {'interval': (0.1, 0.9)},
+     {'alpha': 0.2}],
+    ids = lambda kwargs: f'{kwargs}'
+)
+def test_check_backtesting_input_ValueError_when_metric_name_is_reserved_for_interval_metrics(kwargs_interval):
+    """
+    Test ValueError is raised in check_backtesting_input if a metric is named
+    as one of the interval metrics (`coverage`, `interval_width`) and `interval`
+    (or `alpha`) has a lower and an upper bound.
+    """
+    forecaster = ForecasterRecursive(
+                     estimator = Ridge(random_state=123),
+                     lags      = 2
+                 )
+    cv = TimeSeriesFold(
+             steps              = 5,
+             initial_train_size = len(y[:-12]),
+             refit              = False
+         )
+
+    err_msg = re.escape(
+        "When `interval` has a lower and an upper bound, the backtesting "
+        "metrics include ['coverage', 'interval_width']. Rename the metric(s) "
+        "['coverage', 'interval_width'] passed in `metric`."
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_backtesting_input(
+            forecaster    = forecaster,
+            cv            = cv,
+            metric        = ['mean_absolute_error', coverage, 'interval_width'],
+            y             = y,
+            show_progress = False,
+            **kwargs_interval
+        )
+
+
+@pytest.mark.parametrize(
+    "interval",
+    [None, [0.1, 0.5, 0.9], 'bootstrapping'],
+    ids = lambda interval: f'interval: {interval}'
+)
+def test_check_backtesting_input_no_error_when_metric_name_is_reserved_and_interval_has_not_two_bounds(interval):
+    """
+    Test no error is raised in check_backtesting_input if a metric is named
+    as one of the interval metrics but `interval` does not have a lower and
+    an upper bound, so the interval metrics are not calculated.
+    """
+    forecaster = ForecasterRecursive(
+                     estimator = Ridge(random_state=123),
+                     lags      = 2
+                 )
+    cv = TimeSeriesFold(
+             steps              = 5,
+             initial_train_size = len(y[:-12]),
+             refit              = False
+         )
+
+    check_backtesting_input(
+        forecaster    = forecaster,
+        cv            = cv,
+        metric        = coverage,
+        y             = y,
+        interval      = interval,
+        show_progress = False
+    )
+
+
 def test_check_backtesting_input_ValueError_when_initial_train_size_is_None_ForecasterEquivalentDate():
     """
     Test ValueError is raised in check_backtesting_input when initial_train_size
