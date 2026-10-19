@@ -45,6 +45,8 @@ The main changes in this release are:
 
 + <code>[backtesting_forecaster_multiseries]</code> and <code>[backtesting_foundation]</code> silently left out of the metrics, including the aggregated ones, the series that could not be predicted in a fold (shorter than the window size, missing values in the last window, or no observed values in the context window). A `MissingValuesWarning` now names those series and folds. ([#1406](https://github.com/skforecast/skforecast/issues/1406))
 
++ <code>[backtesting_forecaster_multiseries]</code> and the hyperparameter search of <code>[ForecasterRecursiveMultiSeries]</code> raised `ValueError: Length of '<series>' must be greater than the maximum window size needed by the forecaster` when a series that starts late or ends early had exactly `window_size` values in the training set of a fold. That series is now left out of the fold. ([#1410](https://github.com/skforecast/skforecast/issues/1410), [#1418](https://github.com/skforecast/skforecast/pull/1418))
+
 
 ## 0.26.0 <small>Oct 8, 2026</small> { id="0.26.0" }
 

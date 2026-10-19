@@ -1416,6 +1416,40 @@ def test_train_test_split_one_step_ahead_when_ordinal_category_and_level_without
     )
 
 
+def test_train_test_split_one_step_ahead_when_series_with_window_size_values_in_train():
+    """
+    Test _train_test_split_one_step_ahead when a series has exactly
+    `window_size` values in the training set. It is left out of both the
+    training and the test sets, since `fit` needs more than `window_size`
+    values to create a training row.
+    """
+    series_late = {
+        "series_1": pd.Series(
+            np.arange(15, dtype=float),
+            index=pd.date_range("2020-01-01", periods=15)
+        ),
+        "series_2": pd.Series(
+            np.arange(50, 58, dtype=float),
+            index=pd.date_range("2020-01-08", periods=8)
+        ),
+    }
+
+    forecaster = ForecasterRecursiveMultiSeries(
+        LinearRegression(), lags=3, encoding='ordinal'
+    )
+
+    X_train, y_train, X_test, y_test, X_train_encoding, X_test_encoding, sample_weight, fit_kwargs = (
+        forecaster._train_test_split_one_step_ahead(
+            series=series_late, initial_train_size=10
+        )
+    )
+
+    assert X_train_encoding.unique().tolist() == ['series_1']
+    assert X_test_encoding.unique().tolist() == ['series_1']
+    np.testing.assert_array_almost_equal(y_train.to_numpy(), np.arange(3, 10))
+    np.testing.assert_array_almost_equal(y_test.to_numpy(), np.arange(10, 15))
+
+
 def test_train_test_split_one_step_ahead_when_weight_func_and_series_weights():
     """
     Test _train_test_split_one_step_ahead when both weight_func and

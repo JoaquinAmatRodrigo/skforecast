@@ -1457,3 +1457,54 @@ def test_output_backtesting_foundation_series_skipped_when_context_window_all_na
             verbose=False,
             show_progress=False,
         )
+
+
+def test_output_backtesting_foundation_series_predicted_when_context_has_one_observation():
+    """
+    Test a series with a single observation in the context window of a fold
+    is predicted in that fold: foundation models need no window to create
+    predictors, so one observation is enough. `series_2` starts at the last
+    position of the training set of fold 0.
+    """
+    series = {
+        "series_1": series_dict["series_1"],
+        "series_2": series_dict["series_2"].iloc[37:],
+    }
+    forecaster = make_forecaster()
+    cv = TimeSeriesFold(
+        steps=3,
+        initial_train_size=38,
+        refit=False,
+        verbose=False,
+    )
+    with patch(
+        "skforecast.model_selection._validation.deepcopy_forecaster",
+        side_effect=deepcopy,
+    ):
+        metric, backtest_predictions = backtesting_foundation(
+            forecaster=forecaster,
+            series=series,
+            cv=cv,
+            metric="mean_absolute_error",
+            add_aggregated_metric=False,
+            verbose=False,
+            show_progress=False,
+        )
+
+    expected_metric = pd.DataFrame(
+        {
+            "levels": ["series_1", "series_2"],
+            "mean_absolute_error": [43.0, 93.0],
+        }
+    )
+    expected_predictions = pd.DataFrame(
+        {
+            "level": ["series_1", "series_2"] * 12,
+            "fold": np.repeat([0, 1, 2, 3], 6),
+            "pred": np.full(24, 0.5),
+        },
+        index=_test_index.repeat(2),
+    )
+
+    pd.testing.assert_frame_equal(metric, expected_metric)
+    pd.testing.assert_frame_equal(backtest_predictions, expected_predictions)
