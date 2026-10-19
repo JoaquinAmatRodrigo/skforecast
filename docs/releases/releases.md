@@ -16,16 +16,30 @@ All significant changes to this project are documented in this release file.
 
 The main changes in this release are:
 
++ <span class="badge text-bg-fix">Fix</span> The `predict_interval` method of <code>[ForecasterStats]</code> returns the interval requested in `interval`; it always returned the 95% interval.
+
+!!! warning "Before upgrading"
+
+    Some results change with this version, without any change in your code:
+
+    + <code>[ForecasterStats]</code>: `predict_interval(interval=...)` without `alpha` returns the requested interval instead of the 95% one.
+
+    And some code needs to be updated: passing both `alpha` and `interval` to <code>[ForecasterStats]</code> or <code>[backtesting_stats]</code> raises a `ValueError`. See **Changed**.
+
 
 **Added**
 
 
 **Changed**
 
++ In the `predict_interval` method of <code>[ForecasterStats]</code> and in <code>[backtesting_stats]</code>, `alpha` is an alias of `interval` (`alpha=0.05` is equivalent to `interval=[0.025, 0.975]`), and passing both raises a `ValueError`. Previously, `alpha` took precedence over `interval`. `interval` now comes before `alpha` in the signature.
+
 + The first fit of <code>[Ets]</code> in a new environment, when numba compiles its functions, takes about 40% less time (7 s instead of 12 s on a 4-core CPU). Estimates and selected models are unchanged. ([#1400](https://github.com/skforecast/skforecast/pull/1400))
 
 
 **Fixed**
+
++ Fixed an issue in the `predict_interval` method of <code>[ForecasterStats]</code> where `interval` was ignored unless `alpha=None` was also passed, because `alpha` defaulted to 0.05 and took precedence: `interval=[0.1, 0.9]` returned the 95% interval. <code>[backtesting_stats]</code> was not affected.
 
 + <code>[ForecasterRecursiveMultiSeries]</code> raised a `KeyError` in `fit` and in backtesting when the series names were integers (dict keys, wide DataFrame columns or numeric ids in long data). The names are now kept as given; with `encoding='onehot'` the one-hot columns are named after the series as strings. ([#1357](https://github.com/skforecast/skforecast/issues/1357), [#1412](https://github.com/skforecast/skforecast/pull/1412))
 

@@ -644,11 +644,7 @@ def test_output_backtesting_stats_yes_refit_fixed_train_size_yes_exog_list_of_me
     pd.testing.assert_frame_equal(expected_preds, backtest_predictions, atol=0.0001)
     
 
-@pytest.mark.parametrize("alpha, interval", 
-                         [(0.05, [0.01, 0.99]), 
-                          (None, [0.025, 0.975])], 
-                         ids = lambda values: f'alpha, interval: {values}')
-def test_output_backtesting_stats_no_refit_yes_exog_interval_with_mocked(alpha, interval):
+def test_output_backtesting_stats_no_refit_yes_exog_interval_with_mocked():
     """
     Test output of backtesting_stats with backtesting mocked, Series y is mocked, yes exog, 
     no refit, 12 observations to backtest, steps=3 (no remainder), metric='mean_absolute_error',
@@ -673,8 +669,7 @@ def test_output_backtesting_stats_no_refit_yes_exog_interval_with_mocked(alpha, 
                                         cv         = cv,
                                         exog       = exog_datetime,
                                         metric     = ['mean_absolute_error'],
-                                        alpha      = alpha,
-                                        interval   = interval,
+                                        interval   = [0.025, 0.975],
                                         verbose    = False
                                    )
     
@@ -703,11 +698,7 @@ def test_output_backtesting_stats_no_refit_yes_exog_interval_with_mocked(alpha, 
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.0001)
 
 
-@pytest.mark.parametrize("alpha, interval", 
-                         [(0.05, [0.01, 0.99]), 
-                          (None, [0.025, 0.975])], 
-                         ids = lambda values: f'alpha, interval: {values}')
-def test_output_backtesting_stats_yes_refit_yes_exog_interval_with_mocked(alpha, interval):
+def test_output_backtesting_stats_yes_refit_yes_exog_interval_with_mocked():
     """
     Test output of backtesting_stats with backtesting mocked, Series y is mocked, yes exog, 
     yes refit, 12 observations to backtest, steps=3 (no remainder), 
@@ -732,8 +723,7 @@ def test_output_backtesting_stats_yes_refit_yes_exog_interval_with_mocked(alpha,
                                         cv         = cv,
                                         exog       = exog_datetime,
                                         metric     = 'mean_absolute_error',
-                                        alpha      = alpha,
-                                        interval   = interval,
+                                        interval   = [0.025, 0.975],
                                         verbose    = False
                                    )
     
@@ -762,11 +752,7 @@ def test_output_backtesting_stats_yes_refit_yes_exog_interval_with_mocked(alpha,
     pd.testing.assert_frame_equal(expected_backtest_predictions, backtest_predictions, atol=0.0001)
 
 
-@pytest.mark.parametrize("alpha, interval", 
-                         [(0.05, [0.01, 0.99]), 
-                          (None, [0.025, 0.975])], 
-                         ids = lambda values: f'alpha, interval: {values}')
-def test_output_backtesting_stats_yes_refit_fixed_train_size_yes_exog_interval_with_mocked(alpha, interval):
+def test_output_backtesting_stats_yes_refit_fixed_train_size_yes_exog_interval_with_mocked():
     """
     Test output of backtesting_stats with backtesting mocked, Series y is mocked, yes exog, 
     yes refit, fixed_train_size, 12 observations to backtest, steps=3 (no remainder), 
@@ -791,8 +777,7 @@ def test_output_backtesting_stats_yes_refit_fixed_train_size_yes_exog_interval_w
                                        cv         = cv,
                                        exog       = exog_datetime,
                                        metric     = ['mean_absolute_error'],
-                                       alpha      = alpha,
-                                       interval   = interval,
+                                       interval   = [0.025, 0.975],
                                        verbose    = False
                                    )
     
@@ -1137,8 +1122,7 @@ def test_output_backtesting_stats_multiple_estimators_refit_False_interval_with_
                                             y          = y_datetime,
                                             cv         = cv,
                                             metric     = 'mean_squared_error',
-                                            alpha      = 0.05,
-                                            interval   = None,
+                                            interval   = [0.025, 0.975],
                                             verbose    = False
                                        )
     
@@ -1194,8 +1178,7 @@ def test_output_backtesting_stats_multiple_estimators_refit_True_interval_with_m
                                         y          = y_datetime,
                                         cv         = cv,
                                         metric     = 'mean_squared_error',
-                                        alpha      = 0.05,
-                                        interval   = None,
+                                        interval   = [0.025, 0.975],
                                         verbose    = False
                                    )
     
@@ -1529,3 +1512,69 @@ def test_backtesting_stats_IgnoredArgumentWarning_integer_refit_with_non_Sarimax
         metric.loc[0, 'mean_squared_error'], 0.01505251113240201, rtol=1e-2
     )
     assert len(predictions) == 12
+
+
+def test_backtesting_stats_ValueError_when_alpha_and_interval_are_provided():
+    """
+    Test ValueError is raised when both `alpha` and `interval` are provided.
+    """
+    forecaster = ForecasterStats(estimator=Arima(order=(1, 1, 0)))
+    cv = TimeSeriesFold(
+             steps              = 3,
+             initial_train_size = len(y_datetime) - 12,
+             refit              = True
+         )
+
+    err_msg = re.escape(
+        "`alpha` and `interval` cannot be used together. Use only one "
+        "of them: `alpha=0.05` is equivalent to `interval=[0.025, 0.975]`."
+    )
+    with pytest.raises(ValueError, match=err_msg):
+        backtesting_stats(
+            forecaster = forecaster,
+            y          = y_datetime,
+            cv         = cv,
+            metric     = 'mean_absolute_error',
+            alpha      = 0.05,
+            interval   = [0.1, 0.9]
+        )
+
+
+def test_output_backtesting_stats_alpha_is_alias_of_interval():
+    """
+    Test backtesting_stats returns the same output with `alpha` as with the
+    equivalent `interval`.
+    """
+    forecaster = ForecasterStats(
+                     estimator = Arima(order=(1, 1, 0))
+                 )
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             refit                 = True,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+
+    metric, backtest_predictions = backtesting_stats(
+                                       forecaster    = forecaster,
+                                       y             = y_datetime,
+                                       cv            = cv,
+                                       metric        = 'mean_absolute_error',
+                                       alpha         = 0.2,
+                                       n_jobs        = 1,
+                                       show_progress = False
+                                   )
+    expected_metric, expected_predictions = backtesting_stats(
+                                                forecaster    = forecaster,
+                                                y             = y_datetime,
+                                                cv            = cv,
+                                                metric        = 'mean_absolute_error',
+                                                interval      = [0.1, 0.9],
+                                                n_jobs        = 1,
+                                                show_progress = False
+                                            )
+
+    pd.testing.assert_frame_equal(metric, expected_metric)
+    pd.testing.assert_frame_equal(backtest_predictions, expected_predictions)

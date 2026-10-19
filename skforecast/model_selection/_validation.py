@@ -2220,8 +2220,8 @@ def backtesting_stats(
     cv: TimeSeriesFold,
     metric: str | Callable | list[str | Callable],
     exog: pd.Series | pd.DataFrame | None = None,
-    alpha: float | None = None,
     interval: list[float] | tuple[float, ...] | None = None,
+    alpha: float | None = None,
     freeze_params: bool = True,
     n_jobs: int | str = 'auto',
     verbose: bool = False,
@@ -2255,19 +2255,25 @@ def backtesting_stats(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    alpha : float, default None
-        The confidence intervals for the forecasts are (1 - alpha) %.
-        If both, `alpha` and `interval` are provided, `alpha` will be used.
     interval : list, tuple, default None
         Confidence of the prediction interval estimated. The values must be
         symmetric. Sequence of quantiles to compute, which must be between 
         0 and 1 inclusive. For example, interval of 95% should be as 
-        `interval = [0.025, 0.975]`. If both, `alpha` and `interval` are 
-        provided, `alpha` will be used.
+        `interval = [0.025, 0.975]`. If both `alpha` and `interval` are
+        `None`, no intervals are estimated.
 
         **Changed in version 0.23.0:** `interval` is now expressed as
         quantiles (0-1) instead of percentiles (0-100). Passing percentiles
         is not longer supported and will raise a `ValueError`.
+
+        **Changed in version 0.27.0:** passing both `alpha` and `interval`
+        raises a `ValueError` (previously, `alpha` took precedence), and
+        `interval` comes before `alpha` in the signature.
+    alpha : float, default None
+        Alias of `interval` expressed as the significance level: the
+        confidence intervals for the forecasts are (1 - alpha) %. For
+        example, `alpha=0.05` is equivalent to `interval=[0.025, 0.975]`.
+        It cannot be used together with `interval`.
     freeze_params : bool, default True
         Determines whether to freeze the model parameters after the first fit
         for estimators that perform automatic model selection.
@@ -2339,6 +2345,12 @@ def backtesting_stats(
             "`model_selection` module."
         )
     
+    if alpha is not None and interval is not None:
+        raise ValueError(
+            "`alpha` and `interval` cannot be used together. Use only one "
+            "of them: `alpha=0.05` is equivalent to `interval=[0.025, 0.975]`."
+        )
+
     check_backtesting_input(
         forecaster        = forecaster,
         cv                = cv,
@@ -2351,6 +2363,12 @@ def backtesting_stats(
         show_progress     = show_progress,
         suppress_warnings = suppress_warnings
     )
+
+    # NOTE: `alpha` is an alias of `interval`. It is translated into the
+    # equivalent `interval` so that the rest of the process only uses `interval`.
+    if alpha is not None:
+        interval = [alpha / 2, 1 - alpha / 2]
+        alpha = None
     
     metric_values, backtest_predictions = _backtesting_stats(
         forecaster        = forecaster,

@@ -4760,7 +4760,7 @@ See [references/interval-compatibility.md](references/interval-compatibility.md)
 1. **Passing percentiles instead of quantiles**: `interval` is on the 0-1 scale. Use `interval=[0.1, 0.9]`, not `[10, 90]` (percentiles are deprecated and emit a `FutureWarning`). Mixing scales, e.g. `[0.1, 90]`, raises a `ValueError`.
 2. **Forgetting `store_in_sample_residuals=True`**: Required in `fit()` before using `predict_interval(method='bootstrapping')`.
 3. **Wrong default method for multi-series**: `ForecasterRecursiveMultiSeries` and `ForecasterDirectMultiVariate` default to `method='conformal'`, not `'bootstrapping'`.
-4. **Mixing `alpha` and `interval`**: `ForecasterStats` supports both `alpha` (e.g., `alpha=0.05` for 95% interval) and `interval=[lo, hi]` (quantiles). ML forecasters only support `interval`.
+4. **Mixing `alpha` and `interval`**: in `ForecasterStats` and `backtesting_stats`, `alpha` is an alias of `interval` (`alpha=0.05` is `interval=[0.025, 0.975]`). Pass only one of them; passing both raises a `ValueError`. ML forecasters only support `interval`.
 5. **Not evaluating coverage**: Always check if actual coverage matches nominal interval width.
 6. **Ignoring physical bounds**: neither the model nor the intervals know that a series cannot be negative (counts, sales, demand), so predictions and lower bounds can fall below zero. Clip them after predicting, e.g. `predictions.clip(lower=0)`. See the FAQ [Non-negative predictions](https://skforecast.org/latest/faq/non-negative-predictions.html).
 
@@ -4832,12 +4832,12 @@ forecaster.predict_interval(
 ```python
 forecaster.predict_interval(
     steps,
-    alpha=0.05,                      # significance level → 95% interval
-    interval=None,                   # list[float] | None — quantiles, alternative to alpha
+    interval=[0.025, 0.975],         # symmetric quantiles → 95% interval (default if None)
+    alpha=None,                      # alias of interval: alpha=0.05 is interval=[0.025, 0.975]
 )
 # NOTE: No `method`, `n_boot`, `use_in_sample_residuals`, `use_binned_residuals`,
 #       or `random_state` parameters.
-# Use EITHER `alpha` OR `interval`, not both.
+# Use EITHER `alpha` OR `interval`: passing both raises a ValueError.
 ```
 
 ### ForecasterEquivalentDate (conformal only)
@@ -5047,10 +5047,10 @@ forecaster.fit(y=data['target'])
 predictions = forecaster.predict(steps=12)
 
 # 3. Prediction intervals (all stat models support this natively,
-#    no bootstrapping needed). Accepts both `interval` and `alpha`.
+#    no bootstrapping needed). Default (no `interval` nor `alpha`): 95%.
 predictions_interval = forecaster.predict_interval(
     steps=12,
-    interval=[0.1, 0.9],  # quantiles (0-1). Or use alpha=0.2 for 80% interval
+    interval=[0.1, 0.9],  # symmetric quantiles (0-1), or its alias alpha=0.2
 )
 ```
 
@@ -6975,8 +6975,8 @@ forecaster.predict_interval(
     last_window=None,                   # pd.Series | None
     last_window_exog=None,              # pd.Series | pd.DataFrame | None
     exog=None,                          # pd.Series | pd.DataFrame | None
-    alpha=0.05,                         # float, significance level
-    interval=None,                      # list[float] | tuple[float] | None, quantiles 0-1
+    interval=None,                      # list[float] | tuple[float] | None, symmetric quantiles 0-1 (both None: 95%)
+    alpha=None,                         # float | None, alias of interval (alpha=0.05 is interval=[0.025, 0.975])
     suppress_warnings=False             # bool
 ) -> pd.DataFrame
 
@@ -7261,8 +7261,8 @@ backtesting_stats(
     cv,                                 # TimeSeriesFold
     metric,                             # str | Callable | list[str | Callable]
     exog=None,                          # pd.Series | pd.DataFrame | None
-    alpha=None,                         # float | None, significance level
-    interval=None,                      # list[float] | tuple[float] | None
+    interval=None,                      # list[float] | tuple[float] | None, symmetric quantiles 0-1
+    alpha=None,                         # float | None, alias of interval, not both
     freeze_params=True,                 # bool, if True only first fold fits the model
     n_jobs='auto',                      # int | str
     verbose=False,                      # bool
