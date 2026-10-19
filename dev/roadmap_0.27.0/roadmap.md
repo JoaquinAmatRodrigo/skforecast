@@ -21,6 +21,16 @@ Revisión del 2026-10-18 sobre este informe. **Esta sección manda sobre la secc
 mete en 0.27.0 unos 40 elementos porque el análisis se hizo sin límite de tiempo. Las
 secciones 1 a 7 quedan como referencia: evidencia, antes y después, y esbozos de cada arreglo.
 
+> **MUY IMPORTANTE: BUG-search-short-series** (añadido el 2026-10-19). Las búsquedas
+> multiserie (`grid_search`, `random_search` y `bayesian_search`, con `TimeSeriesFold` y
+> `OneStepAheadFold`) evalúan cada candidato sobre las series y folds que puede predecir.
+> Con distintos `lags`, una ventana grande deja fuera las series cortas y la búsqueda elige
+> por una métrica calculada sobre puntos distintos, sin ningún aviso. Medido: el ranking se
+> invierte, también con ventas reales de M5. Diseño propuesto (opción c2: predecir con los
+> lags que faltan a NaN cuando el estimador los acepta, con escalado propio de cada serie),
+> prototipo validado contra skforecast, opciones descartadas y mediciones pendientes en
+> [`BUG-search-short-series.md`](BUG-search-short-series.md).
+
 **Comprobado en local** (Python 3.14.3, numpy 2.5.3, pandas 2.3.3, scikit-learn 1.9.1,
 numba 0.68.0, statsmodels 0.14.6): BUG-03, BUG-01 y BUG-stats-interval-ignored se
 reproducen con sus scripts. QW-03 se confirma en el código: el `ValueError` de
@@ -35,6 +45,7 @@ cifras son las de la sesión en la nube y no se han vuelto a medir.
 | Resultados erróneos silenciosos | BUG-03, BUG-01, BUG-stats-interval-ignored, BUG-04, BUG-10, ISSUE-1406 | Todos S. BUG-01 solo como aviso silenciable: el backtesting sobre datos de entrenamiento es un uso documentado. Hechos (2026-10-19): ISSUE-1406 con #1415 (sustituye a PR-1407, cerrado) y BUG-stats-interval-ignored con #1416; DEP-stats-alpha descartado (decisión 5) |
 | Backtesting probabilístico (titular de la release) | QW-03, QW-09, QW-04, QW-08, BUG-02, QW-10 | Es lo que se pide desde 2024 (#885, #902, #1253, #1409, D1119). Tres cambios de salida independientes que se fusionan por separado y se anuncian juntos en `releases.md`: QW-09 (`coverage` e `interval_width`, #1409) va primero porque no depende de QW-04; QW-04 (`y_true`) y QW-10 (`step`) después |
 | Foundation para producción | QW-05, BUG-06, QW-02 | QW-02 pendiente de decisión |
+| **Búsquedas multiserie con series cortas (MUY IMPORTANTE)** | BUG-search-short-series | M a L. Resultado erróneo silencioso en un uso habitual de los modelos globales. Diseño en [`BUG-search-short-series.md`](BUG-search-short-series.md); antes o durante la implementación, las mediciones de su sección 8.2 (sobre todo los intervalos con residuos out-of-sample). No bloquea QW-09, pero cambia qué puntos entran en sus métricas |
 | Paneles multiserie | QW-01, BUG-07, ISSUE-1410 | Hechos: ISSUE-1357 (IDs enteros) con #1412, que sustituye a PR-1408 (cerrado), e ISSUE-1410 con #1418 (2026-10-19) |
 | Stats: corrección y rendimiento | BUG-08, PERF-02, PR-1400 | PR-1400 ya está fusionado en `0.27.x`. Volver a medir PERF-02 después de BUG-08 |
 | PRs externos | PR-1402, PR-1387, PR-1388, PR-1389 | Inventariados, no revisados línea a línea |
@@ -86,11 +97,17 @@ FE-04 → foundation con `interval` (tras BUG-06).
    invierte un silencio documentado. Propuesta: hacerlo; en ML el mismo olvido ya da error.
 4. **HANDOFF-T2/T3/T4** (`dev/handoff_utils_pendiente.md`): pendientes de decisión de Joaquín.
 5. **PR-1341** (TiRex-2): aceptarlo o no; la revisión es grande (L).
+6. **BUG-search-short-series**: confirmar la opción c2 (o pasar a c1) con las mediciones de
+   la sección 8.2 de [`BUG-search-short-series.md`](BUG-search-short-series.md). También
+   decidir si `predict` admite una `last_window` más corta que la ventana y si `fit` acepta
+   series con `window_size` valores o menos para ajustar su transformer (requisito medido).
+   Cambia métricas y rankings existentes con estimadores que aceptan NaN: necesita una línea
+   en "Before upgrading".
 
 ### Para después de 0.27.0
 
-FE-02, FE-03, FE-04, PERF-01 (gana 3,4 veces con una serie y nada con 50), QW-06, BUG-09,
-BUG-11, GAP-foundation-backtesting-interval (depende de BUG-06), ISSUE-1131 y todo lo de la
+FE-02, FE-03, FE-04, PERF-01 (gana 3,4 veces con una serie y nada con 50), QW-06, BUG-09 (b)
+(la parte (a) se adelantó a 0.27.0, ver la tabla de bugs), BUG-11, GAP-foundation-backtesting-interval (depende de BUG-06), ISSUE-1131 y todo lo de la
 sección 5.
 
 ### Huecos del análisis a cubrir al implementar
@@ -128,7 +145,7 @@ sección 5.
 |---|---|
 | A. Resultados silenciosamente erróneos, esfuerzo S | BUG-03, BUG-01, BUG-02, ISSUE-1406 (#1415, hecho), BUG-04, BUG-10, BUG-stats-interval-ignored (#1416, hecho) |
 | B. Quick wins diarios y PR listos | QW-03, QW-01, QW-09, QW-04, QW-10 (tres cambios de salida, un solo anuncio), PR-1389, PR-1388, ISSUE-1410 (#1418, hecho), QW-02, QW-05, ISSUE-1385, PR-1400, PR-1402, PR-1387 |
-| C. Corrección de más alcance, STATS y quick wins secundarios | BUG-06, BUG-08, PERF-02, QW-07 (+ DOC-skills-percentiles-stale), BUG-07, QW-08, QW-06, BUG-11, BUG-09 |
+| C. Corrección de más alcance, STATS y quick wins secundarios | BUG-06, BUG-08, PERF-02, QW-07 (+ DOC-skills-percentiles-stale), BUG-07, QW-08, QW-06, BUG-11, BUG-09 ((a) hecho con #1419; queda (b)) |
 | D. Features y gaps | FE-02, PERF-01, GAP-foundation-backtesting-interval, FE-04, FE-03 |
 | E. Mantenimiento y decisiones | DEP-python310 (anunciar), DEP-arima-dictstyle, HANDOFF-T2/T3/T4, PR-1341 (TiRex-2), ISSUE-1131 (alcance) |
 
@@ -145,9 +162,10 @@ sección 5.
   #1253, #1409, D1119) y solo reutilizan funciones existentes.
 - Dependencias que fijan el orden interno: BUG-10 antes de FE-02; BUG-06 antes de aceptar
   `interval` en `backtesting_foundation`; ISSUE-1406 y BUG-stats-interval-ignored antes de
-  QW-09 (hechos); QW-04, QW-09, ISSUE-1406 e ISSUE-1410 antes de FE-04; BUG-02 antes de QW-10 (columna `step`)
-  y de BUG-09 (este reutiliza la misma
-  deduplicación); BUG-04 y QW-05 comparten la declaración del atributo de backend.
+  QW-09 (hechos); QW-04, QW-09, ISSUE-1406 e ISSUE-1410 antes de FE-04; BUG-02 antes de QW-10 (columna `step`);
+  BUG-09 (a) no dependía de BUG-02 y se adelantó (#1419, 2026-10-19): al hacer BUG-02, la
+  deduplicación de `_backtesting_stats` debe conservar la clave (fecha, `estimator_id`) con
+  varios estimadores; BUG-04 y QW-05 comparten la declaración del atributo de backend.
 - STATS entra solo por corrección y rendimiento medidos (intervalo ignorado; BUG-08, de 5 a
   15 veces más rápido; PERF-02, de 3 a 70 veces con carga); BUG-09 va al final por ser nicho.
   Deep learning queda fuera por diseño; de los módulos restantes solo entran PR-1402 y PR-1387.
@@ -475,7 +493,7 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
 |---|---|---|---|---|---|
 | **BUG-03** | Las búsquedas eligen el peor modelo con métricas en las que mayor es mejor (`r2_score`): el orden y la dirección de Optuna dependen del tipo de tarea, no de la métrica, y `return_best=True` reentrena con el peor | model_selection | S | `dev/roadmap_0.27.0/repro/BUG-03.py` | (1) En las 3 búsquedas bayesianas, ordenar por `study.direction` (`_search.py:916,2049,2427`). (2) Helper `_infer_metric_direction` con la convención de sklearn (`*_score` se maximiza; `*_error`, `*_loss`, `*_deviance` se minimizan) usado en todas las ordenaciones (`_search.py:514,916,1537,2049,2427,2817,3077`) y como `direction` por defecto (`:846,1953,2369`). (3) Docstrings de `metric` y `kwargs_create_study` |
 | **BUG-01** | `backtesting` con `initial_train_size=None` sobre un forecaster ya ajustado evalúa in-sample sin ningún aviso | model_selection | S | `dev/roadmap_0.27.0/repro/BUG-01.py` | En la rama `else` de `check_backtesting_input` (`skforecast/model_selection/_utils.py:370-380`), comparar la primera fecha de test (`index[window_size + gap]`) con `forecaster.training_range_` (dict por serie en multiserie) y emitir un aviso silenciable con `suppress_warnings` con el número y rango de predicciones in-sample. Que el `NotFittedError` sugiera primero `initial_train_size` |
-| **BUG-02** | Con `fold_stride < steps` la métrica solo mide los horizontes `1..fold_stride` (con 1, el error a 1 paso) y todas las búsquedas seleccionan por ese error | model_selection | S | `dev/roadmap_0.27.0/repro/BUG-02.py` | Parámetro en `TimeSeriesFold`, p. ej. `overlapping_metric="last"` o `"all"`, aplicado en los 5 puntos de deduplicación (`_validation.py:662-667,1488-1493,2159-2164,2643-2648,2674-2679`); aviso mientras el defecto sea `"last"` (como `OneStepAheadValidationWarning`, `_utils.py:653-658`); no cambiar el defecto sin anunciarlo (la receta de meses naturales depende de `"last"`); corregir `skills/backtesting-configuration/SKILL.md:202-208`, la guía y `llms-base.txt`. Coordinar con BUG-09 |
+| **BUG-02** | Con `fold_stride < steps` la métrica solo mide los horizontes `1..fold_stride` (con 1, el error a 1 paso) y todas las búsquedas seleccionan por ese error | model_selection | S | `dev/roadmap_0.27.0/repro/BUG-02.py` | Parámetro en `TimeSeriesFold`, p. ej. `overlapping_metric="last"` o `"all"`, aplicado en los 5 puntos de deduplicación (`_validation.py:662-667,1488-1493,2159-2164,2643-2648,2674-2679`; números de línea anteriores a #1409; el de stats usa (fecha, `estimator_id`) con varios estimadores tras BUG-09 (a)); aviso mientras el defecto sea `"last"` (como `OneStepAheadValidationWarning`, `_utils.py:653-658`); no cambiar el defecto sin anunciarlo (la receta de meses naturales depende de `"last"`); corregir `skills/backtesting-configuration/SKILL.md:202-208`, la guía y `llms-base.txt`. Coordinar con BUG-09 |
 | **BUG-04** | Un pipeline o modelo precargado (p. ej. Chronos-2 con fine-tuning) se descarta en silencio al crear `ForecasterFoundation`: `clone` lo pierde y se recarga el checkpoint base | foundation | S | `dev/roadmap_0.27.0/repro/BUG-04.py` | `FoundationModel.__sklearn_clone__`: clon estándar y, si el usuario pasó el objeto, copiar la referencia al clon sin copiar pesos. Así lo heredan `ForecasterFoundation.__init__` (`_forecaster_foundation.py:156`), `deepcopy_forecaster` (`utils.py:4999`) y `bayesian_search_foundation`. Cada adaptador declara su atributo de backend (compartido con QW-05). Requisito de PLAN-CKPT (`dev/PLAN_UnifiedFinetunedCheckpoint.md`) |
 | **BUG-10** | TabICL (medido) y TabPFN-TS (mismo código) no ignoran las covariables solo pasadas aunque `IgnoredArgumentWarning` diga que sí: predicciones absurdas en silencio al ajustar con exog y predecir sin ella o con menos columnas | foundation | S | `dev/roadmap_0.27.0/repro/BUG-10.py` (requiere `tabicl`) | En `FoundationModel.predict`, si `adapter.supports_past_only_covariates` es False, quitar de `context_exog` las columnas sin futuro antes de llamar al adaptador (arreglo centralizado). Causa: `_adapters.py:2679-2685` (TabICL) y `:3347-3353` (TabPFN) concatenan toda la exog de contexto; T0 (`:3869-3878`) y Nori (`:4795-4799`) ya filtran bien |
 | **BUG-stats-interval-ignored** | `ForecasterStats.predict_interval` ignora `interval` porque `alpha=0.05` por defecto tiene precedencia: `interval=[0.1, 0.9]` devuelve el intervalo del 95%. La skill lo usa como ejemplo de intervalo del 80% | stats | S | `dev/roadmap_0.27.0/repro/BUG-stats-interval-ignored.py` | **Hecho: #1416, fusionado en `0.27.x` el 2026-10-19.** `alpha=None` por defecto; se usa `interval` si se pasa y el 95% si no se pasa ninguno; `alpha` sigue como alias (sin deprecar, decisión 5) y pasar los dos da `ValueError`, en `predict_interval` y en `backtesting_stats`. `backtesting_stats` traduce `alpha` a `interval` al principio. `interval` pasa a ir antes que `alpha` en las dos firmas (una llamada posicional antigua falla con `TypeError`, no en silencio; no hay ninguna en el repo). Ahora también se valida `alpha` (entre 0 y 1) en `predict_interval`. Corregidos `skills/statistical-models/SKILL.md`, `skills/prediction-intervals/` y `skills/complete-api-reference/`, la guía `forecasting-statistical-models.ipynb` (re-ejecutada, mismas predicciones) y `releases.md` (Fixed, Changed, highlight y "Before upgrading") |
@@ -483,7 +501,7 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
 | **BUG-08** | `freeze_params=True` (por defecto) no congela nada en `backtesting_stats` ni en `grid/random_search_stats`: la búsqueda automática de Arima/Ets se repite en cada fold y en cada candidato | model_selection (stats) | S | `dev/roadmap_0.27.0/repro/BUG-08.py` | En `_backtesting_stats`, tras el primer ajuste y antes de `Parallel`, propagar `best_params_` a las plantillas: `for est, est_ in zip(forecaster.estimators, forecaster.estimators_): if getattr(est_, "best_params_", None): est._set_params(**est_.best_params_)`. Causa: `_validation.py:2097-2100` congela `estimators_` y `_forecaster_stats.py:521` los vuelve a clonar desde las plantillas. Regenerar valores esperados de tests automáticos con `refit=True`; nota Fixed |
 | **BUG-07** | El formato largo con MultiIndex que documenta la guía solo funciona si el MultiIndex sale de `reshape_series_wide_to_long`; con `df.set_index(["series_id", "date"])` fallan `fit`, backtesting, búsquedas multiserie y foundation | recursive (multiseries) / utils | S | `dev/roadmap_0.27.0/repro/BUG-07.py` | En la rama MultiIndex de `check_preprocess_series` (`utils.py:4199-4202`), si el grupo no tiene `freq`, inferirla con `pd.infer_freq` (al menos 3 observaciones) y aplicar `asfreq`; si no se puede, `ValueError` propio del MultiIndex que sugiera `reshape_series_long_to_dict(..., freq=...)`. Corregir la errata "If it a" (`:4271,4285`) y alinear `skills/forecasting-multiple-series/SKILL.md:52` con la guía. PR-1408 tocaba `check_preprocess_series`, pero se cerró y #1412, que lo sustituye, no toca `utils.py`: sin conflicto |
 | **BUG-11** | `backtesting_forecaster(ForecasterEquivalentDate, interval=...)` con el `interval_method='bootstrapping'` por defecto lanza `AttributeError: ... no attribute 'predict_quantiles'` en lugar de un error claro (la guía lo esquiva fijando `conformal`) | model_selection | S | `dev/roadmap_0.27.0/repro/BUG-11.py` | `ForecasterEquivalentDate` está en `forecasters_boot_conformal` (`skforecast/model_selection/_utils.py:222-228`) pero solo admite conformal: lista propia de forecasters solo conformal y `ValueError` que indique `interval_method="conformal"` (o usar conformal por defecto para este forecaster) |
-| **BUG-09** | `backtesting_stats` falla con `fold_stride != steps` con varios estimadores, y con Sarimax y `refit=False` (también con `refit` entero >= 3 y `fold_stride` por defecto); `grid_search_stats` devuelve 0 filas. Nicho: prioridad baja dentro de STATS | model_selection (stats) | S (~10 líneas) | `dev/roadmap_0.27.0/repro/BUG-09.py` | (a) Deduplicar por (fecha, `estimator_id`) con varios estimadores (`_validation.py:2160-2164`). (b) `last_window` desde el origen del fold anterior hasta el del actual (`_validation.py:1825-1830`). Validado: diferencia 0,0 frente a la referencia; 52 tests de stats pasan con el parche |
+| **BUG-09** | `backtesting_stats` falla con `fold_stride != steps` con varios estimadores, y con Sarimax y `refit=False` (también con `refit` entero >= 3 y `fold_stride` por defecto); `grid_search_stats` devuelve 0 filas. Nicho: prioridad baja dentro de STATS | model_selection (stats) | S (~10 líneas) | `dev/roadmap_0.27.0/repro/BUG-09.py` | (a) **Hecho (2026-10-19)** con #1419 (rama `fix/stats-multi-estimator-overlapping-folds`, base `0.27.x`): deduplica por (fecha, `estimator_id`) con varios estimadores; test parametrizado (`fold_stride` 1 y 2, con y sin `interval`) que compara cada estimador con su backtesting por separado, falla sin el arreglo; nota en `releases.md` (Fixed). Desde #1409 también rompía `coverage` e `interval_width`; aplicado sobre #1409, cada estimador tiene las suyas. (b) `last_window` desde el origen del fold anterior hasta el del actual (`_validation.py:1825-1830`). Validado: diferencia 0,0 frente a la referencia; 52 tests de stats pasan con el parche |
 
 **Rendimiento (reproducido)**
 
