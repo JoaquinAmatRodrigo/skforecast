@@ -470,3 +470,23 @@ def test_check_preprocess_series_when_series_is_dict_with_a_pandas_Series_and_a_
     for k in series_indexes:
         pd.testing.assert_index_equal(series_indexes[k], expected_series_indexes[k])
         assert series_indexes[k].freq == expected_series_indexes[k].freq
+
+
+def test_check_preprocess_series_when_series_dict_has_integer_names():
+    """
+    Test non-string series names (e.g. integers) are normalized to strings so
+    the keys and the Series names stay consistent (issue #1357).
+    """
+    index = pd.date_range('2021-01-01', periods=5, freq='D')
+    series = {
+        0: pd.Series(np.arange(5, dtype=float), index=index, name=0),
+        1: pd.Series(np.arange(5, 10, dtype=float), index=index, name=1),
+    }
+
+    series_dict, series_indexes = check_preprocess_series(series=series)
+
+    assert list(series_dict.keys()) == ['0', '1']
+    assert list(series_indexes.keys()) == ['0', '1']
+    for k in series_dict:
+        assert series_dict[k].name == k
+

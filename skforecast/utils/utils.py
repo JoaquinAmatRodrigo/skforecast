@@ -4233,6 +4233,9 @@ def check_preprocess_series(
     indexes_freq = set()
     indexes_tz = set()
     series_indexes = {}
+    # Normalize series IDs to strings so non-string names (e.g. integers) are
+    # handled consistently across fit, encoding, last window and predict.
+    series_dict = {str(k): v for k, v in series_dict.items()}
     for k, v in series_dict.items():
         if isinstance(v, pd.DataFrame):
             if v.shape[1] != 1:
