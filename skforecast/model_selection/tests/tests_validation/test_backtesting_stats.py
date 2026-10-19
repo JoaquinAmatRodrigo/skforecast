@@ -1205,6 +1205,71 @@ def test_output_backtesting_stats_multiple_estimators_refit_True_interval_with_m
     assert (backtest_predictions['pred'] < backtest_predictions['upper_bound']).all()
 
 
+@pytest.mark.parametrize("interval",
+                         [None, [0.1, 0.9]],
+                         ids = lambda interval: f'interval: {interval}')
+@pytest.mark.parametrize("fold_stride",
+                         [1, 2],
+                         ids = lambda fold_stride: f'fold_stride: {fold_stride}')
+def test_output_backtesting_stats_multiple_estimators_overlapping_folds(fold_stride, interval):
+    """
+    Test output of backtesting_stats with multiple estimators and overlapping
+    folds (fold_stride < steps). The metrics and predictions of each estimator
+    must be equal to those obtained backtesting each estimator alone.
+    """
+    estimators = [Arima(order=(1, 1, 1)), Arar()]
+    cv = TimeSeriesFold(
+             steps                 = 3,
+             initial_train_size    = len(y_datetime) - 12,
+             fold_stride           = fold_stride,
+             refit                 = True,
+             fixed_train_size      = False,
+             gap                   = 0,
+             allow_incomplete_fold = True
+         )
+    metrics = ['mean_absolute_error', 'mean_squared_error']
+
+    forecaster = ForecasterStats(estimator=estimators)
+    metric, backtest_predictions = backtesting_stats(
+                                       forecaster = forecaster,
+                                       y          = y_datetime,
+                                       cv         = cv,
+                                       metric     = metrics,
+                                       interval   = interval,
+                                       n_jobs     = 1,
+                                       verbose    = False
+                                   )
+
+    expected_metric = []
+    expected_preds = []
+    for estimator in estimators:
+        forecaster_alone = ForecasterStats(estimator=estimator)
+        metric_alone, preds_alone = backtesting_stats(
+                                        forecaster = forecaster_alone,
+                                        y          = y_datetime,
+                                        cv         = cv,
+                                        metric     = metrics,
+                                        interval   = interval,
+                                        n_jobs     = 1,
+                                        verbose    = False
+                                    )
+        estimator_id = forecaster_alone.estimator_ids[0]
+        metric_alone.insert(0, 'estimator_id', estimator_id)
+        preds_alone.insert(1, 'estimator_id', estimator_id)
+        expected_metric.append(metric_alone)
+        expected_preds.append(preds_alone)
+
+    expected_metric = pd.concat(expected_metric, ignore_index=True)
+    expected_preds = pd.concat(expected_preds)
+
+    pd.testing.assert_frame_equal(expected_metric, metric)
+    for estimator_id, preds in expected_preds.groupby('estimator_id', sort=False):
+        pd.testing.assert_frame_equal(
+            preds,
+            backtest_predictions.query("estimator_id == @estimator_id")
+        )
+
+
 def test_output_backtesting_stats_auto_arima_arar_freeze_params_False_gap_air_passengers():
     """
     Test output of backtesting_stats with Arima in auto mode (order=None, 
