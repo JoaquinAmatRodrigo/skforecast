@@ -2544,12 +2544,16 @@ def _backtesting_foundation(
     folds = cv.split(X=series, as_pandas=False)
     span_index = cv._extract_index(X=series)
     gap = cv.gap
-    
+
+    # NOTE: Foundation models create no predictors from past values, so their
+    # window size is 0: a series with at least one observed value in the train
+    # span of a fold is used as context. `forecaster.window_size` is the maximum
+    # context length, not the minimum, and it must not be used here.
     data_folds = _extract_data_folds_multiseries(
                      series             = series,
                      folds              = folds,
                      span_index         = span_index,
-                     window_size        = 1,  # Minimum 1 observation as context.
+                     window_size        = 0,
                      exog               = exog,
                      dropna_last_window = False,
                      externally_fitted  = False

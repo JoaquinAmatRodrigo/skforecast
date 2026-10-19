@@ -71,7 +71,7 @@ def test_warn_levels_not_predicted_multiseries_MissingValuesWarning_when_levels_
         "so their metrics, and the aggregated metrics, do not include those "
         "folds. Levels never predicted have NaN metrics and are left out of the "
         "aggregated metrics.\n"
-        f"  - Fewer than `window_size` ({window_size}) observations in the "
+        f"  - `window_size` ({window_size}) observations or fewer in the "
         "training set: 'l3' (never predicted).\n"
         f"  - Missing values in the last window, {reason_last_window}: "
         "'l2' (folds 1)."

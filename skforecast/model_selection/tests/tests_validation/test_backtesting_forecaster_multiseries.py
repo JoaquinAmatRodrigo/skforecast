@@ -5622,7 +5622,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
          )
 
     warn_msg = re.escape(
-        "  - Fewer than `window_size` (5) observations in the training set: "
+        "  - `window_size` (5) observations or fewer in the training set: "
         "'l2' (never predicted)."
     )
     with warnings.catch_warnings(record=True) as caught:
@@ -5654,6 +5654,83 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
         np.repeat(metrics_levels.loc[0, 'mean_absolute_error'], 3)
     )
     assert backtest_predictions['level'].unique().tolist() == ['l1']
+
+
+@pytest.mark.parametrize(
+    'series_type', ['dict', 'DataFrame'], ids=lambda st: f'series_type: {st}'
+)
+def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_series_with_window_size_values_in_train(series_type):
+    """
+    Test backtesting_forecaster_multiseries for ForecasterRecursiveMultiSeries
+    when a series has exactly `window_size` values in the training set of a
+    fold. It is left out of that fold, as `fit` needs more than `window_size`
+    values, and a MissingValuesWarning names it. 'l2' starts at position 35,
+    so it has 3 values (`window_size`) in the training set of fold 0.
+    """
+
+    series = {
+        'l1': series_dict_range['l1'],
+        'l2': series_dict_range['l2'].iloc[-15:],
+    }
+    if series_type == 'DataFrame':
+        series = pd.DataFrame(series)
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = Ridge(random_state=123),
+                     lags               = 3,
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 4,
+             initial_train_size = 38,
+             refit              = True
+         )
+
+    warn_msg = re.escape(
+        "  - `window_size` (3) observations or fewer in the training set: "
+        "'l2' (folds 0)."
+    )
+    with pytest.warns(MissingValuesWarning, match=warn_msg):
+        metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                                   forecaster    = forecaster,
+                                                   series        = series,
+                                                   cv            = cv,
+                                                   metric        = 'mean_absolute_error',
+                                                   n_jobs        = 1,
+                                                   show_progress = False
+                                               )
+
+    expected_metric = pd.DataFrame(
+        data = {
+            'levels': ['l1', 'l2', 'average', 'weighted_average', 'pooling'],
+            'mean_absolute_error': [
+                0.19938932460999484, 0.2283967486471236, 0.2138930366285592,
+                0.21099229422484633, 0.21099229422484633
+            ]
+        }
+    )
+    expected_predictions = pd.DataFrame(
+        data = {
+            'level': ['l1', 'l1', 'l1', 'l1'] + ['l1', 'l2'] * 8,
+            'fold': [0, 0, 0, 0] + [1] * 8 + [2] * 8,
+            'pred': [
+                0.527352157729845, 0.4611455074452208, 0.530859515656855,
+                0.5051073113947905, 0.38377517831780966, 0.6936077075649952,
+                0.4748045253920008, 0.5964029171300466, 0.4934104486336531,
+                0.5846510900908921, 0.4843959809635463, 0.5966003633890359,
+                0.4489844872817164, 0.5928812629546099, 0.46106455277509606,
+                0.5879478033668082, 0.48919093602201746, 0.5843272729969948,
+                0.4824505452038054, 0.5888683029035551
+            ]
+        },
+        index = pd.Index(
+            [38, 39, 40, 41, 42, 42, 43, 43, 44, 44, 45, 45, 46, 46, 47, 47,
+             48, 48, 49, 49]
+        )
+    )
+
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
 def test_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_MissingValuesWarning_when_NaN_last_window_and_differentiation():

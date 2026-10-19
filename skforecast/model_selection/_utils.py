@@ -950,7 +950,10 @@ def _extract_data_folds_multiseries(
     span_index : pandas DatetimeIndex, pandas RangeIndex
         Full index from the minimum to the maximum index among all series.
     window_size : int
-        Size of the window needed to create the predictors.
+        Size of the window needed to create the predictors. A series with
+        `window_size` values or fewer in the training set of a fold is left
+        out of that fold, since `fit` needs more than `window_size` values to
+        create at least one training row.
     exog : pandas Series, pandas DataFrame, dict, default None
         Exogenous variables.
     dropna_last_window : bool, default False
@@ -1008,7 +1011,7 @@ def _extract_data_folds_multiseries(
                     last_valid_index = series_train[col].last_valid_index()
                     if (
                         len(series_train[col].loc[first_valid_index:last_valid_index])
-                        < window_size
+                        <= window_size
                     ):
                         series_to_drop.append(col)
 
@@ -1029,7 +1032,7 @@ def _extract_data_folds_multiseries(
                     last_valid_index  = v_train.last_valid_index()
                     if first_valid_index is not None and last_valid_index is not None:
                         v_train = v_train.loc[first_valid_index : last_valid_index]
-                        if len(v_train) >= window_size:
+                        if len(v_train) > window_size:
                             series_train[k] = v_train
                 
                 v_last_window = v.loc[last_window_loc_start:last_window_loc_end]
@@ -1084,8 +1087,8 @@ def _warn_levels_not_predicted_multiseries(
     metrics, and the aggregated metrics, do not include that fold. The levels
     are grouped by the reason why they are not predicted:
 
-    - The level is not in the training set of the fold: it has fewer than
-    `window_size` observations, so the forecaster is not trained with it.
+    - The level is not in the training set of the fold: it has `window_size`
+    observations or fewer, so the forecaster is not trained with it.
     - The level is in the training set of the fold, or the training set is not
     used, but its last window cannot be used to predict: it has missing values
     and the estimator does not support them natively or the forecaster uses
@@ -1161,7 +1164,7 @@ def _warn_levels_not_predicted_multiseries(
         )
     reason_messages = {
         'train': (
-            f"Fewer than `window_size` ({forecaster.window_size}) observations "
+            f"`window_size` ({forecaster.window_size}) observations or fewer "
             f"in the training set"
         ),
         'last_window': reason_last_window
