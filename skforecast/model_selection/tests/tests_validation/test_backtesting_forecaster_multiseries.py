@@ -1,6 +1,7 @@
 # Unit test backtesting_forecaster_multiseries
 # ==============================================================================
 import re
+import warnings
 import pytest
 import numpy as np
 import pandas as pd
@@ -5523,13 +5524,17 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
 # * Test backtesting ForecasterRecursiveMultiSeries with NaN values            *
 # ******************************************************************************
 
-def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_fold_skipped_when_no_levels_to_predict():
+@pytest.mark.parametrize(
+    'n_jobs', [1, 2], ids=lambda n_jobs: f'n_jobs: {n_jobs}'
+)
+def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_fold_skipped_when_no_levels_to_predict(n_jobs):
     """
     Test output of backtesting_forecaster_multiseries for
     ForecasterRecursiveMultiSeries when the last window of a fold has NaN
     values in every level to predict. Since the estimator does not natively
     support NaN, the levels are dropped from the last window, the fold is
-    skipped and a MissingValuesWarning is raised.
+    skipped and a MissingValuesWarning is raised. The warning is raised after
+    the backtesting, so it is not lost when the folds run in parallel.
     """
 
     series_nan = series_wide_range.copy()
@@ -5549,10 +5554,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
          )
 
     warn_msg = re.escape(
-        "Fold 2 has been skipped because none of the levels to predict "
-        "['l1'] have a last window free of missing values. "
-        "Ridge cannot predict when NaNs are present, so these levels are "
-        "excluded. No predictions are generated for this fold."
+        "  - Missing values in the last window, Ridge does not support them: "
+        "'l1' (folds 2)."
     )
     with pytest.warns(MissingValuesWarning, match=warn_msg):
         metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
@@ -5563,7 +5566,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
                                                    metric                = 'mean_absolute_error',
                                                    add_aggregated_metric = False,
                                                    exog                  = None,
-                                                   n_jobs                = 1,
+                                                   n_jobs                = n_jobs,
                                                    verbose               = False
                                                )
 
@@ -5588,6 +5591,116 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
     assert 2 not in backtest_predictions['fold'].to_numpy()
+
+
+@pytest.mark.parametrize(
+    'suppress_warnings', [False, True], ids=lambda sw: f'suppress_warnings: {sw}'
+)
+def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_MissingValuesWarning_when_level_never_predicted(suppress_warnings):
+    """
+    Test backtesting_forecaster_multiseries for ForecasterRecursiveMultiSeries
+    when a series is shorter than the window size, so it is never predicted.
+    A MissingValuesWarning names it (unless `suppress_warnings=True`), its
+    metrics are NaN and the aggregated metrics are computed without it.
+    """
+
+    series = {
+        'l1': series_dict_range['l1'],
+        'l2': series_dict_range['l2'].iloc[-4:],
+    }
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = Ridge(random_state=123),
+                     lags               = 3,
+                     window_features    = RollingFeatures(stats='mean', window_sizes=5),
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 4,
+             initial_train_size = len(series['l1']) - 12,
+             refit              = True
+         )
+
+    warn_msg = re.escape(
+        "  - Fewer than `window_size` (5) observations in the training set: "
+        "'l2' (never predicted)."
+    )
+    with warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter('always')
+        metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                                   forecaster        = forecaster,
+                                                   series            = series,
+                                                   cv                = cv,
+                                                   metric            = 'mean_absolute_error',
+                                                   n_jobs            = 1,
+                                                   show_progress     = False,
+                                                   suppress_warnings = suppress_warnings
+                                               )
+    caught = [
+        str(w.message) for w in caught if issubclass(w.category, MissingValuesWarning)
+    ]
+    if suppress_warnings:
+        assert caught == []
+    else:
+        assert len(caught) == 1
+        assert re.search(warn_msg, caught[0])
+
+    assert metrics_levels['levels'].tolist() == [
+        'l1', 'l2', 'average', 'weighted_average', 'pooling'
+    ]
+    assert np.isnan(metrics_levels.loc[1, 'mean_absolute_error'])
+    np.testing.assert_allclose(
+        metrics_levels.loc[2:, 'mean_absolute_error'].to_numpy(),
+        np.repeat(metrics_levels.loc[0, 'mean_absolute_error'], 3)
+    )
+    assert backtest_predictions['level'].unique().tolist() == ['l1']
+
+
+def test_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_MissingValuesWarning_when_NaN_last_window_and_differentiation():
+    """
+    Test backtesting_forecaster_multiseries for ForecasterRecursiveMultiSeries
+    with differentiation when the last window of a fold has missing values.
+    The level is dropped from that fold even if the estimator supports NaN
+    natively, and the MissingValuesWarning gives differentiation as the reason.
+    """
+
+    series = {
+        'l1': series_dict_range['l1'].copy(),
+        'l2': series_dict_range['l2'],
+    }
+    series['l1'].iloc[44] = np.nan
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = HistGradientBoostingRegressor(
+                                              max_iter=5, random_state=123
+                                          ),
+                     lags               = 3,
+                     differentiation    = 1,
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 4,
+             initial_train_size = len(series['l1']) - 12,
+             refit              = False,
+             differentiation    = 1
+         )
+
+    warn_msg = re.escape(
+        "  - Missing values in the last window, they are not allowed with "
+        "differentiation: 'l1' (folds 2)."
+    )
+    with pytest.warns(MissingValuesWarning, match=warn_msg):
+        _, backtest_predictions = backtesting_forecaster_multiseries(
+                                      forecaster    = forecaster,
+                                      series        = series,
+                                      cv            = cv,
+                                      metric        = 'mean_absolute_error',
+                                      n_jobs        = 1,
+                                      show_progress = False
+                                  )
+
+    folds_l1 = backtest_predictions.loc[backtest_predictions['level'] == 'l1', 'fold']
+    assert 2 not in folds_l1.to_numpy()
 
 
 # ******************************************************************************

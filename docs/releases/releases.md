@@ -29,6 +29,8 @@ The main changes in this release are:
 
 + <code>[ForecasterRecursiveMultiSeries]</code> raised a `KeyError` in `fit` and in backtesting when the series names were integers (dict keys, wide DataFrame columns or numeric ids in long data). The names are now kept as given; with `encoding='onehot'` the one-hot columns are named after the series as strings. ([#1357](https://github.com/skforecast/skforecast/issues/1357), [#1412](https://github.com/skforecast/skforecast/pull/1412))
 
++ <code>[backtesting_forecaster_multiseries]</code> and <code>[backtesting_foundation]</code> silently left out of the metrics, including the aggregated ones, the series that could not be predicted in a fold (shorter than the window size, missing values in the last window, or no observed values in the context window). A `MissingValuesWarning` now names those series and folds. ([#1406](https://github.com/skforecast/skforecast/issues/1406))
+
 
 ## 0.26.0 <small>Oct 8, 2026</small> { id="0.26.0" }
 
