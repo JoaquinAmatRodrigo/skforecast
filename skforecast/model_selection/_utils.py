@@ -8,6 +8,7 @@
 from __future__ import annotations
 from typing import Callable, Generator, Any
 import warnings
+from itertools import chain
 import numpy as np
 import pandas as pd
 from joblib import cpu_count
@@ -16,7 +17,11 @@ from sklearn.linear_model._base import LinearModel, LinearClassifierMixin
 from sklearn.pipeline import Pipeline
 from tqdm.auto import tqdm
 
-from ..exceptions import IgnoredArgumentWarning, OneStepAheadValidationWarning
+from ..exceptions import (
+    IgnoredArgumentWarning,
+    MissingValuesWarning,
+    OneStepAheadValidationWarning
+)
 from ..metrics import add_y_train_argument, _any_metric_needs_y_train, _get_metric
 from ..utils import (
     _date_range_from_index,
@@ -1062,6 +1067,124 @@ def _extract_data_folds_multiseries(
             exog_test = None
 
         yield series_train, series_last_window, levels_last_window, exog_train, exog_test, fold
+
+
+def _warn_levels_not_predicted_multiseries(
+    forecaster: object,
+    series: pd.DataFrame | dict[str, pd.Series | pd.DataFrame],
+    folds: list,
+    span_index: pd.DatetimeIndex | pd.RangeIndex,
+    levels: list[str],
+    levels_predict_folds: list[list[str]],
+    levels_train_folds: list[list[str]] | None = None
+) -> None:
+    """
+    Warn about the levels that are not predicted in a fold of the multi-series
+    backtesting although they have observed values in its test set, so their
+    metrics, and the aggregated metrics, do not include that fold. The levels
+    are grouped by the reason why they are not predicted:
+
+    - The level is not in the training set of the fold: it has fewer than
+    `window_size` observations, so the forecaster is not trained with it.
+    - The level is in the training set of the fold, or the training set is not
+    used, but its last window cannot be used to predict: it has missing values
+    and the estimator does not support them natively or the forecaster uses
+    differentiation. For `ForecasterFoundation`, its context window has no
+    observed values.
+
+    A level without observed values in the test set of a fold (for example, a
+    series that starts after it) is not reported, there is nothing to evaluate.
+
+    Parameters
+    ----------
+    forecaster : object
+        Forecaster used in the backtesting.
+    series : pandas DataFrame, dict
+        Time series.
+    folds : list
+        Folds created using the split method of the TimeSeriesFold object.
+    span_index : pandas DatetimeIndex, pandas RangeIndex
+        Full index from the minimum to the maximum index among all series.
+    levels : list
+        Levels to predict.
+    levels_predict_folds : list
+        Levels predicted in each fold.
+    levels_train_folds : list, default None
+        Levels of the training set of each fold. If `None`, the training set
+        is not used (the forecaster is fitted before the backtesting, or it is
+        not trained) and every level not predicted is attributed to the last
+        window.
+
+    Returns
+    -------
+    None
+
+    """
+
+    if levels_train_folds is None:
+        levels_train_folds = [None] * len(folds)
+
+    not_predicted = {'train': {}, 'last_window': {}}
+    for fold, levels_train, levels_predict in zip(
+        folds, levels_train_folds, levels_predict_folds
+    ):
+        levels_train = set(levels_train) if levels_train is not None else None
+        levels_predict = set(levels_predict)
+        test_no_gap_loc_start = span_index[fold[4][0]]
+        test_no_gap_loc_end   = span_index[fold[4][1] - 1]
+        for level in levels:
+            if level in levels_predict:
+                continue
+            y_test = series[level].loc[test_no_gap_loc_start:test_no_gap_loc_end]
+            if not y_test.notna().to_numpy().any():
+                continue
+            reason = (
+                'train' if levels_train is not None and level not in levels_train
+                else 'last_window'
+            )
+            not_predicted[reason].setdefault(level, []).append(fold[0])
+
+    if not not_predicted['train'] and not not_predicted['last_window']:
+        return
+
+    if type(forecaster).__name__ == 'ForecasterFoundation':
+        reason_last_window = "No observed values in the context window"
+    elif forecaster.differentiation_max is not None:
+        reason_last_window = (
+            "Missing values in the last window, they are not allowed with "
+            "differentiation"
+        )
+    else:
+        reason_last_window = (
+            f"Missing values in the last window, "
+            f"{type(forecaster.estimator).__name__} does not support them"
+        )
+    reason_messages = {
+        'train': (
+            f"Fewer than `window_size` ({forecaster.window_size}) observations "
+            f"in the training set"
+        ),
+        'last_window': reason_last_window
+    }
+
+    levels_predicted = set(chain(*levels_predict_folds))
+    lines = []
+    for reason, levels_folds in not_predicted.items():
+        if levels_folds:
+            levels_info = [
+                f"{level!r} (never predicted)" if level not in levels_predicted
+                else f"{level!r} (folds {', '.join(map(str, fold_numbers))})"
+                for level, fold_numbers in levels_folds.items()
+            ]
+            lines.append(f"  - {reason_messages[reason]}: {', '.join(levels_info)}.")
+
+    warnings.warn(
+        "Some levels are not predicted in folds where they have observed values, "
+        "so their metrics, and the aggregated metrics, do not include those "
+        "folds. Levels never predicted have NaN metrics and are left out of the "
+        "aggregated metrics.\n" + "\n".join(lines),
+        MissingValuesWarning
+    )
 
 
 def _calculate_metrics_backtesting_multiseries(

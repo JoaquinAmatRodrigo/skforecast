@@ -17,8 +17,7 @@ from tqdm.auto import tqdm
 from ..metrics import add_y_train_argument, _any_metric_needs_y_train, _get_metric
 from ..exceptions import (
     LongTrainingWarning,
-    IgnoredArgumentWarning,
-    MissingValuesWarning
+    IgnoredArgumentWarning
 )
 from ..model_selection._split import TimeSeriesFold
 from ..model_selection._utils import (
@@ -26,6 +25,7 @@ from ..model_selection._utils import (
     check_backtesting_input,
     select_n_jobs_backtesting,
     _extract_data_folds_multiseries,
+    _warn_levels_not_predicted_multiseries,
     _calculate_metrics_backtesting_multiseries
 )
 from ..utils import (
@@ -1021,16 +1021,10 @@ def _fit_predict_forecaster_multiseries(
         steps = fold[3][1] - fold[3][0]
 
     preds = []
+    # NOTE: The levels not predicted in the fold are reported once, after all
+    # folds, by `_warn_levels_not_predicted_multiseries`. A warning raised here
+    # would be lost when the folds run in parallel worker processes.
     levels_predict = [level for level in levels if level in last_window_levels]
-    if not levels_predict:
-        warnings.warn(
-            f"Fold {fold[0]} has been skipped because none of the levels to predict "
-            f"{levels} have a last window free of missing values. "
-            f"{type(forecaster.estimator).__name__} cannot predict when NaNs are "
-            f"present, so these levels are excluded. No predictions are generated for "
-            f"this fold.",
-            MissingValuesWarning
-        )
 
     if interval is not None:
         kwargs_interval = {
@@ -1223,6 +1217,10 @@ def _backtesting_forecaster_multiseries(
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
+        A level that is not predicted in any fold (for example, a series
+        shorter than the window size of the forecaster) has NaN metrics and is
+        left out of the aggregated metrics. A `MissingValuesWarning` names the
+        levels not predicted in a fold where they have observed values.
     backtest_predictions : pandas DataFrame
         Long-format DataFrame containing the predicted values for each series. The 
         DataFrame includes the following columns:
@@ -1429,12 +1427,16 @@ def _backtesting_forecaster_multiseries(
                  )
 
     # Strip series_train and exog_train for refit=False folds to minimize
-    # IPC serialization cost when using joblib.Parallel.
-    data_folds_list = [
-        (None, lw, levels_lw, None, e_test, fold) if fold[5] is False
-        else (s_train, lw, levels_lw, e_train, e_test, fold)
-        for s_train, lw, levels_lw, e_train, e_test, fold in data_folds
-    ]
+    # IPC serialization cost when using joblib.Parallel. The levels of the
+    # training set of each fold are kept to report why a level is not predicted.
+    data_folds_list = []
+    levels_train_folds = []
+    for s_train, lw, levels_lw, e_train, e_test, fold in data_folds:
+        levels_train_folds.append(list(s_train))
+        if fold[5] is False:
+            data_folds_list.append((None, lw, levels_lw, None, e_test, fold))
+        else:
+            data_folds_list.append((s_train, lw, levels_lw, e_train, e_test, fold))
 
     if show_progress:
         data_folds_list = tqdm(data_folds_list)
@@ -1469,8 +1471,19 @@ def _backtesting_forecaster_multiseries(
     ]
     backtest_predictions = pd.concat(backtest_predictions, axis=0)
     backtest_predictions.insert(0, 'fold', np.concatenate(fold_labels))
-    backtest_levels = set(chain(*[result[1] for result in results]))
-    
+    levels_predict_folds = [result[1] for result in results]
+    backtest_levels = set(chain(*levels_predict_folds))
+
+    _warn_levels_not_predicted_multiseries(
+        forecaster           = forecaster,
+        series               = series,
+        folds                = folds,
+        span_index           = span_index,
+        levels               = levels,
+        levels_predict_folds = levels_predict_folds,
+        levels_train_folds   = None if externally_fitted else levels_train_folds
+    )
+
     backtest_predictions = (
         backtest_predictions
         .rename_axis('idx', axis=0)
@@ -1636,6 +1649,10 @@ def backtesting_forecaster_multiseries(
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s). Index are the levels and columns the metrics.
+        A level that is not predicted in any fold (for example, a series
+        shorter than the window size of the forecaster) has NaN metrics and is
+        left out of the aggregated metrics. A `MissingValuesWarning` names the
+        levels not predicted in a fold where they have observed values.
     backtest_predictions : pandas DataFrame
         Long-format DataFrame containing the predicted values for each series. The 
         DataFrame includes the following columns:
@@ -2430,6 +2447,11 @@ def _backtesting_foundation(
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s).
+        In multi-series mode, a level that is not predicted in any fold (for
+        example, a series with no observed values in its context window) has
+        NaN metrics and is left out of the aggregated metrics. A
+        `MissingValuesWarning` names the levels not predicted in a fold where
+        they have observed values.
     backtest_predictions : pandas DataFrame
         Value of predictions. The DataFrame includes the following columns:
 
@@ -2518,6 +2540,7 @@ def _backtesting_foundation(
     data_folds_tqdm = tqdm(data_folds, total=len(folds)) if show_progress else data_folds
     
     backtest_predictions = []
+    levels_predict_folds = []
     for context, _, _, context_exog, exog_test, fold in data_folds_tqdm:
 
         fold_number = fold[0]
@@ -2552,17 +2575,12 @@ def _backtesting_foundation(
             if level_series.notna().any()
         }
         levels_predict = [level for level in levels if level in context]
+        levels_predict_folds.append(levels_predict)
         if not levels_predict:
             # NOTE: Same behaviour as `_backtesting_forecaster_multiseries`: the
-            # fold is skipped with a warning and contributes an empty frame so
-            # that the output keeps its columns and the metrics are `None`.
-            warnings.warn(
-                f"Fold {fold_number} has been skipped because none of the levels "
-                f"to predict {levels} have observed values in both its context "
-                f"window and its test window. No predictions are generated for "
-                f"this fold.",
-                MissingValuesWarning
-            )
+            # fold is skipped and contributes an empty frame so that the output
+            # keeps its columns and the metrics are `None`. The levels not
+            # predicted are reported after all folds.
             col_names = ["pred"] if quantiles is None else [f"q_{q}" for q in quantiles]
             pred = pd.DataFrame(
                 {
@@ -2613,6 +2631,15 @@ def _backtesting_foundation(
         backtest_predictions.append(pred)
 
     backtest_predictions = pd.concat(backtest_predictions, axis=0)
+
+    _warn_levels_not_predicted_multiseries(
+        forecaster           = forecaster,
+        series               = series,
+        folds                = folds,
+        span_index           = span_index,
+        levels               = levels,
+        levels_predict_folds = levels_predict_folds
+    )
 
     if is_multiseries:
         backtest_levels = set(backtest_predictions['level'].unique())
@@ -2792,6 +2819,11 @@ def backtesting_foundation(
     -------
     metrics_levels : pandas DataFrame
         Value(s) of the metric(s).
+        In multi-series mode, a level that is not predicted in any fold (for
+        example, a series with no observed values in its context window) has
+        NaN metrics and is left out of the aggregated metrics. A
+        `MissingValuesWarning` names the levels not predicted in a fold where
+        they have observed values.
     backtest_predictions : pandas DataFrame
         Value of predictions. The DataFrame includes the following columns:
 
