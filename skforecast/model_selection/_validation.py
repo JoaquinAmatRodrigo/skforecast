@@ -1778,7 +1778,6 @@ def _fit_predict_forecaster_stats(
     exog: pd.Series | pd.DataFrame | None,
     steps: int,
     gap: int,
-    alpha: float | None,
     interval: list[float] | tuple[float, ...] | None,
     refit: bool | int,
     folds: list,
@@ -1807,10 +1806,9 @@ def _fit_predict_forecaster_stats(
         Number of steps to predict.
     gap : int
         Number of observations between training end and test start.
-    alpha : float or None
-        Confidence level for prediction intervals.
     interval : list, tuple, or None
-        Percentiles for prediction intervals.
+        Quantiles of the prediction interval (`alpha` is already translated
+        into `interval` by `backtesting_stats`).
     refit : bool or int
         Whether to refit in each fold.
     folds : list
@@ -1871,7 +1869,7 @@ def _fit_predict_forecaster_stats(
         last_window_exog = None
 
     steps = len(range(test_iloc_start, test_iloc_end))
-    if alpha is None and interval is None:
+    if interval is None:
         pred = forecaster.predict(
                    steps             = steps,
                    last_window       = last_window_y,
@@ -1883,7 +1881,6 @@ def _fit_predict_forecaster_stats(
         pred = forecaster.predict_interval(
                    steps             = steps,
                    exog              = exog_test,
-                   alpha             = alpha,
                    interval          = interval,
                    last_window       = last_window_y,
                    last_window_exog  = last_window_exog,
@@ -1910,7 +1907,6 @@ def _backtesting_stats(
     cv: TimeSeriesFold,
     metric: str | Callable | list[str | Callable],
     exog: pd.Series | pd.DataFrame | None = None,
-    alpha: float | None = None,
     interval: list[float] | tuple[float, ...] | None = None,
     freeze_params: bool = True,
     n_jobs: int | str = 'auto',
@@ -1945,15 +1941,13 @@ def _backtesting_stats(
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
         regressed on exog[i].
-    alpha : float, default None
-        The confidence intervals for the forecasts are (1 - alpha) %.
-        If both, `alpha` and `interval` are provided, `alpha` will be used.
     interval : list, tuple, default None
         Confidence of the prediction interval estimated. The values must be
-        symmetric. Sequence of quantiles to compute, which must be between 
-        0 and 1 inclusive. For example, interval of 95% should be as 
-        `interval = [0.025, 0.975]`. If both, `alpha` and `interval` are 
-        provided, `alpha` will be used.
+        symmetric. Sequence of quantiles to compute, which must be between
+        0 and 1 inclusive. For example, interval of 95% should be as
+        `interval = [0.025, 0.975]`. If `None`, no intervals are estimated.
+        `backtesting_stats` translates its `alpha` argument into `interval`
+        before calling this function.
     freeze_params : bool, default True
         Determines whether to freeze the model parameters after the first fit
         for estimators that perform automatic model selection.
@@ -2089,7 +2083,7 @@ def _backtesting_stats(
     steps = cv.steps
     gap = cv.gap
 
-    if alpha is not None or interval is not None:
+    if interval is not None:
         ids_not_support_interval = [
             est_id for est_id, est_type in zip(forecaster.estimator_ids, forecaster.estimator_types)
             if est_type not in forecaster.estimators_support_interval
@@ -2133,7 +2127,6 @@ def _backtesting_stats(
         "exog": exog,
         "steps": steps,
         "gap": gap,
-        "alpha": alpha,
         "interval": interval,
         "refit": refit,
         "folds": folds,
@@ -2368,15 +2361,13 @@ def backtesting_stats(
     # equivalent `interval` so that the rest of the process only uses `interval`.
     if alpha is not None:
         interval = [alpha / 2, 1 - alpha / 2]
-        alpha = None
-    
+
     metric_values, backtest_predictions = _backtesting_stats(
         forecaster        = forecaster,
         y                 = y,
         cv                = cv,
         metric            = metric,
         exog              = exog,
-        alpha             = alpha,
         interval          = interval,
         freeze_params     = freeze_params,
         n_jobs            = n_jobs,
