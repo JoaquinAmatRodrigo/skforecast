@@ -2168,9 +2168,18 @@ def _backtesting_stats(
 
     backtest_predictions_for_metrics = backtest_predictions
     if overlapping_folds:
+        # With several estimators, each date has one row per estimator, so the
+        # duplicates are identified by the pair (date, estimator_id).
+        if forecaster.n_estimators == 1:
+            is_duplicated = backtest_predictions_for_metrics.index.duplicated(keep='last')
+        else:
+            is_duplicated = (
+                backtest_predictions_for_metrics
+                .set_index('estimator_id', append=True)
+                .index.duplicated(keep='last')
+            )
         backtest_predictions_for_metrics = (
-            backtest_predictions_for_metrics
-            .loc[~backtest_predictions_for_metrics.index.duplicated(keep='last')]
+            backtest_predictions_for_metrics.loc[~is_duplicated]
         )
 
     if forecaster.n_estimators == 1:
