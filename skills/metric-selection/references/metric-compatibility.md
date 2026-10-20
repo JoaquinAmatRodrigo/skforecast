@@ -17,6 +17,7 @@ Complete reference for all metrics available in skforecast: properties, compatib
 |--------|-------------|--------|:-------------------:|:-----------------:|:------------------:|:-------------:|-------|----------------|
 | Mean Absolute Error | `'mean_absolute_error'` | sklearn | — | — | ✓ | ✓ | [0, ∞) | Average absolute deviation from truth |
 | Mean Squared Error | `'mean_squared_error'` | sklearn | — | — | — | ✓ | [0, ∞) | Average squared deviation; penalizes large errors |
+| Root Mean Squared Error | `'root_mean_squared_error'` | sklearn | — | — | — | ✓ | [0, ∞) | Square root of MSE; same units as the target |
 | Median Absolute Error | `'median_absolute_error'` | sklearn | — | — | ✓✓ | ✓ | [0, ∞) | Median of absolute deviations; very robust |
 | Mean Absolute Percentage Error | `'mean_absolute_percentage_error'` | sklearn | — | ✓ | — | — | [0, ∞) fraction | Relative error as a fraction (0.1 = 10 %), not × 100; explodes when y_true = 0 |
 | Mean Squared Log Error | `'mean_squared_log_error'` | sklearn | — | — | — | ✓* | [0, ∞) | Log-scale MSE; penalizes under-predictions more |

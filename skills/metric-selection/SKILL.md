@@ -75,11 +75,11 @@ What is your forecaster producing?
 | Criterion | Recommended metric | Avoid |
 |-----------|-------------------|-------|
 | **General purpose** | MAE (`'mean_absolute_error'`) | — |
-| **Penalize large errors more** | MSE (`'mean_squared_error'`) | — |
+| **Penalize large errors more** | MSE (`'mean_squared_error'`) or RMSE (`'root_mean_squared_error'`, same units as the target) | — |
 | **Robust to outliers** | MAE or MedAE (`'median_absolute_error'`) | MSE (inflated by outliers) |
 | **Need percentage interpretation** | SMAPE (`'symmetric_mean_absolute_percentage_error'`) | MAPE if data has zeros |
 | **Data contains zeros or near-zero values** | MAE, MASE, RMSSE | MAPE (divides by y_true → extremely large values) |
-| **Compare across different-scale series** | MASE (`'mean_absolute_scaled_error'`) or RMSSE (`'root_mean_squared_scaled_error'`) | MAE, MSE (scale-dependent) |
+| **Compare across different-scale series** | MASE (`'mean_absolute_scaled_error'`) or RMSSE (`'root_mean_squared_scaled_error'`) | MAE, MSE, RMSE (scale-dependent) |
 | **Target is always positive** | MSLE (`'mean_squared_log_error'`) | — (use when relative errors matter more than absolute) |
 | **Interpretable baseline comparison** | MASE (value < 1 means better than naive forecast) | — |
 

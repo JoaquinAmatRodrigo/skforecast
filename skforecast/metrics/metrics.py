@@ -13,6 +13,7 @@ import inspect
 from functools import wraps
 from sklearn.metrics import (
     mean_squared_error,
+    root_mean_squared_error,
     mean_absolute_error,
     mean_absolute_percentage_error,
     mean_squared_log_error,
@@ -45,6 +46,7 @@ def _get_metric(metric: str) -> Callable:
     allowed_metrics = [
         # Regression metrics
         "mean_squared_error",
+        "root_mean_squared_error",
         "mean_absolute_error",
         "mean_absolute_percentage_error",
         "mean_squared_log_error",
@@ -66,6 +68,7 @@ def _get_metric(metric: str) -> Callable:
 
     metrics = {
         "mean_squared_error": mean_squared_error,
+        "root_mean_squared_error": root_mean_squared_error,
         "mean_absolute_error":  mean_absolute_error,
         "mean_absolute_percentage_error":  mean_absolute_percentage_error,
         "mean_squared_log_error":  mean_squared_log_error,

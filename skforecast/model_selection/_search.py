@@ -85,9 +85,9 @@ def grid_search_forecaster(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -192,9 +192,9 @@ def random_search_forecaster(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -302,9 +302,9 @@ def _evaluate_grid_hyperparameters(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -591,9 +591,9 @@ def bayesian_search_forecaster(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -988,9 +988,9 @@ def grid_search_forecaster_multiseries(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -1113,9 +1113,9 @@ def random_search_forecaster_multiseries(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -1243,9 +1243,9 @@ def _evaluate_grid_hyperparameters_multiseries(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -1615,9 +1615,9 @@ def bayesian_search_forecaster_multiseries(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -2157,9 +2157,9 @@ def bayesian_search_foundation(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
 
-        - If `str`: `{'mean_squared_error', 'mean_absolute_error',
-          'mean_absolute_percentage_error', 'mean_squared_log_error',
-          'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}`.
+        - If `str`: name of the metric, for example `'mean_absolute_error'` or
+          `'root_mean_squared_error'`. All accepted names are listed in
+          https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and
           `y_train` (optional) that returns a float.
         - If `list`: List containing multiple strings and/or callables.
@@ -2488,9 +2488,9 @@ def grid_search_stats(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -2582,9 +2582,9 @@ def random_search_stats(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -2679,9 +2679,9 @@ def _evaluate_grid_hyperparameters_stats(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -2903,9 +2903,9 @@ def grid_search_equivalent_date(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
 
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
