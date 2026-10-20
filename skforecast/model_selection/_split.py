@@ -6,7 +6,6 @@
 
 
 from __future__ import annotations
-from typing import Any
 import warnings
 import numpy as np
 import pandas as pd
@@ -561,8 +560,7 @@ class OneStepAheadFold(BaseFold):
     def split(
         self,
         X: pd.Series | pd.DataFrame | pd.Index | dict[str, pd.Series | pd.DataFrame],
-        as_pandas: bool = False,
-        externally_fitted: Any = None
+        as_pandas: bool = False
     ) -> list | pd.DataFrame:
         """
         Split the time series data into train and test folds.
@@ -574,8 +572,6 @@ class OneStepAheadFold(BaseFold):
         as_pandas : bool, default False
             If True, the folds are returned as a DataFrame. This is useful to visualize
             the folds in a more interpretable way.
-        externally_fitted : Any, default None
-            Not used.
         
         Returns
         -------

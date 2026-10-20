@@ -42,6 +42,8 @@ The main changes in this release are:
 
 + Backtesting and hyperparameter search with a forecaster with `differentiation` no longer require repeating it in <code>[TimeSeriesFold]</code> or <code>[OneStepAheadFold]</code>; it raised a `ValueError`, and grid and random search returned an empty DataFrame. The `differentiation` argument of both folds, and `window_size` of <code>[OneStepAheadFold]</code>, have no effect on the folds and are deprecated (`FutureWarning`, removed in 0.29.0). With `verbose=True`, the training size now includes the observations used to differentiate. ([#1423](https://github.com/skforecast/skforecast/pull/1423))
 
++ Removed the `externally_fitted` argument of the `split` method of <code>[OneStepAheadFold]</code>, which was not used. ([#1423](https://github.com/skforecast/skforecast/pull/1423))
+
 + The first fit of <code>[Ets]</code> in a new environment, when numba compiles its functions, takes about 40% less time (7 s instead of 12 s on a 4-core CPU). Estimates and selected models are unchanged. ([#1400](https://github.com/skforecast/skforecast/pull/1400))
 
 

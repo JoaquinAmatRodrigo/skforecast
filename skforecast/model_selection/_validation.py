@@ -385,9 +385,8 @@ def _backtesting_forecaster(
         Training time series.
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
-        folds. Its `window_size` is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`. The object passed is not modified.
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -765,9 +764,8 @@ def backtesting_forecaster(
         Training time series.
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
-        folds. Its `window_size` is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`. The object passed is not modified.
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -1178,9 +1176,8 @@ def _backtesting_forecaster_multiseries(
         Training time series.
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
-        folds. Its `window_size` is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`. The object passed is not modified.
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -1629,9 +1626,8 @@ def backtesting_forecaster_multiseries(
         Training time series.
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
-        folds. Its `window_size` is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`. The object passed is not modified.
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -2003,10 +1999,9 @@ def _backtesting_stats(
         Training time series.
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
-        folds. Its `window_size` is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`. With estimators other than `Sarimax`, its `refit`
-        is set to `True`. The object passed is not modified.
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified. With estimators other than `Sarimax`,
+        `refit` is set to `True`.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -2356,10 +2351,9 @@ def backtesting_stats(
         Training time series.
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
-        folds. Its `window_size` is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`. With estimators other than `Sarimax`, its `refit`
-        is set to `True`. The object passed is not modified.
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified. With estimators other than `Sarimax`,
+        `refit` is set to `True`.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -2546,10 +2540,8 @@ def _backtesting_foundation(
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
         folds. Its `window_size` is taken from the forecaster (the context
-        length), its `refit` and `fixed_train_size` are ignored (the context grows
-        with each fold), and its `verbose` and `return_all_indexes` are replaced by
-        the `verbose` argument of this function and `False`. The object passed is
-        not modified.
+        length), and the object passed is not modified. `refit` and
+        `fixed_train_size` are ignored: the context grows with each fold.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
 
@@ -2960,10 +2952,8 @@ def backtesting_foundation(
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
         folds. Its `window_size` is taken from the forecaster (the context
-        length), its `refit` and `fixed_train_size` are ignored (the context grows
-        with each fold), and its `verbose` and `return_all_indexes` are replaced by
-        the `verbose` argument of this function and `False`. The object passed is
-        not modified.
+        length), and the object passed is not modified. `refit` and
+        `fixed_train_size` are ignored: the context grows with each fold.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
 

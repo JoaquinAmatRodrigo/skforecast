@@ -78,13 +78,9 @@ def grid_search_forecaster(
         Training time series.
     cv : TimeSeriesFold, OneStepAheadFold
         TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds. The object passed is not modified.
-
-        - If `TimeSeriesFold`, each candidate is evaluated with backtesting: the
-        `window_size` of the cv is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`.
-        - If `OneStepAheadFold`, only its `initial_train_size` is used.
+        the data into folds. With a `TimeSeriesFold`, its `window_size` is taken
+        from the forecaster; with a `OneStepAheadFold`, only its `initial_train_size`
+        is used. The object passed is not modified.
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
@@ -191,13 +187,9 @@ def random_search_forecaster(
         Training time series.
     cv : TimeSeriesFold, OneStepAheadFold
         TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds. The object passed is not modified.
-
-        - If `TimeSeriesFold`, each candidate is evaluated with backtesting: the
-        `window_size` of the cv is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`.
-        - If `OneStepAheadFold`, only its `initial_train_size` is used.
+        the data into folds. With a `TimeSeriesFold`, its `window_size` is taken
+        from the forecaster; with a `OneStepAheadFold`, only its `initial_train_size`
+        is used. The object passed is not modified.
     param_distributions : dict
         Dictionary with parameters names (`str`) as keys and 
         distributions or lists of parameters to try.
@@ -307,13 +299,9 @@ def _evaluate_grid_hyperparameters(
         Training time series.
     cv : TimeSeriesFold, OneStepAheadFold
         TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds. The object passed is not modified.
-
-        - If `TimeSeriesFold`, each candidate is evaluated with backtesting: the
-        `window_size` of the cv is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`.
-        - If `OneStepAheadFold`, only its `initial_train_size` is used.
+        the data into folds. With a `TimeSeriesFold`, its `window_size` is taken
+        from the forecaster; with a `OneStepAheadFold`, only its `initial_train_size`
+        is used. The object passed is not modified.
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
@@ -601,13 +589,9 @@ def bayesian_search_forecaster(
         Training time series.
     cv : TimeSeriesFold, OneStepAheadFold
         TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds. The object passed is not modified.
-
-        - If `TimeSeriesFold`, each candidate is evaluated with backtesting: the
-        `window_size` of the cv is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`.
-        - If `OneStepAheadFold`, only its `initial_train_size` is used.
+        the data into folds. With a `TimeSeriesFold`, its `window_size` is taken
+        from the forecaster; with a `OneStepAheadFold`, only its `initial_train_size`
+        is used. The object passed is not modified.
     search_space : Callable (optuna)
         Function with argument `trial` which returns a dictionary with parameters names 
         (`str`) as keys and Trial object from optuna (trial.suggest_float, 
@@ -1005,13 +989,9 @@ def grid_search_forecaster_multiseries(
         Training time series.
     cv : TimeSeriesFold, OneStepAheadFold
         TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds. The object passed is not modified.
-
-        - If `TimeSeriesFold`, each candidate is evaluated with backtesting: the
-        `window_size` of the cv is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`.
-        - If `OneStepAheadFold`, only its `initial_train_size` is used.
+        the data into folds. With a `TimeSeriesFold`, its `window_size` is taken
+        from the forecaster; with a `OneStepAheadFold`, only its `initial_train_size`
+        is used. The object passed is not modified.
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
@@ -1136,13 +1116,9 @@ def random_search_forecaster_multiseries(
         Training time series.
     cv : TimeSeriesFold, OneStepAheadFold
         TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds. The object passed is not modified.
-
-        - If `TimeSeriesFold`, each candidate is evaluated with backtesting: the
-        `window_size` of the cv is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`.
-        - If `OneStepAheadFold`, only its `initial_train_size` is used.
+        the data into folds. With a `TimeSeriesFold`, its `window_size` is taken
+        from the forecaster; with a `OneStepAheadFold`, only its `initial_train_size`
+        is used. The object passed is not modified.
     param_distributions : dict
         Dictionary with parameters names (`str`) as keys and distributions or 
         lists of parameters to try.
@@ -1272,13 +1248,9 @@ def _evaluate_grid_hyperparameters_multiseries(
         Training time series.
     cv : TimeSeriesFold, OneStepAheadFold
         TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds. The object passed is not modified.
-
-        - If `TimeSeriesFold`, each candidate is evaluated with backtesting: the
-        `window_size` of the cv is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`.
-        - If `OneStepAheadFold`, only its `initial_train_size` is used.
+        the data into folds. With a `TimeSeriesFold`, its `window_size` is taken
+        from the forecaster; with a `OneStepAheadFold`, only its `initial_train_size`
+        is used. The object passed is not modified.
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
@@ -1649,13 +1621,9 @@ def bayesian_search_forecaster_multiseries(
         Training time series.
     cv : TimeSeriesFold, OneStepAheadFold
         TimeSeriesFold or OneStepAheadFold object with the information needed to split
-        the data into folds. The object passed is not modified.
-
-        - If `TimeSeriesFold`, each candidate is evaluated with backtesting: the
-        `window_size` of the cv is taken from the forecaster, and its `verbose` and
-        `return_all_indexes` are replaced by the `verbose` argument of this
-        function and `False`.
-        - If `OneStepAheadFold`, only its `initial_train_size` is used.
+        the data into folds. With a `TimeSeriesFold`, its `window_size` is taken
+        from the forecaster; with a `OneStepAheadFold`, only its `initial_train_size`
+        is used. The object passed is not modified.
     search_space : Callable
         Function with argument `trial` which returns a dictionary with parameters names 
         (`str`) as keys and Trial object from optuna (trial.suggest_float, 
@@ -2180,11 +2148,10 @@ def bayesian_search_foundation(
         Training time series. Passed directly to `backtesting_foundation`.
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
-        folds. Each candidate is evaluated with `backtesting_foundation`, which
-        takes the `window_size` of the cv from the forecaster, ignores its `refit`
-        and `fixed_train_size`, and replaces its `verbose` and `return_all_indexes`
-        by the `verbose` argument of this function and `False`. The object passed
-        is not modified. `OneStepAheadFold` is not accepted and raises `TypeError`.
+        folds. Its `window_size` is taken from the forecaster (the context
+        length), and the object passed is not modified. `refit` and
+        `fixed_train_size` are ignored: the context grows with each fold.
+        `OneStepAheadFold` is not accepted and raises `TypeError`.
     search_space : Callable
         Function with argument `trial` which returns a dictionary with parameter
         names (`str`) as keys and Trial object from optuna
@@ -2534,11 +2501,9 @@ def grid_search_stats(
         Training time series. 
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
-        folds. Each candidate is evaluated with backtesting: the `window_size` of the
-        cv is taken from the forecaster, and its `verbose` and `return_all_indexes`
-        are replaced by the `verbose` argument of this function and `False`. With
-        estimators other than `Sarimax`, its `refit` is set to `True`. The object
-        passed is not modified.
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified. With estimators other than `Sarimax`,
+        `refit` is set to `True`.
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
@@ -2633,11 +2598,9 @@ def random_search_stats(
         Training time series. 
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
-        folds. Each candidate is evaluated with backtesting: the `window_size` of the
-        cv is taken from the forecaster, and its `verbose` and `return_all_indexes`
-        are replaced by the `verbose` argument of this function and `False`. With
-        estimators other than `Sarimax`, its `refit` is set to `True`. The object
-        passed is not modified.
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified. With estimators other than `Sarimax`,
+        `refit` is set to `True`.
     param_distributions : dict
         Dictionary with parameters names (`str`) as keys and 
         distributions or lists of parameters to try.
@@ -2735,11 +2698,9 @@ def _evaluate_grid_hyperparameters_stats(
         Training time series. 
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
-        folds. Each candidate is evaluated with backtesting: the `window_size` of the
-        cv is taken from the forecaster, and its `verbose` and `return_all_indexes`
-        are replaced by the `verbose` argument of this function and `False`. With
-        estimators other than `Sarimax`, its `refit` is set to `True`. The object
-        passed is not modified.
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified. With estimators other than `Sarimax`,
+        `refit` is set to `True`.
     param_grid : dict
         Dictionary with parameters names (`str`) as keys and lists of parameter
         settings to try as values.
@@ -2954,10 +2915,8 @@ def grid_search_equivalent_date(
         Training time series.
     cv : TimeSeriesFold
         TimeSeriesFold object with the information needed to split the data into
-        folds. Each candidate is evaluated with backtesting: the `window_size` of the
-        cv is taken from the forecaster, and its `verbose` and `return_all_indexes`
-        are replaced by the `verbose` argument of this function and `False`. The
-        object passed is not modified.
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified.
     param_grid : dict, list
         Configurations to try. Valid parameter names are `offset`, `n_offsets`
         and `agg_func`.
