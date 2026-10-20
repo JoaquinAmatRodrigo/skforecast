@@ -388,9 +388,9 @@ def _backtesting_forecaster(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -766,9 +766,9 @@ def backtesting_forecaster(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -1176,9 +1176,9 @@ def _backtesting_forecaster_multiseries(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -1625,9 +1625,9 @@ def backtesting_forecaster_multiseries(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -1996,9 +1996,9 @@ def _backtesting_stats(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -2345,9 +2345,9 @@ def backtesting_stats(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -2531,9 +2531,9 @@ def _backtesting_foundation(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
 
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and
         `y_train` (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
@@ -2941,9 +2941,9 @@ def backtesting_foundation(
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
 
-        - If `string`: {'mean_squared_error', 'mean_absolute_error',
-        'mean_absolute_percentage_error', 'mean_squared_log_error',
-        'mean_absolute_scaled_error', 'root_mean_squared_scaled_error'}
+        - If `string`: name of the metric, for example `'mean_absolute_error'`
+        or `'root_mean_squared_error'`. All accepted names are listed in
+        https://skforecast.org/latest/user_guides/metrics.html.
         - If `Callable`: Function with arguments `y_true`, `y_pred` and
         `y_train` (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
