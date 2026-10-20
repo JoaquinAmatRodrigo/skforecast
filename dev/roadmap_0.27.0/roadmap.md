@@ -42,8 +42,8 @@ cifras son las de la sesión en la nube y no se han vuelto a medir.
 
 **Hecho en `0.27.x`:** PR-1400 (compilación de Ets), #1412 (ISSUE-1357, IDs enteros),
 #1415 (ISSUE-1406), #1416 (BUG-stats-interval-ignored), #1418 (ISSUE-1410), #1419 (BUG-09 a),
-#1420 (QW-09, #1409) y #1422 (#1411, mensaje cuando los NaN dejan sin muestras de
-entrenamiento).
+#1420 (QW-09, #1409), #1422 (#1411, mensaje cuando los NaN dejan sin muestras de
+entrenamiento) y #1387 (ISSUE-1386, PR externo: `plot_residuals` con `fig`).
 
 **Orden recomendado para lo que queda:**
 
@@ -83,7 +83,7 @@ entrenamiento).
 | **Búsquedas multiserie con series cortas (MUY IMPORTANTE)** | BUG-search-short-series | M a L. Resultado erróneo silencioso en un uso habitual de los modelos globales. Diseño en [`BUG-search-short-series.md`](BUG-search-short-series.md); antes o durante la implementación, las mediciones de su sección 8.2 (sobre todo los intervalos con residuos out-of-sample). No bloquea QW-09, pero cambia qué puntos entran en sus métricas |
 | Paneles multiserie | QW-01, BUG-07, ISSUE-1410 | Hechos: ISSUE-1357 (IDs enteros) con #1412, que sustituye a PR-1408 (cerrado), e ISSUE-1410 con #1418 (2026-10-19) |
 | Stats: corrección y rendimiento | BUG-08, PERF-02, PR-1400 | PR-1400 ya está fusionado en `0.27.x`. Volver a medir PERF-02 después de BUG-08 |
-| PRs externos | PR-1402, PR-1387, PR-1388, PR-1389 | Inventariados, no revisados línea a línea |
+| PRs externos | PR-1402, PR-1387, PR-1388, PR-1389 | Hecho: PR-1387 fusionado en `0.27.x` (2026-10-20). PR-1402, PR-1388 y PR-1389 inventariados, no revisados línea a línea |
 | Pequeños | QW-07, DEP-python310 (anunciar la retirada en 0.28), DEP-arima-dictstyle | |
 
 El orden dentro de cada tema sigue las dependencias de la sección 1. En particular:
@@ -198,7 +198,7 @@ sección 5.
 | Bloque | Elementos, en orden |
 |---|---|
 | A. Resultados silenciosamente erróneos, esfuerzo S | BUG-03, BUG-01, BUG-02, ISSUE-1406 (#1415, hecho), BUG-04, BUG-10, BUG-stats-interval-ignored (#1416, hecho) |
-| B. Quick wins diarios y PR listos | QW-03, QW-01, QW-09, QW-04, QW-10 (tres cambios de salida, un solo anuncio), PR-1389, PR-1388, ISSUE-1410 (#1418, hecho), QW-02, QW-05, ISSUE-1385, PR-1400, PR-1402, PR-1387 |
+| B. Quick wins diarios y PR listos | QW-03, QW-01, QW-09, QW-04, QW-10 (tres cambios de salida, un solo anuncio), PR-1389, PR-1388, ISSUE-1410 (#1418, hecho), QW-02, QW-05, ISSUE-1385, PR-1400, PR-1402, PR-1387 (#1387, hecho) |
 | C. Corrección de más alcance, STATS y quick wins secundarios | BUG-06, BUG-08, PERF-02, QW-07 (+ DOC-skills-percentiles-stale), BUG-07, QW-08, PERF-03, QW-06, BUG-11, BUG-09 ((a) hecho con #1419; queda (b)) |
 | D. Features y gaps | FE-02, PERF-01, GAP-foundation-backtesting-interval, FE-04, FE-03 |
 | E. Mantenimiento y decisiones | DEP-python310 (anunciar), DEP-arima-dictstyle, HANDOFF-T2/T3/T4, PR-1341 (TiRex-2), ISSUE-1131 (alcance) |
@@ -966,7 +966,7 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
 | PR-1408 / ISSUE-1357 | https://github.com/skforecast/skforecast/pull/1408, https://github.com/skforecast/skforecast/pull/1412, https://github.com/skforecast/skforecast/issues/1357 | Resuelto: PR-1408 se cerró sin fusionar el 2026-10-18 y lo sustituyó #1412, fusionado en `0.27.x` el mismo día (#1357 cerrada) | Nada que hacer. Los nombres enteros se conservan como enteros: QW-04 debe usar la serie ya preprocesada |
 | PR-1389 / ISSUE-1354 | https://github.com/skforecast/skforecast/pull/1389, https://github.com/skforecast/skforecast/issues/1354 | PR externo | Revisar: `set_in_sample_residuals` con CatBoost y exog categórica |
 | PR-1388 / ISSUE-1355 | https://github.com/skforecast/skforecast/pull/1388, https://github.com/skforecast/skforecast/issues/1355 | PR externo | Revisar: búsquedas con `lags=None` y solo window features |
-| PR-1387 / ISSUE-1386 | https://github.com/skforecast/skforecast/pull/1387, https://github.com/skforecast/skforecast/issues/1386 | PR externo (+10/-5) | Fusionar: `plot_residuals` ignora `fig` |
+| PR-1387 / ISSUE-1386 | https://github.com/skforecast/skforecast/pull/1387, https://github.com/skforecast/skforecast/issues/1386 | Resuelto: fusionado en `0.27.x` el 2026-10-20 con la autoría del contribuidor, más un commit nuestro (nota de la versión en la 0.27.0 y test de `fig=None`); #1386 cerrada | Nada. `plot_residuals` usa `fig.add_subplot`; ninguna otra función que acepte `fig` o `ax` (`plot_multivariate_time_series_corr`, `plot_prediction_intervals`, `ForecasterRnn.plot_history`) tiene el mismo bug |
 | ISSUE-1410 | https://github.com/skforecast/skforecast/issues/1410, https://github.com/skforecast/skforecast/pull/1418 | Resuelto: #1418, fusionado en `0.27.x` el 2026-10-19 | Nada. Una serie con `window_size` valores o menos en el entrenamiento de un fold queda fuera de ese fold; `backtesting_foundation` usa `window_size=0`. FE-04 debe usar la misma frontera |
 | ISSUE-1385 (T0) | https://github.com/skforecast/skforecast/issues/1385; `skforecast/foundation/_adapters.py:3724-3729` | Sin PR; no reproducido aquí (sin `tfc-t0`) | Adaptar a `tfc-t0>=0.4` (`predict` sin `context` ni `quantiles`; torch como extra desde 0.6.0) |
 | ISSUE-1409 + DISC-1119 + GAP-backtesting-interval-metrics | https://github.com/skforecast/skforecast/issues/1409, https://github.com/skforecast/skforecast/discussions/1119 | Sin PR | Se implementan por separado como QW-09 (`coverage` e `interval_width`, #1409) y QW-10 (columna `step`, D1119) (sección 2). Sin aviso de infracobertura (sección 7) |
