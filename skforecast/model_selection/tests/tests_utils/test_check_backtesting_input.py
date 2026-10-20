@@ -1008,7 +1008,6 @@ def test_check_backtesting_input_ValueError_when_Direct_forecaster_not_enough_st
              steps                 = 1,
              initial_train_size    = len(y[:-12]),
              window_size           = None,
-             differentiation       = None,
              refit                 = False,
              fixed_train_size      = True,
              gap                   = 5,

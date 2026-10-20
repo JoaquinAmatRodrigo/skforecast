@@ -33,7 +33,6 @@ def test_output_random_search_forecaster_ForecasterRecursive_with_mocked():
             steps                 = 3,
             initial_train_size    = len(y_train),
             window_size           = None,
-            differentiation       = None,
             refit                 = False,
             fixed_train_size      = False,
             gap                   = 0,

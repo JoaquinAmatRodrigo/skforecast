@@ -34,7 +34,6 @@ def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
             steps                 = 3,
             initial_train_size    = len(y[:-12]),
             window_size           = None,
-            differentiation       = None,
             refit                 = False,
             fixed_train_size      = True,
             gap                   = 0,
