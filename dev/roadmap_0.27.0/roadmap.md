@@ -43,8 +43,8 @@ cifras son las de la sesión en la nube y no se han vuelto a medir.
 **Hecho en `0.27.x`:** PR-1400 (compilación de Ets), #1412 (ISSUE-1357, IDs enteros),
 #1415 (ISSUE-1406), #1416 (BUG-stats-interval-ignored), #1418 (ISSUE-1410), #1419 (BUG-09 a),
 #1420 (QW-09, #1409), #1422 (#1411, mensaje cuando los NaN dejan sin muestras de
-entrenamiento) y #1387 (ISSUE-1386, PR externo: `plot_residuals` con `fig`). En rama, sin
-PR: QW-03 y DEP-cv-differentiation (`fix/cv-inherit-differentiation`, 2026-10-20; el cv ya
+entrenamiento) y #1387 (ISSUE-1386, PR externo: `plot_residuals` con `fig`). En PR #1423
+(sin fusionar): QW-03 y DEP-cv-differentiation (`fix/cv-inherit-differentiation`, 2026-10-20; el cv ya
 no exige repetir la `differentiation` del forecaster, y `differentiation` de los dos folds y
 `window_size` de `OneStepAheadFold` quedan deprecados: no tienen efecto, dan `FutureWarning`
 y se eliminan en la 0.29.0).
@@ -58,7 +58,7 @@ y se eliminan en la 0.29.0).
 2. **BUG-03** (S): las búsquedas reentrenan con el peor candidato cuando la métrica es "mayor
    es mejor", sin aviso y con `return_best=True` por defecto.
 3. ~~**QW-03**~~ y ~~**DEP-cv-differentiation**~~ **Hechos en la rama
-   `fix/cv-inherit-differentiation`** (pendiente de PR): elimina un `ValueError` en todo
+   `fix/cv-inherit-differentiation`** (#1423, sin fusionar): elimina un `ValueError` en todo
    backtesting con `differentiation`, cuyo peor caso era una búsqueda que devuelve un
    DataFrame vacío, y depreca los argumentos del cv que no cambian los folds.
 4. **BUG-04 y BUG-10** (S cada uno): foundation es foco, y los dos hacen que se prediga con

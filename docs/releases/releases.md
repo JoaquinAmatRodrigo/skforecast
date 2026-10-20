@@ -18,7 +18,7 @@ The main changes in this release are:
 
 + <span class="badge text-bg-feature">Feature</span> Backtesting with a prediction interval reports its empirical `coverage` and mean `interval_width` next to the other metrics, per series and aggregated in multi-series backtesting, for machine learning, statistical and foundation models. ([#1409](https://github.com/skforecast/skforecast/issues/1409))
 
-+ <span class="badge text-bg-api-change">API Change</span> Backtesting and hyperparameter search no longer require repeating the `differentiation` of the forecaster in <code>[TimeSeriesFold]</code> or <code>[OneStepAheadFold]</code>. The `differentiation` argument of both folds, and `window_size` of <code>[OneStepAheadFold]</code>, are deprecated: they have no effect, emit a `FutureWarning` and will be removed in 0.29.0.
++ <span class="badge text-bg-api-change">API Change</span> Backtesting and hyperparameter search no longer require repeating the `differentiation` of the forecaster in <code>[TimeSeriesFold]</code> or <code>[OneStepAheadFold]</code>. The `differentiation` argument of both folds, and `window_size` of <code>[OneStepAheadFold]</code>, are deprecated: they have no effect, emit a `FutureWarning` and will be removed in 0.29.0. ([#1423](https://github.com/skforecast/skforecast/pull/1423))
 
 + <span class="badge text-bg-fix">Fix</span> The `predict_interval` method of <code>[ForecasterStats]</code> returns the interval requested in `interval`; it always returned the 95% interval. ([#1416](https://github.com/skforecast/skforecast/pull/1416))
 
@@ -40,7 +40,7 @@ The main changes in this release are:
 
 + In the `predict_interval` method of <code>[ForecasterStats]</code> and in <code>[backtesting_stats]</code>, `alpha` is an alias of `interval` (`alpha=0.05` is equivalent to `interval=[0.025, 0.975]`), and passing both raises a `ValueError`. Previously, `alpha` took precedence over `interval`. `interval` now comes before `alpha` in the signature. ([#1416](https://github.com/skforecast/skforecast/pull/1416))
 
-+ Backtesting and hyperparameter search with a forecaster with `differentiation` no longer require repeating it in <code>[TimeSeriesFold]</code> or <code>[OneStepAheadFold]</code>; it raised a `ValueError`, and grid and random search returned an empty DataFrame. The `differentiation` argument of both folds, and `window_size` of <code>[OneStepAheadFold]</code>, have no effect on the folds and are deprecated (`FutureWarning`, removed in 0.29.0). With `verbose=True`, the training size now includes the observations used to differentiate.
++ Backtesting and hyperparameter search with a forecaster with `differentiation` no longer require repeating it in <code>[TimeSeriesFold]</code> or <code>[OneStepAheadFold]</code>; it raised a `ValueError`, and grid and random search returned an empty DataFrame. The `differentiation` argument of both folds, and `window_size` of <code>[OneStepAheadFold]</code>, have no effect on the folds and are deprecated (`FutureWarning`, removed in 0.29.0). With `verbose=True`, the training size now includes the observations used to differentiate. ([#1423](https://github.com/skforecast/skforecast/pull/1423))
 
 + The first fit of <code>[Ets]</code> in a new environment, when numba compiles its functions, takes about 40% less time (7 s instead of 12 s on a 4-core CPU). Estimates and selected models are unchanged. ([#1400](https://github.com/skforecast/skforecast/pull/1400))
 
