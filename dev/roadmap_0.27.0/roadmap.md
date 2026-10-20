@@ -43,7 +43,7 @@ cifras son las de la sesión en la nube y no se han vuelto a medir.
 | Tema | Elementos | Notas |
 |---|---|---|
 | Resultados erróneos silenciosos | BUG-03, BUG-01, BUG-stats-interval-ignored, BUG-04, BUG-10, ISSUE-1406 | Todos S. BUG-01 solo como aviso silenciable: el backtesting sobre datos de entrenamiento es un uso documentado. Hechos (2026-10-19): ISSUE-1406 con #1415 (sustituye a PR-1407, cerrado) y BUG-stats-interval-ignored con #1416; DEP-stats-alpha descartado (decisión 5) |
-| Backtesting probabilístico (titular de la release) | QW-03, QW-09, QW-04, QW-08, BUG-02, QW-10 | Es lo que se pide desde 2024 (#885, #902, #1253, #1409, D1119). Tres cambios de salida independientes que se fusionan por separado y se anuncian juntos en `releases.md`: QW-09 (`coverage` e `interval_width`, #1409) va primero porque no depende de QW-04; QW-04 (`y_true`) y QW-10 (`step`) después |
+| Backtesting probabilístico (titular de la release) | QW-03, QW-09, QW-04, QW-08, PERF-03, BUG-02, QW-10 | Es lo que se pide desde 2024 (#885, #902, #1253, #1409, D1119). Tres cambios de salida independientes que se fusionan por separado y se anuncian juntos en `releases.md`: QW-09 (`coverage` e `interval_width`, #1409) va primero porque no depende de QW-04; QW-04 (`y_true`) y QW-10 (`step`) después. PERF-03 (métricas en numpy, 2,6 veces más rápida la búsqueda con `OneStepAheadFold`) va junto a QW-08 o justo detrás |
 | Foundation para producción | QW-05, BUG-06, QW-02 | QW-02 pendiente de decisión |
 | **Búsquedas multiserie con series cortas (MUY IMPORTANTE)** | BUG-search-short-series | M a L. Resultado erróneo silencioso en un uso habitual de los modelos globales. Diseño en [`BUG-search-short-series.md`](BUG-search-short-series.md); antes o durante la implementación, las mediciones de su sección 8.2 (sobre todo los intervalos con residuos out-of-sample). No bloquea QW-09, pero cambia qué puntos entran en sus métricas |
 | Paneles multiserie | QW-01, BUG-07, ISSUE-1410 | Hechos: ISSUE-1357 (IDs enteros) con #1412, que sustituye a PR-1408 (cerrado), e ISSUE-1410 con #1418 (2026-10-19) |
@@ -64,6 +64,9 @@ El orden dentro de cada tema sigue las dependencias de la sección 1. En particu
   el intervalo nominal está siempre en `interval`.
 - ISSUE-1410 conviene antes (mismo fichero), pero no bloquea (hecho con #1418).
 - BUG-02 va antes que QW-10.
+- PERF-03 va junto a QW-08 o justo detrás: los dos tocan `_get_metric`
+  (`skforecast/metrics/metrics.py`), así que no conviene tener dos PRs abiertas sobre la
+  misma función. Si QW-08 añade `root_mean_squared_error`, PERF-03 incluye su versión en numpy.
 
 Orden de QW-09: ~~ISSUE-1406 (#1415) → BUG-stats-interval-ignored (#1416) → ISSUE-1410
 (#1418)~~ (hechos el 2026-10-19) → **QW-09 (siguiente)** → QW-08 (validar
@@ -145,7 +148,7 @@ sección 5.
 |---|---|
 | A. Resultados silenciosamente erróneos, esfuerzo S | BUG-03, BUG-01, BUG-02, ISSUE-1406 (#1415, hecho), BUG-04, BUG-10, BUG-stats-interval-ignored (#1416, hecho) |
 | B. Quick wins diarios y PR listos | QW-03, QW-01, QW-09, QW-04, QW-10 (tres cambios de salida, un solo anuncio), PR-1389, PR-1388, ISSUE-1410 (#1418, hecho), QW-02, QW-05, ISSUE-1385, PR-1400, PR-1402, PR-1387 |
-| C. Corrección de más alcance, STATS y quick wins secundarios | BUG-06, BUG-08, PERF-02, QW-07 (+ DOC-skills-percentiles-stale), BUG-07, QW-08, QW-06, BUG-11, BUG-09 ((a) hecho con #1419; queda (b)) |
+| C. Corrección de más alcance, STATS y quick wins secundarios | BUG-06, BUG-08, PERF-02, QW-07 (+ DOC-skills-percentiles-stale), BUG-07, QW-08, PERF-03, QW-06, BUG-11, BUG-09 ((a) hecho con #1419; queda (b)) |
 | D. Features y gaps | FE-02, PERF-01, GAP-foundation-backtesting-interval, FE-04, FE-03 |
 | E. Mantenimiento y decisiones | DEP-python310 (anunciar), DEP-arima-dictstyle, HANDOFF-T2/T3/T4, PR-1341 (TiRex-2), ISSUE-1131 (alcance) |
 
@@ -509,6 +512,7 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
 |---|---|---|---|---|---|
 | **PERF-02** | El ajuste de Ets y Sarimax (L-BFGS-B de scipy >= 1.15) se vuelve de 3 a 70 veces más lento con cualquier otra carga en la máquina, y `n_jobs='auto'` deja en serie todo backtesting de Arima/Ets/Arar (refit obligatorio) | stats / model_selection (stats) | S | `dev/roadmap_0.27.0/repro/PERF-02.py` | (a) Envolver `Ets.fit`, `Sarimax.fit` (y `Arima.fit`) en `threadpoolctl.threadpool_limits(1, user_api="blas")` (dependencia de scikit-learn; 1,45 ms por llamada, 0,007 ms con un `ThreadpoolController` reutilizado). (b) `select_n_jobs_backtesting` (`_utils.py:706`): `max(1, cpu_count() - 1)` para `ForecasterStats` con `refit` True o 1. Volver a medir tras BUG-08 |
 | **PERF-01** | `backtesting_foundation` llama al modelo una vez por fold aunque es zero-shot, y prepara los datos con 0,87 a 1,33 ms por serie y fold | foundation / model_selection | M | `dev/roadmap_0.27.0/repro/PERF-01.py` | (1) Posiciones de fold con `searchsorted` y sumas acumuladas de `notna` una vez por serie, en lugar de `_extract_data_folds_multiseries`. (2) Pseudo-series (serie, fold) en trozos de ~1024 por llamada; una llamada por fold con `cross_learning=True` (mezclar folds filtraría futuro). (3) Cachear `expand_index` y comprobar NaN con numpy en `_prepare_future_exog` (`_foundation_model.py:870,877,1261`). Sin cambios de API |
+| **PERF-03** | Las métricas pedidas como texto (`mean_absolute_error`, `mean_squared_error`) usan las funciones de scikit-learn, cuya validación cuesta unos 150 µs por llamada; se llaman una vez por serie, métrica y candidato. Ocupan el 42 a 51% del tiempo de `grid_search_forecaster_multiseries` con `OneStepAheadFold` (más un 9% de MASE con 3 métricas) y el 5 a 11% del backtesting multiserie | metrics / model_selection | S (~1 día con tests de igualdad frente a scikit-learn y benchmark) | `dev/roadmap_0.27.0/repro/PERF-03.py` | En `_get_metric` (`skforecast/metrics/metrics.py:45-73`), versiones privadas en numpy de MAE y MSE (y RMSE con QW-08) con el mismo `__name__`, para que las columnas no cambien. Conservar la validación de scikit-learn: error con NaN y con longitudes distintas, y aplanar a 1D (si no, `(n,)` frente a `(n, 1)` daría por broadcasting una matriz `n x n` sin avisar). MASE y RMSSE con arrays de numpy en lugar de Series (hoy restan Series, que alinean por índice). MAPE y MSLE siguen en scikit-learn (`eps` del denominador, error con negativos) hasta medir su uso. Quien pase la función de scikit-learn como callable no gana nada. `get_group` (1 a 2%) no merece la pena; volver a medir después. Coordinar con QW-08: los dos tocan `_get_metric` |
 
 ### Observado frente a esperado
 
@@ -586,6 +590,15 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
   a 2,70 s sin exog y de 26,69 s a 8,13 s con exog. Esperado: una o pocas llamadas
   agrupadas. Solo medido Chronos-2 en CPU; TabICL, TabPFN-TS y Nori solo ganarían con (1)
   y (3).
+- **PERF-03.** Observado (1000 series de 400 días, Ridge, `lags=7`, MAE y MSE, prototipo en
+  memoria; Python 3.14.3, numpy 2.5.3, pandas 2.3.3, scikit-learn 1.9.1, lightgbm 4.6.0, medido
+  en local el 2026-10-20): `grid_search_forecaster_multiseries` con `OneStepAheadFold` y 8
+  candidatos 3,32 s frente a 1,27 s (2,6x; con 100 series, 0,35 frente a 0,14 s); backtesting
+  1,92 frente a 1,65 s (1,16x); métricas idénticas (diferencia máxima 0). Con perfilador, las
+  métricas de scikit-learn ocupan el 41,7% (1 métrica) y el 51,0% (3 métricas, más MASE 9,2%)
+  de la búsqueda con `OneStepAheadFold`, y del 5,2 al 10,6% del backtesting con Ridge o LightGBM;
+  `get_group`, del 0,9 al 2,1%. Esperado: que el coste de la métrica sea el del cálculo, no el de
+  la validación de scikit-learn.
 
 ---
 
