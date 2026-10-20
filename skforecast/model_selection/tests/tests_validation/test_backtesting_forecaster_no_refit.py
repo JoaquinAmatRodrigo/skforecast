@@ -1753,7 +1753,6 @@ def test_output_backtesting_forecaster_ForecasterDirect_differentiation_gap_with
             steps                 = 3,
             initial_train_size    = len(y_train),
             window_size           = None,
-            differentiation       = 1,
             refit                 = False,
             fixed_train_size      = True,
             gap                   = 2,

@@ -402,7 +402,6 @@ def test_output_evaluate_grid_hyperparameters_ForecasterRecursive_with_different
             steps                 = 3,
             initial_train_size    = len(y_train),
             window_size           = None,
-            differentiation       = 1,
             refit                 = False,
             fixed_train_size      = False,
             gap                   = 0,

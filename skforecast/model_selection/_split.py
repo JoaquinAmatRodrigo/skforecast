@@ -52,12 +52,6 @@ class BaseFold():
         hyperparameter search functions, it is taken from the forecaster. To get
         the same folds when calling `split` directly, use `forecaster.window_size`,
         which already includes the differentiation order of the forecaster.
-    differentiation : int, default None
-        Order of differentiation of the forecaster. It is only used to report the
-        training observations when `verbose=True`; it does not change the folds.
-        In the backtesting and hyperparameter search functions, if `None`, the
-        value of the forecaster is used. If set, it must be equal to the
-        `differentiation` of the forecaster (the maximum order when it is a dict).
     refit : bool, int, default False
         Whether to refit the forecaster in each fold.
 
@@ -86,6 +80,10 @@ class BaseFold():
         Whether to return all indexes or only the start and end indexes of each fold.
     verbose : bool, default True
         Whether to print information about generated folds.
+    differentiation : int, default None
+        **Deprecated** since version 0.27.0, it has no effect and will be removed
+        in version 0.29.0. The `window_size` of the forecaster already includes
+        its differentiation order.
 
     Attributes
     ----------
@@ -97,9 +95,6 @@ class BaseFold():
         (`None` when `initial_train_size` is `None`).
     window_size : int
         Number of observations needed to generate the autoregressive predictors.
-    differentiation : int
-        Order of differentiation of the forecaster. It is only used to report the
-        training observations when `verbose=True`.
     return_all_indexes : bool
         Whether to return all indexes or only the start and end indexes of each fold.
     verbose : bool
@@ -123,6 +118,10 @@ class BaseFold():
         verbose: bool = True
     ) -> None:
 
+        self._warn_deprecated_params(
+            params     = {'window_size': window_size, 'differentiation': differentiation},
+            stacklevel = 4
+        )
         self._validate_params(
             cv_name               = type(self).__name__,
             steps                 = steps,
@@ -145,6 +144,51 @@ class BaseFold():
         self.differentiation           = differentiation
         self.return_all_indexes        = return_all_indexes
         self.verbose                   = verbose
+
+    def _warn_deprecated_params(
+        self,
+        params: dict,
+        stacklevel: int
+    ) -> None:
+        """
+        Warn when a deprecated parameter is set to a value other than `None`:
+        `differentiation` in all fold classes and `window_size` in
+        `OneStepAheadFold`. These parameters do not change the folds and their
+        values are ignored.
+
+        Parameters
+        ----------
+        params : dict
+            Parameters set by the user.
+        stacklevel : int
+            Stack level of the warning, so that it points to the user's code.
+
+        Returns
+        -------
+        None
+        
+        """
+
+        # TODO: Remove in version 0.29.0 together with the deprecated parameters.
+        cv_name = type(self).__name__
+        deprecated_params = {
+            'differentiation': (
+                f"`differentiation` is deprecated since version 0.27.0 and has no "
+                f"effect on the folds of `{cv_name}`: the `window_size` of the "
+                f"forecaster already includes its differentiation order. It will "
+                f"be removed in version 0.29.0."
+            )
+        }
+        if cv_name == 'OneStepAheadFold':
+            deprecated_params['window_size'] = (
+                "`window_size` is deprecated since version 0.27.0 and has no "
+                "effect on the fold of `OneStepAheadFold`. It will be removed in "
+                "version 0.29.0."
+            )
+
+        for param, message in deprecated_params.items():
+            if params.get(param) is not None:
+                warnings.warn(message, FutureWarning, stacklevel=stacklevel)
 
     def _validate_params(
         self,
@@ -375,6 +419,8 @@ class BaseFold():
                 f"`params` must be a dictionary. Got {type(params)}."
             )
 
+        self._warn_deprecated_params(params=params, stacklevel=3)
+
         current_params = dict(vars(self))
         unknown_params = set(params.keys()) - set(current_params.keys())
         if unknown_params:
@@ -396,10 +442,6 @@ class OneStepAheadFold(BaseFold):
     Class to split time series data into train and test folds for one-step-ahead
     forecasting.
 
-    The arguments `window_size` and `differentiation` are taken from the forecaster
-    automatically when the object is used inside a hyperparameter search, so they
-    do not need to be set manually in that context.
-
     Parameters
     ----------
     initial_train_size : int, str, pandas Timestamp
@@ -408,19 +450,16 @@ class OneStepAheadFold(BaseFold):
         - If an integer, the number of observations used for initial training.
         - If a date string or pandas Timestamp, it is the last date included in 
         the initial training set.
-    window_size : int, default None
-        Number of observations needed to generate the autoregressive predictors.
-        It does not change the fold.
-    differentiation : int, default None
-        Order of differentiation of the forecaster. It is only used to report the
-        training observations when `verbose=True`; it does not change the folds.
-        In the hyperparameter search functions, if `None`, the value of the
-        forecaster is used. If set, it must be equal to the `differentiation` of
-        the forecaster (the maximum order when it is a dict).
     return_all_indexes : bool, default False
         Whether to return all indexes or only the start and end indexes of each fold.
     verbose : bool, default True
         Whether to print information about generated folds.
+    window_size : int, default None
+        **Deprecated** since version 0.27.0, it has no effect and will be removed
+        in version 0.29.0.
+    differentiation : int, default None
+        **Deprecated** since version 0.27.0, it has no effect and will be removed
+        in version 0.29.0.
 
     Attributes
     ----------
@@ -429,11 +468,6 @@ class OneStepAheadFold(BaseFold):
         Timestamp parseable by pandas) marking the last observation of the training set.
     initial_train_size_as_int : int
         Resolved integer position of `initial_train_size`, set when `split()` is called.
-    window_size : int
-        Number of observations needed to generate the autoregressive predictors.
-    differentiation : int
-        Order of differentiation of the forecaster. It is only used to report the
-        training observations when `verbose=True`.
     return_all_indexes : bool
         Whether to return all indexes or only the start and end indexes of each fold.
     verbose : bool
@@ -468,8 +502,6 @@ class OneStepAheadFold(BaseFold):
         info = (
             f"OneStepAheadFold(\n"
             f"    initial_train_size = {self.initial_train_size},\n"
-            f"    window_size        = {self.window_size},\n"
-            f"    differentiation    = {self.differentiation},\n"
             f"    return_all_indexes = {self.return_all_indexes},\n"
             f"    verbose            = {self.verbose},\n"
             f")"
@@ -492,8 +524,6 @@ class OneStepAheadFold(BaseFold):
                 <ul>
                     <li><strong>Initial train size:</strong> {self.initial_train_size}</li>
                     <li><strong>Initial train size as int:</strong> {self.initial_train_size_as_int}</li>
-                    <li><strong>Window size:</strong> {self.window_size}</li>
-                    <li><strong>Differentiation:</strong> {self.differentiation}</li>
                     <li><strong>Return all indexes:</strong> {self.return_all_indexes}</li>
                 </ul>
             </details>
@@ -648,29 +678,18 @@ class OneStepAheadFold(BaseFold):
 
         """
 
-        if self.differentiation is None:
-            differentiation = 0
-        else:
-            differentiation = self.differentiation
-
-        initial_train_size_as_int = initial_train_size_as_int - differentiation
-        test_length = len(index) - (initial_train_size_as_int + differentiation)
+        test_length = len(index) - initial_train_size_as_int
 
         print("Information of folds")
         print("--------------------")
         print(
             f"Number of observations in train: {initial_train_size_as_int}"
         )
-        if self.differentiation is not None:
-            print(
-                f"    First {differentiation} observation/s in training set "
-                f"are used for differentiation"
-            )
         print(
             f"Number of observations in test: {test_length}"
         )
         
-        training_start = index[fold[1][0] + differentiation]
+        training_start = index[fold[1][0]]
         training_end = index[fold[1][-1]]
         test_start  = index[fold[2][0]]
         test_end    = index[fold[2][-1] - 1]
@@ -700,10 +719,9 @@ class TimeSeriesFold(BaseFold):
     to inspect the resulting folds.
 
     The user always provides `initial_train_size` (it can only be `None` when reusing
-    an already fitted forecaster). The arguments `window_size` and `differentiation`
-    are taken from the forecaster automatically when the object is used inside a
-    backtesting or hyperparameter search, so they do not need to be set manually in
-    that context.
+    an already fitted forecaster). The argument `window_size` is taken from the
+    forecaster automatically when the object is used inside a backtesting or
+    hyperparameter search, so it does not need to be set manually in that context.
 
     Parameters
     ----------
@@ -733,12 +751,6 @@ class TimeSeriesFold(BaseFold):
         hyperparameter search functions, it is taken from the forecaster. To get
         the same folds when calling `split` directly, use `forecaster.window_size`,
         which already includes the differentiation order of the forecaster.
-    differentiation : int, default None
-        Order of differentiation of the forecaster. It is only used to report the
-        training observations when `verbose=True`; it does not change the folds.
-        In the backtesting and hyperparameter search functions, if `None`, the
-        value of the forecaster is used. If set, it must be equal to the
-        `differentiation` of the forecaster (the maximum order when it is a dict).
     refit : bool, int, default False
         Whether to refit the forecaster in each fold.
 
@@ -767,6 +779,10 @@ class TimeSeriesFold(BaseFold):
         Whether to return all indexes or only the start and end indexes of each fold.
     verbose : bool, default True
         Whether to print information about generated folds.
+    differentiation : int, default None
+        **Deprecated** since version 0.27.0, it has no effect and will be removed
+        in version 0.29.0. The `window_size` of the forecaster already includes
+        its differentiation order.
 
     Attributes
     ----------
@@ -787,9 +803,6 @@ class TimeSeriesFold(BaseFold):
         Whether the folds overlap.
     window_size : int
         Number of observations needed to generate the autoregressive predictors.
-    differentiation : int
-        Order of differentiation of the forecaster. It is only used to report the
-        training observations when `verbose=True`.
     refit : bool, int
         Whether to refit the forecaster in each fold.
     fixed_train_size : bool
@@ -887,7 +900,6 @@ class TimeSeriesFold(BaseFold):
             f"    steps                 = {self.steps},\n"
             f"    fold_stride           = {self.fold_stride},\n"
             f"    window_size           = {self.window_size},\n"
-            f"    differentiation       = {self.differentiation},\n"
             f"    refit                 = {self.refit},\n"
             f"    fixed_train_size      = {self.fixed_train_size},\n"
             f"    gap                   = {self.gap},\n"
@@ -919,7 +931,6 @@ class TimeSeriesFold(BaseFold):
                     <li><strong>Fold stride:</strong> {self.fold_stride}</li>
                     <li><strong>Overlapping folds:</strong> {self.overlapping_folds}</li>
                     <li><strong>Window size:</strong> {self.window_size}</li>
-                    <li><strong>Differentiation:</strong> {self.differentiation}</li>
                     <li><strong>Refit:</strong> {self.refit}</li>
                     <li><strong>Fixed train size:</strong> {self.fixed_train_size}</li>
                     <li><strong>Gap:</strong> {self.gap}</li>
@@ -1283,20 +1294,10 @@ class TimeSeriesFold(BaseFold):
                 f"{self.window_size}"
             )
         else:
-            if self.differentiation is None:
-                print(
-                    f"Number of observations used for initial training: "
-                    f"{initial_train_size_as_int}"
-                )
-            else:
-                print(
-                    f"Number of observations used for initial training: "
-                    f"{initial_train_size_as_int - self.differentiation}"
-                )
-                print(
-                    f"    First {self.differentiation} observation/s in training sets "
-                    f"are used for differentiation"
-                )
+            print(
+                f"Number of observations used for initial training: "
+                f"{initial_train_size_as_int}"
+            )
         print(
             f"Number of observations used for backtesting: "
             f"{len(index) - initial_train_size_as_int}"
@@ -1324,20 +1325,15 @@ class TimeSeriesFold(BaseFold):
 
         print("")
 
-        if self.differentiation is None:
-            differentiation = 0
-        else:
-            differentiation = self.differentiation
-        
         for i, fold in enumerate(folds):
             is_fold_skipped   = i in index_to_skip
             has_training      = fold[-1] if i != 0 else True
             training_start    = (
-                index[fold[1][0] + differentiation] if fold[1] is not None else None
+                index[fold[1][0]] if fold[1] is not None else None
             )
             training_end      = index[fold[1][-1]] if fold[1] is not None else None
             training_length   = (
-                len(fold[1]) - differentiation if fold[1] is not None else 0
+                len(fold[1]) if fold[1] is not None else 0
             )
             validation_start  = index[fold[4][0]]
             validation_end    = index[fold[4][-1]]

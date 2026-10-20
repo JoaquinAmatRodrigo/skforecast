@@ -457,25 +457,26 @@ def test_grid_search_equivalent_date_output_file():
     os.remove(output_file)
 
 
-def test_grid_search_equivalent_date_ValueError_when_cv_differentiation_differs():
+def test_grid_search_equivalent_date_cv_differentiation_is_ignored():
     """
-    Test ValueError is raised before evaluating any candidate when
-    `differentiation` of the cv is set, since ForecasterEquivalentDate does
-    not differentiate the series.
+    Test that `differentiation` of the cv has no effect in
+    grid_search_equivalent_date: it raises a FutureWarning and gives the same
+    results as `None`, although ForecasterEquivalentDate does not differentiate
+    the series.
     """
-    forecaster = ForecasterEquivalentDate(offset=1)
-    cv = TimeSeriesFold(
-        steps=3, initial_train_size=30, differentiation=1, verbose=False
-    )
-
-    err_msg = re.escape(
-        "The differentiation included in the forecaster "
-        "(None) differs from the differentiation "
-        "included in the cv (1). Set `differentiation=None` "
-        "in the cv to use the value of the forecaster."
-    )
-    with pytest.raises(ValueError, match=err_msg):
-        grid_search_equivalent_date(
-            forecaster=forecaster, y=y, cv=cv, param_grid={'n_offsets': [1, 2]},
-            metric='mean_absolute_error', show_progress=False
+    cv = TimeSeriesFold(steps=3, initial_train_size=30, verbose=False)
+    with pytest.warns(FutureWarning, match="`differentiation` is deprecated"):
+        cv_explicit = TimeSeriesFold(
+            steps=3, initial_train_size=30, differentiation=1, verbose=False
         )
+
+    results = [
+        grid_search_equivalent_date(
+            forecaster=ForecasterEquivalentDate(offset=1), y=y, cv=cv_search,
+            param_grid={'n_offsets': [1, 2]}, metric='mean_absolute_error',
+            show_progress=False
+        )
+        for cv_search in [cv, cv_explicit]
+    ]
+
+    pd.testing.assert_frame_equal(results[0], results[1])

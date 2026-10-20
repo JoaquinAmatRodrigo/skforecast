@@ -1,6 +1,5 @@
 # Unit test grid_search_forecaster
 # ==============================================================================
-import re
 import numpy as np
 import pandas as pd
 import pytest
@@ -223,18 +222,19 @@ def test_grid_search_forecaster_one_step_ahead_date_initial_train_size_equivalen
 @pytest.mark.parametrize(
     "cv_class", [TimeSeriesFold, OneStepAheadFold], ids=lambda cv: cv.__name__
 )
-def test_grid_search_forecaster_cv_differentiation_None_uses_forecaster_differentiation(cv_class):
+def test_grid_search_forecaster_cv_differentiation_is_deprecated_and_ignored(cv_class):
     """
-    Test that when `differentiation` of the cv is `None`, grid_search_forecaster
-    uses the `differentiation` of the forecaster: the results are the same as
-    with the explicit value, the forecaster is refitted and the cv is not
-    modified.
+    Test that `differentiation` of the cv is deprecated and has no effect in
+    grid_search_forecaster: a value different from the one of the forecaster
+    raises a FutureWarning and gives the same results as `None`. The forecaster
+    is refitted and the cv is not modified.
     """
     kwargs = {'steps': 4, 'refit': False} if cv_class is TimeSeriesFold else {}
     cv = cv_class(initial_train_size=30, verbose=False, **kwargs)
-    cv_explicit = cv_class(
-        initial_train_size=30, differentiation=1, verbose=False, **kwargs
-    )
+    with pytest.warns(FutureWarning, match="`differentiation` is deprecated"):
+        cv_explicit = cv_class(
+            initial_train_size=30, differentiation=2, verbose=False, **kwargs
+        )
     param_grid = {'alpha': [0.01, 1]}
     lags_grid = [2, 4]
 
@@ -258,28 +258,3 @@ def test_grid_search_forecaster_cv_differentiation_None_uses_forecaster_differen
     assert forecaster.is_fitted
     assert cv.differentiation is None
     assert cv.window_size is None
-
-
-def test_grid_search_forecaster_ValueError_when_cv_differentiation_differs():
-    """
-    Test ValueError is raised before evaluating any candidate when
-    `differentiation` of the cv differs from the one of the forecaster, instead
-    of skipping every candidate and returning an empty DataFrame.
-    """
-    forecaster = ForecasterRecursive(estimator=Ridge(), lags=2, differentiation=1)
-    cv = TimeSeriesFold(
-        steps=4, initial_train_size=30, differentiation=2, verbose=False
-    )
-
-    err_msg = re.escape(
-        "The differentiation included in the forecaster "
-        "(1) differs from the differentiation "
-        "included in the cv (2). Set `differentiation=None` "
-        "in the cv to use the value of the forecaster."
-    )
-    with pytest.raises(ValueError, match=err_msg):
-        grid_search_forecaster(
-            forecaster=forecaster, y=y, cv=cv, param_grid={'alpha': [0.01, 1]},
-            metric='mean_absolute_error', show_progress=False
-        )
-    assert not forecaster.is_fitted

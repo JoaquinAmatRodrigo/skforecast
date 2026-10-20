@@ -44,9 +44,10 @@ cifras son las de la sesión en la nube y no se han vuelto a medir.
 #1415 (ISSUE-1406), #1416 (BUG-stats-interval-ignored), #1418 (ISSUE-1410), #1419 (BUG-09 a),
 #1420 (QW-09, #1409), #1422 (#1411, mensaje cuando los NaN dejan sin muestras de
 entrenamiento) y #1387 (ISSUE-1386, PR externo: `plot_residuals` con `fig`). En rama, sin
-PR: QW-03 (`fix/cv-inherit-differentiation`, 2026-10-20; el cv con `differentiation=None`
-hereda la del forecaster, un valor explícito distinto sigue dando `ValueError` y las
-búsquedas lo lanzan antes del bucle de candidatos).
+PR: QW-03 y DEP-cv-differentiation (`fix/cv-inherit-differentiation`, 2026-10-20; el cv ya
+no exige repetir la `differentiation` del forecaster, y `differentiation` de los dos folds y
+`window_size` de `OneStepAheadFold` quedan deprecados: no tienen efecto, dan `FutureWarning`
+y se eliminan en la 0.29.0).
 
 **Orden recomendado para lo que queda:**
 
@@ -56,9 +57,10 @@ búsquedas lo lanzan antes del bucle de candidatos).
    no retrase la release.
 2. **BUG-03** (S): las búsquedas reentrenan con el peor candidato cuando la métrica es "mayor
    es mejor", sin aviso y con `return_best=True` por defecto.
-3. ~~**QW-03**~~ **Hecho en la rama `fix/cv-inherit-differentiation`** (pendiente de PR):
-   elimina un `ValueError` en todo backtesting con `differentiation`, cuyo peor caso era una
-   búsqueda que devuelve un DataFrame vacío.
+3. ~~**QW-03**~~ y ~~**DEP-cv-differentiation**~~ **Hechos en la rama
+   `fix/cv-inherit-differentiation`** (pendiente de PR): elimina un `ValueError` en todo
+   backtesting con `differentiation`, cuyo peor caso era una búsqueda que devuelve un
+   DataFrame vacío, y depreca los argumentos del cv que no cambian los folds.
 4. **BUG-04 y BUG-10** (S cada uno): foundation es foco, y los dos hacen que se prediga con
    otro modelo u otros datos sin aviso.
 5. **QW-08 + PERF-03**, y después el bloque de salidas del backtesting: QW-04, BUG-02 + QW-10,
@@ -243,6 +245,7 @@ sección 5.
 | Item | Área | Valor para el usuario | A cuántos usuarios afecta | Esfuerzo | Evidencia | Esbozo del cambio / API |
 |---|---|---|---|---|---|---|
 | **QW-03** Heredar `differentiation` en `TimeSeriesFold` y `OneStepAheadFold` | model_selection | No hay que repetir `differentiation` en el cv; deja de fallar el código generado con la propia referencia IA; desaparece el peor caso (grid devuelve DataFrame vacío y forecaster sin ajustar) | Flujo habitual: todo backtesting o búsqueda con `differentiation` (recomendada con árboles), una o varias series | S (2 líneas, docstrings, 2 tests) | `skforecast/model_selection/_utils.py:274-288,602-620` lanza el error y `_validation.py:513-518,1286-1291` sobrescribe después `cv.differentiation` con `forecaster.differentiation_max`; `tools/ai/llms-base.txt:340,370` ya dice "set automatically"; prototipo: predicciones idénticas (`DataFrame.equals`), 220 tests pasan | Comprobar solo si `cv.differentiation is not None`; mantener el `ValueError` si el usuario fija un valor distinto. Quitar el comentario "must match" de 5 celdas en 3 guías |
+| **DEP-cv-differentiation** Deprecar `differentiation` en `TimeSeriesFold` y `OneStepAheadFold`, y `window_size` en `OneStepAheadFold` (añadido el 2026-10-20, misma PR que QW-03) | model_selection | Menos argumentos que no hacen nada: `differentiation` no cambia ningún fold (solo restaba observaciones en la salida de `verbose`) y llevaba a error, porque `window_size=max_lag, differentiation=d` da una última ventana más corta que la del backtesting; `window_size` no cambia el fold de `OneStepAheadFold` | Quien pasa estos argumentos al cv (las guías lo hacían en 5 celdas, y el código generado por IA también) | S | `_split.py`: `differentiation` solo en `_print_info`; el `window_size` del forecaster ya incluye la diferenciación (`_forecaster_recursive.py:415`); ningún código del paquete fija `window_size` ni llama a `split()` en `OneStepAheadFold`. Predicciones idénticas antes y después (backtesting de una serie, directo, multiserie con dict y búsquedas con los dos folds) | `FutureWarning` en `__init__` y en `set_params` cuando el valor no es `None`; el valor se ignora. Sin la comprobación de conflicto de QW-03 (`_check_cv_differentiation`, eliminada) ni la línea de differentiation en `verbose`. **Pendiente para la 0.29.0:** quitar los parámetros, sus atributos y su validación, y las ~120 llamadas `differentiation = None` de los tests |
 | **QW-01** Aviso cuando `predict()` con `levels=None` excluye series | recursive (multiseries) | Las series cuya última observación no llega a la fecha máxima dejan de desaparecer en silencio del forecast de producción | Flujo habitual en paneles de retail o demanda construidos desde formato largo o con NaN al final | S (~15 líneas) | `skforecast/utils/utils.py:4680` (`if input_levels_is_list and ...`); medido: 6 series entrenadas, 4 predichas, 0 avisos; store_sales 50 entrenadas, 47 predichas. Misma familia que #1406 / PR-1407 (aviso en backtesting), pero en `predict` y con código distinto | `IgnoredArgumentWarning` también con `levels=None`, con lista ordenada y truncada a 10, la fecha máxima y cómo predecirlas; un solo aviso en `predict_interval(method='bootstrapping')` |
 | **QW-09** Cobertura y anchura del intervalo en las métricas de backtesting (#1409) | model_selection / metrics | `coverage` e `interval_width` en la tabla de métricas cuando `interval` tiene dos cotas, por nivel y en los agregados (`average`, `weighted_average`, `pooling`), sin flag | Flujo habitual: todo backtesting probabilístico de ML y stats (las búsquedas pasan `interval=None`, `_search.py:454,1454,2778,3033`, y no cambian) | S (~1 día con tests y docs) | https://github.com/skforecast/skforecast/issues/1409; las métricas solo usan `pred` (`_validation.py:688`, `_utils.py:1067`); `skforecast/metrics/metrics.py:459` (`calculate_coverage`, no ignora NaN); medido en bike_sharing (80% nominal): cobertura de LGBM con residuos in-sample 0,53 (bootstrapping) y 0,26 (conformal) frente a 0,80 y 0,62 con residuos out-of-sample, sin ninguna señal (`work/verify/FE-01-value.md`) | Helper privado que calcula las dos métricas si la salida tiene `lower_bound` y `upper_bound`, sobre las mismas filas que el resto de métricas (tras `keep='last'`) y sin las filas con `y_true` NaN (en multiserie solo `pred` se pone a NaN, `_validation.py:1499`); columnas detrás de las métricas del usuario. En multiserie, pasar las cotas a `_calculate_metrics_backtesting_multiseries` (hoy solo `[['pred']]`, `_validation.py:1510`); las series nunca predichas dan NaN y quedan fuera de los agregados, como el resto de métricas desde #1415. `_backtesting_stats` ya solo recibe `interval` (`alpha` se quitó de las funciones privadas el 2026-10-19). Cubre `backtesting_forecaster`, `_multiseries` (incluido `ForecasterRnn`) y `_stats` (uno o varios estimadores); foundation cuando acepte `interval`. `ValueError` si una métrica del usuario se llama `coverage` o `interval_width`. Sin aviso de infracobertura (descartado, sección 7) |
 | **QW-10** Columna `step` en las predicciones de backtesting (D1119) | model_selection | Paso del horizonte de cada predicción, para analizar error y cobertura por horizonte sin reconstruirlo a mano | Flujo habitual: todo informe por horizonte | S | https://github.com/skforecast/skforecast/discussions/1119; `_validation.py:660,1471,2140,2574` (solo `fold`); `cumcount()+1` por fold falla con `gap>0` (con `gap=3` los pasos reales son 4..13, `work/verify/FE-01-risk.md`) | Columna `step` (de `gap + 1` a `gap + steps`) junto a `fold` en los cuatro backtesting; receta documentada por `step` y `level`. Después de BUG-02; independiente de QW-04 y QW-09. Cambio de salida anunciado |
@@ -271,6 +274,23 @@ cv = TimeSeriesFold(steps=24, initial_train_size=n_train, differentiation=1)  # 
 cv = TimeSeriesFold(steps=24, initial_train_size=n_train)  # se hereda del forecaster
 backtesting_forecaster(forecaster, y=y, cv=cv, metric="mean_absolute_error")
 # Mismo resultado que con differentiation=1 explícito; un valor explícito distinto sigue dando ValueError
+```
+
+### DEP-cv-differentiation: antes y después
+
+```python
+# Antes (0.26.0)
+cv = TimeSeriesFold(steps=24, initial_train_size=n_train, window_size=24, differentiation=1)
+cv.split(X=y, as_pandas=True)  # última ventana de 24, aunque el backtesting usa 25
+```
+
+```python
+# Después
+cv = TimeSeriesFold(steps=24, initial_train_size=n_train, window_size=24, differentiation=1)
+# FutureWarning: `differentiation` is deprecated since version 0.27.0 and has no effect on the
+# folds of `TimeSeriesFold`: the `window_size` of the forecaster already includes its
+# differentiation order. It will be removed in version 0.29.0.
+cv = TimeSeriesFold(steps=24, initial_train_size=n_train, window_size=forecaster.window_size)
 ```
 
 ### QW-01: antes y después
@@ -943,7 +963,7 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
 | FE-01 completo: función pública `evaluate_backtesting` / `calculate_backtesting_metrics` por fold, paso, serie y grupos | Verificado con veredicto partido | Lente de valor: tras QW-04, QW-09 y QW-10 aporta 2 o 3 líneas por uso y basta una receta. Lente de riesgo: versión reducida M (sin `y`, sin aviso, sin MASE, total distinto del backtesting con folds solapados). Decidir en 0.28 según demanda (única petición: https://github.com/skforecast/skforecast/issues/720); requiere BUG-02 |
 | WAPE (de QW-08) | Verificado (`later`) | Función nueva con tests y docs; sMAPE ya cubre las series con ceros |
 | `suppress_warnings` en `ForecasterFoundation.predict*` | Hallazgo de QW-02 | Hueco de consistencia con ML |
-| Validar el cv una vez antes del bucle de grid | Hallazgo de QW-03 | Junto con BUG-05. La `differentiation` del cv ya se valida antes del bucle con QW-03 (grid, random, multiserie y `grid_search_equivalent_date`); falta el resto de comprobaciones del cv |
+| Validar el cv una vez antes del bucle de grid | Hallazgo de QW-03 | Junto con BUG-05. La `differentiation` del cv ya no se comprueba (DEP-cv-differentiation la depreca y la ignora); queda el resto de comprobaciones del cv |
 | MultiSeries con exog de RangeIndex reseteado da un resultado erróneo en silencio | Hallazgo de QW-06, medido | Poco frecuente; anotar y tratarlo con QW-06 si el diseño lo permite |
 | skops en `ForecasterFoundation` | Hallazgo de QW-05 | Posible cuando el backend quede fuera del estado |
 | PLAN-CKPT (`finetuned_checkpoint`) y PLAN-TTM (adaptador TinyTimeMixer) | Plan sin código (`dev/PLAN_*.md`), no verificado | BUG-04 es requisito de PLAN-CKPT |
