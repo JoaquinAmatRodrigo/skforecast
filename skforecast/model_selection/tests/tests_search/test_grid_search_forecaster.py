@@ -41,7 +41,6 @@ def test_output_grid_search_forecaster_ForecasterRecursive_with_mocked():
             steps                 = 3,
             initial_train_size    = len(y_train),
             window_size           = None,
-            differentiation       = None,
             refit                 = False,
             fixed_train_size      = False,
             gap                   = 0,
@@ -132,7 +131,6 @@ def test_grid_search_forecaster_equivalence_backtesting_one_step_ahead(
             steps                 = 1,
             initial_train_size    = len(y_train),
             window_size           = None,
-            differentiation       = None,
             refit                 = False,
             fixed_train_size      = False,
             gap                   = 0,
@@ -217,3 +215,44 @@ def test_grid_search_forecaster_one_step_ahead_date_initial_train_size_equivalen
     # `initial_train_size` must remain the raw user input on the (deep-copied) cv objects.
     assert cv_int.initial_train_size == initial_train_size_int
     assert cv_date.initial_train_size == "2020-02-07"
+
+
+@pytest.mark.parametrize(
+    "cv_class", [TimeSeriesFold, OneStepAheadFold], ids=lambda cv: cv.__name__
+)
+def test_grid_search_forecaster_cv_differentiation_is_deprecated_and_ignored(cv_class):
+    """
+    Test that `differentiation` of the cv is deprecated and has no effect in
+    grid_search_forecaster: a value different from the one of the forecaster
+    raises a FutureWarning and gives the same results as `None`. The forecaster
+    is refitted and the cv is not modified.
+    """
+    kwargs = {'steps': 4, 'refit': False} if cv_class is TimeSeriesFold else {}
+    cv = cv_class(initial_train_size=30, verbose=False, **kwargs)
+    with pytest.warns(FutureWarning, match="`differentiation` is deprecated"):
+        cv_explicit = cv_class(
+            initial_train_size=30, differentiation=2, verbose=False, **kwargs
+        )
+    param_grid = {'alpha': [0.01, 1]}
+    lags_grid = [2, 4]
+
+    forecaster = ForecasterRecursive(estimator=Ridge(), lags=2, differentiation=1)
+    results = grid_search_forecaster(
+        forecaster=forecaster, y=y, cv=cv, param_grid=param_grid,
+        lags_grid=lags_grid, metric='mean_absolute_error', return_best=True,
+        show_progress=False
+    )
+    forecaster_explicit = ForecasterRecursive(
+        estimator=Ridge(), lags=2, differentiation=1
+    )
+    results_explicit = grid_search_forecaster(
+        forecaster=forecaster_explicit, y=y, cv=cv_explicit, param_grid=param_grid,
+        lags_grid=lags_grid, metric='mean_absolute_error', return_best=True,
+        show_progress=False
+    )
+
+    pd.testing.assert_frame_equal(results, results_explicit)
+    assert len(results) == 4
+    assert forecaster.is_fitted
+    assert cv.differentiation is None
+    assert cv.window_size is None

@@ -1,7 +1,9 @@
 # Unit test backtesting_forecaster
 # ==============================================================================
 import re
+import warnings
 import pytest
+import pandas as pd
 from scipy.stats import norm
 from sklearn.linear_model import Ridge
 from skforecast.recursive import ForecasterRecursive
@@ -32,7 +34,6 @@ def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
             steps                 = 3,
             initial_train_size    = len(y[:-12]),
             window_size           = None,
-            differentiation       = None,
             refit                 = False,
             fixed_train_size      = True,
             gap                   = 0,
@@ -91,3 +92,43 @@ def test_backtesting_forecaster_no_interval_metrics_when_interval_has_not_two_bo
                 )
 
     assert list(metric.columns) == ['mean_absolute_error']
+
+
+def test_backtesting_forecaster_cv_differentiation_is_deprecated_and_ignored():
+    """
+    Test that `differentiation` of the cv is deprecated and has no effect: a
+    value different from the one of the forecaster raises a FutureWarning and
+    gives the same predictions as `None`. Backtesting does not raise the
+    warning, the same cv object works with forecasters with different
+    `differentiation` and it is not modified.
+    """
+    forecaster_diff = ForecasterRecursive(estimator=Ridge(), lags=3, differentiation=1)
+    forecaster_no_diff = ForecasterRecursive(estimator=Ridge(), lags=3)
+    cv = TimeSeriesFold(steps=4, initial_train_size=30, refit=True, verbose=False)
+    warn_msg = re.escape("`differentiation` is deprecated since version 0.27.0")
+    with pytest.warns(FutureWarning, match=warn_msg):
+        cv_explicit = TimeSeriesFold(
+            steps=4, initial_train_size=30, refit=True, differentiation=2,
+            verbose=False
+        )
+
+    with warnings.catch_warnings():
+        warnings.filterwarnings("error", message=warn_msg, category=FutureWarning)
+        metric, predictions = backtesting_forecaster(
+            forecaster=forecaster_diff, y=y, cv=cv, metric='mean_absolute_error',
+            show_progress=False
+        )
+        metric_no_diff, _ = backtesting_forecaster(
+            forecaster=forecaster_no_diff, y=y, cv=cv, metric='mean_absolute_error',
+            show_progress=False
+        )
+    metric_explicit, predictions_explicit = backtesting_forecaster(
+        forecaster=forecaster_diff, y=y, cv=cv_explicit, metric='mean_absolute_error',
+        show_progress=False
+    )
+
+    pd.testing.assert_frame_equal(metric, metric_explicit)
+    pd.testing.assert_frame_equal(predictions, predictions_explicit)
+    assert not metric.equals(metric_no_diff)
+    assert cv.differentiation is None
+    assert cv.window_size is None

@@ -1787,8 +1787,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
              steps              = 24,
              refit              = False,
              fixed_train_size   = True,
-             gap                = 0,
-             differentiation    = forecaster.differentiation_max
+             gap                = 0
          )
     
     metrics, predictions = backtesting_forecaster_multiseries(
@@ -1870,8 +1869,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
              steps              = 24,
              refit              = False,
              fixed_train_size   = True,
-             gap                = 0,
-             differentiation    = forecaster.differentiation_max
+             gap                = 0
          )
     
     metrics, predictions = backtesting_forecaster_multiseries(
@@ -4653,8 +4651,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
              steps              = 3,
              gap                = 2,
              refit              = False,
-             fixed_train_size   = False,
-             differentiation    = 1
+             fixed_train_size   = False
          )
 
     metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
@@ -5322,7 +5319,6 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
             steps                 = 4,
             initial_train_size    = len(series_dict_range['l1']) - 12,
             window_size           = None,
-            differentiation       = None,
             refit                 = False,
             fixed_train_size      = True,
             gap                   = 0,
@@ -5400,7 +5396,6 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
             steps                 = 4,
             initial_train_size    = len(series_wide_range) - 12,
             window_size           = None,
-            differentiation       = None,
             refit                 = False,
             fixed_train_size      = True,
             gap                   = 0,
@@ -5481,7 +5476,6 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
             steps                 = 4,
             initial_train_size    = len(series_dict_range['l1']) - 12,
             window_size           = None,
-            differentiation       = None,
             refit                 = True,
             fixed_train_size      = False,
             gap                   = 0,
@@ -5559,7 +5553,6 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
             steps                 = 4,
             initial_train_size    = len(series_wide_range) - 12,
             window_size           = None,
-            differentiation       = None,
             refit                 = True,
             fixed_train_size      = False,
             gap                   = 0,
@@ -5820,8 +5813,7 @@ def test_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_Missi
     cv = TimeSeriesFold(
              steps              = 4,
              initial_train_size = len(series['l1']) - 12,
-             refit              = False,
-             differentiation    = 1
+             refit              = False
          )
 
     warn_msg = re.escape(
@@ -6165,3 +6157,36 @@ def test_output_backtesting_forecaster_multiseries_when_series_names_are_integer
 
     pd.testing.assert_frame_equal(metrics, expected_metrics)
     pd.testing.assert_frame_equal(predictions, expected_predictions)
+
+
+def test_backtesting_forecaster_multiseries_cv_differentiation_is_ignored_with_dict_differentiation():
+    """
+    Test that `differentiation` of the cv has no effect when the forecaster has
+    a dict as `differentiation`: a value different from the maximum order gives
+    the same output as `None`, and the cv is not modified.
+    """
+    forecaster = ForecasterRecursiveMultiSeries(
+        estimator=Ridge(random_state=123),
+        lags=3,
+        differentiation={'l1': 1, 'l2': 2, '_unknown_level': 1},
+    )
+    cv = TimeSeriesFold(steps=5, initial_train_size=30, refit=True, verbose=False)
+    with pytest.warns(FutureWarning, match="`differentiation` is deprecated"):
+        cv_explicit = TimeSeriesFold(
+            steps=5, initial_train_size=30, refit=True, differentiation=1,
+            verbose=False
+        )
+
+    metrics, predictions = backtesting_forecaster_multiseries(
+        forecaster=forecaster, series=series_dict_range, cv=cv,
+        metric='mean_absolute_error', show_progress=False
+    )
+    metrics_explicit, predictions_explicit = backtesting_forecaster_multiseries(
+        forecaster=forecaster, series=series_dict_range, cv=cv_explicit,
+        metric='mean_absolute_error', show_progress=False
+    )
+
+    pd.testing.assert_frame_equal(metrics, metrics_explicit)
+    pd.testing.assert_frame_equal(predictions, predictions_explicit)
+    assert cv.differentiation is None
+    assert cv.window_size is None

@@ -384,7 +384,9 @@ def _backtesting_forecaster(
     y : pandas Series
         Training time series.
     cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data into folds.
+        TimeSeriesFold object with the information needed to split the data into
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -523,7 +525,6 @@ def _backtesting_forecaster(
 
     cv.set_params({
         'window_size': forecaster.window_size,
-        'differentiation': forecaster.differentiation_max,
         'return_all_indexes': False,
         'verbose': verbose
     })
@@ -762,7 +763,9 @@ def backtesting_forecaster(
     y : pandas Series
         Training time series.
     cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data into folds.
+        TimeSeriesFold object with the information needed to split the data into
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -1172,7 +1175,9 @@ def _backtesting_forecaster_multiseries(
     series : pandas DataFrame, dict
         Training time series.
     cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data into folds.
+        TimeSeriesFold object with the information needed to split the data into
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -1327,7 +1332,6 @@ def _backtesting_forecaster_multiseries(
 
     cv.set_params({
         'window_size': forecaster.window_size,
-        'differentiation': forecaster.differentiation_max,
         'return_all_indexes': False,
         'verbose': verbose
     })
@@ -1621,7 +1625,9 @@ def backtesting_forecaster_multiseries(
     series : pandas DataFrame, dict
         Training time series.
     cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data into folds.
+        TimeSeriesFold object with the information needed to split the data into
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -1992,7 +1998,10 @@ def _backtesting_stats(
     y : pandas Series
         Training time series.
     cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data into folds.
+        TimeSeriesFold object with the information needed to split the data into
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified. With estimators other than `Sarimax`,
+        `refit` is set to `True`.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -2341,7 +2350,10 @@ def backtesting_stats(
     y : pandas Series
         Training time series.
     cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data into folds.
+        TimeSeriesFold object with the information needed to split the data into
+        folds. Its `window_size` is taken from the forecaster, and the object
+        passed is not modified. With estimators other than `Sarimax`,
+        `refit` is set to `True`.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
         
@@ -2526,8 +2538,10 @@ def _backtesting_foundation(
         mode; a wide `pd.DataFrame` or `dict[str, pd.Series]` runs in
         multi-series mode.
     cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data
-        into folds.
+        TimeSeriesFold object with the information needed to split the data into
+        folds. Its `window_size` is taken from the forecaster (the context
+        length), and the object passed is not modified. `refit` and
+        `fixed_train_size` are ignored: the context grows with each fold.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
 
@@ -2936,8 +2950,10 @@ def backtesting_foundation(
         Long-format DataFrames are normalised internally to a dict before
         processing.
     cv : TimeSeriesFold
-        TimeSeriesFold object with the information needed to split the data
-        into folds.
+        TimeSeriesFold object with the information needed to split the data into
+        folds. Its `window_size` is taken from the forecaster (the context
+        length), and the object passed is not modified. `refit` and
+        `fixed_train_size` are ignored: the context grows with each fold.
     metric : str, Callable, list
         Metric used to quantify the goodness of fit of the model.
 

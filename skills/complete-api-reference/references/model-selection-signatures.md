@@ -288,7 +288,6 @@ TimeSeriesFold(
     initial_train_size=None,        # int | str | pd.Timestamp | None
     fold_stride=None,               # int | None, if None equals steps
     window_size=None,               # int | None, set automatically by forecaster
-    differentiation=None,           # int | None, set automatically by forecaster
     refit=False,                    # bool | int, refit model each fold or every n folds
     fixed_train_size=True,          # bool, fixed vs expanding window
     gap=0,                          # int, observations between train end and test start
@@ -300,8 +299,6 @@ TimeSeriesFold(
 
 OneStepAheadFold(
     initial_train_size,             # int | str | pd.Timestamp (required)
-    window_size=None,               # int | None, set automatically by forecaster
-    differentiation=None,           # int | None, set automatically by forecaster
     return_all_indexes=False,       # bool
     verbose=True                    # bool
 )

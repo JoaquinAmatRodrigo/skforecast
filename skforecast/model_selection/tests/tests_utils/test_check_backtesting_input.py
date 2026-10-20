@@ -180,99 +180,6 @@ def test_check_backtesting_input_TypeError_when_not_valid_exog_type():
         )
 
 
-@pytest.mark.parametrize("differentiation", 
-    [{'l1': 1, 'l2': 2, '_unknown_level': 1}, {'l1': 2, 'l2': None, '_unknown_level': 1}], 
-     ids = lambda diff: f'differentiation: {diff}')
-def test_check_backtesting_input_ValueError_when_ForecasterRecursiveMultiSeries_diff_dict_not_cv_diff(differentiation):
-    """
-    Test ValueError is raised in check_backtesting_input if `differentiation`
-    of the ForecasterRecursiveMultiSeries as dict is different from 
-    `differentiation` of the cv.
-    """
-    forecaster = ForecasterRecursiveMultiSeries(
-        estimator=Ridge(), lags=2, differentiation=differentiation
-    )
-
-    cv = TimeSeriesFold(
-             steps                 = 3,
-             initial_train_size    = len(series_dict_range['l1']) - 12,
-             refit                 = False,
-             fixed_train_size      = False,
-             gap                   = 0,
-             allow_incomplete_fold = True,
-             differentiation       = 1,
-             verbose               = False
-         )
-    
-    err_msg = re.escape(
-        "When using a dict as `differentiation` in ForecasterRecursiveMultiSeries, "
-        "the `differentiation` included in the cv (1) must be "
-        "the same as the maximum `differentiation` included in the forecaster "
-        "(2). Set the same value "
-        "for both using the `differentiation` argument."
-    )
-    with pytest.raises(ValueError, match = err_msg):
-        check_backtesting_input(
-            forecaster              = forecaster,
-            cv                      = cv,
-            metric                  = 'mean_absolute_error',
-            series                  = series_dict_range,
-            interval                = None,
-            n_boot                  = 500,
-            random_state            = 123,
-            use_in_sample_residuals = True,
-            show_progress           = False,
-            suppress_warnings       = False
-        )
-
-
-@pytest.mark.parametrize("forecaster", 
-    [ForecasterRecursive(estimator=Ridge(), lags=2, differentiation=2),
-     ForecasterRecursiveMultiSeries(estimator=Ridge(), lags=2, differentiation=2)], 
-     ids = lambda fr: f'forecaster: {type(fr).__name__}')
-def test_check_backtesting_input_ValueError_when_forecaster_diff_not_cv_diff(forecaster):
-    """
-    Test ValueError is raised in check_backtesting_input if `differentiation`
-    of the forecaster is different from `differentiation` of the cv.
-    """
-    if type(forecaster).__name__ == 'ForecasterRecursive':
-        data_length = len(y)
-    else:
-        data_length = len(series_dict_range['l1'])
-    
-    cv = TimeSeriesFold(
-             steps                 = 3,
-             initial_train_size    = data_length - 12,
-             refit                 = False,
-             fixed_train_size      = False,
-             gap                   = 0,
-             allow_incomplete_fold = True,
-             differentiation       = 1,
-             verbose               = False
-         )
-    
-    err_msg = re.escape(
-        "The differentiation included in the forecaster "
-        "(2) differs from the differentiation "
-        "included in the cv (1). Set the same value "
-        "for both using the `differentiation` argument."
-    )
-    with pytest.raises(ValueError, match = err_msg):
-        check_backtesting_input(
-            forecaster              = forecaster,
-            cv                      = cv,
-            metric                  = 'mean_absolute_error',
-            y                       = y,
-            series                  = series_dict_range,
-            interval                = None,
-            n_boot                  = 500,
-            random_state            = 123,
-            use_in_sample_residuals = True,
-            show_progress           = False,
-            suppress_warnings       = False
-        )
-
-
 def test_check_backtesting_input_TypeError_when_metric_not_correct_type():
     """
     Test TypeError is raised in check_backtesting_input if `metric` is not string, 
@@ -1101,7 +1008,6 @@ def test_check_backtesting_input_ValueError_when_Direct_forecaster_not_enough_st
              steps                 = 1,
              initial_train_size    = len(y[:-12]),
              window_size           = None,
-             differentiation       = None,
              refit                 = False,
              fixed_train_size      = True,
              gap                   = 5,

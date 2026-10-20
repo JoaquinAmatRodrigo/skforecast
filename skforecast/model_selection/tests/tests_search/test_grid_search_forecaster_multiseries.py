@@ -1,5 +1,6 @@
 # Unit test grid_search_forecaster_multiseries
 # ==============================================================================
+import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
@@ -675,3 +676,38 @@ def test_output_grid_search_forecaster_multiseries_ForecasterRecursiveMultiSerie
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
+
+
+@pytest.mark.parametrize(
+    "cv_class", [TimeSeriesFold, OneStepAheadFold], ids=lambda cv: cv.__name__
+)
+def test_grid_search_forecaster_multiseries_cv_differentiation_is_ignored(cv_class):
+    """
+    Test that `differentiation` of the cv has no effect in
+    grid_search_forecaster_multiseries with a dict as `differentiation`: a value
+    different from the maximum order gives the same results as `None`.
+    """
+    kwargs = {'steps': 4} if cv_class is TimeSeriesFold else {}
+    cv = cv_class(initial_train_size=30, verbose=False, **kwargs)
+    with pytest.warns(FutureWarning, match="`differentiation` is deprecated"):
+        cv_explicit = cv_class(
+            initial_train_size=30, differentiation=1, verbose=False, **kwargs
+        )
+
+    results = []
+    for cv_search in [cv, cv_explicit]:
+        forecaster = ForecasterRecursiveMultiSeries(
+            estimator=Ridge(random_state=123),
+            lags=2,
+            differentiation={'l1': 1, 'l2': 2, '_unknown_level': 1},
+        )
+        results.append(
+            grid_search_forecaster_multiseries(
+                forecaster=forecaster, series=series_dict_range, cv=cv_search,
+                param_grid={'alpha': [0.01, 1]}, metric='mean_absolute_error',
+                show_progress=False
+            )
+        )
+
+    pd.testing.assert_frame_equal(results[0], results[1])
+    assert len(results[0]) == 2

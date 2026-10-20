@@ -425,12 +425,11 @@ cv = TimeSeriesFold(
     steps=12,                        # (required) Number of observations to predict in each fold (forecast horizon)
     initial_train_size=100,          # Number of observations for initial training. Can be int, str (date), or pd.Timestamp
     fold_stride=None,                # Observations between consecutive test set starts. If None, equals steps (no overlap)
-    window_size=None,                # Observations needed for autoregressive predictors (set automatically by forecaster)
-    differentiation=None,            # Differencing order to extend last_window (set automatically by forecaster)
+    window_size=None,                # Observations needed for autoregressive predictors (set automatically by forecaster; when calling split() directly, use forecaster.window_size, which includes differentiation)
     refit=False,                     # Whether to refit forecaster each fold: True, False, or int (refit every n folds)
-    fixed_train_size=True,           # If True, training size is fixed; if False, expands each fold
+    fixed_train_size=True,           # If True, the training window rolls with a fixed size; if False, it expands each fold (only with refit)
     gap=0,                           # Observations between end of training and start of test set
-    skip_folds=None,                 # Folds to skip: int (every n-th fold) or list of fold indexes to skip
+    skip_folds=None,                 # Folds to leave out: int (keep one of every n folds, starting with the first) or list of fold indexes to skip
     allow_incomplete_fold=True,      # Whether to allow last fold with fewer observations than steps
     return_all_indexes=False,        # Whether to return all indexes or only start/end of each fold
     verbose=True                     # Whether to print information about generated folds
@@ -445,6 +444,7 @@ print(folds)
 - If `fold_stride == steps`: test sets are back-to-back without overlap
 - If `fold_stride < steps`: test sets overlap (multiple forecasts for same observations)
 - If `fold_stride > steps`: gaps between consecutive test sets
+- `differentiation` (both folds) and `window_size` (`OneStepAheadFold`) are deprecated since 0.27.0: they have no effect, emit a `FutureWarning` and will be removed in 0.29.0
 
 ### OneStepAheadFold
 
@@ -455,8 +455,6 @@ from skforecast.model_selection import OneStepAheadFold
 
 cv = OneStepAheadFold(
     initial_train_size=100,          # (required) Number of observations for initial training. Can be int, str (date), or pd.Timestamp
-    window_size=None,                # Observations needed for autoregressive predictors (set automatically by forecaster)
-    differentiation=None,            # Differencing order to extend last_window (set automatically by forecaster)
     return_all_indexes=False,        # Whether to return all indexes or only start/end of each fold
     verbose=True                     # Whether to print information about generated folds
 )

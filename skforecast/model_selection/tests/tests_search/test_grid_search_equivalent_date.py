@@ -455,3 +455,28 @@ def test_grid_search_equivalent_date_output_file():
     output_file_content = pd.read_csv(output_file, sep='\t', low_memory=False)
     assert len(output_file_content) == len(results)
     os.remove(output_file)
+
+
+def test_grid_search_equivalent_date_cv_differentiation_is_ignored():
+    """
+    Test that `differentiation` of the cv has no effect in
+    grid_search_equivalent_date: it raises a FutureWarning and gives the same
+    results as `None`, although ForecasterEquivalentDate does not differentiate
+    the series.
+    """
+    cv = TimeSeriesFold(steps=3, initial_train_size=30, verbose=False)
+    with pytest.warns(FutureWarning, match="`differentiation` is deprecated"):
+        cv_explicit = TimeSeriesFold(
+            steps=3, initial_train_size=30, differentiation=1, verbose=False
+        )
+
+    results = [
+        grid_search_equivalent_date(
+            forecaster=ForecasterEquivalentDate(offset=1), y=y, cv=cv_search,
+            param_grid={'n_offsets': [1, 2]}, metric='mean_absolute_error',
+            show_progress=False
+        )
+        for cv_search in [cv, cv_explicit]
+    ]
+
+    pd.testing.assert_frame_equal(results[0], results[1])
