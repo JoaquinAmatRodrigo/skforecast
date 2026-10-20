@@ -29,8 +29,8 @@ class BaseFold():
     Parameters
     ----------
     steps : int, default None
-        Number of observations used to be predicted in each fold. This is also commonly
-        referred to as the forecast horizon or test size.
+        Number of observations to predict in each fold, also known as the forecast
+        horizon or test size.
     initial_train_size : int, str, pandas Timestamp, default None
         Number of observations used for initial training.
 
@@ -46,29 +46,36 @@ class BaseFold():
         - If `fold_stride < steps`, test sets overlap and multiple forecasts will
         be generated for the same observations.
         - If `fold_stride > steps`, gaps are left between consecutive test sets.
-    window_size : int, default None
+    window_size : int, pandas DateOffset, default None
         Number of observations needed to generate the autoregressive predictors.
         It sets the start of the last window of each fold. In the backtesting and
         hyperparameter search functions, it is taken from the forecaster. To get
         the same folds when calling `split` directly, use `forecaster.window_size`,
-        which already includes the differentiation order of the forecaster.
+        which already includes the differentiation order of the forecaster. A
+        pandas DateOffset (the `window_size` of a `ForecasterEquivalentDate` with
+        a DateOffset as `offset`) is converted by `split` into the equivalent
+        number of observations, which replaces the value of this attribute.
     refit : bool, int, default False
         Whether to refit the forecaster in each fold.
 
         - If `True`, the forecaster is refitted in each fold.
         - If `False`, the forecaster is trained only in the first fold.
         - If an integer, the forecaster is trained in the first fold and then refitted
-          every `refit` folds.
+        every `refit` folds.
     fixed_train_size : bool, default True
-        Whether the training size is fixed or increases in each fold.
+        Whether the training set keeps its size and moves forward with each fold
+        (rolling window, `True`) or grows with each fold (expanding window, `False`).
+        Only used when the forecaster is refitted (`refit` is not `False`).
     gap : int, default 0
         Number of observations between the end of the training set and the start of the
         test set.
     skip_folds : int, list, default None
-        Number of folds to skip.
+        Folds to leave out of the output.
 
-        - If an integer, every 'skip_folds'-th is returned.
-        - If a list, the indexes of the folds to skip.
+        - If an integer, only one of every `skip_folds` folds is kept, starting
+        with the first one.
+        - If a list, the indexes of the folds to leave out. The first fold (0)
+        cannot be skipped because it is needed to train the forecaster.
 
         For example, if `skip_folds=3` and there are 10 folds, the returned folds are
         0, 3, 6, and 9. If `skip_folds=[1, 2, 3]`, the returned folds are 0, 4, 5, 6, 7,
@@ -77,9 +84,13 @@ class BaseFold():
         Whether to allow the last fold to include fewer observations than `steps`.
         If `False`, the last fold is excluded if it is incomplete.
     return_all_indexes : bool, default False
-        Whether to return all indexes or only the start and end indexes of each fold.
+        If `True`, each partition of a fold is a `range` with all its positions.
+        If `False`, it is a list with its start and end positions. In the
+        backtesting and hyperparameter search functions, it is set to `False`.
     verbose : bool, default True
-        Whether to print information about generated folds.
+        Whether to print information about the folds when `split` is called. In
+        the backtesting and hyperparameter search functions, it is replaced by
+        their own `verbose` argument.
     differentiation : int, default None
         **Deprecated** since version 0.27.0, it has no effect and will be removed
         in version 0.29.0. The `window_size` of the forecaster already includes
@@ -107,7 +118,7 @@ class BaseFold():
         steps: int | None = None,
         initial_train_size: int | str | pd.Timestamp | None = None,
         fold_stride: int | None = None,
-        window_size: int | None = None,
+        window_size: int | pd.DateOffset | None = None,
         differentiation: int | None = None,
         refit: bool | int = False,
         fixed_train_size: bool = True,
@@ -196,7 +207,7 @@ class BaseFold():
         steps: int | None = None,
         initial_train_size: int | str | pd.Timestamp | None = None,
         fold_stride: int | None = None,
-        window_size: int | None = None,
+        window_size: int | pd.DateOffset | None = None,
         differentiation: int | None = None,
         refit: bool | int = False,
         fixed_train_size: bool = True,
@@ -439,8 +450,16 @@ class BaseFold():
 
 class OneStepAheadFold(BaseFold):
     """
-    Class to split time series data into train and test folds for one-step-ahead
-    forecasting.
+    Split time series data into a single train and test fold to evaluate
+    one-step-ahead predictions. The training set contains the first
+    `initial_train_size` observations and the test set the rest of the series.
+
+    It is the faster alternative to `TimeSeriesFold` in the hyperparameter search
+    functions (`grid_search_forecaster`, `bayesian_search_forecaster`, ...): the
+    forecaster is trained once, and each observation of the test set is predicted
+    one step ahead from the observed values. It is not accepted by the
+    backtesting functions. The `split` method can also be called directly to
+    inspect the fold.
 
     Parameters
     ----------
@@ -451,9 +470,11 @@ class OneStepAheadFold(BaseFold):
         - If a date string or pandas Timestamp, it is the last date included in 
         the initial training set.
     return_all_indexes : bool, default False
-        Whether to return all indexes or only the start and end indexes of each fold.
+        If `True`, each partition of the fold is a list with a `range` with all its
+        positions. If `False`, it is a list with its start and end positions.
     verbose : bool, default True
-        Whether to print information about generated folds.
+        Whether to print information about the fold when `split` is called. The
+        hyperparameter search functions do not call `split`, so they print nothing.
     window_size : int, default None
         **Deprecated** since version 0.27.0, it has no effect and will be removed
         in version 0.29.0.
@@ -553,14 +574,13 @@ class OneStepAheadFold(BaseFold):
         as_pandas : bool, default False
             If True, the folds are returned as a DataFrame. This is useful to visualize
             the folds in a more interpretable way.
-        externally_fitted : Any
-            This argument is not used in this class. It is included for API consistency.
+        externally_fitted : Any, default None
+            Not used.
         
         Returns
         -------
         fold : list, pandas DataFrame
-            A list of lists containing the indices (position) of the fold. The list
-            contains 2 lists with the following information:
+            A list with the fold number, 2 lists with positions and a boolean:
 
             - fold: fold number.
             - [train_start, train_end]: list with the start and end positions of the
@@ -572,11 +592,13 @@ class OneStepAheadFold(BaseFold):
         
             It is important to note that the returned values are the positions of the
             observations and not the actual values of the index, so they can be used to
-            slice the data directly using iloc.
+            slice the data directly using iloc. If `return_all_indexes` is `True`, each
+            list contains a `range` with all the positions instead.
 
-            If `as_pandas` is `True`, the folds are returned as a DataFrame with the
+            If `as_pandas` is `True`, the fold is returned as a DataFrame with the
             following columns: 'fold', 'train_start', 'train_end', 'test_start', 
-            'test_end', 'fit_forecaster'.
+            'test_end', 'fit_forecaster'. With `return_all_indexes=True`, the
+            columns are 'fold', 'train_index', 'test_index', 'fit_forecaster'.
 
             Following the python convention, the start index is inclusive and the end
             index is exclusive. This means that the last index is not included in the
@@ -726,12 +748,13 @@ class TimeSeriesFold(BaseFold):
     Parameters
     ----------
     steps : int
-        Number of observations used to be predicted in each fold. This is also commonly
-        referred to as the forecast horizon or test size.
+        Number of observations to predict in each fold, also known as the forecast
+        horizon or test size.
     initial_train_size : int, str, pandas Timestamp, default None
         Number of observations used for initial training. 
         
-        - If `None` or 0, the initial forecaster is not trained in the first fold.
+        - If `None`, there is no initial training: the forecaster must be already
+        fitted, and `window_size` is needed to build the first last window.
         - If an integer, the number of observations used for initial training.
         - If a date string or pandas Timestamp, it is the last date included in 
         the initial training set.
@@ -745,12 +768,15 @@ class TimeSeriesFold(BaseFold):
         be generated for the same observations.
         - If `fold_stride > steps`, gaps are left between consecutive test sets.
         **New in version 0.18.0**
-    window_size : int, default None
+    window_size : int, pandas DateOffset, default None
         Number of observations needed to generate the autoregressive predictors.
         It sets the start of the last window of each fold. In the backtesting and
         hyperparameter search functions, it is taken from the forecaster. To get
         the same folds when calling `split` directly, use `forecaster.window_size`,
-        which already includes the differentiation order of the forecaster.
+        which already includes the differentiation order of the forecaster. A
+        pandas DateOffset (the `window_size` of a `ForecasterEquivalentDate` with
+        a DateOffset as `offset`) is converted by `split` into the equivalent
+        number of observations, which replaces the value of this attribute.
     refit : bool, int, default False
         Whether to refit the forecaster in each fold.
 
@@ -759,15 +785,19 @@ class TimeSeriesFold(BaseFold):
         - If an integer, the forecaster is trained in the first fold and then refitted
         every `refit` folds.
     fixed_train_size : bool, default True
-        Whether the training size is fixed or increases in each fold.
+        Whether the training set keeps its size and moves forward with each fold
+        (rolling window, `True`) or grows with each fold (expanding window, `False`).
+        Only used when the forecaster is refitted (`refit` is not `False`).
     gap : int, default 0
         Number of observations between the end of the training set and the start of the
         test set.
     skip_folds : int, list, default None
-        Number of folds to skip.
+        Folds to leave out of the output.
 
-        - If an integer, every 'skip_folds'-th is returned.
-        - If a list, the indexes of the folds to skip.
+        - If an integer, only one of every `skip_folds` folds is kept, starting
+        with the first one.
+        - If a list, the indexes of the folds to leave out. The first fold (0)
+        cannot be skipped because it is needed to train the forecaster.
 
         For example, if `skip_folds=3` and there are 10 folds, the returned folds are
         0, 3, 6, and 9. If `skip_folds=[1, 2, 3]`, the returned folds are 0, 4, 5, 6, 7,
@@ -776,9 +806,13 @@ class TimeSeriesFold(BaseFold):
         Whether to allow the last fold to include fewer observations than `steps`.
         If `False`, the last fold is excluded if it is incomplete.
     return_all_indexes : bool, default False
-        Whether to return all indexes or only the start and end indexes of each fold.
+        If `True`, each partition of a fold is a `range` with all its positions.
+        If `False`, it is a list with its start and end positions. In the
+        backtesting and hyperparameter search functions, it is set to `False`.
     verbose : bool, default True
-        Whether to print information about generated folds.
+        Whether to print information about the folds when `split` is called. In
+        the backtesting and hyperparameter search functions, it is replaced by
+        their own `verbose` argument.
     differentiation : int, default None
         **Deprecated** since version 0.27.0, it has no effect and will be removed
         in version 0.29.0. The `window_size` of the forecaster already includes
@@ -787,12 +821,12 @@ class TimeSeriesFold(BaseFold):
     Attributes
     ----------
     steps : int
-        Number of observations used to be predicted in each fold. This is also commonly
-        referred to as the forecast horizon or test size.
+        Number of observations to predict in each fold, also known as the forecast
+        horizon or test size.
     initial_train_size : int, str, pandas Timestamp
         Number of observations used for initial training, or a date (string or pandas
         Timestamp parseable by pandas) marking the last observation of the training set.
-        If `None` or 0, the initial forecaster is not trained in the first fold.
+        If `None`, the forecaster is not trained in the first fold.
     initial_train_size_as_int : int
         Resolved integer position of `initial_train_size`, set when `split()` is called
         (`None` when `initial_train_size` is `None`).
@@ -831,10 +865,12 @@ class TimeSeriesFold(BaseFold):
     the training set goes from the first to the third observation. The second 
     list `[1, 3]` indicates that the last window seen by the forecaster during 
     training goes from the second to the third observation. The third list `[3, 8]` 
-    indicates that the test set goes from the fourth to the eighth observation. 
-    The fourth list `[4, 8]` indicates that the test set including the gap goes 
-    from the fifth to the eighth observation. The boolean `True` indicates that 
-    the forecaster will be trained in this fold.
+    indicates that the forecaster predicts from the fourth to the eighth
+    observation: the gap (fourth observation) and the test set. The fourth list
+    `[4, 8]` indicates that the test set, after the gap, goes from the fifth to
+    the eighth observation; these are the observations used to evaluate the
+    forecaster. The boolean `True` indicates that the forecaster will be trained
+    in this fold.
 
     Following the python convention, the start index is inclusive and the end index is
     exclusive. This means that the last index is not included in the slice.
@@ -852,7 +888,7 @@ class TimeSeriesFold(BaseFold):
         steps: int,
         initial_train_size: int | str | pd.Timestamp | None = None,
         fold_stride: int | None = None,
-        window_size: int | None = None,
+        window_size: int | pd.DateOffset | None = None,
         differentiation: int | None = None,
         refit: bool | int = False,
         fixed_train_size: bool = True,
@@ -968,8 +1004,8 @@ class TimeSeriesFold(BaseFold):
         Returns
         -------
         folds : list, pandas DataFrame
-            A list of lists containing the indices (position) for each fold. Each list
-            contains 4 lists and a boolean with the following information:
+            A list with one element per fold, containing the fold number, 4 lists
+            with positions and a boolean:
 
             - fold: fold number.
             - [train_start, train_end]: list with the start and end positions of the
@@ -981,23 +1017,27 @@ class TimeSeriesFold(BaseFold):
             forecaster, so the interval also covers the observations needed to
             differentiate. If the argument `window_size` is `None`, this list is
             empty.
-            - [test_start, test_end]: list with the start and end positions of the test
-            set. These are the observations used to evaluate the forecaster.
+            - [test_start, test_end]: list with the start and end positions of the
+            observations predicted in the fold, from the end of the last window: the
+            `gap` followed by the test set.
             - [test_start_with_gap, test_end_with_gap]: list with the start and end
-            positions of the test set including the gap. The gap is the number of
-            observations between the end of the training set and the start of the test
-            set.
+            positions of the test set, after the `gap`. These are the observations
+            used to evaluate the forecaster. Without gap, they are the same as
+            [test_start, test_end].
             - fit_forecaster: boolean indicating whether the forecaster should be fitted
             in this fold.
 
             It is important to note that the returned values are the positions of the
             observations and not the actual values of the index, so they can be used to
-            slice the data directly using iloc.
+            slice the data directly using iloc. If `return_all_indexes` is `True`, the
+            lists are replaced by `range` objects with all the positions.
 
             If `as_pandas` is `True`, the folds are returned as a DataFrame with the
             following columns: 'fold', 'train_start', 'train_end', 'last_window_start',
             'last_window_end', 'test_start', 'test_end', 'test_start_with_gap',
-            'test_end_with_gap', 'fit_forecaster'.
+            'test_end_with_gap', 'fit_forecaster'. With `return_all_indexes=True`,
+            the columns are 'fold', 'train_index', 'last_window_index', 'test_index',
+            'test_index_with_gap', 'fit_forecaster'.
 
             Following the python convention, the start index is inclusive and the end
             index is exclusive. This means that the last index is not included in the
