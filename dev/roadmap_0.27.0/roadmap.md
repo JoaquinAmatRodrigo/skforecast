@@ -43,7 +43,7 @@ cifras son las de la sesión en la nube y no se han vuelto a medir.
 | Tema | Elementos | Notas |
 |---|---|---|
 | Resultados erróneos silenciosos | BUG-03, BUG-01, BUG-stats-interval-ignored, BUG-04, BUG-10, ISSUE-1406 | Todos S. BUG-01 solo como aviso silenciable: el backtesting sobre datos de entrenamiento es un uso documentado. Hechos (2026-10-19): ISSUE-1406 con #1415 (sustituye a PR-1407, cerrado) y BUG-stats-interval-ignored con #1416; DEP-stats-alpha descartado (decisión 5) |
-| Backtesting probabilístico (titular de la release) | QW-03, QW-09, QW-04, QW-08, PERF-03, BUG-02, QW-10 | Es lo que se pide desde 2024 (#885, #902, #1253, #1409, D1119). Tres cambios de salida independientes que se fusionan por separado y se anuncian juntos en `releases.md`: QW-09 (`coverage` e `interval_width`, #1409) va primero porque no depende de QW-04; QW-04 (`y_true`) y QW-10 (`step`) después. PERF-03 (métricas en numpy, 2,6 veces más rápida la búsqueda con `OneStepAheadFold`) va junto a QW-08 o justo detrás |
+| Backtesting probabilístico (titular de la release) | QW-03, QW-09, QW-04, QW-08, PERF-03, BUG-02, QW-10 | Es lo que se pide desde 2024 (#885, #902, #1253, #1409, D1119). Tres cambios de salida independientes que se fusionan por separado y se anuncian juntos en `releases.md`: QW-09 (`coverage` e `interval_width`, #1409) va primero porque no depende de QW-04; QW-04 (`y_true`) y QW-10 (`step`) después. PERF-03 (métricas en numpy: la búsqueda con `OneStepAheadFold` y 1000 series, 2,6 veces más rápida con Ridge y 1,4 con LightGBM) va junto a QW-08 o justo detrás |
 | Foundation para producción | QW-05, BUG-06, QW-02 | QW-02 pendiente de decisión |
 | **Búsquedas multiserie con series cortas (MUY IMPORTANTE)** | BUG-search-short-series | M a L. Resultado erróneo silencioso en un uso habitual de los modelos globales. Diseño en [`BUG-search-short-series.md`](BUG-search-short-series.md); antes o durante la implementación, las mediciones de su sección 8.2 (sobre todo los intervalos con residuos out-of-sample). No bloquea QW-09, pero cambia qué puntos entran en sus métricas |
 | Paneles multiserie | QW-01, BUG-07, ISSUE-1410 | Hechos: ISSUE-1357 (IDs enteros) con #1412, que sustituye a PR-1408 (cerrado), e ISSUE-1410 con #1418 (2026-10-19) |
@@ -590,15 +590,46 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
   a 2,70 s sin exog y de 26,69 s a 8,13 s con exog. Esperado: una o pocas llamadas
   agrupadas. Solo medido Chronos-2 en CPU; TabICL, TabPFN-TS y Nori solo ganarían con (1)
   y (3).
-- **PERF-03.** Observado (1000 series de 400 días, Ridge, `lags=7`, MAE y MSE, prototipo en
-  memoria; Python 3.14.3, numpy 2.5.3, pandas 2.3.3, scikit-learn 1.9.1, lightgbm 4.6.0, medido
-  en local el 2026-10-20): `grid_search_forecaster_multiseries` con `OneStepAheadFold` y 8
-  candidatos 3,32 s frente a 1,27 s (2,6x; con 100 series, 0,35 frente a 0,14 s); backtesting
-  1,92 frente a 1,65 s (1,16x); métricas idénticas (diferencia máxima 0). Con perfilador, las
-  métricas de scikit-learn ocupan el 41,7% (1 métrica) y el 51,0% (3 métricas, más MASE 9,2%)
-  de la búsqueda con `OneStepAheadFold`, y del 5,2 al 10,6% del backtesting con Ridge o LightGBM;
-  `get_group`, del 0,9 al 2,1%. Esperado: que el coste de la métrica sea el del cálculo, no el de
-  la validación de scikit-learn.
+- **PERF-03.** Observado (series de 400 días, `lags=7`, MAE y MSE, 8 candidatos, prototipo en
+  memoria; Python 3.14.3, numpy 2.5.3, pandas 2.3.3, scikit-learn 1.9.1, lightgbm 4.6.0, 10
+  núcleos, medido en local el 2026-10-20). Los tiempos son de la llamada completa
+  (`grid_search_forecaster_multiseries` o `backtesting_forecaster_multiseries`, con ajuste y
+  predicción), mediana de 3; solo cambia la función de la métrica, así que la diferencia es
+  toda del cálculo de métricas. Con la versión en numpy que se implementaría (conversión a
+  `float` y a 1D, y `ValueError` con longitudes distintas, sin datos o con NaN o infinitos,
+  como hoy scikit-learn; mismos resultados y mismos errores comprobados):
+
+  | Series | Caso | scikit-learn | numpy con comprobaciones | Ganancia |
+  |--:|:--|--:|--:|--:|
+  | 100 | Grid `OneStepAheadFold`, Ridge | 0,35 s | 0,14 s | 2,6x |
+  | 100 | Grid `OneStepAheadFold`, LightGBM | 1,81 s | 1,58 s | 1,15x |
+  | 1000 | Grid `OneStepAheadFold`, Ridge | 3,36 s | 1,30 s | 2,59x |
+  | 1000 | Grid `OneStepAheadFold`, LightGBM | 5,95 s | 4,22 s | 1,41x |
+  | 1000 | Backtesting, Ridge, `refit=False` | 1,99 s | 1,69 s | 1,17x |
+
+  (Las filas de 100 series se midieron con la versión sin comprobaciones; con 1000 series, las
+  comprobaciones solo añaden unos 0,02 s. Con LightGBM la ganancia varía entre ejecuciones: de
+  1,41x a 1,56x con 1000 series.) Métricas idénticas a las de scikit-learn en todos los casos
+  (diferencia máxima 0). `dev/roadmap_0.27.0/repro/PERF-03.py` reproduce las filas de 1000
+  series y el coste por llamada.
+
+  - **Coste por llamada** (Series de 100 valores): scikit-learn 138 µs, numpy sin
+    comprobaciones 5,4 µs, con comprobaciones 6,4 µs. Las comprobaciones no cambian la
+    ganancia.
+  - **El ahorro en segundos no depende del estimador**: series x métricas x candidatos x ~130
+    µs (con 1000 series, 2 métricas y 8 candidatos, 16.000 llamadas, unos 2,1 s, igual con
+    Ridge que con LightGBM). Lo que cambia es el porcentaje: más de la mitad de la búsqueda con
+    un estimador rápido y muchas series, un tercio con LightGBM y 1000 series, poco con pocas
+    series o modelos caros; crece con más métricas o más candidatos.
+  - **Con perfilador**, las métricas de scikit-learn ocupan el 41,7% (1 métrica) y el 51,0%
+    (3 métricas, más MASE 9,2%) de la búsqueda con `OneStepAheadFold`, y del 5,2 al 10,6% del
+    backtesting con Ridge o LightGBM; `get_group`, del 0,9 al 2,1%.
+  - **Sin medir todavía**: MASE y RMSSE en numpy (el prototipo no los toca; con 3 métricas la
+    ganancia sería algo mayor), RMSE como texto (cuando entre QW-08). MAPE y MSLE se quedan en
+    scikit-learn, sin ganancia.
+
+  Esperado: que el coste de la métrica sea el del cálculo, no el de la validación de
+  scikit-learn.
 
 ---
 
