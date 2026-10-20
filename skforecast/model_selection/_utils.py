@@ -177,16 +177,19 @@ def check_backtesting_input(
         skforecast.utils.select_n_jobs_fit_forecaster.
     freeze_params : bool, default True
         Determines whether to freeze the model parameters after the first fit
-        for estimators that perform automatic model selection.
+        for estimators that perform automatic model selection (`Arima` with
+        `order=None` or `seasonal_order=None`, `Ets` with `model='ZZZ'`).
 
-        - If `True`, the model parameters found during the first fit (e.g., order 
-        and seasonal_order for Arima, or smoothing parameters for Ets) are reused
-        in all subsequent refits. This avoids re-running the automatic selection
-        procedure in each fold and reduces runtime.
+        - If `True`, the parameters selected in the first fit (`best_params_`)
+        are reused in all subsequent refits, so the automatic selection runs only
+        once. Arima keeps the orders, intercept, drift and Box-Cox lambda, and
+        re-estimates the coefficients in each refit. Ets keeps the model type,
+        smoothing parameters and Box-Cox lambda, and re-estimates the initial
+        states.
         - If `False`, automatic model selection is performed independently in each
         refit, allowing parameters to adapt across folds. This increases runtime
-        and adds a `params` column to the output with the parameters selected per
-        fold.
+        and adds an `estimator_params` column to the output with the model
+        selected in each fold.
     show_progress : bool, default True
         Whether to show a progress bar.
     suppress_warnings: bool, default False

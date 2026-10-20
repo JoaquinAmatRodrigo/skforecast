@@ -1,8 +1,10 @@
 # Unit test grid_search_stats
 # ==============================================================================
+from unittest.mock import patch
 import numpy as np
 import pandas as pd
-from skforecast.stats import Sarimax
+import skforecast.stats._arima as arima_module
+from skforecast.stats import Arima, Sarimax
 from skforecast.recursive import ForecasterStats
 from skforecast.model_selection._split import TimeSeriesFold
 from skforecast.model_selection._search import grid_search_stats
@@ -58,3 +60,37 @@ def test_output_grid_search_stats_sarimax_with_mocked():
     )
 
     pd.testing.assert_frame_equal(results, expected_results, atol=0.0001)
+
+
+def test_grid_search_stats_automatic_search_runs_once_per_candidate():
+    """
+    Test that grid_search_stats with an automatic Arima runs the automatic
+    selection once per candidate (in the first fit of its backtesting) and
+    reuses the selected model in the other folds (`freeze_params=True`).
+    Before the fix, it was repeated in every fold of every candidate.
+    """
+    forecaster = ForecasterStats(estimator=Arima(order=None, seasonal_order=None))
+    cv = TimeSeriesFold(
+             steps              = 3,
+             initial_train_size = len(y_datetime) - 12,
+             refit              = True,
+             verbose            = False
+         )
+
+    with patch(
+        'skforecast.stats._arima.auto_arima', wraps=arima_module.auto_arima
+    ) as mock_auto_arima:
+        results = grid_search_stats(
+                      forecaster        = forecaster,
+                      y                 = y_datetime,
+                      cv                = cv,
+                      param_grid        = {'max_p': [2, 3]},
+                      metric            = 'mean_absolute_error',
+                      return_best       = False,
+                      n_jobs            = 1,
+                      suppress_warnings = True,
+                      verbose           = False
+                  )
+
+    assert len(results) == 2
+    assert mock_auto_arima.call_count == 2

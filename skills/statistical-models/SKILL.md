@@ -161,7 +161,7 @@ metric, predictions_bt = backtesting_stats(
     y=data['target'],
     cv=cv,
     metric='mean_absolute_error',
-    freeze_params=True,  # Params from first fit reused in refits (avoids re-running auto selection)
+    freeze_params=True,  # Model selected in the first fit reused in refits (auto selection runs once)
 )
 # If freeze_params=False, auto selection runs independently each fold and output
 # includes an extra 'estimator_params' column with the parameters selected per fold.
