@@ -5128,3 +5128,88 @@ def estimator_has_native_nan_support(estimator: object) -> bool:
         return True
 
     return False
+
+
+def _all_samples_removed_message(
+    series_name: str,
+    dropna_from_series: bool,
+    max_lag: int | None,
+    max_size_window_features: int | None,
+    estimator: object
+) -> str:
+    """
+    Create the message of the error raised when no training sample is left
+    after removing the rows with NaN values.
+
+    Rows with NaN in the target are always removed, so if `dropna_from_series`
+    is `False`, the target is the only possible cause. Otherwise, the message
+    gives the size of the largest lag and window feature, since missing values
+    closer together than them can leave a NaN in every row, and the ways to
+    keep training samples. Setting `dropna_from_series = False` is suggested
+    directly only if the estimator natively supports NaN values.
+
+    Parameters
+    ----------
+    series_name : str
+        Name of the input series used in the message, "`y`" or "`series`".
+    dropna_from_series : bool
+        Value of `dropna_from_series` of the forecaster.
+    max_lag : int, None
+        Largest lag of the forecaster. `None` if no lags are used.
+    max_size_window_features : int, None
+        Largest window size of the window features. `None` if no window
+        features are used.
+    estimator : object
+        Estimator of the forecaster.
+
+    Returns
+    -------
+    message : str
+        Error message.
+
+    """
+
+    if not dropna_from_series:
+        return (
+            "All samples have been removed due to NaNs: the target is NaN in "
+            f"every row. Review {series_name} or fill its missing values."
+        )
+
+    sizes = []
+    predictors = []
+    shorten = []
+    if max_lag is not None:
+        sizes.append(f"largest lag: {max_lag}")
+        predictors.append("lags")
+        shorten.append("fewer lags")
+    if max_size_window_features is not None:
+        sizes.append(f"largest window feature: {max_size_window_features}")
+        predictors.append("window features")
+        shorten.append(
+            "shorter window features (or a smaller `min_periods` if they are "
+            "`RollingFeatures`)"
+        )
+    sizes = f" ({', '.join(sizes)})"
+    predictors = " or ".join(predictors)
+    shorten = f"use {' or '.join(shorten)}"
+
+    fill = f"fill the missing values of {series_name} and `exog`"
+    if estimator_has_native_nan_support(estimator):
+        fixes = (
+            "set `dropna_from_series = False` (the estimator accepts NaNs), "
+            f"{fill}, or {shorten}"
+        )
+    else:
+        fixes = (
+            f"{fill}, {shorten}, or use an estimator that accepts NaNs (for "
+            "example, LightGBM or scikit-learn HistGradientBoosting models) "
+            "and set `dropna_from_series = False`"
+        )
+
+    return (
+        "All samples have been removed due to NaNs: every row has a missing "
+        f"value in the target or in the predictors{sizes}. This can happen "
+        f"when the missing values of {series_name} are closer together than "
+        f"the {predictors}, or when `exog` has a missing value in every row. "
+        f"To keep training samples, {fixes}."
+    )

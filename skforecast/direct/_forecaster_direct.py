@@ -27,6 +27,7 @@ from ..exceptions import (
     ResidualsUsageWarning
 )
 from ..utils import (
+    _all_samples_removed_message,
     initialize_lags,
     initialize_window_features,
     initialize_weights,
@@ -1403,9 +1404,13 @@ class ForecasterDirect(ForecasterBase):
 
         if len(y_train_step) == 0:
             raise ValueError(
-                "All samples have been removed due to NaNs. Set "
-                "`forecaster.dropna_from_series = False` or review `y` and "
-                "`exog` values."
+                _all_samples_removed_message(
+                    series_name              = "`y`",
+                    dropna_from_series       = self.dropna_from_series,
+                    max_lag                  = self.max_lag,
+                    max_size_window_features = self.max_size_window_features,
+                    estimator                = self.estimator
+                )
             )
 
         return X_train_step, y_train_step, train_index_step

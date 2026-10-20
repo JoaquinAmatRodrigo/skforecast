@@ -31,6 +31,7 @@ from ..exceptions import (
     UnknownLevelWarning
 )
 from ..utils import (
+    _all_samples_removed_message,
     _date_range_from_index,
     initialize_lags,
     initialize_window_features,
@@ -1698,9 +1699,13 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
 
         if X_train.empty:
             raise ValueError(
-                "All samples have been removed due to NaNs. Set "
-                "`forecaster.dropna_from_series = False` or review `series` "
-                "and `exog` values."
+                _all_samples_removed_message(
+                    series_name              = "`series`",
+                    dropna_from_series       = self.dropna_from_series,
+                    max_lag                  = self.max_lag,
+                    max_size_window_features = self.max_size_window_features,
+                    estimator                = self.estimator
+                )
             )
         
         if self.encoding == 'onehot':
