@@ -330,6 +330,7 @@ def test_session_start_remote_skips_sync_for_branch_not_on_origin(
 ):
     repo = make_clone_behind(tmp_path, "0.27.x", 1)
     git(repo, "checkout", "-q", "-b", "fix/new")
+    git(repo, "update-ref", "refs/remotes/origin/fix/new", "HEAD")
     monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(repo))
 
     assert session_start_remote.main() == 0
@@ -337,6 +338,40 @@ def test_session_start_remote_skips_sync_for_branch_not_on_origin(
 
     assert "origin/fix/new" not in out
     assert out.startswith("WARNING: the skforecast cloud environment")
+    # The stale ref of the branch, which is not on GitHub, is removed.
+    stale_ref = subprocess.run(
+        ["git", "rev-parse", "--verify", "--quiet", "origin/fix/new"],
+        cwd=repo, capture_output=True, text=True,
+    )
+    assert stale_ref.returncode != 0
+
+
+def test_session_start_remote_points_session_branch_to_release_branch(
+    session_start_remote, monkeypatch, capsys, tmp_path
+):
+    # A cloud session starts on a `claude/...` branch created from `main`, with
+    # a stale `origin/claude/...` ref although the branch is not on GitHub.
+    repo = make_clone_behind(tmp_path, "main", 0)
+    for release in ("0.9.x", "0.27.x", "0.26.x"):
+        git(tmp_path / "other", "push", "-q", "origin", f"main:{release}")
+    git(repo, "checkout", "-q", "-b", "claude/session-x")
+    git(repo, "update-ref", "refs/remotes/origin/claude/session-x", "HEAD")
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(repo))
+
+    assert session_start_remote.main() == 0
+    out = capsys.readouterr().out
+
+    assert out.startswith(
+        "The session branch 'claude/session-x' is not on GitHub and starts from "
+        "`main`. Do not build on it: create the work branch from the release "
+        "branch (`git fetch origin 0.27.x && git checkout -b fix/<topic> "
+        "origin/0.27.x`"
+    )
+    stale_ref = subprocess.run(
+        ["git", "rev-parse", "--verify", "--quiet", "origin/claude/session-x"],
+        cwd=repo, capture_output=True, text=True,
+    )
+    assert stale_ref.returncode != 0
 
 
 def test_session_start_remote_installs_ruff():

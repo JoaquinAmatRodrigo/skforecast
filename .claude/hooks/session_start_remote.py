@@ -9,8 +9,12 @@ the developer's conda environment. In the cloud (Ubuntu, no conda) it:
    minutes before were missing). A protected branch (`main`, `X.Y.x`) with no
    local changes or commits is fast-forwarded to it; any other branch that is
    behind only gets a warning, since it may hold work of a resumed session.
-   This runs before the install, so the dependencies come from the updated
-   pyproject.toml.
+   A branch that is not on GitHub loses its stale `origin/<branch>` ref, if
+   the checkout has one, so it does not look pushed. If it is the `claude/...`
+   branch the session started on (created from `main`), the hook says to
+   create the work branch from the latest release branch of `origin` instead
+   (CLAUDE.md, "Git workflow"). This runs before the install, so the
+   dependencies come from the updated pyproject.toml.
 1. Creates a virtual environment outside the repository (~/.venvs/skforecast),
    because the `.venv` directory at the repository root must not be used.
 2. Installs skforecast in editable mode with the `test` extras except the deep
@@ -53,6 +57,8 @@ REPORTED_PACKAGES = (
     "numpy", "pandas", "scikit-learn", "scipy", "numba", "statsmodels", "optuna"
 )
 PROTECTED_BRANCH = re.compile(r"^(main|\d+\.\d+\.x)$")
+RELEASE_BRANCH = re.compile(r"^refs/heads/(\d+)\.(\d+)\.x$")
+SESSION_BRANCH_PREFIX = "claude/"
 FETCH_TIMEOUT = 60
 
 
@@ -93,11 +99,56 @@ def git(*args, cwd):
     ).stdout.strip()
 
 
+def latest_release_branch(cwd):
+    """
+    Name of the release branch (`X.Y.x`) with the highest version on `origin`,
+    or None if it cannot be listed. `origin` is used instead of `__version__`
+    because the checkout may be a stale `main`.
+    """
+    try:
+        heads = subprocess.run(
+            ["git", "ls-remote", "--heads", "origin", "refs/heads/*.x"],
+            cwd=cwd, capture_output=True, text=True, timeout=FETCH_TIMEOUT,
+            env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+        ).stdout
+    except subprocess.TimeoutExpired:
+        return None
+    versions = [
+        (int(match[1]), int(match[2]))
+        for line in heads.splitlines()
+        if (match := RELEASE_BRANCH.match(line.split("\t")[-1]))
+    ]
+    if not versions:
+        return None
+    major, minor = max(versions)
+    return f"{major}.{minor}.x"
+
+
+def branch_not_on_origin(branch, remote_ref, cwd):
+    """
+    Remove the stale `origin/<branch>` ref of a branch that is not on GitHub,
+    so it does not look pushed, and return the status of a session branch.
+    """
+    if git("rev-parse", "--verify", "--quiet", remote_ref, cwd=cwd):
+        git("update-ref", "-d", f"refs/remotes/{remote_ref}", cwd=cwd)
+    if not branch.startswith(SESSION_BRANCH_PREFIX):
+        return None
+    release = latest_release_branch(cwd) or "X.Y.x"
+    return (
+        f"The session branch '{branch}' is not on GitHub and starts from `main`. "
+        f"Do not build on it: create the work branch from the release branch "
+        f"(`git fetch origin {release} && git checkout -b fix/<topic> "
+        f"origin/{release}`, or `feature/<topic>`) and push that one "
+        f"(CLAUDE.md, Git workflow)."
+    )
+
+
 def sync_with_origin(cwd):
     """
     Fetch the current branch from `origin` and fast-forward a protected branch
     that is behind it. Return a one line status, or None when there is nothing
-    to compare (detached HEAD, no `origin`, branch not pushed yet).
+    to compare (detached HEAD, no `origin`, branch not pushed yet and not a
+    session branch).
     """
     branch = git("rev-parse", "--abbrev-ref", "HEAD", cwd=cwd)
     if branch in ("", "HEAD") or not git("remote", "get-url", "origin", cwd=cwd):
@@ -120,7 +171,7 @@ def sync_with_origin(cwd):
         )
     if fetch.returncode != 0:
         if "couldn't find remote ref" in fetch.stderr:
-            return None
+            return branch_not_on_origin(branch, remote_ref, cwd)
         reason = (fetch.stderr.strip().splitlines() or ["unknown error"])[-1]
         return (
             f"WARNING: could not fetch {remote_ref} ({reason}); the checkout "
