@@ -55,6 +55,11 @@
             "type": "command",
             "command": "\"$(command -v python3 || command -v python)\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/session_start_local.py\"",
             "timeout": 60
+          },
+          {
+            "type": "command",
+            "command": "\"$(command -v python3 || command -v python)\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/branch_guard.py\"",
+            "timeout": 60
           }
         ]
       }
@@ -75,6 +80,15 @@
           {
             "type": "command",
             "command": "\"$(command -v python3 || command -v python)\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/attribution_guard.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|mcp__.*github.*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$(command -v python3 || command -v python)\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/branch_guard.py\""
           }
         ]
       }

@@ -346,34 +346,6 @@ def test_session_start_remote_skips_sync_for_branch_not_on_origin(
     assert stale_ref.returncode != 0
 
 
-def test_session_start_remote_points_session_branch_to_release_branch(
-    session_start_remote, monkeypatch, capsys, tmp_path
-):
-    # A cloud session starts on a `claude/...` branch created from `main`, with
-    # a stale `origin/claude/...` ref although the branch is not on GitHub.
-    repo = make_clone_behind(tmp_path, "main", 0)
-    for release in ("0.9.x", "0.27.x", "0.26.x"):
-        git(tmp_path / "other", "push", "-q", "origin", f"main:{release}")
-    git(repo, "checkout", "-q", "-b", "claude/session-x")
-    git(repo, "update-ref", "refs/remotes/origin/claude/session-x", "HEAD")
-    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(repo))
-
-    assert session_start_remote.main() == 0
-    out = capsys.readouterr().out
-
-    assert out.startswith(
-        "The session branch 'claude/session-x' is not on GitHub and starts from "
-        "`main`. Do not build on it: create the work branch from the release "
-        "branch (`git fetch origin 0.27.x && git checkout -b fix/<topic> "
-        "origin/0.27.x`"
-    )
-    stale_ref = subprocess.run(
-        ["git", "rev-parse", "--verify", "--quiet", "origin/claude/session-x"],
-        cwd=repo, capture_output=True, text=True,
-    )
-    assert stale_ref.returncode != 0
-
-
 def test_session_start_remote_installs_ruff():
     sys.path.insert(0, str(HOOKS_DIR))
     try:
@@ -486,3 +458,153 @@ def test_ruff_check_reports_new_findings_but_skips_dev(tmp_path):
     assert "F401" in stdout
     _, stdout, _ = check("dev")
     assert stdout == ""
+
+
+# branch_guard.py
+# ==============================================================================
+
+
+def make_repo(tmp_path, branch="fix/x", releases=("0.9.x", "0.27.x", "0.26.x")):
+    """
+    A clone on `branch` of a bare `origin` with `main` and the release
+    branches `releases`, and a local tag `v1.0`.
+    """
+    repo = make_clone_behind(tmp_path, "main", 0)
+    for release in releases:
+        git(tmp_path / "other", "push", "-q", "origin", f"main:{release}")
+    git(repo, "fetch", "-q", "origin")
+    git(repo, "tag", "v1.0")
+    if branch != "main":
+        git(repo, "checkout", "-q", "-b", branch)
+    return repo
+
+
+@pytest.mark.parametrize(
+    "command, blocked",
+    [
+        ("git checkout -b claude/session-x origin/0.27.x", ["claude/session-x"]),
+        ("git switch -c worktree-abc", ["worktree-abc"]),
+        ("git switch --create=Feature/Upper", ["Feature/Upper"]),
+        ("git branch -m my_branch", ["my_branch"]),
+        ("git branch feature-without-slash main", ["feature-without-slash"]),
+        ("git worktree add -b claude/w ../w origin/0.27.x", ["claude/w"]),
+        ("git fetch origin 0.27.x && git checkout -b fix/a origin/0.27.x", []),
+        ("git checkout -b docs/user-guide-lags", []),
+        ("git branch -m chore/cloud-session-branches", []),
+        ("git checkout -b 0.27.x origin/0.27.x", []),
+        ("git branch -D claude/session-x", []),
+        ("git branch --list 'claude/*'", []),
+        ("git checkout main", []),
+    ],
+    ids=lambda x: str(x),
+)
+def test_branch_guard_checks_created_branches(tmp_path, command, blocked):
+    repo = make_repo(tmp_path)
+    code, _, err = run_hook(
+        "branch_guard.py", {**bash(command), "cwd": str(repo)}
+    )
+
+    assert code == (2 if blocked else 0)
+    for branch in blocked:
+        assert f"'{branch}'" in err
+    if blocked:
+        assert "created from the release branch `origin/0.27.x`" in err
+
+
+@pytest.mark.parametrize(
+    "branch, command, blocked",
+    [
+        ("claude/session-x", "git push -u origin claude/session-x", True),
+        ("claude/session-x", "git push", True),
+        ("claude/session-x", "git push -u origin HEAD", True),
+        ("fix/x", "git push origin HEAD:claude/other", True),
+        ("fix/x", "git push origin +fix/x:refs/heads/tmp", True),
+        ("fix/x", 'gh pr create --base 0.27.x --head claude/x --title "T"', True),
+        ("fix/x", "git push -u origin fix/x", False),
+        ("fix/x", "git push -q origin fix/x 2>&1 | tail -1", False),
+        ("fix/x", "git push origin fix/x > push.log 2>/dev/null", False),
+        ("claude/session-x", "git push -q 2>&1 | tail -1", True),
+        ("fix/x", "git push", False),
+        ("fix/x", "git -C . push origin HEAD", False),
+        ("claude/session-x", "git push origin --delete claude/session-x", False),
+        ("claude/session-x", "git push origin :claude/old", False),
+        ("claude/session-x", "git push origin v1.0", False),
+        ("claude/session-x", "git push --tags", False),
+        ("main", "git push origin main", False),
+    ],
+    ids=lambda x: str(x),
+)
+def test_branch_guard_checks_pushed_branches(tmp_path, branch, command, blocked):
+    repo = make_repo(tmp_path, branch=branch)
+    code, _, err = run_hook(
+        "branch_guard.py", {**bash(command), "cwd": str(repo)}
+    )
+
+    assert code == (2 if blocked else 0), err
+    if blocked:
+        assert err.startswith("Blocked: branch")
+
+
+@pytest.mark.parametrize(
+    "tool_name, tool_input, blocked",
+    [
+        ("mcp__github__create_branch", {"branch": "claude/x"}, True),
+        ("mcp__github__create_pull_request", {"head": "claude/x", "base": "0.27.x"}, True),
+        ("mcp__github__create_pull_request", {"head": "owner:fix/x", "base": "0.27.x"}, False),
+        ("mcp__github__push_files", {"branch": "docs/readme"}, False),
+        ("mcp__github__pull_request_read", {"pullNumber": 1}, False),
+    ],
+    ids=lambda x: str(x),
+)
+def test_branch_guard_checks_github_mcp_tools(tmp_path, tool_name, tool_input, blocked):
+    code, _, _ = run_hook(
+        "branch_guard.py",
+        {"tool_name": tool_name, "tool_input": tool_input, "cwd": str(tmp_path)},
+    )
+
+    assert code == (2 if blocked else 0)
+
+
+@pytest.mark.parametrize(
+    "branch, releases, expected",
+    [
+        ("claude/session-x", ("0.9.x", "0.27.x", "0.26.x"),
+         "The current branch 'claude/session-x' does not follow the branch naming "
+         "rule, do not build on it or push it. Before the first change, create the "
+         "work branch: `git fetch origin 0.27.x && git checkout -b <type>/<topic> "
+         "origin/0.27.x`."),
+        ("worktree-abc", (), "`git fetch origin X.Y.x && git checkout -b"),
+        ("fix/x", ("0.27.x",), ""),
+        ("main", ("0.27.x",), ""),
+    ],
+    ids=["session-branch", "worktree-no-release", "valid", "main"],
+)
+def test_branch_guard_session_start(tmp_path, branch, releases, expected):
+    repo = make_repo(tmp_path, branch=branch, releases=releases)
+    code, out, _ = run_hook(
+        "branch_guard.py", {"hook_event_name": "SessionStart", "cwd": str(repo)}
+    )
+
+    assert code == 0
+    if expected:
+        assert out.startswith(expected) if "claude" in branch else expected in out
+    else:
+        assert out == ""
+
+
+def test_branch_guard_registered_in_settings():
+    settings = json.loads((PROJECT_DIR / ".claude" / "settings.json").read_text())
+    commands = {
+        event: [
+            hook["command"]
+            for entry in settings["hooks"][event]
+            for hook in entry["hooks"]
+            if "branch_guard.py" in hook["command"]
+        ]
+        for event in ("SessionStart", "PreToolUse")
+    }
+    assert len(commands["SessionStart"]) == 1
+    assert [
+        entry["matcher"] for entry in settings["hooks"]["PreToolUse"]
+        if any("branch_guard.py" in h["command"] for h in entry["hooks"])
+    ] == ["Bash|mcp__.*github.*"]
