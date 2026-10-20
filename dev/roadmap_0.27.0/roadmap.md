@@ -48,7 +48,7 @@ DEP-cv-differentiation, 2026-10-20: el cv ya no exige repetir la `differentiatio
 forecaster; `differentiation` de los dos folds y `window_size` de `OneStepAheadFold` quedan
 deprecados, sin efecto, con `FutureWarning` y eliminación en la 0.29.0; además corrige las
 docstrings de los folds y quita `externally_fitted` de `OneStepAheadFold.split`).
-**BUG-08** hecho en la rama `fix/stats-freeze-params` (2026-10-20, commit sin PR todavía):
+**BUG-08** hecho con #1425 (rama `fix/stats-freeze-params`, 2026-10-20, pendiente de fusionar):
 `_backtesting_stats` pasa `best_params_` del primer ajuste a las plantillas
 `forecaster.estimators` (opción a). Medido en local (Python 3.14.3, numpy 2.5.3, pandas
 2.3.3, scipy 1.18.1, numba 0.68.0, `n_jobs=1`): repro (800 puntos, m=7, 20 folds) Arima
@@ -100,7 +100,7 @@ folds; MAE 0,0621 con lambda reestimada, 0,0643 congelada).
 | Foundation para producción | QW-05, BUG-06, QW-02 | QW-02 pendiente de decisión |
 | **Búsquedas multiserie con series cortas (MUY IMPORTANTE)** | BUG-search-short-series | M a L. Resultado erróneo silencioso en un uso habitual de los modelos globales. Diseño en [`BUG-search-short-series.md`](BUG-search-short-series.md); antes o durante la implementación, las mediciones de su sección 8.2 (sobre todo los intervalos con residuos out-of-sample). No bloquea QW-09, pero cambia qué puntos entran en sus métricas |
 | Paneles multiserie | QW-01, BUG-07, ISSUE-1410 | Hechos: ISSUE-1357 (IDs enteros) con #1412, que sustituye a PR-1408 (cerrado), e ISSUE-1410 con #1418 (2026-10-19) |
-| Stats: corrección y rendimiento | BUG-08, PERF-02, PR-1400 | PR-1400 ya está fusionado en `0.27.x`. BUG-08 hecho en `fix/stats-freeze-params` (2026-10-20). Volver a medir PERF-02 después de BUG-08 |
+| Stats: corrección y rendimiento | BUG-08, PERF-02, PR-1400 | PR-1400 ya está fusionado en `0.27.x`. BUG-08 hecho con #1425 (2026-10-20, pendiente de fusionar). Volver a medir PERF-02 después de BUG-08 |
 | PRs externos | PR-1402, PR-1387, PR-1388, PR-1389 | Hecho: PR-1387 fusionado en `0.27.x` (2026-10-20). PR-1402, PR-1388 y PR-1389 inventariados, no revisados línea a línea |
 | Pequeños | QW-07, DEP-python310 (anunciar la retirada en 0.28), DEP-arima-dictstyle | |
 
