@@ -48,6 +48,10 @@ class BaseFold():
         - If `fold_stride > steps`, gaps are left between consecutive test sets.
     window_size : int, default None
         Number of observations needed to generate the autoregressive predictors.
+        It sets the start of the last window of each fold. In the backtesting and
+        hyperparameter search functions, it is taken from the forecaster. To get
+        the same folds when calling `split` directly, use `forecaster.window_size`,
+        which already includes the differentiation order of the forecaster.
     differentiation : int, default None
         Order of differentiation of the forecaster. It is only used to report the
         training observations when `verbose=True`; it does not change the folds.
@@ -406,6 +410,7 @@ class OneStepAheadFold(BaseFold):
         the initial training set.
     window_size : int, default None
         Number of observations needed to generate the autoregressive predictors.
+        It does not change the fold.
     differentiation : int, default None
         Order of differentiation of the forecaster. It is only used to report the
         training observations when `verbose=True`; it does not change the folds.
@@ -724,6 +729,10 @@ class TimeSeriesFold(BaseFold):
         **New in version 0.18.0**
     window_size : int, default None
         Number of observations needed to generate the autoregressive predictors.
+        It sets the start of the last window of each fold. In the backtesting and
+        hyperparameter search functions, it is taken from the forecaster. To get
+        the same folds when calling `split` directly, use `forecaster.window_size`,
+        which already includes the differentiation order of the forecaster.
     differentiation : int, default None
         Order of differentiation of the forecaster. It is only used to report the
         training observations when `verbose=True`; it does not change the folds.
