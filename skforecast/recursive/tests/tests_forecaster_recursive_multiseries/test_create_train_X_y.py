@@ -2838,9 +2838,14 @@ def test_ValueError_create_train_X_series_DataFrame_exog_dict_and_empty_X_train_
     )
     
     error_msg = re.escape(
-        "All samples have been removed due to NaNs. Set "
-        "`forecaster.dropna_from_series = False` or review `series` "
-        "and `exog` values."
+        "All samples have been removed due to NaNs: every row has a missing "
+        "value in the target or in the predictors (largest lag: 5). This can "
+        "happen when the missing values of `series` are closer together than the "
+        "lags, or when `exog` has a missing value in every row. To keep "
+        "training samples, fill the missing values of `series` and `exog`, use "
+        "fewer lags, or use an estimator that accepts NaNs (for example, "
+        "LightGBM or scikit-learn HistGradientBoosting models) and set "
+        "`dropna_from_series = False`."
     )
     with pytest.raises(ValueError, match = error_msg):
         forecaster._create_train_X_y(series=series, exog=exog_dict)
