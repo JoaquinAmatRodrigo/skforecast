@@ -164,7 +164,9 @@ class Ets(BaseEstimator, RegressorMixin):
         Indicates whether automatic model selection was used (model="ZZZ" or model=None).
     best_params_ : dict or None
         If automatic model selection was used (model="ZZZ" or model=None), this dictionary contains
-        the parameters of the selected best model. Otherwise, it is None.
+        the parameters of the selected best model. Otherwise, it is None. It
+        includes the Box-Cox lambda used in the fit (`lambda_param`, with
+        `lambda_auto=False`), also when it was selected with `lambda_auto=True`.
     
     """
 
@@ -306,6 +308,10 @@ class Ets(BaseEstimator, RegressorMixin):
                 verbose                    = False,
             )
 
+            # NOTE: The Box-Cox lambda used in the fit is stored (also when it
+            # is selected with `lambda_auto`), as R's `ets(y, model = fit)`
+            # does, so the same model is fitted with these parameters.
+            transform = self.model_.transform
             self.best_params_ = {
                 "m": self.model_.config.m,
                 "model": f"{self.model_.config.error}{self.model_.config.trend}{self.model_.config.season}",
@@ -314,8 +320,8 @@ class Ets(BaseEstimator, RegressorMixin):
                 "beta": self.model_.params.beta,
                 "gamma": self.model_.params.gamma,
                 "phi": self.model_.params.phi,
-                "lambda_param": self.lambda_param,
-                "lambda_auto": self.lambda_auto,
+                "lambda_param": transform.lambda_param if transform is not None else None,
+                "lambda_auto": False,
                 "bias_adjust": self.bias_adjust,
                 "bounds": self.bounds,
                 "seasonal": self.seasonal,

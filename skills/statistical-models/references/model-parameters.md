@@ -249,8 +249,8 @@ backtesting_stats(
 
 With `freeze_params=True` and `refit=True`, the `best_params_` of the first fit
 are used in every refit: Arima keeps the orders, intercept, drift and Box-Cox
-lambda and re-estimates the coefficients; Ets keeps the model type and the
-smoothing parameters and re-estimates the initial states. `grid_search_stats`
+lambda and re-estimates the coefficients; Ets keeps the model type, smoothing
+parameters and Box-Cox lambda and re-estimates the initial states. `grid_search_stats`
 and `random_search_stats` always backtest each candidate this way.
 
 ## Exogenous Variables Support

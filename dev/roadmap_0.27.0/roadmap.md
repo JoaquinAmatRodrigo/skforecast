@@ -56,6 +56,10 @@ automático de 15,7 s a 4,3 s (3,6x, 20 búsquedas a 1) y Ets de 3,2 s a 0,38 s 
 `grid_search_stats` con 2 candidatos, de 40 búsquedas a 2. h2o (`steps=12`, 7 folds, ventana
 creciente): Arima de 5,0 s a 2,8 s (MAE 0,06190 a 0,05955) y Ets de 0,83 s a 0,14 s (MAE
 0,06279 a 0,06130). `freeze_params=False` no cambia. PERF-02 se puede volver a medir.
+Segundo commit: `Ets.best_params_` guarda la lambda de Box-Cox del ajuste (`lambda_auto=False`),
+como `ets(y, model = fit)` de R y como `Arima`; antes Guerrero se repetía en cada fold con los
+parámetros de suavizado congelados (h2o con `lambda_auto=True`: lambda de 0,34 a 0,01 entre
+folds; MAE 0,0621 con lambda reestimada, 0,0643 congelada).
 
 **Orden recomendado para lo que queda:**
 

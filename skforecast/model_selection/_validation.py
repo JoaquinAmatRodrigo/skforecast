@@ -2030,8 +2030,9 @@ def _backtesting_stats(
         - If `True`, the parameters selected in the first fit (`best_params_`)
         are reused in all subsequent refits, so the automatic selection runs only
         once. Arima keeps the orders, intercept, drift and Box-Cox lambda, and
-        re-estimates the coefficients in each refit. Ets keeps the model type
-        and the smoothing parameters, and re-estimates the initial states.
+        re-estimates the coefficients in each refit. Ets keeps the model type,
+        smoothing parameters and Box-Cox lambda, and re-estimates the initial
+        states.
         - If `False`, automatic model selection is performed independently in each
         refit, allowing parameters to adapt across folds. This increases runtime
         and adds an `estimator_params` column to the output with the model
@@ -2402,8 +2403,9 @@ def backtesting_stats(
         - If `True`, the parameters selected in the first fit (`best_params_`)
         are reused in all subsequent refits, so the automatic selection runs only
         once. Arima keeps the orders, intercept, drift and Box-Cox lambda, and
-        re-estimates the coefficients in each refit. Ets keeps the model type
-        and the smoothing parameters, and re-estimates the initial states.
+        re-estimates the coefficients in each refit. Ets keeps the model type,
+        smoothing parameters and Box-Cox lambda, and re-estimates the initial
+        states.
         - If `False`, automatic model selection is performed independently in each
         refit, allowing parameters to adapt across folds. This increases runtime
         and adds an `estimator_params` column to the output with the model

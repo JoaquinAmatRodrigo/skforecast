@@ -32,6 +32,8 @@ The main changes in this release are:
 
     + <code>[backtesting_stats]</code>, <code>[grid_search_stats]</code> and <code>[random_search_stats]</code> with automatic <code>[Arima]</code> or <code>[Ets]</code> and `refit=True`: predictions and metrics change from the second fold, because the model selected in the first fit is reused. `freeze_params=False` in <code>[backtesting_stats]</code> gives the previous results.
 
+    + <code>[Ets]</code> with `lambda_auto=True`: `best_params_` contains the Box-Cox lambda selected in the fit and `lambda_auto=False`, so the model rebuilt from it keeps that lambda.
+
     And some code needs to be updated: passing both `alpha` and `interval` to <code>[ForecasterStats]</code> or <code>[backtesting_stats]</code> raises a `ValueError`; and the metrics of backtesting with one prediction interval (`interval`, or `quantiles` in <code>[backtesting_foundation]</code>) have two more columns, `coverage` and `interval_width`, so code that selects them by position may need to change. See **Added** and **Changed**.
 
 
@@ -59,7 +61,7 @@ The main changes in this release are:
 
 + <code>[backtesting_stats]</code> raised `ValueError: Length of values (2) does not match length of index (1)` with a <code>[ForecasterStats]</code> with several estimators and overlapping folds (`fold_stride < steps`). Each estimator now gets its own metrics, the same as when it is backtested alone. ([#1419](https://github.com/skforecast/skforecast/pull/1419))
 
-+ `freeze_params=True` (the default) in <code>[backtesting_stats]</code>, also used by <code>[grid_search_stats]</code> and <code>[random_search_stats]</code>, did not freeze anything: the automatic selection of <code>[Arima]</code> and <code>[Ets]</code> was repeated in every refit. The model selected in the first fit is now reused, 3.6 times faster with automatic Arima and 8 times with Ets (20 folds).
++ `freeze_params=True` (the default) in <code>[backtesting_stats]</code>, also used by <code>[grid_search_stats]</code> and <code>[random_search_stats]</code>, did not freeze anything: the automatic selection of <code>[Arima]</code> and <code>[Ets]</code> was repeated in every refit. The model selected in the first fit is now reused, 3.6 times faster with automatic Arima and 8 times with Ets (20 folds). With `lambda_auto=True`, `best_params_` of <code>[Ets]</code> stores the selected Box-Cox lambda, as R's `ets(y, model = fit)` reuses it.
 
 + <code>[ForecasterRecursiveMultiSeries]</code> raised a `KeyError` in `fit` and in backtesting when the series names were integers (dict keys, wide DataFrame columns or numeric ids in long data). The names are now kept as given; with `encoding='onehot'` the one-hot columns are named after the series as strings. ([#1357](https://github.com/skforecast/skforecast/issues/1357), [#1412](https://github.com/skforecast/skforecast/pull/1412))
 
