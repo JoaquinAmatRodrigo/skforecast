@@ -108,3 +108,41 @@ def test_warn_levels_not_predicted_multiseries_MissingValuesWarning_last_window_
             levels               = ['l1', 'l2', 'l3'],
             levels_predict_folds = [['l2'], ['l1', 'l2']]
         )
+
+
+def test_warn_levels_not_predicted_multiseries_MissingValuesWarning_lists_skipped_folds():
+    """
+    Test the folds in which no level is predicted are listed as skipped when a
+    level has observed values in their test set (fold 0), and that no warning
+    is raised when the skipped fold has nothing to evaluate ('l3' has no
+    observed values in the test set of fold 0).
+    """
+    forecaster = ForecasterRecursiveMultiSeries(estimator=Ridge(), lags=3)
+
+    warn_msg = re.escape(
+        "  - `window_size` (3) observations or fewer in the training set: "
+        "'l1' (folds 0), 'l2' (folds 0).\n"
+        "  - Folds skipped, no level can be predicted in them: 0."
+    )
+    with pytest.warns(MissingValuesWarning, match=warn_msg):
+        _warn_levels_not_predicted_multiseries(
+            forecaster           = forecaster,
+            series               = series_dict_range,
+            folds                = folds,
+            span_index           = span_index,
+            levels               = ['l1', 'l2', 'l3'],
+            levels_predict_folds = [[], ['l1', 'l2', 'l3']],
+            levels_train_folds   = [[], ['l1', 'l2', 'l3']]
+        )
+
+    with warnings.catch_warnings():
+        warnings.simplefilter('error')
+        _warn_levels_not_predicted_multiseries(
+            forecaster           = forecaster,
+            series               = series_dict_range,
+            folds                = folds,
+            span_index           = span_index,
+            levels               = ['l3'],
+            levels_predict_folds = [[], ['l3']],
+            levels_train_folds   = [[], ['l3']]
+        )

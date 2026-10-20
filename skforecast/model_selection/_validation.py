@@ -25,6 +25,7 @@ from ..model_selection._utils import (
     check_backtesting_input,
     select_n_jobs_backtesting,
     _extract_data_folds_multiseries,
+    _select_fit_folds_multiseries,
     _warn_levels_not_predicted_multiseries,
     _calculate_metrics_backtesting_multiseries,
     _get_interval_columns,
@@ -979,7 +980,8 @@ def _fit_predict_forecaster_multiseries(
         `_extract_data_folds_multiseries`. Contains:
         `(series_train, last_window_series, last_window_levels,
         exog_train, exog_test, fold)`.
-        For `refit=False` folds, `series_train` and `exog_train` are `None`.
+        The forecaster is fitted only if `series_train` is not `None`. For
+        the folds without fit, `series_train` and `exog_train` are `None`.
     forecaster : object
         Forecaster model.
     store_in_sample_residuals : bool
@@ -1016,10 +1018,9 @@ def _fit_predict_forecaster_multiseries(
 
     Returns
     -------
-    pred : pandas DataFrame
-        Predictions for the fold.
-    levels_predict : list of str
-        Levels predicted in this fold.
+    pred : pandas DataFrame, None
+        Predictions for the fold. `None` if no level is predicted in the fold
+        (it is only fitted for the following folds without refit).
     
     """
 
@@ -1032,7 +1033,7 @@ def _fit_predict_forecaster_multiseries(
         fold
     ) = data_fold
 
-    if fold[5] is True:
+    if series_train is not None:
         forecaster.fit(
             series                    = series_train, 
             exog                      = exog_train,
@@ -1062,6 +1063,8 @@ def _fit_predict_forecaster_multiseries(
     # folds, by `_warn_levels_not_predicted_multiseries`. A warning raised here
     # would be lost when the folds run in parallel worker processes.
     levels_predict = [level for level in levels if level in last_window_levels]
+    if not levels_predict:
+        return None
 
     if interval is not None:
         kwargs_interval = {
@@ -1131,7 +1134,7 @@ def _fit_predict_forecaster_multiseries(
     if type(forecaster).__name__ != 'ForecasterDirectMultiVariate' and gap > 0:
         pred = pred.iloc[len(levels_predict) * gap:, :]
 
-    return pred, levels_predict
+    return pred
 
 
 @manage_warnings
@@ -1259,7 +1262,10 @@ def _backtesting_forecaster_multiseries(
         A level that is not predicted in any fold (for example, a series
         shorter than the window size of the forecaster) has NaN metrics and is
         left out of the aggregated metrics. A `MissingValuesWarning` names the
-        levels not predicted in a fold where they have observed values.
+        levels not predicted in a fold where they have observed values. A fold
+        in which no level can be predicted is skipped (no predictions, and the
+        forecaster is not trained only for it). If no fold can be predicted, a
+        `ValueError` is raised.
         If `interval` has a lower and an upper bound (a `float`, or a `list` or
         `tuple` of 2 quantiles, optionally with the median 0.5), two more 
         columns are added after the metrics, for each level and aggregated in 
@@ -1419,36 +1425,53 @@ def _backtesting_forecaster_multiseries(
         out_sample_residuals_by_bin_ = forecaster.out_sample_residuals_by_bin_
         binner_ = deepcopy(forecaster.binner)
 
-    if initial_train_size is not None:
-        # NOTE: This allows for parallelization when `refit` is `False`. The initial 
-        # Forecaster fit occurs outside of the auxiliary function.
-        data_fold = _extract_data_folds_multiseries(
-                        series             = series,
-                        folds              = [folds[0]],
-                        span_index         = span_index,
-                        window_size        = forecaster.window_size,
-                        exog               = exog,
-                        dropna_last_window = dropna_last_window,
-                        externally_fitted  = False
-                    )
-        series_train, _, last_window_levels, exog_train, _, _ = next(data_fold)
-        forecaster.fit(
-            series                    = series_train,
-            exog                      = exog_train,
-            store_last_window         = last_window_levels,
-            store_in_sample_residuals = store_in_sample_residuals,
-            suppress_warnings         = suppress_warnings
+    externally_fitted = True if initial_train_size is None else False
+    data_folds = list(
+        _extract_data_folds_multiseries(
+            series             = series,
+            folds              = folds,
+            span_index         = span_index,
+            window_size        = forecaster.window_size,
+            exog               = exog,
+            dropna_last_window = dropna_last_window,
+            externally_fitted  = externally_fitted
         )
-        _restore_out_sample_residuals(
-            forecaster                   = forecaster,
-            out_sample_residuals_        = out_sample_residuals_,
-            out_sample_residuals_by_bin_ = out_sample_residuals_by_bin_,
-            binner_                      = binner_
+    )
+
+    # NOTE: A fold without levels to predict (no level is in its training set
+    # or has a valid last window) is skipped. The forecaster is only fitted in a
+    # refit fold if its model predicts at least one level, in that fold or in
+    # the following folds without refit, so `fit` never receives an empty
+    # training set. The levels of the training set of each fold are kept to
+    # report why a level is not predicted.
+    levels_train_folds = [list(data_fold[0]) for data_fold in data_folds]
+    levels_predict_folds = [
+        [level for level in levels if level in data_fold[2]]
+        for data_fold in data_folds
+    ]
+    if not any(levels_predict_folds):
+        n_folds_no_train = 0 if externally_fitted else sum(
+            not set(levels).intersection(levels_train)
+            for levels_train in levels_train_folds
         )
-        folds[0][5] = False
-        
+        raise ValueError(
+            f"No fold of the backtesting has a level to predict. In every fold, "
+            f"each level has `window_size` ({forecaster.window_size}) observations "
+            f"or fewer in the training set, or its last window cannot be used to "
+            f"predict (fewer than `window_size` observations, or missing values "
+            f"that are not supported). Folds without levels in the training set: "
+            f"{n_folds_no_train} of {len(folds)}. Review `initial_train_size`, "
+            f"`fixed_train_size` and `refit` of `cv`, `levels`, or the span of "
+            f"the series."
+        )
+    fit_folds = _select_fit_folds_multiseries(
+                    folds                = folds,
+                    levels_predict_folds = levels_predict_folds
+                )
+
     if refit:
-        n_of_fits = int(len(folds) / refit)
+        # NOTE: The initial fit is included, the skipped fits are not.
+        n_of_fits = sum(fit_folds)
         if type(forecaster).__name__ != 'ForecasterDirectMultiVariate' and n_of_fits > 50:
             warnings.warn(
                 f"The forecaster will be fit {n_of_fits} times. This can take substantial "
@@ -1463,29 +1486,40 @@ def _backtesting_forecaster_multiseries(
                 LongTrainingWarning
             )
 
-    externally_fitted = True if initial_train_size is None else False
-    data_folds = _extract_data_folds_multiseries(
-                     series             = series,
-                     folds              = folds,
-                     span_index         = span_index,
-                     window_size        = forecaster.window_size,
-                     exog               = exog,
-                     dropna_last_window = dropna_last_window,
-                     externally_fitted  = externally_fitted
-                 )
+    if initial_train_size is not None:
+        # NOTE: This allows for parallelization when `refit` is `False`. The initial 
+        # Forecaster fit occurs outside of the auxiliary function.
+        if fit_folds[0]:
+            series_train, _, last_window_levels, exog_train, _, _ = data_folds[0]
+            forecaster.fit(
+                series                    = series_train,
+                exog                      = exog_train,
+                store_last_window         = last_window_levels,
+                store_in_sample_residuals = store_in_sample_residuals,
+                suppress_warnings         = suppress_warnings
+            )
+            _restore_out_sample_residuals(
+                forecaster                   = forecaster,
+                out_sample_residuals_        = out_sample_residuals_,
+                out_sample_residuals_by_bin_ = out_sample_residuals_by_bin_,
+                binner_                      = binner_
+            )
+        fit_folds[0] = False
+        folds[0][5] = False
 
-    # Strip series_train and exog_train for refit=False folds to minimize
-    # IPC serialization cost when using joblib.Parallel. The levels of the
-    # training set of each fold are kept to report why a level is not predicted.
+    # Strip series_train and exog_train for the folds without fit to minimize
+    # IPC serialization cost when using joblib.Parallel. Skipped folds (no fit
+    # and no levels to predict) are not sent to the workers.
     data_folds_list = []
-    levels_train_folds = []
-    for s_train, lw, levels_lw, e_train, e_test, fold in data_folds:
-        levels_train_folds.append(list(s_train))
-        if fold[5] is False:
-            data_folds_list.append((None, lw, levels_lw, None, e_test, fold))
-        else:
+    for (s_train, lw, levels_lw, e_train, e_test, fold), fit_fold, levels_predict in zip(
+        data_folds, fit_folds, levels_predict_folds
+    ):
+        if fit_fold:
             data_folds_list.append((s_train, lw, levels_lw, e_train, e_test, fold))
+        elif levels_predict:
+            data_folds_list.append((None, lw, levels_lw, None, e_test, fold))
 
+    fold_numbers = [data_fold[5][0] for data_fold in data_folds_list]
     if show_progress:
         data_folds_list = tqdm(data_folds_list)
 
@@ -1513,13 +1547,17 @@ def _backtesting_forecaster_multiseries(
         for data_fold in data_folds_list
     )
 
-    backtest_predictions = [result[0] for result in results]
+    # NOTE: A fold that is only fitted, because its model predicts the
+    # following folds without refit, returns no predictions (`None`).
     fold_labels = [
-        np.repeat(fold[0], backtest_predictions[i].shape[0]) for i, fold in enumerate(folds)
+        np.repeat(fold_number, pred.shape[0])
+        for fold_number, pred in zip(fold_numbers, results)
+        if pred is not None
     ]
-    backtest_predictions = pd.concat(backtest_predictions, axis=0)
+    backtest_predictions = pd.concat(
+        [pred for pred in results if pred is not None], axis=0
+    )
     backtest_predictions.insert(0, 'fold', np.concatenate(fold_labels))
-    levels_predict_folds = [result[1] for result in results]
     backtest_levels = set(chain(*levels_predict_folds))
 
     _warn_levels_not_predicted_multiseries(
@@ -1713,7 +1751,10 @@ def backtesting_forecaster_multiseries(
         A level that is not predicted in any fold (for example, a series
         shorter than the window size of the forecaster) has NaN metrics and is
         left out of the aggregated metrics. A `MissingValuesWarning` names the
-        levels not predicted in a fold where they have observed values.
+        levels not predicted in a fold where they have observed values. A fold
+        in which no level can be predicted is skipped (no predictions, and the
+        forecaster is not trained only for it). If no fold can be predicted, a
+        `ValueError` is raised.
         If `interval` has a lower and an upper bound (a `float`, or a `list` or
         `tuple` of 2 quantiles, optionally with the median 0.5), two more 
         columns are added after the metrics, for each level and aggregated in 
@@ -2741,9 +2782,11 @@ def _backtesting_foundation(
         levels_predict = [level for level in levels if level in context]
         levels_predict_folds.append(levels_predict)
         if not levels_predict:
-            # NOTE: Same behaviour as `_backtesting_forecaster_multiseries`: the
-            # fold is skipped and contributes an empty frame so that the output
-            # keeps its columns and the metrics are `None`. The levels not
+            # NOTE: As in `_backtesting_forecaster_multiseries`, the fold is
+            # skipped. It contributes an empty frame so that the output keeps
+            # its columns and the metrics are `None` if every fold is skipped
+            # (`_backtesting_forecaster_multiseries` raises a ValueError
+            # instead, it has no forecaster to train). The levels not
             # predicted are reported after all folds.
             col_names = ["pred"] if quantiles is None else [f"q_{q}" for q in quantiles]
             pred = pd.DataFrame(
