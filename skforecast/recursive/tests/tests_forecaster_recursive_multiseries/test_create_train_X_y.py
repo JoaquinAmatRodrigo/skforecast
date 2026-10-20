@@ -2761,9 +2761,7 @@ def test_ValueError_create_train_X_series_DataFrame_exog_dict_and_empty_X_train_
     )
     
     error_msg = re.escape(
-        "All samples have been removed due to NaNs. Set "
-        "`forecaster.dropna_from_series = False` or review `series` "
-        "and `exog` values."
+        "All training samples have been removed because every row"
     )
     with pytest.raises(ValueError, match = error_msg):
         forecaster._create_train_X_y(series=series, exog=exog_dict)

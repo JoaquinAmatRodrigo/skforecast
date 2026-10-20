@@ -117,7 +117,7 @@ def test_filter_nan_X_y_step_ValueError_when_all_samples_removed(
     )
     idx = pd.date_range('2020-01-01', periods=len(y), freq='D')
 
-    err_msg = "All samples have been removed due to NaNs"
+    err_msg = "All training samples have been removed because every row"
     with pytest.raises(ValueError, match=err_msg):
         forecaster._filter_nan_X_y_step(X, y, idx)
 

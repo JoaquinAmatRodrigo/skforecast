@@ -1534,11 +1534,38 @@ def test_create_train_X_y_ValueError_when_all_samples_removed_due_to_NaN():
                  )
 
     err_msg = re.escape(
-        "All samples have been removed due to NaNs. Set "
-        "`forecaster.dropna_from_series = False` or review `y` and `exog` values."
+        "All training samples have been removed because every row"
     )
     with pytest.raises(ValueError, match=err_msg):
         forecaster._create_train_X_y(y=y)
+
+
+def test_create_train_X_y_all_samples_removed_error_is_actionable():
+    """
+    When all rows are dropped (issue #1411), the error must name the largest
+    span and the real remedies instead of the circular "set dropna=False" advice.
+    """
+    idx = pd.date_range("2020-01-01", periods=120, freq="D")
+    y = pd.Series(
+        np.random.default_rng(0).normal(100, 5, 120), index=idx, name="y"
+    )
+    y.iloc[::10] = np.nan
+    forecaster = ForecasterRecursive(
+        estimator=LinearRegression(), lags=12, dropna_from_series=True
+    )
+
+    with pytest.raises(ValueError) as excinfo:
+        forecaster._create_train_X_y(y=y)
+
+    msg = str(excinfo.value)
+    # names the largest span (max lag here = 12)
+    assert "12 observations" in msg
+    # names the three real remedies
+    assert "estimator that accepts NaNs" in msg
+    assert "reduce the number of lags" in msg
+    assert "shorter window features" in msg
+    # and warns that simply flipping dropna is not a fix
+    assert "does not help" in msg
 
 
 def test_create_train_X_y_output_when_window_features_lags_None_and_exog():

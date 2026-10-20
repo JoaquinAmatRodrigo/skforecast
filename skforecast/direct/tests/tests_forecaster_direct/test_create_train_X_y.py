@@ -3543,8 +3543,7 @@ def test_filter_nan_X_y_step_ValueError_when_all_samples_removed_due_to_NaN():
                  )
 
     err_msg = re.escape(
-        "All samples have been removed due to NaNs. Set "
-        "`forecaster.dropna_from_series = False` or review `y` and `exog` values."
+        "All training samples have been removed because every row"
     )
     with pytest.raises(ValueError, match=err_msg):
         # _create_train_X_y creates the matrices, then _filter_nan_X_y_step

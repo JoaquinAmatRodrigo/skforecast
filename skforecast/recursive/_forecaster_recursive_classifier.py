@@ -1008,9 +1008,15 @@ class ForecasterRecursiveClassifier(ForecasterBase):
 
         if len(y_train) == 0:
             raise ValueError(
-                "All samples have been removed due to NaNs. Set "
-                "`forecaster.dropna_from_series = False` or review `y` and "
-                "`exog` values."
+                "All training samples have been removed because every row of "
+                "`X_train` contained a NaN. This happens when the lags or window "
+                f"features (the largest spans {self.window_size} observations) are "
+                "longer than the gaps between the NaNs in `y` or `exog`, so no "
+                "complete row remains. Setting `dropna_from_series = False` does "
+                "not help on its own, since an estimator that rejects NaNs will "
+                "then raise 'Input X contains NaN'. To fix it, either use an "
+                "estimator that accepts NaNs, reduce the number of lags, or use "
+                "shorter window features (and a smaller `min_periods`)."
             )
 
         last_window_ = None
