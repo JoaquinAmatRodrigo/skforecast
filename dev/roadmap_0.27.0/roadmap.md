@@ -60,6 +60,10 @@ Segundo commit: `Ets.best_params_` guarda la lambda de Box-Cox del ajuste (`lamb
 como `ets(y, model = fit)` de R y como `Arima`; antes Guerrero se repetía en cada fold con los
 parámetros de suavizado congelados (h2o con `lambda_auto=True`: lambda de 0,34 a 0,01 entre
 folds; MAE 0,0621 con lambda reestimada, 0,0643 congelada).
+**Pendiente antes de la release (BUG-08):** volver a ejecutar
+`docs/user_guides/comparing-forecasting-models.ipynb`: usa AutoARIMA y AutoETS (con `refit`
+forzado a `True`), así que sus métricas y tiempos cambian con #1425. No se ejecutó en el PR
+porque también corre modelos foundation, RNN y LightGBM.
 
 **Orden recomendado para lo que queda:**
 
