@@ -62,7 +62,7 @@ backtesting_stats(
     exog=None,                          # pd.Series | pd.DataFrame | None
     interval=None,                      # list[float] | tuple[float] | None, symmetric quantiles 0-1
     alpha=None,                         # float | None, alias of interval, not both
-    freeze_params=True,                 # bool, if True only first fold fits the model
+    freeze_params=True,                 # bool, if True auto selection (Arima, Ets) runs only in the first fit
     n_jobs='auto',                      # int | str
     verbose=False,                      # bool
     show_progress=True,                 # bool
