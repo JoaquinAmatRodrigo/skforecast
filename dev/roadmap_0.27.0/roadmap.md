@@ -47,10 +47,10 @@ entrenamiento).
 
 **Orden recomendado para lo que queda:**
 
-1. **BUG-search-short-series: cerrar la decisión pendiente 6 y empezar ya.** Es el resultado
-   erróneo silencioso más grave que queda en un uso habitual (modelos globales con series
-   cortas) y el elemento más largo (M a L). Las mediciones de la sección 8.2 de su documento
-   son el camino crítico de la release; lo demás se puede hacer en paralelo.
+1. **BUG-search-short-series: aplazado (decisión del 2026-10-20)** hasta terminar los
+   arreglos rápidos (S) de los puntos 2 a 8. Sigue siendo el resultado erróneo silencioso más
+   grave que queda y el elemento más largo (M a L), así que conviene retomarlo pronto para que
+   no retrase la release.
 2. **BUG-03** (S): las búsquedas reentrenan con el peor candidato cuando la métrica es "mayor
    es mejor", sin aviso y con `return_best=True` por defecto.
 3. **QW-03** (S, 2 líneas): elimina un `ValueError` en todo backtesting con `differentiation`,
