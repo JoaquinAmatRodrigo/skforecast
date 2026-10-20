@@ -33,7 +33,7 @@ The main changes in this release are:
 
 + <code>[backtesting_forecaster]</code>, <code>[backtesting_forecaster_multiseries]</code>, <code>[backtesting_stats]</code> and <code>[backtesting_foundation]</code> add `coverage` and `interval_width` (mean width of the interval, in the units of the series) to the metrics when the predictions define one interval: a float `interval`, or two quantiles optionally with the median (`[0.1, 0.9]` or `[0.1, 0.5, 0.9]`, in `interval` or `quantiles`). In multi-series backtesting they are reported per series and in the aggregated rows. ([#1409](https://github.com/skforecast/skforecast/issues/1409))
 
-+ `metric='root_mean_squared_error'` (RMSE, from scikit-learn) is accepted by name in backtesting and hyperparameter search, as `'mean_squared_error'` already was. Before, it had to be passed as a function.
++ `metric='root_mean_squared_error'` (RMSE, from scikit-learn) is accepted by name in backtesting and hyperparameter search, as `'mean_squared_error'` already was. Before, it had to be passed as a function. ([#1424](https://github.com/skforecast/skforecast/pull/1424))
 
 
 **Changed**
