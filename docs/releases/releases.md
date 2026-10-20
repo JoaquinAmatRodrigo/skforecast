@@ -59,6 +59,8 @@ The main changes in this release are:
 
 + <code>[backtesting_forecaster_multiseries]</code> and the hyperparameter search of <code>[ForecasterRecursiveMultiSeries]</code> raised `ValueError: Length of '<series>' must be greater than the maximum window size needed by the forecaster` when a series that starts late or ends early had exactly `window_size` values in the training set of a fold. That series is now left out of the fold. ([#1410](https://github.com/skforecast/skforecast/issues/1410), [#1418](https://github.com/skforecast/skforecast/pull/1418))
 
++ <code>[plot_residuals]</code> ignored the `fig` argument when another figure was active: the subplots were drawn on the active figure and `fig` was returned empty. ([#1386](https://github.com/skforecast/skforecast/issues/1386), [#1387](https://github.com/skforecast/skforecast/pull/1387))
+
 
 ## 0.26.0 <small>Oct 8, 2026</small> { id="0.26.0" }
 
