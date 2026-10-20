@@ -616,35 +616,6 @@ class Ets(BaseEstimator, RegressorMixin):
 
         return value
     
-    def _set_params(self, **params) -> None:
-        """
-        Set the parameters of this estimator. Internal method without resetting 
-        the fitted state. This method is intended for internal use only, please 
-        use `set_params()` instead.
-
-        Parameters
-        ----------
-        **params : dict
-            Estimator parameters.
-
-        Returns
-        -------
-        None
-
-        """
-
-        for key, value in params.items():
-            setattr(self, key, value)
-
-        self.is_auto = self.model is None or self.model == "ZZZ"
-        if self.is_auto:
-            self.model = "ZZZ"
-            estimator_name_ = "AutoEts()"
-        else:
-            estimator_name_ = f"Ets({self.model})"
-
-        self.estimator_name_ = estimator_name_
-    
     def set_params(self, **params) -> Ets:
         """
         Set the parameters of this estimator and reset the fitted state.
@@ -679,9 +650,19 @@ class Ets(BaseEstimator, RegressorMixin):
                     f"Invalid parameter '{key}' for estimator {self.__class__.__name__}. "
                     f"Valid parameters are: {sorted(valid_params)}"
                 )
-        
-        self._set_params(**params)
-        
+
+        for key, value in params.items():
+            setattr(self, key, value)
+
+        self.is_auto = self.model is None or self.model == "ZZZ"
+        if self.is_auto:
+            self.model = "ZZZ"
+            estimator_name_ = "AutoEts()"
+        else:
+            estimator_name_ = f"Ets({self.model})"
+
+        self.estimator_name_ = estimator_name_
+
         # Reset fitted state - model needs to be refitted with new parameters
         self.model_               = None
         self.model_config_        = None

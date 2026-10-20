@@ -121,7 +121,7 @@ def _fit_predict_with_fix(fold, forecaster, freeze_params, refit, **kwargs):
     if freeze_params and refit:
         for est, est_ in zip(forecaster.estimators, forecaster.estimators_):
             if getattr(est_, "best_params_", None):
-                est._set_params(**est_.best_params_)
+                est.set_params(**est_.best_params_)
     return _orig_fit_predict(
         fold=fold,
         forecaster=forecaster,
