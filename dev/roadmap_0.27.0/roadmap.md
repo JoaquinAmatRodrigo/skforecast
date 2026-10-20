@@ -38,12 +38,46 @@ reproducen con sus scripts. QW-03 se confirma en el código: el `ValueError` de
 pero `_validation.py:513-518` la sobrescribe después con la del forecaster. El resto de
 cifras son las de la sesión en la nube y no se han vuelto a medir.
 
+### Estado y prioridad (revisión del 2026-10-20)
+
+**Hecho en `0.27.x`:** PR-1400 (compilación de Ets), #1412 (ISSUE-1357, IDs enteros),
+#1415 (ISSUE-1406), #1416 (BUG-stats-interval-ignored), #1418 (ISSUE-1410), #1419 (BUG-09 a),
+#1420 (QW-09, #1409) y #1422 (#1411, mensaje cuando los NaN dejan sin muestras de
+entrenamiento).
+
+**Orden recomendado para lo que queda:**
+
+1. **BUG-search-short-series: cerrar la decisión pendiente 6 y empezar ya.** Es el resultado
+   erróneo silencioso más grave que queda en un uso habitual (modelos globales con series
+   cortas) y el elemento más largo (M a L). Las mediciones de la sección 8.2 de su documento
+   son el camino crítico de la release; lo demás se puede hacer en paralelo.
+2. **BUG-03** (S): las búsquedas reentrenan con el peor candidato cuando la métrica es "mayor
+   es mejor", sin aviso y con `return_best=True` por defecto.
+3. **QW-03** (S, 2 líneas): elimina un `ValueError` en todo backtesting con `differentiation`,
+   cuyo peor caso es una búsqueda que devuelve un DataFrame vacío.
+4. **BUG-04 y BUG-10** (S cada uno): foundation es foco, y los dos hacen que se prediga con
+   otro modelo u otros datos sin aviso.
+5. **QW-08 + PERF-03**, y después el bloque de salidas del backtesting: QW-04, BUG-02 + QW-10,
+   anunciados juntos.
+6. **QW-01 y BUG-01** (S, avisos).
+7. **FE-05** (comparar varios modelos en un backtesting, nuevo): después de QW-03, que es
+   bloqueante (hoy un mismo `cv` no sirve para forecasters con distinta `differentiation`), y
+   de BUG-06 (punto de foundation con intervalos). QW-04 y QW-10 no bloquean, pero sus
+   columnas deben coincidir.
+8. **QW-11** (más features en `CalendarFeatures`, nuevo): S e independiente de todo lo
+   demás; se puede hacer en cualquier momento. Alcance revisado con el análisis de la
+   sección 2: `hour_of_week` y los días de fin de semana del mes, no los indicadores de
+   inicio y fin de periodo.
+9. Resto del alcance: QW-05, BUG-06, QW-02, BUG-07, BUG-08, PERF-02, PRs externos y QW-07.
+
 ### Alcance
 
 | Tema | Elementos | Notas |
 |---|---|---|
 | Resultados erróneos silenciosos | BUG-03, BUG-01, BUG-stats-interval-ignored, BUG-04, BUG-10, ISSUE-1406 | Todos S. BUG-01 solo como aviso silenciable: el backtesting sobre datos de entrenamiento es un uso documentado. Hechos (2026-10-19): ISSUE-1406 con #1415 (sustituye a PR-1407, cerrado) y BUG-stats-interval-ignored con #1416; DEP-stats-alpha descartado (decisión 5) |
-| Backtesting probabilístico (titular de la release) | QW-03, QW-09, QW-04, QW-08, PERF-03, BUG-02, QW-10 | Es lo que se pide desde 2024 (#885, #902, #1253, #1409, D1119). Tres cambios de salida independientes que se fusionan por separado y se anuncian juntos en `releases.md`: QW-09 (`coverage` e `interval_width`, #1409) va primero porque no depende de QW-04; QW-04 (`y_true`) y QW-10 (`step`) después. PERF-03 (métricas en numpy: la búsqueda con `OneStepAheadFold` y 1000 series, 2,6 veces más rápida con Ridge y 1,4 con LightGBM) va junto a QW-08 o justo detrás |
+| Backtesting probabilístico (titular de la release) | QW-03, QW-09, QW-04, QW-08, PERF-03, BUG-02, QW-10 | Es lo que se pide desde 2024 (#885, #902, #1253, #1409, D1119). Tres cambios de salida independientes que se fusionan por separado y se anuncian juntos en `releases.md`: QW-09 (`coverage` e `interval_width`, #1409) va primero porque no depende de QW-04; QW-04 (`y_true`) y QW-10 (`step`) después. PERF-03 (métricas en numpy: la búsqueda con `OneStepAheadFold` y 1000 series, 2,6 veces más rápida con Ridge y 1,4 con LightGBM) va junto a QW-08 o justo detrás. Hecho: QW-09 con #1420 (2026-10-20) |
+| Comparar modelos | FE-05 | M. Nuevo (2026-10-20). Una llamada para el backtesting de varios forecasters de cualquier familia sobre los mismos puntos. Sustituye el código que hoy repite la guía `comparing-forecasting-models.ipynb`. Diseño analizado y prototipado (sección 3). Requisitos: QW-03 (bloqueante) y BUG-06 |
+| Feature engineering | QW-11 | S. Nuevo (2026-10-20). `hour_of_week` y el número de días de fin de semana del mes en `CalendarFeatures`, siempre opcionales, más un aviso y una guía de codificación. Medido en 18 series: `hour_of_week` reduce el MAE una mediana del 24% con Ridge en series horarias. Los festivos, que son lo que más aporta en series diarias, quedan como feature aparte (FE-06) |
 | Foundation para producción | QW-05, BUG-06, QW-02 | QW-02 pendiente de decisión |
 | **Búsquedas multiserie con series cortas (MUY IMPORTANTE)** | BUG-search-short-series | M a L. Resultado erróneo silencioso en un uso habitual de los modelos globales. Diseño en [`BUG-search-short-series.md`](BUG-search-short-series.md); antes o durante la implementación, las mediciones de su sección 8.2 (sobre todo los intervalos con residuos out-of-sample). No bloquea QW-09, pero cambia qué puntos entran en sus métricas |
 | Paneles multiserie | QW-01, BUG-07, ISSUE-1410 | Hechos: ISSUE-1357 (IDs enteros) con #1412, que sustituye a PR-1408 (cerrado), e ISSUE-1410 con #1418 (2026-10-19) |
@@ -69,9 +103,9 @@ El orden dentro de cada tema sigue las dependencias de la sección 1. En particu
   misma función. Si QW-08 añade `root_mean_squared_error`, PERF-03 incluye su versión en numpy.
 
 Orden de QW-09: ~~ISSUE-1406 (#1415) → BUG-stats-interval-ignored (#1416) → ISSUE-1410
-(#1418)~~ (hechos el 2026-10-19) → **QW-09 (siguiente)** → QW-08 (validar
-también los nombres reservados `coverage` e `interval_width`) → QW-04 → BUG-02 + QW-10 →
-FE-04 → foundation con `interval` (tras BUG-06).
+(#1418)~~ (hechos el 2026-10-19) → ~~QW-09 (#1420)~~ (hecho el 2026-10-20) → **QW-08
+(siguiente)** (validar también los nombres reservados `coverage` e `interval_width`) → QW-04
+→ BUG-02 + QW-10 → FE-05 → FE-04 → foundation con `interval` (tras BUG-06).
 
 ### Decisiones tomadas (2026-10-18)
 
@@ -106,6 +140,22 @@ FE-04 → foundation con `interval` (tras BUG-06).
    series con `window_size` valores o menos para ajustar su transformer (requisito medido).
    Cambia métricas y rankings existentes con estimadores que aceptan NaN: necesita una línea
    en "Before upgrading".
+7. **FE-05** (comparar modelos): diseño recomendado en "FE-05: análisis de diseño"
+   (sección 3). Falta decidir: el nombre (propuesta: `compare_forecasters` en
+   `model_selection`); si las métricas se calculan por defecto sobre los puntos comunes
+   (propuesta: sí, con aviso y `common_points=False` como alternativa); y el alcance de la
+   v1 (propuesta: una serie con todas las familias, y multiserie con modelos globales y
+   foundation; los modelos locales por serie, en la v2). Entrada como dict
+   `{nombre: forecaster}`, porque con una lista no hay nombres únicos para tres
+   `ForecasterRecursive` con estimadores distintos.
+8. **QW-11** (`CalendarFeatures`): qué features entran. Propuesta en la sección 2, con el
+   análisis medido. Las nuevas no entran en la lista por defecto (`features=None`), para que
+   la salida de `CalendarFeatures()` no cambie. Los indicadores `month_start`, `month_end`,
+   `quarter_start`, etc. solo como comodidad (paridad con feature-engine y mlforecast), no
+   por precisión: medido, no aportan en ninguna de las 8 series diarias.
+9. **FE-06** (festivos en `CalendarFeatures` con el paquete `holidays` como dependencia
+   opcional): si entra en 0.27.0 o en 0.28. Es lo que más mejora las series diarias medidas,
+   pero solo hay 2 series con festivos y el alcance es M.
 
 ### Para después de 0.27.0
 
@@ -197,6 +247,7 @@ sección 5.
 | **QW-07** Mensajes de error accionables en cuatro puntos | utils / model_selection | Frecuencia inferida, intervalos en percentiles, residuos ausentes en multiserie y función equivocada para el tipo de forecaster pasan a decir cómo resolverse (hoy grid/random con la familia equivocada devuelven un DataFrame vacío sin excepción) | Usuarios nuevos, quien migra desde 0.23/0.24 y quien pasa de ML a foundation; una vez por usuario, muy frecuente | S (+142/-3 en el prototipo) | `utils.py:2046-2050`, `:1222-1229`, `:1875-1884,1936-1947`; `_search.py:474,519`; `_validation.py:866-871,1695-1700,2318-2323,2825-2830`; prototipo: 615 + 365 tests pasan sin cambios. (b) amplía DOC-skills-percentiles-stale | (a) `pd.infer_freq` y receta `.asfreq`; (b) frase de migración si el límite está en (1, 100]; (c) un dict con todos los valores None cuenta como vacío y reutiliza el mensaje accionable; (d) `check_forecaster_type_model_selection` al inicio de cada backtesting y búsqueda, nombrando las funciones correctas. Corregir `skills/troubleshooting-common-errors/SKILL.md:72,184` |
 | **QW-08** RMSE como string y nombres de métrica únicos | metrics | `metric='root_mean_squared_error'` sin importar sklearn; nombres de pinball con el cuantil; error claro en backtesting con dos métricas del mismo nombre | RMSE: flujo habitual (ahorro diario pequeño); pinball con varios cuantiles: nicho | S (+7/-1 y validación) | `skforecast/metrics/metrics.py:45-62` (solo la variante escalada, `:52`) y `:555-558`; medido: dos pinball dan columnas duplicadas, y en multiserie `TypeError` (`_utils.py:1247`); las búsquedas ya validan nombres únicos (`_search.py:394-400`) | Añadir RMSE a `allowed_metrics`; validar unicidad en los backtesting; `__name__ = f"mean_pinball_loss_q_{alpha}"` (Changed: renombra una columna). Completar los docstrings de `metric` (MedAE, sMAPE) |
 | **QW-06** Alinear `exog` por índice en `predict` de Recursive y Direct | recursive / direct | Pasar un único DataFrame de exog (pasado y futuro) sin recortarlo, como ya hacen MultiSeries y Foundation | Flujo habitual de producción con calendario o meteo; coherencia entre forecasters | S (+36/-1 en el prototipo) | `utils.py:1656` (`align_by_index` solo en MultiSeries) y `:1738-1745`; prototipo: mismos resultados que el recorte manual, 871 tests pasan (1 a adaptar); con RangeIndex reseteado daría `[-1.331, ...]` frente a `[1.005, ...]` en silencio | Solo con `DatetimeIndex`: si el índice contiene el primer paso esperado, `exog.iloc[pos:]` antes del chequeo de NaN y de `transform_dataframe`; también Classifier y DirectMultiVariate; RangeIndex mantiene el chequeo estricto; `fit` no cambia. Toca el mismo camino de `predict` que HANDOFF-DOUBLE-WARN (sección 5): resolver el doble aviso a la vez si sale barato |
+| **QW-11** Más features en `CalendarFeatures` (añadido el 2026-10-20, revisado con el análisis de abajo) | preprocessing | La hora de la semana (día de la semana por hora) en series horarias y los días de fin de semana del mes en series mensuales, que hoy hay que construir a mano como exógenas; un aviso cuando una feature anual se usa con menos de un año de datos; y una guía de codificación por tipo de modelo | Series horarias con modelos lineales (el mayor efecto medido) y series mensuales con modelos lineales; con árboles el efecto es pequeño | S (cada feature es una entrada en `datetime_attrs` y en `_FEATURE_KNOWN_CATEGORIES`; tests y docs) | `skforecast/preprocessing/_calendar.py:20-30,193-205` (11 features: `year`, `month`, `week`, `day_of_week`, `day_of_month`, `day_of_year`, `weekend`, `hour`, `minute`, `second`, `quarter`); análisis medido en 18 series (`repro/QW-11-calendar-analysis.py`, resultados en `.csv`) y revisión de 7 librerías, ver "QW-11: análisis" debajo. Sin peticiones en GitHub | Añadir, sin cambiar la lista por defecto: `hour_of_week` (0 a 167, codificable con 168) y `weekend_days_in_month` (8 a 10, sin codificar; además, valorar el conteo de cada día de la semana en el mes, 7 columnas). Opcional por paridad: `is_month_start`, `is_month_end` y `days_in_month`. No añadir `is_quarter_*` ni `is_year_*` (redundantes con `month` y `day_of_year`), ni Fourier con K armónicos (la codificación spline ya existente rinde igual). Aviso en `fit` si una feature anual (`month`, `week`, `day_of_year`, `quarter`) se usa con menos de un año de datos. Guía: one-hot o spline con modelos lineales, enteros (`encoding=None`) con árboles |
 
 ### QW-03: antes y después
 
@@ -279,6 +330,100 @@ by_step = preds.groupby(["level", "step"]).apply(lambda g: pd.Series({
     "coverage": calculate_coverage(g.y_true, g.lower_bound, g.upper_bound),
 }), include_groups=False)   # receta documentada, sin función nueva
 ```
+
+### QW-11: antes y después
+
+```python
+# Antes: la hora de la semana se construye a mano como exógena (también para predecir)
+how = y.index.dayofweek * 24 + y.index.hour
+exog = pd.get_dummies(pd.Categorical(how, categories=range(168)), prefix="how", dtype=int)
+exog.index = y.index
+forecaster = ForecasterRecursive(Ridge(), lags=24)
+forecaster.fit(y=y, exog=exog)
+```
+
+```python
+# Después
+forecaster = ForecasterRecursive(
+    Ridge(), lags=24,
+    calendar_features=CalendarFeatures(features=["hour_of_week"], encoding="onehot"),
+)
+forecaster.fit(y=y)   # predict calcula la feature para las fechas futuras
+```
+
+### QW-11: análisis de features de calendario (2026-10-20)
+
+**Método.** 18 series: 5 horarias (bike_sharing, vic_electricity, NO2 de Valencia, 2 edificios
+de bdg2), 8 diarias (bike_sharing, vic_electricity, metro, autobús y tren de Madrid, BiciMAD,
+Wikipedia y el total de store_sales) y 5 mensuales (h2o, 3 combustibles y comercio minorista
+de Australia). `ForecasterRecursive` con Ridge y con LightGBM, backtesting con `refit=False`
+(horarias: lags 1 a 24 y 168, `steps=24`, 8 semanas de test; diarias: lags 1 a 14,
+`steps=7`, 52 semanas; mensuales: lags 1 a 12, `steps=12`, 48 meses). Cada configuración se
+compara con una base de buenas prácticas con lo que `CalendarFeatures` ofrece hoy: one-hot
+con Ridge y enteros con LightGBM. Las features se construyen desde el índice y entran como
+exógenas, para poder probar las que todavía no existen. Python 3.14.3, numpy 2.5.3,
+pandas 2.3.3, scikit-learn 1.9.1, lightgbm 4.6.0. Script y resultados por serie:
+`repro/QW-11-calendar-analysis.py` y `.csv`.
+
+**Resultados** (cambio del MAE frente a la base; mediana, y entre paréntesis cuántas series
+mejoran o empeoran más de un 1%):
+
+| Frecuencia | Configuración | Ridge | LightGBM |
+|---|---|---|---|
+| Horaria | `hour_of_week` en lugar de `day_of_week` + `hour` | **-23,8%** (4 mejor, 0 peor) | +4,9% (1, 4) |
+| Horaria | Base + `hour_of_week` | **-23,8%** (4, 0) | -2,6% (3, 1) |
+| Horaria | Base + festivo (solo 2 series) | +0,3% | -1,1% (1, 0) |
+| Horaria | Codificación cíclica (seno y coseno, la que se usa por defecto) en lugar de one-hot | +3,4% (0, 4), hasta +12,6% | -0,1% |
+| Horaria | Spline existente en lugar de one-hot | 0,0% (idéntico) | +2,8% |
+| Horaria | Base + `day_of_year` (Fourier, K=3) con menos de un año de datos (bdg2) | +65% y +140% | +11% y +150% |
+| Diaria | Base + `is_month_start` / `is_month_end` / días hasta fin de mes | +0,2% / 0,0% / +0,5% (ninguna mejora) | 0,0% / 0,0% / -1,5% (resultados mixtos) |
+| Diaria | Base + `week_of_month` / `day_of_month` | -0,1% / +1,6% | -1,2% / -0,8% (mixtos) |
+| Diaria | Base + festivo (solo 2 series) | **-4,5%** (vic: -8,0%) | **-6,3%** (vic: -12,5%) |
+| Diaria | `day_of_year` cíclico (K=1) en lugar de `month` | +7,4% (1, 6) | -3,6% (5, 1) |
+| Diaria | `day_of_year` Fourier K=6 en lugar de `month` | -0,2% | -7,1% (7, 1) |
+| Diaria | `day_of_year` spline existente (13 nodos) en lugar de `month` | -0,5% | -6,3% (5, 2) |
+| Diaria | `day_of_year` entero existente en lugar de `month` | +7,5% | -4,9% (5, 2) |
+| Diaria | Base + `day_of_year` spline existente | -2,0% (6, 2) | -3,4% (7, 1) |
+| Mensual | Base + `days_in_month` | +0,2% | +0,5% |
+| Mensual | Base + días de fin de semana del mes | **-1,3%** (4, 0), hasta -11,8% | +2,0% (0, 4) |
+| Mensual | Base + número de cada día de la semana del mes | -0,8% (2, 0), hasta -12,8% | -0,8% (2, 2) |
+
+**Conclusiones**
+
+1. **`hour_of_week` es la feature nueva que más aporta:** una mediana del 24% menos de MAE con
+   Ridge en series horarias, sin empeorar ninguna. Un modelo lineal no puede representar la
+   interacción entre día de la semana y hora con dos features separadas; los árboles sí (con
+   LightGBM, añadirla da un -2,6%, y sustituir las dos por ella empeora). La tienen sktime y
+   statsmodels (`CalendarSeasonality`).
+2. **Los indicadores de inicio y fin de periodo no mejoran la precisión.** En las 8 series
+   diarias, `is_month_start`, `is_month_end` y los días hasta fin de mes no mejoran con Ridge y
+   dan resultados mixtos con LightGBM. Los de trimestre y año son redundantes con `month` y
+   `day_of_year`. Tiene sentido añadirlos solo como comodidad, porque feature-engine y la rama
+   principal de mlforecast los tienen. Salvedad: ninguna de las series tiene efectos de nómina
+   o de cierre de mes (pagos, retiradas de efectivo), donde sí podrían aportar.
+3. **Los festivos son lo que más mejora las series diarias** (del 4,5% al 12,5% en las dos
+   series con festivos), pero `CalendarFeatures` no los genera. darts, sktime, Prophet y
+   pytimetk usan el paquete `holidays`; gluonts usa kernels de distancia al festivo. Pasa a
+   FE-06 (sección 3): es el hueco más claro frente a otras librerías.
+4. **Los días de fin de semana del mes ayudan a los modelos lineales en series mensuales**
+   (4 de 5 series mejoran, hasta un 12%), con LightGBM no. Son los regresores de días
+   laborables de X-13 y del paquete forecast de R; ninguna librería de Python los ofrece.
+5. **La codificación importa tanto como las features:** la cíclica (seno y coseno con un
+   armónico), que es la de `CalendarFeatures` por defecto, empeora los modelos lineales (+3,4%
+   de mediana en horarias, hasta +12,6%; +7,4% en el ciclo anual de las diarias). One-hot y la
+   spline existente rinden igual entre sí. No hace falta añadir Fourier con K armónicos
+   (Prophet, sktime, statsmodels): la spline ya cubre ese caso. Hace falta documentarlo:
+   one-hot o spline con modelos lineales, enteros con árboles.
+6. **Con árboles en series diarias, la posición en el año a resolución diaria mejora frente a
+   `month`** (de -4,9% a -7,1% según la codificación, en 5 a 7 de 8 series), y eso ya se puede
+   hacer con `day_of_year`. Es guía, no código nuevo.
+7. **Las features anuales con menos de un año de historia son peligrosas:** en los dos
+   edificios de bdg2 (9 meses de datos), añadir `day_of_year` empeora el error entre un 11% y
+   un 150%, porque el test cae en una parte del año que no se ha visto. Merece un aviso.
+
+**Salvedades.** Un modelo por familia con hiperparámetros fijos; los festivos, solo en 2
+series; en store_sales (datos simulados), LightGBM mejora un 40% con cualquier feature que
+resuelva el año por días, y eso arrastra los mejores casos de varias filas diarias.
 
 ### QW-04: antes y después
 
@@ -417,6 +562,8 @@ predictions = forecaster.predict(steps=24, exog=exog_all)
 | **FE-02** Covariables solo pasadas en `backtesting_foundation` (`past_only_exog`). Amplía ISSUE-1131 (solo la parte foundation) | foundation / model_selection | Evaluar de forma honesta variables observadas a posteriori o indicadores adelantados, y ajustar `context_length` con ellas, sin bucle manual | Nicho dentro de foundation (Chronos-2, TS-ICL, TimesFM 3.0), que es foco principal | S (30 a 40 líneas, ~4 tests) | `skforecast/model_selection/_validation.py:2521,2596,2606` (todas las columnas de exog van como futuras); `_search.py:2328-2339`; medido con Chronos-2 small: MAE 1,186 con la columna como futura frente a 2,919 honesto; como solo pasada mejora un 6% frente a descartarla (3,104) | `past_only_exog: str or list[str] or None = None` en `backtesting_foundation` y `bayesian_search_foundation`; se quitan de `exog_test` y se conservan en `context_exog`; `ValueError` si no existen; `IgnoredArgumentWarning` con adaptadores sin soporte | Bajo si BUG-10 se corrige antes; sin él, TabICL y TabPFN-TS corrompen la predicción en silencio. Presentarlo como hueco, no como fuga (el contrato de exog es "conocida a futuro") | No |
 | **FE-04** `ForecasterEquivalentDate` en `backtesting_forecaster_multiseries` | model_selection | Baseline en una llamada con métricas por serie y agregadas y, sobre todo, con los mismos pliegues que el modelo global (el bucle manual compara periodos distintos sin avisar) | Flujo habitual en multiserie para quien valida contra un baseline; sin peticiones explícitas | M (~120 líneas, 12 a 15 tests, docs) | `TypeError` en `_validation.py:1687-1701`; medido: con una serie que empieza 60 días tarde, el bucle evalúa 40 predicciones desde 2022-12-27 y el modelo global 100 desde 2022-10-28; prototipo: filas (idx, level, fold) idénticas, 50 series en 0,63 s | Función privada `_backtesting_equivalent_date_multiseries` con pliegues sobre el índice común y un clon por nivel; solo conformal; errores claros con bootstrapping, `return_predictors` y `use_in_sample_residuals=False`; arreglo de `_split.py:985` (DateOffset con dict). Ya en docs: `initial_train_size` como fecha en el bucle manual | Corrección: pliegues, series cortas (misma frontera `window_size` que #1410, `_forecaster_equivalent_date.py:433`), DateOffset con dict. Conflictos con QW-04 y QW-09 (ISSUE-1406 e ISSUE-1410 ya resueltos con #1415 y #1418): hacerlo después. Las dos lentes la ven de prioridad media-baja | No |
 | **FE-03** Ventanas estacionales en `RollingFeatures` (`season_length`) | preprocessing | Medias estacionales (misma hora de los últimos días, mismo día de las últimas semanas) sin clases propias frágiles que además no se guardan | Series horarias o diarias con estacionalidad múltiple y modelos de árboles | M (código S, ~40 líneas; el resto es docs y contexto IA) | `skforecast/preprocessing/_preprocessing.py:1604,1657,1673` (solo ventanas contiguas); `skforecast/utils/utils.py:3599-3611` (las clases propias no se guardan); medido con LGBM: -2,2% de MAE en bike_sharing y -1,9% en vic_electricity frente a lags estacionales; con Ridge, 0%; prototipo: diferencia transform/transform_batch 3e-14 | `season_length=None` como último parámetro; `window_sizes` sigue siendo el tramo en pasos; validar `window_sizes % season_length == 0`; atributo de clase `season_length = None` para pickles de 0.26; nombres `roll_mean_168_s24`. Documentar ya los lags estacionales múltiples (`skills/feature-engineering/SKILL.md:250-257`) | Bajo con la semántica de tramo (la API propuesta al principio rompía `window_size` de los forecasters). En Direct la ventana se alinea con el origen; `window_size` grande excluye series cortas. Duda: mejora modesta y solo con árboles | No |
+| **FE-05** Comparar varios forecasters en un solo backtesting (añadido el 2026-10-20; diseño analizado y prototipado, ver "FE-05: análisis de diseño") | model_selection | Comparar baseline, ML, stats y foundation en una llamada, sobre los mismos puntos de test y con la misma escala en las métricas, con una tabla por modelo (y por serie) y el tiempo de cada uno. Hoy hay que llamar a cuatro funciones distintas, renombrar las columnas `q_*` de foundation, medir tiempos a mano y escribir una función de resumen propia | Flujo habitual: elegir modelo frente a un baseline es el primer paso de casi todo proyecto. Sin peticiones explícitas en GitHub | M (~300 líneas: dispatch a las cuatro funciones existentes, normalización de la salida, métricas centralizadas sobre puntos comunes; tests de equivalencia con las llamadas individuales; reescribir la guía de comparación) | `docs/user_guides/comparing-forecasting-models.ipynb` (celdas 5 y 9 a 13): `summarize` propio, un `time.perf_counter()` por modelo, `rename` de `q_0.1`/`q_0.5`/`q_0.9` en foundation y bucles por serie para los modelos locales. Prototipo: `repro/FE-05-prototype.py`. Precedente de varios modelos en un backtesting: `ForecasterStats` con varios estimadores y columna `estimator_id` (#1093) | `compare_forecasters(forecasters: dict[str, Forecaster], series, cv, metric, ...)`; ver el diseño completo en el análisis | Medio: cuatro familias con argumentos y salidas distintos. Requisitos: QW-03 (bloqueante, medido) y BUG-06; BUG-11 se rodea dentro | No (función nueva) |
+| **FE-06** Festivos en `CalendarFeatures` (añadido el 2026-10-20) | preprocessing | Festivos nacionales y regionales como features (indicador, días antes y después, puentes) sin construir la columna a mano | Flujo habitual en series diarias y horarias de demanda, movilidad y energía | M (dependencia opcional `holidays`, país y región, ventanas, tests y docs) | "QW-11: análisis" (sección 2): mediana de -4,5% con Ridge y -6,3% con LightGBM en las 2 series diarias con festivos (vic_electricity: -8,0% y -12,5%). Lo ofrecen darts (`holidays_timeseries`), sktime (`HolidayFeatures`, con ventanas y puentes), Prophet (`add_country_holidays`, con ventanas) y pytimetk; gluonts usa kernels de distancia al festivo. skforecast solo tiene `calculate_distance_from_holiday`, que necesita la columna de festivos ya construida | En `CalendarFeatures`: `holidays_country`, `holidays_subdiv` y `holidays_window=(días antes, días después)`, o una lista de fechas propia; columnas `is_holiday` y, con ventana, una por desplazamiento. Reutilizar `calculate_distance_from_holiday` para la distancia | Medio: dependencia nueva (opcional); los festivos cambian entre versiones del paquete, así que los resultados solo se reproducen fijando la versión. Solo 2 series medidas (decisión pendiente 9) | No (parámetros nuevos) |
 
 ### FE-02: antes y después
 
@@ -483,6 +630,156 @@ window_features = RollingFeatures(
 )
 # roll_mean_168_s24 = media de y[t-24], y[t-48], ..., y[t-168] (7 puntos)
 ```
+
+### FE-05: antes y después
+
+```python
+# Antes (guía comparing-forecasting-models): una función por familia, tiempos y resumen a mano
+predictions, elapsed = {}, {}
+start = time.perf_counter()
+_, predictions["Seasonal naive"] = backtesting_forecaster(naive, y=y, cv=cv, ...)
+elapsed["Seasonal naive"] = time.perf_counter() - start
+# ... lo mismo con backtesting_forecaster (Ridge, LightGBM), backtesting_stats (ARIMA, ETS)
+_, pred = backtesting_foundation(chronos, series=y, cv=cv, quantiles=[0.1, 0.5, 0.9], ...)
+predictions["Chronos-2"] = pred.rename(
+    columns={"q_0.1": "lower_bound", "q_0.5": "pred", "q_0.9": "upper_bound"}
+)
+results = summarize(predictions, elapsed, ...)   # función propia de ~40 líneas
+```
+
+```python
+# Después
+metrics, predictions = compare_forecasters(
+    forecasters = {
+        "Seasonal naive": ForecasterEquivalentDate(offset=7),
+        "LightGBM": ForecasterRecursive(LGBMRegressor(), lags=7),
+        "ARIMA": ForecasterStats(Arima(m=7)),
+        "Chronos-2": ForecasterFoundation(FoundationModel("autogluon/chronos-2-small")),
+    },
+    series   = y,
+    cv       = cv,
+    metric   = ["mean_absolute_error", "mean_absolute_scaled_error"],
+    interval = [0.1, 0.9],
+)
+# metrics: forecaster, level, n_predictions, mean_absolute_error,
+#          mean_absolute_scaled_error, coverage, interval_width, elapsed_time
+```
+
+### FE-05: análisis de diseño (2026-10-20)
+
+**Cómo difieren hoy las cuatro funciones** (comprobado en `0.27.x`):
+
+| | `backtesting_forecaster` | `backtesting_forecaster_multiseries` | `backtesting_stats` | `backtesting_foundation` |
+|---|---|---|---|---|
+| Datos | `y` | `series` | `y` | `series` (Series, DataFrame o dict) |
+| Intervalo | `interval`, `interval_method='bootstrapping'` por defecto | `interval`, `interval_method='conformal'` por defecto | `interval` o `alpha` | solo `quantiles` |
+| Salida de predicciones | `fold, pred, lower_bound, upper_bound` | `level, fold, pred, ...` | `fold, pred, ...` (+ `estimator_id` con varios estimadores) | `level, fold, pred`; con cuantiles, `q_*` y **sin `pred`** (BUG-06) |
+| Tabla de métricas | sin columna de nivel | columna `levels` (en plural) | `estimator_id` con varios estimadores | sin columna de nivel con una serie |
+| Particularidades | `ForecasterEquivalentDate` solo admite conformal (BUG-11) | | | la primera llamada carga el modelo (16,7 s frente a menos de 1 s después, Chronos-2 small en CPU) |
+
+**Medido con el prototipo** (`repro/FE-05-prototype.py`, h2o, 36 puntos de test):
+
+1. **Con un solo `cv` no se pueden comparar forecasters con distinta `differentiation`.** Con
+   `cv.differentiation=None`, el forecaster con `differentiation=1` da `ValueError`; con
+   `cv.differentiation=1`, el que no diferencia da `ValueError`. QW-03 es requisito (el
+   prototipo lo rodea fijando la `differentiation` del cv para cada forecaster).
+2. **MASE cambia con el `window_size` de cada forecaster:** con las mismas predicciones,
+   0,7051, 0,6931 y 0,6784 según `y_train` empiece en la observación 1, 12 o 24 (un 4%).
+   Cada función recorta `y_train` con su propio `window_size` (`_validation.py:683-695`), así
+   que cada modelo se mide con una escala distinta. Además, el `window_size` de foundation es
+   la longitud de contexto (8192 con Chronos-2, en una serie de 204 puntos), así que "el mayor
+   `window_size`" no sirve como regla común. La regla correcta: todas las observaciones
+   anteriores al primer punto de test, iguales para todos.
+3. **Puntos comunes:** en un panel en el que una serie empieza tarde, el modelo con
+   `lags=72` no puede predecirla y el resto sí. Si se evalúa a cada modelo sobre sus puntos,
+   la comparación no es justa; si se usan los puntos comunes, esa serie desaparece de la
+   comparación para todos. Es el mismo dilema que BUG-search-short-series, y la opción c2 de
+   ese documento lo reduciría.
+4. **La cobertura compara configuraciones, no solo modelos:** LightGBM con los residuos
+   in-sample por defecto cubre un 11% con un intervalo nominal del 80%, frente al 58% de
+   ARIMA o el 78% de Chronos-2. Una tabla de comparación lo pone a la vista; hay que
+   documentar la receta de residuos out-of-sample, no cambiar defaults.
+
+**Alternativas evaluadas**
+
+| Opción | Ventajas | Inconvenientes | Veredicto |
+|---|---|---|---|
+| A. Lista de forecasters en `backtesting_forecaster` y variantes | Sin función nueva | Solo compara dentro de una familia; el tipo de retorno cambia según la entrada; los argumentos de intervalo y residuos son de una sola familia | Descartada |
+| B. Función nueva que llama a la función de cada familia y centraliza las métricas | Compara familias; reutiliza las funciones existentes sin reimplementarlas; mismas reglas para todos | Hay que mapear argumentos por familia | **Recomendada** |
+| C. Clase con estado (`ForecastingBenchmark` de sktime, `leaderboard` de AutoGluon) | Permite añadir modelos, gráficos y caché | Mucha más API; no encaja con el estilo funcional de `model_selection` | Descartada |
+| D. Solo un resumen de resultados ya calculados (`{nombre: predicciones}` → tabla) | Muy barata; el usuario conserva todo el control | Siguen siendo N llamadas, sin tiempos y sin mapeo de intervalos | Es la mitad interna de B; no exponerla en la v1 |
+| E. Predicciones en formato ancho, una columna por modelo (Nixtla) | Cómodo para gráficos | Choca con el formato largo de skforecast (`level`, `estimator_id`) | Formato largo con columna `forecaster` |
+
+**Diseño recomendado (opción B)**
+
+```python
+metrics, predictions = compare_forecasters(
+    forecasters           = {"Seasonal naive": ..., "LightGBM": ..., "ARIMA": ..., "Chronos-2": ...},
+    series                = y,                  # Series, DataFrame ancho o dict, como backtesting_foundation
+    cv                    = cv,                 # initial_train_size obligatorio
+    metric                = ["mean_absolute_error", "mean_absolute_scaled_error"],
+    exog                  = exog,
+    interval              = [0.1, 0.9],         # solo dos cotas, o None
+    levels                = None,
+    add_aggregated_metric = True,
+    common_points         = True,
+    backtesting_kwargs    = {"LightGBM": {"use_in_sample_residuals": False},
+                             "ETS": {"exog": None}},
+    show_progress         = True,
+    suppress_warnings     = False,
+)
+```
+
+Reglas:
+
+1. **Llama a las funciones públicas existentes sin modificarlas.** Test clave: las
+   predicciones de cada modelo son idénticas a las de su llamada individual.
+2. **Un solo argumento `series`.** Los forecasters de una serie (Recursive, Direct,
+   EquivalentDate, Stats) reciben la serie si hay una; con varias series, `ValueError` en la
+   v1 (los modelos locales por serie, en la v2). Los globales y foundation reciben el panel.
+3. **Intervalo común de dos cotas.** ML: `interval`; EquivalentDate: con
+   `interval_method='conformal'` forzado (BUG-11); stats: `interval`; foundation: `quantiles`
+   `[lo, 0.5, hi]` mapeados a `lower_bound` y `upper_bound`, con el punto de `pred` (requiere
+   BUG-06; hoy solo hay `q_0.5`, que no es el punto de TabICL ni de Nori). Distribuciones,
+   bootstrapping o varios cuantiles quedan fuera de la v1.
+4. **`backtesting_kwargs` por nombre** para lo propio de cada familia (`interval_method`,
+   `use_in_sample_residuals`, `n_boot`, `freeze_params`, `exog`, `n_jobs`...). Se valida
+   contra la firma de la función de destino; las claves que controla `compare_forecasters`
+   (`cv`, `metric`, `series`/`y`, `interval`, `quantiles`) dan `ValueError`.
+5. **Métricas centralizadas:** se descartan las de cada función y se recalculan sobre las
+   predicciones, con la misma deduplicación de folds solapados y el mismo `y_train` para
+   todos (todas las observaciones anteriores al primer punto de test). Reutilizar
+   `_calculate_metrics_backtesting_multiseries`, que ya da los agregados `average`,
+   `weighted_average` y `pooling`, y `coverage` e `interval_width` (#1420).
+6. **Puntos comunes por defecto**, con un aviso que diga cuántos puntos se quitan a cada
+   modelo; `common_points=False` evalúa a cada uno sobre los suyos. La columna
+   `n_predictions` siempre está.
+7. **`initial_train_size` obligatorio:** con `None`, el inicio del test depende del
+   `window_size` de cada forecaster y la evaluación sería in-sample (BUG-01).
+8. **`ForecasterStats` con varios estimadores:** una fila por estimador, `"ARIMA (Arima)"`;
+   el tiempo es el del forecaster completo y se indica.
+9. **Errores:** se interrumpe en el primer fallo, con el nombre del modelo en el mensaje
+   (`raise ValueError(f"Forecaster 'LightGBM': ...") from e`). No se silencian, para no
+   repetir BUG-05.
+10. **Ejecución secuencial entre modelos;** cada función conserva su `n_jobs`. `elapsed_time`
+    incluye la carga del modelo foundation en la primera llamada: documentarlo.
+11. **Fuera de la v1:** forecasters de clasificación (mezclar tareas no tiene sentido),
+    modelos locales por serie en paneles, gráfico de comparación y paralelismo entre
+    modelos. `ForecasterRnn` y `ForecasterDirectMultiVariate` entran sin coste por la función
+    multiserie.
+
+**Salidas:** `metrics` con `forecaster`, `level` (singular, también con una serie, aunque
+`backtesting_forecaster_multiseries` use `levels`), `n_predictions`, las métricas, `coverage`,
+`interval_width` y `elapsed_time`; `predictions` en formato largo, con índice de fechas y las
+columnas `forecaster`, `level`, `fold`, `pred`, `lower_bound` y `upper_bound` (y `y_true` y
+`step` cuando lleguen QW-04 y QW-10).
+
+**Dependencias y orden:** QW-03 (bloqueante) → BUG-06 (para intervalos de foundation) →
+FE-05. QW-04 y QW-10 no bloquean, porque las métricas se recalculan aquí, pero conviene que las
+columnas de salida coincidan: si FE-05 va antes, que ya incluya `y_true` y `step` con los
+mismos nombres. Docs: reescribir `comparing-forecasting-models.ipynb` con la función (quita la
+función `summarize`, los tiempos y los `rename`) y añadirla a `llms-base.txt` y a las skills
+`choosing-a-forecaster` y `backtesting-configuration`.
 
 ---
 
