@@ -102,9 +102,9 @@ def test_OneStepAheadFold_FutureWarning_when_deprecated_params_are_set(capfd, de
 
     with pytest.warns(FutureWarning) as record:
         cv = OneStepAheadFold(initial_train_size=70, **deprecated_params)
-    assert [str(w.message) for w in record] == [
-        warn_msgs[param] for param in warn_msgs if param in deprecated_params
-    ]
+    assert sorted(str(w.message) for w in record) == sorted(
+        warn_msgs[param] for param in deprecated_params
+    )
     folds = cv.split(X=y)
     out, _ = capfd.readouterr()
 
@@ -122,6 +122,23 @@ def test_OneStepAheadFold_FutureWarning_when_deprecated_params_are_set(capfd, de
     assert "window_size" not in repr(cv)
     assert "differentiation" not in repr(cv)
     assert "Differentiation" not in cv._repr_html_()
+
+
+@pytest.mark.parametrize(
+    "window_size", [0, -1, "invalid"], ids=lambda ws: f'window_size: {ws}'
+)
+def test_OneStepAheadFold_deprecated_window_size_is_not_validated(window_size):
+    """
+    Test that an invalid `window_size` only raises the FutureWarning, since it
+    is deprecated and its value is ignored. Subclasses also raise the warning.
+    """
+    class CustomOneStepAheadFold(OneStepAheadFold):
+        pass
+
+    for cv_class in [OneStepAheadFold, CustomOneStepAheadFold]:
+        with pytest.warns(FutureWarning, match="`window_size` is deprecated"):
+            cv = cv_class(initial_train_size=70, window_size=window_size)
+        assert cv.split(X=pd.Series(np.arange(100))) == [0, [0, 70], [70, 100], True]
 
 
 def test_OneStepAheadFold_no_FutureWarning_when_deprecated_params_are_None():

@@ -112,6 +112,9 @@ class BaseFold():
 
     """
 
+    # TODO: Remove in version 0.29.0 together with the deprecated parameters.
+    _deprecated_params = ('differentiation',)
+
     def __init__(
         self,
         steps: int | None = None,
@@ -161,10 +164,10 @@ class BaseFold():
         stacklevel: int
     ) -> None:
         """
-        Warn when a deprecated parameter is set to a value other than `None`:
-        `differentiation` in all fold classes and `window_size` in
-        `OneStepAheadFold`. These parameters do not change the folds and their
-        values are ignored.
+        Warn when a parameter listed in `_deprecated_params` is set to a value
+        other than `None`: `differentiation` in all fold classes and `window_size`
+        in `OneStepAheadFold`. These parameters do not change the folds, so their
+        values are ignored and not validated.
 
         Parameters
         ----------
@@ -181,24 +184,23 @@ class BaseFold():
 
         # TODO: Remove in version 0.29.0 together with the deprecated parameters.
         cv_name = type(self).__name__
-        deprecated_params = {
+        messages = {
             'differentiation': (
                 f"`differentiation` is deprecated since version 0.27.0 and has no "
                 f"effect on the folds of `{cv_name}`: the `window_size` of the "
                 f"forecaster already includes its differentiation order. It will "
                 f"be removed in version 0.29.0."
-            )
+            ),
+            'window_size': (
+                f"`window_size` is deprecated since version 0.27.0 and has no "
+                f"effect on the fold of `{cv_name}`. It will be removed in "
+                f"version 0.29.0."
+            ),
         }
-        if cv_name == 'OneStepAheadFold':
-            deprecated_params['window_size'] = (
-                "`window_size` is deprecated since version 0.27.0 and has no "
-                "effect on the fold of `OneStepAheadFold`. It will be removed in "
-                "version 0.29.0."
-            )
 
-        for param, message in deprecated_params.items():
+        for param in self._deprecated_params:
             if params.get(param) is not None:
-                warnings.warn(message, FutureWarning, stacklevel=stacklevel)
+                warnings.warn(messages[param], FutureWarning, stacklevel=stacklevel)
 
     def _validate_params(
         self,
@@ -295,7 +297,10 @@ class BaseFold():
                     f"a date string, or a pandas Timestamp. Got {initial_train_size}."
                 )
         
-        if (
+        # NOTE: Deprecated parameters are not validated because their values
+        # are ignored (`differentiation` in all classes, `window_size` in
+        # `OneStepAheadFold`).
+        if 'window_size' not in self._deprecated_params and (
             not isinstance(window_size, (int, np.integer, pd.DateOffset, type(None)))
             or isinstance(window_size, (int, np.integer))
             and window_size < 1
@@ -303,13 +308,6 @@ class BaseFold():
             raise ValueError(
                 f"`window_size` must be an integer greater than 0. Got {window_size}."
             )
-        
-        if differentiation is not None:
-            if not isinstance(differentiation, (int, np.integer)) or differentiation < 0:
-                raise ValueError(
-                    f"`differentiation` must be None or an integer greater than or "
-                    f"equal to 0. Got {differentiation}."
-                )
             
         if not isinstance(return_all_indexes, bool):
             raise TypeError(
@@ -494,6 +492,9 @@ class OneStepAheadFold(BaseFold):
         Whether to print information about generated folds.
 
     """
+
+    # TODO: Remove in version 0.29.0 together with the deprecated parameters.
+    _deprecated_params = ('window_size', 'differentiation')
 
     def __init__(
         self,

@@ -444,7 +444,7 @@ print(folds)
 - If `fold_stride == steps`: test sets are back-to-back without overlap
 - If `fold_stride < steps`: test sets overlap (multiple forecasts for same observations)
 - If `fold_stride > steps`: gaps between consecutive test sets
-- `differentiation` (both folds) and `window_size` (`OneStepAheadFold`) are deprecated since 0.27.0: they have no effect, raise a `FutureWarning` and will be removed in 0.29.0
+- `differentiation` (both folds) and `window_size` (`OneStepAheadFold`) are deprecated since 0.27.0: they have no effect, emit a `FutureWarning` and will be removed in 0.29.0
 
 ### OneStepAheadFold
 
