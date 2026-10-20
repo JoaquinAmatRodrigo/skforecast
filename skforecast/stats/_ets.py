@@ -644,7 +644,6 @@ class Ets(BaseEstimator, RegressorMixin):
             estimator_name_ = f"Ets({self.model})"
 
         self.estimator_name_ = estimator_name_
-        
     
     def set_params(self, **params) -> Ets:
         """
