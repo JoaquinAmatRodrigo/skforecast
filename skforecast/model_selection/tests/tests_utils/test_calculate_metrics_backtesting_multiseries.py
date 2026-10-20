@@ -117,6 +117,15 @@ predictions_different_length = (
     .set_index('level', append=True)
 )
 
+# NOTE: As in backtesting, the bounds are not NaN when `pred` is NaN (item_3
+# has no observed values in its last predictions).
+predictions_interval_different_length = predictions_different_length.copy()
+predictions_interval_different_length['lower_bound'] = (predictions['pred'] - 1.5).to_numpy()
+predictions_interval_different_length['upper_bound'] = (predictions['pred'] * 1.1).to_numpy()
+predictions_interval_missing_level = predictions_missing_level.copy()
+predictions_interval_missing_level['lower_bound'] = predictions_missing_level['pred'] - 1.5
+predictions_interval_missing_level['upper_bound'] = predictions_missing_level['pred'] * 1.1
+
 span_index = pd.date_range(start="2012-01-01", end="2012-02-19", freq="D")
 
 folds = [
@@ -443,6 +452,113 @@ def test_calculate_metrics_backtesting_multiseries_output_when_aggregated_metric
                 1.0503330878204564,
                 1.0503330878204564,
                 1.096968360536767,
+            ],
+        }
+    )
+
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_calculate_metrics_backtesting_multiseries_output_when_interval_and_predictions_have_different_length():
+    """
+    Test output of _calculate_metrics_backtesting_multiseries when predictions
+    include `lower_bound` and `upper_bound`: coverage and interval_width are
+    added after the metrics, for each level and aggregated. Rows whose `pred`
+    is NaN are excluded although their bounds are not NaN, and the other
+    metrics are the same as without the bounds.
+    """
+    metrics = [add_y_train_argument(mean_absolute_error)]
+    results = _calculate_metrics_backtesting_multiseries(
+        series=data,
+        predictions=predictions_interval_different_length,
+        folds=folds,
+        span_index=span_index,
+        window_size=window_size,
+        metrics=metrics,
+        levels=levels,
+        add_aggregated_metric=True,
+    )
+
+    expected = pd.DataFrame(
+        data={
+            "levels": [
+                "item_1",
+                "item_2",
+                "item_3",
+                "average",
+                "weighted_average",
+                "pooling",
+            ],
+            "mean_absolute_error": [
+                1.47756696,
+                3.48012924,
+                3.1736833333333334,
+                2.7104598444444448,
+                2.613332338709678,
+                2.613332338709678,
+            ],
+            "coverage": [
+                0.68,
+                0.24,
+                0.5,
+                0.47333333333333333,
+                0.46774193548387094,
+                0.46774193548387094,
+            ],
+            "interval_width": [
+                3.8544806960000018,
+                3.7798795480000025,
+                3.769625016666669,
+                3.8013284202222244,
+                3.807975908064518,
+                3.8079759080645186,
+            ],
+        }
+    )
+
+    pd.testing.assert_frame_equal(results, expected)
+
+
+def test_calculate_metrics_backtesting_multiseries_output_when_interval_and_one_level_is_not_predicted():
+    """
+    Test output of _calculate_metrics_backtesting_multiseries when predictions
+    include `lower_bound` and `upper_bound` and one level is not predicted:
+    its coverage and interval_width are NaN and it is left out of the
+    aggregated metrics.
+    """
+    metrics = [add_y_train_argument(mean_absolute_error)]
+    results = _calculate_metrics_backtesting_multiseries(
+        series=data,
+        predictions=predictions_interval_missing_level,
+        folds=folds,
+        span_index=span_index,
+        window_size=window_size,
+        metrics=metrics,
+        levels=levels,
+        add_aggregated_metric=True,
+    )
+
+    expected = pd.DataFrame(
+        data={
+            "levels": [
+                "item_1",
+                "item_2",
+                "item_3",
+                "average",
+                "weighted_average",
+                "pooling",
+            ],
+            "mean_absolute_error": [
+                1.47756696, 3.48012924, np.nan, 2.4788481, 2.4788481, 2.4788481
+            ],
+            "coverage": [0.68, 0.24, np.nan, 0.46, 0.46, 0.46],
+            "interval_width": [
+                3.8544806960000018,
+                3.7798795480000025,
+                np.nan,
+                3.817180122000002,
+                3.817180122000002,
+                3.817180122000002,
             ],
         }
     )

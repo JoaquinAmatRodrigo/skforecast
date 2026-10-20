@@ -35,7 +35,7 @@ epsilon, so MAPE is not infinite but an extremely large number (about 1e16).
 
 | Metric | Function | Input signature | Use with | Measures |
 |--------|----------|-----------------|----------|----------|
-| Coverage | `calculate_coverage` | `(y_true, lower_bound, upper_bound)` | Any forecaster with intervals | Calibration (proportion of truths in interval) |
+| Coverage | `calculate_coverage` | `(y_true, lower_bound, upper_bound)` | Any forecaster with intervals | Calibration (proportion of truths in interval). Backtesting with one interval (two quantiles, optionally with the median) reports it as `coverage`, next to `interval_width` (mean width) |
 | CRPS (bootstrap) | `crps_from_predictions` | `(y_true: float, y_pred: ndarray)` | Bootstrapped predictions | Calibration + sharpness (single observation) |
 | CRPS (quantiles) | `crps_from_quantiles` | `(y_true: float, pred_quantiles: ndarray, quantile_levels: ndarray)` | Foundation models, quantile predictions | Calibration + sharpness (single observation) |
 | Winkler Score | `winkler_score` | `(y_true, lower_bound, upper_bound, alpha)` | Any single interval | Calibration + sharpness of one interval; miscoverage penalty scaled by `alpha` |
@@ -78,7 +78,7 @@ epsilon, so MAPE is not infinite but an extremely large number (about 1e16).
 | MSLE | Positive data where relative errors matter more than absolute | Data has zeros or negative values |
 | MASE | Comparing across series with different scales; need baseline reference | Very short training series (naive denominator unreliable) |
 | RMSSE | Same as MASE but want to penalize large errors more | Same as MASE |
-| Coverage | Evaluating prediction interval calibration | Want to measure interval width/sharpness (use CRPS) |
+| Coverage | Evaluating prediction interval calibration, always next to the mean width (`interval_width` in backtesting) | Want a single score of calibration and sharpness (use Winkler, WIS or CRPS) |
 | CRPS | Comprehensive interval/quantile evaluation (calibration + sharpness) | Only have point forecasts |
 | Winkler score | Scoring a single interval with a tunable miscoverage penalty (`alpha`) | Comparing full distributions (use WIS or CRPS) |
 | Weighted interval score (WIS) | Scoring several quantile intervals + median as one CRPS-like number | Only have a single interval (use Winkler) or only point forecasts |

@@ -725,6 +725,8 @@ def test_output_backtesting_forecaster_interval_no_exog_no_remainder_with_mocked
     'use_in_sample_residuals = True'
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.06464382862831312]})
+    expected_metric["coverage"] = [0.8333333333333334]
+    expected_metric["interval_width"] = [0.7474812737151848]
     expected_predictions = pd.DataFrame(
         data = np.array([
             [0.55717779, 0.19882822, 0.87939731],
@@ -787,6 +789,8 @@ def test_output_backtesting_forecaster_interval_no_exog_yes_remainder_with_mocke
     'use_in_sample_residuals = True'
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.07085869503962372]})
+    expected_metric["coverage"] = [0.75]
+    expected_metric["interval_width"] = [0.7470977809517679]
     expected_predictions = pd.DataFrame(
         data = np.array([
             [0.55717779, 0.19882822, 0.87939731],
@@ -848,6 +852,8 @@ def test_output_backtesting_forecaster_interval_yes_exog_no_remainder_with_mocke
     'use_in_sample_residuals = True'
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.05585411566592716]})
+    expected_metric["coverage"] = [0.8333333333333334]
+    expected_metric["interval_width"] = [0.7314648071673182]
     expected_predictions = pd.DataFrame(
     data = np.array([
             [0.59059622, 0.24316567, 0.93342085],
@@ -910,6 +916,8 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_with_mock
     'use_in_sample_residuals = True'
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.06313056651237414]})
+    expected_metric["coverage"] = [0.75]
+    expected_metric["interval_width"] = [0.7312480487974929]
     expected_predictions = pd.DataFrame(
         data = np.array([
             [0.59059622, 0.24316567, 0.93342085],
@@ -1141,6 +1149,8 @@ def test_output_backtesting_forecaster_interval_conformal_and_binned_with_mocked
     12 observations to backtest, steps=5 (2 remainder), conformal=True, binned=True.
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.063130566512374]})
+    expected_metric["coverage"] = [0.5]
+    expected_metric["interval_width"] = [0.5415038251185561]
     expected_predictions = pd.DataFrame(
         data = np.array([
             [0.59059622, 0.2974502 , 0.88374223],
@@ -1206,6 +1216,8 @@ def test_output_backtesting_forecaster_interval_conformal_and_binned_with_mocked
     12 observations to backtest, steps=5 (2 remainder), conformal=True, binned=True.
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.061964730085838]})
+    expected_metric["coverage"] = [0.75]
+    expected_metric["interval_width"] = [0.5825684213412612]
     expected_predictions = pd.DataFrame(
         data = np.array([
             [0.55584775, 0.37659309, 0.73510242],
@@ -1274,6 +1286,8 @@ def test_output_backtesting_forecaster_interval_out_sample_residuals_no_exog_no_
     'use_in_sample_residuals = False'
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.0646438286283131]})
+    expected_metric["coverage"] = [0.3333333333333333]
+    expected_metric["interval_width"] = [0.9242189113778497]
     expected_predictions = pd.DataFrame(
         data = np.array([
             [0.55717779, 0.63654358, 1.5406994 ],
@@ -1348,6 +1362,8 @@ def test_output_backtesting_forecaster_interval_out_sample_residuals_binned_no_e
     Out sample residuals are set using set_out_sample_residuals method.
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.06464382841082142]})
+    expected_metric["coverage"] = [0.3333333333333333]
+    expected_metric["interval_width"] = [0.9214527208722357]
     expected_predictions = pd.DataFrame(
         data = np.array([
             [0.55717779, 0.55986585, 1.48476203],
@@ -1556,6 +1572,8 @@ def test_output_backtesting_forecaster_interval_yes_exog_yes_remainder_gap_with_
     'use_in_sample_residuals = True'
     """
     expected_metric = pd.DataFrame({"mean_squared_error": [0.07965887934114284]})
+    expected_metric["coverage"] = [0.7058823529411765]
+    expected_metric["interval_width"] = [0.6885674818609466]
     expected_predictions = pd.DataFrame(
         data = np.array(
             [[ 0.65022999,  0.32111688,  1.0092382 ],
@@ -1631,6 +1649,8 @@ def test_output_backtesting_forecaster_interval_yes_exog_not_allow_remainder_gap
     exog_with_index.index = pd.date_range(start='2022-01-01', periods=50, freq='D')
 
     expected_metric = pd.DataFrame({"mean_squared_error": [0.08826806818628832]})
+    expected_metric["coverage"] = [0.6666666666666666]
+    expected_metric["interval_width"] = [0.6875855105779679]
     expected_predictions = pd.DataFrame(
         data = np.array([[ 0.65022999,  0.32111688,  1.0092382 ],
                         [ 0.52364637,  0.17891138,  0.88265459],

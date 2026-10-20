@@ -22,7 +22,12 @@ from ..exceptions import (
     MissingValuesWarning,
     OneStepAheadValidationWarning
 )
-from ..metrics import add_y_train_argument, _any_metric_needs_y_train, _get_metric
+from ..metrics import (
+    add_y_train_argument,
+    _any_metric_needs_y_train,
+    _get_metric,
+    calculate_coverage
+)
 from ..utils import (
     _date_range_from_index,
     check_interval,
@@ -31,6 +36,11 @@ from ..utils import (
     _copy_rows_to_check,
     _check_in_place_fit,
 )
+
+# NOTE: Names of the metrics added to the backtesting metrics when the
+# predictions include `lower_bound` and `upper_bound`, see
+# `_calculate_interval_metrics`.
+INTERVAL_METRIC_NAMES = ['coverage', 'interval_width']
 
 
 def initialize_lags_grid(
@@ -388,6 +398,20 @@ def check_backtesting_input(
         raise ValueError(
             "`skip_folds` is not allowed for ForecasterStats. Set it to `None`."
         )
+
+    # NOTE: `backtesting_foundation` passes its `quantiles` as `interval`.
+    if _get_interval_bound_quantiles(interval) is not None or alpha is not None:
+        metric_names = [
+            m if isinstance(m, str) else getattr(m, '__name__', None)
+            for m in (metric if isinstance(metric, list) else [metric])
+        ]
+        reserved_names = [name for name in metric_names if name in INTERVAL_METRIC_NAMES]
+        if reserved_names:
+            raise ValueError(
+                f"When `interval` has a lower and an upper bound, or `alpha` is "
+                f"used, the backtesting metrics include {INTERVAL_METRIC_NAMES}. "
+                f"Rename the metric(s) {reserved_names} passed in `metric`."
+            )
 
     if not isinstance(add_aggregated_metric, bool):
         raise TypeError("`add_aggregated_metric` must be a boolean: `True`, `False`.")
@@ -1190,6 +1214,129 @@ def _warn_levels_not_predicted_multiseries(
     )
 
 
+def _get_interval_bound_quantiles(
+    interval: float | list[float] | tuple[float, ...] | str | object | None
+) -> list[float] | None:
+    """
+    Quantiles of the lower and upper bounds of the prediction interval defined
+    by `interval`: a float (nominal coverage), or a list or tuple of two
+    quantiles, optionally with the median (0.5). Any other value (more
+    quantiles, 'bootstrapping', a distribution or None) does not define a
+    single interval and returns None.
+
+    Parameters
+    ----------
+    interval : float, list, tuple, str, object, None
+        Argument `interval` of the backtesting functions (or `quantiles` in
+        `backtesting_foundation`).
+
+    Returns
+    -------
+    bound_quantiles : list, None
+        Quantiles of the lower and upper bounds, sorted, or None.
+
+    """
+
+    if isinstance(interval, float):
+        return [0.5 - interval / 2, 0.5 + interval / 2]
+
+    if isinstance(interval, (list, tuple)):
+        bound_quantiles = list(interval)
+        if len(bound_quantiles) == 3 and 0.5 in bound_quantiles:
+            bound_quantiles.remove(0.5)
+        if len(bound_quantiles) == 2:
+            return sorted(bound_quantiles)
+
+    return None
+
+
+def _get_interval_columns(
+    columns: pd.Index | list[str],
+    interval: float | list[float] | tuple[float, ...] | str | object | None
+) -> list[str] | None:
+    """
+    Columns of the backtesting predictions with the lower and upper bounds of
+    the prediction interval, used to calculate the interval metrics
+    (`INTERVAL_METRIC_NAMES`): `lower_bound` and `upper_bound` if they exist,
+    otherwise the quantile columns (`q_<quantile>`) of the bounds defined by
+    `interval` (see `_get_interval_bound_quantiles`).
+
+    Parameters
+    ----------
+    columns : pandas Index, list
+        Columns of the backtesting predictions.
+    interval : float, list, tuple, str, object, None
+        Argument `interval` of the backtesting functions (or `quantiles` in
+        `backtesting_foundation`).
+
+    Returns
+    -------
+    interval_columns : list, None
+        Names of the lower and upper bound columns, or None if the predictions
+        do not define a single interval.
+
+    """
+
+    if {'lower_bound', 'upper_bound'}.issubset(columns):
+        return ['lower_bound', 'upper_bound']
+
+    bound_quantiles = _get_interval_bound_quantiles(interval)
+    if bound_quantiles is not None:
+        interval_columns = [f"q_{q}" for q in bound_quantiles]
+        if set(interval_columns).issubset(columns):
+            return interval_columns
+
+    return None
+
+
+def _calculate_interval_metrics(
+    y_true: np.ndarray | pd.Series,
+    lower_bound: np.ndarray | pd.Series,
+    upper_bound: np.ndarray | pd.Series,
+) -> list[float]:
+    """
+    Calculate the coverage and the mean width of a prediction interval
+    defined by its lower and upper bounds.
+
+    Rows with a missing value in `y_true`, `lower_bound` or `upper_bound`
+    are ignored. If no row is left, both metrics are NaN.
+
+    Parameters
+    ----------
+    y_true : numpy ndarray, pandas Series
+        True values of the target variable.
+    lower_bound : numpy ndarray, pandas Series
+        Lower bound of the interval.
+    upper_bound : numpy ndarray, pandas Series
+        Upper bound of the interval.
+
+    Returns
+    -------
+    interval_metrics : list
+        Coverage (share of true values inside the interval, bounds included)
+        and mean width (mean of `upper_bound - lower_bound`, in the units of
+        the series), in the order of `INTERVAL_METRIC_NAMES`.
+
+    """
+
+    y_true = np.asarray(y_true, dtype=float)
+    lower_bound = np.asarray(lower_bound, dtype=float)
+    upper_bound = np.asarray(upper_bound, dtype=float)
+
+    mask = ~(np.isnan(y_true) | np.isnan(lower_bound) | np.isnan(upper_bound))
+    if not mask.any():
+        return [np.nan, np.nan]
+
+    coverage = calculate_coverage(
+                   y_true      = y_true[mask],
+                   lower_bound = lower_bound[mask],
+                   upper_bound = upper_bound[mask]
+               )
+    interval_width = np.mean(upper_bound[mask] - lower_bound[mask])
+
+    return [float(coverage), float(interval_width)]
+
+
 def _calculate_metrics_backtesting_multiseries(
     series: pd.DataFrame | dict[str, pd.Series | pd.DataFrame],
     predictions: pd.DataFrame,
@@ -1210,12 +1357,18 @@ def _calculate_metrics_backtesting_multiseries(
     - 'pooling': the values of all levels are pooled and then the metric is
     calculated.
 
+    If `predictions` includes the columns `lower_bound` and `upper_bound`, the
+    coverage and the mean width of the interval (`INTERVAL_METRIC_NAMES`) are
+    added after the metrics, for each level and aggregated in the same way.
+
     Parameters
     ----------
     series : pandas DataFrame, dict
         Series data used for backtesting.
     predictions : pandas DataFrame
-        MultiIndex DataFrame generated during the backtesting multiseries process. 
+        MultiIndex DataFrame generated during the backtesting multiseries process.
+        The first column is the point prediction used to calculate the metrics.
+        It may also include the columns `lower_bound` and `upper_bound`.
     folds : list, tqdm
         Folds created during the backtesting process.
     span_index : pandas DatetimeIndex, pandas RangeIndex
@@ -1269,6 +1422,10 @@ def _calculate_metrics_backtesting_multiseries(
     
     metric_names = [m.__name__ for m in metrics]
     needs_y_train = _any_metric_needs_y_train(metrics)
+    add_interval_metrics = {'lower_bound', 'upper_bound'}.issubset(predictions.columns)
+    output_names = (
+        metric_names + INTERVAL_METRIC_NAMES if add_interval_metrics else metric_names
+    )
 
     levels_in_predictions = predictions.index.get_level_values('level').unique()
 
@@ -1281,15 +1438,17 @@ def _calculate_metrics_backtesting_multiseries(
         series = pd.concat(series, names = ['level', 'idx']).to_frame('y_true')
     
     predictions = predictions.swaplevel()
-    predictions.columns = ['y_pred']
+    predictions = predictions.rename(columns={predictions.columns[0]: 'y_pred'})
 
+    # NOTE: Rows are dropped only by `y_true` and `y_pred`, so the metrics are
+    # the same with and without the interval bounds.
     y_true_y_pred = pd.merge(
         series,
         predictions,
         left_index  = True,
         right_index = True,
         how         = "inner",
-    ).dropna(axis=0, how="any")
+    ).dropna(axis=0, how="any", subset=['y_true', 'y_pred'])
 
     if needs_y_train:
         train_indexes = []
@@ -1334,22 +1493,30 @@ def _calculate_metrics_backtesting_multiseries(
             else:
                 y_train = None
             metrics_level = [
-                m(y_true=y_true, y_pred=y_pred, y_train=y_train) 
+                m(y_true=y_true, y_pred=y_pred, y_train=y_train)
                 for m in metrics
             ]
+            if add_interval_metrics:
+                metrics_level.extend(
+                    _calculate_interval_metrics(
+                        y_true      = y_true,
+                        lower_bound = group['lower_bound'],
+                        upper_bound = group['upper_bound']
+                    )
+                )
             metrics_levels.append(metrics_level)
         else:
-            metrics_levels.append([None for _ in metrics])
+            metrics_levels.append([None for _ in output_names])
 
     metrics_levels = pd.DataFrame(
                          data    = metrics_levels,
-                         columns = metric_names
+                         columns = output_names
                      )
     metrics_levels.insert(0, 'levels', levels)
 
     if len(levels) < 2:
         add_aggregated_metric = False
-    
+
     if add_aggregated_metric:
 
         # aggregation: average
@@ -1369,7 +1536,7 @@ def _calculate_metrics_backtesting_multiseries(
             metrics_levels.merge(n_predictions_levels, on='levels', how='inner')
         )
         weighted_averages = {}
-        for col in metric_names:
+        for col in output_names:
             weighted_averages[col] = np.average(
                 metrics_levels_no_missing[col],
                 weights = metrics_levels_no_missing['n_predictions']
@@ -1405,8 +1572,17 @@ def _calculate_metrics_backtesting_multiseries(
                 pooled.append(
                     m(y_true=y_true, y_pred=y_pred, y_train=y_train)
                 )
-        
-        pooled = pd.DataFrame([pooled], columns=metric_names)
+
+        if add_interval_metrics:
+            pooled.extend(
+                _calculate_interval_metrics(
+                    y_true      = y_true,
+                    lower_bound = y_true_y_pred['lower_bound'],
+                    upper_bound = y_true_y_pred['upper_bound']
+                )
+            )
+
+        pooled = pd.DataFrame([pooled], columns=output_names)
         pooled['levels'] = 'pooling'
 
         metrics_levels = pd.concat(

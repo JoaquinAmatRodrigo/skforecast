@@ -2,7 +2,9 @@
 # ==============================================================================
 import re
 import pytest
+from scipy.stats import norm
 from sklearn.linear_model import Ridge
+from skforecast.recursive import ForecasterRecursive
 from skforecast.recursive import ForecasterRecursiveMultiSeries
 from skforecast.model_selection import backtesting_forecaster
 from skforecast.model_selection._split import TimeSeriesFold
@@ -54,3 +56,38 @@ def test_backtesting_forecaster_TypeError_when_forecaster_not_supported_types():
             verbose               = False,
             show_progress         = False
         )
+
+
+@pytest.mark.parametrize(
+    "interval",
+    [None, [0.1, 0.3, 0.9], [0.05, 0.1, 0.9, 0.95], 'bootstrapping', norm],
+    ids = lambda interval: f'interval: {interval}'
+)
+def test_backtesting_forecaster_no_interval_metrics_when_interval_has_not_two_bounds(interval):
+    """
+    Test that the interval metrics (`coverage`, `interval_width`) are not added 
+    to the metrics when `interval` is None, a list of quantiles that is not 2
+    quantiles (optionally with the median), 'bootstrapping' or a scipy.stats
+    distribution.
+    """
+    forecaster = ForecasterRecursive(
+                     estimator = Ridge(random_state=123),
+                     lags      = 2
+                 )
+    cv = TimeSeriesFold(
+             steps              = 3,
+             initial_train_size = len(y[:-12]),
+             refit              = False
+         )
+
+    metric, _ = backtesting_forecaster(
+                    forecaster    = forecaster,
+                    y             = y,
+                    cv            = cv,
+                    metric        = 'mean_absolute_error',
+                    interval      = interval,
+                    n_boot        = 10,
+                    show_progress = False
+                )
+
+    assert list(metric.columns) == ['mean_absolute_error']

@@ -486,6 +486,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.14238176570382063]})
+    expected_metric['coverage'] = [0.6666666666666666]
+    expected_metric['interval_width'] = [0.5088251973883504]
     expected_predictions = pd.DataFrame(
                                data = np.array([[0.64371728, 0.4255348 , 0.8903798 ],
                                                 [0.47208179, 0.19965087, 0.71918954],
@@ -547,6 +549,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.1509587543248219]})
+    expected_metric['coverage'] = [0.8333333333333334]
+    expected_metric['interval_width'] = [0.5425038109312446]
     expected_predictions = pd.DataFrame(
                                data = np.array([[0.64371728, 0.4255348 , 0.8903798 ],
                                                 [0.47208179, 0.19965087, 0.71918954],
@@ -611,6 +615,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
         {'levels': ['l1', 'l2'],
          'mean_absolute_error': [0.12454132173965092, 0.27469835002689663]}
     )
+    expected_metric['coverage'] = [0.7058823529411765, 0.7647058823529411]
+    expected_metric['interval_width'] = [0.46677546034005973, 0.8664270806310438]
     expected_predictions = pd.DataFrame(
         data={
             "level": [
@@ -877,6 +883,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.136188772278576]})
+    expected_metric['coverage'] = [0.8]
+    expected_metric['interval_width'] = [0.47536156754492137]
     expected_predictions = pd.DataFrame(
                                data = np.array([[0.49730036, 0.28665807, 0.77661141],
                                                 [0.47420843, 0.26274039, 0.67160352],
@@ -943,6 +951,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.13924838761692487]})
+    expected_metric['coverage'] = [0.7333333333333333]
+    expected_metric['interval_width'] = [0.4880569485959905]
     expected_predictions = pd.DataFrame(
         data = np.array([[0.43537767, 0.14792273, 0.66812034],
                          [0.47436444, 0.26492951, 0.70721115],
@@ -1015,6 +1025,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.11243765852459384]})
+    expected_metric['coverage'] = [0.7058823529411765]
+    expected_metric['interval_width'] = [0.4324028962520794]
     expected_predictions = pd.DataFrame(
         data = np.array([[0.49746847, 0.29550116, 0.74555927],
                         [0.46715961, 0.2507391 , 0.64732398],
@@ -1084,6 +1096,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.12472922864372042]})
+    expected_metric['coverage'] = [0.8]
+    expected_metric['interval_width'] = [0.4419651459613951]
     expected_predictions = pd.DataFrame(
                                data = np.array([[0.49746847, 0.29550116, 0.74555927],
                                                 [0.46715961, 0.2507391 , 0.64732398],
@@ -1151,6 +1165,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.1355099897175138]})
+    expected_metric['coverage'] = [0.7333333333333333]
+    expected_metric['interval_width'] = [0.4754266159053663]
     expected_predictions = pd.DataFrame(
         data = np.array([[0.42170236, 0.16610213, 0.64208341],
                          [0.47242371, 0.29346814, 0.68859381],
@@ -1219,6 +1235,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
         {'levels': ['l1', 'l2'], 
          'mean_absolute_error': [0.13341641696298234, 0.2532943228025243]}
     )
+    expected_metric['coverage'] = [0.85, 0.8]
+    expected_metric['interval_width'] = [0.5144138797066418, 0.913811202740858]
     expected_predictions = pd.DataFrame(
         data = np.array([[ 3.62121311e-01,  7.42133126e-02,  5.16491440e-01,
                            3.65807102e-01, -1.32713926e-01,  7.41872674e-01],
@@ -1317,6 +1335,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
         {'levels': ['l2'], 
          'mean_absolute_error': [0.2791832310123065]}
     )
+    expected_metric['coverage'] = [0.75]
+    expected_metric['interval_width'] = [0.8842311454250064]
     expected_predictions = pd.DataFrame(
         data = np.array([[0.49984026, -0.00291582, 0.87744884],
                          [0.4767447 ,  0.01828895, 0.85327192],
@@ -2195,6 +2215,16 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
             },
         }
     )
+    expected_metrics["coverage"] = [
+        0.5228758169934641, 0.19607843137254902, np.nan,
+        0.75, 0.5806451612903226, 0.5123998524140839,
+        0.45083932853717024, 0.45083932853717024,
+    ]
+    expected_metrics["interval_width"] = [
+        282.7962665860667, 1302.6992038367125, np.nan,
+        742.9224908390433, 2133.858039833906, 1115.569000273932,
+        882.8877829176492, 882.8877829176492,
+    ]
     expected_predictions = pd.DataFrame(
         {
             "level": [
@@ -2527,6 +2557,16 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
             },
         }
     )
+    expected_metrics["coverage"] = [
+        0.5620915032679739, 0.16339869281045752, np.nan,
+        0.725, 0.6774193548387096, 0.5319773877292853,
+        0.4556354916067146, 0.4556354916067146,
+    ]
+    expected_metrics["interval_width"] = [
+        364.18711940646875, 1538.77459256165, np.nan,
+        839.5203370819634, 2616.1515178238615, 1339.658391718486,
+        1053.7541149885346, 1053.7541149885346,
+    ]
     expected_predictions = pd.DataFrame(
         {
             "level": [
@@ -2669,6 +2709,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
 
     expected_metric = pd.DataFrame({'levels': ['l1'],
                                     'mean_absolute_error': [0.2126428594686577]})
+    expected_metric['coverage'] = [0.6666666666666666]
+    expected_metric['interval_width'] = [0.6217525835997278]
     expected_predictions = pd.DataFrame(
                                data = np.array([[0.4978839 , 0.22253806, 0.84910042],
                                                 [0.46288427, 0.19593158, 0.81468311],
@@ -2749,6 +2791,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
 
     expected_metric = pd.DataFrame({'levels': ['l1'],
                                     'mean_absolute_error': [0.2126428594686577]})
+    expected_metric['coverage'] = [0.6666666666666666]
+    expected_metric['interval_width'] = [0.6352843778179694]
     expected_predictions = pd.DataFrame(
                                data = np.array([[0.4978839 , 0.22253817, 0.84910021],
                                                 [0.46288427, 0.18267593, 0.82100705],
@@ -4278,6 +4322,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.0849883385916299]})
+    expected_metric['coverage'] = [0.6666666666666666]
+    expected_metric['interval_width'] = [0.2867944058422353]
     expected_predictions = pd.DataFrame(
         data = np.array([[0.76991301, 0.62064319, 0.88703848],
                         [0.4856994 , 0.33642958, 0.63146337],
@@ -4343,6 +4389,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.08191170312799796]})
+    expected_metric['coverage'] = [0.8333333333333334]
+    expected_metric['interval_width'] = [0.2805702960406427]
     expected_predictions = pd.DataFrame(
         data = np.array([[0.76727126, 0.62448381, 0.87733835],
                         [0.48402505, 0.33143897, 0.63172374],
@@ -4409,6 +4457,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.11791887332493929]})
+    expected_metric['coverage'] = [0.7647058823529411]
+    expected_metric['interval_width'] = [0.3590986036470171]
     expected_predictions = pd.DataFrame(
         data = np.array([[0.55880533, 0.38060874, 0.73874531],
                         [0.46285725, 0.25809849, 0.62184013],
@@ -4480,6 +4530,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.09906557188440204]})
+    expected_metric['coverage'] = [0.6666666666666666]
+    expected_metric['interval_width'] = [0.31394641616263175]
     expected_predictions = pd.DataFrame(
                                data = np.array([[0.5137416 , 0.33718724, 0.66241188],
                                                 [0.51578881, 0.33778405, 0.68539556],
@@ -4549,6 +4601,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.12073089072357064]})
+    expected_metric['coverage'] = [0.6666666666666666]
+    expected_metric['interval_width'] = [0.3476439165265743]
     expected_predictions = pd.DataFrame(
         data = np.array([[0.40010139, 0.20836912, 0.57962111],
                         [0.42717215, 0.25573292, 0.55497709],
@@ -4681,6 +4735,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
         {'levels': ['l1'], 
          'mean_absolute_error': [0.09237017311770493]}
     )
+    expected_metric['coverage'] = [0.75]
+    expected_metric['interval_width'] = [0.29641168339234725]
     expected_predictions = pd.DataFrame(
         data = np.array([[0.2983264 , 0.14944839, 0.40498101],
                         [0.45367569, 0.33634679, 0.60319301],
@@ -4759,6 +4815,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
         {'levels': ['l1'], 
          'mean_absolute_error': [0.10066454067329249]}
     )
+    expected_metric['coverage'] = [0.875]
+    expected_metric['interval_width'] = [0.4086514071303449]
     expected_predictions = pd.DataFrame(
         data = np.array([[0.53203113, 0.30246275, 0.80217901],
                         [0.62129188, 0.36244991, 0.86033622],
@@ -4838,6 +4896,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.11791887332493929]})
+    expected_metric['coverage'] = [0.7647058823529411]
+    expected_metric['interval_width'] = [0.3590986036470171]
     expected_predictions = pd.DataFrame(
         data = np.array([[0.55880533, 0.38060874, 0.5629389 , 0.73874531],
                         [0.46285725, 0.25809849, 0.4598901 , 0.62184013],
@@ -4976,6 +5036,8 @@ def test_output_backtesting_forecaster_interval_conformal_and_binned_with_mocked
     
     expected_metric = pd.DataFrame({'levels': ['l1'], 
                                     'mean_absolute_error': [0.11916192143057436]})
+    expected_metric['coverage'] = [0.6]
+    expected_metric['interval_width'] = [0.23813269386675837]
     expected_predictions = pd.DataFrame(
         data = np.array([[0.36268205, 0.20433986, 0.52102424],
                          [0.51787041, 0.43620381, 0.599537  ],

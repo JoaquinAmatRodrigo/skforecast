@@ -674,6 +674,8 @@ def test_output_backtesting_stats_no_refit_yes_exog_interval_with_mocked():
                                    )
     
     expected_metric = pd.DataFrame({"mean_absolute_error": [0.3040748056175932]})
+    expected_metric["coverage"] = [1.0]
+    expected_metric["interval_width"] = [6.667294827683887]
     expected_values = np.array([[ 0.59409098, -1.08941968,  2.27760163],
                                 [ 0.78323365, -2.51570095,  4.08216824],
                                 [ 0.99609033, -4.02240666,  6.01458732],
@@ -728,6 +730,8 @@ def test_output_backtesting_stats_yes_refit_yes_exog_interval_with_mocked():
                                    )
     
     expected_metric = pd.DataFrame({"mean_absolute_error": [0.31145145397674484]})
+    expected_metric["coverage"] = [1.0]
+    expected_metric["interval_width"] = [6.657028326924074]
     expected_values = np.array([[ 0.59409098, -1.08941968,  2.27760163],
                                 [ 0.78323365, -2.51570095,  4.08216824],
                                 [ 0.99609033, -4.02240666,  6.01458732],
@@ -782,6 +786,8 @@ def test_output_backtesting_stats_yes_refit_fixed_train_size_yes_exog_interval_w
                                    )
     
     expected_metric = pd.DataFrame({"mean_absolute_error": [0.31329767191681507]})
+    expected_metric["coverage"] = [1.0]
+    expected_metric["interval_width"] = [6.696882579371329]
     expected_values = np.array([[ 0.59409098, -1.08941968,  2.27760163],
                                 [ 0.78323365, -2.51570095,  4.08216824],
                                 [ 0.99609033, -4.02240666,  6.01458732],
@@ -1127,7 +1133,11 @@ def test_output_backtesting_stats_multiple_estimators_refit_False_interval_with_
                                        )
     
     # Check metric structure
-    assert list(metric.columns) == ['estimator_id', 'mean_squared_error']
+    assert list(metric.columns) == [
+        'estimator_id', 'mean_squared_error', 'coverage', 'interval_width'
+    ]
+    assert metric['coverage'].between(0, 1).all()
+    assert (metric['interval_width'] > 0).all()
     assert len(metric) == 4
     assert list(metric['estimator_id']) == [
         'skforecast.Sarimax', 'skforecast.Arar', 
@@ -1183,7 +1193,11 @@ def test_output_backtesting_stats_multiple_estimators_refit_True_interval_with_m
                                    )
     
     # Check metric structure
-    assert list(metric.columns) == ['estimator_id', 'mean_squared_error']
+    assert list(metric.columns) == [
+        'estimator_id', 'mean_squared_error', 'coverage', 'interval_width'
+    ]
+    assert metric['coverage'].between(0, 1).all()
+    assert (metric['interval_width'] > 0).all()
     assert len(metric) == 4
     assert list(metric['estimator_id']) == [
         'skforecast.Sarimax', 'skforecast.Arar', 

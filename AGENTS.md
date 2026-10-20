@@ -405,7 +405,10 @@ metric, predictions = backtesting_forecaster(
     show_progress=True,                         # Show progress bar
     suppress_warnings=False                     # Suppress skforecast warnings
 )
+# metric columns: mean_absolute_error, coverage, interval_width
 ```
+
+When the predictions define one interval, the backtesting functions add two columns to `metric`, after the requested metrics: `coverage` (share of true values inside the interval) and `interval_width` (mean width of the interval, in the units of the series). One interval means a float `interval` such as `0.8`, or two quantiles, optionally with the median: `interval=[0.1, 0.9]` or `[0.1, 0.5, 0.9]`, and the same in `quantiles` of `backtesting_foundation`. Compare `coverage` with the nominal level (0.8 for `[0.1, 0.9]`) and read it together with `interval_width`: a wide interval covers more. Multi-series backtesting reports them per level and in the aggregated rows, and `backtesting_stats` per estimator (also with `alpha`). With other quantiles (for example `[0.05, 0.1, 0.9, 0.95]`), `interval='bootstrapping'` or a distribution, they are not added; use CRPS or the pinball loss instead. A custom metric cannot be named `coverage` or `interval_width` when they are added.
 
 ## Cross-Validation Strategies
 

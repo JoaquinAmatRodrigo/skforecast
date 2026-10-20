@@ -323,7 +323,10 @@ metric, predictions = backtesting_forecaster(
     show_progress=True,                         # Show progress bar
     suppress_warnings=False                     # Suppress skforecast warnings
 )
+# metric columns: mean_absolute_error, coverage, interval_width
 ```
+
+When the predictions define one interval, the backtesting functions add two columns to `metric`, after the requested metrics: `coverage` (share of true values inside the interval) and `interval_width` (mean width of the interval, in the units of the series). One interval means a float `interval` such as `0.8`, or two quantiles, optionally with the median: `interval=[0.1, 0.9]` or `[0.1, 0.5, 0.9]`, and the same in `quantiles` of `backtesting_foundation`. Compare `coverage` with the nominal level (0.8 for `[0.1, 0.9]`) and read it together with `interval_width`: a wide interval covers more. Multi-series backtesting reports them per level and in the aggregated rows, and `backtesting_stats` per estimator (also with `alpha`). With other quantiles (for example `[0.05, 0.1, 0.9, 0.95]`), `interval='bootstrapping'` or a distribution, they are not added; use CRPS or the pinball loss instead. A custom metric cannot be named `coverage` or `interval_width` when they are added.
 
 ## Cross-Validation Strategies
 
@@ -2519,7 +2522,13 @@ metric, predictions = backtesting_foundation(
     metric='mean_absolute_error',
     quantiles=[0.1, 0.5, 0.9],   # Native model quantiles; no bootstrapping
 )
+# metric columns: levels, mean_absolute_error, coverage, interval_width
 ```
+
+The metrics use `q_0.5` as the point forecast. With two quantiles, optionally
+with the median (`[0.1, 0.9]` or `[0.1, 0.5, 0.9]`), `metric` also reports the
+empirical `coverage` of the interval they define and its mean width
+(`interval_width`). With other quantiles they are not added.
 
 ## Tuning Inference-Time Parameters
 
@@ -3158,6 +3167,13 @@ Use these metrics when evaluating prediction intervals or quantile forecasts.
 Coverage measures the proportion of true values that fall within the predicted
 interval. **Target: match the nominal level** (e.g., 90% interval should have ~90% coverage).
 
+Backtesting functions add `coverage` and `interval_width` (mean width of the
+interval, in the units of the series) to `metric` when the predictions define
+one interval: a float `interval`, or two quantiles optionally with the median
+(`interval` or, in `backtesting_foundation`, `quantiles`). There is no need to
+pass them in `metric`. Use
+`calculate_coverage` for predictions made outside backtesting:
+
 ```python
 from skforecast.metrics import calculate_coverage
 
@@ -3430,7 +3446,7 @@ epsilon, so MAPE is not infinite but an extremely large number (about 1e16).
 
 | Metric | Function | Input signature | Use with | Measures |
 |--------|----------|-----------------|----------|----------|
-| Coverage | `calculate_coverage` | `(y_true, lower_bound, upper_bound)` | Any forecaster with intervals | Calibration (proportion of truths in interval) |
+| Coverage | `calculate_coverage` | `(y_true, lower_bound, upper_bound)` | Any forecaster with intervals | Calibration (proportion of truths in interval). Backtesting with one interval (two quantiles, optionally with the median) reports it as `coverage`, next to `interval_width` (mean width) |
 | CRPS (bootstrap) | `crps_from_predictions` | `(y_true: float, y_pred: ndarray)` | Bootstrapped predictions | Calibration + sharpness (single observation) |
 | CRPS (quantiles) | `crps_from_quantiles` | `(y_true: float, pred_quantiles: ndarray, quantile_levels: ndarray)` | Foundation models, quantile predictions | Calibration + sharpness (single observation) |
 | Winkler Score | `winkler_score` | `(y_true, lower_bound, upper_bound, alpha)` | Any single interval | Calibration + sharpness of one interval; miscoverage penalty scaled by `alpha` |
@@ -3473,7 +3489,7 @@ epsilon, so MAPE is not infinite but an extremely large number (about 1e16).
 | MSLE | Positive data where relative errors matter more than absolute | Data has zeros or negative values |
 | MASE | Comparing across series with different scales; need baseline reference | Very short training series (naive denominator unreliable) |
 | RMSSE | Same as MASE but want to penalize large errors more | Same as MASE |
-| Coverage | Evaluating prediction interval calibration | Want to measure interval width/sharpness (use CRPS) |
+| Coverage | Evaluating prediction interval calibration, always next to the mean width (`interval_width` in backtesting) | Want a single score of calibration and sharpness (use Winkler, WIS or CRPS) |
 | CRPS | Comprehensive interval/quantile evaluation (calibration + sharpness) | Only have point forecasts |
 | Winkler score | Scoring a single interval with a tunable miscoverage penalty (`alpha`) | Comparing full distributions (use WIS or CRPS) |
 | Weighted interval score (WIS) | Scoring several quantile intervals + median as one CRPS-like number | Only have a single interval (use Winkler) or only point forecasts |
@@ -4666,8 +4682,17 @@ metric, predictions = backtesting_forecaster(
     use_in_sample_residuals=True,
     use_binned_residuals=True,
 )
-# predictions has columns: pred, lower_bound, upper_bound
+# predictions has columns: fold, pred, lower_bound, upper_bound
+# metric has columns: mean_absolute_error, coverage, interval_width
 ```
+
+When `interval` defines one interval (a float, or two quantiles optionally with
+the median, such as `[0.1, 0.5, 0.9]`), `metric` also reports its empirical
+`coverage` and its mean width (`interval_width`, in the units of the series),
+per level and aggregated in multi-series backtesting. `backtesting_foundation`
+does the same with `quantiles`. A coverage
+well below the nominal level (0.8 for `[0.1, 0.9]`) is common with in-sample
+residuals and complex estimators: switch to out-of-sample residuals (see below).
 
 ## Multi-Series Intervals
 
@@ -4718,6 +4743,10 @@ creating the forecaster, or predict with `use_binned_residuals=False`.
 
 ## Evaluating Interval Quality
 
+Backtesting with one interval (two quantiles, optionally with the median) already returns `coverage` and
+`interval_width` in `metric`. For predictions made outside backtesting (for
+example `predict_interval` on a test set), compute it with `calculate_coverage`:
+
 ```python
 from skforecast.metrics import calculate_coverage
 
@@ -4761,7 +4790,7 @@ See [references/interval-compatibility.md](references/interval-compatibility.md)
 2. **Forgetting `store_in_sample_residuals=True`**: Required in `fit()` before using `predict_interval(method='bootstrapping')`.
 3. **Wrong default method for multi-series**: `ForecasterRecursiveMultiSeries` and `ForecasterDirectMultiVariate` default to `method='conformal'`, not `'bootstrapping'`.
 4. **Mixing `alpha` and `interval`**: in `ForecasterStats` and `backtesting_stats`, `alpha` is an alias of `interval` (`alpha=0.05` is `interval=[0.025, 0.975]`). Pass only one of them; passing both raises a `ValueError`. ML forecasters only support `interval`.
-5. **Not evaluating coverage**: Always check if actual coverage matches nominal interval width.
+5. **Not evaluating coverage**: Always check if actual coverage matches the nominal level. Backtesting with one interval (a float `interval`, or two quantiles optionally with the median) reports it in the `coverage` column of `metric`, next to `interval_width`.
 6. **Ignoring physical bounds**: neither the model nor the intervals know that a series cannot be negative (counts, sales, demand), so predictions and lower bounds can fall below zero. Clip them after predicting, e.g. `predictions.clip(lower=0)`. See the FAQ [Non-negative predictions](https://skforecast.org/latest/faq/non-negative-predictions.html).
 
 ## References
