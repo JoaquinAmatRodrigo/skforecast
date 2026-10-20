@@ -68,7 +68,8 @@ entrenamiento).
    demás; se puede hacer en cualquier momento. Alcance revisado con el análisis de la
    sección 2: `hour_of_week` y los días de fin de semana del mes, no los indicadores de
    inicio y fin de periodo.
-9. Resto del alcance: QW-05, BUG-06, QW-02, BUG-07, BUG-08, PERF-02, PRs externos y QW-07.
+9. Resto del alcance: QW-05, QW-02, BUG-07, BUG-08, PERF-02, PRs externos y QW-07. BUG-06
+   no está aquí porque va antes de FE-05 (punto 7).
 
 ### Alcance
 
