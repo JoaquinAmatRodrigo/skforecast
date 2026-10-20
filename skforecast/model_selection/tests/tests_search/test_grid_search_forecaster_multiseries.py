@@ -1,5 +1,7 @@
 # Unit test grid_search_forecaster_multiseries
 # ==============================================================================
+import re
+import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import Ridge
@@ -675,3 +677,35 @@ def test_output_grid_search_forecaster_multiseries_ForecasterRecursiveMultiSerie
     )
 
     pd.testing.assert_frame_equal(results, expected_results)
+
+
+def test_grid_search_forecaster_multiseries_ValueError_when_cv_differentiation_differs():
+    """
+    Test ValueError is raised before evaluating any candidate when
+    `differentiation` of the cv differs from the maximum `differentiation` of
+    the forecaster, instead of skipping every candidate and returning an
+    empty DataFrame.
+    """
+    forecaster = ForecasterRecursiveMultiSeries(
+        estimator=Ridge(random_state=123),
+        lags=2,
+        differentiation={'l1': 1, 'l2': 2, '_unknown_level': 1},
+    )
+    cv = TimeSeriesFold(
+        steps=4, initial_train_size=30, differentiation=1, verbose=False
+    )
+
+    err_msg = re.escape(
+        "When using a dict as `differentiation` in ForecasterRecursiveMultiSeries, "
+        "the `differentiation` included in the cv (1) must be "
+        "the same as the maximum `differentiation` included in the forecaster "
+        "(2). Set `differentiation=None` in the cv "
+        "to use the value of the forecaster."
+    )
+    with pytest.raises(ValueError, match=err_msg):
+        grid_search_forecaster_multiseries(
+            forecaster=forecaster, series=series_dict_range, cv=cv,
+            param_grid={'alpha': [0.01, 1]}, metric='mean_absolute_error',
+            show_progress=False
+        )
+    assert not forecaster.is_fitted

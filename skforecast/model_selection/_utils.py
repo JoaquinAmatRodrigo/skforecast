@@ -43,6 +43,55 @@ from ..utils import (
 INTERVAL_METRIC_NAMES = ['coverage', 'interval_width']
 
 
+def _check_cv_differentiation(
+    forecaster: object,
+    cv: object
+) -> None:
+    """
+    Check that the `differentiation` of the cv, when set by the user, is the same
+    as the `differentiation` of the forecaster. If `cv.differentiation` is `None`,
+    the check is skipped because the backtesting and hyperparameter search
+    functions take the value from the forecaster. A value of 0 is equivalent
+    to no differentiation. Forecasters without the `differentiation` attribute
+    are not checked.
+
+    Parameters
+    ----------
+    forecaster : Forecaster
+        Forecaster model.
+    cv : TimeSeriesFold, OneStepAheadFold
+        Object with the information needed to split the data into folds.
+
+    Returns
+    -------
+    None
+
+    """
+
+    if not hasattr(forecaster, 'differentiation') or cv.differentiation is None:
+        return
+
+    differentiation_max = forecaster.differentiation_max
+    if (differentiation_max or 0) != cv.differentiation:
+        if type(forecaster).__name__ == "ForecasterRecursiveMultiSeries" and isinstance(
+            forecaster.differentiation, dict
+        ):
+            raise ValueError(
+                f"When using a dict as `differentiation` in ForecasterRecursiveMultiSeries, "
+                f"the `differentiation` included in the cv ({cv.differentiation}) must be "
+                f"the same as the maximum `differentiation` included in the forecaster "
+                f"({differentiation_max}). Set `differentiation=None` in the cv "
+                f"to use the value of the forecaster."
+            )
+        else:
+            raise ValueError(
+                f"The differentiation included in the forecaster "
+                f"({differentiation_max}) differs from the differentiation "
+                f"included in the cv ({cv.differentiation}). Set `differentiation=None` "
+                f"in the cv to use the value of the forecaster."
+            )
+
+
 def initialize_lags_grid(
     forecaster: object, 
     lags_grid: (
@@ -282,25 +331,7 @@ def check_backtesting_input(
                     f"`exog` must be a pandas Series, DataFrame or None. Got {type(exog)}."
                 )
 
-    if hasattr(forecaster, 'differentiation'):
-        if forecaster.differentiation_max != cv.differentiation:
-            if forecaster_name == "ForecasterRecursiveMultiSeries" and isinstance(
-                forecaster.differentiation, dict
-            ):
-                raise ValueError(
-                    f"When using a dict as `differentiation` in ForecasterRecursiveMultiSeries, "
-                    f"the `differentiation` included in the cv ({cv.differentiation}) must be "
-                    f"the same as the maximum `differentiation` included in the forecaster "
-                    f"({forecaster.differentiation_max}). Set the same value "
-                    f"for both using the `differentiation` argument."
-                )
-            else:
-                raise ValueError(
-                    f"The differentiation included in the forecaster "
-                    f"({forecaster.differentiation_max}) differs from the differentiation "
-                    f"included in the cv ({cv.differentiation}). Set the same value "
-                    f"for both using the `differentiation` argument."
-                )
+    _check_cv_differentiation(forecaster=forecaster, cv=cv)
 
     if not isinstance(metric, (str, Callable, list)):
         raise TypeError(
@@ -628,25 +659,7 @@ def check_one_step_ahead_input(
                     f"`exog` must be a pandas Series, DataFrame or None. Got {type(exog)}."
                 )
 
-    if hasattr(forecaster, 'differentiation'):
-        if forecaster.differentiation_max != cv.differentiation:
-            if forecaster_name == "ForecasterRecursiveMultiSeries" and isinstance(
-                forecaster.differentiation, dict
-            ):
-                raise ValueError(
-                    f"When using a dict as `differentiation` in ForecasterRecursiveMultiSeries, "
-                    f"the `differentiation` included in the cv ({cv.differentiation}) must be "
-                    f"the same as the maximum `differentiation` included in the forecaster "
-                    f"({forecaster.differentiation_max}). Set the same value "
-                    f"for both using the `differentiation` argument."
-                )
-            else:
-                raise ValueError(
-                    f"The differentiation included in the forecaster "
-                    f"({forecaster.differentiation_max}) differs from the differentiation "
-                    f"included in the cv ({cv.differentiation}). Set the same value "
-                    f"for both using the `differentiation` argument."
-                )
+    _check_cv_differentiation(forecaster=forecaster, cv=cv)
 
     if not isinstance(metric, (str, Callable, list)):
         raise TypeError(

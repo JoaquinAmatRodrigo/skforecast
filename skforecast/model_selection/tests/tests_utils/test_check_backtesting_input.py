@@ -208,8 +208,8 @@ def test_check_backtesting_input_ValueError_when_ForecasterRecursiveMultiSeries_
         "When using a dict as `differentiation` in ForecasterRecursiveMultiSeries, "
         "the `differentiation` included in the cv (1) must be "
         "the same as the maximum `differentiation` included in the forecaster "
-        "(2). Set the same value "
-        "for both using the `differentiation` argument."
+        "(2). Set `differentiation=None` in the cv "
+        "to use the value of the forecaster."
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(
@@ -254,8 +254,8 @@ def test_check_backtesting_input_ValueError_when_forecaster_diff_not_cv_diff(for
     err_msg = re.escape(
         "The differentiation included in the forecaster "
         "(2) differs from the differentiation "
-        "included in the cv (1). Set the same value "
-        "for both using the `differentiation` argument."
+        "included in the cv (1). Set `differentiation=None` "
+        "in the cv to use the value of the forecaster."
     )
     with pytest.raises(ValueError, match = err_msg):
         check_backtesting_input(

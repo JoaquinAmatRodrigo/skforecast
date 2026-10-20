@@ -28,6 +28,7 @@ from ..model_selection._validation import (
 )
 from ..metrics import add_y_train_argument, _get_metric
 from ..model_selection._utils import (
+    _check_cv_differentiation,
     check_one_step_ahead_input,
     initialize_lags_grid,
     _initialize_levels_model_selection_multiseries,
@@ -362,6 +363,11 @@ def _evaluate_grid_hyperparameters(
             f"`cv` must be an instance of `TimeSeriesFold` or `OneStepAheadFold`. "
             f"Got {type(cv)}."
         )
+
+    # NOTE: The differentiation of the forecaster does not change between
+    # candidates, so a conflict with the cv is raised here instead of being
+    # caught for every candidate inside the loop.
+    _check_cv_differentiation(forecaster=forecaster_search, cv=cv)
     
     if cv_name == 'OneStepAheadFold':
 
@@ -1331,6 +1337,11 @@ def _evaluate_grid_hyperparameters_multiseries(
             f"`cv` must be an instance of `TimeSeriesFold` or `OneStepAheadFold`. "
             f"Got {type(cv)}."
         )
+
+    # NOTE: The differentiation of the forecaster does not change between
+    # candidates, so a conflict with the cv is raised here instead of being
+    # caught for every candidate inside the loop.
+    _check_cv_differentiation(forecaster=forecaster_search, cv=cv)
     
     if cv_name == 'OneStepAheadFold':
 
@@ -2951,6 +2962,11 @@ def grid_search_equivalent_date(
         raise TypeError(
             f"`cv` must be an instance of `TimeSeriesFold`. Got {type(cv).__name__}."
         )
+
+    # NOTE: The differentiation of the forecaster does not change between
+    # candidates, so a conflict with the cv is raised here instead of being
+    # caught for every candidate inside the loop.
+    _check_cv_differentiation(forecaster=forecaster, cv=cv)
 
     if isinstance(param_grid, dict):
         if 'alias' in param_grid:

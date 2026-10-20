@@ -340,7 +340,7 @@ cv = TimeSeriesFold(
     initial_train_size=100,          # Number of observations for initial training. Can be int, str (date), or pd.Timestamp
     fold_stride=None,                # Observations between consecutive test set starts. If None, equals steps (no overlap)
     window_size=None,                # Observations needed for autoregressive predictors (set automatically by forecaster)
-    differentiation=None,            # Differencing order to extend last_window (set automatically by forecaster)
+    differentiation=None,            # Differencing order, only reported by verbose (taken from the forecaster if None; an explicit value must match it)
     refit=False,                     # Whether to refit forecaster each fold: True, False, or int (refit every n folds)
     fixed_train_size=True,           # If True, training size is fixed; if False, expands each fold
     gap=0,                           # Observations between end of training and start of test set
@@ -370,7 +370,7 @@ from skforecast.model_selection import OneStepAheadFold
 cv = OneStepAheadFold(
     initial_train_size=100,          # (required) Number of observations for initial training. Can be int, str (date), or pd.Timestamp
     window_size=None,                # Observations needed for autoregressive predictors (set automatically by forecaster)
-    differentiation=None,            # Differencing order to extend last_window (set automatically by forecaster)
+    differentiation=None,            # Differencing order, only reported by verbose (taken from the forecaster if None; an explicit value must match it)
     return_all_indexes=False,        # Whether to return all indexes or only start/end of each fold
     verbose=True                     # Whether to print information about generated folds
 )

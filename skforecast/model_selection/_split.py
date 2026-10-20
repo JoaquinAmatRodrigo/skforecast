@@ -49,8 +49,11 @@ class BaseFold():
     window_size : int, default None
         Number of observations needed to generate the autoregressive predictors.
     differentiation : int, default None
-        Number of observations to use for differentiation. This is used to extend the
-        `last_window` as many observations as the differentiation order.
+        Order of differentiation of the forecaster. It is only used to report the
+        training observations when `verbose=True`; it does not change the folds.
+        In the backtesting and hyperparameter search functions, if `None`, the
+        value of the forecaster is used. If set, it must be equal to the
+        `differentiation` of the forecaster (the maximum order when it is a dict).
     refit : bool, int, default False
         Whether to refit the forecaster in each fold.
 
@@ -91,8 +94,8 @@ class BaseFold():
     window_size : int
         Number of observations needed to generate the autoregressive predictors.
     differentiation : int
-        Number of observations to use for differentiation. This is used to extend the
-        `last_window` as many observations as the differentiation order.
+        Order of differentiation of the forecaster. It is only used to report the
+        training observations when `verbose=True`.
     return_all_indexes : bool
         Whether to return all indexes or only the start and end indexes of each fold.
     verbose : bool
@@ -389,6 +392,10 @@ class OneStepAheadFold(BaseFold):
     Class to split time series data into train and test folds for one-step-ahead
     forecasting.
 
+    The arguments `window_size` and `differentiation` are taken from the forecaster
+    automatically when the object is used inside a hyperparameter search, so they
+    do not need to be set manually in that context.
+
     Parameters
     ----------
     initial_train_size : int, str, pandas Timestamp
@@ -400,8 +407,11 @@ class OneStepAheadFold(BaseFold):
     window_size : int, default None
         Number of observations needed to generate the autoregressive predictors.
     differentiation : int, default None
-        Number of observations to use for differentiation. This is used to extend the
-        `last_window` as many observations as the differentiation order.
+        Order of differentiation of the forecaster. It is only used to report the
+        training observations when `verbose=True`; it does not change the folds.
+        In the hyperparameter search functions, if `None`, the value of the
+        forecaster is used. If set, it must be equal to the `differentiation` of
+        the forecaster (the maximum order when it is a dict).
     return_all_indexes : bool, default False
         Whether to return all indexes or only the start and end indexes of each fold.
     verbose : bool, default True
@@ -417,8 +427,8 @@ class OneStepAheadFold(BaseFold):
     window_size : int
         Number of observations needed to generate the autoregressive predictors.
     differentiation : int
-        Number of observations to use for differentiation. This is used to extend the
-        `last_window` as many observations as the differentiation order.
+        Order of differentiation of the forecaster. It is only used to report the
+        training observations when `verbose=True`.
     return_all_indexes : bool
         Whether to return all indexes or only the start and end indexes of each fold.
     verbose : bool
@@ -715,8 +725,11 @@ class TimeSeriesFold(BaseFold):
     window_size : int, default None
         Number of observations needed to generate the autoregressive predictors.
     differentiation : int, default None
-        Number of observations to use for differentiation. This is used to extend the
-        `last_window` as many observations as the differentiation order.
+        Order of differentiation of the forecaster. It is only used to report the
+        training observations when `verbose=True`; it does not change the folds.
+        In the backtesting and hyperparameter search functions, if `None`, the
+        value of the forecaster is used. If set, it must be equal to the
+        `differentiation` of the forecaster (the maximum order when it is a dict).
     refit : bool, int, default False
         Whether to refit the forecaster in each fold.
 
@@ -766,8 +779,8 @@ class TimeSeriesFold(BaseFold):
     window_size : int
         Number of observations needed to generate the autoregressive predictors.
     differentiation : int
-        Number of observations to use for differentiation. This is used to extend the
-        `last_window` as many observations as the differentiation order.
+        Order of differentiation of the forecaster. It is only used to report the
+        training observations when `verbose=True`.
     refit : bool, int
         Whether to refit the forecaster in each fold.
     fixed_train_size : bool
@@ -943,9 +956,10 @@ class TimeSeriesFold(BaseFold):
             training set.
             - [last_window_start, last_window_end]: list with the start and end positions
             of the last window seen by the forecaster during training. The last window
-            is used to generate the lags used as predictors. If `differentiation` is
-            included, the interval is extended as many observations as the
-            differentiation order. If the argument `window_size` is `None`, this list is
+            is used to generate the lags used as predictors. In the backtesting
+            functions, `window_size` includes the differentiation order of the
+            forecaster, so the interval also covers the observations needed to
+            differentiate. If the argument `window_size` is `None`, this list is
             empty.
             - [test_start, test_end]: list with the start and end positions of the test
             set. These are the observations used to evaluate the forecaster.

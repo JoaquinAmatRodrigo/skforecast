@@ -6165,3 +6165,35 @@ def test_output_backtesting_forecaster_multiseries_when_series_names_are_integer
 
     pd.testing.assert_frame_equal(metrics, expected_metrics)
     pd.testing.assert_frame_equal(predictions, expected_predictions)
+
+
+def test_backtesting_forecaster_multiseries_cv_differentiation_None_with_dict_differentiation():
+    """
+    Test that when `differentiation` of the cv is `None` and the forecaster has a
+    dict as `differentiation`, backtesting_forecaster_multiseries uses the maximum
+    `differentiation` of the forecaster: the output is the same as with the
+    explicit value, and the cv is not modified.
+    """
+    forecaster = ForecasterRecursiveMultiSeries(
+        estimator=Ridge(random_state=123),
+        lags=3,
+        differentiation={'l1': 1, 'l2': 2, '_unknown_level': 1},
+    )
+    cv = TimeSeriesFold(steps=5, initial_train_size=30, refit=True, verbose=False)
+    cv_explicit = TimeSeriesFold(
+        steps=5, initial_train_size=30, refit=True, differentiation=2, verbose=False
+    )
+
+    metrics, predictions = backtesting_forecaster_multiseries(
+        forecaster=forecaster, series=series_dict_range, cv=cv,
+        metric='mean_absolute_error', show_progress=False
+    )
+    metrics_explicit, predictions_explicit = backtesting_forecaster_multiseries(
+        forecaster=forecaster, series=series_dict_range, cv=cv_explicit,
+        metric='mean_absolute_error', show_progress=False
+    )
+
+    pd.testing.assert_frame_equal(metrics, metrics_explicit)
+    pd.testing.assert_frame_equal(predictions, predictions_explicit)
+    assert cv.differentiation is None
+    assert cv.window_size is None

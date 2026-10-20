@@ -18,6 +18,8 @@ The main changes in this release are:
 
 + <span class="badge text-bg-feature">Feature</span> Backtesting with a prediction interval reports its empirical `coverage` and mean `interval_width` next to the other metrics, per series and aggregated in multi-series backtesting, for machine learning, statistical and foundation models. ([#1409](https://github.com/skforecast/skforecast/issues/1409))
 
++ <span class="badge text-bg-enhancement">Enhancement</span> <code>[TimeSeriesFold]</code> and <code>[OneStepAheadFold]</code> take `differentiation` from the forecaster, so it no longer has to be repeated in the cv to backtest or search a forecaster with `differentiation`.
+
 + <span class="badge text-bg-fix">Fix</span> The `predict_interval` method of <code>[ForecasterStats]</code> returns the interval requested in `interval`; it always returned the 95% interval. ([#1416](https://github.com/skforecast/skforecast/pull/1416))
 
 !!! warning "Before upgrading"
@@ -37,6 +39,8 @@ The main changes in this release are:
 **Changed**
 
 + In the `predict_interval` method of <code>[ForecasterStats]</code> and in <code>[backtesting_stats]</code>, `alpha` is an alias of `interval` (`alpha=0.05` is equivalent to `interval=[0.025, 0.975]`), and passing both raises a `ValueError`. Previously, `alpha` took precedence over `interval`. `interval` now comes before `alpha` in the signature. ([#1416](https://github.com/skforecast/skforecast/pull/1416))
+
++ <code>[TimeSeriesFold]</code> and <code>[OneStepAheadFold]</code> with `differentiation=None` (default) take the `differentiation` of the forecaster in backtesting and hyperparameter search; it previously raised a `ValueError`, and grid and random search returned an empty DataFrame. An explicit value must still match the forecaster, and searches now raise the `ValueError` before evaluating any candidate.
 
 + The first fit of <code>[Ets]</code> in a new environment, when numba compiles its functions, takes about 40% less time (7 s instead of 12 s on a 4-core CPU). Estimates and selected models are unchanged. ([#1400](https://github.com/skforecast/skforecast/pull/1400))
 

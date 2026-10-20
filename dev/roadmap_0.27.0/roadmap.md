@@ -43,7 +43,9 @@ cifras son las de la sesión en la nube y no se han vuelto a medir.
 **Hecho en `0.27.x`:** PR-1400 (compilación de Ets), #1412 (ISSUE-1357, IDs enteros),
 #1415 (ISSUE-1406), #1416 (BUG-stats-interval-ignored), #1418 (ISSUE-1410), #1419 (BUG-09 a),
 #1420 (QW-09, #1409) y #1422 (#1411, mensaje cuando los NaN dejan sin muestras de
-entrenamiento).
+entrenamiento). En rama, sin PR: QW-03 (`fix/cv-inherit-differentiation`, 2026-10-20; el cv
+con `differentiation=None` hereda la del forecaster, un valor explícito distinto sigue dando
+`ValueError` y las búsquedas lo lanzan antes del bucle de candidatos).
 
 **Orden recomendado para lo que queda:**
 
@@ -53,8 +55,9 @@ entrenamiento).
    no retrase la release.
 2. **BUG-03** (S): las búsquedas reentrenan con el peor candidato cuando la métrica es "mayor
    es mejor", sin aviso y con `return_best=True` por defecto.
-3. **QW-03** (S, 2 líneas): elimina un `ValueError` en todo backtesting con `differentiation`,
-   cuyo peor caso es una búsqueda que devuelve un DataFrame vacío.
+3. ~~**QW-03**~~ **Hecho en la rama `fix/cv-inherit-differentiation`** (pendiente de PR):
+   elimina un `ValueError` en todo backtesting con `differentiation`, cuyo peor caso era una
+   búsqueda que devuelve un DataFrame vacío.
 4. **BUG-04 y BUG-10** (S cada uno): foundation es foco, y los dos hacen que se prediga con
    otro modelo u otros datos sin aviso.
 5. **QW-08 + PERF-03**, y después el bloque de salidas del backtesting: QW-04, BUG-02 + QW-10,
@@ -939,7 +942,7 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
 | FE-01 completo: función pública `evaluate_backtesting` / `calculate_backtesting_metrics` por fold, paso, serie y grupos | Verificado con veredicto partido | Lente de valor: tras QW-04, QW-09 y QW-10 aporta 2 o 3 líneas por uso y basta una receta. Lente de riesgo: versión reducida M (sin `y`, sin aviso, sin MASE, total distinto del backtesting con folds solapados). Decidir en 0.28 según demanda (única petición: https://github.com/skforecast/skforecast/issues/720); requiere BUG-02 |
 | WAPE (de QW-08) | Verificado (`later`) | Función nueva con tests y docs; sMAPE ya cubre las series con ceros |
 | `suppress_warnings` en `ForecasterFoundation.predict*` | Hallazgo de QW-02 | Hueco de consistencia con ML |
-| Validar el cv una vez antes del bucle de grid | Hallazgo de QW-03 | Junto con BUG-05 |
+| Validar el cv una vez antes del bucle de grid | Hallazgo de QW-03 | Junto con BUG-05. La `differentiation` del cv ya se valida antes del bucle con QW-03 (grid, random, multiserie y `grid_search_equivalent_date`); falta el resto de comprobaciones del cv |
 | MultiSeries con exog de RangeIndex reseteado da un resultado erróneo en silencio | Hallazgo de QW-06, medido | Poco frecuente; anotar y tratarlo con QW-06 si el diseño lo permite |
 | skops en `ForecasterFoundation` | Hallazgo de QW-05 | Posible cuando el backend quede fuera del estado |
 | PLAN-CKPT (`finetuned_checkpoint`) y PLAN-TTM (adaptador TinyTimeMixer) | Plan sin código (`dev/PLAN_*.md`), no verificado | BUG-04 es requisito de PLAN-CKPT |
