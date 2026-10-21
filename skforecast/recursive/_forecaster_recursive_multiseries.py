@@ -1969,9 +1969,9 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         if not series_test:
             raise ValueError(
                 "No series can be evaluated in the test set: none of the series "
-                "in the training set can be predicted after it and has observed "
-                "values in it. Review `initial_train_size` of `cv` or the span "
-                "of the series."
+                "used to train can be predicted after the training set and has "
+                "observed values in the test set. Review `initial_train_size` of "
+                "`cv` or the span of the series."
             )
 
         forecaster_state = (self.is_fitted, self.series_names_in_, self.exog_names_in_)

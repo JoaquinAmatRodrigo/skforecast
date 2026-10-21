@@ -1498,9 +1498,10 @@ def test_train_test_split_one_step_ahead_when_series_ends_at_end_of_train():
         ),
         (
             5, "2020-01-08",
-            "No series can be evaluated in the test set: none of the series in "
-            "the training set can be predicted after it and has observed values "
-            "in it. Review `initial_train_size` of `cv` or the span of the series."
+            "No series can be evaluated in the test set: none of the series used "
+            "to train can be predicted after the training set and has observed "
+            "values in the test set. Review `initial_train_size` of `cv` or the "
+            "span of the series."
         ),
     ],
     ids=['no series to train', 'no series to evaluate']
