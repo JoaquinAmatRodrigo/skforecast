@@ -1062,7 +1062,8 @@ def _fit_predict_forecaster_multiseries(
     # NOTE: The levels not predicted in the fold are reported once, after all
     # folds, by `_warn_levels_not_predicted_multiseries`. A warning raised here
     # would be lost when the folds run in parallel worker processes.
-    levels_predict = [level for level in levels if level in last_window_levels]
+    last_window_levels_set = set(last_window_levels)
+    levels_predict = [level for level in levels if level in last_window_levels_set]
     if not levels_predict:
         return None
 
@@ -1426,29 +1427,37 @@ def _backtesting_forecaster_multiseries(
         binner_ = deepcopy(forecaster.binner)
 
     externally_fitted = True if initial_train_size is None else False
-    data_folds = list(
-        _extract_data_folds_multiseries(
-            series             = series,
-            folds              = folds,
-            span_index         = span_index,
-            window_size        = forecaster.window_size,
-            exog               = exog,
-            dropna_last_window = dropna_last_window,
-            externally_fitted  = externally_fitted
-        )
-    )
+    data_folds_generator = _extract_data_folds_multiseries(
+                               series             = series,
+                               folds              = folds,
+                               span_index         = span_index,
+                               window_size        = forecaster.window_size,
+                               exog               = exog,
+                               dropna_last_window = dropna_last_window,
+                               externally_fitted  = externally_fitted
+                           )
 
     # NOTE: A fold without levels to predict (no level is in its training set
     # or has a valid last window) is skipped. The forecaster is only fitted in a
     # refit fold if its model predicts at least one level, in that fold or in
     # the following folds without refit, so `fit` never receives an empty
     # training set. The levels of the training set of each fold are kept to
-    # report why a level is not predicted.
-    levels_train_folds = [list(data_fold[0]) for data_fold in data_folds]
-    levels_predict_folds = [
-        [level for level in levels if level in data_fold[2]]
-        for data_fold in data_folds
-    ]
+    # report why a level is not predicted. Only the training sets of the refit
+    # folds are kept, the other folds are predicted with the model of the
+    # previous refit.
+    data_folds = []
+    levels_train_folds = []
+    levels_predict_folds = []
+    for s_train, lw, levels_lw, e_train, e_test, fold in data_folds_generator:
+        levels_train_folds.append(list(s_train))
+        levels_lw_set = set(levels_lw)
+        levels_predict_folds.append(
+            [level for level in levels if level in levels_lw_set]
+        )
+        if fold[5] is not True:
+            s_train, e_train = None, None
+        data_folds.append((s_train, lw, levels_lw, e_train, e_test, fold))
+
     if not any(levels_predict_folds):
         n_folds_no_train = 0 if externally_fitted else sum(
             not set(levels).intersection(levels_train)
