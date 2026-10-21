@@ -3,6 +3,7 @@
 import re
 import warnings
 import pytest
+from unittest.mock import patch
 import numpy as np
 import pandas as pd
 from lightgbm import LGBMRegressor
@@ -6190,3 +6191,486 @@ def test_backtesting_forecaster_multiseries_cv_differentiation_is_ignored_with_d
     pd.testing.assert_frame_equal(predictions, predictions_explicit)
     assert cv.differentiation is None
     assert cv.window_size is None
+
+
+# ******************************************************************************
+# * Test backtesting multiseries with folds without series to train or predict *
+# ******************************************************************************
+
+def make_series_end_start(start):
+    """
+    Panel where 'l1' and 'l2' end at position 17 (retired products) and 'l3'
+    starts at position `start` (a product launched later). With
+    `initial_train_size=10`, `steps=5` and `fixed_train_size=True`, the
+    training set of fold k covers the positions 5k to 5k + 9 and its test set
+    the positions 5k + 10 to 5k + 14.
+    """
+    return {
+        'l1': series_dict_range['l1'].iloc[:18],
+        'l2': series_dict_range['l2'].iloc[:18],
+        'l3': series_dict_range['l1'].iloc[start:].rename('l3'),
+    }
+
+
+def run_backtesting_counting_fits(series, refit, levels=None):
+    """
+    Run backtesting_forecaster_multiseries with a ForecasterRecursiveMultiSeries
+    and return its output, the number of calls to `fit` and the messages of
+    the MissingValuesWarnings raised.
+    """
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = Ridge(random_state=123),
+                     lags               = 3,
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 5,
+             initial_train_size = 10,
+             refit              = refit,
+             fixed_train_size   = True
+         )
+    fit = ForecasterRecursiveMultiSeries.fit
+    with patch.object(
+        ForecasterRecursiveMultiSeries, 'fit', autospec=True, side_effect=fit
+    ) as mock_fit, warnings.catch_warnings(record=True) as caught:
+        warnings.simplefilter('always')
+        metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                                   forecaster    = forecaster,
+                                                   series        = series,
+                                                   cv            = cv,
+                                                   levels        = levels,
+                                                   metric        = 'mean_absolute_error',
+                                                   n_jobs        = 1,
+                                                   show_progress = False
+                                               )
+    messages = [
+        str(w.message) for w in caught if issubclass(w.category, MissingValuesWarning)
+    ]
+
+    return metrics_levels, backtest_predictions, mock_fit.call_count, messages
+
+
+@pytest.mark.parametrize(
+    'start, expected_mae, expected_levels_folds, expected_n_fits, expected_warn',
+    [
+        # No series to train: the training set of fold 7 (positions 35 to 44)
+        # is after the end of 'l1' and 'l2' and before the start of 'l3'.
+        (46,
+         [0.25541948249719515, 0.24239211060510774, np.nan,
+          0.24890579655115144, 0.24890579655115144, 0.24890579655115147],
+         {0: ['l1', 'l2'], 1: ['l1', 'l2']},
+         2,
+         "  - `window_size` (3) observations or fewer in the training set: "
+         "'l3' (never predicted).\n"
+         "  - Folds skipped, no level can be predicted in them: 7."),
+        # No series to predict: 'l1' and 'l2' are in the training set of fold 2
+        # but have no last window, 'l3' starts at the test start of fold 2.
+        (20,
+         [0.25541948249719515, 0.24239211060510774, 0.22122118084516976,
+          0.23967759131582422, 0.23202493331579677, 0.2320249333157968],
+         {0: ['l1', 'l2'], 1: ['l1', 'l2'], 3: ['l3'], 4: ['l3'], 5: ['l3'],
+          6: ['l3'], 7: ['l3']},
+         7,
+         "  - `window_size` (3) observations or fewer in the training set: "
+         "'l3' (folds 2).\n"
+         "  - Folds skipped, no level can be predicted in them: 2."),
+    ],
+    ids=['start: 46, no series to train', 'start: 20, no series to predict']
+)
+def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_fold_skipped_when_no_series_to_train_or_predict(
+    start, expected_mae, expected_levels_folds, expected_n_fits, expected_warn
+):
+    """
+    Test backtesting_forecaster_multiseries for ForecasterRecursiveMultiSeries
+    with refit and `fixed_train_size=True` when a fold has no series to train
+    (`fit` would receive an empty dict) or no series with a last window to
+    predict. The fold is skipped, the forecaster is not fitted in the folds
+    without predictions, and a MissingValuesWarning lists the skipped folds
+    in which a level has observed values. The metrics of each level and the
+    aggregated metrics only include the predicted folds.
+    """
+    series = make_series_end_start(start)
+
+    metrics_levels, backtest_predictions, n_fits, messages = (
+        run_backtesting_counting_fits(series=series, refit=True)
+    )
+
+    expected_metric = pd.DataFrame({
+        'levels': ['l1', 'l2', 'l3', 'average', 'weighted_average', 'pooling'],
+        'mean_absolute_error': expected_mae
+    })
+    levels_folds = {
+        fold: levels.tolist()
+        for fold, levels in backtest_predictions.groupby('fold')['level'].unique().items()
+    }
+
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    assert levels_folds == expected_levels_folds
+    assert n_fits == expected_n_fits
+    assert len(messages) == 1
+    assert re.search(re.escape(expected_warn), messages[0])
+
+    # The metric of each level is the MAE of its predicted values
+    for level in ['l1', 'l2', 'l3']:
+        pred = backtest_predictions.query("level == @level")['pred'].dropna()
+        if not pred.empty:
+            np.testing.assert_almost_equal(
+                metrics_levels.set_index('levels').loc[level, 'mean_absolute_error'],
+                mean_absolute_error(series[level].loc[pred.index], pred)
+            )
+
+
+@pytest.mark.parametrize(
+    'refit, expected_mae, expected_levels_folds, expected_n_fits, expected_warn',
+    [
+        (True,
+         [0.25541948249719515, 0.24239211060510774, 0.23436315432036406,
+          0.244058249140889, 0.24186903418141562, 0.24186903418141562],
+         {0: ['l1', 'l2'], 1: ['l1', 'l2'], 5: ['l3'], 6: ['l3'], 7: ['l3']},
+         5,
+         "  - `window_size` (3) observations or fewer in the training set: "
+         "'l3' (folds 4).\n"
+         "  - Folds skipped, no level can be predicted in them: 4."),
+        # Intermittent refit: the refit folds 2 and 4 are not fitted, so fold
+        # 5 is not predicted with the model of fold 0, which has no 'l3'.
+        (2,
+         [0.2819275854710012, 0.22422588724325793, 0.22354520538973383,
+          0.24323289270133097, 0.24171845521582352, 0.2417184552158235],
+         {0: ['l1', 'l2'], 1: ['l1', 'l2'], 6: ['l3'], 7: ['l3']},
+         2,
+         "  - `window_size` (3) observations or fewer in the training set: "
+         "'l3' (folds 4, 5).\n"
+         "  - Folds skipped, no level can be predicted in them: 4, 5."),
+        (False,
+         [0.2819275854710012, 0.22422588724325793, np.nan,
+          0.2530767363571296, 0.2530767363571296, 0.2530767363571296],
+         {0: ['l1', 'l2'], 1: ['l1', 'l2']},
+         1,
+         "  - `window_size` (3) observations or fewer in the training set: "
+         "'l3' (never predicted).\n"
+         "  - Folds skipped, no level can be predicted in them: 4, 5, 6, 7."),
+    ],
+    ids=['refit: True', 'refit: 2', 'refit: False']
+)
+def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_some_folds_without_series(
+    refit, expected_mae, expected_levels_folds, expected_n_fits, expected_warn
+):
+    """
+    Test backtesting_forecaster_multiseries for ForecasterRecursiveMultiSeries
+    when only some folds have no series. 'l1' and 'l2' have no last window in
+    folds 2 and 3, no fold trains with any series in folds 3 and 4, and 'l3'
+    starts at position 31, so it is in the training set from fold 5 on. The
+    forecaster is only fitted in a refit fold if its model predicts a level
+    (in that fold or in the following folds without refit), and with
+    intermittent refit the folds after a skipped refit are not predicted
+    until the next refit with series.
+    """
+    series = make_series_end_start(31)
+
+    metrics_levels, backtest_predictions, n_fits, messages = (
+        run_backtesting_counting_fits(series=series, refit=refit)
+    )
+
+    expected_metric = pd.DataFrame({
+        'levels': ['l1', 'l2', 'l3', 'average', 'weighted_average', 'pooling'],
+        'mean_absolute_error': expected_mae
+    })
+    levels_folds = {
+        fold: levels.tolist()
+        for fold, levels in backtest_predictions.groupby('fold')['level'].unique().items()
+    }
+
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    assert levels_folds == expected_levels_folds
+    assert n_fits == expected_n_fits
+    assert len(messages) == 1
+    assert re.search(re.escape(expected_warn), messages[0])
+
+
+@pytest.mark.parametrize(
+    'n_jobs', [1, 2], ids=lambda n_jobs: f'n_jobs: {n_jobs}'
+)
+def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_some_folds_without_series_predictions(n_jobs):
+    """
+    Test the predictions of backtesting_forecaster_multiseries for
+    ForecasterRecursiveMultiSeries when folds 2, 3 and 4 have no series to
+    predict (see `make_series_end_start`), also when the folds run in
+    parallel. The skipped folds have no rows and the other folds keep their
+    fold number.
+    """
+    series = make_series_end_start(31)
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = Ridge(random_state=123),
+                     lags               = 3,
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 5,
+             initial_train_size = 10,
+             refit              = True,
+             fixed_train_size   = True
+         )
+
+    warn_msg = re.escape("  - Folds skipped, no level can be predicted in them: 4.")
+    with pytest.warns(MissingValuesWarning, match=warn_msg):
+        _, backtest_predictions = backtesting_forecaster_multiseries(
+                                      forecaster    = forecaster,
+                                      series        = series,
+                                      cv            = cv,
+                                      metric        = 'mean_absolute_error',
+                                      n_jobs        = n_jobs,
+                                      show_progress = False
+                                  )
+
+    expected_predictions = pd.DataFrame(
+        data = {
+            'level': ['l1', 'l2'] * 10 + ['l3'] * 15,
+            'fold': [0] * 10 + [1] * 10 + [5] * 5 + [6] * 5 + [7] * 5,
+            'pred': [
+                0.5765327552247788, 0.4791003935251127, 0.6158935540243541,
+                0.4822453441973361, 0.6140789566574273, 0.5299743785053955,
+                0.5881264724011849, 0.5354745367684511, 0.5823808516978444,
+                0.5315878813749515, 0.4814809964610126, 0.6509277269208132,
+                0.46169569587674786, 0.6323539366874602, 0.4482864686049449,
+                0.6449388289787558, np.nan, np.nan, np.nan, np.nan,
+                0.42583029, 0.42583029, 0.42583029, 0.42583029, 0.42583029,
+                0.5115595989745081, 0.5511109118432358, 0.5753796065766646,
+                0.5738889457525943, 0.5696159713989377, 0.6296379069264187,
+                0.5746679844819182, 0.4670417095667662, 0.5123013654483111,
+                0.5316863053868477
+            ]
+        },
+        index = pd.Index(
+            [10, 10, 11, 11, 12, 12, 13, 13, 14, 14, 15, 15, 16, 16, 17, 17,
+             18, 18, 19, 19] + list(range(35, 50))
+        )
+    )
+
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+@pytest.mark.parametrize(
+    'start, refit',
+    [(46, True), (31, False)],
+    ids=lambda dt: f'start, refit: {dt}'
+)
+def test_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_ValueError_when_no_fold_has_levels_to_predict(start, refit):
+    """
+    Test ValueError is raised in backtesting_forecaster_multiseries when no
+    fold has a level to predict: 'l3' is never in the training set of a fold,
+    it starts after the last one (refit) or after the initial one (no refit).
+    No forecaster is fitted.
+    """
+    series = make_series_end_start(start)
+
+    err_msg = re.escape(
+        "No fold of the backtesting has a level to predict. In every fold, "
+        "each level has `window_size` (3) observations or fewer in the "
+        "training set, or its last window cannot be used to predict (fewer "
+        "than `window_size` observations, or missing values that are not "
+        "supported). Folds without levels in the training set: 8 of 8. Review "
+        "`initial_train_size`, `fixed_train_size` and `refit` of `cv`, "
+        "`levels`, or the span of the series."
+    )
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = Ridge(random_state=123),
+                     lags               = 3,
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 5,
+             initial_train_size = 10,
+             refit              = refit,
+             fixed_train_size   = True
+         )
+    fit = ForecasterRecursiveMultiSeries.fit
+    with patch.object(
+        ForecasterRecursiveMultiSeries, 'fit', autospec=True, side_effect=fit
+    ) as mock_fit:
+        with pytest.raises(ValueError, match=err_msg):
+            backtesting_forecaster_multiseries(
+                forecaster    = forecaster,
+                series        = series,
+                cv            = cv,
+                levels        = 'l3',
+                metric        = 'mean_absolute_error',
+                n_jobs        = 1,
+                show_progress = False
+            )
+    assert mock_fit.call_count == 0
+
+
+@pytest.mark.parametrize(
+    'refit', [True, False], ids=lambda refit: f'refit: {refit}'
+)
+def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_folds_skipped_when_level_not_in_train(refit):
+    """
+    Test backtesting_forecaster_multiseries for ForecasterDirectMultiVariate
+    when the level 'l2' starts at position 26. It has no values, or
+    `window_size` values, in the training set of folds 0 to 3, so they are
+    skipped (with refit) instead of fitting the forecaster without its level.
+    Without refit, the forecaster is only trained with the training set of
+    fold 0, so no fold can be predicted and a ValueError is raised.
+    """
+    series = series_wide_range.copy()
+    series.iloc[:26, 1] = np.nan
+    forecaster = ForecasterDirectMultiVariate(
+                     estimator          = HistGradientBoostingRegressor(
+                                              random_state=123, max_iter=10, min_samples_leaf=2
+                                          ),
+                     level              = 'l2',
+                     lags               = 3,
+                     steps              = 3,
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 3,
+             initial_train_size = 20,
+             refit              = refit
+         )
+
+    if not refit:
+        err_msg = re.escape(
+            "No fold of the backtesting has a level to predict. "
+        )
+        with pytest.raises(ValueError, match=err_msg):
+            backtesting_forecaster_multiseries(
+                forecaster    = forecaster,
+                series        = series,
+                cv            = cv,
+                metric        = 'mean_absolute_error',
+                show_progress = False
+            )
+    else:
+        warn_msg = re.escape(
+            "  - `window_size` (3) observations or fewer in the training set: "
+            "'l2' (folds 2, 3).\n"
+            "  - Folds skipped, no level can be predicted in them: 2, 3."
+        )
+        with pytest.warns(MissingValuesWarning, match=warn_msg):
+            metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                                       forecaster    = forecaster,
+                                                       series        = series,
+                                                       cv            = cv,
+                                                       metric        = 'mean_absolute_error',
+                                                       n_jobs        = 1,
+                                                       show_progress = False
+                                                   )
+
+        expected_metric = pd.DataFrame({
+            'levels': ['l2'],
+            'mean_absolute_error': [0.2939265579010415]
+        })
+        expected_predictions = pd.DataFrame(
+            data = {
+                'level': ['l2'] * 18,
+                'fold': np.repeat([4, 5, 6, 7, 8, 9], 3),
+                'pred': [
+                    0.2379793185778571, 0.2797075235212401, 0.5986018309168295,
+                    0.37131399045569347, 0.454442686269131, 0.357411354951168,
+                    0.7313360089117927, 0.6042077538124078, 0.4419539208783518,
+                    0.6856350399270728, 0.572392384573581, 0.5742304707452792,
+                    0.28940499550219034, 0.42042478770545644, 0.6718176078601567,
+                    0.7595718286300486, 0.684142229994857, 0.4909012154455743
+                ]
+            },
+            index = pd.RangeIndex(start=32, stop=50, step=1)
+        )
+
+        pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+        pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_level_predicted_without_observed_values():
+    """
+    Test backtesting_forecaster_multiseries for ForecasterRecursiveMultiSeries
+    when 'l1' ends at the end of the training set (position 29 and
+    `initial_train_size` 30). It is predicted in fold 0, as it has a complete
+    last window, but it has no observed values to evaluate: its metric is NaN
+    and it is left out of the aggregated metrics, also of the weighted average.
+    """
+    series = {
+        'l1': series_dict_range['l1'].iloc[:30],
+        'l2': series_dict_range['l2'],
+    }
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = Ridge(random_state=123),
+                     lags               = 3,
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 5,
+             initial_train_size = 30,
+             refit              = False
+         )
+
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster        = forecaster,
+                                               series            = series,
+                                               cv                = cv,
+                                               metric            = 'mean_absolute_error',
+                                               n_jobs            = 1,
+                                               show_progress     = False,
+                                               suppress_warnings = True
+                                           )
+
+    expected_metric = pd.DataFrame({
+        'levels': ['l1', 'l2', 'average', 'weighted_average', 'pooling'],
+        'mean_absolute_error': [np.nan] + [0.22275680983818927] * 4
+    })
+    levels_folds = {
+        fold: levels.tolist()
+        for fold, levels in backtest_predictions.groupby('fold')['level'].unique().items()
+    }
+
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    assert levels_folds == {0: ['l1', 'l2'], 1: ['l2'], 2: ['l2'], 3: ['l2']}
+
+
+def test_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_ValueError_when_no_level_predicted_has_observed_values():
+    """
+    Test ValueError is raised in backtesting_forecaster_multiseries when the
+    only level predicted has no observed values in the test set: 'l1' ends at
+    the end of the training set and 'l2' starts after it, so it is never in
+    the training set. No forecaster is fitted.
+    """
+    series = {
+        'l1': series_dict_range['l1'].iloc[:30],
+        'l2': pd.Series(np.arange(45, dtype=float), index=pd.RangeIndex(35, 80)),
+    }
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = Ridge(random_state=123),
+                     lags               = 3,
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 5,
+             initial_train_size = 30,
+             refit              = False
+         )
+
+    err_msg = re.escape(
+        "No level predicted in the backtesting has observed values in the "
+        "test set of the folds in which it is predicted, so the metrics "
+        "cannot be calculated. Review `initial_train_size`, `fixed_train_size` "
+        "and `refit` of `cv`, `levels`, or the span of the series."
+    )
+    fit = ForecasterRecursiveMultiSeries.fit
+    with patch.object(
+        ForecasterRecursiveMultiSeries, 'fit', autospec=True, side_effect=fit
+    ) as mock_fit:
+        with pytest.raises(ValueError, match=err_msg):
+            backtesting_forecaster_multiseries(
+                forecaster    = forecaster,
+                series        = series,
+                cv            = cv,
+                metric        = 'mean_absolute_error',
+                n_jobs        = 1,
+                show_progress = False
+            )
+    assert mock_fit.call_count == 0

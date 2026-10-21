@@ -71,6 +71,10 @@ The main changes in this release are:
 
 + <code>[backtesting_forecaster_multiseries]</code> and the hyperparameter search of <code>[ForecasterRecursiveMultiSeries]</code> raised `ValueError: Length of '<series>' must be greater than the maximum window size needed by the forecaster` when a series that starts late or ends early had exactly `window_size` values in the training set of a fold. That series is now left out of the fold. ([#1410](https://github.com/skforecast/skforecast/issues/1410), [#1418](https://github.com/skforecast/skforecast/pull/1418))
 
++ <code>[backtesting_forecaster_multiseries]</code> and the hyperparameter search of multi-series forecasters raised an unrelated `ValueError` (`Found frequencies: []`, or `` `last_window` must have as many values as needed ``) when no series could be trained or predicted in a fold, for example in panels where some series end and others start later. That fold is now skipped and listed in the `MissingValuesWarning`; if no fold can be predicted or evaluated, a `ValueError` explains why. ([#1427](https://github.com/skforecast/skforecast/pull/1427))
+
++ The `weighted_average` metric of <code>[backtesting_forecaster_multiseries]</code> was NaN when a level was predicted but had no observed values in its test set, for example a series that ends at the end of the training set. It is also the metric that ranks the candidates of the hyperparameter searches of <code>[ForecasterRecursiveMultiSeries]</code> by default. That level is now left out of the weighted average, as it already was of the average and the pooling. ([#1427](https://github.com/skforecast/skforecast/pull/1427))
+
 + <code>[plot_residuals]</code> ignored the `fig` argument when another figure was active: the subplots were drawn on the active figure and `fig` was returned empty. ([#1386](https://github.com/skforecast/skforecast/issues/1386), [#1387](https://github.com/skforecast/skforecast/pull/1387))
 
 
