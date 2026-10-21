@@ -75,6 +75,10 @@
           {
             "type": "command",
             "command": "\"$(command -v python3 || command -v python)\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/attribution_guard.py\""
+          },
+          {
+            "type": "command",
+            "command": "\"$(command -v python3 || command -v python)\" \"$CLAUDE_PROJECT_DIR/.claude/hooks/branch_name_guard.py\""
           }
         ]
       }

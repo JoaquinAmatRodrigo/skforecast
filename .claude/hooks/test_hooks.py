@@ -128,6 +128,120 @@ def test_attribution_guard_ignores_github_mcp_read_tools():
     assert code == 0
 
 
+# branch_name_guard.py
+# ==============================================================================
+
+
+@pytest.fixture
+def repo_on_branch(tmp_path):
+    """A repository whose current branch is the one given to the function."""
+    def make(branch):
+        git(tmp_path, "init", "-q")
+        git(tmp_path, "checkout", "-q", "-b", branch)
+        git(tmp_path, "commit", "-q", "--allow-empty", "-m", "init")
+        return tmp_path
+    return make
+
+
+@pytest.mark.parametrize(
+    "current, command",
+    [
+        ("claude/cool-goldberg-oj79ow", "git push -u origin claude/cool-goldberg-oj79ow"),
+        ("claude/cool-goldberg-oj79ow", "git push -u origin HEAD"),
+        ("claude/cool-goldberg-oj79ow", "git push"),
+        ("claude/cool-goldberg-oj79ow", "git add . && git commit -m x && git push origin"),
+        ("fix/x", "git push origin HEAD:refs/heads/claude/abc"),
+        ("fix/x", "git -c push.default=current push --force-with-lease origin +fix/x:claude/abc"),
+        ("claude/abc", "gh pr create --base 0.27.x --title Fix --body-file b.md"),
+        ("fix/x", "gh pr create --base 0.27.x --head skforecast:claude/abc --title Fix"),
+        ("worktree-fix-dict-span", "git push -u origin HEAD"),
+        ("claude/abc", "git push -u origin 2>&1 | tail -3"),
+        ("claude/abc", "git push origin > /tmp/push.log"),
+    ],
+    ids=["explicit", "head", "bare", "chained", "refs-heads", "lease-refspec",
+         "gh-current", "gh-head", "worktree", "redirect", "redirect-target"],
+)
+def test_branch_name_guard_blocks_session_branches(repo_on_branch, current, command):
+    repo = repo_on_branch(current)
+    code, _, stderr = run_hook(
+        "branch_name_guard.py", {**bash(command), "cwd": str(repo)},
+        CLAUDE_PROJECT_DIR=str(repo),
+    )
+    assert code == 2
+    assert "<type>/<topic>" in stderr
+    assert "git branch -m" in stderr
+
+
+def test_branch_name_guard_names_latest_release_branch(repo_on_branch):
+    repo = repo_on_branch("claude/abc")
+    for release in ("0.9.x", "0.27.x", "0.26.x"):
+        git(repo, "update-ref", f"refs/remotes/origin/{release}", "HEAD")
+    code, _, stderr = run_hook(
+        "branch_name_guard.py", {**bash("git push"), "cwd": str(repo)},
+        CLAUDE_PROJECT_DIR=str(repo),
+    )
+    assert code == 2
+    assert "origin/0.27.x..HEAD" in stderr
+
+
+@pytest.mark.parametrize(
+    "current, command",
+    [
+        ("fix/multiseries-folds", "git push -u origin fix/multiseries-folds"),
+        ("fix/multiseries-folds", "git push"),
+        ("claude/abc", "git push -u origin docs/faq"),
+        ("claude/abc", "git branch -m fix/x && git push -u origin fix/x"),
+        ("fix/x", "git push origin --delete claude/abc"),
+        ("fix/x", "git push origin :claude/abc"),
+        ("claude/abc", "git status && git log --oneline origin/0.27.x..HEAD"),
+        ("docs/faq", "gh pr create --base 0.27.x --title Docs"),
+        ("claude/abc", "git push -u origin fix/x 2>&1"),
+    ],
+    ids=["conventional", "bare-conventional", "other-refspec", "renamed",
+         "delete", "delete-refspec", "not-push", "gh-conventional", "redirect"],
+)
+def test_branch_name_guard_allows_conventional_branches(repo_on_branch, current, command):
+    repo = repo_on_branch(current)
+    code, _, _ = run_hook(
+        "branch_name_guard.py", {**bash(command), "cwd": str(repo)},
+        CLAUDE_PROJECT_DIR=str(repo),
+    )
+    assert code == 0
+
+
+@pytest.mark.parametrize(
+    "tool_name, tool_input, expected",
+    [
+        ("mcp__github__create_pull_request",
+         {"head": "claude/abc", "base": "0.27.x", "title": "Fix"}, 2),
+        ("mcp__plugin_github_github__create_branch",
+         {"branch": "claude/abc", "from_branch": "0.27.x"}, 2),
+        ("mcp__github__push_files", {"branch": "claude/abc", "files": []}, 2),
+        ("mcp__github__create_pull_request",
+         {"head": "fix/x", "base": "0.27.x", "title": "Fix"}, 0),
+        ("mcp__github__list_branches", {"branch": "claude/abc"}, 0),
+    ],
+    ids=["pr", "create-branch", "push-files", "pr-conventional", "read-tool"],
+)
+def test_branch_name_guard_github_mcp_tools(tmp_path, tool_name, tool_input, expected):
+    payload = {"tool_name": tool_name, "tool_input": tool_input, "cwd": str(tmp_path)}
+    code, _, _ = run_hook(
+        "branch_name_guard.py", payload, CLAUDE_PROJECT_DIR=str(tmp_path)
+    )
+    assert code == expected
+
+
+def test_branch_name_guard_registered_for_bash_and_github_mcp():
+    settings = json.loads((PROJECT_DIR / ".claude" / "settings.json").read_text())
+    commands = [
+        hook["command"]
+        for entry in settings["hooks"]["PreToolUse"]
+        if entry["matcher"] == "Bash|mcp__.*github.*"
+        for hook in entry["hooks"]
+    ]
+    assert any("branch_name_guard.py" in command for command in commands)
+
+
 # post_pr_footer.py
 # ==============================================================================
 
@@ -336,7 +450,82 @@ def test_session_start_remote_skips_sync_for_branch_not_on_origin(
     out = capsys.readouterr().out
 
     assert "origin/fix/new" not in out
-    assert out.startswith("WARNING: the skforecast cloud environment")
+    assert "on 'fix/new', the branch being continued" in out
+    assert "WARNING: the skforecast cloud environment" in out
+
+
+def make_release_clone(tmp_path, start):
+    """
+    A single branch clone of `start` from an `origin` like GitHub's: `main`
+    still at the previous release (0.26.0), the release branch in development
+    `0.27.x` (0.27.0) and an older `0.9.x`.
+    """
+    seed = tmp_path / "seed"
+    (seed / "skforecast").mkdir(parents=True)
+    git(seed, "init", "-q")
+    (seed / "pyproject.toml").write_text("[project]\nname = 'x'\n")
+    for branch, version in [("0.9.x", "0.9.0"), ("main", "0.26.0"), ("0.27.x", "0.27.0")]:
+        git(seed, "checkout", "-q", "-B", branch)
+        (seed / "skforecast" / "__init__.py").write_text(f'__version__ = "{version}"\n')
+        git(seed, "add", ".")
+        git(seed, "commit", "-q", "-m", version)
+    origin = tmp_path / "origin.git"
+    git(tmp_path, "clone", "-q", "--bare", str(seed), str(origin))
+    # Single branch: origin/0.27.x only exists if the hook fetches it.
+    git(tmp_path, "clone", "-q", "--single-branch", "-b", start, str(origin), "clone")
+    return seed, tmp_path / "clone"
+
+
+@pytest.mark.parametrize(
+    "start, checkout, commit, expected",
+    [
+        ("main", None, False, "`git switch -c <type>/<topic> origin/0.27.x`"),
+        ("0.27.x", None, False, "`git switch -c <type>/<topic> origin/0.27.x`"),
+        ("main", "claude/cool-goldberg-oj79ow", False,
+         "`git switch -c <type>/<topic> origin/0.27.x`"),
+        ("main", "claude/cool-goldberg-oj79ow", True,
+         "on 'claude/cool-goldberg-oj79ow': before the first push, rename it"),
+        ("0.27.x", "fix/x", False, "on 'fix/x', the branch being continued"),
+    ],
+    ids=["main", "release", "fresh-session-branch", "resumed-session-branch",
+         "continued-branch"],
+)
+def test_session_start_remote_says_which_branch_to_work_on(
+    session_start_remote, monkeypatch, capsys, tmp_path, start, checkout, commit,
+    expected,
+):
+    seed, repo = make_release_clone(tmp_path, start)
+    if checkout:
+        git(repo, "checkout", "-q", "-b", checkout)
+    if commit:
+        git(repo, "commit", "-q", "--allow-empty", "-m", "work")
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(repo))
+
+    assert session_start_remote.main() == 0
+    out = capsys.readouterr().out
+
+    assert "named `<type>/<topic>`" in out
+    assert "Do not use a `claude/...` branch" in out
+    assert expected in out
+    assert "0.26.x" not in out
+    assert head(repo, "origin/0.27.x") == head(seed, "0.27.x")
+
+
+def test_session_start_remote_removes_stale_ref_of_branch_not_on_origin(
+    session_start_remote, monkeypatch, capsys, tmp_path
+):
+    _, repo = make_release_clone(tmp_path, "main")
+    git(repo, "checkout", "-q", "-b", "claude/abc")
+    git(repo, "update-ref", "refs/remotes/origin/claude/abc", "HEAD")
+    monkeypatch.setenv("CLAUDE_PROJECT_DIR", str(repo))
+
+    assert session_start_remote.main() == 0
+
+    refs = subprocess.run(
+        ["git", "for-each-ref", "refs/remotes/origin/claude/"],
+        cwd=repo, capture_output=True, text=True, check=True,
+    ).stdout
+    assert refs == ""
 
 
 def test_session_start_remote_installs_ruff():

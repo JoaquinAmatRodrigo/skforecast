@@ -12,7 +12,7 @@ Title hint from the user: $ARGUMENTS
 ## 1. Branches
 
 - Release branch: read `__version__` in `skforecast/__init__.py` and derive `X.Y.x` (e.g. `0.26.0` → `0.26.x`). The PR base is that branch, never `main`.
-- If the current branch is `main` or the release branch, create a descriptive `feature/<topic>` or `fix/<topic>` branch first. In cloud sessions, keep the branch the session was started on.
+- The branch is named `<type>/<topic>` (`feature`, `fix`, `docs`, `chore`, `perf`). If the current branch is `main` or the release branch, create one first. If it is a `claude/...` (cloud session) or `worktree-...` branch, rename it with `git branch -m <type>/<topic>` before pushing (a hook blocks pushing those), after checking that `git log --oneline origin/<release-branch>..HEAD` lists only the commits of this work.
 - Review `git diff <release-branch>...HEAD --stat` and `git status`; uncommitted changes must be committed or left out on purpose (ask if unclear).
 
 ## 2. Checks
