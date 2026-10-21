@@ -408,7 +408,7 @@ MAE en los puntos de cold start (los que `lags=56` deja fuera hoy):
 | Aviso de #1415 (`_warn_levels_not_predicted_multiseries`) | causas `train` y `last_window` | con c2 casi no salta con estimadores con NaN; revisar sus textos |
 | `MissingValuesWarning` de `check_predict_input` por NaN en la última ventana | salta | no avisar por los NaN de relleno, o cada backtesting avisará |
 | Búsquedas | silencian tras el primer candidato | aviso temprano y único para estimadores sin NaN |
-| Mensajes de error que describen la regla de predicción: `ValueError` de #1427 cuando ningún fold tiene niveles que predecir, y los añadidos el 2026-10-21 (backtesting sin nada evaluable, en #1427; one-step-ahead sin series que entrenar o evaluar, en la rama `fix/dict-series-span-initial-train-size`) | citan la regla actual (más de `window_size` valores en el entrenamiento, última ventana completa) | revisar los textos: con estimadores que aceptan NaN la regla cambia |
+| Mensajes de error que describen la regla de predicción: `ValueError` de #1427 cuando ningún fold tiene niveles que predecir, y los añadidos el 2026-10-21 (backtesting sin nada evaluable, en #1427; one-step-ahead sin series que entrenar o evaluar, en #1430) | citan la regla actual (más de `window_size` valores en el entrenamiento, última ventana completa) | revisar los textos: con estimadores que aceptan NaN la regla cambia |
 | Búsqueda con `OneStepAheadFold` (`_evaluate_grid_hyperparameters_multiseries` y `_objective` de bayesian, `_search.py`) | `_train_test_split_one_step_ahead` se llama por candidato de `lags` fuera del `try`: un candidato sin nada que evaluar aborta toda la búsqueda | tratarlo por candidato ("Parameters skipped"), como con `TimeSeriesFold`; hace falta para los estimadores sin NaN, que mantienen el descarte |
 | Docs, `llms-base.txt`, skills (`forecasting-multiple-series`, `hyperparameter-optimization`, `backtesting-configuration`), release note con "Before upgrading" | | cambio de comportamiento público: `ai-context-sync` |
 
@@ -480,3 +480,9 @@ después (el script 5 lo evita con `allow_writing_files=False`).
   qué puntos entran; con c2 entran más. El punto 1 de la sección 8.2 le afecta directamente.
 - **FE-04 (baseline multiserie con los mismos folds):** mismo principio (comparar sobre los
   mismos puntos). El baseline tiene su propia frontera de series cortas.
+- **#1427 y #1430 (fusionados el 2026-10-21):** el backtesting multiserie salta los folds sin
+  series que entrenar o predecir, y `weighted_average` deja fuera los niveles predichos sin
+  valores observados; `initial_train_size` se valida contra el span de las series, y el test
+  del one-step-ahead (`_train_test_split_one_step_ahead`, que c2 también modifica) solo incluye
+  las series con valores observados tras el entrenamiento. Con c2 se saltarán menos folds con
+  estimadores que aceptan NaN; los textos de sus errores están en la sección 7.

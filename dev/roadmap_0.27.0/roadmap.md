@@ -38,7 +38,7 @@ reproducen con sus scripts. QW-03 se confirma en el código: el `ValueError` de
 pero `_validation.py:513-518` la sobrescribe después con la del forecaster. El resto de
 cifras son las de la sesión en la nube y no se han vuelto a medir.
 
-### Estado y prioridad (revisión del 2026-10-20)
+### Estado y prioridad (revisión del 2026-10-21)
 
 **Hecho en `0.27.x`:** PR-1400 (compilación de Ets), #1412 (ISSUE-1357, IDs enteros),
 #1415 (ISSUE-1406), #1416 (BUG-stats-interval-ignored), #1418 (ISSUE-1410), #1419 (BUG-09 a),
@@ -48,7 +48,10 @@ DEP-cv-differentiation, 2026-10-20: el cv ya no exige repetir la `differentiatio
 forecaster; `differentiation` de los dos folds y `window_size` de `OneStepAheadFold` quedan
 deprecados, sin efecto, con `FutureWarning` y eliminación en la 0.29.0; además corrige las
 docstrings de los folds y quita `externally_fitted` de `OneStepAheadFold.split`).
-**BUG-08** hecho con #1425 (rama `fix/stats-freeze-params`, 2026-10-20, pendiente de fusionar):
+**Paneles con series que terminan y empiezan más tarde** (2026-10-21, sin elemento previo en el
+roadmap; ver sección 6): #1427 (folds sin series en el backtesting multiserie) y #1430
+(`initial_train_size` contra el span de las series y test set del one-step-ahead).
+**BUG-08** hecho con #1425 (rama `fix/stats-freeze-params`, fusionado en `0.27.x` el 2026-10-20):
 `_backtesting_stats` pasa `best_params_` del primer ajuste a las plantillas
 `forecaster.estimators` (opción a). Medido en local (Python 3.14.3, numpy 2.5.3, pandas
 2.3.3, scipy 1.18.1, numba 0.68.0, `n_jobs=1`): repro (800 puntos, m=7, 20 folds) Arima
@@ -103,8 +106,8 @@ porque también corre modelos foundation, RNN y LightGBM.
 | Feature engineering | QW-11 | S. Nuevo (2026-10-20). `hour_of_week` y el número de días de fin de semana del mes en `CalendarFeatures`, siempre opcionales, más un aviso y una guía de codificación. Medido en 18 series: `hour_of_week` reduce el MAE una mediana del 24% con Ridge en series horarias. Los festivos, que son lo que más aporta en series diarias, quedan como feature aparte (FE-06) |
 | Foundation para producción | QW-05, BUG-06, QW-02 | QW-02 pendiente de decisión |
 | **Búsquedas multiserie con series cortas (MUY IMPORTANTE)** | BUG-search-short-series | M a L. Resultado erróneo silencioso en un uso habitual de los modelos globales. Diseño en [`BUG-search-short-series.md`](BUG-search-short-series.md); antes o durante la implementación, las mediciones de su sección 8.2 (sobre todo los intervalos con residuos out-of-sample). No bloquea QW-09, pero cambia qué puntos entran en sus métricas |
-| Paneles multiserie | QW-01, BUG-07, ISSUE-1410 | Hechos: ISSUE-1357 (IDs enteros) con #1412, que sustituye a PR-1408 (cerrado), e ISSUE-1410 con #1418 (2026-10-19) |
-| Stats: corrección y rendimiento | BUG-08, PERF-02, PR-1400 | PR-1400 ya está fusionado en `0.27.x`. BUG-08 hecho con #1425 (2026-10-20, pendiente de fusionar). Volver a medir PERF-02 después de BUG-08 |
+| Paneles multiserie | QW-01, BUG-07, ISSUE-1410 | Hechos: ISSUE-1357 (IDs enteros) con #1412, que sustituye a PR-1408 (cerrado), e ISSUE-1410 con #1418 (2026-10-19); folds sin series con #1427 y `initial_train_size` contra el span con #1430 (2026-10-21, sección 6) |
+| Stats: corrección y rendimiento | BUG-08, PERF-02, PR-1400 | PR-1400 ya está fusionado en `0.27.x`. BUG-08 hecho con #1425 (fusionado el 2026-10-20). Volver a medir PERF-02 después de BUG-08 |
 | PRs externos | PR-1402, PR-1387, PR-1388, PR-1389 | Hecho: PR-1387 fusionado en `0.27.x` (2026-10-20). PR-1402, PR-1388 y PR-1389 inventariados, no revisados línea a línea |
 | Pequeños | QW-07, DEP-python310 (anunciar la retirada en 0.28), DEP-arima-dictstyle | |
 
@@ -1011,6 +1014,8 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
 | PR-1388 / ISSUE-1355 | https://github.com/skforecast/skforecast/pull/1388, https://github.com/skforecast/skforecast/issues/1355 | PR externo | Revisar: búsquedas con `lags=None` y solo window features |
 | PR-1387 / ISSUE-1386 | https://github.com/skforecast/skforecast/pull/1387, https://github.com/skforecast/skforecast/issues/1386 | Resuelto: fusionado en `0.27.x` el 2026-10-20 con la autoría del contribuidor, más un commit nuestro (nota de la versión en la 0.27.0 y test de `fig=None`); #1386 cerrada | Nada. `plot_residuals` usa `fig.add_subplot`; ninguna otra función que acepte `fig` o `ax` (`plot_multivariate_time_series_corr`, `plot_prediction_intervals`, `ForecasterRnn.plot_history`) tiene el mismo bug |
 | ISSUE-1410 | https://github.com/skforecast/skforecast/issues/1410, https://github.com/skforecast/skforecast/pull/1418 | Resuelto: #1418, fusionado en `0.27.x` el 2026-10-19 | Nada. Una serie con `window_size` valores o menos en el entrenamiento de un fold queda fuera de ese fold; `backtesting_foundation` usa `window_size=0`. FE-04 debe usar la misma frontera |
+| Folds sin series | https://github.com/skforecast/skforecast/pull/1427 | Resuelto: fusionado en `0.27.x` el 2026-10-21; sin issue (hallado desde skforecast-ai) | Nada. Un fold sin series que entrenar o predecir se salta y se lista en el `MissingValuesWarning`; si no se puede predecir ni evaluar ningún fold, `ValueError` antes de entrenar. También: `weighted_average` ya no es NaN cuando un nivel se predice sin valores observados (es la métrica que ordena las búsquedas por defecto), y la extracción de folds no retiene el entrenamiento de los folds sin refit (2000 series y 100 folds: pico de memoria de 1383 a 1022 MB) |
+| `initial_train_size` contra el span | https://github.com/skforecast/skforecast/pull/1430 | Resuelto: fusionado en `0.27.x` el 2026-10-21; sin issue (hallado desde skforecast-ai) | Nada. `check_backtesting_input` y `check_one_step_ahead_input` validan contra el span de un dict de series, no contra la serie más larga; `OneStepAheadFold.split` devolvía el número de series como final del test con un dict; el test del one-step-ahead deja fuera las series sin valores tras el entrenamiento (antes la búsqueda entera fallaba), con `ValueError` claro si no hay nada que entrenar o evaluar. Pendiente con BUG-search-short-series: tratar por candidato el error de la búsqueda one-step-ahead (nota en su sección 7) |
 | ISSUE-1385 (T0) | https://github.com/skforecast/skforecast/issues/1385; `skforecast/foundation/_adapters.py:3724-3729` | Sin PR; no reproducido aquí (sin `tfc-t0`) | Adaptar a `tfc-t0>=0.4` (`predict` sin `context` ni `quantiles`; torch como extra desde 0.6.0) |
 | ISSUE-1409 + DISC-1119 + GAP-backtesting-interval-metrics | https://github.com/skforecast/skforecast/issues/1409, https://github.com/skforecast/skforecast/discussions/1119 | Sin PR | Se implementan por separado como QW-09 (`coverage` e `interval_width`, #1409) y QW-10 (columna `step`, D1119) (sección 2). Sin aviso de infracobertura (sección 7) |
 | GAP-foundation-backtesting-interval | `skforecast/model_selection/_validation.py:2712-2720` (`backtesting_foundation` solo tiene `quantiles`); `skforecast/model_selection/_search.py:2091` (única búsqueda foundation) | Asimetría de API, comprobada en las firmas; sin medir | Aceptar `interval` en `backtesting_foundation` después de BUG-06; `grid_search_foundation` opcional |
