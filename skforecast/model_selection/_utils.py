@@ -1062,6 +1062,44 @@ def _extract_data_folds_multiseries(
         yield series_train, series_last_window, levels_last_window, exog_train, exog_test, fold
 
 
+def _select_fit_folds_multiseries(
+    folds: list,
+    levels_predict_folds: list[list[str]]
+) -> list[bool]:
+    """
+    Select the folds of a multi-series backtesting in which the forecaster is
+    fitted. A fold with refit (`fold[5]` is `True`) trains the model that
+    predicts it and the following folds without refit. That model is only
+    fitted if at least one of these folds has a level to predict, so no
+    forecaster is trained with an empty training set (no series with more
+    than `window_size` values) or only to be discarded.
+
+    Parameters
+    ----------
+    folds : list
+        Folds created using the split method of the TimeSeriesFold object,
+        before the initial fit sets `fold[5]` of the first fold to `False`.
+    levels_predict_folds : list
+        Levels predicted in each fold.
+
+    Returns
+    -------
+    fit_folds : list
+        `True` for the folds in which the forecaster is fitted.
+
+    """
+
+    fit_folds = [False] * len(folds)
+    refit_fold = None
+    for i, (fold, levels_predict) in enumerate(zip(folds, levels_predict_folds)):
+        if fold[5] is True:
+            refit_fold = i
+        if refit_fold is not None and levels_predict:
+            fit_folds[refit_fold] = True
+
+    return fit_folds
+
+
 def _warn_levels_not_predicted_multiseries(
     forecaster: object,
     series: pd.DataFrame | dict[str, pd.Series | pd.DataFrame],
@@ -1087,6 +1125,8 @@ def _warn_levels_not_predicted_multiseries(
 
     A level without observed values in the test set of a fold (for example, a
     series that starts after it) is not reported, there is nothing to evaluate.
+    A fold in which no level is predicted is skipped (no predictions). If a
+    level has observed values in its test set, the fold is also listed.
 
     Parameters
     ----------
@@ -1118,6 +1158,7 @@ def _warn_levels_not_predicted_multiseries(
         levels_train_folds = [None] * len(folds)
 
     not_predicted = {'train': {}, 'last_window': {}}
+    skipped_folds = []
     for fold, levels_train, levels_predict in zip(
         folds, levels_train_folds, levels_predict_folds
     ):
@@ -1136,6 +1177,8 @@ def _warn_levels_not_predicted_multiseries(
                 else 'last_window'
             )
             not_predicted[reason].setdefault(level, []).append(fold[0])
+            if not levels_predict and fold[0] not in skipped_folds:
+                skipped_folds.append(fold[0])
 
     if not not_predicted['train'] and not not_predicted['last_window']:
         return
@@ -1170,6 +1213,11 @@ def _warn_levels_not_predicted_multiseries(
                 for level, fold_numbers in levels_folds.items()
             ]
             lines.append(f"  - {reason_messages[reason]}: {', '.join(levels_info)}.")
+    if skipped_folds:
+        lines.append(
+            f"  - Folds skipped, no level can be predicted in them: "
+            f"{', '.join(map(str, skipped_folds))}."
+        )
 
     warnings.warn(
         "Some levels are not predicted in folds where they have observed values, "
@@ -1498,14 +1546,25 @@ def _calculate_metrics_backtesting_multiseries(
             .reset_index(name="n_predictions")
             .rename(columns={"level": "levels"})
         )
+        # NOTE: A level predicted without observed values in its test set (for
+        # example, a series that ends at the end of the training set) has no
+        # metric, so it is left out of the weighted average, as it is of the
+        # average and the pooling.
+        n_predictions_levels = n_predictions_levels[
+            n_predictions_levels['levels'].isin(y_true_y_pred_grouped.groups)
+        ]
         metrics_levels_no_missing = (
             metrics_levels.merge(n_predictions_levels, on='levels', how='inner')
         )
         weighted_averages = {}
         for col in output_names:
-            weighted_averages[col] = np.average(
-                metrics_levels_no_missing[col],
-                weights = metrics_levels_no_missing['n_predictions']
+            weighted_averages[col] = (
+                np.average(
+                    metrics_levels_no_missing[col],
+                    weights = metrics_levels_no_missing['n_predictions']
+                )
+                if not metrics_levels_no_missing.empty
+                else np.nan
             )
         weighted_average = pd.DataFrame(weighted_averages, index=[0])
         weighted_average['levels'] = 'weighted_average'

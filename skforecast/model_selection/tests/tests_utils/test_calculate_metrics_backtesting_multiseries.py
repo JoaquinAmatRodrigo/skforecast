@@ -949,3 +949,40 @@ def test_calculate_metrics_backtesting_multiseries_dataframe_no_multiindex_many_
     assert results["mean_absolute_error"].notna().all()
     assert list(results["levels"][:5]) == levels_many
     assert list(results["levels"][5:]) == ["average", "weighted_average", "pooling"]
+
+
+def test_calculate_metrics_backtesting_multiseries_level_predicted_without_observed_values():
+    """
+    Test that a level with predictions but no observed values in their dates
+    ('item_2' ends the day before the first prediction) has NaN metrics and is
+    left out of the aggregated metrics: the weighted average is not NaN and it
+    is equal to the average and the pooling.
+    """
+    series = {
+        'item_1': data['item_1'],
+        'item_2': data['item_2'].iloc[:25],
+    }
+    predictions_two_levels = predictions.query("level in ['item_1', 'item_2']")
+    metrics = [add_y_train_argument(mean_absolute_error)]
+
+    results = _calculate_metrics_backtesting_multiseries(
+        series=series,
+        predictions=predictions_two_levels,
+        folds=folds,
+        span_index=span_index,
+        window_size=window_size,
+        metrics=metrics,
+        levels=['item_1', 'item_2'],
+        add_aggregated_metric=True,
+    )
+
+    expected = pd.DataFrame(
+        {
+            'levels': ['item_1', 'item_2', 'average', 'weighted_average', 'pooling'],
+            'mean_absolute_error': [
+                1.47756696, np.nan, 1.47756696, 1.47756696, 1.47756696
+            ],
+        }
+    )
+
+    pd.testing.assert_frame_equal(results, expected)
