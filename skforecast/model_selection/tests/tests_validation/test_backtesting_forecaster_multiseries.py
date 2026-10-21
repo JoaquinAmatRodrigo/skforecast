@@ -22,6 +22,7 @@ from skforecast.recursive import ForecasterRecursive
 from skforecast.recursive import ForecasterRecursiveMultiSeries
 from skforecast.direct import ForecasterDirectMultiVariate
 from skforecast.preprocessing import RollingFeatures, CalendarFeatures
+from skforecast.preprocessing import reshape_series_wide_to_long
 from skforecast.model_selection import TimeSeriesFold, backtesting_forecaster_multiseries
 
 # Fixtures
@@ -35,6 +36,7 @@ from ..fixtures_model_selection_multiseries import (
     series_long_dt_nans,
     series_dict_range,
     series_dict_dt,
+    series_dict_dt_different_periods,
     series_dict_nans,
     exog_dict_nans,
     series_dict_nans_train,
@@ -5783,6 +5785,95 @@ def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSerie
             [38, 39, 40, 41, 42, 42, 43, 43, 44, 44, 45, 45, 46, 46, 47, 47,
              48, 48, 49, 49]
         )
+    )
+
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+@pytest.mark.parametrize(
+    'refit, expected_mae, expected_pred',
+    [
+        (
+            False,
+            0.23058579677470523,
+            [
+                0.5111685415023672, 0.4576320880057068, 0.5028940906700193,
+                0.48951366694397264, 0.4840673484803482, 0.47386562047358355,
+                0.48278929675931237, 0.4828753603381954, 0.48568433023101965,
+                0.4861758512165585, 0.46858792622859635, 0.4914694579546538,
+                0.49205222588666714, 0.485298516839881, 0.4860152229125711
+            ]
+        ),
+        (
+            True,
+            0.23523349990681713,
+            [
+                0.5111685415023672, 0.4576320880057068, 0.5028940906700193,
+                0.48951366694397264, 0.4840673484803482, 0.47670848582087594,
+                0.4708052692196205, 0.45984718810917186, 0.4583735769695982,
+                0.45956880210695206, 0.4903597399065393, 0.4898175896808835,
+                0.503596577052183, 0.5069762968907888, 0.5059015282951356
+            ]
+        ),
+    ],
+    ids=['refit: False', 'refit: True']
+)
+@pytest.mark.parametrize(
+    'series_type', ['dict', 'long'], ids=lambda st: f'series_type: {st}'
+)
+def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_initial_train_size_greater_than_longest_series(series_type, refit, expected_mae, expected_pred):
+    """
+    Test backtesting_forecaster_multiseries for ForecasterRecursiveMultiSeries
+    when the series do not cover the same period and `initial_train_size` (35)
+    is greater than the length of the longest series (30) but smaller than the
+    span of the series (50), over which the folds are built. 'l1' ends before
+    the end of the training set, so it is never predicted and its metric is
+    NaN. The long format DataFrame without missing values is converted to the
+    same dict of series.
+    """
+
+    series = series_dict_dt_different_periods
+    if series_type == 'long':
+        series = reshape_series_wide_to_long(pd.DataFrame(series)).dropna()
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = Ridge(random_state=123),
+                     lags               = 3,
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 5,
+             initial_train_size = 35,
+             refit              = refit
+         )
+
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster        = forecaster,
+                                               series            = series,
+                                               cv                = cv,
+                                               metric            = 'mean_absolute_error',
+                                               n_jobs            = 1,
+                                               show_progress     = False,
+                                               suppress_warnings = True
+                                           )
+
+    expected_metric = pd.DataFrame(
+        data = {
+            'levels': ['l1', 'l2', 'average', 'weighted_average', 'pooling'],
+            'mean_absolute_error': [np.nan] + [expected_mae] * 4
+        }
+    )
+    expected_predictions = pd.DataFrame(
+        data = {
+            'level': ['l2'] * 15,
+            'fold': [0] * 5 + [1] * 5 + [2] * 5,
+            'pred': expected_pred
+        },
+        index = pd.DatetimeIndex(
+                    pd.date_range(start='2020-02-05', periods=15, freq='D'),
+                    freq=None
+                )
     )
 
     pd.testing.assert_frame_equal(expected_metric, metrics_levels)

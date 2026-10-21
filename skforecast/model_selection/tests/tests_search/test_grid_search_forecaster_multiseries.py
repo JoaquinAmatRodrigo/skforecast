@@ -7,6 +7,7 @@ from sklearn.linear_model import Ridge
 from lightgbm import LGBMRegressor
 from skforecast.recursive import ForecasterRecursiveMultiSeries
 from skforecast.direct import ForecasterDirectMultiVariate
+from skforecast.preprocessing import reshape_series_wide_to_long
 from skforecast.model_selection import grid_search_forecaster_multiseries
 from skforecast.model_selection._split import TimeSeriesFold, OneStepAheadFold
 from sklearn.preprocessing import StandardScaler
@@ -19,6 +20,7 @@ from ..fixtures_model_selection_multiseries import (
     series_long_dt_item_sales,
     series_dict_range,
     series_dict_dt,
+    series_dict_dt_different_periods,
     series_dict_nans,
     series_wide_dt_item_sales,
     exog_wide_dt_item_sales,
@@ -674,6 +676,126 @@ def test_output_grid_search_forecaster_multiseries_ForecasterRecursiveMultiSerie
         },
         index = pd.RangeIndex(start=0, stop=8, step=1)
     )
+
+    pd.testing.assert_frame_equal(results, expected_results)
+
+
+@pytest.mark.parametrize(
+    'series_type', ['dict', 'long'], ids=lambda st: f'series_type: {st}'
+)
+def test_output_grid_search_forecaster_multiseries_ForecasterRecursiveMultiSeries_one_step_ahead_initial_train_size_greater_than_longest_series(series_type):
+    """
+    Test output of grid_search_forecaster_multiseries with a OneStepAheadFold
+    when the series do not cover the same period and `initial_train_size` (35)
+    is greater than the length of the longest series (30) but smaller than the
+    span of the series (50), over which the train and test sets are split.
+    Only 'l2' has values in the test set, so the three aggregated metrics are
+    equal. The best forecaster is refitted on all the observations of both
+    series.
+    """
+    series = series_dict_dt_different_periods
+    if series_type == 'long':
+        series = reshape_series_wide_to_long(pd.DataFrame(series)).dropna()
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = Ridge(random_state=123),
+                     lags               = 3,
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = OneStepAheadFold(initial_train_size=35)
+
+    results = grid_search_forecaster_multiseries(
+                  forecaster        = forecaster,
+                  series            = series,
+                  cv                = cv,
+                  param_grid        = {'alpha': [0.01, 1]},
+                  lags_grid         = [3, 5],
+                  metric            = 'mean_absolute_error',
+                  aggregate_metric  = ['average', 'weighted_average', 'pooling'],
+                  return_best       = True,
+                  verbose           = False,
+                  show_progress     = False,
+                  suppress_warnings = True
+              )
+
+    expected_mae = [
+        0.22297398871870422, 0.22814308884928106, 0.22917458933203,
+        0.23035548103646877
+    ]
+    expected_results = pd.DataFrame({
+        'levels': [['l1', 'l2']] * 4,
+        'lags': [
+            np.array([1, 2, 3, 4, 5]), np.array([1, 2, 3]),
+            np.array([1, 2, 3]), np.array([1, 2, 3, 4, 5])
+        ],
+        'lags_label': [
+            np.array([1, 2, 3, 4, 5]), np.array([1, 2, 3]),
+            np.array([1, 2, 3]), np.array([1, 2, 3, 4, 5])
+        ],
+        'params': [{'alpha': 1}, {'alpha': 0.01}, {'alpha': 1}, {'alpha': 0.01}],
+        'mean_absolute_error__average': expected_mae,
+        'mean_absolute_error__weighted_average': expected_mae,
+        'mean_absolute_error__pooling': expected_mae,
+        'alpha': [1., 0.01, 1., 0.01]
+    })
+
+    pd.testing.assert_frame_equal(results, expected_results)
+    np.testing.assert_array_equal(forecaster.lags, np.array([1, 2, 3, 4, 5]))
+    assert forecaster.estimator.alpha == 1
+    assert forecaster.series_names_in_ == ['l1', 'l2']
+    assert forecaster.training_range_['l1'][-1] == pd.Timestamp('2020-01-30')
+    assert forecaster.training_range_['l2'][-1] == pd.Timestamp('2020-02-19')
+
+
+def test_output_grid_search_forecaster_multiseries_ForecasterRecursiveMultiSeries_one_step_ahead_series_ends_at_end_of_train():
+    """
+    Test output of grid_search_forecaster_multiseries with a OneStepAheadFold
+    when a series ends at the end of the training set ('l1' ends at position
+    29 and `initial_train_size` is 30). It has nothing to evaluate, so it is
+    left out of the test set and the candidates are evaluated with 'l2'.
+    """
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = Ridge(random_state=123),
+                     lags               = 3,
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = OneStepAheadFold(initial_train_size=30)
+
+    results = grid_search_forecaster_multiseries(
+                  forecaster        = forecaster,
+                  series            = series_dict_dt_different_periods,
+                  cv                = cv,
+                  param_grid        = {'alpha': [0.01, 1]},
+                  lags_grid         = [3, 5],
+                  metric            = 'mean_absolute_error',
+                  aggregate_metric  = ['average', 'weighted_average', 'pooling'],
+                  return_best       = False,
+                  verbose           = False,
+                  show_progress     = False,
+                  suppress_warnings = True
+              )
+
+    expected_mae = [
+        0.2139719995055757, 0.21511679537252698, 0.2164188294756968,
+        0.23456642114215853
+    ]
+    expected_results = pd.DataFrame({
+        'levels': [['l1', 'l2']] * 4,
+        'lags': [
+            np.array([1, 2, 3, 4, 5]), np.array([1, 2, 3]),
+            np.array([1, 2, 3]), np.array([1, 2, 3, 4, 5])
+        ],
+        'lags_label': [
+            np.array([1, 2, 3, 4, 5]), np.array([1, 2, 3]),
+            np.array([1, 2, 3]), np.array([1, 2, 3, 4, 5])
+        ],
+        'params': [{'alpha': 1}, {'alpha': 1}, {'alpha': 0.01}, {'alpha': 0.01}],
+        'mean_absolute_error__average': expected_mae,
+        'mean_absolute_error__weighted_average': expected_mae,
+        'mean_absolute_error__pooling': expected_mae,
+        'alpha': [1., 1., 0.01, 0.01]
+    })
 
     pd.testing.assert_frame_equal(results, expected_results)
 

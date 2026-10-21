@@ -256,27 +256,35 @@ def check_backtesting_input(
         if not isinstance(y, pd.Series):
             raise TypeError("`y` must be a pandas Series.")
         data_name = 'y'
-        data_length = len(y)
+        data_length_name = "the length of `y`"
+        index = cv._extract_index(y)
 
     elif forecaster_name in forecasters_multi_no_dict:
         if not isinstance(series, pd.DataFrame):
             raise TypeError("`series` must be a pandas DataFrame.")
         data_name = 'series'
-        data_length = len(series)
-        
+        data_length_name = "the length of `series`"
+        index = cv._extract_index(series)
+
     elif forecaster_name in forecasters_multi_dict:
-        
-        # NOTE: Checks are not need as they are done in the function 
+
+        # NOTE: Checks are not need as they are done in the function
         # `check_preprocess_series` that is used before `check_backtesting_input`
         # in the backtesting function.
-        
+
+        # NOTE: The folds are built over the span of all series (from the
+        # earliest to the latest index), which is longer than any of them when
+        # they do not cover the same period.
         data_name = 'series'
-        data_length = max([len(series[serie]) for serie in series])
+        data_length_name = "the length of the span of `series`"
+        index = cv._extract_index(series)
+
+    data_length = len(index)
 
     if exog is not None:
         if forecaster_name in forecasters_multi_dict:
-            # NOTE: Checks are not need as they are done in the function 
-            # `check_preprocess_exog_multiseries` that is used before 
+            # NOTE: Checks are not need as they are done in the function
+            # `check_preprocess_exog_multiseries` that is used before
             # `check_backtesting_input` in the backtesting function.
             pass
         else:
@@ -301,15 +309,10 @@ def check_backtesting_input(
             raise ValueError(
                 f"`initial_train_size` must be an integer greater than "
                 f"the `window_size` of the forecaster ({forecaster.window_size}) "
-                f"and smaller than the length of `{data_name}` ({data_length}) or "
+                f"and smaller than {data_length_name} ({data_length}) or "
                 f"a date within this range of the index."
             )
     elif initial_train_size is not None:
-        if forecaster_name in forecasters_uni:
-            index = cv._extract_index(y)
-        else:
-            index = cv._extract_index(series)
-
         initial_train_size = date_to_index_position(
                                  index        = index, 
                                  date_input   = initial_train_size, 
@@ -324,14 +327,14 @@ def check_backtesting_input(
             if initial_train_size < 1 or initial_train_size >= data_length:
                 raise ValueError(
                     f"If `initial_train_size` is an integer, it must be greater than "
-                    f"0 and smaller than the length of `{data_name}` ({data_length}). "
+                    f"0 and smaller than {data_length_name} ({data_length}). "
                     f"If it is a date, it must be within this range of the index."
                 )
         elif initial_train_size < forecaster.window_size or initial_train_size >= data_length:
             raise ValueError(
                 f"If `initial_train_size` is an integer, it must be greater than "
                 f"the `window_size` of the forecaster ({forecaster.window_size}) "
-                f"and smaller than the length of `{data_name}` ({data_length}). If "
+                f"and smaller than {data_length_name} ({data_length}). If "
                 f"it is a date, it must be within this range of the index."
             )
         if allow_incomplete_fold:
@@ -364,7 +367,7 @@ def check_backtesting_input(
         ]:
             raise ValueError(
                 f"When using {forecaster_name}, `initial_train_size` must be an "
-                f"integer smaller than the length of `{data_name}` ({data_length})."
+                f"integer smaller than {data_length_name} ({data_length})."
             )
         else:
             if not forecaster.is_fitted:
@@ -581,23 +584,28 @@ def check_one_step_ahead_input(
     if forecaster_name in forecasters_uni:
         if not isinstance(y, pd.Series):
             raise TypeError(f"`y` must be a pandas Series. Got {type(y)}")
-        data_name = 'y'
-        data_length = len(y)
+        data_length_name = "the length of `y`"
+        index = cv._extract_index(y)
 
     elif forecaster_name in forecasters_multi_no_dict:
         if not isinstance(series, pd.DataFrame):
             raise TypeError(f"`series` must be a pandas DataFrame. Got {type(series)}")
-        data_name = 'series'
-        data_length = len(series)
-    
+        data_length_name = "the length of `series`"
+        index = cv._extract_index(series)
+
     elif forecaster_name in forecasters_multi_dict:
-        
-        # NOTE: Checks are not need as they are done in the function 
+
+        # NOTE: Checks are not need as they are done in the function
         # `check_preprocess_series` that is used before `check_one_step_ahead_input`
         # in the backtesting function.
-        
-        data_name = 'series'
-        data_length = max([len(series[serie]) for serie in series])
+
+        # NOTE: The training and test sets are split over the span of all series
+        # (from the earliest to the latest index), which is longer than any of
+        # them when they do not cover the same period.
+        data_length_name = "the length of the span of `series`"
+        index = cv._extract_index(series)
+
+    data_length = len(index)
 
     if exog is not None:
         if forecaster_name in forecasters_multi_dict:
@@ -617,14 +625,9 @@ def check_one_step_ahead_input(
             f"multiple strings and/or callables. Got {type(metric)}."
         )
 
-    if forecaster_name in forecasters_uni:
-        index = cv._extract_index(y)
-    else:
-        index = cv._extract_index(series)
-
     initial_train_size = date_to_index_position(
-                             index        = index, 
-                             date_input   = initial_train_size, 
+                             index        = index,
+                             date_input   = initial_train_size,
                              method       = 'validation',
                              date_literal = 'initial_train_size'
                          )
@@ -632,7 +635,7 @@ def check_one_step_ahead_input(
         raise ValueError(
             f"If `initial_train_size` is an integer, it must be greater than "
             f"the `window_size` of the forecaster ({forecaster.window_size}) "
-            f"and smaller than the length of `{data_name}` ({data_length}). If "
+            f"and smaller than {data_length_name} ({data_length}). If "
             f"it is a date, it must be within this range of the index."
         )
 

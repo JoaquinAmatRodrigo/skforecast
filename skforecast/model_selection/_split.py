@@ -622,7 +622,7 @@ class OneStepAheadFold(BaseFold):
         fold = [
             0,
             [0, initial_train_size_as_int - 1],
-            [initial_train_size_as_int, len(X)],
+            [initial_train_size_as_int, len(index)],
             True
         ]
 

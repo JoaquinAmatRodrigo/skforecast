@@ -16,7 +16,8 @@ from skforecast.model_selection._utils import check_one_step_ahead_input
 # Fixtures
 from skforecast.model_selection.tests.fixtures_model_selection import y
 from skforecast.model_selection.tests.fixtures_model_selection_multiseries import (
-    series_dict_dt
+    series_dict_dt,
+    series_dict_dt_different_periods
 )
 
 
@@ -196,17 +197,18 @@ def test_check_one_step_ahead_input_TypeError_when_metric_not_correct_type():
 def test_check_one_step_ahead_input_ValueError_when_initial_train_size_not_correct_value(initial_train_size, forecaster):
     """
     Test ValueError is raised in check_one_step_ahead_input when 
-    initial_train_size >= length `y` or `series` or initial_train_size < window_size.
+    initial_train_size >= length `y` or span of `series` or initial_train_size
+    < window_size.
     """
     y_datetime = y.copy()
     y_datetime.index = pd.date_range(start='2020-01-01', periods=len(y), freq='D')
 
     if type(forecaster).__name__ == 'ForecasterRecursive':
         data_length = len(y_datetime)
-        data_name = 'y'
+        data_length_name = 'the length of `y`'
     else:
         data_length = len(series_dict_dt['l1'])
-        data_name = 'series'
+        data_length_name = 'the length of the span of `series`'
 
     if initial_train_size == 'greater':
         initial_train_size = data_length
@@ -220,7 +222,7 @@ def test_check_one_step_ahead_input_ValueError_when_initial_train_size_not_corre
     err_msg = re.escape(
         f"If `initial_train_size` is an integer, it must be greater than "
         f"the `window_size` of the forecaster ({forecaster.window_size}) "
-        f"and smaller than the length of `{data_name}` ({data_length}). If "
+        f"and smaller than {data_length_name} ({data_length}). If "
         f"it is a date, it must be within this range of the index."
     )
     with pytest.raises(ValueError, match = err_msg):
@@ -235,8 +237,61 @@ def test_check_one_step_ahead_input_ValueError_when_initial_train_size_not_corre
         )
 
 
-@pytest.mark.parametrize("boolean_argument", 
-                         ['show_progress', 'suppress_warnings'], 
+@pytest.mark.parametrize("initial_train_size",
+                         [50, '2020-02-19'],
+                         ids = lambda initial: f'initial_train_size: {initial}')
+def test_check_one_step_ahead_input_ValueError_when_initial_train_size_not_smaller_than_span_of_series_dict(initial_train_size):
+    """
+    Test ValueError is raised in check_one_step_ahead_input when `series` is a
+    dict of series that do not cover the same period and `initial_train_size`
+    is not smaller than the length of the span of the series (50), which is
+    longer than any of them (30).
+    """
+    forecaster = ForecasterRecursiveMultiSeries(estimator=Ridge(), lags=3)
+    cv = OneStepAheadFold(initial_train_size=initial_train_size)
+
+    err_msg = re.escape(
+        "If `initial_train_size` is an integer, it must be greater than "
+        "the `window_size` of the forecaster (3) and smaller than the length "
+        "of the span of `series` (50). If it is a date, it must be within this "
+        "range of the index."
+    )
+    with pytest.raises(ValueError, match = err_msg):
+        check_one_step_ahead_input(
+            forecaster        = forecaster,
+            cv                = cv,
+            metric            = 'mean_absolute_error',
+            series            = series_dict_dt_different_periods,
+            show_progress     = False,
+            suppress_warnings = False
+        )
+
+
+@pytest.mark.parametrize("initial_train_size",
+                         [40, '2020-02-09'],
+                         ids = lambda initial: f'initial_train_size: {initial}')
+def test_check_one_step_ahead_input_no_error_when_initial_train_size_greater_than_longest_series_but_smaller_than_span(initial_train_size):
+    """
+    Test no error is raised in check_one_step_ahead_input when `series` is a
+    dict of series that do not cover the same period and `initial_train_size`
+    is greater than the length of the longest series (30) but smaller than
+    the span of the series (50), over which the train and test sets are split.
+    """
+    forecaster = ForecasterRecursiveMultiSeries(estimator=Ridge(), lags=3)
+    cv = OneStepAheadFold(initial_train_size=initial_train_size)
+
+    check_one_step_ahead_input(
+        forecaster        = forecaster,
+        cv                = cv,
+        metric            = 'mean_absolute_error',
+        series            = series_dict_dt_different_periods,
+        show_progress     = False,
+        suppress_warnings = True
+    )
+
+
+@pytest.mark.parametrize("boolean_argument",
+                         ['show_progress', 'suppress_warnings'],
                          ids = lambda argument: f'{argument}')
 def test_check_one_step_ahead_input_TypeError_when_boolean_arguments_not_bool(boolean_argument):
     """

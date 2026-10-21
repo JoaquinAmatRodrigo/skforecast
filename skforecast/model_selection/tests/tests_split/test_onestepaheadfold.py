@@ -7,6 +7,9 @@ import numpy as np
 import pandas as pd
 from skforecast.model_selection._split import OneStepAheadFold
 
+# Fixtures
+from ..fixtures_model_selection_multiseries import series_dict_dt_different_periods
+
 
 def test_OneStepAheadFold_split_raise_error_when_X_is_not_series_dataframe_or_dict():
     """
@@ -258,3 +261,43 @@ def test_OneStepAhead_split_int_and_date_initial_train_size(capfd, initial_train
     # is stored in `initial_train_size_as_int` (split() must not mutate the input).
     assert cv.initial_train_size == initial_train_size
     assert cv.initial_train_size_as_int == 70
+
+
+@pytest.mark.parametrize(
+    "as_pandas",
+    [False, True],
+    ids=lambda as_pandas: f"as_pandas: {as_pandas}",
+)
+def test_OneStepAhead_split_dict_of_series_that_do_not_cover_the_same_period(capfd, as_pandas):
+    """
+    Test OneStepAhead splits when X is a dict of series that do not cover the
+    same period. The test set ends at the end of the span of the series (50),
+    not at the number of series.
+    """
+    cv = OneStepAheadFold(initial_train_size=40)
+    folds = cv.split(X=series_dict_dt_different_periods, as_pandas=as_pandas)
+    out, _ = capfd.readouterr()
+    expected_out = (
+        "Information of folds\n"
+        "--------------------\n"
+        "Number of observations in train: 40\n"
+        "Number of observations in test: 10\n"
+        "Training : 2020-01-01 00:00:00 -- 2020-02-09 00:00:00 (n=40)\n"
+        "Test     : 2020-02-10 00:00:00 -- 2020-02-19 00:00:00 (n=10)\n\n"
+    )
+
+    assert out == expected_out
+    if as_pandas:
+        expected_folds = pd.DataFrame(
+            {
+                'fold': [0],
+                'train_start': [0],
+                'train_end': [40],
+                'test_start': [40],
+                'test_end': [50],
+                'fit_forecaster': [True]
+            }
+        )
+        pd.testing.assert_frame_equal(folds, expected_folds)
+    else:
+        assert folds == [0, [0, 40], [40, 50], True]
