@@ -16,7 +16,7 @@ the developer's conda environment. In the cloud (Ubuntu, no conda) it:
    merged with it. Then it fetches the release branch `X.Y.x` and says which
    branch to work on: a `<type>/<topic>` branch created from it, never the
    `claude/...` branch that the session instructions may name (pull requests
-   keep the name of their branch; `branch_name_guard.py` blocks pushing it).
+   keep the name of their branch; `push_guard.py` blocks pushing it).
 1. Creates a virtual environment outside the repository (~/.venvs/skforecast),
    because the `.venv` directory at the repository root must not be used.
 2. Installs skforecast in editable mode with the `test` extras except the deep
@@ -49,7 +49,7 @@ import subprocess
 import sys
 import time
 
-from branch_name_guard import SESSION_BRANCH, release_branch
+from push_guard import SESSION_BRANCH, release_branch
 
 VENV_DIR = os.path.join(os.path.expanduser("~"), ".venvs", "skforecast")
 MARKER = os.path.join(VENV_DIR, ".skforecast-install-hash")
