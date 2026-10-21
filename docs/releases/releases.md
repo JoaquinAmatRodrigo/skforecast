@@ -73,6 +73,8 @@ The main changes in this release are:
 
 + <code>[backtesting_forecaster_multiseries]</code>, <code>[backtesting_foundation]</code> and the hyperparameter search of <code>[ForecasterRecursiveMultiSeries]</code> rejected a valid `initial_train_size` when the series do not cover the same period: it was compared with the length of the longest series instead of the span of all series, over which the folds are built. The `split` method of <code>[OneStepAheadFold]</code> also returned a wrong test end with a dict of series.
 
++ The hyperparameter search of <code>[ForecasterRecursiveMultiSeries]</code> with <code>[OneStepAheadFold]</code> failed with `ValueError: Length of '<series>' must be greater than the maximum window size needed by the forecaster` when a series ended at the end of the training set, even if other series could be evaluated. That series is now left out of the test set; if no series can be trained or evaluated, a `ValueError` explains why.
+
 + <code>[plot_residuals]</code> ignored the `fig` argument when another figure was active: the subplots were drawn on the active figure and `fig` was returned empty. ([#1386](https://github.com/skforecast/skforecast/issues/1386), [#1387](https://github.com/skforecast/skforecast/pull/1387))
 
 

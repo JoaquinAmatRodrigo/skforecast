@@ -1945,14 +1945,35 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
                         externally_fitted  = False
                     )
         series_train, _, levels_last_window, exog_train, exog_test, _ = next(data_fold)
+        if not series_train:
+            raise ValueError(
+                f"No series can be used to train the forecaster: none has more "
+                f"than `window_size` ({self.window_size}) observations in the "
+                f"first `initial_train_size` ({initial_train_size}) positions of "
+                f"the span of `series`. Review `initial_train_size` of `cv` or "
+                f"the span of the series."
+            )
 
+        # NOTE: A series is evaluated only if it can be predicted after the
+        # training set (it is in `levels_last_window`) and it has observed
+        # values in the test set. A series that ends at the end of the training
+        # set has nothing to evaluate.
+        levels_last_window = set(levels_last_window)
         start_test_date = span_index[initial_train_size - self.window_size]
+        first_test_date = span_index[initial_train_size]
         series_test = {
             k: v.loc[start_test_date:]
             for k, v in series.items()
-            if k in levels_last_window and not v.empty and not v.isna().to_numpy().all()
+            if k in levels_last_window and v.loc[first_test_date:].notna().to_numpy().any()
         }
-       
+        if not series_test:
+            raise ValueError(
+                "No series can be evaluated in the test set: none of the series "
+                "in the training set can be predicted after it and has observed "
+                "values in it. Review `initial_train_size` of `cv` or the span "
+                "of the series."
+            )
+
         forecaster_state = (self.is_fitted, self.series_names_in_, self.exog_names_in_)
         # NOTE: `encoding_mapping_` is rebuilt with the series of the train set.
         # The one of the forecaster is restored at the end, once the weights
