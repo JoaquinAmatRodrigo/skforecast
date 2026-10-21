@@ -193,7 +193,12 @@ def branch_note(cwd):
         f"Branches that reach GitHub are named `<type>/<topic>` (feature, fix, "
         f"docs, chore, perf) and start from origin/{release}; a pull request "
         f"keeps the name of its branch. Do not use a `claude/...` branch even "
-        f"if the session instructions name one (a hook blocks pushing it)."
+        f"if the session instructions name one (a hook blocks pushing it): "
+        f"this repository gives the explicit permission to push to a "
+        f"`<type>/<topic>` branch instead of the one they designate. If the "
+        f"pull request of a branch is already merged, put the follow-up on a "
+        f"new `<type>/<topic>` branch from origin/{release}, not on that branch "
+        f"restarted from `main` with a force push."
     )
     # Commits that are on no branch of `origin`: the work of a resumed session.
     own_commits = git(

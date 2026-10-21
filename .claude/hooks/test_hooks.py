@@ -249,10 +249,14 @@ def test_push_guard_allows_conventional_branches(repo_on_branch, current, comman
 )
 def test_push_guard_github_mcp_tools(tmp_path, tool_name, tool_input, expected):
     payload = {"tool_name": tool_name, "tool_input": tool_input, "cwd": str(tmp_path)}
-    code, _, _ = run_hook(
+    code, _, stderr = run_hook(
         "push_guard.py", payload, CLAUDE_PROJECT_DIR=str(tmp_path)
     )
     assert code == expected
+    if expected == 2:
+        # There may be no local branch to rename.
+        assert "Use a `<type>/<topic>` name" in stderr
+        assert "git branch -m" not in stderr
 
 
 @pytest.mark.parametrize(
@@ -283,6 +287,10 @@ def test_push_guard_blocks_force_and_protected_pushes(repo_on_branch, command, e
     )
     assert code == 2
     assert expected in stderr
+    if expected == "force pushes":
+        # The session instructions allow a force push to restart a branch
+        # whose pull request is merged; here the follow-up goes to a new one.
+        assert "already merged, push the follow-up to a new" in stderr
 
 
 @pytest.mark.parametrize(
@@ -632,6 +640,10 @@ def test_session_start_remote_says_which_branch_to_work_on(
 
     assert "named `<type>/<topic>`" in out
     assert "Do not use a `claude/...` branch" in out
+    # The session instructions say to never push to a branch other than the
+    # one they designate "without explicit permission".
+    assert "gives the explicit permission to push" in out
+    assert "already merged, put the follow-up on a new" in out
     assert expected in out
     assert "0.26.x" not in out
     assert head(repo, "origin/0.27.x") == head(seed, "0.27.x")
