@@ -10,7 +10,13 @@ the developer's conda environment. In the cloud (Ubuntu, no conda) it:
    local changes or commits is fast-forwarded to it; any other branch that is
    behind only gets a warning, since it may hold work of a resumed session.
    This runs before the install, so the dependencies come from the updated
-   pyproject.toml.
+   pyproject.toml. A branch that is not on GitHub loses its stale
+   `origin/<branch>` ref, if the checkout has one (seen on a `claude/...`
+   branch, pointing to `main`), so that it does not look pushed and is not
+   merged with it. Then it fetches the release branch `X.Y.x` and says which
+   branch to work on: a `<type>/<topic>` branch created from it, never the
+   `claude/...` branch that the session instructions may name (pull requests
+   keep the name of their branch; `push_guard.py` blocks pushing it).
 1. Creates a virtual environment outside the repository (~/.venvs/skforecast),
    because the `.venv` directory at the repository root must not be used.
 2. Installs skforecast in editable mode with the `test` extras except the deep
@@ -42,6 +48,8 @@ import shutil
 import subprocess
 import sys
 import time
+
+from push_guard import SESSION_BRANCH, release_branch
 
 VENV_DIR = os.path.join(os.path.expanduser("~"), ".venvs", "skforecast")
 MARKER = os.path.join(VENV_DIR, ".skforecast-install-hash")
@@ -120,6 +128,7 @@ def sync_with_origin(cwd):
         )
     if fetch.returncode != 0:
         if "couldn't find remote ref" in fetch.stderr:
+            git("update-ref", "-d", f"refs/remotes/{remote_ref}", cwd=cwd)
             return None
         reason = (fetch.stderr.strip().splitlines() or ["unknown error"])[-1]
         return (
@@ -159,6 +168,66 @@ def sync_with_origin(cwd):
         f"({ahead} ahead) and was not updated: {reason}. Merge {remote_ref} "
         f"before building on it."
     )
+
+
+def branch_note(cwd):
+    """
+    Fetch the release branch and return which branch to work on. The session
+    may start on a `claude/...` branch or its instructions may name one; in
+    this repository the work goes to a `<type>/<topic>` branch instead.
+    """
+    release = release_branch(cwd)
+    if release is None:
+        return None
+    try:
+        subprocess.run(
+            ["git", "fetch", "--quiet", "origin",
+             f"+refs/heads/{release}:refs/remotes/origin/{release}"],
+            cwd=cwd, capture_output=True, timeout=FETCH_TIMEOUT,
+            env={**os.environ, "GIT_TERMINAL_PROMPT": "0"},
+        )
+    except subprocess.TimeoutExpired:
+        pass
+    branch = git("rev-parse", "--abbrev-ref", "HEAD", cwd=cwd)
+    rule = (
+        f"Branches that reach GitHub are named `<type>/<topic>` (feature, fix, "
+        f"docs, chore, perf) and start from origin/{release}; a pull request "
+        f"keeps the name of its branch. Do not use a `claude/...` branch even "
+        f"if the session instructions name one (a hook blocks pushing it): "
+        f"this repository gives the explicit permission to push to a "
+        f"`<type>/<topic>` branch instead of the one they designate. If the "
+        f"pull request of a branch is already merged, put the follow-up on a "
+        f"new `<type>/<topic>` branch from origin/{release}, not on that branch "
+        f"restarted from `main` with a force push."
+    )
+    # Commits that are on no branch of `origin`: the work of a resumed session.
+    own_commits = git(
+        "rev-list", "--count", "HEAD", "--not", "--remotes=origin", cwd=cwd
+    )
+    if SESSION_BRANCH.match(branch) and own_commits not in ("", "0"):
+        action = (
+            f"This session is on '{branch}': before the first push, rename it "
+            f"with `git branch -m <type>/<topic>` and check that `git log "
+            f"--oneline origin/{release}..HEAD` lists only the commits of this "
+            f"work (if it started from `main`, move them with `git rebase "
+            f"--onto origin/{release} origin/main`)."
+        )
+    elif (
+        branch in ("", "HEAD")
+        or PROTECTED_BRANCH.match(branch)
+        or SESSION_BRANCH.match(branch)
+    ):
+        action = (
+            f"Once the topic is known, before the first commit, run `git switch "
+            f"-c <type>/<topic> origin/{release}` (uncommitted changes move "
+            f"with it), unless the user asks to continue an existing branch."
+        )
+    else:
+        action = (
+            f"This session is on '{branch}', the branch being continued: "
+            f"commit and push to it."
+        )
+    return f"{rule} {action}"
 
 
 def find_uv(project_dir):
@@ -216,6 +285,9 @@ def main():
     sync = sync_with_origin(project_dir)
     if sync:
         print(sync)
+    branch = branch_note(project_dir)
+    if branch:
+        print(branch)
     pyproject_path = os.path.join(project_dir, "pyproject.toml")
     with_dl = deep_learning_enabled()
     with open(pyproject_path, "rb") as f:
