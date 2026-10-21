@@ -408,6 +408,8 @@ MAE en los puntos de cold start (los que `lags=56` deja fuera hoy):
 | Aviso de #1415 (`_warn_levels_not_predicted_multiseries`) | causas `train` y `last_window` | con c2 casi no salta con estimadores con NaN; revisar sus textos |
 | `MissingValuesWarning` de `check_predict_input` por NaN en la última ventana | salta | no avisar por los NaN de relleno, o cada backtesting avisará |
 | Búsquedas | silencian tras el primer candidato | aviso temprano y único para estimadores sin NaN |
+| Mensajes de error que describen la regla de predicción: `ValueError` de #1427 cuando ningún fold tiene niveles que predecir, y los añadidos el 2026-10-21 (backtesting sin nada evaluable, en #1427; one-step-ahead sin series que entrenar o evaluar, en la rama `fix/dict-series-span-initial-train-size`) | citan la regla actual (más de `window_size` valores en el entrenamiento, última ventana completa) | revisar los textos: con estimadores que aceptan NaN la regla cambia |
+| Búsqueda con `OneStepAheadFold` (`_evaluate_grid_hyperparameters_multiseries` y `_objective` de bayesian, `_search.py`) | `_train_test_split_one_step_ahead` se llama por candidato de `lags` fuera del `try`: un candidato sin nada que evaluar aborta toda la búsqueda | tratarlo por candidato ("Parameters skipped"), como con `TimeSeriesFold`; hace falta para los estimadores sin NaN, que mantienen el descarte |
 | Docs, `llms-base.txt`, skills (`forecasting-multiple-series`, `hyperparameter-optimization`, `backtesting-configuration`), release note con "Before upgrading" | | cambio de comportamiento público: `ai-context-sync` |
 
 Fuera de alcance: `ForecasterDirectMultiVariate` y `ForecasterRnn` (usan todas las series como
