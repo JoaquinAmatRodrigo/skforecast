@@ -34,6 +34,8 @@ ENV_ASSIGNMENT = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*=")
 # A redirection (`2>&1`, `>log`, `> log`), which is not an argument; group 1 is
 # empty when the target is the next word.
 REDIRECTION = re.compile(r"^(?:\d+|&)?(?:>>?|<<?|>&|<&)(.*)$")
+# The start of a heredoc (`<<EOF`, `<<'EOF'`, `<<-EOF`), not a here-string (`<<<`).
+HEREDOC_START = re.compile(r"(?<!<)<<(?!<)-?\s*['\"]?([A-Za-z_][A-Za-z0-9_]*)['\"]?")
 # git options that take a separate value before the subcommand.
 GIT_OPTIONS_WITH_VALUE = {"-C", "-c", "--git-dir", "--work-tree", "--namespace"}
 # `git push` options that take a separate value.
@@ -59,14 +61,34 @@ BLOCK_MESSAGE = (
 )
 
 
+def without_heredocs(command):
+    """
+    Remove the body of every heredoc from `command`: its lines are data (a
+    commit message, a file written with `cat`), not commands, so a line such
+    as `git push` in a handoff note must not be checked as if it ran.
+    """
+    kept = []
+    delimiter = None
+    for line in command.split("\n"):
+        if delimiter is not None:
+            if line.strip() == delimiter:
+                delimiter = None
+            continue
+        kept.append(line)
+        match = HEREDOC_START.search(line)
+        if match:
+            delimiter = match.group(1)
+    return "\n".join(kept)
+
+
 def segments(command):
     """
     Split `command` into simple commands and return the words of each, with
-    leading env assignments and redirections removed. A segment that is not
-    valid shell (for example a line inside a heredoc) is skipped.
+    leading env assignments and redirections removed. Heredoc bodies are left
+    out, and a segment that is not valid shell is skipped.
     """
     result = []
-    for segment in SEGMENT_SEPARATOR.split(command):
+    for segment in SEGMENT_SEPARATOR.split(without_heredocs(command)):
         try:
             words = shlex.split(segment.strip().lstrip("({ "))
         except ValueError:
@@ -146,7 +168,7 @@ def pushed_branches(args, cwd):
         if _ and not src:
             continue  # `:branch` deletes it.
         dst = dst or src
-        if dst == "HEAD":
+        if dst in ("HEAD", "@"):
             dst = current_branch(cwd)
         branches.append(dst.removeprefix("refs/heads/"))
     return branches

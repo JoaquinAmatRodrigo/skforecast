@@ -157,9 +157,13 @@ def repo_on_branch(tmp_path):
         ("worktree-fix-dict-span", "git push -u origin HEAD"),
         ("claude/abc", "git push -u origin 2>&1 | tail -3"),
         ("claude/abc", "git push origin > /tmp/push.log"),
+        ("claude/abc", "git push origin @"),
+        ("claude/abc", "cat > notes.md <<'EOF'\nWIP\nEOF\ngit push -u origin HEAD"),
+        ("claude/abc", "git commit -F - <<< 'Fix' && git push"),
     ],
     ids=["explicit", "head", "bare", "chained", "refs-heads", "lease-refspec",
-         "gh-current", "gh-head", "worktree", "redirect", "redirect-target"],
+         "gh-current", "gh-head", "worktree", "redirect", "redirect-target",
+         "at-sign", "after-heredoc", "here-string"],
 )
 def test_branch_name_guard_blocks_session_branches(repo_on_branch, current, command):
     repo = repo_on_branch(current)
@@ -196,9 +200,12 @@ def test_branch_name_guard_names_latest_release_branch(repo_on_branch):
         ("claude/abc", "git status && git log --oneline origin/0.27.x..HEAD"),
         ("docs/faq", "gh pr create --base 0.27.x --title Docs"),
         ("claude/abc", "git push -u origin fix/x 2>&1"),
+        ("claude/abc", "cat > notes.md <<'EOF'\nThen run:\ngit push origin claude/x\nEOF"),
+        ("claude/abc", "cat <<-EOF > notes.md\n\tgit push\n\tEOF"),
     ],
     ids=["conventional", "bare-conventional", "other-refspec", "renamed",
-         "delete", "delete-refspec", "not-push", "gh-conventional", "redirect"],
+         "delete", "delete-refspec", "not-push", "gh-conventional", "redirect",
+         "heredoc", "indented-heredoc"],
 )
 def test_branch_name_guard_allows_conventional_branches(repo_on_branch, current, command):
     repo = repo_on_branch(current)
