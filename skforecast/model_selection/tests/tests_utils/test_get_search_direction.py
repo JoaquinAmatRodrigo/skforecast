@@ -38,16 +38,16 @@ def custom_metric(y_true, y_pred):  # pragma: no cover
         ('accuracy_score', forecaster_clf, 'maximize'),
         (custom_metric, forecaster_reg, 'minimize'),
         (custom_metric, forecaster_clf, 'maximize'),
-        ('not_a_metric', forecaster_reg, 'minimize'),
-        ('not_a_metric', forecaster_clf, 'maximize'),
+        ('mean_absolute_scaled_error', forecaster_reg, 'minimize'),
+        ('f1_score', forecaster_reg, 'maximize'),
     ],
     ids=lambda dt: f'{getattr(dt, "__name__", dt)}'
 )
 def test_get_search_direction_output(metric, forecaster, expected):
     """
-    Test that the direction follows the metric when it is known and the task
-    of the forecaster otherwise (also for names that are not valid metrics,
-    which are reported when the candidates are evaluated).
+    Test that the direction follows the metric when it is known (names ending
+    in `_score` are maximized, any other name is minimized) and the task of
+    the forecaster otherwise.
     """
     assert _get_search_direction(metric=metric, forecaster=forecaster) == expected
 

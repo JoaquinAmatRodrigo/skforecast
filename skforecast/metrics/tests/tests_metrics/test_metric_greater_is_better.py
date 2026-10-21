@@ -22,10 +22,7 @@ from skforecast.metrics import (
     add_y_train_argument,
     create_mean_pinball_loss,
     mean_absolute_scaled_error,
-    root_mean_squared_scaled_error,
-    symmetric_mean_absolute_percentage_error,
     winkler_score,
-    weighted_interval_score,
     _get_metric,
 )
 from skforecast.metrics.metrics import _metric_greater_is_better
@@ -83,10 +80,10 @@ def test_metric_greater_is_better_output_when_scikit_learn_metric(metric, expect
         ('mean_absolute_error', False),
         ('mean_absolute_percentage_error', False),
         ('mean_squared_log_error', False),
-        ('mean_absolute_scaled_error', False),
-        ('root_mean_squared_scaled_error', False),
+        ('mean_absolute_scaled_error', None),
+        ('root_mean_squared_scaled_error', None),
         ('median_absolute_error', False),
-        ('symmetric_mean_absolute_percentage_error', False),
+        ('symmetric_mean_absolute_percentage_error', None),
         ('accuracy_score', True),
         ('balanced_accuracy_score', True),
         ('f1_score', True),
@@ -97,7 +94,9 @@ def test_metric_greater_is_better_output_when_scikit_learn_metric(metric, expect
 )
 def test_metric_greater_is_better_output_when_metric_from_get_metric(metric, expected):
     """
-    Test the direction of every metric accepted by name.
+    Test the direction of every metric accepted by name. The metrics of
+    skforecast have no known direction, so the search uses the direction of
+    the task (they are regression metrics, which are minimized).
     """
     assert _metric_greater_is_better(_get_metric(metric=metric)) is expected
 
@@ -105,34 +104,30 @@ def test_metric_greater_is_better_output_when_metric_from_get_metric(metric, exp
 @pytest.mark.parametrize(
     'metric',
     [
+        custom_metric,
+        custom_score,
+        lambda y_true, y_pred: 0.0,
+        partial(custom_metric),
         mean_absolute_scaled_error,
-        root_mean_squared_scaled_error,
-        symmetric_mean_absolute_percentage_error,
-        winkler_score,
-        weighted_interval_score,
         create_mean_pinball_loss(alpha=0.9),
+        winkler_score,
     ],
-    ids=lambda dt: f'{dt.__name__}'
-)
-def test_metric_greater_is_better_False_when_skforecast_metric(metric):
-    """
-    Test that the metrics of skforecast are minimized, including the ones whose
-    name ends in `_score` (Winkler and weighted interval score).
-    """
-    assert _metric_greater_is_better(metric) is False
-    assert _metric_greater_is_better(add_y_train_argument(metric)) is False
-
-
-@pytest.mark.parametrize(
-    'metric',
-    [custom_metric, custom_score, lambda y_true, y_pred: 0.0, partial(custom_metric)],
-    ids=['custom_metric', 'custom_score', 'lambda', 'partial']
+    ids=[
+        'custom_metric',
+        'custom_score',
+        'lambda',
+        'partial',
+        'mean_absolute_scaled_error',
+        'pinball',
+        'winkler_score',
+    ]
 )
 def test_metric_greater_is_better_None_when_direction_unknown(metric):
     """
-    Test that `None` is returned for user-defined metrics without the attribute
-    `greater_is_better`. The scikit-learn naming convention is not applied to
-    them (`custom_score`).
+    Test that `None` is returned for functions that are not scikit-learn
+    metrics and have no attribute `greater_is_better`, so that the search
+    uses the direction of the task. The scikit-learn naming convention is not
+    applied to them (`custom_score`, `winkler_score`).
     """
     assert _metric_greater_is_better(metric) is None
     assert _metric_greater_is_better(add_y_train_argument(metric)) is None
@@ -140,7 +135,7 @@ def test_metric_greater_is_better_None_when_direction_unknown(metric):
 
 @pytest.mark.parametrize(
     'greater_is_better',
-    [True, False, np.bool_(True)],
+    [True, False],
     ids=lambda dt: f'greater_is_better: {dt}'
 )
 def test_metric_greater_is_better_output_when_attribute_is_defined(greater_is_better):
@@ -160,10 +155,10 @@ def test_metric_greater_is_better_output_when_attribute_is_defined(greater_is_be
     my_partial.greater_is_better = greater_is_better
 
     for metric in [my_metric, my_score, my_partial]:
-        assert _metric_greater_is_better(metric) is bool(greater_is_better)
+        assert _metric_greater_is_better(metric) is greater_is_better
         assert (
             _metric_greater_is_better(add_y_train_argument(metric))
-            is bool(greater_is_better)
+            is greater_is_better
         )
 
 
@@ -175,11 +170,11 @@ def test_metric_greater_is_better_TypeError_when_attribute_is_not_bool():
     def my_metric(y_true, y_pred):  # pragma: no cover
         return 0.0
 
-    my_metric.greater_is_better = 'maximize'
-
-    err_msg = re.escape(
-        "The attribute `greater_is_better` of the metric must be a boolean: "
-        "`True` or `False`. Got <class 'str'>."
-    )
-    with pytest.raises(TypeError, match=err_msg):
-        _metric_greater_is_better(my_metric)
+    for greater_is_better in ['maximize', 1, np.bool_(True)]:
+        my_metric.greater_is_better = greater_is_better
+        err_msg = re.escape(
+            f"The attribute `greater_is_better` of the metric must be a boolean: "
+            f"`True` or `False`. Got {type(greater_is_better)}."
+        )
+        with pytest.raises(TypeError, match=err_msg):
+            _metric_greater_is_better(my_metric)

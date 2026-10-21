@@ -96,13 +96,11 @@ def grid_search_forecaster(
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
 
-        The first metric ranks the candidates. Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -213,13 +211,11 @@ def random_search_forecaster(
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
 
-        The first metric ranks the candidates. Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -333,13 +329,11 @@ def _evaluate_grid_hyperparameters(
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
 
-        The first metric ranks the candidates. Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -632,13 +626,11 @@ def bayesian_search_forecaster(
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
 
-        The first metric ranks the candidates. Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -1042,14 +1034,11 @@ def grid_search_forecaster_multiseries(
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
 
-        The first metric ranks the candidates (the first aggregation in
-        multi-series searches). Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     aggregate_metric : str, list, default None
         Aggregation method/s used to combine the metric/s of all levels (series)
         when multiple levels are predicted. If list, the first aggregation method
@@ -1178,14 +1167,11 @@ def random_search_forecaster_multiseries(
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
 
-        The first metric ranks the candidates (the first aggregation in
-        multi-series searches). Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     aggregate_metric : str, list, default None
         Aggregation method/s used to combine the metric/s of all levels (series)
         when multiple levels are predicted. If list, the first aggregation method
@@ -1319,14 +1305,11 @@ def _evaluate_grid_hyperparameters_multiseries(
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
 
-        The first metric ranks the candidates (the first aggregation in
-        multi-series searches). Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     aggregate_metric : str, list, default None
         Aggregation method/s used to combine the metric/s of all levels (series)
         when multiple levels are predicted. If list, the first aggregation method
@@ -1702,14 +1685,11 @@ def bayesian_search_forecaster_multiseries(
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
 
-        The first metric ranks the candidates (the first aggregation in
-        multi-series searches). Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     aggregate_metric : str, list, default None
         Aggregation method/s used to combine the metric/s of all levels (series)
         when multiple levels are predicted. If list, the first aggregation method
@@ -2259,14 +2239,11 @@ def bayesian_search_foundation(
           `y_train` (optional) that returns a float.
         - If `list`: List containing multiple strings and/or callables.
 
-        The first metric ranks the candidates (the first aggregation in
-        multi-series searches). Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     aggregate_metric : str, list, default None
         Aggregation method(s) used to combine the metric(s) of all levels (series)
         when multiple levels are predicted. If list, the first aggregation method
@@ -2604,13 +2581,11 @@ def grid_search_stats(
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
 
-        The first metric ranks the candidates. Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -2709,13 +2684,11 @@ def random_search_stats(
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
 
-        The first metric ranks the candidates. Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -2817,13 +2790,11 @@ def _evaluate_grid_hyperparameters_stats(
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
 
-        The first metric ranks the candidates. Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -3052,13 +3023,11 @@ def grid_search_equivalent_date(
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
 
-        The first metric ranks the candidates. Its direction is inferred from the metric:
-        the scikit-learn metrics whose name ends in `_score` (for example
-        `r2_score` or `accuracy_score`) are maximized; the ones ending in
-        `_error`, `_loss` or `_deviance`, and the metrics of skforecast, are
-        minimized. For any other callable, set its attribute `greater_is_better`
-        (`True` or `False`); if it is not set, the metric is minimized in
-        regression tasks and maximized in classification tasks.
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     return_best : bool, default True
         Refit the `forecaster` using the best found configuration on the whole data.
     n_jobs : int, 'auto', default 'auto'

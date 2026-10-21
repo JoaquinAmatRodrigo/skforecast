@@ -394,7 +394,7 @@ argument is silently ignored.
 
 In hyperparameter searches, the first metric ranks the candidates, and its direction
 is inferred from the metric: scikit-learn metrics ending in `_score` (`r2_score`,
-`accuracy_score`) are maximized; errors, losses and skforecast metrics are minimized.
+`accuracy_score`) are maximized; errors and losses are minimized.
 A custom metric is minimized in regression and maximized in classification, unless
 it defines the attribute `greater_is_better`:
 

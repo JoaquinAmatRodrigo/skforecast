@@ -2134,7 +2134,8 @@ def _get_search_direction(metric: Callable, forecaster: object) -> str:
     ----------
     metric : str, Callable
         Metric used to rank the candidates of the search. If `str`, the name of
-        a metric accepted by `_get_metric`.
+        a metric accepted by `_get_metric`: the ones ending in `_score` are
+        maximized and the rest are minimized.
     forecaster : object
         Forecaster model.
 
@@ -2145,14 +2146,9 @@ def _get_search_direction(metric: Callable, forecaster: object) -> str:
 
     """
 
-    greater_is_better = None
     if isinstance(metric, str):
-        # NOTE: An invalid name is reported when the candidates are evaluated.
-        try:
-            metric = _get_metric(metric=metric)
-        except ValueError:
-            metric = None
-    if metric is not None:
+        greater_is_better = metric.endswith('_score')
+    else:
         greater_is_better = _metric_greater_is_better(metric)
     if greater_is_better is None:
         greater_is_better = (

@@ -386,7 +386,7 @@ print(fold)
 
 Three search strategies are available: `grid_search_forecaster`, `random_search_forecaster`, and `bayesian_search_forecaster` (Optuna-based). All accept `TimeSeriesFold` or `OneStepAheadFold`. Multi-series variants: `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries`, `bayesian_search_forecaster_multiseries`.
 
-Results are sorted by the first metric, best first, and `return_best=True` refits the forecaster with the first row. The direction comes from the metric: scikit-learn metrics ending in `_score` (`r2_score`, `accuracy_score`) are maximized; errors, losses and skforecast metrics are minimized. A custom callable is minimized in regression and maximized in classification unless it sets the attribute `greater_is_better` (`True` or `False`). In the Bayesian searches, `kwargs_create_study={'direction': ...}` overrides it.
+Results are sorted by the first metric, best first, and `return_best=True` refits the forecaster with the first row. The direction comes from the metric: scikit-learn metrics ending in `_score` (`r2_score`, `accuracy_score`) are maximized; errors and losses are minimized. A custom callable is minimized in regression and maximized in classification unless it sets the attribute `greater_is_better` (`True` or `False`). In the Bayesian searches, `kwargs_create_study={'direction': ...}` overrides it.
 
 ```python
 from skforecast.model_selection import bayesian_search_forecaster, TimeSeriesFold

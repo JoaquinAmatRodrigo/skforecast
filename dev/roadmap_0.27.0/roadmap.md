@@ -76,9 +76,9 @@ porque también corre modelos foundation, RNN y LightGBM.
    grave que queda y el elemento más largo (M a L), así que conviene retomarlo pronto para que
    no retrase la release.
 2. ~~**BUG-03**~~ **Hecho en la rama `fix/search-metric-direction`** (2026-10-21, sin PR
-   todavía): la dirección sale de la métrica (opción c: atributo `greater_is_better`,
-   métricas de skforecast, convención de nombres solo para `sklearn.metrics`; si no se conoce,
-   la dirección de la tarea). Las bayesianas ordenan por `study.direction` y avisan si
+   todavía): la dirección sale de la métrica (opción c: atributo `greater_is_better` y
+   convención de nombres solo para `sklearn.metrics`; si no se conoce, la dirección de la
+   tarea, que ya minimiza las métricas de skforecast, todas de regresión). Las bayesianas ordenan por `study.direction` y avisan si
    `direction` contradice la métrica. Helpers `_metric_greater_is_better`
    (`skforecast/metrics/metrics.py`) y `_get_search_direction` y `_check_study_direction`
    (`skforecast/model_selection/_utils.py`).
