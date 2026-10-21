@@ -1564,3 +1564,55 @@ def test_output_backtesting_foundation_series_predicted_when_context_has_one_obs
 
     pd.testing.assert_frame_equal(metric, expected_metric)
     pd.testing.assert_frame_equal(backtest_predictions, expected_predictions)
+
+
+def test_output_backtesting_foundation_initial_train_size_greater_than_longest_series():
+    """
+    Test backtesting when the series do not cover the same period and
+    `initial_train_size` (35) is greater than the length of the longest series
+    (30) but smaller than the span of the series (50), over which the folds
+    are built. `series_1` ends before the end of the training set, so it is
+    never predicted and its metric is NaN.
+    """
+    series = {
+        "series_1": series_dict["series_1"].iloc[:30],
+        "series_2": series_dict["series_2"].iloc[20:],
+    }
+    forecaster = make_forecaster()
+    cv = TimeSeriesFold(
+        steps=5,
+        initial_train_size=35,
+        refit=False,
+        verbose=False,
+    )
+    with patch(
+        "skforecast.model_selection._validation.deepcopy_forecaster",
+        side_effect=deepcopy,
+    ):
+        metric, backtest_predictions = backtesting_foundation(
+            forecaster=forecaster,
+            series=series,
+            cv=cv,
+            metric="mean_absolute_error",
+            add_aggregated_metric=False,
+            verbose=False,
+            show_progress=False,
+        )
+
+    expected_metric = pd.DataFrame(
+        {
+            "levels": ["series_1", "series_2"],
+            "mean_absolute_error": [np.nan, 91.5],
+        }
+    )
+    expected_predictions = pd.DataFrame(
+        {
+            "level": ["series_2"] * 15,
+            "fold": np.repeat([0, 1, 2], 5),
+            "pred": np.full(15, 0.5),
+        },
+        index=_index[35:],
+    )
+
+    pd.testing.assert_frame_equal(metric, expected_metric)
+    pd.testing.assert_frame_equal(backtest_predictions, expected_predictions)
