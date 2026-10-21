@@ -47,7 +47,8 @@ entrenamiento), #1387 (ISSUE-1386, PR externo: `plot_residuals` con `fig`) y #14
 DEP-cv-differentiation, 2026-10-20: el cv ya no exige repetir la `differentiation` del
 forecaster; `differentiation` de los dos folds y `window_size` de `OneStepAheadFold` quedan
 deprecados, sin efecto, con `FutureWarning` y eliminación en la 0.29.0; además corrige las
-docstrings de los folds y quita `externally_fitted` de `OneStepAheadFold.split`).
+docstrings de los folds y quita `externally_fitted` de `OneStepAheadFold.split`) y #1424
+(parte de QW-08: `metric='root_mean_squared_error'` por nombre en backtesting y búsquedas).
 **Paneles con series que terminan y empiezan más tarde** (2026-10-21, sin elemento previo en el
 roadmap; ver sección 6): #1427 (folds sin series en el backtesting multiserie) y #1430
 (`initial_train_size` contra el span de las series y test set del one-step-ahead).
@@ -83,7 +84,9 @@ porque también corre modelos foundation, RNN y LightGBM.
 4. **BUG-04 y BUG-10** (S cada uno): foundation es foco, y los dos hacen que se prediga con
    otro modelo u otros datos sin aviso.
 5. **QW-08 + PERF-03**, y después el bloque de salidas del backtesting: QW-04, BUG-02 + QW-10,
-   anunciados juntos.
+   anunciados juntos. De QW-08, el RMSE por nombre ya está hecho (#1424); quedan la
+   validación de nombres de métrica repetidos en los backtesting y los nombres de pinball
+   con el cuantil.
 6. **QW-01 y BUG-01** (S, avisos).
 7. **FE-05** (comparar varios modelos en un backtesting, nuevo): después de BUG-06 (punto de
    foundation con intervalos). QW-03, que era bloqueante porque un mismo `cv` no servía para
@@ -126,7 +129,8 @@ El orden dentro de cada tema sigue las dependencias de la sección 1. En particu
 - BUG-02 va antes que QW-10.
 - PERF-03 va junto a QW-08 o justo detrás: los dos tocan `_get_metric`
   (`skforecast/metrics/metrics.py`), así que no conviene tener dos PRs abiertas sobre la
-  misma función. Si QW-08 añade `root_mean_squared_error`, PERF-03 incluye su versión en numpy.
+  misma función. `root_mean_squared_error` ya se acepta por nombre (#1424), así que PERF-03
+  tiene que incluir su versión en numpy.
 
 Orden de QW-09: ~~ISSUE-1406 (#1415) → BUG-stats-interval-ignored (#1416) → ISSUE-1410
 (#1418)~~ (hechos el 2026-10-19) → ~~QW-09 (#1420)~~ (hecho el 2026-10-20) → **QW-08
