@@ -1543,14 +1543,25 @@ def _calculate_metrics_backtesting_multiseries(
             .reset_index(name="n_predictions")
             .rename(columns={"level": "levels"})
         )
+        # NOTE: A level predicted without observed values in its test set (for
+        # example, a series that ends at the end of the training set) has no
+        # metric, so it is left out of the weighted average, as it is of the
+        # average and the pooling.
+        n_predictions_levels = n_predictions_levels[
+            n_predictions_levels['levels'].isin(y_true_y_pred_grouped.groups)
+        ]
         metrics_levels_no_missing = (
             metrics_levels.merge(n_predictions_levels, on='levels', how='inner')
         )
         weighted_averages = {}
         for col in output_names:
-            weighted_averages[col] = np.average(
-                metrics_levels_no_missing[col],
-                weights = metrics_levels_no_missing['n_predictions']
+            weighted_averages[col] = (
+                np.average(
+                    metrics_levels_no_missing[col],
+                    weights = metrics_levels_no_missing['n_predictions']
+                )
+                if not metrics_levels_no_missing.empty
+                else np.nan
             )
         weighted_average = pd.DataFrame(weighted_averages, index=[0])
         weighted_average['levels'] = 'weighted_average'

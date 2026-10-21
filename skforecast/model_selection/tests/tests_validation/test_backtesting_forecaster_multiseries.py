@@ -6582,3 +6582,95 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
 
         pd.testing.assert_frame_equal(expected_metric, metrics_levels)
         pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
+
+
+def test_output_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_level_predicted_without_observed_values():
+    """
+    Test backtesting_forecaster_multiseries for ForecasterRecursiveMultiSeries
+    when 'l1' ends at the end of the training set (position 29 and
+    `initial_train_size` 30). It is predicted in fold 0, as it has a complete
+    last window, but it has no observed values to evaluate: its metric is NaN
+    and it is left out of the aggregated metrics, also of the weighted average.
+    """
+    series = {
+        'l1': series_dict_range['l1'].iloc[:30],
+        'l2': series_dict_range['l2'],
+    }
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = Ridge(random_state=123),
+                     lags               = 3,
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 5,
+             initial_train_size = 30,
+             refit              = False
+         )
+
+    metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
+                                               forecaster        = forecaster,
+                                               series            = series,
+                                               cv                = cv,
+                                               metric            = 'mean_absolute_error',
+                                               n_jobs            = 1,
+                                               show_progress     = False,
+                                               suppress_warnings = True
+                                           )
+
+    expected_metric = pd.DataFrame({
+        'levels': ['l1', 'l2', 'average', 'weighted_average', 'pooling'],
+        'mean_absolute_error': [np.nan] + [0.22275680983818927] * 4
+    })
+    levels_folds = {
+        fold: levels.tolist()
+        for fold, levels in backtest_predictions.groupby('fold')['level'].unique().items()
+    }
+
+    pd.testing.assert_frame_equal(expected_metric, metrics_levels)
+    assert levels_folds == {0: ['l1', 'l2'], 1: ['l2'], 2: ['l2'], 3: ['l2']}
+
+
+def test_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_ValueError_when_no_level_predicted_has_observed_values():
+    """
+    Test ValueError is raised in backtesting_forecaster_multiseries when the
+    only level predicted has no observed values in the test set: 'l1' ends at
+    the end of the training set and 'l2' starts after it, so it is never in
+    the training set. No forecaster is fitted.
+    """
+    series = {
+        'l1': series_dict_range['l1'].iloc[:30],
+        'l2': pd.Series(np.arange(45, dtype=float), index=pd.RangeIndex(35, 80)),
+    }
+    forecaster = ForecasterRecursiveMultiSeries(
+                     estimator          = Ridge(random_state=123),
+                     lags               = 3,
+                     encoding           = 'ordinal',
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 5,
+             initial_train_size = 30,
+             refit              = False
+         )
+
+    err_msg = re.escape(
+        "No level predicted in the backtesting has observed values in the "
+        "test set of the folds in which it is predicted, so the metrics "
+        "cannot be calculated. Review `initial_train_size`, `fixed_train_size` "
+        "and `refit` of `cv`, `levels`, or the span of the series."
+    )
+    fit = ForecasterRecursiveMultiSeries.fit
+    with patch.object(
+        ForecasterRecursiveMultiSeries, 'fit', autospec=True, side_effect=fit
+    ) as mock_fit:
+        with pytest.raises(ValueError, match=err_msg):
+            backtesting_forecaster_multiseries(
+                forecaster    = forecaster,
+                series        = series,
+                cv            = cv,
+                metric        = 'mean_absolute_error',
+                n_jobs        = 1,
+                show_progress = False
+            )
+    assert mock_fit.call_count == 0

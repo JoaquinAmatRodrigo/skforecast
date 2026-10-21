@@ -1473,6 +1473,22 @@ def _backtesting_forecaster_multiseries(
             f"`fixed_train_size` and `refit` of `cv`, `levels`, or the span of "
             f"the series."
         )
+    # NOTE: A level predicted in a fold is evaluated only if it has observed
+    # values in its test set (for example, not if the series ends at the end
+    # of the training set). If no level is evaluated, no metric can be
+    # calculated, so it fails before fitting any forecaster.
+    levels_evaluate_any = any(
+        series[level].loc[span_index[fold[4][0]]:span_index[fold[4][1] - 1]].notna().any()
+        for fold, levels_predict in zip(folds, levels_predict_folds)
+        for level in levels_predict
+    )
+    if not levels_evaluate_any:
+        raise ValueError(
+            "No level predicted in the backtesting has observed values in the "
+            "test set of the folds in which it is predicted, so the metrics "
+            "cannot be calculated. Review `initial_train_size`, `fixed_train_size` "
+            "and `refit` of `cv`, `levels`, or the span of the series."
+        )
     fit_folds = _select_fit_folds_multiseries(
                     folds                = folds,
                     levels_predict_folds = levels_predict_folds
