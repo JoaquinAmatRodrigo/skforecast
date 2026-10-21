@@ -75,8 +75,13 @@ porque también corre modelos foundation, RNN y LightGBM.
    arreglos rápidos (S) de los puntos 2 a 8. Sigue siendo el resultado erróneo silencioso más
    grave que queda y el elemento más largo (M a L), así que conviene retomarlo pronto para que
    no retrase la release.
-2. **BUG-03** (S): las búsquedas reentrenan con el peor candidato cuando la métrica es "mayor
-   es mejor", sin aviso y con `return_best=True` por defecto.
+2. ~~**BUG-03**~~ **Hecho en la rama `fix/search-metric-direction`** (2026-10-21, sin PR
+   todavía): la dirección sale de la métrica (opción c: atributo `greater_is_better`,
+   métricas de skforecast, convención de nombres solo para `sklearn.metrics`; si no se conoce,
+   la dirección de la tarea). Las bayesianas ordenan por `study.direction` y avisan si
+   `direction` contradice la métrica. Helpers `_metric_greater_is_better`
+   (`skforecast/metrics/metrics.py`) y `_get_search_direction` y `_check_study_direction`
+   (`skforecast/model_selection/_utils.py`).
 3. ~~**QW-03**~~ y ~~**DEP-cv-differentiation**~~ **Hechos con #1423** (fusionado el
    2026-10-20): elimina un `ValueError` en todo backtesting con `differentiation`, cuyo peor
    caso era una búsqueda que devuelve un DataFrame vacío, y depreca los argumentos del cv que

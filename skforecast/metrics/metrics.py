@@ -9,8 +9,9 @@ from __future__ import annotations
 from typing import Callable
 import numpy as np
 import pandas as pd
+import re
 import inspect
-from functools import wraps
+from functools import partial, wraps
 from sklearn.metrics import (
     mean_squared_error,
     root_mean_squared_error,
@@ -534,7 +535,9 @@ def create_mean_pinball_loss(alpha: float) -> Callable:
     Returns
     -------
     mean_pinball_loss_q: callable
-        Mean Pinball loss for the given quantile.
+        Mean Pinball loss for the given quantile. Its attribute
+        `greater_is_better` is `False`, so it is minimized in hyperparameter
+        searches.
 
     Examples
     --------
@@ -557,7 +560,9 @@ def create_mean_pinball_loss(alpha: float) -> Callable:
 
     def mean_pinball_loss_q(y_true, y_pred):
         return mean_pinball_loss(y_true, y_pred, alpha=alpha)
-    
+
+    mean_pinball_loss_q.greater_is_better = False
+
     return mean_pinball_loss_q
 
 
@@ -865,3 +870,76 @@ def weighted_interval_score(
     wis_per_obs = (1.0 / (n_intervals + 0.5)) * (0.5 * abs_error + weighted_sum)
 
     return float(np.mean(wis_per_obs))
+
+
+# NOTE: Metrics of skforecast in which lower values are better. The direction of
+# the scikit-learn metrics is inferred from their names (see
+# `_metric_greater_is_better`).
+_SKFORECAST_LOWER_IS_BETTER_METRICS = (
+    mean_absolute_scaled_error,
+    root_mean_squared_scaled_error,
+    symmetric_mean_absolute_percentage_error,
+    crps_from_predictions,
+    crps_from_quantiles,
+    winkler_score,
+    weighted_interval_score,
+)
+
+
+def _metric_greater_is_better(metric: Callable) -> bool | None:
+    """
+    Infer whether greater values of a metric are better. The direction is
+    resolved in this order:
+
+    - The attribute `greater_is_better` of the metric (or of the function it
+    wraps), if it is defined.
+    - The metrics of skforecast, in which lower values are better.
+    - The metrics of scikit-learn, following its naming convention: functions
+    ending in `_score` (and `matthews_corrcoef`) are maximized, and functions
+    ending in `_error`, `_loss` or `_deviance` are minimized.
+
+    Wrappers created with `functools.wraps` (such as `add_y_train_argument`)
+    and `functools.partial` objects are unwrapped to find the original function.
+
+    Parameters
+    ----------
+    metric : Callable
+        Metric function.
+
+    Returns
+    -------
+    greater_is_better : bool, None
+        `True` if greater values of the metric are better, `False` if lower
+        values are better and `None` if the direction is unknown.
+
+    """
+
+    func = metric
+    while True:
+        greater_is_better = getattr(func, "greater_is_better", None)
+        if greater_is_better is not None:
+            if not isinstance(greater_is_better, (bool, np.bool_)):
+                raise TypeError(
+                    f"The attribute `greater_is_better` of the metric must be a "
+                    f"boolean: `True` or `False`. Got {type(greater_is_better)}."
+                )
+            return bool(greater_is_better)
+        if isinstance(func, partial):
+            func = func.func
+        elif hasattr(func, "__wrapped__"):
+            func = func.__wrapped__
+        else:
+            break
+
+    if any(func is m for m in _SKFORECAST_LOWER_IS_BETTER_METRICS):
+        return False
+
+    module = getattr(func, "__module__", None) or ""
+    name = getattr(func, "__name__", "")
+    if module == "sklearn.metrics" or module.startswith("sklearn.metrics."):
+        if name.endswith("_score") or name == "matthews_corrcoef":
+            return True
+        if re.search(r"_(error|loss|deviance)$", name):
+            return False
+
+    return None

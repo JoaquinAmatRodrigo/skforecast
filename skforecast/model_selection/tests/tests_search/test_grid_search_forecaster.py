@@ -4,23 +4,24 @@ import numpy as np
 import pandas as pd
 import pytest
 from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.metrics import r2_score, zero_one_loss
 from skforecast.metrics import mean_absolute_scaled_error
 from skforecast.metrics import root_mean_squared_scaled_error
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import Ridge, LogisticRegression
 from sklearn.preprocessing import StandardScaler
-from skforecast.recursive import ForecasterRecursive
+from skforecast.recursive import ForecasterRecursive, ForecasterRecursiveClassifier
 from skforecast.direct import ForecasterDirect
 from skforecast.model_selection._search import grid_search_forecaster
 from skforecast.model_selection._split import TimeSeriesFold
 from skforecast.model_selection._split import OneStepAheadFold
 
 from tqdm import tqdm
-from functools import partialmethod
+from functools import partial, partialmethod
 
 tqdm.__init__ = partialmethod(tqdm.__init__, disable=True)  # hide progress bar
 
 # Fixtures
-from ..fixtures_model_selection import y
+from ..fixtures_model_selection import y, y_clf
 
  
 def test_output_grid_search_forecaster_ForecasterRecursive_with_mocked():
@@ -256,3 +257,124 @@ def test_grid_search_forecaster_cv_differentiation_is_deprecated_and_ignored(cv_
     assert forecaster.is_fitted
     assert cv.differentiation is None
     assert cv.window_size is None
+
+
+def r2_custom(y_true, y_pred):
+    """
+    Custom metric without a known direction.
+    """
+    return r2_score(y_true, y_pred)
+
+
+def r2_custom_greater_is_better(y_true, y_pred, y_train=None):
+    """
+    Custom metric with the attribute `greater_is_better`.
+    """
+    return r2_score(y_true, y_pred)
+
+
+r2_custom_greater_is_better.greater_is_better = True
+
+
+@pytest.mark.parametrize(
+    "cv",
+    [
+        TimeSeriesFold(steps=3, initial_train_size=len(y) - 12, refit=False),
+        OneStepAheadFold(initial_train_size=len(y) - 12),
+    ],
+    ids=lambda cv: f"cv: {type(cv).__name__}",
+)
+@pytest.mark.parametrize(
+    "metric",
+    [r2_score, partial(r2_score), r2_custom_greater_is_better],
+    ids=["r2_score", "partial", "greater_is_better"],
+)
+def test_grid_search_forecaster_maximizes_metric_when_greater_is_better(cv, metric):
+    """
+    Test that, with a metric in which greater values are better, the results
+    are sorted in descending order and `return_best` refits the forecaster
+    with the candidate with the greatest value. Before the fix, the order
+    depended only on the task of the forecaster and the worst candidate was
+    selected.
+    """
+    forecaster = ForecasterRecursive(estimator=Ridge(random_state=123), lags=2)
+    results = grid_search_forecaster(
+        forecaster=forecaster,
+        y=y,
+        cv=cv,
+        param_grid={"alpha": [0.01, 1, 100]},
+        lags_grid=[2, 4],
+        metric=[metric, "mean_absolute_error"],
+        return_best=True,
+    )
+
+    metric_name = results.columns[3]
+    assert results[metric_name].nunique() > 1
+    assert results[metric_name].is_monotonic_decreasing
+    assert forecaster.estimator.alpha == results.loc[0, "alpha"]
+    np.testing.assert_array_equal(forecaster.lags, results.loc[0, "lags"])
+
+
+@pytest.mark.parametrize(
+    "metric",
+    [r2_custom, lambda y_true, y_pred: r2_score(y_true, y_pred)],
+    ids=["custom", "lambda"],
+)
+def test_grid_search_forecaster_minimizes_metric_when_direction_unknown(metric):
+    """
+    Test that a custom metric without a known direction is minimized in a
+    regression task, as before the fix.
+    """
+    forecaster = ForecasterRecursive(estimator=Ridge(random_state=123), lags=2)
+    cv = TimeSeriesFold(steps=3, initial_train_size=len(y) - 12, refit=False)
+    results = grid_search_forecaster(
+        forecaster=forecaster,
+        y=y,
+        cv=cv,
+        param_grid={"alpha": [0.01, 1, 100]},
+        lags_grid=[2, 4],
+        metric=metric,
+        return_best=True,
+    )
+
+    metric_name = results.columns[3]
+    assert results[metric_name].nunique() > 1
+    assert results[metric_name].is_monotonic_increasing
+    assert forecaster.estimator.alpha == results.loc[0, "alpha"]
+
+
+@pytest.mark.parametrize(
+    "metric, greater_is_better",
+    [(zero_one_loss, False), ("accuracy_score", True)],
+    ids=["zero_one_loss", "accuracy_score"],
+)
+def test_grid_search_forecaster_ForecasterRecursiveClassifier_follows_metric_direction(
+    metric, greater_is_better
+):
+    """
+    Test that a classification forecaster minimizes a loss (`zero_one_loss`)
+    and maximizes a score (`accuracy_score`). Before the fix, every metric was
+    maximized in classification tasks.
+    """
+    forecaster = ForecasterRecursiveClassifier(
+        estimator=LogisticRegression(max_iter=1000), lags=2
+    )
+    cv = TimeSeriesFold(steps=3, initial_train_size=len(y_clf) - 12, refit=False)
+    results = grid_search_forecaster(
+        forecaster=forecaster,
+        y=y_clf,
+        cv=cv,
+        param_grid={"C": [1e-4, 0.1, 10]},
+        lags_grid=[2, 4],
+        metric=metric,
+        return_best=True,
+    )
+
+    metric_name = results.columns[3]
+    if greater_is_better:
+        assert results[metric_name].is_monotonic_decreasing
+    else:
+        assert results[metric_name].is_monotonic_increasing
+    assert results[metric_name].iloc[0] != results[metric_name].iloc[1]
+    assert forecaster.estimator.C == 0.1
+    np.testing.assert_array_equal(forecaster.lags, np.array([1, 2, 3, 4]))

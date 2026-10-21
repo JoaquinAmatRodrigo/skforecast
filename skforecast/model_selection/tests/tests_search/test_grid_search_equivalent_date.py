@@ -6,6 +6,7 @@ import pytest
 import numpy as np
 import pandas as pd
 from sklearn.linear_model import LinearRegression
+from sklearn.metrics import r2_score
 
 from skforecast.recursive import ForecasterEquivalentDate, ForecasterRecursive
 from skforecast.model_selection._split import TimeSeriesFold, OneStepAheadFold
@@ -480,3 +481,27 @@ def test_grid_search_equivalent_date_cv_differentiation_is_ignored():
     ]
 
     pd.testing.assert_frame_equal(results[0], results[1])
+
+
+def test_grid_search_equivalent_date_maximizes_metric_when_greater_is_better():
+    """
+    Test that, with a metric in which greater values are better (`r2_score`),
+    the results are sorted in descending order and `return_best` refits the
+    forecaster with the best candidate. Before the fix, the results were
+    always sorted in ascending order.
+    """
+    forecaster = ForecasterEquivalentDate(offset=1, n_offsets=1)
+    cv = TimeSeriesFold(steps=3, initial_train_size=len(y) - 12, refit=False)
+    results = grid_search_equivalent_date(
+                  forecaster  = forecaster,
+                  y           = y,
+                  cv          = cv,
+                  param_grid  = {'offset': [1, 2, 7]},
+                  metric      = r2_score,
+                  return_best = True
+              )
+
+    assert results['r2_score'].nunique() > 1
+    assert results['r2_score'].is_monotonic_decreasing
+    assert results.loc[0, 'offset'] == 1
+    assert forecaster.offset == 1
