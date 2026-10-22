@@ -3078,10 +3078,11 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
 
         # NOTE: `getattr` keeps forecasters saved with previous versions, which
         # do not have this attribute, working.
+        allow_nan_predictions = getattr(self, '_allow_nan_predictions', False)
         predict_fn = _build_predict_function(
-                         estimator     = self.estimator,
-                         feature_names = self.X_train_features_names_out_,
-                         check_finite  = not getattr(self, '_allow_nan_predictions', False)
+                         estimator             = self.estimator,
+                         feature_names         = self.X_train_features_names_out_,
+                         allow_nan_predictions = allow_nan_predictions
                      )
 
         has_lags = self.lags is not None
@@ -3260,10 +3261,11 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
 
         # NOTE: `getattr` keeps forecasters saved with previous versions, which
         # do not have this attribute, working.
+        allow_nan_predictions = getattr(self, '_allow_nan_predictions', False)
         predict_fn = _build_predict_function(
-                         estimator     = self.estimator,
-                         feature_names = self.X_train_features_names_out_,
-                         check_finite  = not getattr(self, '_allow_nan_predictions', False)
+                         estimator             = self.estimator,
+                         feature_names         = self.X_train_features_names_out_,
+                         allow_nan_predictions = allow_nan_predictions
                      )
 
         has_lags = self.lags is not None

@@ -4074,7 +4074,7 @@ class _NonFinitePredictorsError(ValueError):
 def _build_predict_function(
     estimator: object,
     feature_names: list[str] | None = None,
-    check_finite: bool = True
+    allow_nan_predictions: bool = False
 ) -> Callable:
     """
     Build an optimized predict callable for a fitted estimator. The returned
@@ -4108,7 +4108,7 @@ def _build_predict_function(
     The fast path of linear models skips the input validation of their
     `predict` method, so it raises `_NonFinitePredictorsError` (a `ValueError`)
     when `X` contains NaN or infinite values, as `predict` does, instead of
-    returning NaN predictions (unless `check_finite=False`). The rest of fast
+    returning NaN predictions (unless `allow_nan_predictions=True`). The rest of fast
     paths belong to estimators that accept NaN values.
 
     Parameters
@@ -4119,9 +4119,9 @@ def _build_predict_function(
         Names of the columns of `X`, used to name the predictors with
         non-finite values in the error of the fast path of linear models. If
         `None`, the predictors are named by their column position.
-    check_finite : bool, default True
-        If `True`, the fast path of linear models raises when `X` contains NaN
-        or infinite values. If `False`, it returns NaN predictions instead,
+    allow_nan_predictions : bool, default False
+        If `False`, the fast path of linear models raises when `X` contains NaN
+        or infinite values. If `True`, it returns NaN predictions instead,
         which multi-series backtesting uses to evaluate the series and dates
         that can be predicted (it warns about the NaN predictions).
 
@@ -4142,7 +4142,7 @@ def _build_predict_function(
         coef = estimator.coef_
         intercept = estimator.intercept_
 
-        if not check_finite:
+        if allow_nan_predictions:
             def predict_fn(X):
                 return np.dot(X, coef) + intercept
 

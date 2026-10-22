@@ -394,20 +394,20 @@ def test_build_predict_function_catboost_without_cat_features():
     np.testing.assert_allclose(result, expected)
 
 
-def test_build_predict_function_linear_models_NaN_predictions_when_check_finite_False(
+def test_build_predict_function_linear_models_NaN_predictions_when_allow_nan_predictions_True(
     regression_data
 ):
     """
     Test that the fast path of linear models returns NaN predictions for the
     rows with NaN values, and the predictions of `estimator.predict()` for the
-    rest, when `check_finite=False` (used by multi-series backtesting).
+    rest, when `allow_nan_predictions=True` (used by multi-series backtesting).
     """
     X, y = regression_data
     estimator = Ridge(alpha=1.0).fit(X, y)
     X_nan = X[:4].copy()
     X_nan[1, 2] = np.nan
 
-    predict_fn = _build_predict_function(estimator, check_finite=False)
+    predict_fn = _build_predict_function(estimator, allow_nan_predictions=True)
     result = predict_fn(X_nan)
 
     np.testing.assert_array_equal(np.isnan(result), [False, True, False, False])

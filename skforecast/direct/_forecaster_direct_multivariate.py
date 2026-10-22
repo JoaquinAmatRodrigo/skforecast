@@ -2476,12 +2476,12 @@ class ForecasterDirectMultiVariate(ForecasterBase):
             )
             # NOTE: `getattr` keeps forecasters saved with previous versions,
             # which do not have this attribute, working.
-            check_finite = not getattr(self, '_allow_nan_predictions', False)
+            allow_nan_predictions = getattr(self, '_allow_nan_predictions', False)
             predict_fns = [
                 _build_predict_function(
-                    estimator     = est,
-                    feature_names = self.X_train_features_names_out_,
-                    check_finite  = check_finite
+                    estimator             = est,
+                    feature_names         = self.X_train_features_names_out_,
+                    allow_nan_predictions = allow_nan_predictions
                 )
                 for est in estimators
             ]
