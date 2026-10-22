@@ -329,7 +329,9 @@ results, study = bayesian_search_forecaster(
     ...,
     kwargs_create_study={
         'sampler': optuna.samplers.TPESampler(seed=123),
-        'direction': 'minimize',
+        # 'direction' defaults to the direction of the first metric (maximize
+        # for scikit-learn `*_score` metrics, minimize for errors and losses).
+        # If set, results and return_best follow it.
     },
     kwargs_study_optimize={
         'timeout': 600,  # seconds

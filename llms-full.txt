@@ -390,6 +390,8 @@ print(fold)
 
 Three search strategies are available: `grid_search_forecaster`, `random_search_forecaster`, and `bayesian_search_forecaster` (Optuna-based). All accept `TimeSeriesFold` or `OneStepAheadFold`. Multi-series variants: `grid_search_forecaster_multiseries`, `random_search_forecaster_multiseries`, `bayesian_search_forecaster_multiseries`.
 
+Results are sorted by the first metric, best first, and `return_best=True` refits the forecaster with the first row. The direction comes from the metric: scikit-learn metrics ending in `_score` (`r2_score`, `accuracy_score`) are maximized; errors and losses are minimized. A custom callable is minimized in regression and maximized in classification unless it sets the attribute `greater_is_better` (`True` or `False`). In the Bayesian searches, `kwargs_create_study={'direction': ...}` overrides it.
+
 ```python
 from skforecast.model_selection import bayesian_search_forecaster, TimeSeriesFold
 
@@ -3386,6 +3388,20 @@ Skforecast automatically wraps callables via `add_y_train_argument`. If the func
 already has a `y_train` parameter, it will receive the training data. If not, the
 argument is silently ignored.
 
+In hyperparameter searches, the first metric ranks the candidates, and its direction
+is inferred from the metric: scikit-learn metrics ending in `_score` (`r2_score`,
+`accuracy_score`) are maximized; errors and losses are minimized.
+A custom metric is minimized in regression and maximized in classification, unless
+it defines the attribute `greater_is_better`:
+
+```python
+def forecast_skill(y_true, y_pred, y_train):
+    naive_mae = np.mean(np.abs(np.diff(y_train)))
+    return 1 - np.mean(np.abs(y_true - y_pred)) / naive_mae
+
+forecast_skill.greater_is_better = True  # Maximized by the searches
+```
+
 ## Common Mistakes
 
 | Mistake | Problem | Fix |
@@ -4330,7 +4346,9 @@ results, study = bayesian_search_forecaster(
     ...,
     kwargs_create_study={
         'sampler': optuna.samplers.TPESampler(seed=123),
-        'direction': 'minimize',
+        # 'direction' defaults to the direction of the first metric (maximize
+        # for scikit-learn `*_score` metrics, minimize for errors and losses).
+        # If set, results and return_best follow it.
     },
     kwargs_study_optimize={
         'timeout': 600,  # seconds

@@ -24,6 +24,8 @@ The main changes in this release are:
 
 + <span class="badge text-bg-fix">Fix</span> `freeze_params=True`, the default of <code>[backtesting_stats]</code>, reuses the model selected by automatic <code>[Arima]</code> and <code>[Ets]</code> in the first fit, as documented: the automatic selection runs once instead of in every fold (3.6 times faster with Arima and 8.4 with Ets over 20 folds). ([#1425](https://github.com/skforecast/skforecast/pull/1425))
 
++ <span class="badge text-bg-fix">Fix</span> Hyperparameter searches follow the direction of the metric: with a metric in which greater is better, such as `r2_score`, they ranked the worst candidate first and `return_best=True` refitted the forecaster with it. ([#1431](https://github.com/skforecast/skforecast/pull/1431))
+
 !!! warning "Before upgrading"
 
     Some results change with this version, without any change in your code:
@@ -33,6 +35,8 @@ The main changes in this release are:
     + <code>[backtesting_stats]</code>, <code>[grid_search_stats]</code> and <code>[random_search_stats]</code> with automatic <code>[Arima]</code> or <code>[Ets]</code>: predictions and metrics change from the second fold, because the model selected in the first fit is reused. `freeze_params=False` in <code>[backtesting_stats]</code> gives the previous results; the searches have no such argument, so their previous results cannot be reproduced.
 
     + <code>[Ets]</code> with `lambda_auto=True`: `best_params_` contains the Box-Cox lambda selected in the fit and `lambda_auto=False`, so the model rebuilt from it keeps that lambda.
+
+    + Hyperparameter searches with a scikit-learn metric in which greater is better (`r2_score`, `explained_variance_score`...) or, with <code>[ForecasterRecursiveClassifier]</code>, a loss (`zero_one_loss`): the order of the results and the model selected with `return_best` change, now to the best candidate.
 
     And some code needs to be updated: passing both `alpha` and `interval` to <code>[ForecasterStats]</code> or <code>[backtesting_stats]</code> raises a `ValueError`; and the metrics of backtesting with one prediction interval (`interval`, or `quantiles` in <code>[backtesting_foundation]</code>) have two more columns, `coverage` and `interval_width`, so code that selects them by position may need to change. See **Added** and **Changed**.
 
@@ -51,6 +55,10 @@ The main changes in this release are:
 + Backtesting and hyperparameter search with a forecaster with `differentiation` no longer require repeating it in <code>[TimeSeriesFold]</code> or <code>[OneStepAheadFold]</code>; it raised a `ValueError`, and grid and random search returned an empty DataFrame. The `differentiation` argument of both folds, and `window_size` of <code>[OneStepAheadFold]</code>, have no effect on the folds and are deprecated (`FutureWarning`, removed in 0.29.0). With `verbose=True`, the training size now includes the observations used to differentiate. ([#1423](https://github.com/skforecast/skforecast/pull/1423))
 
 + Removed the `externally_fitted` argument of the `split` method of <code>[OneStepAheadFold]</code>, which was not used. ([#1423](https://github.com/skforecast/skforecast/pull/1423))
+
++ <code>[grid_search_stats]</code>, <code>[random_search_stats]</code> and <code>[grid_search_equivalent_date]</code> raise a `ValueError` with the accepted names, before evaluating any candidate, when a metric name is not valid. They skipped every candidate with a warning and returned an empty DataFrame. ([#1431](https://github.com/skforecast/skforecast/pull/1431))
+
++ The hyperparameter searches of multi-series forecasters are faster with metrics that do not use `y_train` (most of them): 19% less time with <code>[OneStepAheadFold]</code> and 8% with <code>[TimeSeriesFold]</code> (200 series, Ridge). The training values were prepared in every fold even when the metric did not need them. ([#1431](https://github.com/skforecast/skforecast/pull/1431))
 
 + The first fit of <code>[Ets]</code> in a new environment, when numba compiles its functions, takes about 40% less time (7 s instead of 12 s on a 4-core CPU). Estimates and selected models are unchanged. ([#1400](https://github.com/skforecast/skforecast/pull/1400))
 
@@ -78,6 +86,8 @@ The main changes in this release are:
 + <code>[backtesting_forecaster_multiseries]</code>, <code>[backtesting_foundation]</code> and the hyperparameter search of <code>[ForecasterRecursiveMultiSeries]</code> rejected a valid `initial_train_size` when every series was shorter than the span of all series. The `split` method of <code>[OneStepAheadFold]</code> also returned a wrong test end with a dict of series. ([#1430](https://github.com/skforecast/skforecast/pull/1430))
 
 + The hyperparameter search of <code>[ForecasterRecursiveMultiSeries]</code> with <code>[OneStepAheadFold]</code> failed with `ValueError: Length of '<series>' must be greater than the maximum window size needed by the forecaster` when a series ended at the end of the training set. That series is now left out of the test set. ([#1430](https://github.com/skforecast/skforecast/pull/1430))
+
++ Hyperparameter searches ranked the candidates by the task of the forecaster (minimize in regression, maximize in classification), not by the metric: with `r2_score`, or `zero_one_loss` in classification, `return_best=True` refitted the worst candidate. The direction is now inferred from the metric (scikit-learn `*_score` metrics are maximized), a custom callable can set `greater_is_better`, and `direction` in `kwargs_create_study` also orders the results. ([#1431](https://github.com/skforecast/skforecast/pull/1431))
 
 + <code>[plot_residuals]</code> ignored the `fig` argument when another figure was active: the subplots were drawn on the active figure and `fig` was returned empty. ([#1386](https://github.com/skforecast/skforecast/issues/1386), [#1387](https://github.com/skforecast/skforecast/pull/1387))
 

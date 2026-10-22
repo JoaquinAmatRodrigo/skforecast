@@ -33,7 +33,9 @@ from ..model_selection._utils import (
     _initialize_levels_model_selection_multiseries,
     _calculate_metrics_one_step_ahead,
     _predict_and_calculate_metrics_one_step_ahead_multiseries,
-    _make_lags_hashable
+    _make_lags_hashable,
+    _get_search_direction,
+    _check_study_direction
 )
 from ..utils import (
     initialize_lags, 
@@ -93,6 +95,12 @@ def grid_search_forecaster(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -202,6 +210,12 @@ def random_search_forecaster(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -314,6 +328,12 @@ def _evaluate_grid_hyperparameters(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -361,7 +381,6 @@ def _evaluate_grid_hyperparameters(
         )
 
     forecaster_search = deepcopy_forecaster(forecaster)
-    is_regression = forecaster_search.__skforecast_tags__['forecaster_task'] == 'regression'
     cv_name = type(cv).__name__
     if cv_name not in ['TimeSeriesFold', 'OneStepAheadFold']:
         raise TypeError(
@@ -515,9 +534,10 @@ def _evaluate_grid_hyperparameters(
                   **metric_dict
               })
     
+    direction = _get_search_direction(metric=metric[0], forecaster=forecaster_search)
     results = (
         results
-        .sort_values(by=list(metric_dict.keys())[0], ascending=True if is_regression else False)
+        .sort_values(by=list(metric_dict.keys())[0], ascending=direction == 'minimize')
         .reset_index(drop=True)
     )
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
@@ -605,6 +625,12 @@ def bayesian_search_forecaster(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -643,10 +669,11 @@ def bayesian_search_forecaster(
         a file.
     kwargs_create_study : dict, default None
         Additional keyword arguments (key, value mappings) to pass to optuna.create_study().
-        If default, the direction is set to 'minimize' for regression tasks or
-        'maximize' for classification tasks, and a 
-        `TPESampler(multivariate=True, group=True, seed=random_state)` 
-        sampler is used during optimization.
+        If default, the direction is inferred from the first metric (see
+        `metric`), and a `TPESampler(multivariate=True, group=True, seed=random_state)`
+        sampler is used during optimization. If `direction` is passed, the order
+        of `results` and the parameters selected with `return_best` follow it
+        (a warning is raised if it contradicts the direction of the metric).
     kwargs_study_optimize : dict, default None
         Additional keyword arguments (key, value mappings) to pass to study.optimize().
 
@@ -682,7 +709,6 @@ def bayesian_search_forecaster(
 
     forecaster_search = deepcopy_forecaster(forecaster)
     forecaster_name = type(forecaster_search).__name__
-    is_regression = forecaster_search.__skforecast_tags__['forecaster_task'] == 'regression'
 
     if cv_name == 'OneStepAheadFold':
 
@@ -851,7 +877,9 @@ def bayesian_search_forecaster(
 
     kwargs_create_study = kwargs_create_study.copy() if kwargs_create_study is not None else {}
     if 'direction' not in kwargs_create_study.keys():
-        kwargs_create_study['direction'] = 'minimize' if is_regression else 'maximize'
+        kwargs_create_study['direction'] = _get_search_direction(
+            metric=metric[0], forecaster=forecaster_search
+        )
     if 'sampler' not in kwargs_create_study:
         with warnings.catch_warnings():
             warnings.filterwarnings(
@@ -883,6 +911,7 @@ def bayesian_search_forecaster(
         optuna.logging.disable_default_handler()
 
     study = optuna.create_study(**kwargs_create_study)
+    direction = _check_study_direction(study=study, metric=metric[0])
 
     try:
         with warnings.catch_warnings():
@@ -921,7 +950,7 @@ def bayesian_search_forecaster(
     
     results = (
         results
-        .sort_values(by=list(metric_dict.keys())[0], ascending=True if is_regression else False)
+        .sort_values(by=list(metric_dict.keys())[0], ascending=direction == 'minimize')
         .reset_index(drop=True)
     )
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
@@ -1004,6 +1033,12 @@ def grid_search_forecaster_multiseries(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     aggregate_metric : str, list, default None
         Aggregation method/s used to combine the metric/s of all levels (series)
         when multiple levels are predicted. If list, the first aggregation method
@@ -1131,6 +1166,12 @@ def random_search_forecaster_multiseries(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     aggregate_metric : str, list, default None
         Aggregation method/s used to combine the metric/s of all levels (series)
         when multiple levels are predicted. If list, the first aggregation method
@@ -1263,6 +1304,12 @@ def _evaluate_grid_hyperparameters_multiseries(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     aggregate_metric : str, list, default None
         Aggregation method/s used to combine the metric/s of all levels (series)
         when multiple levels are predicted. If list, the first aggregation method
@@ -1540,7 +1587,7 @@ def _evaluate_grid_hyperparameters_multiseries(
         columns = ['levels', 'lags', 'lags_label', 'params', *metric_names]
         return pd.DataFrame(columns=columns)
 
-    is_regression = forecaster_search.__skforecast_tags__['forecaster_task'] == 'regression'
+    direction = _get_search_direction(metric=metric[0], forecaster=forecaster_search)
     results = pd.concat(metrics_list, axis=0)
     results.insert(0, 'levels', [levels] * len(results))
     results.insert(1, 'lags', lags_list)
@@ -1548,7 +1595,7 @@ def _evaluate_grid_hyperparameters_multiseries(
     results.insert(3, 'params', params_list)
     results = (
         results
-        .sort_values(by=metric_names[0], ascending=True if is_regression else False)
+        .sort_values(by=metric_names[0], ascending=direction == 'minimize')
         .reset_index(drop=True)
     )
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
@@ -1637,6 +1684,12 @@ def bayesian_search_forecaster_multiseries(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     aggregate_metric : str, list, default None
         Aggregation method/s used to combine the metric/s of all levels (series)
         when multiple levels are predicted. If list, the first aggregation method
@@ -1687,10 +1740,11 @@ def bayesian_search_forecaster_multiseries(
         a file.
     kwargs_create_study : dict, default None
         Additional keyword arguments (key, value mappings) to pass to optuna.create_study().
-        If default, the direction is set to 'minimize' for regression tasks or
-        'maximize' for classification tasks, and a 
-        `TPESampler(multivariate=True, group=True, seed=random_state)` 
-        sampler is used during optimization.
+        If default, the direction is inferred from the first metric (see
+        `metric`), and a `TPESampler(multivariate=True, group=True, seed=random_state)`
+        sampler is used during optimization. If `direction` is passed, the order
+        of `results` and the parameters selected with `return_best` follow it
+        (a warning is raised if it contradicts the direction of the metric).
     kwargs_study_optimize : dict, default None
         Additional keyword arguments (key, value mappings) to pass to study.optimize().
 
@@ -1963,10 +2017,11 @@ def bayesian_search_forecaster_multiseries(
 
             return metrics.loc[0, metric_names[0]]
     
-    is_regression = forecaster_search.__skforecast_tags__['forecaster_task'] == 'regression'
     kwargs_create_study = kwargs_create_study.copy() if kwargs_create_study is not None else {}
     if 'direction' not in kwargs_create_study:
-        kwargs_create_study['direction'] = 'minimize' if is_regression else 'maximize'
+        kwargs_create_study['direction'] = _get_search_direction(
+            metric=metric[0], forecaster=forecaster_search
+        )
     if 'sampler' not in kwargs_create_study:
         with warnings.catch_warnings():
             warnings.filterwarnings(
@@ -1998,6 +2053,7 @@ def bayesian_search_forecaster_multiseries(
         optuna.logging.disable_default_handler()
 
     study = optuna.create_study(**kwargs_create_study)
+    direction = _check_study_direction(study=study, metric=metric[0])
 
     try:
         with warnings.catch_warnings():
@@ -2062,7 +2118,7 @@ def bayesian_search_forecaster_multiseries(
     results.insert(3, 'params', params_list)
     results = (
         results
-        .sort_values(by=metric_names[0], ascending=True if is_regression else False)
+        .sort_values(by=metric_names[0], ascending=direction == 'minimize')
         .reset_index(drop=True)
     )
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
@@ -2182,6 +2238,12 @@ def bayesian_search_foundation(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and
           `y_train` (optional) that returns a float.
         - If `list`: List containing multiple strings and/or callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     aggregate_metric : str, list, default None
         Aggregation method(s) used to combine the metric(s) of all levels (series)
         when multiple levels are predicted. If list, the first aggregation method
@@ -2227,9 +2289,11 @@ def bayesian_search_foundation(
         `None`, logging output is not redirected.
     kwargs_create_study : dict, default None
         Additional keyword arguments passed to `optuna.create_study()`. If not
-        provided, direction is set to 'minimize' for regression tasks, and a
-        `TPESampler(multivariate=True, group=True, seed=random_state)` sampler
-        is used.
+        provided, the direction is inferred from the first metric (see
+        `metric`), and a `TPESampler(multivariate=True, group=True, seed=random_state)`
+        sampler is used. If `direction` is passed, the order of `results` and
+        the parameters selected with `return_best` follow it (a warning is
+        raised if it contradicts the direction of the metric).
     kwargs_study_optimize : dict, default None
         Additional keyword arguments passed to `study.optimize()`.
 
@@ -2378,14 +2442,13 @@ def bayesian_search_foundation(
 
         return metrics.loc[0, metric_names[0]]
 
-    is_regression = (
-        forecaster_search.__skforecast_tags__["forecaster_task"] == "regression"
-    )
     kwargs_create_study = (
         kwargs_create_study.copy() if kwargs_create_study is not None else {}
     )
     if "direction" not in kwargs_create_study:
-        kwargs_create_study["direction"] = "minimize" if is_regression else "maximize"
+        kwargs_create_study["direction"] = _get_search_direction(
+            metric=metric[0], forecaster=forecaster_search
+        )
     if "sampler" not in kwargs_create_study:
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", message=".*multivariate.*|.*group.*")
@@ -2415,6 +2478,7 @@ def bayesian_search_foundation(
         optuna.logging.disable_default_handler()
 
     study = optuna.create_study(**kwargs_create_study)
+    direction = _check_study_direction(study=study, metric=metric[0])
 
     try:
         with warnings.catch_warnings():
@@ -2443,7 +2507,7 @@ def bayesian_search_foundation(
     results.insert(2, "params", params_list)
     results = (
         results.sort_values(
-            by=metric_names[0], ascending=True if is_regression else False
+            by=metric_names[0], ascending=direction == "minimize"
         )
         .reset_index(drop=True)
     )
@@ -2516,6 +2580,12 @@ def grid_search_stats(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -2613,6 +2683,12 @@ def random_search_stats(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -2713,6 +2789,12 @@ def _evaluate_grid_hyperparameters_stats(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     exog : pandas Series, pandas DataFrame, default None
         Exogenous variable/s included as predictor/s. Must have the same
         number of observations as `y` and should be aligned so that y[i] is
@@ -2772,6 +2854,12 @@ def _evaluate_grid_hyperparameters_stats(
 
     if not isinstance(metric, list):
         metric = [metric]
+    metric = [
+        _get_metric(metric=m)
+        if isinstance(m, str)
+        else add_y_train_argument(m)
+        for m in metric
+    ]
     metric_dict = {
         (m if isinstance(m, str) else m.__name__): [] 
         for m in metric
@@ -2840,9 +2928,10 @@ def _evaluate_grid_hyperparameters_stats(
                   **metric_dict
               })
     
+    direction = _get_search_direction(metric=metric[0], forecaster=forecaster_search)
     results = (
         results
-        .sort_values(by=list(metric_dict.keys())[0], ascending=True)
+        .sort_values(by=list(metric_dict.keys())[0], ascending=direction == 'minimize')
         .reset_index(drop=True)
     )
     results = pd.concat([results, results['params'].apply(pd.Series)], axis=1)
@@ -2939,6 +3028,12 @@ def grid_search_equivalent_date(
         - If `Callable`: Function with arguments `y_true`, `y_pred` and `y_train`
         (Optional) that returns a float.
         - If `list`: List containing multiple strings and/or Callables.
+
+        The first metric ranks the candidates. Scikit-learn metrics ending in
+        `_score` are maximized and those ending in `_error`, `_loss` or
+        `_deviance` are minimized. Other functions are minimized in regression
+        and maximized in classification, unless their attribute
+        `greater_is_better` is set (`True` or `False`).
     return_best : bool, default True
         Refit the `forecaster` using the best found configuration on the whole data.
     n_jobs : int, 'auto', default 'auto'
@@ -3028,6 +3123,12 @@ def grid_search_equivalent_date(
 
     if not isinstance(metric, list):
         metric = [metric]
+    metric = [
+        _get_metric(metric=m)
+        if isinstance(m, str)
+        else add_y_train_argument(m)
+        for m in metric
+    ]
     metric_dict = {
         (m if isinstance(m, str) else m.__name__): []
         for m in metric
@@ -3102,9 +3203,10 @@ def grid_search_equivalent_date(
     if use_alias:
         results.insert(0, 'alias', alias_list)
 
+    direction = _get_search_direction(metric=metric[0], forecaster=forecaster_search)
     results = (
         results
-        .sort_values(by=list(metric_dict.keys())[0], ascending=True)
+        .sort_values(by=list(metric_dict.keys())[0], ascending=direction == 'minimize')
         .reset_index(drop=True)
     )
     expanded_params = results['params'].apply(pd.Series)

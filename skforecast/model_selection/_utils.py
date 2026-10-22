@@ -28,6 +28,7 @@ from ..metrics import (
     _get_metric,
     calculate_coverage
 )
+from ..metrics.metrics import _metric_greater_is_better
 from ..utils import (
     _date_range_from_index,
     check_interval,
@@ -2119,3 +2120,75 @@ def _make_lags_hashable(lags, sentinel: object) -> int | tuple | None:
             for k, v in sorted(lags.items())
         )
     return lags
+
+
+def _get_search_direction(metric: Callable, forecaster: object) -> str:
+    """
+    Get the direction in which a hyperparameter search optimizes a metric.
+    It is inferred from the metric (see `_metric_greater_is_better`). If the
+    direction of the metric is unknown, it is set from the task of the
+    forecaster: `'minimize'` for regression and `'maximize'` for
+    classification.
+
+    Parameters
+    ----------
+    metric : Callable
+        Metric used to rank the candidates of the search, as returned by
+        `_get_metric` or `add_y_train_argument`.
+    forecaster : object
+        Forecaster model.
+
+    Returns
+    -------
+    direction : str
+        `'minimize'` or `'maximize'`.
+
+    """
+
+    greater_is_better = _metric_greater_is_better(metric)
+    if greater_is_better is None:
+        greater_is_better = (
+            forecaster.__skforecast_tags__['forecaster_task'] != 'regression'
+        )
+
+    return 'maximize' if greater_is_better else 'minimize'
+
+
+def _check_study_direction(study: object, metric: Callable) -> str:
+    """
+    Get the direction of an optuna study, which is the direction used to rank
+    the trials of a bayesian search. A warning is raised if it contradicts the
+    known direction of the metric (for example, `'minimize'` with
+    `accuracy_score`), usually because of the `direction` passed in
+    `kwargs_create_study`.
+
+    Parameters
+    ----------
+    study : optuna Study
+        Optuna study of the search.
+    metric : Callable
+        Metric optimized by the study.
+
+    Returns
+    -------
+    direction : str
+        `'minimize'` or `'maximize'`.
+
+    """
+
+    direction = study.direction.name.lower()
+    greater_is_better = _metric_greater_is_better(metric)
+    if greater_is_better is not None:
+        metric_direction = 'maximize' if greater_is_better else 'minimize'
+        if direction != metric_direction:
+            warnings.warn(
+                f"The optuna study direction is '{direction}', but greater values "
+                f"of the metric `{getattr(metric, '__name__', metric)}` are "
+                f"{'better' if greater_is_better else 'worse'}, so it should be "
+                f"'{metric_direction}'. The search, the order of the results and "
+                f"`return_best` follow the study direction. Remove `direction` "
+                f"from `kwargs_create_study` to use the direction of the metric.",
+                UserWarning
+            )
+
+    return direction
