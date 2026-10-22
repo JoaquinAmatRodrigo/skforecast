@@ -2132,10 +2132,9 @@ def _get_search_direction(metric: Callable, forecaster: object) -> str:
 
     Parameters
     ----------
-    metric : str, Callable
-        Metric used to rank the candidates of the search. If `str`, the name of
-        a metric accepted by `_get_metric`: the ones ending in `_score` are
-        maximized and the rest are minimized.
+    metric : Callable
+        Metric used to rank the candidates of the search, as returned by
+        `_get_metric` or `add_y_train_argument`.
     forecaster : object
         Forecaster model.
 
@@ -2146,10 +2145,7 @@ def _get_search_direction(metric: Callable, forecaster: object) -> str:
 
     """
 
-    if isinstance(metric, str):
-        greater_is_better = metric.endswith('_score')
-    else:
-        greater_is_better = _metric_greater_is_better(metric)
+    greater_is_better = _metric_greater_is_better(metric)
     if greater_is_better is None:
         greater_is_better = (
             forecaster.__skforecast_tags__['forecaster_task'] != 'regression'

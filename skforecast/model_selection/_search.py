@@ -2854,6 +2854,12 @@ def _evaluate_grid_hyperparameters_stats(
 
     if not isinstance(metric, list):
         metric = [metric]
+    metric = [
+        _get_metric(metric=m)
+        if isinstance(m, str)
+        else add_y_train_argument(m)
+        for m in metric
+    ]
     metric_dict = {
         (m if isinstance(m, str) else m.__name__): [] 
         for m in metric
@@ -3117,6 +3123,12 @@ def grid_search_equivalent_date(
 
     if not isinstance(metric, list):
         metric = [metric]
+    metric = [
+        _get_metric(metric=m)
+        if isinstance(m, str)
+        else add_y_train_argument(m)
+        for m in metric
+    ]
     metric_dict = {
         (m if isinstance(m, str) else m.__name__): []
         for m in metric

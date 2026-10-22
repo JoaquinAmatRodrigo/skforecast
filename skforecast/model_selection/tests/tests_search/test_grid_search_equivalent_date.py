@@ -505,3 +505,22 @@ def test_grid_search_equivalent_date_maximizes_metric_when_greater_is_better():
     assert results['r2_score'].is_monotonic_decreasing
     assert results.loc[0, 'offset'] == 1
     assert forecaster.offset == 1
+
+
+def test_grid_search_equivalent_date_ValueError_when_metric_name_not_valid():
+    """
+    Test ValueError is raised before evaluating any candidate when a metric
+    name is not valid. Before, every candidate was skipped with a warning and
+    an empty DataFrame was returned.
+    """
+    forecaster = ForecasterEquivalentDate(offset=1, n_offsets=1)
+    cv = TimeSeriesFold(steps=3, initial_train_size=len(y) - 12, refit=False)
+
+    with pytest.raises(ValueError, match="Allowed metrics are"):
+        grid_search_equivalent_date(
+            forecaster = forecaster,
+            y          = y,
+            cv         = cv,
+            param_grid = {'offset': [1, 7]},
+            metric     = 'not_a_metric'
+        )

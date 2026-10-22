@@ -9,7 +9,6 @@ from __future__ import annotations
 from typing import Callable
 import numpy as np
 import pandas as pd
-import re
 import inspect
 from functools import partial, wraps
 from sklearn.metrics import (
@@ -104,6 +103,12 @@ def add_y_train_argument(func: Callable) -> Callable:
         Function with `y_train` argument added.
     
     """
+
+    # NOTE: Functions already processed (for example, metrics converted by a
+    # search before calling the backtesting) are returned as they are, so that
+    # `_needs_y_train` is not overwritten.
+    if hasattr(func, "_needs_y_train"):
+        return func
 
     sig = inspect.signature(func)
     
@@ -868,7 +873,6 @@ def weighted_interval_score(
     return float(np.mean(wis_per_obs))
 
 
-
 def _metric_greater_is_better(metric: Callable) -> bool | None:
     """
     Infer whether greater values of a metric are better. The direction is
@@ -900,12 +904,12 @@ def _metric_greater_is_better(metric: Callable) -> bool | None:
     while True:
         greater_is_better = getattr(func, "greater_is_better", None)
         if greater_is_better is not None:
-            if not isinstance(greater_is_better, bool):
+            if not isinstance(greater_is_better, (bool, np.bool_)):
                 raise TypeError(
                     f"The attribute `greater_is_better` of the metric must be a "
                     f"boolean: `True` or `False`. Got {type(greater_is_better)}."
                 )
-            return greater_is_better
+            return bool(greater_is_better)
         if isinstance(func, partial):
             func = func.func
         elif hasattr(func, "__wrapped__"):
@@ -918,7 +922,7 @@ def _metric_greater_is_better(metric: Callable) -> bool | None:
     if module == "sklearn.metrics" or module.startswith("sklearn.metrics."):
         if name.endswith("_score") or name == "matthews_corrcoef":
             return True
-        if re.search(r"_(error|loss|deviance)$", name):
+        if name.endswith(("_error", "_loss", "_deviance")):
             return False
 
     return None

@@ -6,7 +6,7 @@ import warnings
 import optuna
 from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.metrics import r2_score, mean_absolute_error, zero_one_loss
-from skforecast.metrics import add_y_train_argument
+from skforecast.metrics import add_y_train_argument, _get_metric
 from skforecast.recursive import ForecasterRecursive, ForecasterRecursiveClassifier
 from skforecast.model_selection._utils import (
     _get_search_direction,
@@ -34,20 +34,19 @@ def custom_metric(y_true, y_pred):  # pragma: no cover
         (add_y_train_argument(r2_score), forecaster_clf, 'maximize'),
         (mean_absolute_error, forecaster_reg, 'minimize'),
         (zero_one_loss, forecaster_clf, 'minimize'),
-        ('mean_absolute_error', forecaster_reg, 'minimize'),
-        ('accuracy_score', forecaster_clf, 'maximize'),
+        (_get_metric('mean_absolute_error'), forecaster_clf, 'minimize'),
+        (_get_metric('accuracy_score'), forecaster_reg, 'maximize'),
         (custom_metric, forecaster_reg, 'minimize'),
         (custom_metric, forecaster_clf, 'maximize'),
-        ('mean_absolute_scaled_error', forecaster_reg, 'minimize'),
-        ('f1_score', forecaster_reg, 'maximize'),
+        (_get_metric('mean_absolute_scaled_error'), forecaster_reg, 'minimize'),
     ],
     ids=lambda dt: f'{getattr(dt, "__name__", dt)}'
 )
 def test_get_search_direction_output(metric, forecaster, expected):
     """
-    Test that the direction follows the metric when it is known (names ending
-    in `_score` are maximized, any other name is minimized) and the task of
-    the forecaster otherwise.
+    Test that the direction follows the metric when it is known, whatever the
+    task, and the task of the forecaster otherwise (custom functions and the
+    metrics of skforecast).
     """
     assert _get_search_direction(metric=metric, forecaster=forecaster) == expected
 

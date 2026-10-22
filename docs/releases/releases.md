@@ -56,6 +56,10 @@ The main changes in this release are:
 
 + Removed the `externally_fitted` argument of the `split` method of <code>[OneStepAheadFold]</code>, which was not used. ([#1423](https://github.com/skforecast/skforecast/pull/1423))
 
++ <code>[grid_search_stats]</code>, <code>[random_search_stats]</code> and <code>[grid_search_equivalent_date]</code> raise a `ValueError` with the accepted names, before evaluating any candidate, when a metric name is not valid. They skipped every candidate with a warning and returned an empty DataFrame. ([#1431](https://github.com/skforecast/skforecast/pull/1431))
+
++ The hyperparameter searches of multi-series forecasters are faster with metrics that do not use `y_train` (most of them): 19% less time with <code>[OneStepAheadFold]</code> and 8% with <code>[TimeSeriesFold]</code> (200 series, Ridge). The training values were prepared in every fold even when the metric did not need them. ([#1431](https://github.com/skforecast/skforecast/pull/1431))
+
 + The first fit of <code>[Ets]</code> in a new environment, when numba compiles its functions, takes about 40% less time (7 s instead of 12 s on a 4-core CPU). Estimates and selected models are unchanged. ([#1400](https://github.com/skforecast/skforecast/pull/1400))
 
 

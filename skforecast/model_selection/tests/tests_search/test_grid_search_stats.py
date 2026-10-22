@@ -1,5 +1,6 @@
 # Unit test grid_search_stats
 # ==============================================================================
+import pytest
 from unittest.mock import patch
 import numpy as np
 import pandas as pd
@@ -123,3 +124,27 @@ def test_grid_search_stats_maximizes_metric_when_greater_is_better():
     assert results['r2_score'].is_monotonic_decreasing
     assert results.loc[0, 'order'] == (1, 1, 0)
     assert forecaster.estimators[0].get_params()['order'] == (1, 1, 0)
+
+
+def test_grid_search_stats_ValueError_when_metric_name_not_valid():
+    """
+    Test ValueError is raised before evaluating any candidate when a metric
+    name is not valid. Before, every candidate was skipped with a warning and
+    an empty DataFrame was returned.
+    """
+    forecaster = ForecasterStats(estimator=Arima(order=(1, 0, 0)))
+    cv = TimeSeriesFold(
+             steps              = 3,
+             initial_train_size = len(y_datetime) - 12,
+             refit              = False
+         )
+
+    with pytest.raises(ValueError, match="Allowed metrics are"):
+        grid_search_stats(
+            forecaster  = forecaster,
+            y           = y_datetime,
+            cv          = cv,
+            param_grid  = {'order': [(1, 0, 0), (2, 0, 0)]},
+            metric      = 'not_a_metric',
+            return_best = False
+        )

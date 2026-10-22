@@ -135,7 +135,7 @@ def test_metric_greater_is_better_None_when_direction_unknown(metric):
 
 @pytest.mark.parametrize(
     'greater_is_better',
-    [True, False],
+    [True, False, np.bool_(True), np.bool_(False)],
     ids=lambda dt: f'greater_is_better: {dt}'
 )
 def test_metric_greater_is_better_output_when_attribute_is_defined(greater_is_better):
@@ -155,10 +155,10 @@ def test_metric_greater_is_better_output_when_attribute_is_defined(greater_is_be
     my_partial.greater_is_better = greater_is_better
 
     for metric in [my_metric, my_score, my_partial]:
-        assert _metric_greater_is_better(metric) is greater_is_better
+        assert _metric_greater_is_better(metric) is bool(greater_is_better)
         assert (
             _metric_greater_is_better(add_y_train_argument(metric))
-            is greater_is_better
+            is bool(greater_is_better)
         )
 
 
@@ -170,7 +170,7 @@ def test_metric_greater_is_better_TypeError_when_attribute_is_not_bool():
     def my_metric(y_true, y_pred):  # pragma: no cover
         return 0.0
 
-    for greater_is_better in ['maximize', 1, np.bool_(True)]:
+    for greater_is_better in ['maximize', 1, 0.0]:
         my_metric.greater_is_better = greater_is_better
         err_msg = re.escape(
             f"The attribute `greater_is_better` of the metric must be a boolean: "
