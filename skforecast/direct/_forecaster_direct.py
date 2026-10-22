@@ -50,6 +50,7 @@ from ..utils import (
     select_n_jobs_fit_forecaster,
     get_style_repr_html,
     _build_predict_function,
+    _NonFinitePredictorsError,
     manage_warnings,
     configure_estimator_categorical_features,
     cast_catboost_categorical_columns,
@@ -2250,7 +2251,8 @@ class ForecasterDirect(ForecasterBase):
     def _direct_predict(
         self,
         steps: list[int],
-        Xs: list[np.ndarray]
+        Xs: list[np.ndarray],
+        prediction_index: pd.Index | None = None
     ) -> np.ndarray:
         """
         Generate predictions for the specified steps using the fitted estimators.
@@ -2269,6 +2271,12 @@ class ForecasterDirect(ForecasterBase):
         Xs : list[np.ndarray]
             List of numpy arrays with the predictors for each step.
             Each array has shape (1, n_features).
+        prediction_index : pandas Index, default None
+            Index of the predictions, used to give the date of the step in the
+            error raised when a linear model gets NaN predictors. It is only
+            used when it has one value per step in `steps` (with
+            `differentiation` and steps that are not consecutive from 1,
+            `steps` also includes the intermediate steps).
 
         Returns
         -------
@@ -2285,10 +2293,25 @@ class ForecasterDirect(ForecasterBase):
                 message="X does not have valid feature names", 
                 category=UserWarning
             )
-            predict_fns = [_build_predict_function(est) for est in estimators]
-            predictions = np.array(
-                [fn(X).item() for fn, X in zip(predict_fns, Xs)]
-            )
+            predict_fns = [
+                _build_predict_function(
+                    estimator     = est,
+                    feature_names = self.X_train_features_names_out_
+                )
+                for est in estimators
+            ]
+            predictions = np.empty(len(steps), dtype=float)
+            for i, (fn, X, step) in enumerate(zip(predict_fns, Xs, steps)):
+                try:
+                    predictions[i] = fn(X).item()
+                except _NonFinitePredictorsError as e:
+                    date = (
+                        prediction_index[i]
+                        if prediction_index is not None
+                        and len(prediction_index) == len(steps)
+                        else None
+                    )
+                    raise ValueError(e.message(step=step, date=date)) from None
 
         return predictions
 
@@ -2445,7 +2468,11 @@ class ForecasterDirect(ForecasterBase):
         # NOTE: With differentiation, `Xs` has the predictors of all the steps
         # from 1 to `max(steps)`.
         Xs_steps = steps if differentiator is None else list(range(1, max(steps) + 1))
-        predictions = self._direct_predict(steps=Xs_steps, Xs=Xs)
+        predictions = self._direct_predict(
+                          steps            = Xs_steps,
+                          Xs               = Xs,
+                          prediction_index = prediction_index
+                      )
 
         if differentiator is not None:
             predictions = differentiator.inverse_transform_next_window(predictions)
@@ -2562,7 +2589,11 @@ class ForecasterDirect(ForecasterBase):
         # With differentiation, `Xs` has the predictors of all the steps from 1
         # to `max(steps)`.
         Xs_steps = steps if differentiator is None else list(range(1, max(steps) + 1))
-        predictions = self._direct_predict(steps=Xs_steps, Xs=Xs)
+        predictions = self._direct_predict(
+                          steps            = Xs_steps,
+                          Xs               = Xs,
+                          prediction_index = prediction_index
+                      )
         
         rng = np.random.default_rng(seed=random_state)
         if not use_binned_residuals:
@@ -2696,7 +2727,11 @@ class ForecasterDirect(ForecasterBase):
         # With differentiation, `Xs` has the predictors of all the steps from 1
         # to `max(steps)`.
         Xs_steps = steps if differentiator is None else list(range(1, max(steps) + 1))
-        predictions = self._direct_predict(steps=Xs_steps, Xs=Xs)
+        predictions = self._direct_predict(
+                          steps            = Xs_steps,
+                          Xs               = Xs,
+                          prediction_index = prediction_index
+                      )
         
         if use_binned_residuals:
             correction_factor_by_bin = {

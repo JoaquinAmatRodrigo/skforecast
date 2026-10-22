@@ -12,6 +12,7 @@ from functools import partial, wraps
 from importlib.metadata import PackageNotFoundError, version
 from importlib.util import find_spec
 import inspect
+import math
 from packaging.requirements import Requirement
 from pathlib import Path
 import platform
@@ -3980,8 +3981,93 @@ def set_cpu_gpu_device(
     return original_device
 
 
+class _NonFinitePredictorsError(ValueError):
+    """
+    Raised by the fast path of linear models in `_build_predict_function` when
+    the predictors contain NaN or infinite values, which scikit-learn's
+    `predict` rejects. The prediction loops catch it to add the series, the
+    step and the date to the message with `message`.
+
+    Parameters
+    ----------
+    estimator_name : str
+        Name of the estimator class.
+    rows : numpy ndarray
+        Positions of the rows of `X` with non-finite values.
+    predictors : list
+        Names of the predictors (columns of `X`) with non-finite values.
+    has_nan : bool
+        `True` if `X` has NaN values, `False` if it only has infinite values.
+
+    """
+
+    def __init__(
+        self,
+        estimator_name: str,
+        rows: np.ndarray,
+        predictors: list[str],
+        has_nan: bool
+    ) -> None:
+
+        self.estimator_name = estimator_name
+        self.rows = rows
+        self.predictors = predictors
+        self.has_nan = has_nan
+        super().__init__(self.message())
+
+    def message(
+        self,
+        series: list[str] | None = None,
+        step: int | None = None,
+        date: Any = None
+    ) -> str:
+        """
+        Build the error message, with the context known by the caller.
+
+        Parameters
+        ----------
+        series : list, default None
+            Series whose predictors have non-finite values.
+        step : int, default None
+            Step (horizon) predicted, starting at 1.
+        date : object, default None
+            Date (index value) of the step predicted.
+
+        Returns
+        -------
+        message : str
+            Error message.
+
+        """
+
+        value = "NaN" if self.has_nan else "infinity"
+        context = f"Input X contains {value} in the predictors {self.predictors}"
+        if series is not None:
+            context += f" of series {series}"
+        if step is not None:
+            context += f" at step {step}"
+            if date is not None:
+                context += f" ({date})"
+
+        if self.has_nan:
+            return (
+                f"{context}. {self.estimator_name} does not accept missing "
+                f"values encoded as NaN, so its predictions would be NaN. Fill "
+                f"the missing values of the series (or `last_window`) and "
+                f"`exog`, or use an estimator that accepts them, for example "
+                f"HistGradientBoostingRegressor or LGBMRegressor."
+            )
+
+        return (
+            f"{context}. {self.estimator_name} does not accept infinite values. "
+            f"Review the values of the series (or `last_window`) and `exog`."
+        )
+
+
 def _build_predict_function(
     estimator: object,
+    feature_names: list[str] | None = None,
+    allow_nan_predictions: bool = False
 ) -> Callable:
     """
     Build an optimized predict callable for a fitted estimator. The returned
@@ -4012,10 +4098,25 @@ def _build_predict_function(
     This includes user subclasses of scikit-learn estimators, since they may
     override `predict`.
 
+    The fast path of linear models skips the input validation of their
+    `predict` method, so it raises `_NonFinitePredictorsError` (a `ValueError`)
+    when `X` contains NaN or infinite values, as `predict` does, instead of
+    returning NaN predictions (unless `allow_nan_predictions=True`). The rest of fast
+    paths belong to estimators that accept NaN values.
+
     Parameters
     ----------
     estimator : object
         A fitted scikit-learn compatible estimator.
+    feature_names : list, default None
+        Names of the columns of `X`, used to name the predictors with
+        non-finite values in the error of the fast path of linear models. If
+        `None`, the predictors are named by their column position.
+    allow_nan_predictions : bool, default False
+        If `False`, the fast path of linear models raises when `X` contains NaN
+        or infinite values. If `True`, it returns NaN predictions instead,
+        which multi-series backtesting uses to evaluate the series and dates
+        that can be predicted (it warns about the NaN predictions).
 
     Returns
     -------
@@ -4034,11 +4135,36 @@ def _build_predict_function(
         coef = estimator.coef_
         intercept = estimator.intercept_
 
-        # NOTE: np.dot does not validate its input, so NaN in `X` propagates to the
-        # prediction instead of raising as sklearn's `predict` would. Inputs must be
-        # validated upstream (see `check_predict_input`).
+        if allow_nan_predictions:
+            def predict_fn(X):
+                return np.dot(X, coef) + intercept
+
+            return predict_fn
+
+        # NOTE: np.dot does not validate its input, so NaN in `X` would give NaN
+        # predictions instead of raising as sklearn's `predict` does. A non-finite
+        # value in `X` gives a non-finite prediction, and so a non-finite sum of
+        # the predictions, which is the cheapest check. `X` is only inspected
+        # when the sum is not finite (it can also overflow with finite values).
         def predict_fn(X):
-            return np.dot(X, coef) + intercept
+            pred = np.dot(X, coef) + intercept
+            if not math.isfinite(pred.sum()):
+                is_finite_X = np.isfinite(X)
+                if not is_finite_X.all():
+                    is_not_finite_X = ~is_finite_X
+                    columns = np.flatnonzero(is_not_finite_X.any(axis=0))
+                    predictors = (
+                        [feature_names[i] for i in columns]
+                        if feature_names is not None
+                        else [f"column {i}" for i in columns]
+                    )
+                    raise _NonFinitePredictorsError(
+                        estimator_name = estimator_name,
+                        rows           = np.flatnonzero(is_not_finite_X.any(axis=1)),
+                        predictors     = predictors,
+                        has_nan        = bool(np.isnan(X).any())
+                    )
+            return pred
 
         return predict_fn
 

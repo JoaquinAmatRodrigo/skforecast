@@ -6069,7 +6069,9 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
     has NaN values and the estimator does not natively support NaN. All series
     are needed to create the predictors, so no series is dropped from the last
     window, the fold is not skipped and the backtesting completes returning
-    NaN predictions for that fold.
+    NaN predictions for that fold: the linear model does not raise during
+    backtesting, although its `predict` would. They are left out of the metric
+    with a MissingValuesWarning.
     """
 
     series_nan = series_wide_range.copy()
@@ -6089,12 +6091,8 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
              fixed_train_size   = False
          )
 
-    warn_msg = re.escape(
-        "`last_window` has missing values. Most of machine learning models do "
-        "not allow missing values. Prediction method may either raise an error "
-        "or return NaN predictions."
-    )
-    with pytest.warns(MissingValuesWarning, match=warn_msg):
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
         metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
                                                    forecaster            = forecaster,
                                                    series                = series_nan,
@@ -6106,6 +6104,22 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
                                                    n_jobs                = 1,
                                                    verbose               = False
                                                )
+
+    warnings_raised = [
+        str(x.message) for x in w if issubclass(x.category, MissingValuesWarning)
+    ]
+    assert any(
+        message.startswith("`last_window` has missing values.")
+        for message in warnings_raised
+    )
+    assert any(
+        message.startswith(
+            "4 predictions are NaN at dates with observed values and are left "
+            "out of the metrics, which are calculated with fewer values than "
+            "predicted. Number of NaN predictions per series: {'l1': 4}."
+        )
+        for message in warnings_raised
+    )
 
     expected_metric = pd.DataFrame(
         data    = [['l1', 0.21065943446368085]],
@@ -6765,3 +6779,68 @@ def test_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_Value
                 show_progress = False
             )
     assert mock_fit.call_count == 0
+
+
+@pytest.mark.parametrize(
+    "estimator",
+    [Ridge(), HistGradientBoostingRegressor(max_iter=10, random_state=123)],
+    ids=lambda estimator: f"estimator: {type(estimator).__name__}"
+)
+def test_backtesting_forecaster_multiseries_when_exog_has_NaN_in_test_fold(estimator):
+    """
+    Test backtesting_forecaster_multiseries when `exog` has a missing value in
+    the test set of a fold. With a linear model, which does not accept missing
+    values, the backtesting is completed: the dates that cannot be predicted
+    (from the missing value on, recursively) have NaN predictions, which are
+    left out of the metrics with a MissingValuesWarning that gives their number
+    per series. Before, they were left out silently. The forecaster of the user
+    keeps `_allow_nan_predictions=False`, so its `predict` still raises. An
+    estimator that accepts missing values predicts every date without warning.
+    """
+    idx = pd.date_range("2020-01-01", periods=120, freq="D")
+    rng = np.random.default_rng(0)
+    series = {
+        "a": pd.Series(rng.normal(100, 5, 120), index=idx, name="a"),
+        "b": pd.Series(rng.normal(100, 5, 120), index=idx, name="b"),
+    }
+    exog_values = pd.Series(rng.normal(0, 1, 120), index=idx, name="x")
+    exog_values.iloc[95] = np.nan
+    exog = {"a": exog_values.to_frame(), "b": exog_values.to_frame()}
+    forecaster = ForecasterRecursiveMultiSeries(
+        estimator=estimator, lags=3, encoding="ordinal"
+    )
+    cv = TimeSeriesFold(steps=10, initial_train_size=60, refit=False)
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
+        metrics, predictions = backtesting_forecaster_multiseries(
+            forecaster    = forecaster,
+            series        = series,
+            exog          = exog,
+            cv            = cv,
+            metric        = "mean_absolute_error",
+            n_jobs        = 1,
+            show_progress = False
+        )
+    warnings_nan_predictions = [
+        str(x.message) for x in w
+        if issubclass(x.category, MissingValuesWarning)
+        and "predictions are NaN at dates with observed values" in str(x.message)
+    ]
+
+    assert forecaster._allow_nan_predictions is False
+    assert len(predictions) == 120
+    assert not metrics["mean_absolute_error"].isna().any()
+    if isinstance(estimator, Ridge):
+        is_nan = predictions["pred"].isna()
+        assert is_nan.sum() == 10
+        assert predictions.index[is_nan].min() == pd.Timestamp("2020-04-05")
+        assert len(warnings_nan_predictions) == 1
+        assert warnings_nan_predictions[0].startswith(
+            "10 predictions are NaN at dates with observed values and are left "
+            "out of the metrics, which are calculated with fewer values than "
+            "predicted. Number of NaN predictions per series: {'a': 5, 'b': 5}."
+        )
+    else:
+        assert not predictions["pred"].isna().any()
+        assert warnings_nan_predictions == []
