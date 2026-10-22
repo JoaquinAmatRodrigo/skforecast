@@ -4156,7 +4156,6 @@ def _build_predict_function(
                     predictors = (
                         [feature_names[i] for i in columns]
                         if feature_names is not None
-                        and len(feature_names) == X.shape[1]
                         else [f"column {i}" for i in columns]
                     )
                     raise _NonFinitePredictorsError(
