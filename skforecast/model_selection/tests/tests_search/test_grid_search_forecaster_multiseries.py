@@ -3,6 +3,7 @@
 import pytest
 import numpy as np
 import pandas as pd
+from copy import deepcopy
 from sklearn.linear_model import Ridge
 from lightgbm import LGBMRegressor
 from skforecast.recursive import ForecasterRecursiveMultiSeries
@@ -12,6 +13,7 @@ from skforecast.model_selection import grid_search_forecaster_multiseries
 from skforecast.model_selection._split import TimeSeriesFold, OneStepAheadFold
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_absolute_percentage_error
+from sklearn.metrics import r2_score
 from skforecast.metrics import mean_absolute_scaled_error
 
 # Fixtures
@@ -833,3 +835,48 @@ def test_grid_search_forecaster_multiseries_cv_differentiation_is_ignored(cv_cla
 
     pd.testing.assert_frame_equal(results[0], results[1])
     assert len(results[0]) == 2
+
+
+@pytest.mark.parametrize(
+    "forecaster, metric_name",
+    [
+        (
+            ForecasterRecursiveMultiSeries(estimator=Ridge(random_state=123), lags=2),
+            "r2_score__weighted_average",
+        ),
+        (
+            ForecasterDirectMultiVariate(
+                estimator=Ridge(random_state=123), level="l1", steps=3, lags=2
+            ),
+            "r2_score",
+        ),
+    ],
+    ids=lambda dt: f"{type(dt).__name__ if not isinstance(dt, str) else dt}",
+)
+def test_grid_search_forecaster_multiseries_maximizes_metric_when_greater_is_better(
+    forecaster, metric_name
+):
+    """
+    Test that, with a metric in which greater values are better (`r2_score`),
+    the results are sorted in descending order by the first metric (with the
+    suffix of the aggregation when there are several levels) and
+    `return_best` refits the forecaster with the best candidate.
+    """
+    forecaster = deepcopy(forecaster)
+    cv = TimeSeriesFold(
+        steps=3, initial_train_size=len(series_wide_range) - 12, refit=False
+    )
+    results = grid_search_forecaster_multiseries(
+        forecaster=forecaster,
+        series=series_wide_range,
+        cv=cv,
+        param_grid={"alpha": [0.01, 1, 100]},
+        metric=[r2_score, "mean_absolute_error"],
+        aggregate_metric=["weighted_average", "average"],
+        return_best=True,
+    )
+
+    assert results.columns[4] == metric_name
+    assert results[metric_name].nunique() > 1
+    assert results[metric_name].is_monotonic_decreasing
+    assert forecaster.estimator.alpha == results.loc[0, "alpha"]
