@@ -3,8 +3,10 @@
 import re
 import warnings
 import pytest
+import numpy as np
 import pandas as pd
 from scipy.stats import norm
+from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.linear_model import Ridge
 from skforecast.recursive import ForecasterRecursive
 from skforecast.recursive import ForecasterRecursiveMultiSeries
@@ -132,3 +134,61 @@ def test_backtesting_forecaster_cv_differentiation_is_deprecated_and_ignored():
     assert not metric.equals(metric_no_diff)
     assert cv.differentiation is None
     assert cv.window_size is None
+
+
+class RidgeNoInputValidation(RegressorMixin, BaseEstimator):
+    """
+    Ridge regression whose `predict` does not validate its input, so a NaN
+    predictor gives a NaN prediction instead of an error.
+    """
+
+    def __init__(self, random_state=None):
+        self.random_state = random_state
+
+    def fit(self, X, y):
+        self.estimator_ = Ridge(random_state=self.random_state).fit(X, y)
+        return self
+
+    def predict(self, X):
+        return np.asarray(X) @ self.estimator_.coef_ + self.estimator_.intercept_
+
+
+@pytest.mark.parametrize(
+    "estimator, err_msg",
+    [(Ridge(random_state=123),
+      "Input X contains NaN in the predictors ['x'] at step 6. Ridge does not "
+      "accept missing values encoded as NaN, so its predictions would be NaN."),
+     (RidgeNoInputValidation(random_state=123),
+      "5 backtesting predictions are NaN at dates with observed values "
+      "(first: 2020-04-05 00:00:00), so the metrics cannot be calculated.")],
+    ids=lambda x: f"{type(x).__name__}"
+)
+def test_backtesting_forecaster_ValueError_when_exog_has_NaN_in_test_fold(
+    estimator, err_msg
+):
+    """
+    Test backtesting_forecaster raises a ValueError when `exog` has a missing
+    value in the test set of a fold. A linear model, which does not accept
+    missing values, raises when predicting, naming the predictor and the step.
+    An estimator that returns NaN predictions raises before calculating the
+    metrics, with the number of NaN predictions and the first date. Before,
+    the metric raised 'Input contains NaN.'.
+    """
+    idx = pd.date_range("2020-01-01", periods=120, freq="D")
+    rng = np.random.default_rng(0)
+    y = pd.Series(rng.normal(100, 5, 120), index=idx, name="y")
+    exog = pd.Series(rng.normal(0, 1, 120), index=idx, name="x")
+    exog.iloc[95] = np.nan
+    forecaster = ForecasterRecursive(estimator, lags=3)
+    cv = TimeSeriesFold(steps=10, initial_train_size=60, refit=False)
+
+    with pytest.raises(ValueError, match=re.escape(err_msg)):
+        backtesting_forecaster(
+            forecaster        = forecaster,
+            y                 = y,
+            exog              = exog,
+            cv                = cv,
+            metric            = 'mean_absolute_error',
+            show_progress     = False,
+            suppress_warnings = True
+        )

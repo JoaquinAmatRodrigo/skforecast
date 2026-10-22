@@ -6361,6 +6361,28 @@ data = data.ffill()                      # Forward fill
 data = data.interpolate(method='linear') # Linear interpolation
 ```
 
+### "ValueError: Input X contains NaN in the predictors [...]"
+
+A predictor has a missing value when predicting (usually a gap in `exog` in
+the forecast horizon) and the estimator does not accept them (linear models,
+SVR, KNN...). The message names the predictor, the step and, in
+`ForecasterRecursiveMultiSeries`, the series and the date.
+
+```python
+# Fix 1: fill the gaps of exog before predicting or backtesting
+exog = exog.interpolate(method='linear')
+
+# Fix 2: use an estimator that accepts missing values
+forecaster = ForecasterRecursive(
+    estimator=HistGradientBoostingRegressor(),  # or LGBMRegressor(verbose=-1)
+    lags=14,
+)
+```
+
+In multi-series backtesting, the NaN predictions of dates with observed values
+are left out of the metrics with a `MissingValuesWarning` that gives their
+number per series: read it, the metrics use fewer values than predicted.
+
 ### "ValueError: exog must have the same index as y" / "exog does not cover forecast horizon"
 
 ```python

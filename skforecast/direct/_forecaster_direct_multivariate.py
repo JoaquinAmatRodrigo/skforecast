@@ -57,6 +57,7 @@ from ..utils import (
     manage_warnings,
     get_style_repr_html,
     _build_predict_function,
+    _NonFinitePredictorsError,
     scale_correction_factor_differentiation
 )
 from ..preprocessing import TimeSeriesDifferentiator, QuantileBinner
@@ -2458,10 +2459,19 @@ class ForecasterDirectMultiVariate(ForecasterBase):
                 message="X does not have valid feature names", 
                 category=UserWarning
             )
-            predict_fns = [_build_predict_function(est) for est in estimators]
-            predictions = np.array(
-                [fn(X).item() for fn, X in zip(predict_fns, Xs)]
-            )
+            predict_fns = [
+                _build_predict_function(
+                    estimator     = est,
+                    feature_names = self.X_train_features_names_out_
+                )
+                for est in estimators
+            ]
+            predictions = np.empty(len(steps), dtype=float)
+            for i, (fn, X, step) in enumerate(zip(predict_fns, Xs, steps)):
+                try:
+                    predictions[i] = fn(X).item()
+                except _NonFinitePredictorsError as e:
+                    raise ValueError(e.message(step=step)) from None
 
         return predictions
 

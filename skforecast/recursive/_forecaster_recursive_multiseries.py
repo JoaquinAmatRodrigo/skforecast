@@ -63,6 +63,7 @@ from ..utils import (
     get_style_repr_html,
     set_cpu_gpu_device,
     _build_predict_function,
+    _NonFinitePredictorsError,
     scale_correction_factor_differentiation
 )
 from ..preprocessing import TimeSeriesDifferentiator, QuantileBinner
@@ -3064,9 +3065,13 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         predictions = np.full(
             shape=(steps, n_levels), fill_value=np.nan, order='C', dtype=float
         )
+        last_window_index = last_window.index
         last_window = np.concatenate((last_window.to_numpy(), predictions), axis=0)
 
-        predict_fn = _build_predict_function(self.estimator)
+        predict_fn = _build_predict_function(
+                         estimator     = self.estimator,
+                         feature_names = self.X_train_features_names_out_
+                     )
 
         has_lags = self.lags is not None
         has_window_features = self.window_features is not None
@@ -3106,7 +3111,16 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
                 # Same calendar row is broadcast across all series (levels).
                 features[:, exog_end:] = calendar_values[i]
 
-            pred = predict_fn(features)
+            try:
+                pred = predict_fn(features)
+            except _NonFinitePredictorsError as e:
+                raise ValueError(
+                    e.message(
+                        series = [levels[row] for row in e.rows],
+                        step   = i + 1,
+                        date   = expand_index(last_window_index, steps)[i]
+                    )
+                ) from None
 
             predictions[i, :] = pred
 
@@ -3224,6 +3238,7 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
 
         # Expand last_window to 3D: (window_size + steps, n_boot, n_levels)
         # All bootstrap samples start with identical last_window values
+        last_window_index = last_window.index
         last_window = last_window.to_numpy()
         window_size = last_window.shape[0]
         last_window_boot = np.empty(
@@ -3232,7 +3247,10 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         last_window_boot[:window_size, :, :] = last_window[:, np.newaxis, :]
         last_window_boot[window_size:, :, :] = np.nan
 
-        predict_fn = _build_predict_function(self.estimator)
+        predict_fn = _build_predict_function(
+                         estimator     = self.estimator,
+                         feature_names = self.X_train_features_names_out_
+                     )
 
         has_lags = self.lags is not None
         has_window_features = self.window_features is not None
@@ -3284,7 +3302,18 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
                 # Same calendar row is broadcast across all series and bootstrap samples.
                 features[:, exog_end:] = calendar_values[step]
 
-            pred = predict_fn(features)
+            try:
+                pred = predict_fn(features)
+            except _NonFinitePredictorsError as e:
+                # Rows are ordered as [level0_boot0, level1_boot0, ...]
+                rows_levels = np.unique(e.rows % n_levels)
+                raise ValueError(
+                    e.message(
+                        series = [levels[row] for row in rows_levels],
+                        step   = step + 1,
+                        date   = expand_index(last_window_index, steps)[step]
+                    )
+                ) from None
 
             # Reshape from (n_boot × n_levels,) to (n_levels, n_boot)
             pred = pred.reshape(n_boot, n_levels).T

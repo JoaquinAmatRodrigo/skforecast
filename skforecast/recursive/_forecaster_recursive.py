@@ -51,6 +51,7 @@ from ..utils import (
     get_style_repr_html,
     set_cpu_gpu_device,
     _build_predict_function,
+    _NonFinitePredictorsError,
     manage_warnings,
     scale_correction_factor_differentiation
 )
@@ -1705,7 +1706,10 @@ class ForecasterRecursive(ForecasterBase):
         predictions = np.full(shape=steps, fill_value=np.nan, dtype=float)
         last_window = np.concatenate((last_window_values, predictions))
 
-        predict_fn = _build_predict_function(self.estimator)
+        predict_fn = _build_predict_function(
+                         estimator     = self.estimator,
+                         feature_names = self.X_train_features_names_out_
+                     )
 
         has_lags = self.lags is not None
         has_window_features = self.window_features is not None
@@ -1743,7 +1747,10 @@ class ForecasterRecursive(ForecasterBase):
             if has_calendar:
                 X[exog_end:] = calendar_values[i]
         
-            pred = predict_fn(X.reshape(1, -1)).item()
+            try:
+                pred = predict_fn(X.reshape(1, -1)).item()
+            except _NonFinitePredictorsError as e:
+                raise ValueError(e.message(step=i + 1)) from None
             predictions[i] = pred
 
             # Update `last_window` values. The first position is discarded and 
@@ -1830,7 +1837,10 @@ class ForecasterRecursive(ForecasterBase):
         last_window = np.tile(last_window_values[:, np.newaxis], (1, n_boot))
         last_window = np.vstack([last_window, np.full((steps, n_boot), np.nan)])
 
-        predict_fn = _build_predict_function(self.estimator)
+        predict_fn = _build_predict_function(
+                         estimator     = self.estimator,
+                         feature_names = self.X_train_features_names_out_
+                     )
 
         has_lags = self.lags is not None
         has_window_features = self.window_features is not None
@@ -1874,7 +1884,10 @@ class ForecasterRecursive(ForecasterBase):
             if has_calendar:
                 X[:, exog_end:] = calendar_values[i]
         
-            pred = predict_fn(X)
+            try:
+                pred = predict_fn(X)
+            except _NonFinitePredictorsError as e:
+                raise ValueError(e.message(step=i + 1)) from None
 
             if use_binned_residuals:
                 # sampled_residuals is a 3D array: (n_bins, steps, n_boot)

@@ -9,6 +9,7 @@ import pandas as pd
 from lightgbm import LGBMRegressor
 from xgboost import XGBRegressor
 from catboost import CatBoostRegressor
+from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.linear_model import LinearRegression, Ridge
 from sklearn.preprocessing import StandardScaler
 from sklearn.compose import make_column_transformer, make_column_selector
@@ -43,6 +44,23 @@ from ..fixtures_model_selection_multiseries import (
     exog_dict_nans_train,
     custom_metric
 )
+
+
+class RidgeNoInputValidation(RegressorMixin, BaseEstimator):
+    """
+    Ridge regression whose `predict` does not validate its input, so a NaN
+    predictor gives a NaN prediction instead of an error.
+    """
+
+    def __init__(self, random_state=None):
+        self.random_state = random_state
+
+    def fit(self, X, y):
+        self.estimator_ = Ridge(random_state=self.random_state).fit(X, y)
+        return self
+
+    def predict(self, X):
+        return np.asarray(X) @ self.estimator_.coef_ + self.estimator_.intercept_
 
 
 def test_backtesting_forecaster_multiseries_TypeError_when_forecaster_not_a_forecaster_multiseries():
@@ -6062,14 +6080,13 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
     pd.testing.assert_frame_equal(expected_predictions, backtest_predictions)
 
 
-def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_fold_with_NaN_predictions():
+def test_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_ValueError_when_fold_last_window_has_NaN_and_estimator_is_linear_model():
     """
-    Test output of backtesting_forecaster_multiseries for
-    ForecasterDirectMultiVariate when the last window of an intermediate fold
-    has NaN values and the estimator does not natively support NaN. All series
-    are needed to create the predictors, so no series is dropped from the last
-    window, the fold is not skipped and the backtesting completes returning
-    NaN predictions for that fold.
+    Test backtesting_forecaster_multiseries raises a ValueError naming the
+    lags with missing values and the step for ForecasterDirectMultiVariate
+    when the last window of an intermediate fold has NaN values and the
+    estimator is a linear model, which does not accept them. Before, the fast
+    path of linear models returned NaN predictions for that fold.
     """
 
     series_nan = series_wide_range.copy()
@@ -6089,12 +6106,56 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
              fixed_train_size   = False
          )
 
-    warn_msg = re.escape(
-        "`last_window` has missing values. Most of machine learning models do "
-        "not allow missing values. Prediction method may either raise an error "
-        "or return NaN predictions."
+    err_msg = re.escape(
+        "Input X contains NaN in the predictors ['l1_lag_2'] at step 1. Ridge "
+        "does not accept missing values encoded as NaN, so its predictions "
+        "would be NaN."
     )
-    with pytest.warns(MissingValuesWarning, match=warn_msg):
+    with pytest.raises(ValueError, match=err_msg):
+        backtesting_forecaster_multiseries(
+            forecaster            = forecaster,
+            series                = series_nan,
+            cv                    = cv,
+            levels                = 'l1',
+            metric                = 'mean_absolute_error',
+            add_aggregated_metric = False,
+            exog                  = None,
+            n_jobs                = 1,
+            verbose               = False,
+            suppress_warnings     = True
+        )
+
+
+def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_fold_with_NaN_predictions():
+    """
+    Test output of backtesting_forecaster_multiseries for
+    ForecasterDirectMultiVariate when the last window of an intermediate fold
+    has NaN values and the estimator returns NaN predictions with NaN
+    predictors. All series are needed to create the predictors, so no series
+    is dropped from the last window, the fold is not skipped and the
+    backtesting completes returning NaN predictions for that fold. They are
+    left out of the metric with a MissingValuesWarning.
+    """
+
+    series_nan = series_wide_range.copy()
+    series_nan.loc[40, 'l1'] = np.nan
+
+    forecaster = ForecasterDirectMultiVariate(
+                     estimator          = RidgeNoInputValidation(random_state=123),
+                     level              = 'l1',
+                     lags               = 3,
+                     steps              = 4,
+                     transformer_series = None
+                 )
+    cv = TimeSeriesFold(
+             steps              = 4,
+             initial_train_size = len(series_nan) - 16,
+             refit              = False,
+             fixed_train_size   = False
+         )
+
+    with warnings.catch_warnings(record=True) as w:
+        warnings.simplefilter("always")
         metrics_levels, backtest_predictions = backtesting_forecaster_multiseries(
                                                    forecaster            = forecaster,
                                                    series                = series_nan,
@@ -6106,6 +6167,22 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
                                                    n_jobs                = 1,
                                                    verbose               = False
                                                )
+
+    warnings_raised = [
+        str(x.message) for x in w if issubclass(x.category, MissingValuesWarning)
+    ]
+    assert any(
+        message.startswith("`last_window` has missing values.")
+        for message in warnings_raised
+    )
+    assert any(
+        message.startswith(
+            "4 predictions are NaN at dates with observed values and are left "
+            "out of the metrics, which are calculated with fewer values than "
+            "predicted. Number of NaN predictions per series: {'l1': 4}."
+        )
+        for message in warnings_raised
+    )
 
     expected_metric = pd.DataFrame(
         data    = [['l1', 0.21065943446368085]],
@@ -6765,3 +6842,55 @@ def test_backtesting_forecaster_multiseries_ForecasterRecursiveMultiSeries_Value
                 show_progress = False
             )
     assert mock_fit.call_count == 0
+
+
+@pytest.mark.parametrize(
+    "estimator",
+    [Ridge(), HistGradientBoostingRegressor(max_iter=10, random_state=123)],
+    ids=lambda estimator: f"estimator: {type(estimator).__name__}"
+)
+def test_backtesting_forecaster_multiseries_when_exog_has_NaN_in_test_fold(estimator):
+    """
+    Test backtesting_forecaster_multiseries when `exog` has a missing value in
+    the test set of a fold. With a linear model, which does not accept missing
+    values, a ValueError names the predictor, the series, the step and the
+    date. Before, the fast path of linear models returned NaN predictions from
+    that date on, silently left out of the metrics. An estimator that accepts
+    missing values predicts every date.
+    """
+    idx = pd.date_range("2020-01-01", periods=120, freq="D")
+    rng = np.random.default_rng(0)
+    series = {
+        "a": pd.Series(rng.normal(100, 5, 120), index=idx, name="a"),
+        "b": pd.Series(rng.normal(100, 5, 120), index=idx, name="b"),
+    }
+    exog_values = pd.Series(rng.normal(0, 1, 120), index=idx, name="x")
+    exog_values.iloc[95] = np.nan
+    exog = {"a": exog_values.to_frame(), "b": exog_values.to_frame()}
+    forecaster = ForecasterRecursiveMultiSeries(
+        estimator=estimator, lags=3, encoding="ordinal"
+    )
+    cv = TimeSeriesFold(steps=10, initial_train_size=60, refit=False)
+    kwargs = {
+        "forecaster": forecaster,
+        "series": series,
+        "exog": exog,
+        "cv": cv,
+        "metric": "mean_absolute_error",
+        "show_progress": False,
+        "suppress_warnings": True,
+    }
+
+    if isinstance(estimator, Ridge):
+        err_msg = re.escape(
+            "Input X contains NaN in the predictors ['x'] of series ['a', 'b'] "
+            "at step 6 (2020-04-05 00:00:00). Ridge does not accept missing "
+            "values encoded as NaN, so its predictions would be NaN."
+        )
+        with pytest.raises(ValueError, match=err_msg):
+            backtesting_forecaster_multiseries(**kwargs)
+    else:
+        metrics, predictions = backtesting_forecaster_multiseries(**kwargs)
+        assert len(predictions) == 120
+        assert not predictions["pred"].isna().any()
+        assert not metrics["mean_absolute_error"].isna().any()

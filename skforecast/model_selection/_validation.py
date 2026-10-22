@@ -28,6 +28,7 @@ from ..model_selection._utils import (
     _select_fit_folds_multiseries,
     _warn_levels_not_predicted_multiseries,
     _calculate_metrics_backtesting_multiseries,
+    _check_nan_predictions_backtesting,
     _get_interval_columns,
     _calculate_interval_metrics,
     INTERVAL_METRIC_NAMES
@@ -681,6 +682,7 @@ def _backtesting_forecaster(
     
     y_true = y.loc[backtest_predictions_for_metrics.index]
     y_pred = backtest_predictions_for_metrics['pred']
+    _check_nan_predictions_backtesting(y_true=y_true, y_pred=y_pred)
 
     if _any_metric_needs_y_train(metrics):
         train_indexes = []
@@ -2351,6 +2353,7 @@ def _backtesting_stats(
     if forecaster.n_estimators == 1:
         y_true = y.loc[backtest_predictions_for_metrics.index]
         y_pred = backtest_predictions_for_metrics['pred']
+        _check_nan_predictions_backtesting(y_true=y_true, y_pred=y_pred)
         metric_values = [
             m(y_true=y_true, y_pred=y_pred, y_train=y_train)
             for m in metrics
@@ -2374,7 +2377,12 @@ def _backtesting_stats(
 
         grouped = backtest_predictions_for_metrics.groupby('estimator_id', sort=False)
         metric_values = []
-        for _, group in grouped:
+        for estimator_id, group in grouped:
+            _check_nan_predictions_backtesting(
+                y_true       = y_true,
+                y_pred       = group['pred'],
+                estimator_id = estimator_id
+            )
             metric_values_estimator = [
                 m(y_true=y_true, y_pred=group['pred'], y_train=y_train)
                 for m in metrics
@@ -2954,6 +2962,7 @@ def _backtesting_foundation(
             y_pred = backtest_predictions_for_metrics['q_0.5']
         else:
             y_pred = backtest_predictions_for_metrics['pred']
+        _check_nan_predictions_backtesting(y_true=y_true, y_pred=y_pred)
         
         if _any_metric_needs_y_train(metrics):
             train_indexes = []

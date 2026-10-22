@@ -22,6 +22,8 @@ The main changes in this release are:
 
 + <span class="badge text-bg-fix">Fix</span> The `predict_interval` method of <code>[ForecasterStats]</code> returns the interval requested in `interval`; it always returned the 95% interval. ([#1416](https://github.com/skforecast/skforecast/pull/1416))
 
++ <span class="badge text-bg-fix">Fix</span> Forecasters with a linear model of scikit-learn raise a `ValueError` naming the predictor when it has a missing value when predicting, as the `predict` method of the estimator does; they returned NaN predictions, which multi-series backtesting silently left out of the metrics (now warned). ([#PR](https://github.com/skforecast/skforecast/pull/PR))
+
 + <span class="badge text-bg-fix">Fix</span> `freeze_params=True`, the default of <code>[backtesting_stats]</code>, reuses the model selected by automatic <code>[Arima]</code> and <code>[Ets]</code> in the first fit, as documented: the automatic selection runs once instead of in every fold (3.6 times faster with Arima and 8.4 with Ets over 20 folds). ([#1425](https://github.com/skforecast/skforecast/pull/1425))
 
 !!! warning "Before upgrading"
@@ -34,7 +36,7 @@ The main changes in this release are:
 
     + <code>[Ets]</code> with `lambda_auto=True`: `best_params_` contains the Box-Cox lambda selected in the fit and `lambda_auto=False`, so the model rebuilt from it keeps that lambda.
 
-    And some code needs to be updated: passing both `alpha` and `interval` to <code>[ForecasterStats]</code> or <code>[backtesting_stats]</code> raises a `ValueError`; and the metrics of backtesting with one prediction interval (`interval`, or `quantiles` in <code>[backtesting_foundation]</code>) have two more columns, `coverage` and `interval_width`, so code that selects them by position may need to change. See **Added** and **Changed**.
+    And some code needs to be updated: forecasters with a linear model of scikit-learn (`LinearRegression`, `Ridge`, `Lasso`...) raise a `ValueError` when a predictor has a missing value when predicting, for example a gap in `exog`, instead of returning NaN predictions (fill the gaps or use an estimator that accepts missing values); passing both `alpha` and `interval` to <code>[ForecasterStats]</code> or <code>[backtesting_stats]</code> raises a `ValueError`; and the metrics of backtesting with one prediction interval (`interval`, or `quantiles` in <code>[backtesting_foundation]</code>) have two more columns, `coverage` and `interval_width`, so code that selects them by position may need to change. See **Added** and **Changed**.
 
 
 **Added**
@@ -68,6 +70,10 @@ The main changes in this release are:
 + When missing values left no training sample, <code>[ForecasterRecursive]</code>, <code>[ForecasterDirect]</code> and the other machine learning forecasters advised `dropna_from_series = False`, which then failed with estimators that do not accept NaNs. The error now gives the largest lag and window feature and the fixes that work for the estimator. ([#1411](https://github.com/skforecast/skforecast/issues/1411), [#1422](https://github.com/skforecast/skforecast/pull/1422))
 
 + <code>[backtesting_forecaster_multiseries]</code> and <code>[backtesting_foundation]</code> silently left out of the metrics, including the aggregated ones, the series that could not be predicted in a fold (shorter than the window size, missing values in the last window, or no observed values in the context window). A `MissingValuesWarning` now names those series and folds. ([#1406](https://github.com/skforecast/skforecast/issues/1406))
+
++ Forecasters with a linear model of scikit-learn (`LinearRegression`, `Ridge`, `Lasso`...) returned NaN predictions without any error when a predictor had a missing value when predicting, for example a gap in `exog`, and recursive forecasters also returned NaN for the following steps. They now raise a `ValueError`, as the `predict` method of the estimator does, naming the predictor, the step and, in <code>[ForecasterRecursiveMultiSeries]</code>, the series and the date. Estimators that accept missing values are not affected. ([#PR](https://github.com/skforecast/skforecast/pull/PR))
+
++ <code>[backtesting_forecaster_multiseries]</code> and <code>[backtesting_foundation]</code> silently left out of the metrics the NaN predictions of dates with observed values. A `MissingValuesWarning` now gives their number per series. With a single series, <code>[backtesting_forecaster]</code>, <code>[backtesting_stats]</code> and <code>[backtesting_foundation]</code> raised `ValueError: Input contains NaN.` in the metric; the error now gives the number of NaN predictions and the first date. ([#PR](https://github.com/skforecast/skforecast/pull/PR))
 
 + <code>[backtesting_forecaster_multiseries]</code> and the hyperparameter search of <code>[ForecasterRecursiveMultiSeries]</code> raised `ValueError: Length of '<series>' must be greater than the maximum window size needed by the forecaster` when a series that starts late or ends early had exactly `window_size` values in the training set of a fold. That series is now left out of the fold. ([#1410](https://github.com/skforecast/skforecast/issues/1410), [#1418](https://github.com/skforecast/skforecast/pull/1418))
 
