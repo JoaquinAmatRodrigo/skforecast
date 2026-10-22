@@ -1225,3 +1225,29 @@ def test_predict_output_when_exog_has_NaN_and_estimator_accepts_NaN(estimator):
 
     assert not predictions['pred'].isna().any()
     np.testing.assert_array_almost_equal(predictions['pred'].to_numpy(), expected)
+
+
+def test_predict_output_when_allow_nan_predictions_and_exog_has_NaN():
+    """
+    Test predict output when `_allow_nan_predictions=True` (set only by
+    multi-series backtesting) and `exog` has a missing value: the linear
+    model returns a NaN prediction for that step, instead of raising, and the
+    other steps are predicted.
+    """
+    series = pd.DataFrame({
+        'l1': np.arange(50, dtype=float), 'l2': np.arange(50, 100, dtype=float)
+    })
+    exog = pd.Series(np.arange(50, dtype=float), name='exog')
+    exog_pred = pd.Series(
+        [50., np.nan, 52.], index=pd.RangeIndex(50, 53), name='exog'
+    )
+    forecaster = ForecasterDirectMultiVariate(
+        LinearRegression(), level='l1', lags=3, steps=3
+    )
+    forecaster.fit(series=series, exog=exog)
+    forecaster._allow_nan_predictions = True
+    predictions = forecaster.predict(steps=3, exog=exog_pred, suppress_warnings=True)
+
+    np.testing.assert_array_equal(
+        predictions['pred'].isna().to_numpy(), [False, True, False]
+    )

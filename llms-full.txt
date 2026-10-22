@@ -6383,7 +6383,7 @@ data = data.interpolate(method='linear') # Linear interpolation
 
 A predictor has a missing value when predicting and the estimator does not
 accept them. Usually a gap in `exog` in the forecast horizon, or in the last
-window (for example, a series with gaps in `ForecasterDirectMultiVariate`).
+window.
 
 - Linear models of scikit-learn (`LinearRegression`, `Ridge`, `Lasso`...):
   `Input X contains NaN in the predictors ['x'] ... at step 6 (2020-04-05)`,
@@ -6391,10 +6391,6 @@ window (for example, a series with gaps in `ForecasterDirectMultiVariate`).
   `ForecasterRecursiveMultiSeries`, the series.
 - Other estimators that reject NaN (SVR, KNN...): scikit-learn's own
   `Input X contains NaN.`, without those details.
-
-In hyperparameter search, every candidate that fails is skipped with a
-`RuntimeWarning`, so a gap in `exog` can end in "No valid parameter
-combinations found".
 
 ```python
 # Fix 1: fill the gaps of exog before predicting or backtesting
@@ -6407,9 +6403,11 @@ forecaster = ForecasterRecursive(
 )
 ```
 
-In multi-series backtesting, the NaN predictions of dates with observed values
-are left out of the metrics with a `MissingValuesWarning` that gives their
-number per series: read it, the metrics use fewer values than predicted.
+Multi-series backtesting (`backtesting_forecaster_multiseries` and its
+searches) does not raise with a linear model: the dates that cannot be
+predicted get NaN predictions, which are left out of the metrics with a
+`MissingValuesWarning` that gives their number per series. Read it: the
+metrics use fewer values than predicted.
 
 ### "ValueError: exog must have the same index as y" / "exog does not cover forecast horizon"
 

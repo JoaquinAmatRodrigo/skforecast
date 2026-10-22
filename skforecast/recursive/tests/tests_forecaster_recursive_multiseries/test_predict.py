@@ -1748,3 +1748,37 @@ def test_predict_ValueError_when_unknown_level_with_ordinal_encoding_and_estimat
         forecaster.predict(
             steps=2, levels=['l3'], last_window=last_window, suppress_warnings=True
         )
+
+
+def test_predict_output_when_allow_nan_predictions_and_exog_has_NaN():
+    """
+    Test predict output when `_allow_nan_predictions=True` (set only by
+    multi-series backtesting) and `exog` has a missing value: the linear
+    model returns NaN predictions for the series with the missing value from
+    that step on, instead of raising, and the other series are predicted.
+    """
+    index = pd.date_range(start='2020-01-01', periods=50, freq='D')
+    series = {
+        'l1': pd.Series(np.arange(50, dtype=float), index=index),
+        'l2': pd.Series(np.arange(50, 100, dtype=float), index=index)
+    }
+    exog = pd.DataFrame({'exog': np.arange(50, dtype=float)}, index=index)
+    exog_pred = pd.DataFrame(
+        {'exog': [50., 51., 52.]},
+        index=pd.date_range(start='2020-02-20', periods=3, freq='D')
+    )
+    exog_pred_l2 = exog_pred.copy()
+    exog_pred_l2.iloc[1, 0] = np.nan
+    forecaster = ForecasterRecursiveMultiSeries(LinearRegression(), lags=3)
+    forecaster.fit(series=series, exog=exog)
+    forecaster._allow_nan_predictions = True
+    predictions = forecaster.predict(
+        steps=3, exog={'l1': exog_pred, 'l2': exog_pred_l2}, suppress_warnings=True
+    )
+
+    is_nan = predictions['pred'].isna().to_numpy()
+    expected_is_nan = (
+        (predictions['level'] == 'l2') & (predictions.index >= '2020-02-21')
+    ).to_numpy()
+
+    np.testing.assert_array_equal(is_nan, expected_is_nan)

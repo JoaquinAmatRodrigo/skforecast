@@ -388,6 +388,13 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
     _probabilistic_mode: str, bool
         Private attribute used to indicate whether the forecaster should perform 
         some calculations during backtesting.
+    _allow_nan_predictions : bool
+        Private attribute. If `True`, a linear model of scikit-learn returns NaN
+        predictions when a predictor is NaN, instead of raising a `ValueError`.
+        It is set to `True` only by `backtesting_forecaster_multiseries`, in
+        its copy of the forecaster, to evaluate the series and dates that can
+        be predicted; the NaN predictions are warned when calculating the
+        metrics.
 
     Notes
     -----
@@ -474,6 +481,7 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         self.python_version                       = sys.version.split(" ")[0]
         self.forecaster_id                        = forecaster_id
         self._probabilistic_mode                  = "binned"
+        self._allow_nan_predictions               = False
 
         self.lags, self.lags_names, self.max_lag = initialize_lags(type(self).__name__, lags)
         self.lags_are_contiguous = (
@@ -3068,9 +3076,12 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         last_window_index = last_window.index
         last_window = np.concatenate((last_window.to_numpy(), predictions), axis=0)
 
+        # NOTE: `getattr` keeps forecasters saved with previous versions, which
+        # do not have this attribute, working.
         predict_fn = _build_predict_function(
                          estimator     = self.estimator,
-                         feature_names = self.X_train_features_names_out_
+                         feature_names = self.X_train_features_names_out_,
+                         check_finite  = not getattr(self, '_allow_nan_predictions', False)
                      )
 
         has_lags = self.lags is not None
@@ -3247,9 +3258,12 @@ class ForecasterRecursiveMultiSeries(ForecasterBase):
         last_window_boot[:window_size, :, :] = last_window[:, np.newaxis, :]
         last_window_boot[window_size:, :, :] = np.nan
 
+        # NOTE: `getattr` keeps forecasters saved with previous versions, which
+        # do not have this attribute, working.
         predict_fn = _build_predict_function(
                          estimator     = self.estimator,
-                         feature_names = self.X_train_features_names_out_
+                         feature_names = self.X_train_features_names_out_,
+                         check_finite  = not getattr(self, '_allow_nan_predictions', False)
                      )
 
         has_lags = self.lags is not None

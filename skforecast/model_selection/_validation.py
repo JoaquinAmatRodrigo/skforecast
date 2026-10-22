@@ -1391,6 +1391,16 @@ def _backtesting_forecaster_multiseries(
     else:
         forecaster._probabilistic_mode = 'no_binned'
 
+    # NOTE: A missing predictor (for example, a gap in `exog`, or in the last
+    # window of ForecasterDirectMultiVariate) does not stop the backtesting: a
+    # linear model returns NaN predictions for the dates that cannot be
+    # predicted, instead of raising, so the rest of series and dates are still
+    # evaluated. The NaN predictions of dates with observed values are warned
+    # in `_calculate_metrics_backtesting_multiseries`. The forecaster is a copy,
+    # so the attribute does not reach the user's forecaster.
+    if hasattr(forecaster, '_allow_nan_predictions'):
+        forecaster._allow_nan_predictions = True
+
     folds = cv.split(X=series, as_pandas=False)
     span_index = cv._extract_index(X=series)
     initial_train_size = cv.initial_train_size_as_int

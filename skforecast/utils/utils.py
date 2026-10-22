@@ -4073,7 +4073,8 @@ class _NonFinitePredictorsError(ValueError):
 
 def _build_predict_function(
     estimator: object,
-    feature_names: list[str] | None = None
+    feature_names: list[str] | None = None,
+    check_finite: bool = True
 ) -> Callable:
     """
     Build an optimized predict callable for a fitted estimator. The returned
@@ -4107,8 +4108,8 @@ def _build_predict_function(
     The fast path of linear models skips the input validation of their
     `predict` method, so it raises `_NonFinitePredictorsError` (a `ValueError`)
     when `X` contains NaN or infinite values, as `predict` does, instead of
-    returning NaN predictions. The rest of fast paths belong to estimators that
-    accept NaN values.
+    returning NaN predictions (unless `check_finite=False`). The rest of fast
+    paths belong to estimators that accept NaN values.
 
     Parameters
     ----------
@@ -4118,6 +4119,11 @@ def _build_predict_function(
         Names of the columns of `X`, used to name the predictors with
         non-finite values in the error of the fast path of linear models. If
         `None`, the predictors are named by their column position.
+    check_finite : bool, default True
+        If `True`, the fast path of linear models raises when `X` contains NaN
+        or infinite values. If `False`, it returns NaN predictions instead,
+        which multi-series backtesting uses to evaluate the series and dates
+        that can be predicted (it warns about the NaN predictions).
 
     Returns
     -------
@@ -4135,6 +4141,12 @@ def _build_predict_function(
     if is_sklearn_class and isinstance(estimator, LinearModel):
         coef = estimator.coef_
         intercept = estimator.intercept_
+
+        if not check_finite:
+            def predict_fn(X):
+                return np.dot(X, coef) + intercept
+
+            return predict_fn
 
         # NOTE: np.dot does not validate its input, so NaN in `X` would give NaN
         # predictions instead of raising as sklearn's `predict` does. A non-finite
