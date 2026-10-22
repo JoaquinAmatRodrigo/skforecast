@@ -4050,19 +4050,12 @@ class _NonFinitePredictorsError(ValueError):
                 context += f" ({date})"
 
         if self.has_nan:
-            unknown_level = (
-                " The series not seen during training are encoded as NaN in "
-                "`_level_skforecast` with an ordinal encoding; "
-                "`encoding='onehot'` encodes them as zeros."
-                if "_level_skforecast" in self.predictors
-                else ""
-            )
             return (
                 f"{context}. {self.estimator_name} does not accept missing "
                 f"values encoded as NaN, so its predictions would be NaN. Fill "
                 f"the missing values of the series (or `last_window`) and "
                 f"`exog`, or use an estimator that accepts them, for example "
-                f"HistGradientBoostingRegressor or LGBMRegressor.{unknown_level}"
+                f"HistGradientBoostingRegressor or LGBMRegressor."
             )
 
         return (

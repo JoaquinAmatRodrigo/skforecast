@@ -1739,10 +1739,7 @@ def test_predict_ValueError_when_unknown_level_with_ordinal_encoding_and_estimat
         "encoded as NaN, so its predictions would be NaN. Fill the missing "
         "values of the series (or `last_window`) and `exog`, or use an "
         "estimator that accepts them, for example HistGradientBoostingRegressor "
-        "or LGBMRegressor. The "
-        "series not seen during training are encoded as NaN in "
-        "`_level_skforecast` with an ordinal encoding; `encoding='onehot'` "
-        "encodes them as zeros."
+        "or LGBMRegressor."
     )
     with pytest.raises(ValueError, match=err_msg):
         forecaster.predict(
