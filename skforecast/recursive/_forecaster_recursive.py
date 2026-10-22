@@ -1659,7 +1659,8 @@ class ForecasterRecursive(ForecasterBase):
         steps: int,
         last_window_values: np.ndarray,
         exog_values: np.ndarray | None = None,
-        calendar_values: np.ndarray | None = None
+        calendar_values: np.ndarray | None = None,
+        prediction_index: pd.Index | None = None
     ) -> np.ndarray:
         """
         Predict n steps ahead. It is an iterative process in which, each prediction,
@@ -1682,6 +1683,9 @@ class ForecasterRecursive(ForecasterBase):
             Exogenous variable/s included as predictor/s.
         calendar_values : numpy ndarray, default None
             Calendar features included as predictor/s.
+        prediction_index : pandas Index, default None
+            Index of the predictions, used to give the date of the step in the
+            error raised when a linear model gets NaN predictors.
 
         Returns
         -------
@@ -1750,7 +1754,8 @@ class ForecasterRecursive(ForecasterBase):
             try:
                 pred = predict_fn(X.reshape(1, -1)).item()
             except _NonFinitePredictorsError as e:
-                raise ValueError(e.message(step=i + 1)) from None
+                date = prediction_index[i] if prediction_index is not None else None
+                raise ValueError(e.message(step=i + 1, date=date)) from None
             predictions[i] = pred
 
             # Update `last_window` values. The first position is discarded and 
@@ -1769,7 +1774,8 @@ class ForecasterRecursive(ForecasterBase):
         use_binned_residuals: bool,
         n_boot: int,
         exog_values: np.ndarray | None = None,
-        calendar_values: np.ndarray | None = None
+        calendar_values: np.ndarray | None = None,
+        prediction_index: pd.Index | None = None
     ) -> np.ndarray:
         """
         Vectorized bootstrap prediction - predict all n_boot iterations per step.
@@ -1802,6 +1808,9 @@ class ForecasterRecursive(ForecasterBase):
             Exogenous variable/s included as predictor/s.
         calendar_values : numpy ndarray, default None
             Calendar features included as predictor/s.
+        prediction_index : pandas Index, default None
+            Index of the predictions, used to give the date of the step in the
+            error raised when a linear model gets NaN predictors.
 
         Returns
         -------
@@ -1887,7 +1896,8 @@ class ForecasterRecursive(ForecasterBase):
             try:
                 pred = predict_fn(X)
             except _NonFinitePredictorsError as e:
-                raise ValueError(e.message(step=i + 1)) from None
+                date = prediction_index[i] if prediction_index is not None else None
+                raise ValueError(e.message(step=i + 1, date=date)) from None
 
             if use_binned_residuals:
                 # sampled_residuals is a 3D array: (n_bins, steps, n_boot)
@@ -1969,7 +1979,8 @@ class ForecasterRecursive(ForecasterBase):
                               steps              = steps,
                               last_window_values = last_window_values,
                               exog_values        = exog_values,
-                              calendar_values    = calendar_values
+                              calendar_values    = calendar_values,
+                              prediction_index   = prediction_index
                           )
 
         X_predict = []
@@ -2092,7 +2103,8 @@ class ForecasterRecursive(ForecasterBase):
                               steps              = steps,
                               last_window_values = last_window_values,
                               exog_values        = exog_values,
-                              calendar_values    = calendar_values
+                              calendar_values    = calendar_values,
+                              prediction_index   = prediction_index
                           )
 
         if differentiator is not None:
@@ -2235,7 +2247,8 @@ class ForecasterRecursive(ForecasterBase):
                 calendar_values      = calendar_values,
                 sampled_residuals    = sampled_residuals,
                 use_binned_residuals = use_binned_residuals,
-                n_boot               = n_boot
+                n_boot               = n_boot,
+                prediction_index     = prediction_index
             )
 
         if differentiator is not None:
@@ -2351,7 +2364,8 @@ class ForecasterRecursive(ForecasterBase):
                               steps              = steps,
                               last_window_values = last_window_values,
                               exog_values        = exog_values,
-                              calendar_values    = calendar_values
+                              calendar_values    = calendar_values,
+                              prediction_index   = prediction_index
                           )
         
         if use_binned_residuals:

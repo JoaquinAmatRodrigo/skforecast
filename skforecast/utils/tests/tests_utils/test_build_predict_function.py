@@ -325,8 +325,9 @@ def test_NonFinitePredictorsError_message_with_series_step_and_date():
         "Input X contains NaN in the predictors ['exog'] of series ['a', 'b'] "
         "at step 6 (2020-04-05 00:00:00). Ridge does not accept missing values "
         "encoded as NaN, so its predictions would be NaN. Fill the missing "
-        "values of `exog` and `last_window`, or use an estimator that accepts "
-        "them, for example HistGradientBoostingRegressor or LGBMRegressor."
+        "values of the series (or `last_window`) and `exog`, or use an "
+        "estimator that accepts them, for example HistGradientBoostingRegressor "
+        "or LGBMRegressor."
     )
     message = error.message(
         series=["a", "b"], step=6, date=pd.Timestamp("2020-04-05")

@@ -6361,12 +6361,22 @@ data = data.ffill()                      # Forward fill
 data = data.interpolate(method='linear') # Linear interpolation
 ```
 
-### "ValueError: Input X contains NaN in the predictors [...]"
+### "ValueError: Input X contains NaN" when predicting or backtesting
 
-A predictor has a missing value when predicting (usually a gap in `exog` in
-the forecast horizon) and the estimator does not accept them (linear models,
-SVR, KNN...). The message names the predictor, the step and, in
-`ForecasterRecursiveMultiSeries`, the series and the date.
+A predictor has a missing value when predicting and the estimator does not
+accept them. Usually a gap in `exog` in the forecast horizon, or in the last
+window (for example, a series with gaps in `ForecasterDirectMultiVariate`).
+
+- Linear models of scikit-learn (`LinearRegression`, `Ridge`, `Lasso`...):
+  `Input X contains NaN in the predictors ['x'] ... at step 6 (2020-04-05)`,
+  with the predictor, the step, the date and, in
+  `ForecasterRecursiveMultiSeries`, the series.
+- Other estimators that reject NaN (SVR, KNN...): scikit-learn's own
+  `Input X contains NaN.`, without those details.
+
+In hyperparameter search, every candidate that fails is skipped with a
+`RuntimeWarning`, so a gap in `exog` can end in "No valid parameter
+combinations found".
 
 ```python
 # Fix 1: fill the gaps of exog before predicting or backtesting

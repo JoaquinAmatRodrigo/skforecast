@@ -1055,7 +1055,7 @@ def test_predict_ValueError_when_exog_has_NaN_and_estimator_is_linear_model(meth
     forecaster.fit(y=y, exog=exog, store_in_sample_residuals=True)
 
     err_msg = re.escape(
-        "Input X contains NaN in the predictors ['exog'] at step 2. "
+        "Input X contains NaN in the predictors ['exog'] at step 2 (51). "
         "LinearRegression does not accept missing values encoded as NaN, so "
         "its predictions would be NaN."
     )
@@ -1093,3 +1093,29 @@ def test_predict_output_when_exog_has_NaN_and_estimator_accepts_NaN(estimator):
 
     assert not predictions.isna().any()
     np.testing.assert_array_almost_equal(predictions.to_numpy(), expected)
+
+
+def test_predict_ValueError_without_date_when_exog_has_NaN_in_intermediate_step_with_differentiation():
+    """
+    Test predict raises a ValueError naming the step, but not the date, when
+    the forecaster uses differentiation, the steps are not consecutive from 1
+    and `exog` has a missing value in an intermediate step. The predictors of
+    every step up to `max(steps)` are needed to revert the differentiation,
+    but the prediction index only has the dates of the requested steps.
+    """
+    y = pd.Series(np.arange(50, dtype=float) ** 1.5)
+    exog = pd.Series(np.arange(50, dtype=float), name='exog')
+    exog_pred = pd.Series(
+        [50., np.nan, 52.], index=pd.RangeIndex(50, 53), name='exog'
+    )
+    forecaster = ForecasterDirect(
+        LinearRegression(), lags=3, steps=3, differentiation=1
+    )
+    forecaster.fit(y=y, exog=exog)
+
+    err_msg = re.escape(
+        "Input X contains NaN in the predictors ['exog'] at step 2. "
+        "LinearRegression does not accept missing values encoded as NaN"
+    )
+    with pytest.raises(ValueError, match=err_msg):
+        forecaster.predict(steps=[3], exog=exog_pred, suppress_warnings=True)

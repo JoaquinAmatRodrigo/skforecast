@@ -2424,7 +2424,8 @@ class ForecasterDirectMultiVariate(ForecasterBase):
     def _direct_predict(
         self,
         steps: list[int],
-        Xs: list[np.ndarray]
+        Xs: list[np.ndarray],
+        prediction_index: pd.Index | None = None
     ) -> np.ndarray:
         """
         Generate predictions for the specified steps using the fitted estimators.
@@ -2443,6 +2444,12 @@ class ForecasterDirectMultiVariate(ForecasterBase):
         Xs : list[np.ndarray]
             List of numpy arrays with the predictors for each step.
             Each array has shape (1, n_features).
+        prediction_index : pandas Index, default None
+            Index of the predictions, used to give the date of the step in the
+            error raised when a linear model gets NaN predictors. It is only
+            used when it has one value per step in `steps` (with
+            `differentiation` and steps that are not consecutive from 1,
+            `steps` also includes the intermediate steps).
 
         Returns
         -------
@@ -2471,7 +2478,13 @@ class ForecasterDirectMultiVariate(ForecasterBase):
                 try:
                     predictions[i] = fn(X).item()
                 except _NonFinitePredictorsError as e:
-                    raise ValueError(e.message(step=step)) from None
+                    date = (
+                        prediction_index[i]
+                        if prediction_index is not None
+                        and len(prediction_index) == len(steps)
+                        else None
+                    )
+                    raise ValueError(e.message(step=step, date=date)) from None
 
         return predictions
 
@@ -2636,7 +2649,11 @@ class ForecasterDirectMultiVariate(ForecasterBase):
         # NOTE: With differentiation, `Xs` has the predictors of all the steps
         # from 1 to `max(steps)`.
         Xs_steps = steps if differentiator is None else list(range(1, max(steps) + 1))
-        predictions = self._direct_predict(steps=Xs_steps, Xs=Xs)
+        predictions = self._direct_predict(
+                          steps            = Xs_steps,
+                          Xs               = Xs,
+                          prediction_index = prediction_index
+                      )
 
         if differentiator is not None:
             predictions = differentiator.inverse_transform_next_window(predictions)
@@ -2756,7 +2773,11 @@ class ForecasterDirectMultiVariate(ForecasterBase):
         # With differentiation, `Xs` has the predictors of all the steps from 1
         # to `max(steps)`.
         Xs_steps = steps if differentiator is None else list(range(1, max(steps) + 1))
-        predictions = self._direct_predict(steps=Xs_steps, Xs=Xs)
+        predictions = self._direct_predict(
+                          steps            = Xs_steps,
+                          Xs               = Xs,
+                          prediction_index = prediction_index
+                      )
         
         rng = np.random.default_rng(seed=random_state)
         if not use_binned_residuals:
@@ -2892,7 +2913,11 @@ class ForecasterDirectMultiVariate(ForecasterBase):
         # With differentiation, `Xs` has the predictors of all the steps from 1
         # to `max(steps)`.
         Xs_steps = steps if differentiator is None else list(range(1, max(steps) + 1))
-        predictions = self._direct_predict(steps=Xs_steps, Xs=Xs)
+        predictions = self._direct_predict(
+                          steps            = Xs_steps,
+                          Xs               = Xs,
+                          prediction_index = prediction_index
+                      )
         
         if use_binned_residuals:
             correction_factor_by_bin = {

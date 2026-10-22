@@ -156,8 +156,9 @@ class RidgeNoInputValidation(RegressorMixin, BaseEstimator):
 @pytest.mark.parametrize(
     "estimator, err_msg",
     [(Ridge(random_state=123),
-      "Input X contains NaN in the predictors ['x'] at step 6. Ridge does not "
-      "accept missing values encoded as NaN, so its predictions would be NaN."),
+      "Input X contains NaN in the predictors ['x'] at step 6 "
+      "(2020-04-05 00:00:00). Ridge does not accept missing values encoded as "
+      "NaN, so its predictions would be NaN."),
      (RidgeNoInputValidation(random_state=123),
       "5 backtesting predictions are NaN at dates with observed values "
       "(first: 2020-04-05 00:00:00), so the metrics cannot be calculated.")],

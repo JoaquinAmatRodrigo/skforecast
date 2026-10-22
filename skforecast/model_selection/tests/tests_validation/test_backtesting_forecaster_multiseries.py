@@ -6083,7 +6083,7 @@ def test_output_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_
 def test_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_ValueError_when_fold_last_window_has_NaN_and_estimator_is_linear_model():
     """
     Test backtesting_forecaster_multiseries raises a ValueError naming the
-    lags with missing values and the step for ForecasterDirectMultiVariate
+    lags with missing values, the step and the date for ForecasterDirectMultiVariate
     when the last window of an intermediate fold has NaN values and the
     estimator is a linear model, which does not accept them. Before, the fast
     path of linear models returned NaN predictions for that fold.
@@ -6107,9 +6107,9 @@ def test_backtesting_forecaster_multiseries_ForecasterDirectMultiVariate_ValueEr
          )
 
     err_msg = re.escape(
-        "Input X contains NaN in the predictors ['l1_lag_2'] at step 1. Ridge "
-        "does not accept missing values encoded as NaN, so its predictions "
-        "would be NaN."
+        "Input X contains NaN in the predictors ['l1_lag_2'] at step 1 (42). "
+        "Ridge does not accept missing values encoded as NaN, so its "
+        "predictions would be NaN."
     )
     with pytest.raises(ValueError, match=err_msg):
         backtesting_forecaster_multiseries(

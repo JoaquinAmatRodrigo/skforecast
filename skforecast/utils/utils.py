@@ -4060,14 +4060,14 @@ class _NonFinitePredictorsError(ValueError):
             return (
                 f"{context}. {self.estimator_name} does not accept missing "
                 f"values encoded as NaN, so its predictions would be NaN. Fill "
-                f"the missing values of `exog` and `last_window`, or use an "
-                f"estimator that accepts them, for example "
+                f"the missing values of the series (or `last_window`) and "
+                f"`exog`, or use an estimator that accepts them, for example "
                 f"HistGradientBoostingRegressor or LGBMRegressor.{unknown_level}"
             )
 
         return (
             f"{context}. {self.estimator_name} does not accept infinite values. "
-            f"Review the values of `exog` and `last_window`."
+            f"Review the values of the series (or `last_window`) and `exog`."
         )
 
 
@@ -4136,8 +4136,6 @@ def _build_predict_function(
         coef = estimator.coef_
         intercept = estimator.intercept_
 
-        estimator_name_ = type(estimator).__name__
-
         # NOTE: np.dot does not validate its input, so NaN in `X` would give NaN
         # predictions instead of raising as sklearn's `predict` does. A non-finite
         # value in `X` gives a non-finite prediction, and so a non-finite sum of
@@ -4157,7 +4155,7 @@ def _build_predict_function(
                         else [f"column {i}" for i in columns]
                     )
                     raise _NonFinitePredictorsError(
-                        estimator_name = estimator_name_,
+                        estimator_name = estimator_name,
                         rows           = np.flatnonzero(is_not_finite_X.any(axis=1)),
                         predictors     = predictors,
                         has_nan        = bool(np.isnan(X).any())

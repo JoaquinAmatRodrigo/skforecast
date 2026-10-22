@@ -888,7 +888,7 @@ def test_predict_ValueError_when_exog_has_NaN_and_estimator_is_linear_model(meth
     forecaster.fit(y=y, exog=exog, store_in_sample_residuals=True)
 
     err_msg = re.escape(
-        "Input X contains NaN in the predictors ['exog'] at step 2. "
+        "Input X contains NaN in the predictors ['exog'] at step 2 (51). "
         "LinearRegression does not accept missing values encoded as NaN, so "
         "its predictions would be NaN."
     )
