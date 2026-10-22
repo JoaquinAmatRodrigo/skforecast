@@ -24,7 +24,7 @@ The main changes in this release are:
 
 + <span class="badge text-bg-fix">Fix</span> `freeze_params=True`, the default of <code>[backtesting_stats]</code>, reuses the model selected by automatic <code>[Arima]</code> and <code>[Ets]</code> in the first fit, as documented: the automatic selection runs once instead of in every fold (3.6 times faster with Arima and 8.4 with Ets over 20 folds). ([#1425](https://github.com/skforecast/skforecast/pull/1425))
 
-+ <span class="badge text-bg-fix">Fix</span> Hyperparameter searches follow the direction of the metric: with a metric in which greater is better, such as `r2_score`, they ranked the worst candidate first and `return_best=True` refitted the forecaster with it.
++ <span class="badge text-bg-fix">Fix</span> Hyperparameter searches follow the direction of the metric: with a metric in which greater is better, such as `r2_score`, they ranked the worst candidate first and `return_best=True` refitted the forecaster with it. ([#1431](https://github.com/skforecast/skforecast/pull/1431))
 
 !!! warning "Before upgrading"
 
@@ -83,7 +83,7 @@ The main changes in this release are:
 
 + The hyperparameter search of <code>[ForecasterRecursiveMultiSeries]</code> with <code>[OneStepAheadFold]</code> failed with `ValueError: Length of '<series>' must be greater than the maximum window size needed by the forecaster` when a series ended at the end of the training set. That series is now left out of the test set. ([#1430](https://github.com/skforecast/skforecast/pull/1430))
 
-+ Hyperparameter searches ranked the candidates by the task of the forecaster (minimize in regression, maximize in classification), not by the metric: with `r2_score`, or `zero_one_loss` in classification, `return_best=True` refitted the worst candidate. The direction is now inferred from the metric (scikit-learn `*_score` metrics are maximized), a custom callable can set `greater_is_better`, and `direction` in `kwargs_create_study` also orders the results.
++ Hyperparameter searches ranked the candidates by the task of the forecaster (minimize in regression, maximize in classification), not by the metric: with `r2_score`, or `zero_one_loss` in classification, `return_best=True` refitted the worst candidate. The direction is now inferred from the metric (scikit-learn `*_score` metrics are maximized), a custom callable can set `greater_is_better`, and `direction` in `kwargs_create_study` also orders the results. ([#1431](https://github.com/skforecast/skforecast/pull/1431))
 
 + <code>[plot_residuals]</code> ignored the `fig` argument when another figure was active: the subplots were drawn on the active figure and `fig` was returned empty. ([#1386](https://github.com/skforecast/skforecast/issues/1386), [#1387](https://github.com/skforecast/skforecast/pull/1387))
 

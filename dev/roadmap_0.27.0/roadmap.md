@@ -64,6 +64,8 @@ Segundo commit: `Ets.best_params_` guarda la lambda de Box-Cox del ajuste (`lamb
 como `ets(y, model = fit)` de R y como `Arima`; antes Guerrero se repetía en cada fold con los
 parámetros de suavizado congelados (h2o con `lambda_auto=True`: lambda de 0,34 a 0,01 entre
 folds; MAE 0,0621 con lambda reestimada, 0,0643 congelada).
+**En revisión:** BUG-03 con #1431 (rama `fix/search-metric-direction`, abierto el
+2026-10-22): las búsquedas siguen la dirección de la métrica (decisión 6).
 **Pendiente antes de la release (BUG-08):** volver a ejecutar
 `docs/user_guides/comparing-forecasting-models.ipynb`: usa AutoARIMA y AutoETS (con `refit`
 forzado a `True`), así que sus métricas y tiempos cambian con #1425. No se ejecutó en el PR
@@ -75,13 +77,14 @@ porque también corre modelos foundation, RNN y LightGBM.
    arreglos rápidos (S) de los puntos 2 a 8. Sigue siendo el resultado erróneo silencioso más
    grave que queda y el elemento más largo (M a L), así que conviene retomarlo pronto para que
    no retrase la release.
-2. ~~**BUG-03**~~ **Hecho en la rama `fix/search-metric-direction`** (2026-10-21, sin PR
-   todavía): la dirección sale de la métrica (opción c: atributo `greater_is_better` y
-   convención de nombres solo para `sklearn.metrics`; si no se conoce, la dirección de la
-   tarea, que ya minimiza las métricas de skforecast, todas de regresión). Las bayesianas ordenan por `study.direction` y avisan si
-   `direction` contradice la métrica. Helpers `_metric_greater_is_better`
-   (`skforecast/metrics/metrics.py`) y `_get_search_direction` y `_check_study_direction`
-   (`skforecast/model_selection/_utils.py`).
+2. **BUG-03: en revisión con #1431** (rama `fix/search-metric-direction`, 2026-10-22). La
+   dirección sale de la métrica (decisión 6): atributo `greater_is_better` y convención de
+   nombres solo para `sklearn.metrics`; si no se conoce, la dirección de la tarea, que ya
+   minimiza las métricas de skforecast (todas de regresión). Las bayesianas ordenan por
+   `study.direction` y avisan si `direction` contradice la métrica. Helpers
+   `_metric_greater_is_better` (`skforecast/metrics/metrics.py`), `_get_search_direction` y
+   `_check_study_direction` (`skforecast/model_selection/_utils.py`), pensados para que
+   BUG-search-short-series no tenga que tocar la dirección. Al fusionar: pasar a "Hecho".
 3. ~~**QW-03**~~ y ~~**DEP-cv-differentiation**~~ **Hechos con #1423** (fusionado el
    2026-10-20): elimina un `ValueError` en todo backtesting con `differentiation`, cuyo peor
    caso era una búsqueda que devuelve un DataFrame vacío, y depreca los argumentos del cv que
@@ -108,7 +111,7 @@ porque también corre modelos foundation, RNN y LightGBM.
 
 | Tema | Elementos | Notas |
 |---|---|---|
-| Resultados erróneos silenciosos | BUG-03, BUG-01, BUG-stats-interval-ignored, BUG-04, BUG-10, ISSUE-1406 | Todos S. BUG-01 solo como aviso silenciable: el backtesting sobre datos de entrenamiento es un uso documentado. Hechos (2026-10-19): ISSUE-1406 con #1415 (sustituye a PR-1407, cerrado) y BUG-stats-interval-ignored con #1416; DEP-stats-alpha descartado (decisión 5) |
+| Resultados erróneos silenciosos | BUG-03, BUG-01, BUG-stats-interval-ignored, BUG-04, BUG-10, ISSUE-1406 | Todos S. BUG-01 solo como aviso silenciable: el backtesting sobre datos de entrenamiento es un uso documentado. Hechos (2026-10-19): ISSUE-1406 con #1415 (sustituye a PR-1407, cerrado) y BUG-stats-interval-ignored con #1416; DEP-stats-alpha descartado (decisión 5). En revisión: BUG-03 con #1431 (2026-10-22) |
 | Backtesting probabilístico (titular de la release) | QW-03, QW-09, QW-04, QW-08, PERF-03, BUG-02, QW-10 | Es lo que se pide desde 2024 (#885, #902, #1253, #1409, D1119). Tres cambios de salida independientes que se fusionan por separado y se anuncian juntos en `releases.md`: QW-09 (`coverage` e `interval_width`, #1409) va primero porque no depende de QW-04; QW-04 (`y_true`) y QW-10 (`step`) después. PERF-03 (métricas en numpy: la búsqueda con `OneStepAheadFold` y 1000 series, 2,6 veces más rápida con Ridge y 1,4 con LightGBM) va junto a QW-08 o justo detrás. Hechos: QW-09 con #1420 y QW-03 con #1423 (2026-10-20) |
 | Comparar modelos | FE-05 | M. Nuevo (2026-10-20). Una llamada para el backtesting de varios forecasters de cualquier familia sobre los mismos puntos. Sustituye el código que hoy repite la guía `comparing-forecasting-models.ipynb`. Diseño analizado y prototipado (sección 3). Requisitos: QW-03 (hecho, #1423) y BUG-06 |
 | Feature engineering | QW-11 | S. Nuevo (2026-10-20). `hour_of_week` y el número de días de fin de semana del mes en `CalendarFeatures`, siempre opcionales, más un aviso y una guía de codificación. Medido en 18 series: `hour_of_week` reduce el MAE una mediana del 24% con Ridge en series horarias. Los festivos, que son lo que más aporta en series diarias, quedan como feature aparte (FE-06) |
@@ -155,6 +158,17 @@ Orden de QW-09: ~~ISSUE-1406 (#1415) → BUG-stats-interval-ignored (#1416) → 
    también lo aceptan. El bug lo causaba su valor por defecto (0,05), no el alias. En su lugar,
    pasar `alpha` e `interval` a la vez da `ValueError`, como ya hace `Arima.predict_interval`
    con `alpha` y `level`, y desaparece la regla de precedencia.
+6. **BUG-03: dirección de la métrica (2026-10-21).** La dirección de las búsquedas sale de la
+   primera métrica, no de la tarea: el atributo `greater_is_better` de la función (el nombre
+   de `make_scorer` de sklearn y de `make_forecasting_scorer` de sktime) y, solo para
+   funciones de `sklearn.metrics`, su convención de nombres (`*_score` se maximiza;
+   `*_error`, `*_loss` y `*_deviance` se minimizan; `matthews_corrcoef` se maximiza). Una
+   función desconocida usa la dirección de la tarea, sin aviso (como Optuna y sktime). Con
+   `direction` en `kwargs_create_study`, la tabla y `return_best` siguen a `study.direction`
+   y se avisa si contradice una métrica de dirección conocida. Descartados: deducirla solo
+   del nombre (la propuesta inicial: en forecasting muchas reglas que se minimizan se llaman
+   "score", como Winkler o el interval score, y no cubre `partial`, lambdas ni la pinball) y
+   un argumento nuevo en las 10 búsquedas (duplicaría `direction` en las bayesianas).
 
 ### Decisiones pendientes (cerrarlas antes de implementar)
 
@@ -231,7 +245,7 @@ sección 5.
 
 | Bloque | Elementos, en orden |
 |---|---|
-| A. Resultados silenciosamente erróneos, esfuerzo S | BUG-03, BUG-01, BUG-02, ISSUE-1406 (#1415, hecho), BUG-04, BUG-10, BUG-stats-interval-ignored (#1416, hecho) |
+| A. Resultados silenciosamente erróneos, esfuerzo S | BUG-03 (#1431, en revisión), BUG-01, BUG-02, ISSUE-1406 (#1415, hecho), BUG-04, BUG-10, BUG-stats-interval-ignored (#1416, hecho) |
 | B. Quick wins diarios y PR listos | QW-03 y DEP-cv-differentiation (#1423, hechos), QW-01, QW-09, QW-04, QW-10 (tres cambios de salida, un solo anuncio), PR-1389, PR-1388, ISSUE-1410 (#1418, hecho), QW-02, QW-05, ISSUE-1385, PR-1400, PR-1402, PR-1387 (#1387, hecho) |
 | C. Corrección de más alcance, STATS y quick wins secundarios | BUG-06, BUG-08, PERF-02, QW-07 (+ DOC-skills-percentiles-stale), BUG-07, QW-08, PERF-03, QW-06, BUG-11, BUG-09 ((a) hecho con #1419; queda (b)) |
 | D. Features y gaps | FE-02, PERF-01, GAP-foundation-backtesting-interval, FE-04, FE-03 |
@@ -847,7 +861,7 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
 
 | ID | Descripción | Área | Esfuerzo | Script de reproducción | Esbozo del arreglo |
 |---|---|---|---|---|---|
-| **BUG-03** | Las búsquedas eligen el peor modelo con métricas en las que mayor es mejor (`r2_score`): el orden y la dirección de Optuna dependen del tipo de tarea, no de la métrica, y `return_best=True` reentrena con el peor | model_selection | S | `dev/roadmap_0.27.0/repro/BUG-03.py` | (1) En las 3 búsquedas bayesianas, ordenar por `study.direction` (`_search.py:916,2049,2427`). (2) Helper `_infer_metric_direction` con la convención de sklearn (`*_score` se maximiza; `*_error`, `*_loss`, `*_deviance` se minimizan) usado en todas las ordenaciones (`_search.py:514,916,1537,2049,2427,2817,3077`) y como `direction` por defecto (`:846,1953,2369`). (3) Docstrings de `metric` y `kwargs_create_study` |
+| **BUG-03** | Las búsquedas eligen el peor modelo con métricas en las que mayor es mejor (`r2_score`): el orden y la dirección de Optuna dependen del tipo de tarea, no de la métrica, y `return_best=True` reentrena con el peor | model_selection | S | `dev/roadmap_0.27.0/repro/BUG-03.py` | (1) En las 3 búsquedas bayesianas, ordenar por `study.direction` (`_search.py:916,2049,2427`). (2) Helper `_infer_metric_direction` con la convención de sklearn (`*_score` se maximiza; `*_error`, `*_loss`, `*_deviance` se minimizan) usado en todas las ordenaciones (`_search.py:514,916,1537,2049,2427,2817,3077`) y como `direction` por defecto (`:846,1953,2369`). (3) Docstrings de `metric` y `kwargs_create_study`. **En revisión: #1431**, con otro diseño para (2): la convención de nombres solo se aplica a `sklearn.metrics` y el resto usa el atributo `greater_is_better` o la tarea (decisión 6) |
 | **BUG-01** | `backtesting` con `initial_train_size=None` sobre un forecaster ya ajustado evalúa in-sample sin ningún aviso | model_selection | S | `dev/roadmap_0.27.0/repro/BUG-01.py` | En la rama `else` de `check_backtesting_input` (`skforecast/model_selection/_utils.py:370-380`), comparar la primera fecha de test (`index[window_size + gap]`) con `forecaster.training_range_` (dict por serie en multiserie) y emitir un aviso silenciable con `suppress_warnings` con el número y rango de predicciones in-sample. Que el `NotFittedError` sugiera primero `initial_train_size` |
 | **BUG-02** | Con `fold_stride < steps` la métrica solo mide los horizontes `1..fold_stride` (con 1, el error a 1 paso) y todas las búsquedas seleccionan por ese error | model_selection | S | `dev/roadmap_0.27.0/repro/BUG-02.py` | Parámetro en `TimeSeriesFold`, p. ej. `overlapping_metric="last"` o `"all"`, aplicado en los 5 puntos de deduplicación (`_validation.py:662-667,1488-1493,2159-2164,2643-2648,2674-2679`; números de línea anteriores a #1409; el de stats usa (fecha, `estimator_id`) con varios estimadores tras BUG-09 (a)); aviso mientras el defecto sea `"last"` (como `OneStepAheadValidationWarning`, `_utils.py:653-658`); no cambiar el defecto sin anunciarlo (la receta de meses naturales depende de `"last"`); corregir `skills/backtesting-configuration/SKILL.md:202-208`, la guía y `llms-base.txt`. Coordinar con BUG-09 |
 | **BUG-04** | Un pipeline o modelo precargado (p. ej. Chronos-2 con fine-tuning) se descarta en silencio al crear `ForecasterFoundation`: `clone` lo pierde y se recarga el checkpoint base | foundation | S | `dev/roadmap_0.27.0/repro/BUG-04.py` | `FoundationModel.__sklearn_clone__`: clon estándar y, si el usuario pasó el objeto, copiar la referencia al clon sin copiar pesos. Así lo heredan `ForecasterFoundation.__init__` (`_forecaster_foundation.py:156`), `deepcopy_forecaster` (`utils.py:4999`) y `bayesian_search_foundation`. Cada adaptador declara su atributo de backend (compartido con QW-05). Requisito de PLAN-CKPT (`dev/PLAN_UnifiedFinetunedCheckpoint.md`) |
@@ -1055,6 +1069,12 @@ BUG-stats-interval-ignored son hallazgos laterales (verificación de FE-02, de F
   `backtesting_stats`): descartado el 2026-10-19. Se mantiene como alias para quien viene de
   estadística; la ambigüedad se resuelve con un `ValueError` si se pasan los dos (decisión 5).
 - Duplicado "grid/random devuelven un DataFrame vacío" (lente ml-multi): fusionado en BUG-05.
+- Comprobar el dominio de las métricas (MSLE, desviaciones de Poisson, Gamma o Tweedie) sobre
+  `y` antes de entrenar, para que el backtesting falle antes (comentario externo revisado con
+  BUG-03): descartado el 2026-10-22. El error de sklearn ya es claro (en grid y random sale en
+  cada aviso "Parameters skipped"), el caso es raro, el dominio también aplica a `y_pred` (que
+  no se puede comprobar antes), habría que copiar las reglas de sklearn y no sirve para
+  métricas propias. Lo que pierde tiempo en grid y random es BUG-05.
 - Duplicado "propagar `differentiation` a `TimeSeriesFold`" (ml-multi): fusionado en QW-03.
 - Duplicado "aviso de exog en foundation" (consistency): fusionado en QW-02.
 - TODO-reset-forecaster (`_forecaster_recursive.py:1289`, `_forecaster_recursive_multiseries.py:2345`): refactor interno sin valor para el usuario.
